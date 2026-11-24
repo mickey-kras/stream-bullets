@@ -22,7 +22,8 @@ export async function importProviderPhoto(
 ): Promise<void> {
   if (!allowedProviderPhoto(source, provider)) return;
   try {
-    const response: Response = await fetch(source, { redirect: "error", signal: AbortSignal.timeout(5000) });
+    // Workers refuse `redirect: "error"` before sending; a redirect answer is not `ok`, so it fails here too.
+    const response: Response = await fetch(source, { redirect: "manual", signal: AbortSignal.timeout(5000) });
     if (!response.ok) throw new Error("Provider photo unavailable");
     const bytes = await readBody(response, 5 * 1024 * 1024);
     await uploadImage(

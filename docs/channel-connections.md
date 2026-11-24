@@ -211,13 +211,22 @@ These rules apply to a read:
 - Each read stream has a row in `stream_event_sources`, with the platform and its ID.
   Thus a new read updates the entry. It does not make a second entry.
 - The row also keeps the Twitch category and the address of a picture.
-  For Twitch, the picture is the category cover from Get Games, 144 × 192 pixels.
+  For Twitch, the picture is the category cover from Get Games, 360 × 480 pixels.
   For YouTube, it is the `maxres` thumbnail, else the `medium` thumbnail.
+  A custom thumbnail comes from `i9.ytimg.com`, with a signed query.
   When Get Games fails, the covers stay empty. The read continues.
+- After each read, the server loads each new picture one time and keeps a copy in R2.
+  The key is `schedule/<page>/<hash of the picture address>`, so streams with the same cover use one copy.
+  A Twitch cover stays at its size. The Images binding makes two WebP copies of a YouTube thumbnail:
+  960 × 540 for the "Up next" card, and 320 × 180 for a schedule row.
+  The binding is only in the production Worker. Without it, the server does not load YouTube thumbnails.
+- A failed picture does not stop the read. The server does not follow a redirect.
+- The hourly job deletes a copy when no source links to its address.
+  Thus a YouTube copy goes, at the latest, with its source after 30 days.
 - The schedule shows the YouTube thumbnail of a stream first, else the Twitch cover.
   The category chip shows the Twitch category with its cover.
-- `GET /images/stream/<event>/<platform>` serves the picture. The server loads it from `static-cdn.jtvnw.net` or
-  `i.ytimg.com`, so the device of a viewer does not contact these hosts. Cloudflare keeps a loaded picture for one day.
+- `GET /images/stream/<event>/<platform>` serves the large copy, and `.../small` the small one.
+  The device of a viewer does not contact Twitch or YouTube.
 - Two streams are the same stream when their starts are at most 15 minutes apart. The titles can be different.
   A streamer runs one stream at a time. The schedule then shows one entry with the link of each platform.
 - The import makes entries with `imported = 1`. An edit by the owner, or a replay link, sets `imported = 0`.

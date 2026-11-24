@@ -5,6 +5,7 @@ import { IMPORT_HORIZON_MS, importedStreamSchema, type ImportedStream } from "./
 import { activityAvailable } from "./channel-tokens.server";
 import { logError } from "./http.server";
 import { callIngest } from "./ingest-call.server";
+import { storeStreamImages, sweepStreamImages } from "./stream-images.server";
 import { refreshPageOverlay } from "./overlay.server";
 import { capacityGuard, isCapacityError, MAX_UPCOMING_EVENTS } from "./schedule.server";
 
@@ -326,6 +327,7 @@ export async function importPageSchedule(env: AppEnv, streamerId: string, now: n
     if (streams === null) continue;
     if (await syncPlatform(env, streamerId, platform, streams, now)) changed = true;
   }
+  await storeStreamImages(env, streamerId);
   if (changed) await refreshPageOverlay(env, streamerId, ["next"]);
 }
 
@@ -389,6 +391,12 @@ export async function importSchedules(env: AppEnv, now: number): Promise<number>
       "DELETE FROM stream_event_sources WHERE read_at < ? AND (platform='youtube' OR event_id IS NULL)",
     ).bind(stale),
   ]);
+  // The stored pictures of the sources that went, YouTube ones within the same 30 days.
+  try {
+    await sweepStreamImages(env);
+  } catch (error: unknown) {
+    logError("stream_image_sweep_failed", error);
+  }
   if (!importAvailable(env)) return 0;
   const { results } = await env.DB.prepare(
     `SELECT DISTINCT c.streamer_id FROM channel_connections c LEFT JOIN schedule_imports i ON i.streamer_id=c.streamer_id

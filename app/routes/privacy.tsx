@@ -93,7 +93,9 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
           again when the streamer opens the schedule, and about every 6 hours. A scheduled stream that a platform no
           longer lists leaves the schedule, unless the streamer edited it. We also keep the Twitch category of each
           stream and the address of its picture: the YouTube thumbnail or the cover of the Twitch category. Our server
-          loads these pictures from Twitch and YouTube, so your device does not contact them for the schedule.
+          loads each picture once, keeps a small copy, and shows you that copy, so your device does not contact Twitch
+          or YouTube for the schedule. A copy goes when no scheduled stream uses it any more: for YouTube, at the latest
+          30 days after the last read.
         </p>
         <h3>YouTube channels</h3>
         <p>

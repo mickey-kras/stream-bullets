@@ -16654,6 +16654,18 @@
       "source": "app_components_schedule_schedule_feed_eventrow",
       "source_file": "app/components/schedule/schedule-feed.tsx",
       "source_location": "L101",
+      "target": "app_components_schedule_format_zonelabel",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_schedule_schedule_feed_eventrow",
+      "source_file": "app/components/schedule/schedule-feed.tsx",
+      "source_location": "L106",
       "target": "app_components_schedule_format_timeof",
       "weight": 1.0
     },
@@ -16665,44 +16677,8 @@
       "relation": "calls",
       "source": "app_components_schedule_schedule_feed_eventrow",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L107",
+      "source_location": "L112",
       "target": "app_components_schedule_schedule_feed_streampicture",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_schedule_schedule_feed_eventrow",
-      "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L112",
-      "target": "app_components_schedule_format_repeatlabel",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_schedule_schedule_feed_eventrow",
-      "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L112",
-      "target": "app_i18n_index_t",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_schedule_schedule_feed_eventrow",
-      "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L116",
-      "target": "app_components_schedule_schedule_feed_categorychip",
       "weight": 1.0
     },
     {
@@ -16714,43 +16690,43 @@
       "source": "app_components_schedule_schedule_feed_eventrow",
       "source_file": "app/components/schedule/schedule-feed.tsx",
       "source_location": "L117",
+      "target": "app_components_schedule_format_repeatlabel",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_schedule_schedule_feed_eventrow",
+      "source_file": "app/components/schedule/schedule-feed.tsx",
+      "source_location": "L117",
+      "target": "app_i18n_index_t",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_schedule_schedule_feed_eventrow",
+      "source_file": "app/components/schedule/schedule-feed.tsx",
+      "source_location": "L121",
+      "target": "app_components_schedule_schedule_feed_categorychip",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_schedule_schedule_feed_eventrow",
+      "source_file": "app/components/schedule/schedule-feed.tsx",
+      "source_location": "L122",
       "target": "app_components_schedule_format_streamlinks",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_schedule_schedule_feed_eventrow",
-      "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L118",
-      "target": "app_components_ui_icon_icon",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_schedule_schedule_feed_eventrow",
-      "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L120",
-      "target": "app_components_schedule_format_durationlabel",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_schedule_schedule_feed_eventrow",
-      "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L120",
-      "target": "app_components_schedule_format_platformslabel",
       "weight": 1.0
     },
     {
@@ -16762,7 +16738,7 @@
       "source": "app_components_schedule_schedule_feed_eventrow",
       "source_file": "app/components/schedule/schedule-feed.tsx",
       "source_location": "L123",
-      "target": "app_components_schedule_schedule_feed_statustag",
+      "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
     {
@@ -16773,8 +16749,32 @@
       "relation": "calls",
       "source": "app_components_schedule_schedule_feed_eventrow",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L96",
-      "target": "app_components_schedule_format_zonelabel",
+      "source_location": "L125",
+      "target": "app_components_schedule_format_durationlabel",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_schedule_schedule_feed_eventrow",
+      "source_file": "app/components/schedule/schedule-feed.tsx",
+      "source_location": "L125",
+      "target": "app_components_schedule_format_platformslabel",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_schedule_schedule_feed_eventrow",
+      "source_file": "app/components/schedule/schedule-feed.tsx",
+      "source_location": "L128",
+      "target": "app_components_schedule_schedule_feed_statustag",
       "weight": 1.0
     },
     {
@@ -16785,7 +16785,7 @@
       "relation": "calls",
       "source": "app_components_schedule_schedule_feed_groupbyday",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L145",
+      "source_location": "L150",
       "target": "app_components_schedule_format_dayof",
       "weight": 1.0
     },
@@ -16797,7 +16797,7 @@
       "relation": "calls",
       "source": "app_components_schedule_schedule_feed_hero",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L172",
+      "source_location": "L177",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -16809,20 +16809,8 @@
       "relation": "calls",
       "source": "app_components_schedule_schedule_feed_hero",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L173",
+      "source_location": "L178",
       "target": "app_i18n_index_t",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_schedule_schedule_feed_hero",
-      "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L181",
-      "target": "app_components_schedule_schedule_feed_streampicture",
       "weight": 1.0
     },
     {
@@ -16834,6 +16822,18 @@
       "source": "app_components_schedule_schedule_feed_hero",
       "source_file": "app/components/schedule/schedule-feed.tsx",
       "source_location": "L186",
+      "target": "app_components_schedule_schedule_feed_streampicture",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_schedule_schedule_feed_hero",
+      "source_file": "app/components/schedule/schedule-feed.tsx",
+      "source_location": "L191",
       "target": "app_components_schedule_schedule_feed_statustag",
       "weight": 1.0
     },
@@ -16845,7 +16845,7 @@
       "relation": "calls",
       "source": "app_components_schedule_schedule_feed_hero",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L190",
+      "source_location": "L195",
       "target": "app_components_schedule_format_countdown",
       "weight": 1.0
     },
@@ -16857,7 +16857,7 @@
       "relation": "calls",
       "source": "app_components_schedule_schedule_feed_hero",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L201",
+      "source_location": "L206",
       "target": "app_components_schedule_format_whenline",
       "weight": 1.0
     },
@@ -16869,7 +16869,7 @@
       "relation": "calls",
       "source": "app_components_schedule_schedule_feed_hero",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L203",
+      "source_location": "L208",
       "target": "app_components_schedule_schedule_feed_categorychip",
       "weight": 1.0
     },
@@ -16881,7 +16881,7 @@
       "relation": "calls",
       "source": "app_components_schedule_schedule_feed_hero",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L205",
+      "source_location": "L210",
       "target": "app_components_schedule_schedule_feed_topicchips",
       "weight": 1.0
     },
@@ -16893,7 +16893,7 @@
       "relation": "calls",
       "source": "app_components_schedule_schedule_feed_hero",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L208",
+      "source_location": "L213",
       "target": "app_components_schedule_schedule_feed_platformlink",
       "weight": 1.0
     },
@@ -16905,7 +16905,7 @@
       "relation": "calls",
       "source": "app_components_schedule_schedule_feed_platformlink",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L73",
+      "source_location": "L78",
       "target": "app_components_schedule_format_streamlinks",
       "weight": 1.0
     },
@@ -16917,7 +16917,7 @@
       "relation": "calls",
       "source": "app_components_schedule_schedule_feed_platformlink",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L81",
+      "source_location": "L86",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -16929,7 +16929,7 @@
       "relation": "calls",
       "source": "app_components_schedule_schedule_feed_platformlink",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L83",
+      "source_location": "L88",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -16941,7 +16941,7 @@
       "relation": "calls",
       "source": "app_components_schedule_schedule_feed_schedulefeed",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L236",
+      "source_location": "L241",
       "target": "app_lib_schedule_upcomingrows",
       "weight": 1.0
     },
@@ -16953,7 +16953,7 @@
       "relation": "calls",
       "source": "app_components_schedule_schedule_feed_schedulefeed",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L243",
+      "source_location": "L248",
       "target": "app_components_schedule_schedule_feed_hero",
       "weight": 1.0
     },
@@ -16965,7 +16965,7 @@
       "relation": "calls",
       "source": "app_components_schedule_schedule_feed_schedulefeed",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L245",
+      "source_location": "L250",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -16977,7 +16977,7 @@
       "relation": "calls",
       "source": "app_components_schedule_schedule_feed_schedulefeed",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L247",
+      "source_location": "L252",
       "target": "app_components_schedule_schedule_feed_groupbyday",
       "weight": 1.0
     },
@@ -16989,7 +16989,7 @@
       "relation": "calls",
       "source": "app_components_schedule_schedule_feed_schedulefeed",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L252",
+      "source_location": "L257",
       "target": "app_components_schedule_schedule_feed_eventrow",
       "weight": 1.0
     },
@@ -17001,7 +17001,7 @@
       "relation": "calls",
       "source": "app_components_schedule_schedule_feed_schedulefeed",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L263",
+      "source_location": "L268",
       "target": "app_components_schedule_format_dayof",
       "weight": 1.0
     },
@@ -17013,7 +17013,7 @@
       "relation": "calls",
       "source": "app_components_schedule_schedule_feed_schedulefeed",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L271",
+      "source_location": "L276",
       "target": "app_i18n_index_tn",
       "weight": 1.0
     },
@@ -33189,7 +33189,7 @@
       "relation": "calls",
       "source": "app_routes_privacy_privacy",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L579",
+      "source_location": "L581",
       "target": "app_components_common_legaldocument",
       "weight": 1.0
     },
@@ -33201,7 +33201,7 @@
       "relation": "calls",
       "source": "app_routes_privacy_privacy",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L588",
+      "source_location": "L590",
       "target": "app_routes_privacy_sections",
       "weight": 1.0
     },
@@ -39477,20 +39477,8 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_twitchlivestream",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L892",
+      "source_location": "L896",
       "target": "app_server_channel_providers_server_twitchapptoken",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_channel_providers_server_twitchlivestream",
-      "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L893",
-      "target": "app_server_channel_providers_server_providerclient",
       "weight": 1.0
     },
     {
@@ -39502,6 +39490,18 @@
       "source": "app_server_channel_providers_server_twitchlivestream",
       "source_file": "app/server/channel-providers.server.ts",
       "source_location": "L897",
+      "target": "app_server_channel_providers_server_providerclient",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_channel_providers_server_twitchlivestream",
+      "source_file": "app/server/channel-providers.server.ts",
+      "source_location": "L901",
       "target": "app_server_channel_providers_server_getjson",
       "weight": 1.0
     },
@@ -39513,7 +39513,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_twitchlivestream",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L907",
+      "source_location": "L911",
       "target": "app_server_channel_providers_server_streamtitle",
       "weight": 1.0
     },
@@ -39525,7 +39525,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_twitchschedule",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L752",
+      "source_location": "L756",
       "target": "app_server_channel_providers_server_twitchapptoken",
       "weight": 1.0
     },
@@ -39537,7 +39537,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_twitchschedule",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L753",
+      "source_location": "L757",
       "target": "app_server_channel_providers_server_providerclient",
       "weight": 1.0
     },
@@ -39549,7 +39549,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_twitchschedule",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L767",
+      "source_location": "L771",
       "target": "app_server_channel_providers_server_getjson",
       "weight": 1.0
     },
@@ -39561,7 +39561,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_twitchschedule",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L769",
+      "source_location": "L773",
       "target": "app_server_channel_providers_server_withcovers",
       "weight": 1.0
     },
@@ -39573,7 +39573,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_twitchschedule",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L772",
+      "source_location": "L776",
       "target": "app_server_channel_providers_server_twitchstreams",
       "weight": 1.0
     },
@@ -39585,7 +39585,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_twitchstreams",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L690",
+      "source_location": "L694",
       "target": "app_server_channel_providers_server_streamtitle",
       "weight": 1.0
     },
@@ -39597,7 +39597,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_twitchstreams",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L692",
+      "source_location": "L696",
       "target": "app_server_channel_providers_server_streamlength",
       "weight": 1.0
     },
@@ -39633,7 +39633,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_withcovers",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L723",
+      "source_location": "L727",
       "target": "app_server_channel_providers_server_getjson",
       "weight": 1.0
     },
@@ -39669,7 +39669,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_youtubestreams",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L814",
+      "source_location": "L818",
       "target": "app_server_channel_providers_server_streamtitle",
       "weight": 1.0
     },
@@ -39681,7 +39681,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_youtubestreams",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L816",
+      "source_location": "L820",
       "target": "app_server_channel_providers_server_streamlength",
       "weight": 1.0
     },
@@ -39693,7 +39693,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_youtubestreams",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L819",
+      "source_location": "L823",
       "target": "app_server_channel_providers_server_youtubethumbnail",
       "weight": 1.0
     },
@@ -39705,7 +39705,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_youtubeupcoming",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L852",
+      "source_location": "L856",
       "target": "app_server_channel_providers_server_getjson",
       "weight": 1.0
     },
@@ -39717,7 +39717,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_youtubeupcoming",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L853",
+      "source_location": "L857",
       "target": "app_server_channel_providers_server_youtubestreams",
       "weight": 1.0
     },
@@ -48561,7 +48561,7 @@
       "relation": "calls",
       "source": "app_server_provider_avatar_server_importproviderphoto",
       "source_file": "app/server/provider-avatar.server.ts",
-      "source_location": "L27",
+      "source_location": "L28",
       "target": "app_server_http_server_readbody",
       "weight": 1.0
     },
@@ -48573,7 +48573,7 @@
       "relation": "calls",
       "source": "app_server_provider_avatar_server_importproviderphoto",
       "source_file": "app/server/provider-avatar.server.ts",
-      "source_location": "L28",
+      "source_location": "L29",
       "target": "app_server_images_server_uploadimage",
       "weight": 1.0
     },
@@ -49077,7 +49077,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_entryfor",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L196",
+      "source_location": "L197",
       "target": "app_server_schedule_import_server_samestream",
       "weight": 1.0
     },
@@ -49089,7 +49089,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_entryfor",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L199",
+      "source_location": "L200",
       "target": "app_server_schedule_import_server_takeroom",
       "weight": 1.0
     },
@@ -49101,7 +49101,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_importaftervisit",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L349",
+      "source_location": "L351",
       "target": "app_server_schedule_import_server_importonvisit",
       "weight": 1.0
     },
@@ -49113,7 +49113,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_importavailable",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L344",
+      "source_location": "L346",
       "target": "app_server_channel_tokens_server_activityavailable",
       "weight": 1.0
     },
@@ -49125,7 +49125,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_importonvisit",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L353",
+      "source_location": "L355",
       "target": "app_server_schedule_import_server_importavailable",
       "weight": 1.0
     },
@@ -49137,20 +49137,8 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_importonvisit",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L353",
+      "source_location": "L355",
       "target": "app_server_schedule_import_server_readableplatforms",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_schedule_import_server_importonvisit",
-      "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L354",
-      "target": "app_server_schedule_import_server_claim",
       "weight": 1.0
     },
     {
@@ -49162,7 +49150,7 @@
       "source": "app_server_schedule_import_server_importonvisit",
       "source_file": "app/server/schedule-import.server.ts",
       "source_location": "L356",
-      "target": "app_server_schedule_import_server_importpageschedule",
+      "target": "app_server_schedule_import_server_claim",
       "weight": 1.0
     },
     {
@@ -49174,7 +49162,7 @@
       "source": "app_server_schedule_import_server_importonvisit",
       "source_file": "app/server/schedule-import.server.ts",
       "source_location": "L358",
-      "target": "app_server_http_server_logerror",
+      "target": "app_server_schedule_import_server_importpageschedule",
       "weight": 1.0
     },
     {
@@ -49183,10 +49171,10 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
-      "source": "app_server_schedule_import_server_importpageschedule",
+      "source": "app_server_schedule_import_server_importonvisit",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L324",
-      "target": "app_server_schedule_import_server_readableplatforms",
+      "source_location": "L360",
+      "target": "app_server_http_server_logerror",
       "weight": 1.0
     },
     {
@@ -49198,6 +49186,18 @@
       "source": "app_server_schedule_import_server_importpageschedule",
       "source_file": "app/server/schedule-import.server.ts",
       "source_location": "L325",
+      "target": "app_server_schedule_import_server_readableplatforms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_schedule_import_server_importpageschedule",
+      "source_file": "app/server/schedule-import.server.ts",
+      "source_location": "L326",
       "target": "app_server_schedule_import_server_readstreams",
       "weight": 1.0
     },
@@ -49209,7 +49209,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_importpageschedule",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L327",
+      "source_location": "L328",
       "target": "app_server_schedule_import_server_syncplatform",
       "weight": 1.0
     },
@@ -49221,7 +49221,19 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_importpageschedule",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L329",
+      "source_location": "L330",
+      "target": "app_server_stream_images_server_storestreamimages",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_schedule_import_server_importpageschedule",
+      "source_file": "app/server/schedule-import.server.ts",
+      "source_location": "L331",
       "target": "app_server_overlay_server_refreshpageoverlay",
       "weight": 1.0
     },
@@ -49233,7 +49245,31 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_importschedules",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L392",
+      "source_location": "L396",
+      "target": "app_server_stream_images_server_sweepstreamimages",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_schedule_import_server_importschedules",
+      "source_file": "app/server/schedule-import.server.ts",
+      "source_location": "L398",
+      "target": "app_server_http_server_logerror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_schedule_import_server_importschedules",
+      "source_file": "app/server/schedule-import.server.ts",
+      "source_location": "L400",
       "target": "app_server_schedule_import_server_importavailable",
       "weight": 1.0
     },
@@ -49245,7 +49281,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_importschedules",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L403",
+      "source_location": "L411",
       "target": "app_server_schedule_import_server_claim",
       "weight": 1.0
     },
@@ -49257,20 +49293,8 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_importschedules",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L405",
+      "source_location": "L413",
       "target": "app_server_schedule_import_server_importpageschedule",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_schedule_import_server_importschedules",
-      "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L408",
-      "target": "app_server_http_server_logerror",
       "weight": 1.0
     },
     {
@@ -49281,7 +49305,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_notread",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L256",
+      "source_location": "L257",
       "target": "app_server_schedule_import_server_unlinked",
       "weight": 1.0
     },
@@ -49293,7 +49317,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_readagain",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L166",
+      "source_location": "L167",
       "target": "app_server_schedule_import_server_outdated",
       "weight": 1.0
     },
@@ -49305,7 +49329,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_readagain",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L168",
+      "source_location": "L169",
       "target": "app_server_schedule_import_server_takeroom",
       "weight": 1.0
     },
@@ -49317,7 +49341,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_readnew",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L219",
+      "source_location": "L220",
       "target": "app_server_schedule_import_server_entryfor",
       "weight": 1.0
     },
@@ -49329,7 +49353,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_readstreams",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L71",
+      "source_location": "L72",
       "target": "app_server_schedule_import_server_teststreams",
       "weight": 1.0
     },
@@ -49341,7 +49365,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_readstreams",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L72",
+      "source_location": "L73",
       "target": "app_server_ingest_call_server_callingest",
       "weight": 1.0
     },
@@ -49353,7 +49377,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_syncplatform",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L271",
+      "source_location": "L272",
       "target": "app_server_schedule_import_server_startsync",
       "weight": 1.0
     },
@@ -49365,7 +49389,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_syncplatform",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L277",
+      "source_location": "L278",
       "target": "app_server_schedule_import_server_readagain",
       "weight": 1.0
     },
@@ -49377,7 +49401,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_syncplatform",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L278",
+      "source_location": "L279",
       "target": "app_server_schedule_import_server_readnew",
       "weight": 1.0
     },
@@ -49389,7 +49413,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_syncplatform",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L280",
+      "source_location": "L281",
       "target": "app_server_schedule_import_server_notread",
       "weight": 1.0
     },
@@ -49401,7 +49425,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_syncplatform",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L284",
+      "source_location": "L285",
       "target": "app_server_schedule_server_capacityguard",
       "weight": 1.0
     },
@@ -49413,7 +49437,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_syncplatform",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L286",
+      "source_location": "L287",
       "target": "app_server_schedule_server_iscapacityerror",
       "weight": 1.0
     },
@@ -49425,7 +49449,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_assertroom",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L388",
+      "source_location": "L389",
       "target": "app_server_schedule_server_fullschedule",
       "weight": 1.0
     },
@@ -49437,7 +49461,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_assertroom",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L388",
+      "source_location": "L389",
       "target": "app_server_schedule_server_upcomingcount",
       "weight": 1.0
     },
@@ -49449,20 +49473,8 @@
       "relation": "calls",
       "source": "app_server_schedule_server_createevents",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L437",
-      "target": "app_server_schedule_server_parsed",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_schedule_server_createevents",
-      "source_file": "app/server/schedule.server.ts",
       "source_location": "L438",
-      "target": "app_server_schedule_server_ownstreamerid",
+      "target": "app_server_schedule_server_parsed",
       "weight": 1.0
     },
     {
@@ -49474,7 +49486,7 @@
       "source": "app_server_schedule_server_createevents",
       "source_file": "app/server/schedule.server.ts",
       "source_location": "L439",
-      "target": "app_server_access_server_assertstreamerwritable",
+      "target": "app_server_schedule_server_ownstreamerid",
       "weight": 1.0
     },
     {
@@ -49486,7 +49498,7 @@
       "source": "app_server_schedule_server_createevents",
       "source_file": "app/server/schedule.server.ts",
       "source_location": "L440",
-      "target": "app_server_data_server_consumemutationquota",
+      "target": "app_server_access_server_assertstreamerwritable",
       "weight": 1.0
     },
     {
@@ -49497,8 +49509,8 @@
       "relation": "calls",
       "source": "app_server_schedule_server_createevents",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L442",
-      "target": "app_server_schedule_server_planevents",
+      "source_location": "L441",
+      "target": "app_server_data_server_consumemutationquota",
       "weight": 1.0
     },
     {
@@ -49510,7 +49522,7 @@
       "source": "app_server_schedule_server_createevents",
       "source_file": "app/server/schedule.server.ts",
       "source_location": "L443",
-      "target": "app_server_schedule_server_assertroom",
+      "target": "app_server_schedule_server_planevents",
       "weight": 1.0
     },
     {
@@ -49522,6 +49534,18 @@
       "source": "app_server_schedule_server_createevents",
       "source_file": "app/server/schedule.server.ts",
       "source_location": "L444",
+      "target": "app_server_schedule_server_assertroom",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_schedule_server_createevents",
+      "source_file": "app/server/schedule.server.ts",
+      "source_location": "L445",
       "target": "app_server_schedule_server_validtopics",
       "weight": 1.0
     },
@@ -49533,7 +49557,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_createevents",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L445",
+      "source_location": "L446",
       "target": "app_server_schedule_server_insertstatements",
       "weight": 1.0
     },
@@ -49545,32 +49569,8 @@
       "relation": "calls",
       "source": "app_server_schedule_server_createevents",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L445",
+      "source_location": "L446",
       "target": "app_server_schedule_server_templateof",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_schedule_server_createevents",
-      "source_file": "app/server/schedule.server.ts",
-      "source_location": "L446",
-      "target": "app_server_schedule_server_capacityguard",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_schedule_server_createevents",
-      "source_file": "app/server/schedule.server.ts",
-      "source_location": "L446",
-      "target": "app_server_schedule_server_guardedbatch",
       "weight": 1.0
     },
     {
@@ -49582,7 +49582,7 @@
       "source": "app_server_schedule_server_createevents",
       "source_file": "app/server/schedule.server.ts",
       "source_location": "L447",
-      "target": "app_server_schedule_server_getevent",
+      "target": "app_server_schedule_server_capacityguard",
       "weight": 1.0
     },
     {
@@ -49591,10 +49591,22 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
-      "source": "app_server_schedule_server_deleteevent",
+      "source": "app_server_schedule_server_createevents",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L566",
-      "target": "app_server_schedule_server_parsed",
+      "source_location": "L447",
+      "target": "app_server_schedule_server_guardedbatch",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_schedule_server_createevents",
+      "source_file": "app/server/schedule.server.ts",
+      "source_location": "L448",
+      "target": "app_server_schedule_server_getevent",
       "weight": 1.0
     },
     {
@@ -49606,7 +49618,7 @@
       "source": "app_server_schedule_server_deleteevent",
       "source_file": "app/server/schedule.server.ts",
       "source_location": "L567",
-      "target": "app_server_schedule_server_ownedevent",
+      "target": "app_server_schedule_server_parsed",
       "weight": 1.0
     },
     {
@@ -49618,7 +49630,7 @@
       "source": "app_server_schedule_server_deleteevent",
       "source_file": "app/server/schedule.server.ts",
       "source_location": "L568",
-      "target": "app_server_access_server_assertstreamerwritable",
+      "target": "app_server_schedule_server_ownedevent",
       "weight": 1.0
     },
     {
@@ -49630,6 +49642,18 @@
       "source": "app_server_schedule_server_deleteevent",
       "source_file": "app/server/schedule.server.ts",
       "source_location": "L569",
+      "target": "app_server_access_server_assertstreamerwritable",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_schedule_server_deleteevent",
+      "source_file": "app/server/schedule.server.ts",
+      "source_location": "L570",
       "target": "app_server_data_server_consumemutationquota",
       "weight": 1.0
     },
@@ -49641,7 +49665,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_deleteevent",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L576",
+      "source_location": "L577",
       "target": "app_server_schedule_server_endseriesbefore",
       "weight": 1.0
     },
@@ -49653,7 +49677,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_editevent",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L536",
+      "source_location": "L537",
       "target": "app_server_schedule_server_validtopics",
       "weight": 1.0
     },
@@ -49665,7 +49689,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_editevent",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L539",
+      "source_location": "L540",
       "target": "app_server_schedule_server_editoneevent",
       "weight": 1.0
     },
@@ -49677,7 +49701,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_editevent",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L542",
+      "source_location": "L543",
       "target": "app_server_schedule_server_planevents",
       "weight": 1.0
     },
@@ -49689,32 +49713,8 @@
       "relation": "calls",
       "source": "app_server_schedule_server_editevent",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L557",
+      "source_location": "L558",
       "target": "app_server_schedule_server_assertroom",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_schedule_server_editevent",
-      "source_file": "app/server/schedule.server.ts",
-      "source_location": "L558",
-      "target": "app_server_schedule_server_insertstatements",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_schedule_server_editevent",
-      "source_file": "app/server/schedule.server.ts",
-      "source_location": "L558",
-      "target": "app_server_schedule_server_templateof",
       "weight": 1.0
     },
     {
@@ -49726,6 +49726,30 @@
       "source": "app_server_schedule_server_editevent",
       "source_file": "app/server/schedule.server.ts",
       "source_location": "L559",
+      "target": "app_server_schedule_server_insertstatements",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_schedule_server_editevent",
+      "source_file": "app/server/schedule.server.ts",
+      "source_location": "L559",
+      "target": "app_server_schedule_server_templateof",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_schedule_server_editevent",
+      "source_file": "app/server/schedule.server.ts",
+      "source_location": "L560",
       "target": "app_server_schedule_server_endseriesbefore",
       "weight": 1.0
     },
@@ -49737,20 +49761,8 @@
       "relation": "calls",
       "source": "app_server_schedule_server_editevent",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L560",
+      "source_location": "L561",
       "target": "app_server_schedule_server_capacityguard",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_schedule_server_editevent",
-      "source_file": "app/server/schedule.server.ts",
-      "source_location": "L560",
-      "target": "app_server_schedule_server_guardedbatch",
       "weight": 1.0
     },
     {
@@ -49762,6 +49774,18 @@
       "source": "app_server_schedule_server_editevent",
       "source_file": "app/server/schedule.server.ts",
       "source_location": "L561",
+      "target": "app_server_schedule_server_guardedbatch",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_schedule_server_editevent",
+      "source_file": "app/server/schedule.server.ts",
+      "source_location": "L562",
       "target": "app_server_schedule_server_getevent",
       "weight": 1.0
     },
@@ -49773,7 +49797,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_editoneevent",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L500",
+      "source_location": "L501",
       "target": "app_lib_zoned_parsedate",
       "weight": 1.0
     },
@@ -49785,20 +49809,8 @@
       "relation": "calls",
       "source": "app_server_schedule_server_editoneevent",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L502",
+      "source_location": "L503",
       "target": "app_lib_zoned_zonedtime",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_schedule_server_editoneevent",
-      "source_file": "app/server/schedule.server.ts",
-      "source_location": "L505",
-      "target": "app_server_schedule_server_assertroom",
       "weight": 1.0
     },
     {
@@ -49810,6 +49822,18 @@
       "source": "app_server_schedule_server_editoneevent",
       "source_file": "app/server/schedule.server.ts",
       "source_location": "L506",
+      "target": "app_server_schedule_server_assertroom",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_schedule_server_editoneevent",
+      "source_file": "app/server/schedule.server.ts",
+      "source_location": "L507",
       "target": "app_server_schedule_server_guardedbatch",
       "weight": 1.0
     },
@@ -49821,7 +49845,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_editoneevent",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L524",
+      "source_location": "L525",
       "target": "app_server_schedule_server_capacityguard",
       "weight": 1.0
     },
@@ -49833,7 +49857,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_editoneevent",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L526",
+      "source_location": "L527",
       "target": "app_server_schedule_server_getevent",
       "weight": 1.0
     },
@@ -49845,7 +49869,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_endseriesbefore",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L360",
+      "source_location": "L361",
       "target": "app_lib_zoned_localdateof",
       "weight": 1.0
     },
@@ -49857,7 +49881,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_endseriesbefore",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L360",
+      "source_location": "L361",
       "target": "app_lib_zoned_zonedtime",
       "weight": 1.0
     },
@@ -49869,7 +49893,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_eventvalue",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L133",
+      "source_location": "L134",
       "target": "app_lib_schedule_effectivestatus",
       "weight": 1.0
     },
@@ -49881,7 +49905,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_eventvalues",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L112",
+      "source_location": "L113",
       "target": "app_server_schedule_server_topicsfor",
       "weight": 1.0
     },
@@ -49893,7 +49917,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_eventvalues",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L116",
+      "source_location": "L117",
       "target": "app_server_schedule_server_sourcesfor",
       "weight": 1.0
     },
@@ -49905,7 +49929,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_eventvalues",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L119",
+      "source_location": "L120",
       "target": "app_server_schedule_server_eventvalue",
       "weight": 1.0
     },
@@ -49917,7 +49941,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_freshguard",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L633",
+      "source_location": "L634",
       "target": "app_server_schedule_server_seriescte",
       "weight": 1.0
     },
@@ -49929,7 +49953,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_fullschedule",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L383",
+      "source_location": "L384",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -49941,7 +49965,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_getevent",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L463",
+      "source_location": "L464",
       "target": "app_server_schedule_server_eventvalues",
       "weight": 1.0
     },
@@ -49953,7 +49977,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_guardedbatch",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L419",
+      "source_location": "L420",
       "target": "app_server_schedule_server_fullschedule",
       "weight": 1.0
     },
@@ -49965,7 +49989,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_guardedbatch",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L419",
+      "source_location": "L420",
       "target": "app_server_schedule_server_iscapacityerror",
       "weight": 1.0
     },
@@ -49977,7 +50001,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_iscapacityerror",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L411",
+      "source_location": "L412",
       "target": "app_server_schedule_server_failedguard",
       "weight": 1.0
     },
@@ -49989,7 +50013,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_listevents",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L177",
+      "source_location": "L178",
       "target": "app_server_schedule_server_eventrows",
       "weight": 1.0
     },
@@ -50001,7 +50025,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_listevents",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L178",
+      "source_location": "L179",
       "target": "app_server_schedule_server_eventvalues",
       "weight": 1.0
     },
@@ -50013,7 +50037,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_ownedevent",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L208",
+      "source_location": "L209",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -50025,7 +50049,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_ownstreamerid",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L198",
+      "source_location": "L199",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -50049,7 +50073,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_patchevent",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L469",
+      "source_location": "L470",
       "target": "app_server_schedule_server_parsed",
       "weight": 1.0
     },
@@ -50061,7 +50085,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_patchevent",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L470",
+      "source_location": "L471",
       "target": "app_server_schedule_server_ownedevent",
       "weight": 1.0
     },
@@ -50073,7 +50097,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_patchevent",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L471",
+      "source_location": "L472",
       "target": "app_server_access_server_assertstreamerwritable",
       "weight": 1.0
     },
@@ -50085,7 +50109,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_patchevent",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L472",
+      "source_location": "L473",
       "target": "app_server_data_server_consumemutationquota",
       "weight": 1.0
     },
@@ -50097,7 +50121,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_patchevent",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L474",
+      "source_location": "L475",
       "target": "app_lib_schedule_effectivestatus",
       "weight": 1.0
     },
@@ -50109,7 +50133,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_patchevent",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L476",
+      "source_location": "L477",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -50121,7 +50145,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_patchevent",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L478",
+      "source_location": "L479",
       "target": "app_server_schedule_server_getevent",
       "weight": 1.0
     },
@@ -50133,7 +50157,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_patchevent",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L488",
+      "source_location": "L489",
       "target": "app_server_schedule_server_editevent",
       "weight": 1.0
     },
@@ -50145,7 +50169,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_planevents",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L243",
+      "source_location": "L244",
       "target": "app_lib_zoned_parsedate",
       "weight": 1.0
     },
@@ -50157,7 +50181,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_planevents",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L244",
+      "source_location": "L245",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -50169,7 +50193,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_planevents",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L246",
+      "source_location": "L247",
       "target": "app_lib_zoned_zonedtime",
       "weight": 1.0
     },
@@ -50181,7 +50205,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_planevents",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L248",
+      "source_location": "L249",
       "target": "app_lib_zoned_weekdayof",
       "weight": 1.0
     },
@@ -50193,7 +50217,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_planevents",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L255",
+      "source_location": "L256",
       "target": "app_lib_zoned_adddays",
       "weight": 1.0
     },
@@ -50205,7 +50229,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_planevents",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L257",
+      "source_location": "L258",
       "target": "app_lib_schedule_expandseries",
       "weight": 1.0
     },
@@ -50217,7 +50241,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_planevents",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L260",
+      "source_location": "L261",
       "target": "app_server_schedule_server_seriesdone",
       "weight": 1.0
     },
@@ -50229,7 +50253,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_schedulecalendar",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L768",
+      "source_location": "L769",
       "target": "app_server_schedule_server_eventrows",
       "weight": 1.0
     },
@@ -50241,7 +50265,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_schedulecalendar",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L786",
+      "source_location": "L787",
       "target": "app_server_ics_buildcalendar",
       "weight": 1.0
     },
@@ -50253,20 +50277,8 @@
       "relation": "calls",
       "source": "app_server_schedule_server_seriesdone",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L237",
+      "source_location": "L238",
       "target": "app_lib_zoned_adddays",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_schedule_server_seriesdone",
-      "source_file": "app/server/schedule.server.ts",
-      "source_location": "L237",
-      "target": "app_lib_zoned_localdateof",
       "weight": 1.0
     },
     {
@@ -50278,6 +50290,18 @@
       "source": "app_server_schedule_server_seriesdone",
       "source_file": "app/server/schedule.server.ts",
       "source_location": "L238",
+      "target": "app_lib_zoned_localdateof",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_schedule_server_seriesdone",
+      "source_file": "app/server/schedule.server.ts",
+      "source_location": "L239",
       "target": "app_lib_schedule_expandseries",
       "weight": 1.0
     },
@@ -50289,7 +50313,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_sourcesfor",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L105",
+      "source_location": "L106",
       "target": "app_server_schedule_server_addsource",
       "weight": 1.0
     },
@@ -50301,7 +50325,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_topupone",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L659",
+      "source_location": "L660",
       "target": "app_lib_zoned_zonedparts_e2803a10a8d4",
       "weight": 1.0
     },
@@ -50313,7 +50337,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_topupone",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L661",
+      "source_location": "L662",
       "target": "app_lib_zoned_adddays",
       "weight": 1.0
     },
@@ -50325,7 +50349,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_topupone",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L661",
+      "source_location": "L662",
       "target": "app_lib_zoned_localdateof",
       "weight": 1.0
     },
@@ -50337,7 +50361,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_topupone",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L668",
+      "source_location": "L669",
       "target": "app_lib_schedule_expandseries",
       "weight": 1.0
     },
@@ -50349,7 +50373,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_topupone",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L671",
+      "source_location": "L672",
       "target": "app_server_schedule_server_upcomingcount",
       "weight": 1.0
     },
@@ -50361,7 +50385,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_topupone",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L673",
+      "source_location": "L674",
       "target": "app_server_schedule_server_seriesdone",
       "weight": 1.0
     },
@@ -50373,7 +50397,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_topupone",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L675",
+      "source_location": "L676",
       "target": "app_server_schedule_server_insertstatements",
       "weight": 1.0
     },
@@ -50385,7 +50409,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_topupone",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L697",
+      "source_location": "L698",
       "target": "app_server_schedule_server_capacityguard",
       "weight": 1.0
     },
@@ -50397,7 +50421,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_topupone",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L699",
+      "source_location": "L700",
       "target": "app_server_schedule_server_freshguard",
       "weight": 1.0
     },
@@ -50409,7 +50433,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_topupone",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L702",
+      "source_location": "L703",
       "target": "app_server_schedule_server_failedguard",
       "weight": 1.0
     },
@@ -50421,7 +50445,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_topupone",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L702",
+      "source_location": "L703",
       "target": "app_server_schedule_server_iscapacityerror",
       "weight": 1.0
     },
@@ -50433,7 +50457,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_topupseries",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L732",
+      "source_location": "L733",
       "target": "app_server_schedule_server_topupone",
       "weight": 1.0
     },
@@ -50445,7 +50469,7 @@
       "relation": "calls",
       "source": "app_server_schedule_server_topupseries",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L753",
+      "source_location": "L754",
       "target": "app_server_overlay_server_refreshpageoverlay",
       "weight": 1.0
     },
@@ -51235,9 +51259,21 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "app_server_stream_images_server_download",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L50",
+      "target": "app_server_http_server_readbody",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "app_server_stream_images_server_servestreamimage",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L15",
+      "source_location": "L134",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -51249,8 +51285,80 @@
       "relation": "calls",
       "source": "app_server_stream_images_server_servestreamimage",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L31",
-      "target": "app_server_http_server_readbody",
+      "source_location": "L141",
+      "target": "app_server_stream_images_server_picturebase",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_stream_images_server_storeone",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L70",
+      "target": "app_server_stream_images_server_picturebase",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_stream_images_server_storeone",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L74",
+      "target": "app_server_stream_images_server_download",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_stream_images_server_storeone",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L82",
+      "target": "app_server_stream_images_server_resized",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_stream_images_server_storestreamimages",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L102",
+      "target": "app_server_stream_images_server_storeone",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_stream_images_server_storestreamimages",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L104",
+      "target": "app_server_http_server_logerror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_stream_images_server_sweepstreamimages",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L114",
+      "target": "app_server_stream_images_server_picturebase",
       "weight": 1.0
     },
     {
@@ -57237,7 +57345,7 @@
       "relation": "calls",
       "source": "tests_helpers_channels_installfakeproviders",
       "source_file": "tests/helpers/channels.ts",
-      "source_location": "L132",
+      "source_location": "L135",
       "target": "tests_helpers_channels_platformoftoken",
       "weight": 1.0
     },
@@ -57249,7 +57357,7 @@
       "relation": "calls",
       "source": "tests_helpers_channels_installfakeproviders",
       "source_file": "tests/helpers/channels.ts",
-      "source_location": "L133",
+      "source_location": "L136",
       "target": "tests_helpers_channels_json",
       "weight": 1.0
     },
@@ -60475,6 +60583,42 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "tests_schedule_import_test",
+      "source_file": "tests/schedule-import.test.ts",
+      "source_location": "L735",
+      "target": "tests_schedule_import_test_transformer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_schedule_import_test",
+      "source_file": "tests/schedule-import.test.ts",
+      "source_location": "L797",
+      "target": "tests_schedule_import_test_stored",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_schedule_import_test",
+      "source_file": "tests/schedule-import.test.ts",
+      "source_location": "L800",
+      "target": "tests_schedule_import_test_imagecalls",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "tests_schedule_import_test_addconnection",
       "source_file": "tests/schedule-import.test.ts",
       "source_location": "L119",
@@ -63336,7 +63480,7 @@
       "relation": "references",
       "source": "app_env_appcontext",
       "source_file": "app/env.ts",
-      "source_location": "L55",
+      "source_location": "L57",
       "target": "app_i18n_index_locale",
       "weight": 1.0
     },
@@ -64224,7 +64368,7 @@
       "relation": "references",
       "source": "app_server_schedule_import_server_sync",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L96",
+      "source_location": "L97",
       "target": "app_env_appenv",
       "weight": 1.0
     },
@@ -64260,7 +64404,7 @@
       "relation": "references",
       "source": "app_server_schedule_server_seriestemplate",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L590",
+      "source_location": "L591",
       "target": "app_types_streamplatform",
       "weight": 1.0
     },
@@ -64320,7 +64464,7 @@
       "relation": "references",
       "source": "app_server_schedule_server_template",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L275",
+      "source_location": "L276",
       "target": "app_types_streamplatform",
       "weight": 1.0
     },
@@ -100385,6 +100529,42 @@
       "relation": "imports",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
+      "source_location": "L10",
+      "target": "app_server_schedule_server_capacityguard",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_schedule_import_server",
+      "source_file": "app/server/schedule-import.server.ts",
+      "source_location": "L10",
+      "target": "app_server_schedule_server_iscapacityerror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_schedule_import_server",
+      "source_file": "app/server/schedule-import.server.ts",
+      "source_location": "L10",
+      "target": "app_server_schedule_server_max_upcoming_events",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_schedule_import_server",
+      "source_file": "app/server/schedule-import.server.ts",
       "source_location": "L3",
       "target": "app_env_appenv",
       "weight": 1.0
@@ -100470,43 +100650,31 @@
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
       "source_location": "L8",
+      "target": "app_server_stream_images_server_storestreamimages",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_schedule_import_server",
+      "source_file": "app/server/schedule-import.server.ts",
+      "source_location": "L8",
+      "target": "app_server_stream_images_server_sweepstreamimages",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_schedule_import_server",
+      "source_file": "app/server/schedule-import.server.ts",
+      "source_location": "L9",
       "target": "app_server_overlay_server_refreshpageoverlay",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_server_schedule_import_server",
-      "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L9",
-      "target": "app_server_schedule_server_capacityguard",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_server_schedule_import_server",
-      "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L9",
-      "target": "app_server_schedule_server_iscapacityerror",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_server_schedule_import_server",
-      "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L9",
-      "target": "app_server_schedule_server_max_upcoming_events",
       "weight": 1.0
     },
     {
@@ -101191,6 +101359,18 @@
       "source_file": "app/server/stream-images.server.ts",
       "source_location": "L3",
       "target": "app_server_http_server_httperror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_stream_images_server",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L3",
+      "target": "app_server_http_server_logerror",
       "weight": 1.0
     },
     {
@@ -121543,6 +121723,18 @@
       "source_file": "tests/schedule-import.test.ts",
       "source_location": "L20",
       "target": "app_server_stream_images_server_servestreamimage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_schedule_import_test",
+      "source_file": "tests/schedule-import.test.ts",
+      "source_location": "L20",
+      "target": "app_server_stream_images_server_sweepstreamimages",
       "weight": 1.0
     },
     {
@@ -145687,6 +145879,18 @@
       "relation": "imports_from",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
+      "source_location": "L10",
+      "target": "app_server_schedule_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_schedule_import_server",
+      "source_file": "app/server/schedule-import.server.ts",
       "source_location": "L2",
       "target": "ref_zod",
       "weight": 1.0
@@ -145761,7 +145965,7 @@
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
       "source_location": "L8",
-      "target": "app_server_overlay_server",
+      "target": "app_server_stream_images_server",
       "weight": 1.0
     },
     {
@@ -145773,7 +145977,7 @@
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
       "source_location": "L9",
-      "target": "app_server_schedule_server",
+      "target": "app_server_overlay_server",
       "weight": 1.0
     },
     {
@@ -169461,7 +169665,7 @@
       "relation": "contains",
       "source": "app_components_schedule_schedule_feed",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L142",
+      "source_location": "L147",
       "target": "app_components_schedule_schedule_feed_groupbyday",
       "weight": 1.0
     },
@@ -169472,7 +169676,7 @@
       "relation": "contains",
       "source": "app_components_schedule_schedule_feed",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L153",
+      "source_location": "L158",
       "target": "app_components_schedule_schedule_feed_hero",
       "weight": 1.0
     },
@@ -169483,7 +169687,7 @@
       "relation": "contains",
       "source": "app_components_schedule_schedule_feed",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L217",
+      "source_location": "L222",
       "target": "app_components_schedule_schedule_feed_schedulefeed",
       "weight": 1.0
     },
@@ -169527,7 +169731,7 @@
       "relation": "contains",
       "source": "app_components_schedule_schedule_feed",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L62",
+      "source_location": "L67",
       "target": "app_components_schedule_schedule_feed_categorychip",
       "weight": 1.0
     },
@@ -169538,7 +169742,7 @@
       "relation": "contains",
       "source": "app_components_schedule_schedule_feed",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L72",
+      "source_location": "L77",
       "target": "app_components_schedule_schedule_feed_platformlink",
       "weight": 1.0
     },
@@ -169549,7 +169753,7 @@
       "relation": "contains",
       "source": "app_components_schedule_schedule_feed",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L90",
+      "source_location": "L95",
       "target": "app_components_schedule_schedule_feed_eventrow",
       "weight": 1.0
     },
@@ -174444,7 +174648,7 @@
       "relation": "contains",
       "source": "app_env",
       "source_file": "app/env.ts",
-      "source_location": "L50",
+      "source_location": "L52",
       "target": "app_env_appcontext",
       "weight": 1.0
     },
@@ -174455,7 +174659,7 @@
       "relation": "contains",
       "source": "app_env",
       "source_file": "app/env.ts",
-      "source_location": "L59",
+      "source_location": "L61",
       "target": "app_env_appcontext_54cf5bec59a5",
       "weight": 1.0
     },
@@ -181968,7 +182172,7 @@
       "relation": "contains",
       "source": "app_routes_privacy",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L576",
+      "source_location": "L578",
       "target": "app_routes_privacy_privacy",
       "weight": 1.0
     },
@@ -185422,7 +185626,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L609",
+      "source_location": "L612",
       "target": "app_server_channel_providers_server_stream_image_url",
       "weight": 1.0
     },
@@ -185433,7 +185637,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L612",
+      "source_location": "L616",
       "target": "app_server_channel_providers_server_importedstreamschema",
       "weight": 1.0
     },
@@ -185444,7 +185648,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L623",
+      "source_location": "L627",
       "target": "app_server_channel_providers_server_importedstream",
       "weight": 1.0
     },
@@ -185455,7 +185659,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L626",
+      "source_location": "L630",
       "target": "app_server_channel_providers_server_import_horizon_ms",
       "weight": 1.0
     },
@@ -185466,7 +185670,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L629",
+      "source_location": "L633",
       "target": "app_server_channel_providers_server_default_stream_min",
       "weight": 1.0
     },
@@ -185477,7 +185681,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L631",
+      "source_location": "L635",
       "target": "app_server_channel_providers_server_streamlength",
       "weight": 1.0
     },
@@ -185488,7 +185692,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L636",
+      "source_location": "L640",
       "target": "app_server_channel_providers_server_streamtitle",
       "weight": 1.0
     },
@@ -185499,7 +185703,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L641",
+      "source_location": "L645",
       "target": "app_server_channel_providers_server_twitchscheduleschema",
       "weight": 1.0
     },
@@ -185510,7 +185714,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L669",
+      "source_location": "L673",
       "target": "app_server_channel_providers_server_twitchstream",
       "weight": 1.0
     },
@@ -185521,7 +185725,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L675",
+      "source_location": "L679",
       "target": "app_server_channel_providers_server_twitchstreams",
       "weight": 1.0
     },
@@ -185532,7 +185736,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L703",
+      "source_location": "L707",
       "target": "app_server_channel_providers_server_twitchgamesschema",
       "weight": 1.0
     },
@@ -185543,7 +185747,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L714",
+      "source_location": "L718",
       "target": "app_server_channel_providers_server_withcovers",
       "weight": 1.0
     },
@@ -185554,7 +185758,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L745",
+      "source_location": "L749",
       "target": "app_server_channel_providers_server_twitchschedule",
       "weight": 1.0
     },
@@ -185576,7 +185780,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L780",
+      "source_location": "L784",
       "target": "app_server_channel_providers_server_youtubeupcomingschema",
       "weight": 1.0
     },
@@ -185587,7 +185791,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L797",
+      "source_location": "L801",
       "target": "app_server_channel_providers_server_listed_privacy",
       "weight": 1.0
     },
@@ -185598,7 +185802,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L800",
+      "source_location": "L804",
       "target": "app_server_channel_providers_server_youtubethumbnail",
       "weight": 1.0
     },
@@ -185609,7 +185813,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L806",
+      "source_location": "L810",
       "target": "app_server_channel_providers_server_youtubestreams",
       "weight": 1.0
     },
@@ -185620,7 +185824,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L826",
+      "source_location": "L830",
       "target": "app_server_channel_providers_server_youtube_upcoming_pages",
       "weight": 1.0
     },
@@ -185631,7 +185835,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L835",
+      "source_location": "L839",
       "target": "app_server_channel_providers_server_youtubeupcoming",
       "weight": 1.0
     },
@@ -185642,7 +185846,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L861",
+      "source_location": "L865",
       "target": "app_server_channel_providers_server_livestream",
       "weight": 1.0
     },
@@ -185653,7 +185857,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L869",
+      "source_location": "L873",
       "target": "app_server_channel_providers_server_twitchstreamsschema",
       "weight": 1.0
     },
@@ -185664,7 +185868,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L881",
+      "source_location": "L885",
       "target": "app_server_channel_providers_server_twitchvideosschema",
       "weight": 1.0
     },
@@ -185686,7 +185890,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L890",
+      "source_location": "L894",
       "target": "app_server_channel_providers_server_twitchlivestream",
       "weight": 1.0
     },
@@ -191076,7 +191280,7 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L110",
+      "source_location": "L111",
       "target": "app_server_schedule_import_server_startsync",
       "weight": 1.0
     },
@@ -191087,7 +191291,7 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L140",
+      "source_location": "L141",
       "target": "app_server_schedule_import_server_outdated",
       "weight": 1.0
     },
@@ -191098,7 +191302,7 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L150",
+      "source_location": "L151",
       "target": "app_server_schedule_import_server_readagain",
       "weight": 1.0
     },
@@ -191109,7 +191313,7 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L185",
+      "source_location": "L186",
       "target": "app_server_schedule_import_server_takeroom",
       "weight": 1.0
     },
@@ -191120,18 +191324,7 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L19",
-      "target": "app_server_schedule_import_server_importplatform",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_server_schedule_import_server",
-      "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L194",
+      "source_location": "L195",
       "target": "app_server_schedule_import_server_entryfor",
       "weight": 1.0
     },
@@ -191143,6 +191336,17 @@
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
       "source_location": "L20",
+      "target": "app_server_schedule_import_server_importplatform",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_schedule_import_server",
+      "source_file": "app/server/schedule-import.server.ts",
+      "source_location": "L21",
       "target": "app_server_schedule_import_server_import_platforms",
       "weight": 1.0
     },
@@ -191153,7 +191357,7 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L218",
+      "source_location": "L219",
       "target": "app_server_schedule_import_server_readnew",
       "weight": 1.0
     },
@@ -191164,7 +191368,7 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L23",
+      "source_location": "L24",
       "target": "app_server_schedule_import_server_match_window_ms",
       "weight": 1.0
     },
@@ -191175,7 +191379,7 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L243",
+      "source_location": "L244",
       "target": "app_server_schedule_import_server_notread",
       "weight": 1.0
     },
@@ -191186,7 +191390,7 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L25",
+      "source_location": "L26",
       "target": "app_server_schedule_import_server_keep_margin_ms",
       "weight": 1.0
     },
@@ -191197,7 +191401,7 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L264",
+      "source_location": "L265",
       "target": "app_server_schedule_import_server_syncplatform",
       "weight": 1.0
     },
@@ -191208,7 +191412,7 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L27",
+      "source_location": "L28",
       "target": "app_server_schedule_import_server_owner_read_interval_ms",
       "weight": 1.0
     },
@@ -191219,18 +191423,7 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L29",
-      "target": "app_server_schedule_import_server_cron_read_interval_ms",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_server_schedule_import_server",
-      "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L297",
+      "source_location": "L298",
       "target": "app_server_schedule_import_server_unlinked",
       "weight": 1.0
     },
@@ -191241,7 +191434,18 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L309",
+      "source_location": "L30",
+      "target": "app_server_schedule_import_server_cron_read_interval_ms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_schedule_import_server",
+      "source_file": "app/server/schedule-import.server.ts",
+      "source_location": "L310",
       "target": "app_server_schedule_import_server_readableplatforms",
       "weight": 1.0
     },
@@ -191252,7 +191456,7 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L31",
+      "source_location": "L32",
       "target": "app_server_schedule_import_server_cron_pages",
       "weight": 1.0
     },
@@ -191263,7 +191467,7 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L322",
+      "source_location": "L323",
       "target": "app_server_schedule_import_server_importpageschedule",
       "weight": 1.0
     },
@@ -191274,18 +191478,7 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L33",
-      "target": "app_server_schedule_import_server_source_retention_ms",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_server_schedule_import_server",
-      "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L333",
+      "source_location": "L335",
       "target": "app_server_schedule_import_server_claim",
       "weight": 1.0
     },
@@ -191296,7 +191489,18 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L343",
+      "source_location": "L34",
+      "target": "app_server_schedule_import_server_source_retention_ms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_schedule_import_server",
+      "source_file": "app/server/schedule-import.server.ts",
+      "source_location": "L345",
       "target": "app_server_schedule_import_server_importavailable",
       "weight": 1.0
     },
@@ -191307,7 +191511,7 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L348",
+      "source_location": "L350",
       "target": "app_server_schedule_import_server_importaftervisit",
       "weight": 1.0
     },
@@ -191318,18 +191522,7 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L35",
-      "target": "app_server_schedule_import_server_samestream",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_server_schedule_import_server",
-      "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L352",
+      "source_location": "L354",
       "target": "app_server_schedule_import_server_importonvisit",
       "weight": 1.0
     },
@@ -191340,7 +191533,18 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L367",
+      "source_location": "L36",
+      "target": "app_server_schedule_import_server_samestream",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_schedule_import_server",
+      "source_file": "app/server/schedule-import.server.ts",
+      "source_location": "L369",
       "target": "app_server_schedule_import_server_importschedules",
       "weight": 1.0
     },
@@ -191351,7 +191555,7 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L39",
+      "source_location": "L40",
       "target": "app_server_schedule_import_server_readschema",
       "weight": 1.0
     },
@@ -191362,7 +191566,7 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L42",
+      "source_location": "L43",
       "target": "app_server_schedule_import_server_teststreams",
       "weight": 1.0
     },
@@ -191373,7 +191577,7 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L65",
+      "source_location": "L66",
       "target": "app_server_schedule_import_server_readstreams",
       "weight": 1.0
     },
@@ -191384,7 +191588,7 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L78",
+      "source_location": "L79",
       "target": "app_server_schedule_import_server_sourcerow",
       "weight": 1.0
     },
@@ -191395,7 +191599,7 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L89",
+      "source_location": "L90",
       "target": "app_server_schedule_import_server_candidate",
       "weight": 1.0
     },
@@ -191406,7 +191610,7 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L95",
+      "source_location": "L96",
       "target": "app_server_schedule_import_server_sync",
       "weight": 1.0
     },
@@ -191417,7 +191621,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L110",
+      "source_location": "L111",
       "target": "app_server_schedule_server_eventvalues",
       "weight": 1.0
     },
@@ -191428,7 +191632,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L123",
+      "source_location": "L124",
       "target": "app_server_schedule_server_eventvalue",
       "weight": 1.0
     },
@@ -191450,7 +191654,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L147",
+      "source_location": "L148",
       "target": "app_server_schedule_server_upcoming_limit",
       "weight": 1.0
     },
@@ -191461,7 +191665,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L149",
+      "source_location": "L150",
       "target": "app_server_schedule_server_past_limit",
       "weight": 1.0
     },
@@ -191472,7 +191676,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L153",
+      "source_location": "L154",
       "target": "app_server_schedule_server_eventrows",
       "weight": 1.0
     },
@@ -191494,7 +191698,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L170",
+      "source_location": "L171",
       "target": "app_server_schedule_server_listevents",
       "weight": 1.0
     },
@@ -191516,7 +191720,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L182",
+      "source_location": "L183",
       "target": "app_server_schedule_server_listtopicchoices",
       "weight": 1.0
     },
@@ -191527,7 +191731,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L192",
+      "source_location": "L193",
       "target": "app_server_schedule_server_defaultrange",
       "weight": 1.0
     },
@@ -191538,7 +191742,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L196",
+      "source_location": "L197",
       "target": "app_server_schedule_server_ownstreamerid",
       "weight": 1.0
     },
@@ -191549,7 +191753,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L202",
+      "source_location": "L203",
       "target": "app_server_schedule_server_ownedevent",
       "weight": 1.0
     },
@@ -191560,7 +191764,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L213",
+      "source_location": "L214",
       "target": "app_server_schedule_server_validtopics",
       "weight": 1.0
     },
@@ -191571,7 +191775,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L223",
+      "source_location": "L224",
       "target": "app_server_schedule_server_plan",
       "weight": 1.0
     },
@@ -191582,7 +191786,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L235",
+      "source_location": "L236",
       "target": "app_server_schedule_server_seriesdone",
       "weight": 1.0
     },
@@ -191593,7 +191797,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L242",
+      "source_location": "L243",
       "target": "app_server_schedule_server_planevents",
       "weight": 1.0
     },
@@ -191604,7 +191808,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L271",
+      "source_location": "L272",
       "target": "app_server_schedule_server_template",
       "weight": 1.0
     },
@@ -191615,7 +191819,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L283",
+      "source_location": "L284",
       "target": "app_server_schedule_server_insertstatements",
       "weight": 1.0
     },
@@ -191626,7 +191830,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L359",
+      "source_location": "L360",
       "target": "app_server_schedule_server_endseriesbefore",
       "weight": 1.0
     },
@@ -191637,7 +191841,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L377",
+      "source_location": "L378",
       "target": "app_server_schedule_server_upcomingcount",
       "weight": 1.0
     },
@@ -191648,7 +191852,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L382",
+      "source_location": "L383",
       "target": "app_server_schedule_server_fullschedule",
       "weight": 1.0
     },
@@ -191659,7 +191863,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L387",
+      "source_location": "L388",
       "target": "app_server_schedule_server_assertroom",
       "weight": 1.0
     },
@@ -191681,7 +191885,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L396",
+      "source_location": "L397",
       "target": "app_server_schedule_server_capacityguard",
       "weight": 1.0
     },
@@ -191692,7 +191896,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L403",
+      "source_location": "L404",
       "target": "app_server_schedule_server_failedguard",
       "weight": 1.0
     },
@@ -191703,7 +191907,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L410",
+      "source_location": "L411",
       "target": "app_server_schedule_server_iscapacityerror",
       "weight": 1.0
     },
@@ -191714,7 +191918,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L415",
+      "source_location": "L416",
       "target": "app_server_schedule_server_guardedbatch",
       "weight": 1.0
     },
@@ -191725,7 +191929,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L424",
+      "source_location": "L425",
       "target": "app_server_schedule_server_templateof",
       "weight": 1.0
     },
@@ -191747,7 +191951,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L436",
+      "source_location": "L437",
       "target": "app_server_schedule_server_createevents",
       "weight": 1.0
     },
@@ -191758,7 +191962,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L453",
+      "source_location": "L454",
       "target": "app_server_schedule_server_getevent",
       "weight": 1.0
     },
@@ -191769,7 +191973,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L468",
+      "source_location": "L469",
       "target": "app_server_schedule_server_patchevent",
       "weight": 1.0
     },
@@ -191791,7 +191995,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L491",
+      "source_location": "L492",
       "target": "app_server_schedule_server_editoneevent",
       "weight": 1.0
     },
@@ -191802,7 +192006,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L529",
+      "source_location": "L530",
       "target": "app_server_schedule_server_editevent",
       "weight": 1.0
     },
@@ -191813,7 +192017,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L565",
+      "source_location": "L566",
       "target": "app_server_schedule_server_deleteevent",
       "weight": 1.0
     },
@@ -191824,7 +192028,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L584",
+      "source_location": "L585",
       "target": "app_server_schedule_server_seriestemplate",
       "weight": 1.0
     },
@@ -191835,7 +192039,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L605",
+      "source_location": "L606",
       "target": "app_server_schedule_server_seriescte",
       "weight": 1.0
     },
@@ -191857,7 +192061,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L632",
+      "source_location": "L633",
       "target": "app_server_schedule_server_freshguard",
       "weight": 1.0
     },
@@ -191868,7 +192072,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L657",
+      "source_location": "L658",
       "target": "app_server_schedule_server_topupone",
       "weight": 1.0
     },
@@ -191901,7 +192105,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L721",
+      "source_location": "L722",
       "target": "app_server_schedule_server_topupseries",
       "weight": 1.0
     },
@@ -191912,7 +192116,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L758",
+      "source_location": "L759",
       "target": "app_server_schedule_server_feed_past_limit",
       "weight": 1.0
     },
@@ -191923,7 +192127,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L762",
+      "source_location": "L763",
       "target": "app_server_schedule_server_schedulecalendar",
       "weight": 1.0
     },
@@ -191945,7 +192149,7 @@
       "relation": "contains",
       "source": "app_server_schedule_server",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L91",
+      "source_location": "L92",
       "target": "app_server_schedule_server_sourcesfor",
       "weight": 1.0
     },
@@ -192484,7 +192688,29 @@
       "relation": "contains",
       "source": "app_server_stream_images_server",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L13",
+      "source_location": "L110",
+      "target": "app_server_stream_images_server_sweepstreamimages",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_stream_images_server",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L12",
+      "target": "app_server_stream_images_server_source_types",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_stream_images_server",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L132",
       "target": "app_server_stream_images_server_servestreamimage",
       "weight": 1.0
     },
@@ -192495,8 +192721,85 @@
       "relation": "contains",
       "source": "app_server_stream_images_server",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L5",
-      "target": "app_server_stream_images_server_image_types",
+      "source_location": "L17",
+      "target": "app_server_stream_images_server_size",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_stream_images_server",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L19",
+      "target": "app_server_stream_images_server_thumbnail_sizes",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_stream_images_server",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L24",
+      "target": "app_server_stream_images_server_sourcerow",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_stream_images_server",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L31",
+      "target": "app_server_stream_images_server_picturebase",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_stream_images_server",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L40",
+      "target": "app_server_stream_images_server_download",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_stream_images_server",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L57",
+      "target": "app_server_stream_images_server_resized",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_stream_images_server",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L67",
+      "target": "app_server_stream_images_server_storeone",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_stream_images_server",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L90",
+      "target": "app_server_stream_images_server_storestreamimages",
       "weight": 1.0
     },
     {
@@ -194541,7 +194844,7 @@
       "relation": "contains",
       "source": "app_types",
       "source_file": "app/types.ts",
-      "source_location": "L406",
+      "source_location": "L408",
       "target": "app_types_streamevent",
       "weight": 1.0
     },
@@ -194563,7 +194866,7 @@
       "relation": "contains",
       "source": "app_types",
       "source_file": "app/types.ts",
-      "source_location": "L437",
+      "source_location": "L439",
       "target": "app_types_schedulesnapshot",
       "weight": 1.0
     },
@@ -194574,7 +194877,7 @@
       "relation": "contains",
       "source": "app_types",
       "source_file": "app/types.ts",
-      "source_location": "L443",
+      "source_location": "L445",
       "target": "app_types_communitycard",
       "weight": 1.0
     },
@@ -194585,7 +194888,7 @@
       "relation": "contains",
       "source": "app_types",
       "source_file": "app/types.ts",
-      "source_location": "L455",
+      "source_location": "L457",
       "target": "app_types_supportlink",
       "weight": 1.0
     },
@@ -194596,7 +194899,7 @@
       "relation": "contains",
       "source": "app_types",
       "source_file": "app/types.ts",
-      "source_location": "L462",
+      "source_location": "L464",
       "target": "app_types_supportsettings",
       "weight": 1.0
     },
@@ -194607,7 +194910,7 @@
       "relation": "contains",
       "source": "app_types",
       "source_file": "app/types.ts",
-      "source_location": "L471",
+      "source_location": "L473",
       "target": "app_types_overlaydata",
       "weight": 1.0
     },
@@ -194618,7 +194921,7 @@
       "relation": "contains",
       "source": "app_types",
       "source_file": "app/types.ts",
-      "source_location": "L497",
+      "source_location": "L499",
       "target": "app_types_moderationtarget",
       "weight": 1.0
     },
@@ -194629,7 +194932,7 @@
       "relation": "contains",
       "source": "app_types",
       "source_file": "app/types.ts",
-      "source_location": "L500",
+      "source_location": "L502",
       "target": "app_types_moderation_reasons",
       "weight": 1.0
     },
@@ -194640,7 +194943,7 @@
       "relation": "contains",
       "source": "app_types",
       "source_file": "app/types.ts",
-      "source_location": "L501",
+      "source_location": "L503",
       "target": "app_types_moderationreason",
       "weight": 1.0
     },
@@ -194651,7 +194954,7 @@
       "relation": "contains",
       "source": "app_types",
       "source_file": "app/types.ts",
-      "source_location": "L503",
+      "source_location": "L505",
       "target": "app_types_page_actions",
       "weight": 1.0
     },
@@ -194662,7 +194965,7 @@
       "relation": "contains",
       "source": "app_types",
       "source_file": "app/types.ts",
-      "source_location": "L504",
+      "source_location": "L506",
       "target": "app_types_pageaction",
       "weight": 1.0
     },
@@ -194673,7 +194976,7 @@
       "relation": "contains",
       "source": "app_types",
       "source_file": "app/types.ts",
-      "source_location": "L507",
+      "source_location": "L509",
       "target": "app_types_stepupmode",
       "weight": 1.0
     },
@@ -194684,7 +194987,7 @@
       "relation": "contains",
       "source": "app_types",
       "source_file": "app/types.ts",
-      "source_location": "L511",
+      "source_location": "L513",
       "target": "app_types_stepupneed",
       "weight": 1.0
     },
@@ -194695,19 +194998,8 @@
       "relation": "contains",
       "source": "app_types",
       "source_file": "app/types.ts",
-      "source_location": "L513",
+      "source_location": "L515",
       "target": "app_types_stepupstatus",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_types",
-      "source_file": "app/types.ts",
-      "source_location": "L528",
-      "target": "app_types_securitykey",
       "weight": 1.0
     },
     {
@@ -194728,7 +195020,18 @@
       "relation": "contains",
       "source": "app_types",
       "source_file": "app/types.ts",
-      "source_location": "L538",
+      "source_location": "L530",
+      "target": "app_types_securitykey",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_types",
+      "source_file": "app/types.ts",
+      "source_location": "L540",
       "target": "app_types_adminperson",
       "weight": 1.0
     },
@@ -194739,7 +195042,7 @@
       "relation": "contains",
       "source": "app_types",
       "source_file": "app/types.ts",
-      "source_location": "L545",
+      "source_location": "L547",
       "target": "app_types_moderationevent",
       "weight": 1.0
     },
@@ -194750,7 +195053,7 @@
       "relation": "contains",
       "source": "app_types",
       "source_file": "app/types.ts",
-      "source_location": "L555",
+      "source_location": "L557",
       "target": "app_types_adminpage",
       "weight": 1.0
     },
@@ -194761,7 +195064,7 @@
       "relation": "contains",
       "source": "app_types",
       "source_file": "app/types.ts",
-      "source_location": "L573",
+      "source_location": "L575",
       "target": "app_types_adminpagelist",
       "weight": 1.0
     },
@@ -194772,7 +195075,7 @@
       "relation": "contains",
       "source": "app_types",
       "source_file": "app/types.ts",
-      "source_location": "L578",
+      "source_location": "L580",
       "target": "app_types_reportgroupfilter",
       "weight": 1.0
     },
@@ -194783,7 +195086,7 @@
       "relation": "contains",
       "source": "app_types",
       "source_file": "app/types.ts",
-      "source_location": "L580",
+      "source_location": "L582",
       "target": "app_types_reportgroup",
       "weight": 1.0
     },
@@ -194794,7 +195097,7 @@
       "relation": "contains",
       "source": "app_types",
       "source_file": "app/types.ts",
-      "source_location": "L593",
+      "source_location": "L595",
       "target": "app_types_reportgrouplist",
       "weight": 1.0
     },
@@ -194805,7 +195108,7 @@
       "relation": "contains",
       "source": "app_types",
       "source_file": "app/types.ts",
-      "source_location": "L599",
+      "source_location": "L601",
       "target": "app_types_reportitemreport",
       "weight": 1.0
     },
@@ -194816,7 +195119,7 @@
       "relation": "contains",
       "source": "app_types",
       "source_file": "app/types.ts",
-      "source_location": "L609",
+      "source_location": "L611",
       "target": "app_types_reportitem",
       "weight": 1.0
     },
@@ -194827,7 +195130,7 @@
       "relation": "contains",
       "source": "app_types",
       "source_file": "app/types.ts",
-      "source_location": "L627",
+      "source_location": "L629",
       "target": "app_types_reportitemlist",
       "weight": 1.0
     },
@@ -194838,7 +195141,7 @@
       "relation": "contains",
       "source": "app_types",
       "source_file": "app/types.ts",
-      "source_location": "L634",
+      "source_location": "L636",
       "target": "app_types_ideastatusinput",
       "weight": 1.0
     },
@@ -196169,7 +196472,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L247",
+      "source_location": "L256",
       "target": "docs_channel_connections_limits_and_retention",
       "weight": 1.0
     },
@@ -196180,7 +196483,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L367",
+      "source_location": "L376",
       "target": "docs_channel_connections_token_encryption_and_rotation",
       "weight": 1.0
     },
@@ -196191,7 +196494,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L421",
+      "source_location": "L430",
       "target": "docs_channel_connections_disconnect",
       "weight": 1.0
     },
@@ -196213,7 +196516,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L556",
+      "source_location": "L565",
       "target": "docs_channel_connections_logs_and_alerts",
       "weight": 1.0
     },
@@ -196224,7 +196527,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L586",
+      "source_location": "L595",
       "target": "docs_channel_connections_overlay_key",
       "weight": 1.0
     },
@@ -196235,7 +196538,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L599",
+      "source_location": "L608",
       "target": "docs_channel_connections_setup",
       "weight": 1.0
     },
@@ -196246,7 +196549,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L627",
+      "source_location": "L636",
       "target": "docs_channel_connections_runbook",
       "weight": 1.0
     },
@@ -196257,7 +196560,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L652",
+      "source_location": "L661",
       "target": "docs_channel_connections_turn_the_feature_off",
       "weight": 1.0
     },
@@ -196268,7 +196571,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L690",
+      "source_location": "L699",
       "target": "docs_channel_connections_rollback",
       "weight": 1.0
     },
@@ -196279,7 +196582,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L701",
+      "source_location": "L710",
       "target": "docs_channel_connections_threat_model",
       "weight": 1.0
     },
@@ -196290,7 +196593,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L762",
+      "source_location": "L771",
       "target": "docs_channel_connections_stored_youtube_data",
       "weight": 1.0
     },
@@ -196301,7 +196604,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L801",
+      "source_location": "L810",
       "target": "docs_channel_connections_facts_not_checked",
       "weight": 1.0
     },
@@ -196312,7 +196615,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L447",
+      "source_location": "L456",
       "target": "docs_channel_connections_provider_subscriptions",
       "weight": 1.0
     },
@@ -196323,7 +196626,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L460",
+      "source_location": "L469",
       "target": "docs_channel_connections_subscription_repair",
       "weight": 1.0
     },
@@ -196334,7 +196637,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L508",
+      "source_location": "L517",
       "target": "docs_channel_connections_refused_webhooks",
       "weight": 1.0
     },
@@ -196345,7 +196648,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L532",
+      "source_location": "L541",
       "target": "docs_channel_connections_account_deletion",
       "weight": 1.0
     },
@@ -196356,7 +196659,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L540",
+      "source_location": "L549",
       "target": "docs_channel_connections_callback_failures",
       "weight": 1.0
     },
@@ -196400,7 +196703,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_limits_and_retention",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L321",
+      "source_location": "L330",
       "target": "docs_channel_connections_youtube_quota",
       "weight": 1.0
     },
@@ -196411,7 +196714,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L703",
+      "source_location": "L712",
       "target": "docs_channel_connections_assets",
       "weight": 1.0
     },
@@ -196422,7 +196725,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L711",
+      "source_location": "L720",
       "target": "docs_channel_connections_actors",
       "weight": 1.0
     },
@@ -196433,7 +196736,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L719",
+      "source_location": "L728",
       "target": "docs_channel_connections_threats_and_mitigations",
       "weight": 1.0
     },
@@ -196444,7 +196747,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L748",
+      "source_location": "L757",
       "target": "docs_channel_connections_residual_risks",
       "weight": 1.0
     },
@@ -196455,7 +196758,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_token_encryption_and_rotation",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L410",
+      "source_location": "L419",
       "target": "docs_channel_connections_refresh",
       "weight": 1.0
     },
@@ -202758,7 +203061,7 @@
       "relation": "contains",
       "source": "tests_helpers_channels",
       "source_file": "tests/helpers/channels.ts",
-      "source_location": "L264",
+      "source_location": "L273",
       "target": "tests_helpers_channels_youtubetext",
       "weight": 1.0
     },
@@ -202769,19 +203072,8 @@
       "relation": "contains",
       "source": "tests_helpers_channels",
       "source_file": "tests/helpers/channels.ts",
-      "source_location": "L64",
+      "source_location": "L66",
       "target": "tests_helpers_channels_twitch_scopes",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "tests_helpers_channels",
-      "source_file": "tests/helpers/channels.ts",
-      "source_location": "L78",
-      "target": "tests_helpers_channels_json",
       "weight": 1.0
     },
     {
@@ -202802,7 +203094,18 @@
       "relation": "contains",
       "source": "tests_helpers_channels",
       "source_file": "tests/helpers/channels.ts",
-      "source_location": "L82",
+      "source_location": "L80",
+      "target": "tests_helpers_channels_json",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_channels",
+      "source_file": "tests/helpers/channels.ts",
+      "source_location": "L84",
       "target": "tests_helpers_channels_platformoftoken",
       "weight": 1.0
     },
@@ -202813,7 +203116,7 @@
       "relation": "contains",
       "source": "tests_helpers_channels",
       "source_file": "tests/helpers/channels.ts",
-      "source_location": "L89",
+      "source_location": "L91",
       "target": "tests_helpers_channels_installfakeproviders",
       "weight": 1.0
     },
@@ -206038,6 +206341,39 @@
       "source_file": "tests/schedule-import.test.ts",
       "source_location": "L61",
       "target": "tests_schedule_import_test_schedule",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_schedule_import_test",
+      "source_file": "tests/schedule-import.test.ts",
+      "source_location": "L708",
+      "target": "tests_schedule_import_test_transformer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_schedule_import_test",
+      "source_file": "tests/schedule-import.test.ts",
+      "source_location": "L724",
+      "target": "tests_schedule_import_test_stored",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_schedule_import_test",
+      "source_file": "tests/schedule-import.test.ts",
+      "source_location": "L729",
+      "target": "tests_schedule_import_test_imagecalls",
       "weight": 1.0
     },
     {
@@ -214058,7 +214394,7 @@
       "relation": "references",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L426",
+      "source_location": "L435",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -214082,7 +214418,7 @@
       "relation": "references",
       "source": "docs_channel_connections_refresh",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L412",
+      "source_location": "L421",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -214094,7 +214430,7 @@
       "relation": "references",
       "source": "docs_channel_connections_rollback",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L692",
+      "source_location": "L701",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -214118,7 +214454,7 @@
       "relation": "references",
       "source": "docs_channel_connections_setup",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L618",
+      "source_location": "L627",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -214130,7 +214466,7 @@
       "relation": "references",
       "source": "docs_channel_connections_threats_and_mitigations",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L731",
+      "source_location": "L740",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -214346,7 +214682,7 @@
       "relation": "references",
       "source": "docs_channel_connections_scheduled_streams",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L245",
+      "source_location": "L254",
       "target": "app_server_schedule_import_server_teststreams",
       "weight": 1.0
     },
@@ -216664,7 +217000,7 @@
       "label": "AppContext",
       "norm_label": "appcontext",
       "source_file": "app/env.ts",
-      "source_location": "L50"
+      "source_location": "L52"
     },
     {
       "_callable": true,
@@ -218716,7 +219052,7 @@
       "label": "ImportedStream",
       "norm_label": "importedstream",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L623"
+      "source_location": "L627"
     },
     {
       "_callable": true,
@@ -218728,7 +219064,7 @@
       "label": "LiveStream",
       "norm_label": "livestream",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L861"
+      "source_location": "L865"
     },
     {
       "_callable": true,
@@ -218800,7 +219136,7 @@
       "label": "TwitchStream",
       "norm_label": "twitchstream",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L669"
+      "source_location": "L673"
     },
     {
       "_callable": true,
@@ -219688,7 +220024,7 @@
       "label": "Candidate",
       "norm_label": "candidate",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L89"
+      "source_location": "L90"
     },
     {
       "_callable": true,
@@ -219700,7 +220036,7 @@
       "label": "ImportPlatform",
       "norm_label": "importplatform",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L19"
+      "source_location": "L20"
     },
     {
       "_callable": true,
@@ -219712,7 +220048,7 @@
       "label": "SourceRow",
       "norm_label": "sourcerow",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L78"
+      "source_location": "L79"
     },
     {
       "_callable": true,
@@ -219724,7 +220060,7 @@
       "label": "Sync",
       "norm_label": "sync",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L95"
+      "source_location": "L96"
     },
     {
       "_callable": true,
@@ -219760,7 +220096,7 @@
       "label": "Plan",
       "norm_label": "plan",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L223"
+      "source_location": "L224"
     },
     {
       "_callable": true,
@@ -219772,7 +220108,7 @@
       "label": "SeriesTemplate",
       "norm_label": "seriestemplate",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L584"
+      "source_location": "L585"
     },
     {
       "_callable": true,
@@ -219808,7 +220144,7 @@
       "label": "Template",
       "norm_label": "template",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L271"
+      "source_location": "L272"
     },
     {
       "_callable": true,
@@ -219917,6 +220253,30 @@
       "norm_label": "sessionrow",
       "source_file": "app/server/stepup.server.ts",
       "source_location": "L81"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_stream_images_server_size",
+      "label": "Size",
+      "norm_label": "size",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L17"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_stream_images_server_sourcerow",
+      "label": "SourceRow",
+      "norm_label": "sourcerow",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L24"
     },
     {
       "_callable": true,
@@ -220276,7 +220636,7 @@
       "label": "AdminPage",
       "norm_label": "adminpage",
       "source_file": "app/types.ts",
-      "source_location": "L555"
+      "source_location": "L557"
     },
     {
       "_callable": true,
@@ -220288,7 +220648,7 @@
       "label": "AdminPageList",
       "norm_label": "adminpagelist",
       "source_file": "app/types.ts",
-      "source_location": "L573"
+      "source_location": "L575"
     },
     {
       "_callable": true,
@@ -220300,7 +220660,7 @@
       "label": "AdminPerson",
       "norm_label": "adminperson",
       "source_file": "app/types.ts",
-      "source_location": "L538"
+      "source_location": "L540"
     },
     {
       "_callable": true,
@@ -220456,7 +220816,7 @@
       "label": "CommunityCard",
       "norm_label": "communitycard",
       "source_file": "app/types.ts",
-      "source_location": "L443"
+      "source_location": "L445"
     },
     {
       "_callable": true,
@@ -220564,7 +220924,7 @@
       "label": "IdeaStatusInput",
       "norm_label": "ideastatusinput",
       "source_file": "app/types.ts",
-      "source_location": "L634"
+      "source_location": "L636"
     },
     {
       "_callable": true,
@@ -220636,7 +220996,7 @@
       "label": "ModerationEvent",
       "norm_label": "moderationevent",
       "source_file": "app/types.ts",
-      "source_location": "L545"
+      "source_location": "L547"
     },
     {
       "_callable": true,
@@ -220648,7 +221008,7 @@
       "label": "ModerationReason",
       "norm_label": "moderationreason",
       "source_file": "app/types.ts",
-      "source_location": "L501"
+      "source_location": "L503"
     },
     {
       "_callable": true,
@@ -220660,7 +221020,7 @@
       "label": "ModerationTarget",
       "norm_label": "moderationtarget",
       "source_file": "app/types.ts",
-      "source_location": "L497"
+      "source_location": "L499"
     },
     {
       "_callable": true,
@@ -220708,7 +221068,7 @@
       "label": "OverlayData",
       "norm_label": "overlaydata",
       "source_file": "app/types.ts",
-      "source_location": "L471"
+      "source_location": "L473"
     },
     {
       "_callable": true,
@@ -220804,7 +221164,7 @@
       "label": "PageAction",
       "norm_label": "pageaction",
       "source_file": "app/types.ts",
-      "source_location": "L504"
+      "source_location": "L506"
     },
     {
       "_callable": true,
@@ -220840,7 +221200,7 @@
       "label": "ReportGroup",
       "norm_label": "reportgroup",
       "source_file": "app/types.ts",
-      "source_location": "L580"
+      "source_location": "L582"
     },
     {
       "_callable": true,
@@ -220852,7 +221212,7 @@
       "label": "ReportGroupFilter",
       "norm_label": "reportgroupfilter",
       "source_file": "app/types.ts",
-      "source_location": "L578"
+      "source_location": "L580"
     },
     {
       "_callable": true,
@@ -220864,7 +221224,7 @@
       "label": "ReportGroupList",
       "norm_label": "reportgrouplist",
       "source_file": "app/types.ts",
-      "source_location": "L593"
+      "source_location": "L595"
     },
     {
       "_callable": true,
@@ -220876,7 +221236,7 @@
       "label": "ReportItem",
       "norm_label": "reportitem",
       "source_file": "app/types.ts",
-      "source_location": "L609"
+      "source_location": "L611"
     },
     {
       "_callable": true,
@@ -220888,7 +221248,7 @@
       "label": "ReportItemList",
       "norm_label": "reportitemlist",
       "source_file": "app/types.ts",
-      "source_location": "L627"
+      "source_location": "L629"
     },
     {
       "_callable": true,
@@ -220900,7 +221260,7 @@
       "label": "ReportItemReport",
       "norm_label": "reportitemreport",
       "source_file": "app/types.ts",
-      "source_location": "L599"
+      "source_location": "L601"
     },
     {
       "_callable": true,
@@ -220960,7 +221320,7 @@
       "label": "ScheduleSnapshot",
       "norm_label": "schedulesnapshot",
       "source_file": "app/types.ts",
-      "source_location": "L437"
+      "source_location": "L439"
     },
     {
       "_callable": true,
@@ -220972,7 +221332,7 @@
       "label": "SecurityKey",
       "norm_label": "securitykey",
       "source_file": "app/types.ts",
-      "source_location": "L528"
+      "source_location": "L530"
     },
     {
       "_callable": true,
@@ -220996,7 +221356,7 @@
       "label": "StepUpMode",
       "norm_label": "stepupmode",
       "source_file": "app/types.ts",
-      "source_location": "L507"
+      "source_location": "L509"
     },
     {
       "_callable": true,
@@ -221008,7 +221368,7 @@
       "label": "StepUpNeed",
       "norm_label": "stepupneed",
       "source_file": "app/types.ts",
-      "source_location": "L511"
+      "source_location": "L513"
     },
     {
       "_callable": true,
@@ -221020,7 +221380,7 @@
       "label": "StepUpStatus",
       "norm_label": "stepupstatus",
       "source_file": "app/types.ts",
-      "source_location": "L513"
+      "source_location": "L515"
     },
     {
       "_callable": true,
@@ -221092,7 +221452,7 @@
       "label": "StreamEvent",
       "norm_label": "streamevent",
       "source_file": "app/types.ts",
-      "source_location": "L406"
+      "source_location": "L408"
     },
     {
       "_callable": true,
@@ -221152,7 +221512,7 @@
       "label": "SupportLink",
       "norm_label": "supportlink",
       "source_file": "app/types.ts",
-      "source_location": "L455"
+      "source_location": "L457"
     },
     {
       "_callable": true,
@@ -221176,7 +221536,7 @@
       "label": "SupportSettings",
       "norm_label": "supportsettings",
       "source_file": "app/types.ts",
-      "source_location": "L462"
+      "source_location": "L464"
     },
     {
       "_callable": true,
@@ -228598,7 +228958,7 @@
       "label": "CategoryChip()",
       "norm_label": "categorychip()",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L62"
+      "source_location": "L67"
     },
     {
       "_callable": true,
@@ -228609,7 +228969,7 @@
       "label": "EventRow()",
       "norm_label": "eventrow()",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L90"
+      "source_location": "L95"
     },
     {
       "_callable": true,
@@ -228620,7 +228980,7 @@
       "label": "groupByDay()",
       "norm_label": "groupbyday()",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L142"
+      "source_location": "L147"
     },
     {
       "_callable": true,
@@ -228631,7 +228991,7 @@
       "label": "Hero()",
       "norm_label": "hero()",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L153"
+      "source_location": "L158"
     },
     {
       "_callable": true,
@@ -228642,7 +229002,7 @@
       "label": "PlatformLink()",
       "norm_label": "platformlink()",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L72"
+      "source_location": "L77"
     },
     {
       "_callable": true,
@@ -228653,7 +229013,7 @@
       "label": "ScheduleFeed()",
       "norm_label": "schedulefeed()",
       "source_file": "app/components/schedule/schedule-feed.tsx",
-      "source_location": "L217"
+      "source_location": "L222"
     },
     {
       "_callable": true,
@@ -237704,7 +238064,7 @@
       "label": "Privacy()",
       "norm_label": "privacy()",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L576"
+      "source_location": "L578"
     },
     {
       "_callable": true,
@@ -240380,7 +240740,7 @@
       "label": "streamLength()",
       "norm_label": "streamlength()",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L631"
+      "source_location": "L635"
     },
     {
       "_callable": true,
@@ -240391,7 +240751,7 @@
       "label": "streamTitle()",
       "norm_label": "streamtitle()",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L636"
+      "source_location": "L640"
     },
     {
       "_callable": true,
@@ -240457,7 +240817,7 @@
       "label": "twitchLiveStream()",
       "norm_label": "twitchlivestream()",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L890"
+      "source_location": "L894"
     },
     {
       "_callable": true,
@@ -240468,7 +240828,7 @@
       "label": "twitchSchedule()",
       "norm_label": "twitchschedule()",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L745"
+      "source_location": "L749"
     },
     {
       "_callable": true,
@@ -240479,7 +240839,7 @@
       "label": "twitchStreams()",
       "norm_label": "twitchstreams()",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L675"
+      "source_location": "L679"
     },
     {
       "_callable": true,
@@ -240512,7 +240872,7 @@
       "label": "withCovers()",
       "norm_label": "withcovers()",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L714"
+      "source_location": "L718"
     },
     {
       "_callable": true,
@@ -240556,7 +240916,7 @@
       "label": "youtubeStreams()",
       "norm_label": "youtubestreams()",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L806"
+      "source_location": "L810"
     },
     {
       "_callable": true,
@@ -240567,7 +240927,7 @@
       "label": "youtubeThumbnail()",
       "norm_label": "youtubethumbnail()",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L800"
+      "source_location": "L804"
     },
     {
       "_callable": true,
@@ -240578,7 +240938,7 @@
       "label": "youtubeUpcoming()",
       "norm_label": "youtubeupcoming()",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L835"
+      "source_location": "L839"
     },
     {
       "_callable": true,
@@ -245425,7 +245785,7 @@
       "label": "claim()",
       "norm_label": "claim()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L333"
+      "source_location": "L335"
     },
     {
       "_callable": true,
@@ -245436,7 +245796,7 @@
       "label": "entryFor()",
       "norm_label": "entryfor()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L194"
+      "source_location": "L195"
     },
     {
       "_callable": true,
@@ -245447,7 +245807,7 @@
       "label": "importAfterVisit()",
       "norm_label": "importaftervisit()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L348"
+      "source_location": "L350"
     },
     {
       "_callable": true,
@@ -245458,7 +245818,7 @@
       "label": "importAvailable()",
       "norm_label": "importavailable()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L343"
+      "source_location": "L345"
     },
     {
       "_callable": true,
@@ -245469,7 +245829,7 @@
       "label": "importOnVisit()",
       "norm_label": "importonvisit()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L352"
+      "source_location": "L354"
     },
     {
       "_callable": true,
@@ -245480,7 +245840,7 @@
       "label": "importPageSchedule()",
       "norm_label": "importpageschedule()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L322"
+      "source_location": "L323"
     },
     {
       "_callable": true,
@@ -245491,7 +245851,7 @@
       "label": "importSchedules()",
       "norm_label": "importschedules()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L367"
+      "source_location": "L369"
     },
     {
       "_callable": true,
@@ -245502,7 +245862,7 @@
       "label": "notRead()",
       "norm_label": "notread()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L243"
+      "source_location": "L244"
     },
     {
       "_callable": true,
@@ -245513,7 +245873,7 @@
       "label": "outdated()",
       "norm_label": "outdated()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L140"
+      "source_location": "L141"
     },
     {
       "_callable": true,
@@ -245524,7 +245884,7 @@
       "label": "readablePlatforms()",
       "norm_label": "readableplatforms()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L309"
+      "source_location": "L310"
     },
     {
       "_callable": true,
@@ -245535,7 +245895,7 @@
       "label": "readAgain()",
       "norm_label": "readagain()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L150"
+      "source_location": "L151"
     },
     {
       "_callable": true,
@@ -245546,7 +245906,7 @@
       "label": "readNew()",
       "norm_label": "readnew()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L218"
+      "source_location": "L219"
     },
     {
       "_callable": true,
@@ -245557,7 +245917,7 @@
       "label": "readStreams()",
       "norm_label": "readstreams()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L65"
+      "source_location": "L66"
     },
     {
       "_callable": true,
@@ -245568,7 +245928,7 @@
       "label": "sameStream()",
       "norm_label": "samestream()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L35"
+      "source_location": "L36"
     },
     {
       "_callable": true,
@@ -245579,7 +245939,7 @@
       "label": "startSync()",
       "norm_label": "startsync()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L110"
+      "source_location": "L111"
     },
     {
       "_callable": true,
@@ -245590,7 +245950,7 @@
       "label": "syncPlatform()",
       "norm_label": "syncplatform()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L264"
+      "source_location": "L265"
     },
     {
       "_callable": true,
@@ -245601,7 +245961,7 @@
       "label": "takeRoom()",
       "norm_label": "takeroom()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L185"
+      "source_location": "L186"
     },
     {
       "_callable": true,
@@ -245612,7 +245972,7 @@
       "label": "testStreams()",
       "norm_label": "teststreams()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L42"
+      "source_location": "L43"
     },
     {
       "_callable": true,
@@ -245623,7 +245983,7 @@
       "label": "unlinked()",
       "norm_label": "unlinked()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L297"
+      "source_location": "L298"
     },
     {
       "_callable": true,
@@ -245645,7 +246005,7 @@
       "label": "assertRoom()",
       "norm_label": "assertroom()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L387"
+      "source_location": "L388"
     },
     {
       "_callable": true,
@@ -245656,7 +246016,7 @@
       "label": "capacityGuard()",
       "norm_label": "capacityguard()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L396"
+      "source_location": "L397"
     },
     {
       "_callable": true,
@@ -245667,7 +246027,7 @@
       "label": "createEvents()",
       "norm_label": "createevents()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L436"
+      "source_location": "L437"
     },
     {
       "_callable": true,
@@ -245678,7 +246038,7 @@
       "label": "defaultRange()",
       "norm_label": "defaultrange()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L192"
+      "source_location": "L193"
     },
     {
       "_callable": true,
@@ -245689,7 +246049,7 @@
       "label": "deleteEvent()",
       "norm_label": "deleteevent()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L565"
+      "source_location": "L566"
     },
     {
       "_callable": true,
@@ -245700,7 +246060,7 @@
       "label": "editEvent()",
       "norm_label": "editevent()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L529"
+      "source_location": "L530"
     },
     {
       "_callable": true,
@@ -245711,7 +246071,7 @@
       "label": "editOneEvent()",
       "norm_label": "editoneevent()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L491"
+      "source_location": "L492"
     },
     {
       "_callable": true,
@@ -245722,7 +246082,7 @@
       "label": "endSeriesBefore()",
       "norm_label": "endseriesbefore()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L359"
+      "source_location": "L360"
     },
     {
       "_callable": true,
@@ -245733,7 +246093,7 @@
       "label": "eventRows()",
       "norm_label": "eventrows()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L153"
+      "source_location": "L154"
     },
     {
       "_callable": true,
@@ -245744,7 +246104,7 @@
       "label": "eventValue()",
       "norm_label": "eventvalue()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L123"
+      "source_location": "L124"
     },
     {
       "_callable": true,
@@ -245755,7 +246115,7 @@
       "label": "eventValues()",
       "norm_label": "eventvalues()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L110"
+      "source_location": "L111"
     },
     {
       "_callable": true,
@@ -245766,7 +246126,7 @@
       "label": "failedGuard()",
       "norm_label": "failedguard()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L403"
+      "source_location": "L404"
     },
     {
       "_callable": true,
@@ -245777,7 +246137,7 @@
       "label": "freshGuard()",
       "norm_label": "freshguard()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L632"
+      "source_location": "L633"
     },
     {
       "_callable": true,
@@ -245788,7 +246148,7 @@
       "label": "fullSchedule()",
       "norm_label": "fullschedule()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L382"
+      "source_location": "L383"
     },
     {
       "_callable": true,
@@ -245799,7 +246159,7 @@
       "label": "getEvent()",
       "norm_label": "getevent()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L453"
+      "source_location": "L454"
     },
     {
       "_callable": true,
@@ -245810,7 +246170,7 @@
       "label": "guardedBatch()",
       "norm_label": "guardedbatch()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L415"
+      "source_location": "L416"
     },
     {
       "_callable": true,
@@ -245821,7 +246181,7 @@
       "label": "insertStatements()",
       "norm_label": "insertstatements()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L283"
+      "source_location": "L284"
     },
     {
       "_callable": true,
@@ -245832,7 +246192,7 @@
       "label": "isCapacityError()",
       "norm_label": "iscapacityerror()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L410"
+      "source_location": "L411"
     },
     {
       "_callable": true,
@@ -245843,7 +246203,7 @@
       "label": "listEvents()",
       "norm_label": "listevents()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L170"
+      "source_location": "L171"
     },
     {
       "_callable": true,
@@ -245854,7 +246214,7 @@
       "label": "listTopicChoices()",
       "norm_label": "listtopicchoices()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L182"
+      "source_location": "L183"
     },
     {
       "_callable": true,
@@ -245865,7 +246225,7 @@
       "label": "ownedEvent()",
       "norm_label": "ownedevent()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L202"
+      "source_location": "L203"
     },
     {
       "_callable": true,
@@ -245876,7 +246236,7 @@
       "label": "ownStreamerId()",
       "norm_label": "ownstreamerid()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L196"
+      "source_location": "L197"
     },
     {
       "_callable": true,
@@ -245898,7 +246258,7 @@
       "label": "patchEvent()",
       "norm_label": "patchevent()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L468"
+      "source_location": "L469"
     },
     {
       "_callable": true,
@@ -245909,7 +246269,7 @@
       "label": "planEvents()",
       "norm_label": "planevents()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L242"
+      "source_location": "L243"
     },
     {
       "_callable": true,
@@ -245920,7 +246280,7 @@
       "label": "scheduleCalendar()",
       "norm_label": "schedulecalendar()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L762"
+      "source_location": "L763"
     },
     {
       "_callable": true,
@@ -245931,7 +246291,7 @@
       "label": "seriesCte()",
       "norm_label": "seriescte()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L605"
+      "source_location": "L606"
     },
     {
       "_callable": true,
@@ -245942,7 +246302,7 @@
       "label": "seriesDone()",
       "norm_label": "seriesdone()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L235"
+      "source_location": "L236"
     },
     {
       "_callable": true,
@@ -245953,7 +246313,7 @@
       "label": "sourcesFor()",
       "norm_label": "sourcesfor()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L91"
+      "source_location": "L92"
     },
     {
       "_callable": true,
@@ -245964,7 +246324,7 @@
       "label": "templateOf()",
       "norm_label": "templateof()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L424"
+      "source_location": "L425"
     },
     {
       "_callable": true,
@@ -245986,7 +246346,7 @@
       "label": "topUpOne()",
       "norm_label": "topupone()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L657"
+      "source_location": "L658"
     },
     {
       "_callable": true,
@@ -245997,7 +246357,7 @@
       "label": "topUpSeries()",
       "norm_label": "topupseries()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L721"
+      "source_location": "L722"
     },
     {
       "_callable": true,
@@ -246008,7 +246368,7 @@
       "label": "upcomingCount()",
       "norm_label": "upcomingcount()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L377"
+      "source_location": "L378"
     },
     {
       "_callable": true,
@@ -246019,7 +246379,7 @@
       "label": "validTopics()",
       "norm_label": "validtopics()",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L213"
+      "source_location": "L214"
     },
     {
       "_callable": true,
@@ -246334,11 +246694,77 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_server_stream_images_server_download",
+      "label": "download()",
+      "norm_label": "download()",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L40"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_stream_images_server_picturebase",
+      "label": "pictureBase()",
+      "norm_label": "picturebase()",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L31"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_stream_images_server_resized",
+      "label": "resized()",
+      "norm_label": "resized()",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L57"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_server_stream_images_server_servestreamimage",
       "label": "serveStreamImage()",
       "norm_label": "servestreamimage()",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L13"
+      "source_location": "L132"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_stream_images_server_storeone",
+      "label": "storeOne()",
+      "norm_label": "storeone()",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L67"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_stream_images_server_storestreamimages",
+      "label": "storeStreamImages()",
+      "norm_label": "storestreamimages()",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L90"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_stream_images_server_sweepstreamimages",
+      "label": "sweepStreamImages()",
+      "norm_label": "sweepstreamimages()",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L110"
     },
     {
       "_callable": true,
@@ -250844,7 +251270,7 @@
       "label": "installFakeProviders()",
       "norm_label": "installfakeproviders()",
       "source_file": "tests/helpers/channels.ts",
-      "source_location": "L89"
+      "source_location": "L91"
     },
     {
       "_callable": true,
@@ -250855,7 +251281,7 @@
       "label": "json()",
       "norm_label": "json()",
       "source_file": "tests/helpers/channels.ts",
-      "source_location": "L78"
+      "source_location": "L80"
     },
     {
       "_callable": true,
@@ -250866,7 +251292,7 @@
       "label": "platformOfToken()",
       "norm_label": "platformoftoken()",
       "source_file": "tests/helpers/channels.ts",
-      "source_location": "L82"
+      "source_location": "L84"
     },
     {
       "_callable": true,
@@ -250877,7 +251303,7 @@
       "label": "youtubeText()",
       "norm_label": "youtubetext()",
       "source_file": "tests/helpers/channels.ts",
-      "source_location": "L264"
+      "source_location": "L273"
     },
     {
       "_callable": true,
@@ -253668,6 +254094,17 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_schedule_import_test_imagecalls",
+      "label": "imageCalls()",
+      "norm_label": "imagecalls()",
+      "source_file": "tests/schedule-import.test.ts",
+      "source_location": "L729"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_schedule_import_test_imported",
       "label": "imported()",
       "norm_label": "imported()",
@@ -253717,6 +254154,28 @@
       "norm_label": "segment()",
       "source_file": "tests/schedule-import.test.ts",
       "source_location": "L43"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_schedule_import_test_stored",
+      "label": "stored()",
+      "norm_label": "stored()",
+      "source_file": "tests/schedule-import.test.ts",
+      "source_location": "L724"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_schedule_import_test_transformer",
+      "label": "transformer()",
+      "norm_label": "transformer()",
+      "source_file": "tests/schedule-import.test.ts",
+      "source_location": "L708"
     },
     {
       "_callable": true,
@@ -257879,7 +258338,7 @@
       "label": "appContext",
       "norm_label": "appcontext",
       "source_file": "app/env.ts",
-      "source_location": "L59"
+      "source_location": "L61"
     },
     {
       "_origin": "ast",
@@ -261970,7 +262429,7 @@
       "label": "DEFAULT_STREAM_MIN",
       "norm_label": "default_stream_min",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L629"
+      "source_location": "L633"
     },
     {
       "_origin": "ast",
@@ -261990,7 +262449,7 @@
       "label": "IMPORT_HORIZON_MS",
       "norm_label": "import_horizon_ms",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L626"
+      "source_location": "L630"
     },
     {
       "_origin": "ast",
@@ -262000,7 +262459,7 @@
       "label": "importedStreamSchema",
       "norm_label": "importedstreamschema",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L612"
+      "source_location": "L616"
     },
     {
       "_origin": "ast",
@@ -262030,7 +262489,7 @@
       "label": "LISTED_PRIVACY",
       "norm_label": "listed_privacy",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L797"
+      "source_location": "L801"
     },
     {
       "_origin": "ast",
@@ -262060,7 +262519,7 @@
       "label": "STREAM_IMAGE_URL",
       "norm_label": "stream_image_url",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L609"
+      "source_location": "L612"
     },
     {
       "_origin": "ast",
@@ -262080,7 +262539,7 @@
       "label": "twitchGamesSchema",
       "norm_label": "twitchgamesschema",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L703"
+      "source_location": "L707"
     },
     {
       "_origin": "ast",
@@ -262100,7 +262559,7 @@
       "label": "twitchScheduleSchema",
       "norm_label": "twitchscheduleschema",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L641"
+      "source_location": "L645"
     },
     {
       "_origin": "ast",
@@ -262110,7 +262569,7 @@
       "label": "twitchStreamsSchema",
       "norm_label": "twitchstreamsschema",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L869"
+      "source_location": "L873"
     },
     {
       "_origin": "ast",
@@ -262120,7 +262579,7 @@
       "label": "twitchVideosSchema",
       "norm_label": "twitchvideosschema",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L881"
+      "source_location": "L885"
     },
     {
       "_origin": "ast",
@@ -262130,7 +262589,7 @@
       "label": "YOUTUBE_UPCOMING_PAGES",
       "norm_label": "youtube_upcoming_pages",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L826"
+      "source_location": "L830"
     },
     {
       "_origin": "ast",
@@ -262150,7 +262609,7 @@
       "label": "youtubeUpcomingSchema",
       "norm_label": "youtubeupcomingschema",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L780"
+      "source_location": "L784"
     },
     {
       "_origin": "ast",
@@ -263500,7 +263959,7 @@
       "label": "CRON_PAGES",
       "norm_label": "cron_pages",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L31"
+      "source_location": "L32"
     },
     {
       "_origin": "ast",
@@ -263510,7 +263969,7 @@
       "label": "CRON_READ_INTERVAL_MS",
       "norm_label": "cron_read_interval_ms",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L29"
+      "source_location": "L30"
     },
     {
       "_origin": "ast",
@@ -263520,7 +263979,7 @@
       "label": "IMPORT_PLATFORMS",
       "norm_label": "import_platforms",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L20"
+      "source_location": "L21"
     },
     {
       "_origin": "ast",
@@ -263530,7 +263989,7 @@
       "label": "KEEP_MARGIN_MS",
       "norm_label": "keep_margin_ms",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L25"
+      "source_location": "L26"
     },
     {
       "_origin": "ast",
@@ -263540,7 +263999,7 @@
       "label": "MATCH_WINDOW_MS",
       "norm_label": "match_window_ms",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L23"
+      "source_location": "L24"
     },
     {
       "_origin": "ast",
@@ -263550,7 +264009,7 @@
       "label": "OWNER_READ_INTERVAL_MS",
       "norm_label": "owner_read_interval_ms",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L27"
+      "source_location": "L28"
     },
     {
       "_origin": "ast",
@@ -263560,7 +264019,7 @@
       "label": "readSchema",
       "norm_label": "readschema",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L39"
+      "source_location": "L40"
     },
     {
       "_origin": "ast",
@@ -263570,7 +264029,7 @@
       "label": "SOURCE_RETENTION_MS",
       "norm_label": "source_retention_ms",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L33"
+      "source_location": "L34"
     },
     {
       "_origin": "ast",
@@ -263600,7 +264059,7 @@
       "label": "FEED_PAST_LIMIT",
       "norm_label": "feed_past_limit",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L758"
+      "source_location": "L759"
     },
     {
       "_origin": "ast",
@@ -263630,7 +264089,7 @@
       "label": "PAST_LIMIT",
       "norm_label": "past_limit",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L149"
+      "source_location": "L150"
     },
     {
       "_origin": "ast",
@@ -263640,7 +264099,7 @@
       "label": "UPCOMING_LIMIT",
       "norm_label": "upcoming_limit",
       "source_file": "app/server/schedule.server.ts",
-      "source_location": "L147"
+      "source_location": "L148"
     },
     {
       "_origin": "ast",
@@ -263786,11 +264245,21 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
-      "id": "app_server_stream_images_server_image_types",
-      "label": "IMAGE_TYPES",
-      "norm_label": "image_types",
+      "id": "app_server_stream_images_server_source_types",
+      "label": "SOURCE_TYPES",
+      "norm_label": "source_types",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L5"
+      "source_location": "L12"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_stream_images_server_thumbnail_sizes",
+      "label": "THUMBNAIL_SIZES",
+      "norm_label": "thumbnail_sizes",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L19"
     },
     {
       "_origin": "ast",
@@ -264430,7 +264899,7 @@
       "label": "MODERATION_REASONS",
       "norm_label": "moderation_reasons",
       "source_file": "app/types.ts",
-      "source_location": "L500"
+      "source_location": "L502"
     },
     {
       "_origin": "ast",
@@ -264440,7 +264909,7 @@
       "label": "PAGE_ACTIONS",
       "norm_label": "page_actions",
       "source_file": "app/types.ts",
-      "source_location": "L503"
+      "source_location": "L505"
     },
     {
       "_origin": "ast",
@@ -268113,7 +268582,7 @@
       "label": "TWITCH_SCOPES",
       "norm_label": "twitch_scopes",
       "source_file": "tests/helpers/channels.ts",
-      "source_location": "L64"
+      "source_location": "L66"
     },
     {
       "_origin": "ast",
@@ -270150,7 +270619,7 @@
       "node_kind": "heading",
       "norm_label": "account deletion",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L532"
+      "source_location": "L541"
     },
     {
       "_origin": "ast",
@@ -270161,7 +270630,7 @@
       "node_kind": "heading",
       "norm_label": "actors",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L711"
+      "source_location": "L720"
     },
     {
       "_origin": "ast",
@@ -270172,7 +270641,7 @@
       "node_kind": "heading",
       "norm_label": "assets",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L703"
+      "source_location": "L712"
     },
     {
       "_origin": "ast",
@@ -270183,7 +270652,7 @@
       "node_kind": "heading",
       "norm_label": "callback failures",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L540"
+      "source_location": "L549"
     },
     {
       "_origin": "ast",
@@ -270238,7 +270707,7 @@
       "node_kind": "heading",
       "norm_label": "disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L421"
+      "source_location": "L430"
     },
     {
       "_origin": "ast",
@@ -270260,7 +270729,7 @@
       "node_kind": "heading",
       "norm_label": "facts not checked",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L801"
+      "source_location": "L810"
     },
     {
       "_origin": "ast",
@@ -270282,7 +270751,7 @@
       "node_kind": "heading",
       "norm_label": "limits and retention",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L247"
+      "source_location": "L256"
     },
     {
       "_origin": "ast",
@@ -270293,7 +270762,7 @@
       "node_kind": "heading",
       "norm_label": "logs and alerts",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L556"
+      "source_location": "L565"
     },
     {
       "_origin": "ast",
@@ -270315,7 +270784,7 @@
       "node_kind": "heading",
       "norm_label": "overlay key",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L586"
+      "source_location": "L595"
     },
     {
       "_origin": "ast",
@@ -270337,7 +270806,7 @@
       "node_kind": "heading",
       "norm_label": "provider subscriptions",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L447"
+      "source_location": "L456"
     },
     {
       "_origin": "ast",
@@ -270348,7 +270817,7 @@
       "node_kind": "heading",
       "norm_label": "refresh",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L410"
+      "source_location": "L419"
     },
     {
       "_origin": "ast",
@@ -270359,7 +270828,7 @@
       "node_kind": "heading",
       "norm_label": "refused webhooks",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L508"
+      "source_location": "L517"
     },
     {
       "_origin": "ast",
@@ -270370,7 +270839,7 @@
       "node_kind": "heading",
       "norm_label": "residual risks",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L748"
+      "source_location": "L757"
     },
     {
       "_origin": "ast",
@@ -270381,7 +270850,7 @@
       "node_kind": "heading",
       "norm_label": "rollback",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L690"
+      "source_location": "L699"
     },
     {
       "_origin": "ast",
@@ -270403,7 +270872,7 @@
       "node_kind": "heading",
       "norm_label": "runbook",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L627"
+      "source_location": "L636"
     },
     {
       "_origin": "ast",
@@ -270425,7 +270894,7 @@
       "node_kind": "heading",
       "norm_label": "setup",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L599"
+      "source_location": "L608"
     },
     {
       "_origin": "ast",
@@ -270436,7 +270905,7 @@
       "node_kind": "heading",
       "norm_label": "stored youtube data",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L762"
+      "source_location": "L771"
     },
     {
       "_origin": "ast",
@@ -270447,7 +270916,7 @@
       "node_kind": "heading",
       "norm_label": "subscription repair",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L460"
+      "source_location": "L469"
     },
     {
       "_origin": "ast",
@@ -270458,7 +270927,7 @@
       "node_kind": "heading",
       "norm_label": "threat model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L701"
+      "source_location": "L710"
     },
     {
       "_origin": "ast",
@@ -270469,7 +270938,7 @@
       "node_kind": "heading",
       "norm_label": "threats and mitigations",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L719"
+      "source_location": "L728"
     },
     {
       "_origin": "ast",
@@ -270480,7 +270949,7 @@
       "node_kind": "heading",
       "norm_label": "token encryption and rotation",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L367"
+      "source_location": "L376"
     },
     {
       "_origin": "ast",
@@ -270491,7 +270960,7 @@
       "node_kind": "heading",
       "norm_label": "turn the feature off",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L652"
+      "source_location": "L661"
     },
     {
       "_origin": "ast",
@@ -270502,7 +270971,7 @@
       "node_kind": "heading",
       "norm_label": "youtube quota",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L321"
+      "source_location": "L330"
     },
     {
       "_origin": "ast",

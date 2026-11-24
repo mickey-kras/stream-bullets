@@ -17,7 +17,7 @@ import {
   syncPlatform,
   testStreams,
 } from "../app/server/schedule-import.server";
-import { serveStreamImage } from "../app/server/stream-images.server";
+import { serveStreamImage, sweepStreamImages } from "../app/server/stream-images.server";
 import type { StreamEvent } from "../app/types";
 import { installFakeProviders, type FakeProviders } from "./helpers/channels";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
@@ -699,19 +699,49 @@ describe("when the import runs", (): void => {
 });
 
 describe("pictures and categories", (): void => {
-  const cover = "https://static-cdn.jtvnw.net/ttv-boxart/509658-144x192.jpg";
-  const thumbnail = "https://i.ytimg.com/vi/vid-1/maxresdefault.jpg";
+  const cover = "https://static-cdn.jtvnw.net/ttv-boxart/509658-360x480.jpg";
+  const thumbnail = "https://i9.ytimg.com/vi/vid-1/maxresdefault_custom_1.jpg?sqp=CLi-a8kG&rs=AOn4CLBx-2_q";
+  const games = [{ id: "509658", box_art_url: "https://static-cdn.jtvnw.net/ttv-boxart/509658-{width}x{height}.jpg" }];
+  let sizes: string[];
+
+  /** A stand-in for the Images binding: records each size and answers with the bytes `[9]` as WebP. */
+  function transformer(): ImagesBinding {
+    return {
+      input: () => {
+        const chain = {
+          transform: (options: { width: number; height: number }) => {
+            sizes.push(`${options.width}x${options.height}`);
+            return chain;
+          },
+          output: () =>
+            Promise.resolve({ response: () => new Response(new Uint8Array([9]), { headers: { "Content-Type": "image/webp" } }) }),
+        };
+        return chain;
+      },
+    } as unknown as ImagesBinding;
+  }
+
+  async function stored(): Promise<string[]> {
+    const { objects } = await env.IMAGES.list({ prefix: "schedule/", include: ["httpMetadata"] });
+    return objects.map((object) => `${object.httpMetadata?.contentType}-${object.key.replace(/^.*-/, "")}`).sort();
+  }
+
+  function imageCalls(): number {
+    return fake.calls.filter((call) => /ytimg\.com|jtvnw\.net/.test(call.url.hostname)).length;
+  }
 
   beforeEach(async (): Promise<void> => {
+    sizes = [];
+    env.IMAGE_TRANSFORM = transformer();
+    const keys = (await env.IMAGES.list({ prefix: "schedule/" })).objects.map((object) => object.key);
+    if (keys.length > 0) await env.IMAGES.delete(keys);
     await addConnection("twitch");
     await addConnection("youtube");
   });
 
-  it("stores the Twitch category with its cover and the YouTube thumbnail, and shows the thumbnail first", async (): Promise<void> => {
+  it("keeps the Twitch category with its cover and the YouTube thumbnail, and shows the thumbnail first", async (): Promise<void> => {
     fake.twitchSchedule = [schedule([segment("s1", "Show", now + 2 * day), segment("s2", "Solo", now + 3 * day)])];
-    fake.twitchGames = [
-      { id: "509658", box_art_url: "https://static-cdn.jtvnw.net/ttv-boxart/509658-{width}x{height}.jpg" },
-    ];
+    fake.twitchGames = games;
     fake.upcoming = [
       broadcast("vid-1", "Show (part 5)", now + 2 * day, "public", undefined, {
         medium: { url: "https://i.ytimg.com/vi/vid-1/mqdefault.jpg" },
@@ -720,9 +750,14 @@ describe("pictures and categories", (): void => {
     ];
     await importPageSchedule(env, page, now);
     const [shared, solo] = await events();
-    expect(shared.image).toEqual({ url: `/images/stream/${shared.id}/youtube`, kind: "thumbnail" });
-    expect(shared.category).toEqual({ name: "Just Chatting", cover: `/images/stream/${shared.id}/twitch` });
-    expect(solo.image).toEqual({ url: `/images/stream/${solo.id}/twitch`, kind: "cover" });
+    const base = `/images/stream/${shared.id}`;
+    expect(shared.image).toEqual({ url: `${base}/youtube`, small: `${base}/youtube/small`, kind: "thumbnail" });
+    expect(shared.category).toEqual({ name: "Just Chatting", cover: `${base}/twitch` });
+    expect(solo.image).toEqual({
+      url: `/images/stream/${solo.id}/twitch`,
+      small: `/images/stream/${solo.id}/twitch`,
+      kind: "cover",
+    });
     const rows = await env.DB.prepare(
       "SELECT platform, category, image_url FROM stream_event_sources ORDER BY platform, external_id",
     ).all();
@@ -732,8 +767,8 @@ describe("pictures and categories", (): void => {
       { platform: "youtube", category: null, image_url: thumbnail },
     ]);
     // One Get Games request for the category of both segments.
-    const games = fake.calls.filter((call) => call.url.pathname === "/helix/games");
-    expect(games.map((call) => call.url.searchParams.getAll("id"))).toEqual([["509658"]]);
+    const requests = fake.calls.filter((call) => call.url.pathname === "/helix/games");
+    expect(requests.map((call) => call.url.searchParams.getAll("id"))).toEqual([["509658"]]);
   });
 
   it("reads the schedule without covers when Get Games fails, and drops a thumbnail from another host", async (): Promise<void> => {
@@ -754,32 +789,70 @@ describe("pictures and categories", (): void => {
     ]);
   });
 
-  it("serves a stored picture through the image route and refuses everything else", async (): Promise<void> => {
+  it("stores a small copy of each picture once, serves it from R2, and loads a changed one again", async (): Promise<void> => {
     fake.twitchSchedule = [schedule([segment("s1", "Show", now + 2 * day)])];
-    fake.twitchGames = [
-      { id: "509658", box_art_url: "https://static-cdn.jtvnw.net/ttv-boxart/509658-{width}x{height}.jpg" },
-    ];
+    fake.twitchGames = games;
+    fake.upcoming = [broadcast("vid-1", "Show", now + 2 * day, "public", undefined, { maxres: { url: thumbnail } })];
     await importPageSchedule(env, page, now);
+    expect(await stored()).toEqual(["image/jpeg-large", "image/webp-large", "image/webp-small"]);
+    // The thumbnail becomes 320x180 for a row and 960x540 for the "Up next" card; the cover comes in its size.
+    expect(sizes).toEqual(["320x180", "960x540"]);
+    expect(imageCalls()).toBe(2);
     const [event] = await events();
-    const loaded: string[] = [];
-    vi.stubGlobal("fetch", (input: string | URL): Promise<Response> => {
-      loaded.push(input.toString());
-      return Promise.resolve(new Response(new Uint8Array([1, 2, 3]), { headers: { "Content-Type": "image/jpeg" } }));
-    });
-    const image = await serveStreamImage(env, `${event.id}/twitch`, "GET");
-    expect(image.headers.get("Content-Type")).toBe("image/jpeg");
-    expect(image.headers.get("Cache-Control")).toBe("public, max-age=3600");
-    expect(new Uint8Array(await image.arrayBuffer())).toEqual(new Uint8Array([1, 2, 3]));
-    expect(loaded).toEqual([cover]);
+    const cover = await serveStreamImage(env, `${event.id}/twitch`, "GET");
+    expect(cover.headers.get("Content-Type")).toBe("image/jpeg");
+    expect(cover.headers.get("Cache-Control")).toBe("public, max-age=600");
+    expect(new Uint8Array(await cover.arrayBuffer())).toEqual(new Uint8Array([1, 2, 3]));
+    const large = await serveStreamImage(env, `${event.id}/youtube`, "GET");
+    expect(large.headers.get("Content-Type")).toBe("image/webp");
+    expect(new Uint8Array(await large.arrayBuffer())).toEqual(new Uint8Array([9]));
+    expect((await serveStreamImage(env, `${event.id}/youtube/small`, "GET")).status).toBe(200);
+    // A cover has one size; `small` serves it too.
+    expect((await serveStreamImage(env, `${event.id}/twitch/small`, "GET")).headers.get("Content-Type")).toBe("image/jpeg");
     expect((await serveStreamImage(env, `${event.id}/twitch`, "HEAD")).body).toBeNull();
-    // No picture for that platform, a malformed path, or a host answer that is not an image.
-    await expect(serveStreamImage(env, `${event.id}/youtube`, "GET")).rejects.toMatchObject({ status: 404 });
     await expect(serveStreamImage(env, "../avatar/x", "GET")).rejects.toMatchObject({ status: 404 });
-    vi.stubGlobal("fetch", (): Promise<Response> =>
-      Promise.resolve(new Response("<html>", { headers: { "Content-Type": "text/html" } })),
-    );
-    await expect(serveStreamImage(env, `${event.id}/twitch`, "GET")).rejects.toMatchObject({ status: 404 });
-    vi.stubGlobal("fetch", (): Promise<Response> => Promise.reject(new DOMException("timeout", "TimeoutError")));
-    await expect(serveStreamImage(env, `${event.id}/twitch`, "GET")).rejects.toMatchObject({ status: 404 });
+    // A new read with the same pictures loads nothing; a changed thumbnail is loaded again.
+    await importPageSchedule(env, page, now + 60_000);
+    expect(imageCalls()).toBe(2);
+    fake.upcoming = [
+      broadcast("vid-1", "Show", now + 2 * day, "public", undefined, { maxres: { url: `${thumbnail}-new` } }),
+    ];
+    await importPageSchedule(env, page, now + 120_000);
+    expect(imageCalls()).toBe(3);
+  });
+
+  it("never fails a read for a picture, and serves nothing it could not store", async (): Promise<void> => {
+    fake.twitchSchedule = [schedule([segment("s1", "Show", now + 2 * day)])];
+    fake.twitchGames = games;
+    fake.upcoming = [broadcast("vid-1", "Show", now + 2 * day, "public", undefined, { maxres: { url: thumbnail } })];
+    // A redirect, and then a page that is not an image.
+    fake.image = { status: 302, type: "image/jpeg" };
+    await importPageSchedule(env, page, now);
+    fake.image = { status: 200, type: "text/html" };
+    await importPageSchedule(env, page, now + 60_000);
+    expect(await stored()).toEqual([]);
+    const [event] = await events();
+    expect(event.alsoOn).toHaveLength(1);
+    await expect(serveStreamImage(env, `${event.id}/youtube`, "GET")).rejects.toMatchObject({ status: 404 });
+    // Without the Images binding (the test deployment), a thumbnail is not stored; a cover still is.
+    env.IMAGE_TRANSFORM = undefined;
+    fake.image = { status: 200, type: "image/jpeg" };
+    await importPageSchedule(env, page, now + 120_000);
+    expect(await stored()).toEqual(["image/jpeg-large"]);
+  });
+
+  it("stores a shared cover once, and deletes a copy only when no source links to it", async (): Promise<void> => {
+    fake.twitchSchedule = [schedule([segment("s1", "Show", now + 2 * day), segment("s2", "Solo", now + 3 * day)])];
+    fake.twitchGames = games;
+    fake.upcoming = [broadcast("vid-1", "Show", now + 2 * day, "public", undefined, { maxres: { url: thumbnail } })];
+    await importPageSchedule(env, page, now);
+    // Both segments have the Just Chatting cover: one copy, one download.
+    expect(await stored()).toEqual(["image/jpeg-large", "image/webp-large", "image/webp-small"]);
+    expect(imageCalls()).toBe(2);
+    await env.DB.prepare("DELETE FROM stream_event_sources WHERE external_id='s2'").run();
+    expect(await sweepStreamImages(env)).toBe(0);
+    await env.DB.prepare("DELETE FROM stream_event_sources WHERE platform='youtube'").run();
+    expect(await sweepStreamImages(env)).toBe(2);
+    expect(await stored()).toEqual(["image/jpeg-large"]);
   });
 });
