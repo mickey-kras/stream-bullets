@@ -1,15 +1,17 @@
 A dialog is a modal panel of 560px in the center of the page.
 
-It is a native `dialog` element. `showModal()` keeps the focus in it.
-The backdrop behind it is `#000b` with a blur.
+It is the Radix dialog of the app, with the same class names.
+The `modal-backdrop` layer behind it dims the page and makes it blurry.
+When the dialog opens, the title gets the focus. When it closes, the focus goes back to the control that opened it.
 
-Put Cancel first and the primary action last.
-The Escape key and the close button close the dialog. A click on the backdrop closes it in browsers that support the `closedby` attribute.
-`inline` shows the dialog in the page flow, for previews.
+The Escape key, the close button, and a click on the backdrop close the dialog.
+The actions row has **Cancel** first and the primary action last.
+Set `cancel={false}` to remove **Cancel**.
+Use `inline` only in previews. It shows the panel in the page flow.
 
 ```jsx
-<Dialog open={open} onOpenChange={setOpen} title="Suggest a topic" description="What would make a great conversation?"
-  actions={<Button variant="gold" font="display">Submit topic</Button>}>
-  <TextField label="Title" required />
+<Dialog open={open} onOpenChange={setOpen} title="Report topic" description="Tell us what is wrong."
+  actions={<button type="submit" className="gold">Send report</button>}>
+  <label>Details<textarea rows={3} /></label>
 </Dialog>
 ```

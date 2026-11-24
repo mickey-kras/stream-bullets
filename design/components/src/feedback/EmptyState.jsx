@@ -1,12 +1,13 @@
 import { Icon } from "../core/Icon.jsx";
 
-export function EmptyState({ title, icon, children, action, className = "" }) {
+// The empty state of a list or view (app/components/common.tsx).
+export function EmptyState({ title, icon, children, action }) {
   return (
-    <div className={`sb-empty ${className}`.trim()}>
+    <div className={action ? "empty-state has-cta" : "empty-state"}>
       {icon && <Icon name={icon} size={40} />}
       <h2>{title}</h2>
       {children && <p>{children}</p>}
-      {action && <div className="sb-empty-cta">{action}</div>}
+      {action && <p className="empty-cta">{action}</p>}
     </div>
   );
 }

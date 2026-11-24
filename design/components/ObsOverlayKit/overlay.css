@@ -1,82 +1,18 @@
-/* Frame + scaler (overlay-composition.tsx, wasteland.css, composition.css sample game). */
-body {
-  background: var(--ink);
-}
-.ov-page {
-  min-height: 100vh;
-  display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
-  gap: 16px;
-  padding: 16px;
-}
-.ov-frame {
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  max-height: calc(100vh - 170px);
-  margin: 0 auto;
-  border: 1px solid var(--gold);
-  background: repeating-conic-gradient(var(--mock-check-a) 0 25%, var(--mock-check-b) 0 50%) 0 0 / 24px 24px;
-}
-.ov-scaler {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 1920px;
-  height: 1080px;
-  transform-origin: 0 0;
-}
-.ov-layer {
-  position: absolute;
-  overflow: hidden;
-}
-.ov-content {
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding: 48px;
-}
-.ov-content[data-full] {
-  align-items: flex-start;
-}
-.ov-content > * {
-  width: 100%;
-}
-.ov-game {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 70% 46%, #ffd77a 0 70px, rgb(255 190 90 / 0.55) 71px 120px, transparent 260px),
-    linear-gradient(180deg, #2b1a3c 0%, #7a3b4a 32%, #d9764a 52%, #f2b25c 60%, #6b4a2e 61%, #3a2718 100%);
-}
-.ov-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px 32px;
-  align-items: flex-end;
-  max-width: 1300px;
-  margin: 0 auto;
-  width: 100%;
-}
-.ov-controls > div {
+/* Layout of the kit page only. The stage, the layers and the controls use the app classes of bundle.css. */
+.ov-kit {
   display: grid;
   gap: 8px;
+  max-width: min(100%, calc((100vh - 160px) * 16 / 9));
+  margin: 0 auto;
+  padding: 16px;
 }
-.ov-controls .sb-tabs button {
-  padding: 9px 18px;
-  font-size: 1.062rem;
+.ov-kit .ov-comp-bar {
+  margin: 0;
 }
-.ov-chat-ctl {
-  grid-auto-flow: column;
-  align-items: center;
+.ov-kit .ov-comp-range {
+  flex: 1 1 16rem;
 }
-.ov-range {
-  display: grid;
-  gap: 4px;
-  font: 600 0.875rem var(--body);
-}
-.ov-range input {
-  accent-color: var(--gold);
-  width: 200px;
+/* The kit has more sources than the app bar has buttons: the row may wrap. */
+.ov-kit .ov-comp-bar .seg {
+  flex-wrap: wrap;
 }

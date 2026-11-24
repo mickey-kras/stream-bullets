@@ -11,18 +11,25 @@ Use it when you design or build an interface for the product.
 | `components/<Name>/README.md` | The guidelines and an example for one part of the interface |
 | `components/<Name>/preview.html` | The live preview of one part |
 | `components/src/` | The source of the parts, in JSX. `src/index.js` lists the public parts. |
-| `components/bundle.css`, `index.d.ts` | The styles and the types of the parts |
+| `components/index.d.ts` | The types of the parts |
 | `components/lib/` | React 18.3.1, which the previews load |
 | `components/WebsiteKit/`, `components/ObsOverlayKit/` | The UI kits of the website and the overlay |
 | `assets/<Group>/` | The logos, avatars, station images, and reference screenshots |
 | `fonts/` | The font files of Oswald, Figtree, and Onest |
+| `build.ts`, `site.ts` | The build of the bundle, the style sheet, the kits, and the site page |
 
 ## Build
 
-`node design/build.ts` builds the system.
-It builds `components/src/` into `components/bundle.js`, and each UI kit into its `kit.js`.
-Git does not track these files. Build them before you copy the system to Claude or open a preview.
-A page that loads them supplies React 18 as the globals `React` and `ReactDOM`, and loads `bundle.js` before a kit.
+`node design/build.ts` builds the system. Git does not track the files that it writes.
+
+- `components/bundle.css` is the CSS of the app. The build compiles `app/styles.css` with Tailwind and adds the fonts and the style sheets of the landing page and the overlay. The parts use the markup and the class names of the app, so this CSS gives them the look of production.
+- `components/bundle.js` holds the parts of `components/src/`.
+- `WebsiteKit/kit.js` and `ObsOverlayKit/kit.js` hold the UI kits.
+- `site/index.html` shows the full design system: this brand book, the tokens, a live preview of each part, and the assets. Open it in a browser. It works without a server.
+
+`node design/build.ts --claude` builds the files for the Claude design system. The images then use the upload addresses that `design-system.json` lists.
+
+A page that loads the bundle supplies React 18 as the globals `React` and `ReactDOM`, and loads `bundle.js` before a kit.
 
 ## Tokens
 
@@ -32,8 +39,8 @@ When a value changes there, change `tokens.json` in the same change.
 This folder is a copy of the design system in Claude:
 <https://claude.ai/artifact/KGz1HGxTYswMinnycdVgVt>.
 The link opens only for accounts that have access to it.
-Only the page of the Claude system can show the previews. That page loads the tokens, the fonts, and the bundle before each preview.
-The parts are copies of the app components that we made again. They are not the files of the app.
+The site page and the page of the Claude system show the previews. They load the CSS, React, and the bundle before each preview.
+The parts copy the markup of the app components, with props in place of the data of the app. Some parts import modules of the app, such as the icon glyphs and the percentages of a poll.
 
 ## Product
 
@@ -52,26 +59,24 @@ The look is a dark broadcast station: deep teal, cream text, one gold accent, an
 
 | Group | Parts |
 | --- | --- |
-| Core | Button, IconButton, Icon, Avatar, Logo |
+| Core | Button, IconButton, Icon, Avatar, StreamerLogo, Logo |
 | Forms | TextField, SearchField, Select, Choice, Tabs, Req, RequiredNote |
-| Feedback | Dialog, Sheet, Toast, EmptyState, Banner, LivePill |
-| Topic board | TopicRow, TopicDetail, VoteButtons, Category, TopicChip, Discussion, Comment, Composer |
-| Polls | PollCard, PollStatus, PollResults |
-| Shell | StreamerHeader, SiteHeader, AccountMenu, BackLink, SiteFooter |
-| Overlay | OverlayCard, OverlayPoll, ChatLayer |
+| Feedback | Dialog, Sheet, Toast, EmptyState, Banner, OwnerNotice, LivePill, OnAirTicker |
+| Topic board | TopicRow, TopicDetail, VoteButtons, Category, TopicChip, TopicChips, Discussion, Thread, Comment, Composer |
+| Polls | PollCard, PollStatus, PollResults, PollDiscussion |
+| Shell | StreamerHeader, HeaderSuggestButton, SiteHeader, SiteLogo, HeaderLanguage, HeaderAccount, AccountMenu, NotificationLink, SignInButton, BackLink, SiteFooter |
+| Overlay | OverlayCard, OverlayPoll, OverlayMash, OverlayQr, OverlayComposition, OverlayLayer, OverlayStage, ChatLayer |
 
 Most parts come from these files in `app/components`:
 `ui/{icon,icon-button,avatar,dialog,select,sheet,toast,required}.tsx`, `common.tsx` (EmptyState),
-`streamer/{vote-buttons,topic-board,entry-detail,page-banner}.tsx`, `discussion.tsx`, `poll.tsx`,
-`shell/{site-header,streamer-header,account-menu,back-link,footer}.tsx`, and `overlay/{overlay-stage,chat-layer}.tsx`.
+`streamer/{vote-buttons,topic-board,entry-detail,page-banner,polls-view}.tsx`, `discussion.tsx`, `comment-*.tsx`, `rich-comment-input.tsx`, `poll.tsx`,
+`shell/{site-header,streamer-header,account-menu,back-link,footer,header-language}.tsx`, and `overlay/**`.
 
-Some parts have no React file in the app. They come from CSS patterns:
+Some parts have no React file in the app. They copy the markup of the pages:
 
-- Button comes from the global `button` and `.gold` styles.
-- Logo comes from `SiteLogo`.
-- TextField, SearchField, Choice, and Tabs come from `.modal-content input`, `.search`, `.choice`, and `.tabs`.
-- Category and TopicChip come from `.category` and `.topic-chip`.
-- LivePill comes from `.live-pill`. Banner comes from `.page-banner`.
+- Button copies the global `button` and `.gold` styles.
+- TextField, SearchField, Choice, and Tabs copy the fields, the search forms, `.choice`, and `.tabs`.
+- Category and TopicChip copy `.category` and `.topic-chip`.
 
 The UI kits put the parts together:
 
@@ -157,7 +162,7 @@ The UI kits put the parts together:
 - Primary: a gradient from `gold-hi` to `gold-lo` and `on-gold` text.
 - Destructive: `danger-bg`, `danger-border`, and `danger-text`.
 - On hover, the border of a secondary button becomes gold and the fill becomes `btn-hover`. A gold button becomes `gold-hover`. A link becomes gold. A button on the landing page goes up 2px.
-- A pressed control (`aria-pressed`) has a gold fill, such as votes and tabs. Poll options and small reactions get a gold border or a gold inner ring. A pressed control does not get smaller.
+- A pressed control (`aria-pressed`) has a gold fill, such as votes and tabs. A selected poll option gets a gold border or a gold inner ring. A pressed control does not get smaller.
 - A disabled button has 55% opacity and the wait cursor.
 
 ## Focus
@@ -180,10 +185,10 @@ Do not remove it.
 - Icons are outline icons on a 24px grid with a 1.8 stroke and round line ends. They take the text color.
 - Use 16px for metadata and the footer, and 18px for buttons and menus.
 - Use 20px for navigation and close, 24px for votes and categories, and 40px for empty states.
-- Custom glyphs are in `app/components/ui/icon-paths.tsx`. `components/src/core/Icon.jsx` has the same glyphs.
-- General icons come from Lucide. The app uses `lucide-react@1.71.0`. The previews load `lucide@0.469.0` from unpkg, so some glyphs can look a little different.
+- Custom glyphs are in `app/components/ui/icon-paths.tsx`. General icons come from Lucide (`lucide-react`).
+- `components/src/core/Icon.jsx` imports the glyphs of the app and the same `lucide-react` package, so the icons of the design system are the icons of production.
 - The thumb icons come from Bootstrap Icons (MIT license) at a scale of 24px. A filled thumb means "pressed".
-- The OBS chat has its own mustard platform icons for Twitch, YouTube, and Kick, in `components/src/overlay/ChatLayer.jsx`.
+- The OBS chat has its own mustard platform icons for Twitch, YouTube, and Kick. ChatLayer imports them from `app/components/overlay/wasteland/glyphs.tsx`.
 - Do not use an icon font, PNG icons, emoji, or Unicode characters as icons. Icons are decorative. The control holds the label.
 - The logo is the antenna mark. Use the files in `public/brand` or `assets/Logos`. Do not draw it again.
 
@@ -206,3 +211,5 @@ When the viewer asks for reduced motion in the site settings or in the system, n
 - The fonts in `tokens.json` list one file for each family: Latin for Oswald and Figtree, and Cyrillic for Onest. `fonts/` has the other subsets.
 - The previews do not show the interactive 3D landing page or the characters layer. They use the poster image.
 - The token `dur-chat` (520ms) comes from an earlier system. The app code does not have it.
+- The app minifies its CSS with Lightning CSS. `bundle.css` has the same rules without this step.
+- The parts take props in place of the data, the router, and the translations of the app. Their text is English.

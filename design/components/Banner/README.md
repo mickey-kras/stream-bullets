@@ -1,8 +1,17 @@
-A banner is a status note for a full page.
+A banner is a moderation note at the top of a streamer page.
 
-Use it on a streamer page that a moderator freezes or suspends.
+It shows when an administrator freezes or suspends a page.
+Nobody can post or vote on a frozen page. The public cannot see a suspended page.
+The text and the controls change with `role`:
+
+- `viewer`: a note that the page is frozen.
+- `owner`: the reason and the **Appeal / contact us** button.
+- `admin`: the **Unfreeze** button and the **Open moderation** link.
+
+`OwnerNotice` is the short note of the owner in the account menu.
 
 ```jsx
-<Banner>Comments are paused while this page is frozen.</Banner>
-<Banner tone="suspended">This page is suspended.</Banner>
+<Banner />
+<Banner role="owner" onAppeal={openContact} />
+<Banner tone="suspended" role="admin" moderationHref="/admin?view=pages" />
 ```

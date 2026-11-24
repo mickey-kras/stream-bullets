@@ -1,23 +1,28 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useRef } from "react";
+// Pure hook of the app: sets --ov-scale and data-scaled on the frame (use-design-scale.ts).
+import { useDesignScale } from "../../../app/components/overlay/use-design-scale.ts";
 
-// 1920×1080 design canvas scaled to fit its container (overlay-composition.tsx / use-design-scale.ts).
-export function Stage({ background, children }) {
-  const ref = useRef(null);
-  const [scale, setScale] = useState(0.5);
-  useLayoutEffect(() => {
-    const el = ref.current;
-    const fit = () => setScale(Math.min(el.clientWidth / 1920, el.clientHeight / 1080));
-    fit();
-    const ro = new ResizeObserver(fit);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
+const FRAME = { w: 1920, h: 1080 };
+
+/**
+ * The design canvas of the Overlay control preview (layout-grid.tsx): the 1920 × 1080 `.ov-scaler`, scaled to the
+ * frame width. The background is the transparent checkerboard or the CSS sample game of composition.css.
+ */
+export function Stage({ background = "checker", children }) {
+  const frame = useRef(null);
+  useDesignScale(frame, FRAME.w);
   return (
-    <div className="ov-frame" ref={ref} data-background={background}>
-      <div className="ov-scaler" style={{ transform: `scale(${scale})` }}>
-        {background === "game" && <div className="ov-game" />}
+    <section
+      className="ov-frame ov-comp-frame"
+      data-orientation="horizontal"
+      data-background={background}
+      ref={frame}
+      aria-label="Composition preview"
+    >
+      <div className="ov-scaler" style={{ width: FRAME.w, height: FRAME.h, "--vw": `${FRAME.w / 100}px` }}>
+        {background === "game" && <div className="ov-comp-game" aria-hidden="true" />}
         {children}
       </div>
-    </div>
+    </section>
   );
 }

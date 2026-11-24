@@ -1,19 +1,17 @@
-# OBS overlay UI kit
+This kit shows the overlay that a streamer adds to OBS as a browser source (`/@handle/overlay?key=…`).
 
-This kit shows the transparent 1920×1080 browser source that a streamer adds to OBS (`/@handle/overlay?key=…`).
-All sizes in the stage are design pixels. `Stage.jsx` scales them.
-Do not use `rem` or `vw` for overlay content.
+The OBS page is 1920 × 1080 and transparent. All sizes in the stage are design pixels. `Stage.jsx` scales them.
+The stage is a grid of 16 × 9 cells of 120 pixels. Each layer has its own cell.
+
+In the kit, the chat is 4 × 7 cells at the left. The poll is 11 × 6 cells and the other cards are 11 × 3 cells.
 
 | File | Content |
 | --- | --- |
-| `Stage.jsx` | The frame and the scale. The background is a transparent checkerboard or the CSS sample game from `composition.css`. |
-| `Content.jsx` | The content on air: the live poll on the full stage, the topic spotlight, up next, the hype message, and support. |
-| `Chat.jsx` | The merged Twitch, YouTube, and Kick chat. A new card comes each 2.4s with the rise of 520ms. A moderator removes one message. |
-| `OverlayApp.jsx` | A simple copy of Take and the switches of the chat layer. It is not a copy of the Overlay control page. |
-
-The stage is a grid of 16×9 cells of 120px.
-In the default layout, the chat is 5×7 cells (600×840) at the top left.
-The content uses the remaining area.
+| `Stage.jsx` | The frame of the Overlay control preview and its scale. The background is a transparent checkerboard or the CSS sample game. |
+| `Content.jsx` | The content on air: the live poll, a Mash Battle, the topic spotlight, up next, the message banner, the community card, and support. |
+| `Chat.jsx` | The merged Twitch, YouTube, and Kick chat. A new card comes each 2.4 s. A moderator removes one message in nine. |
+| `OverlayApp.jsx` | A short copy of the bar of the Overlay control page. It is not a copy of the full page. |
+| `overlay.css` | Only the layout of the kit page. The stage uses the classes of the app. |
 
 `main.jsx` starts the kit. `node design/build.ts` builds it into `kit.js`, which `preview.html` loads.
 

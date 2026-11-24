@@ -1,13 +1,59 @@
-<!-- @dsCard group="Overlay" height=420 -->
+<!-- @dsCard group="Overlay" height=1010 subtitle="On-air content layers: poll, Mash Battle, topic, up next, message, community, support" -->
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
-<style>body{padding:20px}.row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:16px}.col{display:grid;gap:14px;min-width:0}body{padding:20px;overflow:hidden;background:repeating-conic-gradient(var(--mock-check-a) 0 25%, var(--mock-check-b) 0 50%) 0 0/40px 40px}</style>
+<style>
+body{margin:0;padding:20px;background:repeating-conic-gradient(var(--mock-check-a) 0 25%, var(--mock-check-b) 0 50%) 0 0/24px 24px}
+.cells{display:grid;grid-template-columns:repeat(2,max-content);gap:20px;align-items:start}
+.cell{position:relative;outline:1px dashed var(--line)}
+.cell-name{margin:0 0 6px;font:600 12px/1.3 var(--body);color:var(--muted)}
+</style>
 </head><body>
 <div id="root"></div>
 <script type="text/babel">
-const { OverlayCard, OverlayPoll } = window.StreamBulletsDesignSystem_e1d9fa;
+const { OverlayComposition, OverlayLayer, OverlayCard, OverlayPoll, OverlayMash } = window.StreamBulletsDesignSystem_e1d9fa;
+const SCALE = 0.5;
+const QR = "https://streambullets.com/@sunny?view=polls&entry=demo";
 
-ReactDOM.createRoot(document.getElementById("root")).render(<div style={{width:1152,transform:"scale(.6)",transformOrigin:"0 0",display:"grid",gap:32}}><OverlayPoll streamer="Sunny" title="Which game deserves a second chance?" options={["Mass Effect Andromeda","No Man's Sky","Cyberpunk 2077"]} counts={[61,27,12]} countdown="1 min left"/><OverlayCard kind="topic" title="Can AI run my homelab?" author="TechNomad" authorPreset={0} likes={142}/></div>);
+// One layer in its grid cell, at half size. A cell is 120 × 120 design pixels.
+function Cell({ name, layer, cols, rows, children }) {
+  const rect = { x: 0, y: 0, w: cols * 120, h: rows * 120 };
+  return (
+    <div>
+      <p className="cell-name">{name} · {cols} × {rows} cells</p>
+      <div className="cell" style={{ width: rect.w * SCALE, height: rect.h * SCALE }}>
+        <OverlayComposition>
+          <OverlayLayer layer={layer} rect={rect} frame={rect}>{children}</OverlayLayer>
+        </OverlayComposition>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <div className="cells">
+    <Cell name="Poll" layer="poll" cols={8} rows={4}>
+      <OverlayPoll title="Should we explore more local AI on stream?" options={["Yes, more local AI", "A mix of both", "Stick to cloud tools"]} counts={[48, 31, 9]} secondsLeft={3720} qr={QR} />
+    </Cell>
+    <Cell name="Poll, Mash Battle" layer="poll" cols={8} rows={5}>
+      <OverlayMash title="Which boss first?" sides={["Malenia", "Radahn", "Fire Giant"]} totals={[12, 25, 4]} left={18} duration={30} qr={QR} />
+    </Cell>
+    <Cell name="Topic" layer="topic" cols={8} rows={3}>
+      <OverlayCard kind="topic" title="Can AI run my homelab?" author="TechNomad" authorPreset={0} likes={142} />
+    </Cell>
+    <Cell name="Up next" layer="next" cols={8} rows={3}>
+      <OverlayCard kind="next" title="Building a quiet streaming PC" when="Fri 8:00 PM" startsIn="in 45 min" qr="https://streambullets.com/@sunny?view=schedule" />
+    </Cell>
+    <Cell name="Message banner" layer="message" cols={8} rows={3}>
+      <OverlayCard kind="message" messageStyle="hype" title="Raid incoming. Say hi!" />
+    </Cell>
+    <Cell name="Support banner" layer="support" cols={8} rows={3}>
+      <OverlayCard kind="support" link="https://ko-fi.com/sunny" />
+    </Cell>
+    <Cell name="Community card" layer="card" cols={8} rows={3}>
+      <OverlayCard kind="card" streamer="Sunny" title="Join the Discord" body="Clips, schedule changes and the homelab build log." cta="Join us" ctaTarget="https://discord.gg/sunny" />
+    </Cell>
+  </div>
+);
 </script>
 </body></html>

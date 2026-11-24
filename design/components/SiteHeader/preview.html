@@ -1,13 +1,25 @@
-<!-- @dsCard group="Shell" height=130 width=1280 -->
+<!-- @dsCard group="Shell" height=230 width=1280 -->
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
-<style>body{padding:20px}.row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:16px}.col{display:grid;gap:14px;min-width:0}body{padding:0}</style>
+<style>body{padding:0}.col{display:grid;gap:24px}</style>
 </head><body>
 <div id="root"></div>
 <script type="text/babel">
 const { SiteHeader } = window.StreamBulletsDesignSystem_e1d9fa;
 
-ReactDOM.createRoot(document.getElementById("root")).render(<SiteHeader links={[{id:"streamers",label:"Streamers",icon:"streamers"},{id:"your-page",label:"Your page",icon:"your-page"}]}/>);
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <div className="col">
+    <SiteHeader
+      current="streamers"
+      links={[
+        { id: "streamers", label: "Streamers", icon: "streamers", href: "/streamers" },
+        { id: "your-page", label: "Your page", icon: "your-page", href: "/@sunny", optional: true },
+      ]}
+      account={{ name: "Sunny", handle: "sunny", preset: 14 }}
+    />
+    <SiteHeader signedIn={false} current={null} />
+  </div>,
+);
 </script>
 </body></html>

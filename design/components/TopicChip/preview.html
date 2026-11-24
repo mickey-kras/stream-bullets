@@ -1,13 +1,32 @@
-<!-- @dsCard group="Topic board" height=80 -->
+<!-- @dsCard group="Topic board" height=140 -->
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
-<style>body{padding:20px}.row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:16px}.col{display:grid;gap:14px;min-width:0}</style>
+<style>body{padding:20px}.col{display:grid;gap:16px}</style>
 </head><body>
 <div id="root"></div>
 <script type="text/babel">
-const { TopicChip } = window.StreamBulletsDesignSystem_e1d9fa;
+const { TopicChip, TopicChips } = window.StreamBulletsDesignSystem_e1d9fa;
 
-ReactDOM.createRoot(document.getElementById("root")).render(<div className="row"><TopicChip icon="cat-gaming">Retro games</TopicChip><TopicChip icon="cat-tech" pressed onClick={()=>{}}>Homelab builds</TopicChip><TopicChip icon="cat-chatting">Just chatting</TopicChip></div>);
+function Toggles() {
+  const [on, setOn] = React.useState(["homelab"]);
+  const flip = (id) => setOn(on.includes(id) ? on.filter((v) => v !== id) : [...on, id]);
+  return (
+    <TopicChips as="fieldset">
+      <TopicChip icon="cat-tech" pressed={on.includes("homelab")} onClick={() => flip("homelab")}>Can AI run my homelab?</TopicChip>
+      <TopicChip icon="cat-gaming" pressed={on.includes("game")} onClick={() => flip("game")}>Which game deserves a second chance?</TopicChip>
+    </TopicChips>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <div className="col">
+    <TopicChips>
+      <TopicChip icon="cat-tech" href="#homelab">Can AI run my homelab?</TopicChip>
+      <TopicChip icon="cat-chatting" href="#tools">Best tools for content creators right now?</TopicChip>
+    </TopicChips>
+    <Toggles />
+  </div>,
+);
 </script>
 </body></html>

@@ -1,13 +1,21 @@
-<!-- @dsCard group="Feedback" height=100 -->
+<!-- @dsCard group="Feedback" height=420 -->
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
-<style>body{padding:20px}.row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:16px}.col{display:grid;gap:14px;min-width:0}</style>
+<style>body{padding:20px 0}</style>
 </head><body>
 <div id="root"></div>
 <script type="text/babel">
 const { Banner } = window.StreamBulletsDesignSystem_e1d9fa;
 
-ReactDOM.createRoot(document.getElementById("root")).render(<div style={{maxWidth:560}}><Banner>Comments are paused while this page is frozen.</Banner></div>);
+// The app places the banner under the streamer header, in .streamer-shell.
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <div className="streamer-shell" style={{ display: "grid", gap: 12 }}>
+    <Banner />
+    <Banner role="owner" />
+    <Banner role="admin" />
+    <Banner tone="suspended" role="admin" />
+  </div>,
+);
 </script>
 </body></html>

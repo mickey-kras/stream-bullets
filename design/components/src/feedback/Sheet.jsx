@@ -1,42 +1,55 @@
-import { IconButton } from "../core/IconButton.jsx";
+import { Dialog as RadixDialog } from "radix-ui";
 import { Icon } from "../core/Icon.jsx";
-import { useModal } from "./Dialog.jsx";
+import { DialogActions, DialogCloseButton, ModalFrame, SheetActionsContext } from "./Dialog.jsx";
 
+// The app sheet (app/components/ui/sheet.tsx): a long dialog with a sticky head, a scrolling body and docked
+// actions. It fills the screen on phones; `short` keeps a centered card.
 export function Sheet({
   open = true,
   onOpenChange,
   title,
+  description,
   onBack,
   backLabel = "Back",
   children,
   actions,
+  cancel = true,
+  cancelLabel = "Cancel",
+  onCancel,
+  closeLabel = "Close dialog",
+  short = false,
+  name,
   inline = false,
   className = "",
 }) {
-  const modal = useModal(open, inline, onOpenChange);
-  if (!open) return null;
-  const close = () => onOpenChange?.(false);
   return (
-    <dialog
-      {...modal}
-      className={`sb-dialog sb-sheet ${className}`.trim()}
-      aria-label={title}
-      data-inline={inline || undefined}
+    <ModalFrame
+      open={open}
+      onOpenChange={onOpenChange}
+      inline={inline}
+      className={`modal-content sheet${short ? " is-short" : ""} ${className}`.trim()}
+      data-sheet={name}
+      {...(description ? {} : { "aria-describedby": undefined })}
     >
-      <div className="sb-dialog-head">
+      <div className="sheet-head">
         {onBack && (
-          <button type="button" className="sb-back" onClick={onBack}>
+          <button type="button" className="back-step" onClick={onBack}>
             <Icon name="chevron-left" size={18} />
             {backLabel}
           </button>
         )}
-        <h2 tabIndex={-1} style={{ flex: 1 }}>
-          {title}
-        </h2>
-        <IconButton label="Close" icon="close" variant="bare" onClick={close} />
+        <RadixDialog.Title tabIndex={-1}>{title}</RadixDialog.Title>
+        <DialogCloseButton label={closeLabel} />
       </div>
-      <div className="sb-sheet-body">{children}</div>
-      {actions && <div className="sb-dialog-actions">{actions}</div>}
-    </dialog>
+      {description ? <RadixDialog.Description className="sr-only">{description}</RadixDialog.Description> : null}
+      <div className="sheet-body">{children}</div>
+      {actions && (
+        <SheetActionsContext.Provider value={true}>
+          <DialogActions cancel={cancel} cancelLabel={cancelLabel} onCancel={onCancel}>
+            {actions}
+          </DialogActions>
+        </SheetActionsContext.Provider>
+      )}
+    </ModalFrame>
   );
 }

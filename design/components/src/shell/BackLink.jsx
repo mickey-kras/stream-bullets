@@ -1,10 +1,12 @@
 import { Icon } from "../core/Icon.jsx";
 
-export function BackLink({ children = "Back", href = "#", onClick }) {
+// "Back to …" on account, Admin, legal and error pages (app/components/shell/back-link.tsx). The app links
+// to the last content page that the reader opened, or to Streamers.
+export function BackLink({ name = "Streamers", href = "/streamers", children }) {
   return (
-    <a className="sb-back" href={href} onClick={onClick}>
-      <Icon name="chevron-left" size={18} />
-      {children}
+    <a className="back-link" href={href}>
+      <Icon name="chevron-left" size={16} />
+      {children ?? `Back to ${name}`}
     </a>
   );
 }

@@ -1,13 +1,46 @@
-<!-- @dsCard group="Feedback" height=330 -->
+<!-- @dsCard group="Feedback" height=560 -->
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
-<style>body{padding:20px}.row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:16px}.col{display:grid;gap:14px;min-width:0}</style>
+<style>body{padding:0;min-height:100vh}</style>
 </head><body>
 <div id="root"></div>
 <script type="text/babel">
-const { Sheet, Button, Choice } = window.StreamBulletsDesignSystem_e1d9fa;
+const { Sheet } = window.StreamBulletsDesignSystem_e1d9fa;
 
-ReactDOM.createRoot(document.getElementById("root")).render(<div style={{maxWidth:560}}><Sheet inline title="Display" onBack={()=>{}} actions={<Button variant="gold">Save</Button>}><Choice name="t" label="High contrast"/><Choice name="t" label="Readable font" defaultChecked/></Sheet></div>);
+function Demo() {
+  const [open, setOpen] = React.useState(true);
+  return (
+    <main className="page-panel">
+      <button type="button" className="gold" onClick={() => setOpen(true)}>
+        Edit your page
+      </button>
+      <Sheet
+        open={open}
+        onOpenChange={setOpen}
+        title="Edit your page"
+        description="Change the name and the description of your page."
+        onBack={() => {}}
+        actions={
+          <button type="submit" className="gold">
+            Save
+          </button>
+        }
+      >
+        <p>Viewers see these details on your page and in the Streamers list.</p>
+        <label>
+          Page name
+          <input defaultValue="Sunny" />
+        </label>
+        <label>
+          Description
+          <textarea rows={3} defaultValue="Tech, homelabs and late-night chats." />
+        </label>
+      </Sheet>
+    </main>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<Demo />);
 </script>
 </body></html>

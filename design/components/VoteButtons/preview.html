@@ -1,13 +1,27 @@
-<!-- @dsCard group="Topic board" height=150 -->
+<!-- @dsCard group="Topic board" height=280 subtitle="Rail beside a topic in a wide panel, row under the topic in a narrow panel" -->
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
-<style>body{padding:20px}.row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:16px}.col{display:grid;gap:14px;min-width:0}</style>
+<style>body{padding:20px}.row{display:flex;flex-wrap:wrap;align-items:flex-start;gap:24px}.wide{width:600px}.narrow{width:420px}</style>
 </head><body>
 <div id="root"></div>
 <script type="text/babel">
 const { VoteButtons } = window.StreamBulletsDesignSystem_e1d9fa;
 
-ReactDOM.createRoot(document.getElementById("root")).render(<div className="col"><VoteButtons likes={142} dislikes={18} reaction={1}/><VoteButtons size="sm" likes={1} dislikes={0} reaction={1}/></div>);
+function Demo(props) {
+  const [r, setR] = React.useState(props.reaction ?? 0);
+  return <VoteButtons {...props} reaction={r} likes={142 + (r === 1 ? 1 : 0)} dislikes={18 + (r === -1 ? 1 : 0)} onReact={setR} />;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <div className="row">
+    <section className="detail wide" aria-label="Wide panel">
+      <div className="topic-content"><Demo reaction={1} /></div>
+    </section>
+    <section className="detail narrow" aria-label="Narrow panel">
+      <div className="topic-content"><Demo /></div>
+    </section>
+  </div>,
+);
 </script>
 </body></html>
