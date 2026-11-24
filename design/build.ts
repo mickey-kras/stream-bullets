@@ -101,6 +101,16 @@ function pageGlobals(modules: Record<string, string>): Plugin {
 }
 
 const common: BuildOptions = {
+  // The Claude build gives assetUrl() in src/core/assets.js the upload address of each image.
+  define: claude
+    ? {
+        "globalThis.__DS_UPLOADS__": JSON.stringify(
+          Object.fromEntries(
+            [...uploads].map(([path, blob]: [string, string]) => [path.slice("assets/".length), `/_blob/${blob}`]),
+          ),
+        ),
+      }
+    : {},
   bundle: true,
   format: "iife",
   target: "es2020",

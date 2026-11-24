@@ -10,7 +10,10 @@ function base() {
 }
 const from = base();
 
+// design/build.ts --claude sets globalThis.__DS_UPLOADS__: the upload address of each file in the Claude design system.
+const uploads = globalThis.__DS_UPLOADS__ ?? {};
+
 // path is relative to design/assets/, for example "Logos/stream-bullets.svg".
 export function assetUrl(path) {
-  return new URL(`../assets/${path}`, from).href;
+  return uploads[path] ?? new URL(`../assets/${path}`, from).href;
 }
