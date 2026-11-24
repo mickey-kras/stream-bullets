@@ -190,7 +190,7 @@ export async function buildSite(design: string): Promise<void> {
 <title>StreamBullets design system</title>
 <link rel="stylesheet" href="../components/bundle.css">
 <style>
-html,body{height:auto;overflow:auto;display:block}
+html{height:auto;overflow:auto}body{height:auto;overflow:visible;display:block}
 body{margin:0}
 .ds{display:grid;grid-template-columns:240px minmax(0,1fr);max-width:1440px;margin:0 auto}
 .ds nav{position:sticky;top:0;align-self:start;max-height:100vh;overflow:auto;padding:var(--space-6) var(--space-4);border-right:1px solid var(--line)}
