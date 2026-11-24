@@ -1,0 +1,13 @@
+<!-- @dsCard group="Topic board" height=360 width=720 -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+<style>body{padding:20px}.row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:16px}.col{display:grid;gap:14px;min-width:0}.tight{padding:10px 16px 16px}.tight h3{font-size:1.4rem}</style>
+</head><body>
+<div id="root"></div>
+<script type="text/babel">
+const { Discussion, Comment, Composer } = window.StreamBulletsDesignSystem_e1d9fa;
+
+ReactDOM.createRoot(document.getElementById("root")).render(<div style={{maxWidth:680,border:"1px solid var(--input-border)",borderRadius:"var(--radius-panel)",background:"var(--grad-panel)"}}><Discussion count={24} className="tight"><Comment name="TechNomad" role="Community member" preset={0} likes={27}>Surprisingly capable for smaller tasks.</Comment><Composer/></Discussion></div>);
+</script>
+</body></html>

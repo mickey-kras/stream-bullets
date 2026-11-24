@@ -1,0 +1,54 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; }
+  body { width: 960px; height: 288px; position: relative; overflow: hidden; background: var(--bg); }
+  svg { position: absolute; inset: 0 0 auto 0; display: block; }
+  .gold { fill: var(--gold); }
+  .cream { fill: var(--cream); }
+  .ink { fill: var(--ink); }
+  .tab { fill: var(--tab); }
+  .live { fill: var(--status-live); }
+  .pill { rx: 4px; }
+  .text { position: absolute; left: var(--space-8); right: var(--space-8); top: 136px; }
+  h1 { margin: 0; font: 600 64px/0.95 var(--font-heading); color: var(--cream); letter-spacing: 0; }
+  p { margin: var(--space-4) 0 0; font: 400 14px/1.5 var(--font-body); color: var(--muted); }
+</style>
+</head>
+<body>
+<!--
+  blocks: gold 256x104, ink 96x104, tab 288x104, status-live 64x104, cream 256x104 (widths are multiples of space-8 and space-16)
+  arrangement: one flush strip of unequal bands across the top, the way the app sets its gold header rule and frame band
+  pattern: the signal bars and beacon of the antenna mark (a literal motif: the brand is a broadcast station), in gold on the tab band
+  steps and radii: bar height space-2, row pitch space-4, bar widths space-6 and 40px, beacon radius space-3; bars are pills (rx = half of space-2); bands are square, as the system has no round surfaces
+-->
+<svg width="960" height="104" viewBox="0 0 960 104" aria-hidden="true">
+  <rect class="gold" x="0" y="0" width="256" height="104"/>
+  <rect class="ink" x="256" y="0" width="96" height="104"/>
+  <rect class="tab" x="352" y="0" width="288" height="104"/>
+  <rect class="live" x="640" y="0" width="64" height="104"/>
+  <rect class="cream" x="704" y="0" width="256" height="104"/>
+  <rect class="gold pill" x="392" y="32" width="24" height="8"/>
+  <rect class="gold pill" x="448" y="32" width="24" height="8"/>
+  <rect class="gold pill" x="376" y="48" width="40" height="8"/>
+  <rect class="gold pill" x="448" y="48" width="40" height="8"/>
+  <rect class="gold pill" x="392" y="64" width="24" height="8"/>
+  <rect class="gold pill" x="448" y="64" width="24" height="8"/>
+  <circle class="gold" cx="432" cy="52" r="12"/>
+  <rect class="gold pill" x="520" y="32" width="24" height="8"/>
+  <rect class="gold pill" x="576" y="32" width="24" height="8"/>
+  <rect class="gold pill" x="504" y="48" width="40" height="8"/>
+  <rect class="gold pill" x="576" y="48" width="40" height="8"/>
+  <rect class="gold pill" x="520" y="64" width="24" height="8"/>
+  <rect class="gold pill" x="576" y="64" width="24" height="8"/>
+  <circle class="gold" cx="560" cy="52" r="12"/>
+</svg>
+<div class="text">
+  <h1>StreamBullets</h1>
+  <p>Suggest topics. Vote. Shape the stream.</p>
+</div>
+</body>
+</html>

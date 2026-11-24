@@ -1,0 +1,13 @@
+<!-- @dsCard group="Shell" height=330 width=1280 -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+<style>body{padding:20px}.row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:16px}.col{display:grid;gap:14px;min-width:0}body{padding:0}</style>
+</head><body>
+<div id="root"></div>
+<script type="text/babel">
+const { StreamerHeader } = window.StreamBulletsDesignSystem_e1d9fa;
+
+ReactDOM.createRoot(document.getElementById("root")).render(<div className="col" style={{gap:24}}><StreamerHeader name="Sunny" preset={14} current="topics" live ticker="Can AI run my homelab? · Live now" action={null}/><div style={{maxWidth:420}}><StreamerHeader name="Sunny" preset={14} current="topics" live compact action={null}/></div></div>);
+</script>
+</body></html>

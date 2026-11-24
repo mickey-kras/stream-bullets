@@ -1,0 +1,152 @@
+{
+ "v": 3,
+ "layout": "files",
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-20T03:40:00Z"
+ },
+ "title": "StreamBullets Design System",
+ "namespace": "StreamBulletsDesignSystem_e1d9fa",
+ "libraries": [
+  {
+   "name": "react",
+   "version": "18.3.1",
+   "global": "React",
+   "file": "components/lib/react.production.min.js"
+  },
+  {
+   "name": "react-dom",
+   "version": "18.3.1",
+   "global": "ReactDOM",
+   "file": "components/lib/react-dom.production.min.js"
+  }
+ ],
+ "sections": {},
+ "groups": [
+  "Logos",
+  "Avatars",
+  "Imagery",
+  "Reference"
+ ],
+ "assetGroups": {
+  "Logos": {
+   "name": "Logos",
+   "tile": "l",
+   "order": [
+    "stream-bullets.svg",
+    "stream-bullets-icon.svg",
+    "apple-touch-icon.png"
+   ],
+   "files": {
+    "stream-bullets.svg": {
+     "name": "stream-bullets.svg",
+     "blob": "21153246e01ca69401414b9f9d003656",
+     "size": 6395,
+     "type": "image/svg+xml"
+    },
+    "stream-bullets-icon.svg": {
+     "name": "stream-bullets-icon.svg",
+     "blob": "d5ae027144ca346c5a38b76d28f1c077",
+     "size": 681,
+     "type": "image/svg+xml"
+    },
+    "apple-touch-icon.png": {
+     "name": "apple-touch-icon.png",
+     "blob": "8b9712f73394339d0a4fc11bfc1760c7",
+     "size": 3921,
+     "type": "image/png"
+    }
+   }
+  },
+  "Avatars": {
+   "name": "Avatars",
+   "tile": "m",
+   "order": [
+    "avatars.webp",
+    "avatar-alien.webp",
+    "avatar-jack-russell.webp"
+   ],
+   "files": {
+    "avatars.webp": {
+     "name": "avatars.webp",
+     "blob": "6c1f6e89956ef16d81278f4020de1e11",
+     "size": 74762,
+     "type": "image/webp"
+    },
+    "avatar-alien.webp": {
+     "name": "avatar-alien.webp",
+     "blob": "b8d12adbc87f7022a014e8502c52e62c",
+     "size": 4094,
+     "type": "image/webp"
+    },
+    "avatar-jack-russell.webp": {
+     "name": "avatar-jack-russell.webp",
+     "blob": "55d9bc173f880c74a68606fc55327e76",
+     "size": 4242,
+     "type": "image/webp"
+    }
+   }
+  },
+  "Imagery": {
+   "name": "Imagery",
+   "tile": "l",
+   "order": [
+    "station-poster.webp",
+    "station-poster-phone.webp"
+   ],
+   "files": {
+    "station-poster.webp": {
+     "name": "station-poster.webp",
+     "blob": "36c2158ea840e29094802fe4ecc4c0ef",
+     "size": 118078,
+     "type": "image/webp"
+    },
+    "station-poster-phone.webp": {
+     "name": "station-poster-phone.webp",
+     "blob": "16f4630fd22b33cd5ab57b51009ea64e",
+     "size": 45238,
+     "type": "image/webp"
+    }
+   }
+  },
+  "Reference": {
+   "name": "Reference",
+   "tile": "l",
+   "order": [
+    "interface-preview-v4.jpg",
+    "poll-discussion-v5.jpg",
+    "reference-style-preview-v3.jpg"
+   ],
+   "files": {
+    "interface-preview-v4.jpg": {
+     "name": "interface-preview-v4.jpg",
+     "blob": "c432d20d15c4037540b6aa2cc86c30ec",
+     "size": 197031,
+     "type": "image/jpeg"
+    },
+    "poll-discussion-v5.jpg": {
+     "name": "poll-discussion-v5.jpg",
+     "blob": "cbf7406990b1aa374f76f47f6bf58c20",
+     "size": 100466,
+     "type": "image/jpeg"
+    },
+    "reference-style-preview-v3.jpg": {
+     "name": "reference-style-preview-v3.jpg",
+     "blob": "2bc74188404d3839af5df9ab58f9f0b9",
+     "size": 197638,
+     "type": "image/jpeg"
+    }
+   }
+  }
+ },
+ "blobs": {},
+ "docs": {
+  "sections": []
+ },
+ "lastChange": {
+  "by": "Claude",
+  "at": "2026-11-20T07:40:00Z",
+  "via": "Claude Code",
+  "note": "Overlay studio proposal: QR code option, toolbar heights; chat cards at one width."
+ }
+}

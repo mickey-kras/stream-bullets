@@ -1,0 +1,13 @@
+<!-- @dsCard group="Overlay" height=540 -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+<style>body{padding:20px}.row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:16px}.col{display:grid;gap:14px;min-width:0}body{padding:20px;overflow:hidden;background:repeating-conic-gradient(var(--mock-check-a) 0 25%, var(--mock-check-b) 0 50%) 0 0/40px 40px}</style>
+</head><body>
+<div id="root"></div>
+<script type="text/babel">
+const { ChatLayer } = window.StreamBulletsDesignSystem_e1d9fa;
+const rows=[{platform:"twitch",name:"PixelLuna",badges:["SUB"],text:"that build is so clean"},{platform:"kick",name:"grizzly_gg",text:"how loud are the fans?"},{platform:"youtube",name:"TechNomad",badges:["MOD"],text:"ran a 7B model on a mini PC last week, totally fine for small tasks"},{platform:"twitch",name:"spam_bot_42",removed:true},{platform:"youtube",name:"Мария",text:"Привет из Киева! 👋"},{platform:"twitch",name:"orbit",text:"vote YES in the poll"}];
+ReactDOM.createRoot(document.getElementById("root")).render(<div style={{position:"relative",width:600,height:840,transform:"scale(.6)",transformOrigin:"0 0"}}><ChatLayer rows={rows}/></div>);
+</script>
+</body></html>

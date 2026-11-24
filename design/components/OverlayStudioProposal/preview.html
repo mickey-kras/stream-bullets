@@ -1,0 +1,103 @@
+<!-- @dsCard group="UI kits" height=1340 width=1440 subtitle="AFTER (proposal): steps 2 and 3 merged into one studio. Click a layer to see its properties." -->
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>StreamBullets — Overlay studio proposal</title>
+<style>
+:root{color-scheme:dark;--bg:#0a2025;--card:#0b2127;--field:#091e24;--cream:#f7edcf;--muted:#bcc8c4;--line:#405456;--gold:#edbd53;--gold-lo:#e8b44b;--on-gold:#0b2228;--btn:#849291;--live:#b3362b;--r:4px;
+--head:Oswald,'Arial Narrow',system-ui,sans-serif;--body:Figtree,system-ui,'Segoe UI',sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--cream);font:400 16px/1.5 var(--body)}
+button,select,input{font:inherit;color:inherit}
+.hdr{display:flex;align-items:center;gap:24px;padding:16px 32px;border-bottom:1px solid var(--line)}
+.who{display:flex;align-items:center;gap:10px;font:600 22px/1 var(--head);text-transform:uppercase}
+.av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#2b6a6e,#123);border:2px solid var(--gold)}
+nav{display:flex;gap:4px;margin-left:auto}
+nav a{padding:10px 14px;border-radius:var(--r);color:var(--muted);text-decoration:none;font-weight:600}
+nav a[aria-current]{background:var(--gold);color:var(--on-gold)}
+main{max-width:1376px;margin:0 auto;padding:28px 32px 48px;display:grid;gap:28px}
+h1{margin:0;font:600 44px/1.1 var(--head);text-transform:uppercase;color:var(--gold)}
+h2{margin:0 0 12px;font:600 26px/1.2 var(--head);display:flex;align-items:center;gap:12px}
+h2 i{font:600 16px/28px var(--body);width:28px;height:28px;border-radius:50%;background:var(--gold);color:var(--on-gold);text-align:center;font-style:normal}
+h3{margin:0 0 8px;font:600 13px/1.3 var(--body);letter-spacing:2px;text-transform:uppercase;color:var(--gold)}
+section{border-top:1px solid var(--line);padding-top:24px}
+.btn{min-height:44px;padding:10px 16px;border:1px solid var(--btn);border-radius:var(--r);background:linear-gradient(110deg,#1c3438,#11282d);cursor:pointer;font-weight:600}
+.btn.gold{background:linear-gradient(110deg,#f3ca68,var(--gold-lo));color:var(--on-gold);border-color:var(--gold-lo)}
+.ch{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.ch>div{border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;align-items:center;gap:12px;background:var(--card)}
+.ch svg{width:32px;height:32px;color:var(--gold);flex:none}.ch b{display:block}.ch small{color:var(--muted)}.ch .btn{margin-left:auto}
+.ok{color:#8fd6a5}
+.bar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:12px}
+.seg{display:inline-flex;border:1px solid var(--btn);border-radius:var(--r);overflow:hidden}
+.seg span{display:inline-flex;align-items:center;min-height:42px;padding:0 12px;font-weight:600;font-size:14px}.bar .btn{min-height:44px;padding-block:0;font-size:14px}.seg .on{background:var(--gold);color:var(--on-gold)}
+.livenote{margin-left:auto;display:flex;align-items:center;gap:8px;color:var(--muted);font-size:14px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--live)}
+.studio{display:grid;grid-template-columns:200px minmax(0,1fr) 300px;gap:16px;align-items:start}
+.pal{display:grid;gap:6px}
+.chip{display:flex;align-items:center;gap:8px;min-height:44px;padding:8px 10px;border:1px dashed var(--btn);border-radius:var(--r);background:transparent;cursor:pointer;text-align:left;font-weight:600;font-size:15px}
+.chip[data-placed]{border-style:solid;border-color:var(--line);color:var(--muted)}
+.chip[data-placed]::after{content:"placed";margin-left:auto;font:600 11px/1 var(--body);letter-spacing:1px;text-transform:uppercase;color:var(--gold)}
+.chip:not([data-placed])::before{content:"+";color:var(--gold);font-weight:700}
+.canvas{position:relative;aspect-ratio:16/9;border:2px solid var(--gold);border-radius:var(--r);overflow:hidden;
+background:linear-gradient(#0b2127cc,#0b2127cc),repeating-conic-gradient(#333 0 25%,#222 0 50%) 0 0/24px 24px;
+background-image:linear-gradient(to right,#f7edcf14 1px,transparent 1px),linear-gradient(to bottom,#f7edcf14 1px,transparent 1px),repeating-conic-gradient(#2a2a2a 0 25%,#1c1c1c 0 50%);background-size:6.25% 11.111%,6.25% 11.111%,24px 24px}
+.ly{position:absolute;border:1px solid #f7edcf55;border-radius:var(--r);padding:8px;cursor:pointer;background:rgba(8,43,46,var(--o,.9));color:var(--cream);text-align:left;font-size:13px;overflow:hidden}
+.ly b{display:block;font:600 11px/1.2 var(--body);letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+.ly strong{font:600 clamp(14px,1.6vw,22px)/1.15 var(--head);text-transform:uppercase}
+.ly[aria-pressed=true]{outline:3px solid var(--gold);outline-offset:1px;border-color:var(--gold)}
+.ly[aria-pressed=true]::after{content:"";position:absolute;right:-1px;bottom:-1px;width:12px;height:12px;background:var(--gold)}
+.ly[data-off]{opacity:.45;border-style:dashed}
+.props{border:1px solid var(--line);border-radius:var(--r);background:var(--card);padding:16px;display:grid;gap:14px}
+.props h4{margin:0;font:600 22px/1.2 var(--head);text-transform:uppercase}
+label{display:grid;gap:6px;font-size:14px;color:var(--muted)}
+select,input[type=number]{min-height:44px;padding:8px 12px;background:var(--field);border:1px solid #607476;border-radius:var(--r);color:var(--cream);width:100%}
+input[type=range]{accent-color:var(--gold);width:100%}
+.tog{display:flex;align-items:center;gap:10px;color:var(--cream);font-size:15px}.tog input{width:22px;height:22px;accent-color:var(--gold)}
+.qr{position:absolute;right:8px;bottom:8px;width:28%;max-width:86px;aspect-ratio:1;border:4px solid #f7edcf;border-radius:2px;background:conic-gradient(#0b2127 25%,#f7edcf 0 50%,#0b2127 0 75%,#f7edcf 0) 0 0/25% 25%,#f7edcf}
+.hint{color:var(--muted);font-size:13px;margin:0}
+.notes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;color:var(--muted);font-size:14px}
+.notes b{color:var(--cream);display:block;margin-bottom:4px}
+</style></head><body>
+<header class="hdr"><div class="who"><span class="av"></span>Feature Host</div>
+<nav aria-label="Streamer"><a href="#">Topics</a><a href="#">Polls</a><a href="#">Schedule</a><a href="#">Community</a><a href="#">Support</a><a href="#" aria-current="page">Overlay</a></nav></header>
+<main>
+<h1>Overlay control</h1>
+<section><h2><i>1</i>Connect channels</h2>
+<div class="ch">
+<div><svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 2h18v13l-6 6h-5l-4 3v-3H2V6zm1 3v12h5v3l3-3h4l3-3V5z"/><path fill="none" stroke="currentColor" stroke-width="2" d="M11 7v6m5-6v6"/></svg><div><b>Twitch</b><small class="ok">Connected as feature_host</small></div><button class="btn" type="button">Disconnect</button></div>
+<div><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M6 5h12a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V9a4 4 0 0 1 4-4z"/><path fill="currentColor" d="m10 8 6 4-6 4z"/></svg><div><b>YouTube</b><small>Not connected</small></div><button class="btn gold" type="button">Connect</button></div>
+<div><svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 3h5v7h3V7h3V3h7v6h-4v3h-3v2h3v3h4v4h-7v-3h-3v-3H8v6H3z"/></svg><div><b>Kick</b><small>Not connected</small></div><button class="btn gold" type="button">Connect</button></div>
+</div><p class="hint" style="margin-top:10px">A broken event subscription repairs itself. "Reconnect" shows only when the platform ended the access, because only the streamer can give the permission again.</p></section>
+<section><h2><i>2</i>Build your overlay</h2>
+<div class="bar"><span class="seg"><span class="on">Horizontal 16 × 9</span><span>Vertical 9 × 16</span></span><span class="seg"><span class="on">Transparent</span><span>Sample game</span></span>
+<button class="btn" type="button">Start test</button><span class="livenote"><span class="dot"></span>Changes go live right away</span></div>
+<div class="studio">
+<div><h3>Layers · one of each</h3><div class="pal" id="pal"></div><p class="hint" style="margin-top:10px">Select a layer to place it. Drag it on the grid to move it. Drag a corner to resize it.</p></div>
+<div class="canvas" id="canvas"></div>
+<aside class="props" id="props" aria-live="polite"></aside>
+</div></section>
+<section><h2><i>3</i>Add to OBS</h2><p class="hint" style="font-size:15px">One browser source, 1920 × 1080. The overlay link does not change when you change the layers.</p><p><button class="btn" type="button">Create overlay link</button></p></section>
+<section class="notes">
+<div><b>What goes away</b>Preview and On air frames, Take, Instant switch, shortcuts 1 to 8, the Position and Size rows, the sources Auto and Hidden.</div>
+<div><b>What replaces it</b>Each layer has "Show on stream". Position and size come from the grid. "Latest active poll" is an option of the Poll layer.</div>
+<div><b>QR code</b>Poll, Topic, Up next, Community card and Support banner can show a QR code of their page. Chat, Characters and Message banner have none.</div>
+<div><b>Test</b>One "Start test" fills every placed layer with sample data on the real overlay, so OBS and the overlay link show it.</div>
+</section>
+</main>
+<script>
+const L=[
+{id:"chat",n:"Chat",box:[1,50,30,47],body:"<strong style='font-size:13px;text-transform:none;font-family:inherit'>PixelLuna: that build is so clean</strong>",f:[["Hide chat commands (!jump)","tog",true]]},
+{id:"characters",n:"Characters",box:[33,78,66,20],body:"🧍 🧍 🧍 walk here",f:[["Maximum characters on screen","num",40],["Seconds without chat before a character walks out","num",60]]},
+{id:"poll",n:"Poll",box:[33,3,45,30],body:"<strong>Which boss first?</strong>",qr:true,f:[["Poll","sel",["Latest active poll","Which boss first?","Next game?"]]]},
+{id:"topic",qr:false,n:"Topic",box:[80,3,19,22],body:"<strong>Mic shootout</strong>",f:[["Topic","sel",["Mic shootout","Hard mode replay","Best budget GPU"]]]},
+{id:"upnext",qr:false,n:"Up next",f:[]},
+{id:"banner",n:"Message banner",f:[["Text","sel",["BRB 5 min","Starting soon"]]]},
+{id:"community",qr:false,n:"Community card",f:[["Card","sel",["Discord","Rules"]]]},
+{id:"support",qr:false,n:"Support banner",f:[["Link","sel",["First support link"]]]}];
+const pal=document.getElementById("pal"),cv=document.getElementById("canvas"),pr=document.getElementById("props");let sel="poll";
+const field=([l,t,v])=>t==="tog"?`<label class="tog"><input type="checkbox" ${v?"checked":""}>${l}</label>`:t==="num"?`<label>${l}<input type="number" value="${v}"></label>`:`<label>${l}<select>${v.map(o=>`<option>${o}</option>`).join("")}</select></label>`;
+function draw(){pal.innerHTML="";cv.innerHTML="";
+for(const l of L){const c=document.createElement("button");c.type="button";c.className="chip";c.textContent=l.n;if(l.box)c.dataset.placed="";c.onclick=()=>{if(!l.box)l.box=[40,40,25,18];sel=l.id;draw()};pal.append(c);
+if(l.box){const e=document.createElement("button");e.type="button";e.className="ly";e.setAttribute("aria-pressed",sel===l.id);e.style.cssText=`left:${l.box[0]}%;top:${l.box[1]}%;width:${l.box[2]}%;height:${l.box[3]}%;--o:${(l.o??90)/100}`;if(l.off)e.dataset.off="";e.innerHTML=`<b>${l.n}</b>${l.body||""}${l.qr?'<span class="qr" title="QR code"></span>':""}`;e.onclick=()=>{sel=l.id;draw()};cv.append(e)}}
+const l=L.find(x=>x.id===sel&&x.box);
+pr.innerHTML=l?`<h3 style="margin:0">Selected layer</h3><h4>${l.n}</h4><label class="tog"><input id="on" type="checkbox" ${l.off?"":"checked"}>Show on stream</label>${l.f.map(field).join("")}${"qr" in l?`<label class="tog"><input id="qr" type="checkbox" ${l.qr?"checked":""}>Show QR code</label><p class="hint">Viewers scan it with a phone and open this item. On by default for a poll.</p>`:""}<label><span>Background: <span id="ov">${l.o??90}</span>%</span><input id="op" type="range" min="0" max="100" value="${l.o??90}"></label><p class="hint">At 0% only the text shows, with a dark outline.</p><button class="btn" id="rm" type="button">Remove from grid</button>`:`<h4>No layer selected</h4><p class="hint">Select a layer on the grid to change it.</p>`;
+if(l){pr.querySelector("#on").onchange=e=>{l.off=!e.target.checked;draw()};pr.querySelector("#op").oninput=e=>{l.o=+e.target.value;pr.querySelector("#ov").textContent=l.o;cv.querySelector("[aria-pressed=true]").style.setProperty("--o",l.o/100)};if("qr" in l)pr.querySelector("#qr").onchange=e=>{l.qr=e.target.checked;draw()};pr.querySelector("#rm").onclick=()=>{delete l.box;draw()}}}
+draw();
+</script></body></html>
