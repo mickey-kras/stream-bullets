@@ -1,7 +1,7 @@
 # Overlay composition and merged chat
 
 The overlay page shows a composition of layers in one transparent browser source.
-The owner builds the composition in **Overlay control**. Each layer has a place on a grid. Changes go live at once.
+The owner builds the composition in the **Overlay** section of **Streamer tools**. Each layer has a place on a grid. Changes go live at once.
 
 The overlay shows only the layers that are on the grid.
 The chat layer shows the merged chat of the connected Twitch, YouTube, and Kick channels.
@@ -180,7 +180,7 @@ Now the overlay shows only layers on the grid.
 The stored layers have a version (`v`). The current version is 2. Stored layers without this version are old.
 The server converts old layers each time it reads them. The result is always the same.
 
-The first time the overlay page or **Overlay control** reads the state, the server stores the result.
+The first time the overlay page or **Streamer tools** reads the state, the server stores the result.
 Each save also stores the current version. Thus the conversion happens one time.
 The owner does nothing. The revision of the overlay does not change.
 
@@ -261,7 +261,7 @@ The `poll` parameter shows one poll in place of the content layers:
 The poll layer then shows that poll, and no other content layer shows.
 The poll layer keeps its cell. If it is off the grid, it takes the cell of a poll at size M, or free space near it.
 
-**Overlay control** shows the full URL and the layer URLs once, when you make a new key.
+The **Overlay** section shows the full URL and the layer URLs once, when you make a new key.
 The server keeps only the SHA-256 hash of the key. Thus it cannot show the URL again.
 If you have the composition URL, add `&layer=chat` to its end for a chat source.
 If you lost the URL, select **Regenerate link**. Then update all OBS sources.
@@ -296,19 +296,23 @@ See [live capacity](live-room-capacity.md).
 
 ## Editor
 
-**Overlay control** has three numbered steps:
+**Streamer tools** is the page of the owner at `/tools`. The header of a streamer page has its **Tools** tab.
+The old address `/overlay-control` redirects to it. The page has two sections:
 
-1. **Connect channels**: the channel connections. With a connected channel, the step shows one status line.
-   Select the line to open the full panel.
-   The line and the cards follow the channel health while the page is open.
-2. **Build your overlay**: the overlay studio.
-3. **Add to OBS**: the overlay link. When the page has a link, one line shows the OBS connection.
-   It shows the number of connected sources. Without a source, it shows when the last one connected or went away.
-   The live room counts the sockets that came in with the current key.
-   It sends each change to the owner's tabs.
+- **Overlay** (`/tools?view=overlay`) has two numbered steps:
+  1. **Build your overlay**: the overlay studio.
+  2. **Add to OBS**: the overlay link.
+- **Channels** (`/tools?view=channels`) has the channel connections. With a connected channel, it shows one status line.
+  Select the line to open the full panel.
+  The line and the cards follow the channel health while the page is open.
 
-A signed-in page owner opens the page from **Overlay** in the header of their own streamer page or from the account menu.
-The site header has no **Overlay** entry.
+When the page has a link, one line in step 2 shows the OBS connection.
+It shows the number of connected sources. Without a source, it shows when the last one connected or went away.
+The live room counts the sockets that came in with the current key.
+It sends each change to the owner's tabs.
+
+A signed-in page owner opens the page from **Tools** in the header of their own streamer page or from the account menu.
+The site header has no **Tools** entry.
 
 The studio has these parts:
 
@@ -405,9 +409,9 @@ Up next and the support banner have no picker. The characters layer has no backg
 Without a selected layer, the settings show a hint.
 
 The chat settings show a warning when the chat layer is on stream and no connected platform is healthy.
-The warning text is "No channel delivers chat right now. See step 1." It links to step 1.
-The warning uses the live channel list of step 1.
-See [Channel health in Overlay control](channel-connections.md#channel-health-in-overlay-control).
+The warning text is "No channel delivers chat right now. See Channels." It links to the **Channels** section.
+The warning uses the live channel list of the page.
+See [Channel health in Streamer tools](channel-connections.md#channel-health-in-streamer-tools).
 
 The settings are a region with the name of the layer, after the grid in the tab sequence.
 When you select a layer with its chip, a screen reader reads the selection. The grid reads its own selections.
@@ -623,7 +627,7 @@ The chat adds only the snapshot rows that are newer than the newest row on scree
 An `unavailable` message clears the chat. The server sends it when the key changes or when an administrator suspends the page.
 The page then keeps trying with a longer wait.
 When the server refuses the key (close code `4403`), the page stops. The value of `data-feed-status` is then `refused`.
-The source needs the new link from **Overlay control**.
+The source needs the new link from the **Overlay** section.
 
 For troubleshooting, the root element of the overlay page has the `data-feed-status` attribute.
 It shows the status of the activity feed.
@@ -650,7 +654,7 @@ Thus close the overlay sources that you do not use.
 - An emote image loads only from a host in `EMOTE_HOSTS`, over HTTPS. Other emotes show their name as text.
 - On all pages, the Content Security Policy allows images from the site, `blob:` URLs, `data:` URLs,
   and each host in `EMOTE_HOSTS` over HTTPS (`https://static-cdn.jtvnw.net`).
-  The policy applies to a full page load. A link in the app opens **Overlay control** without a new page load.
+  The policy applies to a full page load. A link in the app opens **Streamer tools** without a new page load.
   Thus a policy only for that page does not apply to the preview.
 - The Twitch image CDN gets the IP address of the device that shows an emote. The privacy policy (`/privacy`) names this recipient.
 - The overlay page sends no `Referer`. Thus an emote image does not get the key.

@@ -100,7 +100,7 @@ const sections = (legal: ReturnType<typeof loader>): readonly LegalSection[] => 
         </ul>
         <h3>From channels a streamer connects (Twitch, YouTube or Kick)</h3>
         <p>
-          A streamer can connect their own channels in Overlay control. This is separate from sign-in. For each
+          A streamer can connect their own channels in Streamer tools. This is separate from sign-in. For each
           connected channel we keep:
         </p>
         <ul>
@@ -146,7 +146,7 @@ const sections = (legal: ReturnType<typeof loader>): readonly LegalSection[] => 
           The YouTube connection uses YouTube API Services. By connecting a YouTube channel, you agree to the{" "}
           <a href="https://www.youtube.com/t/terms">YouTube Terms of Service</a>. Google’s handling of your data follows
           the <a href="https://policies.google.com/privacy">Google Privacy Policy</a>. You can disconnect the channel in
-          Overlay control at any time. You can also remove StreamBullets’ access in your{" "}
+          Streamer tools at any time. You can also remove StreamBullets’ access in your{" "}
           <a href="https://security.google.com/settings/security/permissions">Google security settings</a>.
         </p>
         <p>
