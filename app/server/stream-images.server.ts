@@ -13,6 +13,8 @@ const SOURCE_TYPES: ReadonlySet<string> = new Set(["image/jpeg", "image/png", "i
 const MAX_SOURCE_BYTES = 5 * 1024 * 1024;
 /** Downloads in one read at most: a page lists a stream a day for 4 weeks on two platforms. */
 const MAX_DOWNLOADS = 60;
+/** The sweep keeps a copy younger than this: a read that runs at the same time can have stored it for a new source. */
+const SWEEP_GRACE_MS = 3_600_000;
 
 type Size = "large" | "small";
 /** A YouTube thumbnail for the "Up next" card and for a schedule row. A Twitch cover comes in its size already. */
@@ -63,27 +65,32 @@ async function resized(env: AppEnv, bytes: Uint8Array<ArrayBuffer>, size: Size):
   return await result.response().arrayBuffer();
 }
 
-/** Stores one picture unless a copy of it exists. Returns whether it tried a download. */
-async function storeOne(env: AppEnv, row: SourceRow, done: Set<string>): Promise<boolean> {
+/** The copies a picture needs: a Twitch cover has one, a YouTube thumbnail two. */
+function sizesOf(platform: string): readonly Size[] {
+  return platform === "twitch" ? ["large"] : ["small", "large"];
+}
+
+/** Stores one picture unless all its copies exist. Takes one download from `budget` before it loads. */
+async function storeOne(env: AppEnv, row: SourceRow, done: Set<string>, budget: { left: number }): Promise<void> {
   // Without the Images binding (the test deployment), a thumbnail cannot become small: it is not loaded.
-  if (row.platform !== "twitch" && !env.IMAGE_TRANSFORM) return false;
+  if (row.platform !== "twitch" && !env.IMAGE_TRANSFORM) return;
   const base = await pictureBase(row);
-  if (done.has(base)) return false;
+  if (done.has(base)) return;
   done.add(base);
-  if (await env.IMAGES.head(`${base}-large`)) return false;
+  const present = await Promise.all(sizesOf(row.platform).map((size: Size) => env.IMAGES.head(`${base}-${size}`)));
+  if (present.every(Boolean) || budget.left <= 0) return;
+  budget.left -= 1;
   const picture = await download(row.image_url);
-  if (!picture) return true;
+  if (!picture) return;
   if (row.platform === "twitch") {
     await env.IMAGES.put(`${base}-large`, picture.bytes, { httpMetadata: { contentType: picture.type } });
-    return true;
+    return;
   }
-  // The small copy first: the large one marks the picture as stored.
-  for (const size of ["small", "large"] as const) {
+  for (const size of sizesOf(row.platform)) {
     await env.IMAGES.put(`${base}-${size}`, await resized(env, picture.bytes, size), {
       httpMetadata: { contentType: "image/webp" },
     });
   }
-  return true;
 }
 
 /** After a read of a page: stores the pictures that are new or changed. A failed picture never fails the read. */
@@ -93,21 +100,23 @@ export async function storeStreamImages(env: AppEnv, streamerId: string): Promis
       WHERE streamer_id=? AND image_url IS NOT NULL AND event_id IS NOT NULL ORDER BY read_at DESC`)
       .bind(streamerId)
       .all<SourceRow>();
-  let downloads = 0;
   const done = new Set<string>();
+  const budget = { left: MAX_DOWNLOADS };
   for (const row of results) {
-    if (downloads >= MAX_DOWNLOADS) break;
     if (!STREAM_IMAGE_URL.test(row.image_url)) continue;
     try {
-      if (await storeOne(env, row, done)) downloads += 1;
+      await storeOne(env, row, done, budget);
     } catch (error: unknown) {
       logError("stream_image_store_failed", error);
     }
   }
 }
 
-/** Hourly: deletes the stored copies that no source links to any more. Returns how many went. */
-export async function sweepStreamImages(env: AppEnv): Promise<number> {
+/**
+ * Hourly: deletes the stored copies that no source links to any more and that are older than an hour, so a copy
+ * that a parallel read just stored for a new source stays. Returns how many went.
+ */
+export async function sweepStreamImages(env: AppEnv, now: number = Date.now()): Promise<number> {
   const { results } = await env.DB.prepare(
     "SELECT DISTINCT streamer_id, image_url FROM stream_event_sources WHERE image_url IS NOT NULL",
   ).all<Pick<SourceRow, "streamer_id" | "image_url">>();
@@ -117,7 +126,8 @@ export async function sweepStreamImages(env: AppEnv): Promise<number> {
   do {
     const listed = await env.IMAGES.list({ prefix: PREFIX, cursor, limit: 1000 });
     for (const object of listed.objects) {
-      if (!keep.has(object.key.replace(/-(large|small)$/, ""))) stale.push(object.key);
+      const young = object.uploaded.getTime() > now - SWEEP_GRACE_MS;
+      if (!young && !keep.has(object.key.replace(/-(large|small)$/, ""))) stale.push(object.key);
     }
     cursor = listed.truncated ? listed.cursor : undefined;
   } while (cursor);

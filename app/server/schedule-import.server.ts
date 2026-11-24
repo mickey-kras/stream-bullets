@@ -393,7 +393,7 @@ export async function importSchedules(env: AppEnv, now: number): Promise<number>
   ]);
   // The stored pictures of the sources that went, YouTube ones within the same 30 days.
   try {
-    await sweepStreamImages(env);
+    await sweepStreamImages(env, now);
   } catch (error: unknown) {
     logError("stream_image_sweep_failed", error);
   }

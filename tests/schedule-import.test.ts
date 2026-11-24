@@ -849,10 +849,40 @@ describe("pictures and categories", (): void => {
     // Both segments have the Just Chatting cover: one copy, one download.
     expect(await stored()).toEqual(["image/jpeg-large", "image/webp-large", "image/webp-small"]);
     expect(imageCalls()).toBe(2);
+    const later = Date.now() + 2 * hour;
     await env.DB.prepare("DELETE FROM stream_event_sources WHERE external_id='s2'").run();
-    expect(await sweepStreamImages(env)).toBe(0);
+    expect(await sweepStreamImages(env, later)).toBe(0);
     await env.DB.prepare("DELETE FROM stream_event_sources WHERE platform='youtube'").run();
-    expect(await sweepStreamImages(env)).toBe(2);
+    // A copy stored in the last hour stays: a parallel read can have stored it for a source the sweep did not see.
+    expect(await sweepStreamImages(env)).toBe(0);
+    expect(await sweepStreamImages(env, later)).toBe(2);
     expect(await stored()).toEqual(["image/jpeg-large"]);
+  });
+
+  it("loads a thumbnail again when one of its copies is missing", async (): Promise<void> => {
+    fake.upcoming = [broadcast("vid-1", "Show", now + 2 * day, "public", undefined, { maxres: { url: thumbnail } })];
+    await importPageSchedule(env, page, now);
+    const small = (await env.IMAGES.list({ prefix: "schedule/" })).objects.find((object) => object.key.endsWith("-small"));
+    await env.IMAGES.delete(small?.key ?? "");
+    await importPageSchedule(env, page, now + 60_000);
+    expect(imageCalls()).toBe(2);
+    expect(await stored()).toEqual(["image/webp-large", "image/webp-small"]);
+  });
+
+  it("downloads at most 60 pictures in one read, also when making the copies fails", async (): Promise<void> => {
+    env.IMAGE_TRANSFORM = {
+      input: () => {
+        throw new Error("Images is down");
+      },
+    } as unknown as ImagesBinding;
+    fake.upcoming = Array.from({ length: 61 }, (_, index: number) =>
+      broadcast(`vid-${index}`, `Show ${index}`, now + day + index * hour, "public", undefined, {
+        maxres: { url: `https://i.ytimg.com/vi/vid-${index}/maxresdefault.jpg` },
+      }),
+    );
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    await importPageSchedule(env, page, now);
+    expect(imageCalls()).toBe(60);
+    expect(await stored()).toEqual([]);
   });
 });

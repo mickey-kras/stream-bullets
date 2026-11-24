@@ -51261,7 +51261,7 @@
       "relation": "calls",
       "source": "app_server_stream_images_server_download",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L50",
+      "source_location": "L52",
       "target": "app_server_http_server_readbody",
       "weight": 1.0
     },
@@ -51273,7 +51273,7 @@
       "relation": "calls",
       "source": "app_server_stream_images_server_servestreamimage",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L134",
+      "source_location": "L144",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -51285,7 +51285,7 @@
       "relation": "calls",
       "source": "app_server_stream_images_server_servestreamimage",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L141",
+      "source_location": "L151",
       "target": "app_server_stream_images_server_picturebase",
       "weight": 1.0
     },
@@ -51297,7 +51297,7 @@
       "relation": "calls",
       "source": "app_server_stream_images_server_storeone",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L70",
+      "source_location": "L77",
       "target": "app_server_stream_images_server_picturebase",
       "weight": 1.0
     },
@@ -51309,7 +51309,19 @@
       "relation": "calls",
       "source": "app_server_stream_images_server_storeone",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L74",
+      "source_location": "L80",
+      "target": "app_server_stream_images_server_sizesof",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_stream_images_server_storeone",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L83",
       "target": "app_server_stream_images_server_download",
       "weight": 1.0
     },
@@ -51321,7 +51333,7 @@
       "relation": "calls",
       "source": "app_server_stream_images_server_storeone",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L82",
+      "source_location": "L90",
       "target": "app_server_stream_images_server_resized",
       "weight": 1.0
     },
@@ -51333,7 +51345,7 @@
       "relation": "calls",
       "source": "app_server_stream_images_server_storestreamimages",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L102",
+      "source_location": "L108",
       "target": "app_server_stream_images_server_storeone",
       "weight": 1.0
     },
@@ -51345,7 +51357,7 @@
       "relation": "calls",
       "source": "app_server_stream_images_server_storestreamimages",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L104",
+      "source_location": "L110",
       "target": "app_server_http_server_logerror",
       "weight": 1.0
     },
@@ -51357,7 +51369,7 @@
       "relation": "calls",
       "source": "app_server_stream_images_server_sweepstreamimages",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L114",
+      "source_location": "L123",
       "target": "app_server_stream_images_server_picturebase",
       "weight": 1.0
     },
@@ -192688,7 +192700,7 @@
       "relation": "contains",
       "source": "app_server_stream_images_server",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L110",
+      "source_location": "L119",
       "target": "app_server_stream_images_server_sweepstreamimages",
       "weight": 1.0
     },
@@ -192710,7 +192722,7 @@
       "relation": "contains",
       "source": "app_server_stream_images_server",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L132",
+      "source_location": "L142",
       "target": "app_server_stream_images_server_servestreamimage",
       "weight": 1.0
     },
@@ -192721,7 +192733,7 @@
       "relation": "contains",
       "source": "app_server_stream_images_server",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L17",
+      "source_location": "L19",
       "target": "app_server_stream_images_server_size",
       "weight": 1.0
     },
@@ -192732,7 +192744,7 @@
       "relation": "contains",
       "source": "app_server_stream_images_server",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L19",
+      "source_location": "L21",
       "target": "app_server_stream_images_server_thumbnail_sizes",
       "weight": 1.0
     },
@@ -192743,7 +192755,7 @@
       "relation": "contains",
       "source": "app_server_stream_images_server",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L24",
+      "source_location": "L26",
       "target": "app_server_stream_images_server_sourcerow",
       "weight": 1.0
     },
@@ -192754,7 +192766,7 @@
       "relation": "contains",
       "source": "app_server_stream_images_server",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L31",
+      "source_location": "L33",
       "target": "app_server_stream_images_server_picturebase",
       "weight": 1.0
     },
@@ -192765,7 +192777,7 @@
       "relation": "contains",
       "source": "app_server_stream_images_server",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L40",
+      "source_location": "L42",
       "target": "app_server_stream_images_server_download",
       "weight": 1.0
     },
@@ -192776,7 +192788,7 @@
       "relation": "contains",
       "source": "app_server_stream_images_server",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L57",
+      "source_location": "L59",
       "target": "app_server_stream_images_server_resized",
       "weight": 1.0
     },
@@ -192787,7 +192799,18 @@
       "relation": "contains",
       "source": "app_server_stream_images_server",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L67",
+      "source_location": "L69",
+      "target": "app_server_stream_images_server_sizesof",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_stream_images_server",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L74",
       "target": "app_server_stream_images_server_storeone",
       "weight": 1.0
     },
@@ -192798,7 +192821,7 @@
       "relation": "contains",
       "source": "app_server_stream_images_server",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L90",
+      "source_location": "L97",
       "target": "app_server_stream_images_server_storestreamimages",
       "weight": 1.0
     },
@@ -220264,7 +220287,7 @@
       "label": "Size",
       "norm_label": "size",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L17"
+      "source_location": "L19"
     },
     {
       "_callable": true,
@@ -220276,7 +220299,7 @@
       "label": "SourceRow",
       "norm_label": "sourcerow",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L24"
+      "source_location": "L26"
     },
     {
       "_callable": true,
@@ -246698,7 +246721,7 @@
       "label": "download()",
       "norm_label": "download()",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L40"
+      "source_location": "L42"
     },
     {
       "_callable": true,
@@ -246709,7 +246732,7 @@
       "label": "pictureBase()",
       "norm_label": "picturebase()",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L31"
+      "source_location": "L33"
     },
     {
       "_callable": true,
@@ -246720,7 +246743,7 @@
       "label": "resized()",
       "norm_label": "resized()",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L57"
+      "source_location": "L59"
     },
     {
       "_callable": true,
@@ -246731,7 +246754,18 @@
       "label": "serveStreamImage()",
       "norm_label": "servestreamimage()",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L132"
+      "source_location": "L142"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_stream_images_server_sizesof",
+      "label": "sizesOf()",
+      "norm_label": "sizesof()",
+      "source_file": "app/server/stream-images.server.ts",
+      "source_location": "L69"
     },
     {
       "_callable": true,
@@ -246742,7 +246776,7 @@
       "label": "storeOne()",
       "norm_label": "storeone()",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L67"
+      "source_location": "L74"
     },
     {
       "_callable": true,
@@ -246753,7 +246787,7 @@
       "label": "storeStreamImages()",
       "norm_label": "storestreamimages()",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L90"
+      "source_location": "L97"
     },
     {
       "_callable": true,
@@ -246764,7 +246798,7 @@
       "label": "sweepStreamImages()",
       "norm_label": "sweepstreamimages()",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L110"
+      "source_location": "L119"
     },
     {
       "_callable": true,
@@ -264259,7 +264293,7 @@
       "label": "THUMBNAIL_SIZES",
       "norm_label": "thumbnail_sizes",
       "source_file": "app/server/stream-images.server.ts",
-      "source_location": "L19"
+      "source_location": "L21"
     },
     {
       "_origin": "ast",
