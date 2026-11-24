@@ -100,8 +100,8 @@ const sections = (legal: ReturnType<typeof loader>): readonly LegalSection[] => 
         </ul>
         <h3>From channels a streamer connects (Twitch, YouTube or Kick)</h3>
         <p>
-          A streamer can connect their own channels in Streamer tools. This is separate from sign-in. For each
-          connected channel we keep:
+          A streamer can connect their own channels in Streamer tools. This is separate from sign-in. For each connected
+          channel we keep:
         </p>
         <ul>
           <li>
