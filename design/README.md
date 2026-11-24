@@ -19,7 +19,7 @@ Use it when you design or build an interface for the product.
 
 ## Build
 
-`pnpm design:build` runs `scripts/build-design.ts`.
+`node design/build.ts` builds the system.
 It builds `components/src/` into `components/bundle.js`, and each UI kit into its `kit.js`.
 Git does not track these files. Build them before you copy the system to Claude or open a preview.
 A page that loads them supplies React 18 as the globals `React` and `ReactDOM`, and loads `bundle.js` before a kit.

@@ -1,0 +1,3 @@
+# Build output of build.ts. Run node design/build.ts.
+/components/bundle.js
+/components/*/kit.js

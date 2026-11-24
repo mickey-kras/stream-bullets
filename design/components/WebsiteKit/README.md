@@ -17,4 +17,4 @@ The kit also keeps the current screen in the `sb-kit-screen` key of `localStorag
 The Schedule, About, and Community tabs show a note. The kit does not copy them.
 
 `kit.css` holds the layout. The parts come from the bundle, `components/bundle.js`.
-`main.jsx` starts the kit. `pnpm design:build` builds it into `kit.js`, which `preview.html` loads.
+`main.jsx` starts the kit. `node design/build.ts` builds it into `kit.js`, which `preview.html` loads.

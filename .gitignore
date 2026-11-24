@@ -71,7 +71,3 @@ __pycache__/
 
 # Static analyzer output
 /reports/
-
-# Design system build output. Run pnpm design:build.
-/design/components/bundle.js
-/design/components/*/kit.js

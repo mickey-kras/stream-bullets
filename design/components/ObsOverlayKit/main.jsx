@@ -1,4 +1,4 @@
-// The entry of the kit. scripts/build-design.ts builds it into ObsOverlayKit/kit.js.
+// The entry of the kit. design/build.ts builds it into ObsOverlayKit/kit.js.
 import { createRoot } from "react-dom/client";
 import { OverlayApp } from "./OverlayApp.jsx";
 

@@ -1,4 +1,4 @@
-// The public parts of the design system. scripts/build-design.ts builds this file into components/bundle.js.
+// The public parts of the design system. design/build.ts builds this file into components/bundle.js.
 export { Avatar } from "./core/Avatar.jsx";
 export { Button } from "./core/Button.jsx";
 export { LOCAL_ICONS, LUCIDE_ICONS, Icon } from "./core/Icon.jsx";
