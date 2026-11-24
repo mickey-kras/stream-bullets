@@ -55,6 +55,7 @@ export const paths = {
   admin: "/admin",
   overlayControl: "/overlay-control",
   privacy: "/privacy",
+  cookies: "/privacy#cookies",
   terms: "/terms",
   reporting: "/terms#reporting",
   // Official board with the suggestion dialog open.

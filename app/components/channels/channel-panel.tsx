@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
-import { useLocation, useNavigate, useRevalidator } from "react-router";
+import { Link, useLocation, useNavigate, useRevalidator } from "react-router";
 import { intlLocale, t, type MessageId } from "../../i18n";
 import { quotaDay, type ActivityPlatform, type ChannelStatusCode, type ConnectResult } from "../../lib/activity";
 import { channelHealth, relativeAge, type ChannelHealth, type ChannelView } from "../../lib/channel-health";
@@ -9,7 +9,7 @@ import { providerName, Reauthenticate } from "../shell/sign-in-dialog";
 import { Dialog, DialogActions } from "../ui/dialog";
 import { Icon, type IconName } from "../ui/icon";
 import { useToast } from "../ui/toast";
-import { useShell } from "../../lib/shell";
+import { paths, useShell } from "../../lib/shell";
 import { detached } from "../../lib/detached";
 import { PlatformIcon } from "../overlay/wasteland/glyphs";
 
@@ -406,7 +406,12 @@ export function ChannelPanel({
   );
   return (
     <div className="ch-panel" ref={panel}>
-      <p className="muted">{t("channels.intro")}</p>
+      <p className="muted">
+        {t("channels.intro")}{" "}
+        {channels.some((channel) => channel.platform === "youtube" && channel.available) &&
+          t("channels.youtubeSchedule")}{" "}
+        <Link to={`${paths.privacy}#data-we-collect`}>{t("legal.privacyPolicy")}</Link>
+      </p>
       {stale && (
         <p className="muted" data-channels-stale>
           {t("channels.refreshFailed")}

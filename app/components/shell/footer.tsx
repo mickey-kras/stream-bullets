@@ -64,6 +64,7 @@ export function SiteFooter(): ReactNode {
         <Link to={paths.privacy} aria-current={current(paths.privacy)}>
           {t("legal.privacy")}
         </Link>
+        <Link to={paths.cookies}>{t("legal.cookies")}</Link>
         <Link to={paths.terms} aria-current={current(paths.terms)}>
           {t("legal.terms")}
         </Link>
@@ -123,6 +124,11 @@ export function SiteFooter(): ReactNode {
         short
       >
         <ul className="more-list">
+          <li>
+            <Link to={paths.cookies} onClick={close}>
+              <MoreRow icon="privacy">{t("legal.cookies")}</MoreRow>
+            </Link>
+          </li>
           <li>
             <button type="button" onClick={() => setDialog("contact")}>
               <MoreRow icon="mail">{t("footer.contact")}</MoreRow>

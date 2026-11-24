@@ -15,12 +15,19 @@ vi.mock("react-dom/server", () => ({
 
 const { default: handleRequest } = await import("../app/entry.server");
 
-const BROWSER = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36";
+const BROWSER =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36";
 const BOT = "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)";
 
 function context(): RouterContextProvider {
   const context = new RouterContextProvider();
-  context.set(appContext, { env: {} as AppEnv, nonce: "test", responseHeaders: new Headers(), requestId: "test-request", locale: "en" });
+  context.set(appContext, {
+    env: {} as AppEnv,
+    nonce: "test",
+    responseHeaders: new Headers(),
+    requestId: "test-request",
+    locale: "en",
+  });
   return context;
 }
 
@@ -29,10 +36,12 @@ type Outcome = { settled: boolean; response: Promise<Response> };
 async function render(userAgent: string, isSpaMode = false): Promise<Outcome> {
   const request = new Request("https://app.example/", { headers: { "User-Agent": userAgent } });
   const outcome: Outcome = { settled: false, response: Promise.resolve(new Response()) };
-  outcome.response = handleRequest(request, 200, new Headers(), { isSpaMode } as EntryContext, context()).then((response: Response): Response => {
-    outcome.settled = true;
-    return response;
-  });
+  outcome.response = handleRequest(request, 200, new Headers(), { isSpaMode } as EntryContext, context()).then(
+    (response: Response): Response => {
+      outcome.settled = true;
+      return response;
+    },
+  );
   // Let every step before the wait for the complete render run.
   await new Promise((resolve): void => {
     setTimeout(resolve, 0);
@@ -49,6 +58,7 @@ describe("server rendering", () => {
     const response = await outcome.response;
     expect(response.headers.get("Content-Type")).toBe("text/html; charset=utf-8");
     expect(response.headers.get("Content-Language")).toBe("en");
+    expect(response.headers.get("Cache-Control")).toBe("no-store, no-transform");
   });
 
   it("returns the document headers and no body for HEAD", async () => {
@@ -56,6 +66,7 @@ describe("server rendering", () => {
     const response = await handleRequest(request, 200, new Headers(), {} as EntryContext, context());
     expect(response.headers.get("Content-Type")).toBe("text/html; charset=utf-8");
     expect(response.headers.get("Content-Language")).toBe("en");
+    expect(response.headers.get("Cache-Control")).toBe("no-store, no-transform");
     expect(response.body).toBeNull();
   });
 

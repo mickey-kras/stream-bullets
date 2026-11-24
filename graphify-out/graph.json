@@ -4761,7 +4761,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L426",
+      "source_location": "L431",
       "target": "app_components_channels_channel_panel_channelproblem",
       "weight": 1.0
     },
@@ -4773,7 +4773,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L430",
+      "source_location": "L435",
       "target": "app_components_overlay_wasteland_glyphs_platformicon",
       "weight": 1.0
     },
@@ -4785,7 +4785,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L433",
+      "source_location": "L438",
       "target": "app_components_channels_channel_panel_healthmark",
       "weight": 1.0
     },
@@ -4797,7 +4797,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L433",
+      "source_location": "L438",
       "target": "app_lib_channel_health_channelhealth_40cffcc64880",
       "weight": 1.0
     },
@@ -4809,7 +4809,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L437",
+      "source_location": "L442",
       "target": "app_components_channels_channel_panel_lastevent",
       "weight": 1.0
     },
@@ -4821,7 +4821,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L440",
+      "source_location": "L445",
       "target": "app_components_channels_channel_panel_problemrole",
       "weight": 1.0
     },
@@ -4833,7 +4833,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L441",
+      "source_location": "L446",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -4845,7 +4845,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L496",
+      "source_location": "L501",
       "target": "app_components_shell_sign_in_dialog_reauthenticate",
       "weight": 1.0
     },
@@ -4857,7 +4857,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L499",
+      "source_location": "L504",
       "target": "app_components_channels_channel_panel_rememberintent",
       "weight": 1.0
     },
@@ -4869,7 +4869,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L518",
+      "source_location": "L523",
       "target": "app_components_ui_dialog_dialog",
       "weight": 1.0
     },
@@ -4881,7 +4881,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L527",
+      "source_location": "L532",
       "target": "app_components_ui_dialog_dialogactions",
       "weight": 1.0
     },
@@ -4893,7 +4893,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L532",
+      "source_location": "L537",
       "target": "app_components_channels_channel_panel_channelpanel_disconnect",
       "weight": 1.0
     },
@@ -18201,7 +18201,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L117",
+      "source_location": "L118",
       "target": "app_components_shell_contact_dialog_contactdialog",
       "weight": 1.0
     },
@@ -18213,7 +18213,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L118",
+      "source_location": "L119",
       "target": "app_components_ui_sheet_sheet",
       "weight": 1.0
     },
@@ -18225,7 +18225,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L128",
+      "source_location": "L129",
       "target": "app_components_shell_footer_morerow",
       "weight": 1.0
     },
@@ -18261,7 +18261,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L74",
+      "source_location": "L75",
       "target": "app_components_shell_dialog_link_dialoglink",
       "weight": 1.0
     },
@@ -18273,7 +18273,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L76",
+      "source_location": "L77",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -27093,7 +27093,7 @@
       "relation": "calls",
       "source": "app_entry_server_handlerequest",
       "source_file": "app/entry.server.tsx",
-      "source_location": "L37",
+      "source_location": "L39",
       "target": "app_i18n_server_withlocale",
       "weight": 1.0
     },
@@ -27105,7 +27105,7 @@
       "relation": "calls",
       "source": "app_entry_server_handlerequest",
       "source_file": "app/entry.server.tsx",
-      "source_location": "L39",
+      "source_location": "L41",
       "target": "app_lib_nonce_noncecontext",
       "weight": 1.0
     },
@@ -27117,7 +27117,7 @@
       "relation": "calls",
       "source": "app_entry_server_handlerequest",
       "source_file": "app/entry.server.tsx",
-      "source_location": "L46",
+      "source_location": "L48",
       "target": "app_server_http_server_logerror",
       "weight": 1.0
     },
@@ -27129,7 +27129,7 @@
       "relation": "calls",
       "source": "app_entry_server_handlerequest",
       "source_file": "app/entry.server.tsx",
-      "source_location": "L46",
+      "source_location": "L48",
       "target": "app_server_route_errors_server_requestid",
       "weight": 1.0
     },
@@ -28367,6 +28367,18 @@
       "source_file": "app/lib/comment-markdown.ts",
       "source_location": "L111",
       "target": "app_lib_comment_markdown_labeltext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_conversions_trackcta",
+      "source_file": "app/lib/conversions.ts",
+      "source_location": "L36",
+      "target": "app_lib_conversions_clickmeasurementallowed",
       "weight": 1.0
     },
     {
@@ -30573,7 +30585,7 @@
       "relation": "calls",
       "source": "app_lib_prefs_savelocalecookie",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L75",
+      "source_location": "L74",
       "target": "app_lib_prefs_setpreferencecookie",
       "weight": 1.0
     },
@@ -30585,7 +30597,7 @@
       "relation": "calls",
       "source": "app_lib_prefs_saveprefscookie",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L68",
+      "source_location": "L67",
       "target": "app_lib_prefs_setpreferencecookie",
       "weight": 1.0
     },
@@ -30597,7 +30609,7 @@
       "relation": "calls",
       "source": "app_lib_prefs_setpreferencecookie",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L99",
+      "source_location": "L86",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -33175,9 +33187,93 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
-      "source": "app_routes_privacy_meta",
+      "source": "app_routes_privacy_clicksettings",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L37",
+      "target": "app_i18n_index_t",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_privacy_clicksettings",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L41",
+      "target": "app_i18n_index_getlocale",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_privacy_clicksettings",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L45",
+      "target": "app_routes_privacy_clicksettings_save",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_privacy_clicksettings_save",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L37",
+      "target": "app_i18n_index_t",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_privacy_loader",
       "source_file": "app/routes/privacy.tsx",
       "source_location": "L13",
+      "target": "app_server_legal_server_legalloader",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_privacy_loader",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L16",
+      "target": "app_legal_legalplaceholdersremain",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_privacy_loader",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L17",
+      "target": "app_lib_conversions_privacysignal",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_privacy_meta",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L59",
       "target": "app_lib_seo_canonicalmeta",
       "weight": 1.0
     },
@@ -33189,7 +33285,7 @@
       "relation": "calls",
       "source": "app_routes_privacy_privacy",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L581",
+      "source_location": "L648",
       "target": "app_components_common_legaldocument",
       "weight": 1.0
     },
@@ -33201,8 +33297,20 @@
       "relation": "calls",
       "source": "app_routes_privacy_privacy",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L590",
+      "source_location": "L659",
       "target": "app_routes_privacy_sections",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_privacy_sections",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L533",
+      "target": "app_routes_privacy_clicksettings",
       "weight": 1.0
     },
     {
@@ -55977,7 +56085,7 @@
       "relation": "calls",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L346",
+      "source_location": "L351",
       "target": "tests_e2e_i18n_spec_phoneproblems",
       "weight": 1.0
     },
@@ -55989,7 +56097,7 @@
       "relation": "calls",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L347",
+      "source_location": "L352",
       "target": "tests_e2e_i18n_spec_shot",
       "weight": 1.0
     },
@@ -57897,7 +58005,7 @@
       "relation": "calls",
       "source": "tests_legal_test",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L118",
+      "source_location": "L119",
       "target": "tests_legal_test_legalcontext",
       "weight": 1.0
     },
@@ -57921,7 +58029,7 @@
       "relation": "calls",
       "source": "tests_legal_test",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L84",
+      "source_location": "L85",
       "target": "tests_legal_test_loaddetails",
       "weight": 1.0
     },
@@ -57933,7 +58041,7 @@
       "relation": "calls",
       "source": "tests_legal_test_loaddetails",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L77",
+      "source_location": "L78",
       "target": "tests_legal_test_legalcontext",
       "weight": 1.0
     },
@@ -57945,7 +58053,7 @@
       "relation": "calls",
       "source": "tests_legal_test_loaddetails",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L79",
+      "source_location": "L80",
       "target": "app_server_legal_server_legalloader",
       "weight": 1.0
     },
@@ -60861,7 +60969,7 @@
       "relation": "calls",
       "source": "tests_server_streaming_test",
       "source_file": "tests/server-streaming.test.ts",
-      "source_location": "L43",
+      "source_location": "L52",
       "target": "tests_server_streaming_test_finish",
       "weight": 1.0
     },
@@ -60873,7 +60981,7 @@
       "relation": "calls",
       "source": "tests_server_streaming_test",
       "source_file": "tests/server-streaming.test.ts",
-      "source_location": "L47",
+      "source_location": "L56",
       "target": "tests_server_streaming_test_render",
       "weight": 1.0
     },
@@ -60885,7 +60993,7 @@
       "relation": "calls",
       "source": "tests_server_streaming_test",
       "source_file": "tests/server-streaming.test.ts",
-      "source_location": "L56",
+      "source_location": "L66",
       "target": "tests_server_streaming_test_context",
       "weight": 1.0
     },
@@ -60897,7 +61005,7 @@
       "relation": "calls",
       "source": "tests_server_streaming_test_render",
       "source_file": "tests/server-streaming.test.ts",
-      "source_location": "L32",
+      "source_location": "L39",
       "target": "tests_server_streaming_test_context",
       "weight": 1.0
     },
@@ -62482,18 +62590,6 @@
       "confidence_score": 1.0,
       "context": "export",
       "relation": "re_exports",
-      "source": "app_routes_privacy",
-      "source_file": "app/routes/privacy.tsx",
-      "source_location": "L9",
-      "target": "app_server_legal_server",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "export",
-      "relation": "re_exports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L2",
@@ -63756,7 +63852,7 @@
       "relation": "references",
       "source": "app_lib_prefs_window",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L57",
+      "source_location": "L56",
       "target": "app_types_displayprefs",
       "weight": 1.0
     },
@@ -68179,6 +68275,18 @@
       "source_file": "app/components/channels/channel-panel.tsx",
       "source_location": "L11",
       "target": "app_components_ui_toast_usetoast",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_channels_channel_panel",
+      "source_file": "app/components/channels/channel-panel.tsx",
+      "source_location": "L12",
+      "target": "app_lib_shell_paths",
       "weight": 1.0
     },
     {
@@ -85590,18 +85698,6 @@
       "source": "app_lib_prefs",
       "source_file": "app/lib/prefs.ts",
       "source_location": "L2",
-      "target": "app_i18n_resolve_locale_cookie",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_lib_prefs",
-      "source_file": "app/lib/prefs.ts",
-      "source_location": "L3",
       "target": "app_types_displayprefs",
       "weight": 1.0
     },
@@ -88289,8 +88385,8 @@
       "relation": "imports",
       "source": "app_routes_privacy",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L4",
-      "target": "app_components_common_legaldocument",
+      "source_location": "L10",
+      "target": "app_server_legal_server_legalloader",
       "weight": 1.0
     },
     {
@@ -88302,7 +88398,31 @@
       "source": "app_routes_privacy",
       "source_file": "app/routes/privacy.tsx",
       "source_location": "L4",
-      "target": "app_components_common_legalsection",
+      "target": "app_lib_conversions_click_storage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_privacy",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L4",
+      "target": "app_lib_conversions_clickmeasurementallowed",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_privacy",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L4",
+      "target": "app_lib_conversions_privacysignal",
       "weight": 1.0
     },
     {
@@ -88314,31 +88434,7 @@
       "source": "app_routes_privacy",
       "source_file": "app/routes/privacy.tsx",
       "source_location": "L5",
-      "target": "app_legal_contactemails",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_routes_privacy",
-      "source_file": "app/routes/privacy.tsx",
-      "source_location": "L5",
-      "target": "app_legal_legal",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_routes_privacy",
-      "source_file": "app/routes/privacy.tsx",
-      "source_location": "L5",
-      "target": "app_legal_legaldetails",
+      "target": "app_signup_policy_signuppolicy",
       "weight": 1.0
     },
     {
@@ -88350,7 +88446,19 @@
       "source": "app_routes_privacy",
       "source_file": "app/routes/privacy.tsx",
       "source_location": "L6",
-      "target": "app_lib_shell_paths",
+      "target": "app_i18n_index_getlocale",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_privacy",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L6",
+      "target": "app_i18n_index_t",
       "weight": 1.0
     },
     {
@@ -88362,7 +88470,79 @@
       "source": "app_routes_privacy",
       "source_file": "app/routes/privacy.tsx",
       "source_location": "L7",
-      "target": "app_server_legal_server_legalloader",
+      "target": "app_components_common_legaldocument",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_privacy",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L7",
+      "target": "app_components_common_legalsection",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_privacy",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L8",
+      "target": "app_legal_contactemails",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_privacy",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L8",
+      "target": "app_legal_legal",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_privacy",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L8",
+      "target": "app_legal_legaldetails",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_privacy",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L8",
+      "target": "app_legal_legalplaceholdersremain",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_privacy",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L9",
+      "target": "app_lib_shell_paths",
       "weight": 1.0
     },
     {
@@ -91686,7 +91866,31 @@
       "source": "app_server_api_conversions",
       "source_file": "app/server/api/conversions.ts",
       "source_location": "L2",
+      "target": "app_lib_conversions_click_permission",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_api_conversions",
+      "source_file": "app/server/api/conversions.ts",
+      "source_location": "L2",
       "target": "app_lib_conversions_cta_events",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_api_conversions",
+      "source_file": "app/server/api/conversions.ts",
+      "source_location": "L2",
+      "target": "app_lib_conversions_privacysignal",
       "weight": 1.0
     },
     {
@@ -137338,18 +137542,6 @@
       "source": "app_lib_prefs",
       "source_file": "app/lib/prefs.ts",
       "source_location": "L2",
-      "target": "app_i18n_resolve",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports_from",
-      "source": "app_lib_prefs",
-      "source_file": "app/lib/prefs.ts",
-      "source_location": "L3",
       "target": "app_types",
       "type_only": true,
       "weight": 1.0
@@ -139402,9 +139594,20 @@
       "relation": "imports_from",
       "source": "app_routes_privacy",
       "source_file": "app/routes/privacy.tsx",
+      "source_location": "L10",
+      "target": "app_server_legal_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_routes_privacy",
+      "source_file": "app/routes/privacy.tsx",
       "source_location": "L2",
       "target": "ref_react",
-      "type_only": true,
       "weight": 1.0
     },
     {
@@ -139428,7 +139631,7 @@
       "source": "app_routes_privacy",
       "source_file": "app/routes/privacy.tsx",
       "source_location": "L4",
-      "target": "app_components_common",
+      "target": "app_lib_conversions",
       "weight": 1.0
     },
     {
@@ -139440,7 +139643,7 @@
       "source": "app_routes_privacy",
       "source_file": "app/routes/privacy.tsx",
       "source_location": "L5",
-      "target": "app_legal",
+      "target": "app_signup_policy",
       "weight": 1.0
     },
     {
@@ -139452,7 +139655,7 @@
       "source": "app_routes_privacy",
       "source_file": "app/routes/privacy.tsx",
       "source_location": "L6",
-      "target": "app_lib_shell",
+      "target": "app_i18n_index",
       "weight": 1.0
     },
     {
@@ -139464,7 +139667,31 @@
       "source": "app_routes_privacy",
       "source_file": "app/routes/privacy.tsx",
       "source_location": "L7",
-      "target": "app_server_legal_server",
+      "target": "app_components_common",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_routes_privacy",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L8",
+      "target": "app_legal",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_routes_privacy",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L9",
+      "target": "app_lib_shell",
       "weight": 1.0
     },
     {
@@ -176521,19 +176748,8 @@
       "relation": "contains",
       "source": "app_lib_conversions",
       "source_file": "app/lib/conversions.ts",
-      "source_location": "L10",
-      "target": "app_lib_conversions_ctaevent",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_conversions",
-      "source_file": "app/lib/conversions.ts",
-      "source_location": "L13",
-      "target": "app_lib_conversions_trackcta",
+      "source_location": "L1",
+      "target": "app_lib_conversions_click_storage",
       "weight": 1.0
     },
     {
@@ -176544,7 +176760,62 @@
       "source": "app_lib_conversions",
       "source_file": "app/lib/conversions.ts",
       "source_location": "L2",
+      "target": "app_lib_conversions_click_permission",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_conversions",
+      "source_file": "app/lib/conversions.ts",
+      "source_location": "L24",
       "target": "app_lib_conversions_cta_events",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_conversions",
+      "source_file": "app/lib/conversions.ts",
+      "source_location": "L32",
+      "target": "app_lib_conversions_ctaevent",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_conversions",
+      "source_file": "app/lib/conversions.ts",
+      "source_location": "L35",
+      "target": "app_lib_conversions_trackcta",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_conversions",
+      "source_file": "app/lib/conversions.ts",
+      "source_location": "L4",
+      "target": "app_lib_conversions_privacysignal",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_conversions",
+      "source_file": "app/lib/conversions.ts",
+      "source_location": "L8",
+      "target": "app_lib_conversions_clickmeasurementallowed",
       "weight": 1.0
     },
     {
@@ -180360,40 +180631,7 @@
       "relation": "contains",
       "source": "app_lib_prefs",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L104",
-      "target": "app_lib_prefs_listeners",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_prefs",
-      "source_file": "app/lib/prefs.ts",
-      "source_location": "L106",
-      "target": "app_lib_prefs_setchangedprefs",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_prefs",
-      "source_file": "app/lib/prefs.ts",
-      "source_location": "L111",
-      "target": "app_lib_prefs_subscribeprefs",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_prefs",
-      "source_file": "app/lib/prefs.ts",
-      "source_location": "L118",
+      "source_location": "L105",
       "target": "app_lib_prefs_changedprefs",
       "weight": 1.0
     },
@@ -180404,7 +180642,7 @@
       "relation": "contains",
       "source": "app_lib_prefs",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L20",
+      "source_location": "L19",
       "target": "app_lib_prefs_withdefaults",
       "weight": 1.0
     },
@@ -180415,7 +180653,7 @@
       "relation": "contains",
       "source": "app_lib_prefs",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L26",
+      "source_location": "L25",
       "target": "app_lib_prefs_prefs_script",
       "weight": 1.0
     },
@@ -180426,18 +180664,7 @@
       "relation": "contains",
       "source": "app_lib_prefs",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L56",
-      "target": "app_lib_prefs_window",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_prefs",
-      "source_file": "app/lib/prefs.ts",
-      "source_location": "L6",
+      "source_location": "L5",
       "target": "app_lib_prefs_prefs_cookie",
       "weight": 1.0
     },
@@ -180448,7 +180675,18 @@
       "relation": "contains",
       "source": "app_lib_prefs",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L61",
+      "source_location": "L55",
+      "target": "app_lib_prefs_window",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_prefs",
+      "source_file": "app/lib/prefs.ts",
+      "source_location": "L60",
       "target": "app_lib_prefs_applyprefs",
       "weight": 1.0
     },
@@ -180459,7 +180697,7 @@
       "relation": "contains",
       "source": "app_lib_prefs",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L66",
+      "source_location": "L65",
       "target": "app_lib_prefs_saveprefscookie",
       "weight": 1.0
     },
@@ -180470,18 +180708,7 @@
       "relation": "contains",
       "source": "app_lib_prefs",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L74",
-      "target": "app_lib_prefs_savelocalecookie",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_prefs",
-      "source_file": "app/lib/prefs.ts",
-      "source_location": "L8",
+      "source_location": "L7",
       "target": "app_lib_prefs_default_prefs",
       "weight": 1.0
     },
@@ -180492,8 +180719,52 @@
       "relation": "contains",
       "source": "app_lib_prefs",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L80",
+      "source_location": "L73",
+      "target": "app_lib_prefs_savelocalecookie",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_prefs",
+      "source_file": "app/lib/prefs.ts",
+      "source_location": "L78",
       "target": "app_lib_prefs_setpreferencecookie",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_prefs",
+      "source_file": "app/lib/prefs.ts",
+      "source_location": "L91",
+      "target": "app_lib_prefs_listeners",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_prefs",
+      "source_file": "app/lib/prefs.ts",
+      "source_location": "L93",
+      "target": "app_lib_prefs_setchangedprefs",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_prefs",
+      "source_file": "app/lib/prefs.ts",
+      "source_location": "L98",
+      "target": "app_lib_prefs_subscribeprefs",
       "weight": 1.0
     },
     {
@@ -180833,7 +181104,7 @@
       "relation": "contains",
       "source": "app_lib_shell",
       "source_file": "app/lib/shell.ts",
-      "source_location": "L67",
+      "source_location": "L68",
       "target": "app_lib_shell_localpath",
       "weight": 1.0
     },
@@ -180855,7 +181126,7 @@
       "relation": "contains",
       "source": "app_lib_shell",
       "source_file": "app/lib/shell.ts",
-      "source_location": "L82",
+      "source_location": "L83",
       "target": "app_lib_shell_renamedpath",
       "weight": 1.0
     },
@@ -182186,7 +182457,40 @@
       "relation": "contains",
       "source": "app_routes_privacy",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L11",
+      "source_location": "L12",
+      "target": "app_routes_privacy_loader",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_routes_privacy",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L21",
+      "target": "app_routes_privacy_subscribetoclickchoice",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_routes_privacy",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L26",
+      "target": "app_routes_privacy_clicksettings",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_routes_privacy",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L57",
       "target": "app_routes_privacy_meta",
       "weight": 1.0
     },
@@ -182197,18 +182501,7 @@
       "relation": "contains",
       "source": "app_routes_privacy",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L22",
-      "target": "app_routes_privacy_sections",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_routes_privacy",
-      "source_file": "app/routes/privacy.tsx",
-      "source_location": "L578",
+      "source_location": "L645",
       "target": "app_routes_privacy_privacy",
       "weight": 1.0
     },
@@ -182219,8 +182512,19 @@
       "relation": "contains",
       "source": "app_routes_privacy",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L9",
-      "target": "app_routes_privacy_loader",
+      "source_location": "L68",
+      "target": "app_routes_privacy_sections",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_routes_privacy_clicksettings",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L29",
+      "target": "app_routes_privacy_clicksettings_save",
       "weight": 1.0
     },
     {
@@ -183913,8 +184217,8 @@
       "relation": "contains",
       "source": "app_server_api_conversions",
       "source_file": "app/server/api/conversions.ts",
-      "source_location": "L6",
-      "target": "app_server_api_conversions_clickschema",
+      "source_location": "L13",
+      "target": "app_server_api_conversions_conversionroutes",
       "weight": 1.0
     },
     {
@@ -183924,8 +184228,8 @@
       "relation": "contains",
       "source": "app_server_api_conversions",
       "source_file": "app/server/api/conversions.ts",
-      "source_location": "L9",
-      "target": "app_server_api_conversions_conversionroutes",
+      "source_location": "L6",
+      "target": "app_server_api_conversions_clickschema",
       "weight": 1.0
     },
     {
@@ -183957,7 +184261,7 @@
       "relation": "contains",
       "source": "app_server_api_cookies",
       "source_file": "app/server/api/cookies.ts",
-      "source_location": "L28",
+      "source_location": "L27",
       "target": "app_server_api_cookies_cookieroutes",
       "weight": 1.0
     },
@@ -197157,17 +197461,6 @@
       "relation": "contains",
       "source": "docs_conversion_audit_conversion_and_mobile_audit",
       "source_file": "docs/conversion-audit.md",
-      "source_location": "L47",
-      "target": "docs_conversion_audit_read_totals",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "docs_conversion_audit_conversion_and_mobile_audit",
-      "source_file": "docs/conversion-audit.md",
       "source_location": "L5",
       "target": "docs_conversion_audit_existing_analytics",
       "weight": 1.0
@@ -197179,7 +197472,29 @@
       "relation": "contains",
       "source": "docs_conversion_audit_conversion_and_mobile_audit",
       "source_file": "docs/conversion-audit.md",
-      "source_location": "L59",
+      "source_location": "L50",
+      "target": "docs_conversion_audit_production_privacy_checks",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_conversion_audit_conversion_and_mobile_audit",
+      "source_file": "docs/conversion-audit.md",
+      "source_location": "L60",
+      "target": "docs_conversion_audit_read_totals",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_conversion_audit_conversion_and_mobile_audit",
+      "source_file": "docs/conversion-audit.md",
+      "source_location": "L72",
       "target": "docs_conversion_audit_mobile_evidence",
       "weight": 1.0
     },
@@ -203911,7 +204226,7 @@
       "relation": "contains",
       "source": "tests_legal_test",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L60",
+      "source_location": "L61",
       "target": "tests_legal_test_publicdetails",
       "weight": 1.0
     },
@@ -203922,7 +204237,7 @@
       "relation": "contains",
       "source": "tests_legal_test",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L66",
+      "source_location": "L67",
       "target": "tests_legal_test_legalcontext",
       "weight": 1.0
     },
@@ -203933,7 +204248,7 @@
       "relation": "contains",
       "source": "tests_legal_test",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L76",
+      "source_location": "L77",
       "target": "tests_legal_test_loaddetails",
       "weight": 1.0
     },
@@ -206573,7 +206888,7 @@
       "relation": "contains",
       "source": "tests_server_streaming_test",
       "source_file": "tests/server-streaming.test.ts",
-      "source_location": "L21",
+      "source_location": "L22",
       "target": "tests_server_streaming_test_context",
       "weight": 1.0
     },
@@ -206584,7 +206899,7 @@
       "relation": "contains",
       "source": "tests_server_streaming_test",
       "source_file": "tests/server-streaming.test.ts",
-      "source_location": "L27",
+      "source_location": "L34",
       "target": "tests_server_streaming_test_outcome",
       "weight": 1.0
     },
@@ -206595,7 +206910,7 @@
       "relation": "contains",
       "source": "tests_server_streaming_test",
       "source_file": "tests/server-streaming.test.ts",
-      "source_location": "L29",
+      "source_location": "L36",
       "target": "tests_server_streaming_test_render",
       "weight": 1.0
     },
@@ -211739,6 +212054,30 @@
       "confidence_score": 0.85,
       "context": "argument",
       "relation": "indirect_call",
+      "source": "app_routes_privacy_clicksettings",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L27",
+      "target": "app_lib_conversions_clickmeasurementallowed",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
+      "source": "app_routes_privacy_clicksettings",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L27",
+      "target": "app_routes_privacy_subscribetoclickchoice",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
       "source": "app_server_comments_server_listcomments",
       "source_file": "app/server/comments.server.ts",
       "source_location": "L132",
@@ -214093,7 +214432,7 @@
       "relation": "indirect_call",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L303",
+      "source_location": "L308",
       "target": "tests_e2e_i18n_spec_headeraction",
       "weight": 1.0
     },
@@ -214189,7 +214528,7 @@
       "relation": "indirect_call",
       "source": "tests_legal_test",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L51",
+      "source_location": "L52",
       "target": "app_routes_privacy_privacy",
       "weight": 1.0
     },
@@ -214201,7 +214540,7 @@
       "relation": "indirect_call",
       "source": "tests_legal_test",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L51",
+      "source_location": "L52",
       "target": "app_routes_terms_terms",
       "weight": 1.0
     },
@@ -217491,7 +217830,7 @@
       "label": "CtaEvent",
       "norm_label": "ctaevent",
       "source_file": "app/lib/conversions.ts",
-      "source_location": "L10"
+      "source_location": "L32"
     },
     {
       "_callable": true,
@@ -218283,7 +218622,7 @@
       "label": "Window",
       "norm_label": "window",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L56"
+      "source_location": "L55"
     },
     {
       "_callable": true,
@@ -222243,7 +222582,7 @@
       "label": "Outcome",
       "norm_label": "outcome",
       "source_file": "tests/server-streaming.test.ts",
-      "source_location": "L27"
+      "source_location": "L34"
     },
     {
       "_callable": true,
@@ -234701,11 +235040,33 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_lib_conversions_clickmeasurementallowed",
+      "label": "clickMeasurementAllowed()",
+      "norm_label": "clickmeasurementallowed()",
+      "source_file": "app/lib/conversions.ts",
+      "source_location": "L8"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_conversions_privacysignal",
+      "label": "privacySignal()",
+      "norm_label": "privacysignal()",
+      "source_file": "app/lib/conversions.ts",
+      "source_location": "L4"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_lib_conversions_trackcta",
       "label": "trackCta()",
       "norm_label": "trackcta()",
       "source_file": "app/lib/conversions.ts",
-      "source_location": "L13"
+      "source_location": "L35"
     },
     {
       "_callable": true,
@@ -236762,7 +237123,7 @@
       "label": "applyPrefs()",
       "norm_label": "applyprefs()",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L61"
+      "source_location": "L60"
     },
     {
       "_callable": true,
@@ -236773,7 +237134,7 @@
       "label": "changedPrefs()",
       "norm_label": "changedprefs()",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L118"
+      "source_location": "L105"
     },
     {
       "_callable": true,
@@ -236784,7 +237145,7 @@
       "label": "saveLocaleCookie()",
       "norm_label": "savelocalecookie()",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L74"
+      "source_location": "L73"
     },
     {
       "_callable": true,
@@ -236795,7 +237156,7 @@
       "label": "savePrefsCookie()",
       "norm_label": "saveprefscookie()",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L66"
+      "source_location": "L65"
     },
     {
       "_callable": true,
@@ -236806,7 +237167,7 @@
       "label": "setChangedPrefs()",
       "norm_label": "setchangedprefs()",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L106"
+      "source_location": "L93"
     },
     {
       "_callable": true,
@@ -236817,7 +237178,7 @@
       "label": "setPreferenceCookie()",
       "norm_label": "setpreferencecookie()",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L80"
+      "source_location": "L78"
     },
     {
       "_callable": true,
@@ -236828,7 +237189,7 @@
       "label": "subscribePrefs()",
       "norm_label": "subscribeprefs()",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L111"
+      "source_location": "L98"
     },
     {
       "_callable": true,
@@ -236839,7 +237200,7 @@
       "label": "withDefaults()",
       "norm_label": "withdefaults()",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L20"
+      "source_location": "L19"
     },
     {
       "_callable": true,
@@ -237143,7 +237504,7 @@
       "label": "localPath()",
       "norm_label": "localpath()",
       "source_file": "app/lib/shell.ts",
-      "source_location": "L67"
+      "source_location": "L68"
     },
     {
       "_callable": true,
@@ -237154,7 +237515,7 @@
       "label": "renamedPath()",
       "norm_label": "renamedpath()",
       "source_file": "app/lib/shell.ts",
-      "source_location": "L82"
+      "source_location": "L83"
     },
     {
       "_callable": true,
@@ -238096,11 +238457,44 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_routes_privacy_clicksettings",
+      "label": "ClickSettings()",
+      "norm_label": "clicksettings()",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L26"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_routes_privacy_clicksettings_save",
+      "label": "save()",
+      "norm_label": "save()",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L29"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_routes_privacy_loader",
+      "label": "loader()",
+      "norm_label": "loader()",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L12"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_routes_privacy_meta",
       "label": "meta()",
       "norm_label": "meta()",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L11"
+      "source_location": "L57"
     },
     {
       "_callable": true,
@@ -238111,7 +238505,7 @@
       "label": "Privacy()",
       "norm_label": "privacy()",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L578"
+      "source_location": "L645"
     },
     {
       "_callable": true,
@@ -238122,7 +238516,18 @@
       "label": "sections()",
       "norm_label": "sections()",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L22"
+      "source_location": "L68"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_routes_privacy_subscribetoclickchoice",
+      "label": "subscribeToClickChoice()",
+      "norm_label": "subscribetoclickchoice()",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L21"
     },
     {
       "_callable": true,
@@ -252323,14 +252728,14 @@
             "callee": "set",
             "file": "tests/legal.test.ts",
             "lang": "typescript",
-            "line": "L68",
+            "line": "L69",
             "receiver_type": "RouterContextProvider"
           }
         ]
       },
       "norm_label": "legalcontext()",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L66"
+      "source_location": "L67"
     },
     {
       "_callable": true,
@@ -252341,7 +252746,7 @@
       "label": "loadDetails()",
       "norm_label": "loaddetails()",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L76"
+      "source_location": "L77"
     },
     {
       "_callable": true,
@@ -254369,14 +254774,14 @@
             "callee": "set",
             "file": "tests/server-streaming.test.ts",
             "lang": "typescript",
-            "line": "L23",
+            "line": "L24",
             "receiver_type": "RouterContextProvider"
           }
         ]
       },
       "norm_label": "context()",
       "source_file": "tests/server-streaming.test.ts",
-      "source_location": "L21"
+      "source_location": "L22"
     },
     {
       "_callable": true,
@@ -254398,7 +254803,7 @@
       "label": "render()",
       "norm_label": "render()",
       "source_file": "tests/server-streaming.test.ts",
-      "source_location": "L29"
+      "source_location": "L36"
     },
     {
       "_callable": true,
@@ -259003,11 +259408,31 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_lib_conversions_click_permission",
+      "label": "CLICK_PERMISSION",
+      "norm_label": "click_permission",
+      "source_file": "app/lib/conversions.ts",
+      "source_location": "L2"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_conversions_click_storage",
+      "label": "CLICK_STORAGE",
+      "norm_label": "click_storage",
+      "source_file": "app/lib/conversions.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_lib_conversions_cta_events",
       "label": "CTA_EVENTS",
       "norm_label": "cta_events",
       "source_file": "app/lib/conversions.ts",
-      "source_location": "L2"
+      "source_location": "L24"
     },
     {
       "_origin": "ast",
@@ -260667,7 +261092,7 @@
       "label": "DEFAULT_PREFS",
       "norm_label": "default_prefs",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L8"
+      "source_location": "L7"
     },
     {
       "_origin": "ast",
@@ -260677,7 +261102,7 @@
       "label": "listeners",
       "norm_label": "listeners",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L104"
+      "source_location": "L91"
     },
     {
       "_origin": "ast",
@@ -260687,7 +261112,7 @@
       "label": "PREFS_COOKIE",
       "norm_label": "prefs_cookie",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L6"
+      "source_location": "L5"
     },
     {
       "_origin": "ast",
@@ -260697,7 +261122,7 @@
       "label": "PREFS_SCRIPT",
       "norm_label": "prefs_script",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L26"
+      "source_location": "L25"
     },
     {
       "_origin": "ast",
@@ -261313,16 +261738,6 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
-      "id": "app_routes_privacy_loader",
-      "label": "loader",
-      "norm_label": "loader",
-      "source_file": "app/routes/privacy.tsx",
-      "source_location": "L9"
-    },
-    {
-      "_origin": "ast",
-      "community": null,
-      "file_type": "code",
       "id": "app_routes_settings",
       "label": "settings.tsx",
       "norm_label": "settings.tsx",
@@ -261647,7 +262062,7 @@
       "label": "conversionRoutes",
       "norm_label": "conversionroutes",
       "source_file": "app/server/api/conversions.ts",
-      "source_location": "L9"
+      "source_location": "L13"
     },
     {
       "_origin": "ast",
@@ -261667,7 +262082,7 @@
       "label": "cookieRoutes",
       "norm_label": "cookieroutes",
       "source_file": "app/server/api/cookies.ts",
-      "source_location": "L28"
+      "source_location": "L27"
     },
     {
       "_origin": "ast",
@@ -268981,7 +269396,7 @@
       "label": "publicDetails",
       "norm_label": "publicdetails",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L60"
+      "source_location": "L61"
     },
     {
       "_origin": "ast",
@@ -271425,7 +271840,18 @@
       "node_kind": "heading",
       "norm_label": "mobile evidence",
       "source_file": "docs/conversion-audit.md",
-      "source_location": "L59"
+      "source_location": "L72"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_conversion_audit_production_privacy_checks",
+      "label": "Production privacy checks",
+      "node_kind": "heading",
+      "norm_label": "production privacy checks",
+      "source_file": "docs/conversion-audit.md",
+      "source_location": "L50"
     },
     {
       "_origin": "ast",
@@ -271436,7 +271862,7 @@
       "node_kind": "heading",
       "norm_label": "read totals",
       "source_file": "docs/conversion-audit.md",
-      "source_location": "L47"
+      "source_location": "L60"
     },
     {
       "_origin": "ast",

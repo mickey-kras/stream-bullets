@@ -97,7 +97,23 @@ describe("anonymous conversion totals", () => {
   });
 
   it("accepts only anonymous CTA labels and deduplicates receipt IDs", async () => {
-    const body = { id: crypto.randomUUID(), event: "cta_browse" };
+    const event = { id: crypto.randomUUID(), event: "cta_browse" };
+    expect(await (await call("POST", "conversions", { body: event })).json()).toEqual({ counted: false });
+    const body = { ...event, permission: "v1" };
+    for (const signal of ["DNT", "Sec-GPC"]) {
+      const request = new Request("https://example.test/api/conversions", {
+        method: "POST",
+        headers: { Origin: env.APP_ORIGIN, "Content-Type": "application/json", [signal]: "1" },
+        body: JSON.stringify(body),
+      });
+      const response = await dispatch(
+        conversionRoutes,
+        request,
+        { env, nonce: "test", responseHeaders: new Headers() },
+        "conversions",
+      );
+      expect(await response.json()).toEqual({ counted: false });
+    }
     const responses = await Promise.all([call("POST", "conversions", { body }), call("POST", "conversions", { body })]);
     expect(responses.map((response) => response.status)).toEqual([200, 200]);
     const results: { counted: boolean }[] = await Promise.all(
@@ -143,6 +159,20 @@ it("sends only a fixed label and fresh receipt, and never blocks navigation on f
   const warning = vi.spyOn(console, "warn").mockImplementation(() => undefined);
   vi.stubGlobal("fetch", fetch);
   try {
+    vi.stubGlobal("localStorage", { getItem: () => null });
+    trackCta("cta_browse");
+    expect(fetch).not.toHaveBeenCalled();
+    vi.stubGlobal("localStorage", { getItem: () => String(Date.now() - 1) });
+    trackCta("cta_browse");
+    expect(fetch).not.toHaveBeenCalled();
+    vi.stubGlobal("localStorage", { getItem: () => String(Date.now() + 60_000) });
+    vi.stubGlobal("navigator", { globalPrivacyControl: true });
+    trackCta("cta_browse");
+    expect(fetch).not.toHaveBeenCalled();
+    vi.stubGlobal("navigator", { doNotTrack: "1" });
+    trackCta("cta_browse");
+    expect(fetch).not.toHaveBeenCalled();
+    vi.stubGlobal("navigator", {});
     trackCta("cta_browse");
     trackCta("cta_browse");
     expect(fetch).toHaveBeenCalledTimes(2);
@@ -151,7 +181,7 @@ it("sends only a fixed label and fresh receipt, and never blocks navigation on f
     expect(first[1]).toMatchObject({ credentials: "omit", referrerPolicy: "no-referrer", keepalive: true });
     const one = JSON.parse(first[1]!.body as string) as { event: string; id: string };
     const two = JSON.parse(fetch.mock.calls[1][1]!.body as string) as { event: string; id: string };
-    expect(Object.keys(one)).toEqual(["event", "id"]);
+    expect(Object.keys(one)).toEqual(["event", "id", "permission"]);
     expect(one.event).toBe("cta_browse");
     expect(one.id).not.toBe(two.id);
     fetch.mockResolvedValueOnce(new Response(null, { status: 503 }));

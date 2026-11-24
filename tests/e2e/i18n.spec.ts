@@ -269,7 +269,12 @@ const phoneScreens: { role: string | null; ip: number; screens: PhoneScreen[] }[
         path: "/streamers",
         open: async (page) => {
           await page.locator(".footer-compact .footer-link").click();
-          await page.locator(".more-list li").first().getByRole("button").click();
+          const menu = page.getByRole("dialog");
+          await expect(menu.getByRole("link", { name: /^(Cookies|Файлы cookie)$/ })).toHaveAttribute(
+            "href",
+            "/privacy#cookies",
+          );
+          await menu.getByRole("button", { name: /^(Kontakt|Контакты)$/ }).click();
         },
       },
     ],
