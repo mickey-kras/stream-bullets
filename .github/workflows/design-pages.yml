@@ -1,0 +1,65 @@
+name: Design system site
+
+# Publishes design/ to GitHub Pages. design/build.ts writes the site to design/site/ and the style sheet and
+# bundles it loads to design/components/. The site also loads design/assets/ and design/fonts/.
+on:
+  push:
+    branches: [main]
+    paths:
+      - design/**
+      - app/styles.css
+      - app/styles/**
+      - app/components/**
+      - public/fonts.css
+      - package.json
+      - pnpm-lock.yaml
+      - .github/workflows/design-pages.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: design-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: node design/build.ts
+      - name: Open the site at the root URL
+        run: printf '<!doctype html><meta http-equiv="refresh" content="0; url=site/"><a href="site/">Design system</a>\n' > design/index.html
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: design/
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}site/
+    steps:
+      - uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a
+        with:
+          egress-policy: audit
+      - id: deploy
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
