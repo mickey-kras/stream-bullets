@@ -27,7 +27,7 @@ Use it when you design or build an interface for the product.
 - `WebsiteKit/kit.js` and `ObsOverlayKit/kit.js` hold the UI kits.
 - `site/index.html` shows the full design system: this brand book, the tokens, a live preview of each part, and the assets. Open it in a browser. It works without a server.
 
-GitHub Pages shows the site at <https://mickey-kras.github.io/stream-bullets/site/>. The workflow `.github/workflows/design-pages.yml` builds and publishes it after each change to `main` that touches `design/` or the CSS and parts of the app.
+GitHub Pages shows the site at <https://mickey-kras.github.io/stream-bullets/design/>. The workflow `.github/workflows/design-pages.yml` builds and publishes it after each change to `main` that touches `design/` or the CSS and parts of the app.
 
 `node design/build.ts --claude` builds the files for the Claude design system. The images then use the upload addresses that `design-system.json` lists. The theme rules of the app also apply to the `data-theme` attribute that the Claude page sets.
 
