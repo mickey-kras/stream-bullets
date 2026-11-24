@@ -50,17 +50,29 @@ const themes: Record<string, string> = {
 };
 
 async function preview(design: string, name: string, blobs: Map<string, string>): Promise<string> {
-  let html: string = await readFile(`${design}components/${name}/preview.html`, "utf8");
-  html = html
-    .replace(/^<!--[^\n]*-->\n?/, "")
-    .replace(/<script src="https:\/\/unpkg\.com\/@babel\/standalone[^"]*"><\/script>\n?/, "");
-  for (const match of html.matchAll(/<script type="text\/babel">([\s\S]*?)<\/script>/g)) {
-    const { code } = await transform(match[1], { loader: "jsx", jsx: "transform" });
-    html = html.replace(match[0], () => `<script>${code}</script>`);
+  // The previews are files of this repository. Line 1 is the card comment, and the Claude page
+  // compiles <script type="text/babel"> with Babel at runtime: compile it here instead.
+  const lines: string[] = (await readFile(`${design}components/${name}/preview.html`, "utf8")).split("\n");
+  let html: string = lines
+    .slice(lines[0].startsWith("<!-- @dsCard") ? 1 : 0)
+    .filter((line: string) => !line.includes('src="https://unpkg.com/@babel/standalone@'))
+    .join("\n");
+  const [before, ...scripts] = html.split('<script type="text/babel">');
+  html = before;
+  for (const script of scripts) {
+    const end: number = script.indexOf("</script>");
+    if (end < 0) throw new Error(`Unclosed text/babel script in ${name}/preview.html`);
+    const { code } = await transform(script.slice(0, end), { loader: "jsx", jsx: "transform" });
+    html += `<script>${code}${script.slice(end)}`;
   }
   html = html
-    .replace(/(src|href)="\.\//g, `$1="../../components/${name}/`)
-    .replace(/\/_blob\/([0-9a-f]{32})/g, (_m: string, id: string) => `../../${blobs.get(id) ?? `missing-asset-${id}`}`);
+    .replaceAll('src="./', `src="../../components/${name}/`)
+    .replaceAll('href="./', `href="../../components/${name}/`)
+    .replace(/\/_blob\/([0-9a-f]{32})/g, (_m: string, id: string) => {
+      const path: string | undefined = blobs.get(id);
+      if (!path) throw new Error(`No file in design-system.json for the upload ${id} in ${name}/preview.html`);
+      return `../../${path}`;
+    });
   const head = `<link rel="stylesheet" href="../../components/bundle.css">
 <style>html,body{height:auto;min-height:100%;overflow:auto;display:block}</style>
 <script>{const t=new URLSearchParams(location.search).get("theme");const a={"high-contrast":["data-contrast","high"],"protan-deutan":["data-cvd","pd"],tritan:["data-cvd","tri"]}[t];if(a)document.documentElement.setAttribute(a[0],a[1]);else document.documentElement.setAttribute("data-contrast","default")}</script>
