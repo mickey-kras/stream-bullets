@@ -37,9 +37,7 @@ interface SourceRow {
 
 async function pictureBase(row: Pick<SourceRow, "streamer_id" | "image_url">): Promise<string> {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(row.image_url));
-  const hash = [...new Uint8Array(digest).slice(0, 16)]
-    .map((byte: number) => byte.toString(16).padStart(2, "0"))
-    .join("");
+  const hash = Array.from(new Uint8Array(digest, 0, 16), (byte: number) => byte.toString(16).padStart(2, "0")).join("");
   return `${PREFIX}${row.streamer_id}/${hash}`;
 }
 
