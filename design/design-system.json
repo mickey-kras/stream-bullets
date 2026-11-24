@@ -113,27 +113,34 @@
    "name": "Reference",
    "tile": "l",
    "order": [
-    "interface-preview-v4.jpg",
-    "poll-discussion-v5.jpg",
-    "reference-style-preview-v3.jpg"
+    "topic-board.jpg",
+    "polls.jpg",
+    "poll-discussion.jpg",
+    "landing.jpg"
    ],
    "files": {
-    "interface-preview-v4.jpg": {
-     "name": "interface-preview-v4.jpg",
-     "blob": "c432d20d15c4037540b6aa2cc86c30ec",
-     "size": 197031,
+    "topic-board.jpg": {
+     "name": "topic-board.jpg",
+     "blob": "",
+     "size": 196875,
      "type": "image/jpeg"
     },
-    "poll-discussion-v5.jpg": {
-     "name": "poll-discussion-v5.jpg",
-     "blob": "cbf7406990b1aa374f76f47f6bf58c20",
-     "size": 100466,
+    "polls.jpg": {
+     "name": "polls.jpg",
+     "blob": "",
+     "size": 85281,
      "type": "image/jpeg"
     },
-    "reference-style-preview-v3.jpg": {
-     "name": "reference-style-preview-v3.jpg",
-     "blob": "2bc74188404d3839af5df9ab58f9f0b9",
-     "size": 197638,
+    "poll-discussion.jpg": {
+     "name": "poll-discussion.jpg",
+     "blob": "",
+     "size": 130701,
+     "type": "image/jpeg"
+    },
+    "landing.jpg": {
+     "name": "landing.jpg",
+     "blob": "",
+     "size": 197328,
      "type": "image/jpeg"
     }
    }
