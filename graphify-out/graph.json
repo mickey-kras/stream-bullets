@@ -27081,7 +27081,7 @@
       "relation": "calls",
       "source": "app_entry_server_handlerequest",
       "source_file": "app/entry.server.tsx",
-      "source_location": "L34",
+      "source_location": "L33",
       "target": "app_i18n_resolve_requestlocale",
       "weight": 1.0
     },
@@ -27093,7 +27093,7 @@
       "relation": "calls",
       "source": "app_entry_server_handlerequest",
       "source_file": "app/entry.server.tsx",
-      "source_location": "L35",
+      "source_location": "L37",
       "target": "app_i18n_server_withlocale",
       "weight": 1.0
     },
@@ -27105,7 +27105,7 @@
       "relation": "calls",
       "source": "app_entry_server_handlerequest",
       "source_file": "app/entry.server.tsx",
-      "source_location": "L37",
+      "source_location": "L39",
       "target": "app_lib_nonce_noncecontext",
       "weight": 1.0
     },
@@ -27117,7 +27117,7 @@
       "relation": "calls",
       "source": "app_entry_server_handlerequest",
       "source_file": "app/entry.server.tsx",
-      "source_location": "L44",
+      "source_location": "L46",
       "target": "app_server_http_server_logerror",
       "weight": 1.0
     },
@@ -27129,7 +27129,7 @@
       "relation": "calls",
       "source": "app_entry_server_handlerequest",
       "source_file": "app/entry.server.tsx",
-      "source_location": "L44",
+      "source_location": "L46",
       "target": "app_server_route_errors_server_requestid",
       "weight": 1.0
     },
@@ -60875,6 +60875,18 @@
       "source_file": "tests/server-streaming.test.ts",
       "source_location": "L47",
       "target": "tests_server_streaming_test_render",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_server_streaming_test",
+      "source_file": "tests/server-streaming.test.ts",
+      "source_location": "L56",
+      "target": "tests_server_streaming_test_context",
       "weight": 1.0
     },
     {
@@ -233520,7 +233532,7 @@
             "callee": "get",
             "file": "app/entry.server.tsx",
             "lang": "typescript",
-            "line": "L31",
+            "line": "L30",
             "receiver_type": "RouterContextProvider"
           }
         ]

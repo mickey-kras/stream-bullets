@@ -51,6 +51,14 @@ describe("server rendering", () => {
     expect(response.headers.get("Content-Language")).toBe("en");
   });
 
+  it("returns the document headers and no body for HEAD", async () => {
+    const request = new Request("https://app.example/", { method: "HEAD" });
+    const response = await handleRequest(request, 200, new Headers(), {} as EntryContext, context());
+    expect(response.headers.get("Content-Type")).toBe("text/html; charset=utf-8");
+    expect(response.headers.get("Content-Language")).toBe("en");
+    expect(response.body).toBeNull();
+  });
+
   it("sends the complete page to a bot", async () => {
     const outcome = await render(BOT);
     expect(outcome.settled).toBe(false);

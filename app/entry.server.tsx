@@ -27,11 +27,13 @@ export default async function handleRequest(
   routerContext: EntryContext,
   context: RouterContextProvider,
 ): Promise<Response> {
-  if (request.method === "HEAD") return new Response(null, { status, headers });
   const app = context.get(appContext);
   const { nonce } = app;
   // Prefer the root loader's account locale; otherwise use cookie and browser.
   const locale = app.locale ?? requestLocale(request, null);
+  headers.set("Content-Type", "text/html; charset=utf-8");
+  headers.set("Content-Language", locale);
+  if (request.method === "HEAD") return new Response(null, { status, headers });
   return withLocale(locale, async (): Promise<Response> => {
     const stream = await renderToReadableStream(
       <NonceContext value={nonce}>
@@ -49,8 +51,6 @@ export default async function handleRequest(
     // Bots and SPA mode get the complete document. Browsers get the shell first, so the status
     // and headers are sent before a late render error can change them.
     if (isbot(request.headers.get("User-Agent")) || routerContext.isSpaMode) await stream.allReady;
-    headers.set("Content-Type", "text/html; charset=utf-8");
-    headers.set("Content-Language", locale);
     return new Response(stream, { status, headers });
   });
 }
