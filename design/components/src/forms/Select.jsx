@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Select as RadixSelect } from "radix-ui";
 import { Icon } from "../core/Icon.jsx";
 
 // Radix select-only combobox, as in app/components/ui/select.tsx.
+// Inside a modal <dialog>, the list mounts in that dialog: the page outside it is inert.
 export function Select({ options, value, defaultValue, onValueChange, placeholder, label, className = "", style }) {
   const [inner, setInner] = useState(defaultValue);
+  const [container, setContainer] = useState(undefined);
+  const findDialog = useCallback((el) => setContainer(el?.closest("dialog") ?? undefined), []);
   const current = value ?? inner;
   const selected = options.find((o) => o.value === current);
   const pick = (v) => {
@@ -12,7 +15,7 @@ export function Select({ options, value, defaultValue, onValueChange, placeholde
     onValueChange?.(v);
   };
   return (
-    <div className={`sb-select ${className}`.trim()} style={style}>
+    <div className={`sb-select ${className}`.trim()} style={style} ref={findDialog}>
       <RadixSelect.Root value={current} onValueChange={pick}>
         <RadixSelect.Trigger className="sb-select-trigger" aria-label={label}>
           {selected?.icon && <Icon name={selected.icon} size={20} />}
@@ -23,7 +26,7 @@ export function Select({ options, value, defaultValue, onValueChange, placeholde
             <Icon name="chevron-down" size={16} className="sb-chev" />
           </RadixSelect.Icon>
         </RadixSelect.Trigger>
-        <RadixSelect.Portal>
+        <RadixSelect.Portal container={container}>
           <RadixSelect.Content className="sb-select-list" position="popper" sideOffset={4}>
             <RadixSelect.Viewport>
               {options.map((o) => (
