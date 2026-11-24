@@ -3,7 +3,11 @@ import { CLICK_PERMISSION, CTA_EVENTS, privacySignal } from "../../lib/conversio
 import { json, readJson, requireSameOrigin } from "../http.server";
 import { openWrite, type ApiRoute } from "./router";
 
-const clickSchema = z.strictObject({ id: z.string().uuid(), event: z.enum(CTA_EVENTS), permission: z.literal(CLICK_PERMISSION).optional() });
+const clickSchema = z.strictObject({
+  id: z.string().uuid(),
+  event: z.enum(CTA_EVENTS),
+  permission: z.literal(CLICK_PERMISSION).optional(),
+});
 
 // Clients can report clicks only. Completion counts come from committed database writes.
 export const conversionRoutes: ApiRoute[] = [

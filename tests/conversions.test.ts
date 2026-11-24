@@ -106,7 +106,12 @@ describe("anonymous conversion totals", () => {
         headers: { Origin: env.APP_ORIGIN, "Content-Type": "application/json", [signal]: "1" },
         body: JSON.stringify(body),
       });
-      const response = await dispatch(conversionRoutes, request, { env, nonce: "test", responseHeaders: new Headers() }, "conversions");
+      const response = await dispatch(
+        conversionRoutes,
+        request,
+        { env, nonce: "test", responseHeaders: new Headers() },
+        "conversions",
+      );
       expect(await response.json()).toEqual({ counted: false });
     }
     const responses = await Promise.all([call("POST", "conversions", { body }), call("POST", "conversions", { body })]);

@@ -4761,7 +4761,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L430",
+      "source_location": "L431",
       "target": "app_components_channels_channel_panel_channelproblem",
       "weight": 1.0
     },
@@ -4773,7 +4773,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L434",
+      "source_location": "L435",
       "target": "app_components_overlay_wasteland_glyphs_platformicon",
       "weight": 1.0
     },
@@ -4785,7 +4785,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L437",
+      "source_location": "L438",
       "target": "app_components_channels_channel_panel_healthmark",
       "weight": 1.0
     },
@@ -4797,7 +4797,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L437",
+      "source_location": "L438",
       "target": "app_lib_channel_health_channelhealth_40cffcc64880",
       "weight": 1.0
     },
@@ -4809,7 +4809,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L441",
+      "source_location": "L442",
       "target": "app_components_channels_channel_panel_lastevent",
       "weight": 1.0
     },
@@ -4821,7 +4821,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L444",
+      "source_location": "L445",
       "target": "app_components_channels_channel_panel_problemrole",
       "weight": 1.0
     },
@@ -4833,7 +4833,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L445",
+      "source_location": "L446",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -4845,7 +4845,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L500",
+      "source_location": "L501",
       "target": "app_components_shell_sign_in_dialog_reauthenticate",
       "weight": 1.0
     },
@@ -4857,7 +4857,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L503",
+      "source_location": "L504",
       "target": "app_components_channels_channel_panel_rememberintent",
       "weight": 1.0
     },
@@ -4869,7 +4869,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L522",
+      "source_location": "L523",
       "target": "app_components_ui_dialog_dialog",
       "weight": 1.0
     },
@@ -4881,7 +4881,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L531",
+      "source_location": "L532",
       "target": "app_components_ui_dialog_dialogactions",
       "weight": 1.0
     },
@@ -4893,7 +4893,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L536",
+      "source_location": "L537",
       "target": "app_components_channels_channel_panel_channelpanel_disconnect",
       "weight": 1.0
     },
@@ -28377,7 +28377,7 @@
       "relation": "calls",
       "source": "app_lib_conversions_trackcta",
       "source_file": "app/lib/conversions.ts",
-      "source_location": "L32",
+      "source_location": "L36",
       "target": "app_lib_conversions_clickmeasurementallowed",
       "weight": 1.0
     },
@@ -33273,7 +33273,7 @@
       "relation": "calls",
       "source": "app_routes_privacy_meta",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L55",
+      "source_location": "L59",
       "target": "app_lib_seo_canonicalmeta",
       "weight": 1.0
     },
@@ -33285,7 +33285,7 @@
       "relation": "calls",
       "source": "app_routes_privacy_privacy",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L647",
+      "source_location": "L648",
       "target": "app_components_common_legaldocument",
       "weight": 1.0
     },
@@ -33297,7 +33297,7 @@
       "relation": "calls",
       "source": "app_routes_privacy_privacy",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L658",
+      "source_location": "L659",
       "target": "app_routes_privacy_sections",
       "weight": 1.0
     },
@@ -33309,7 +33309,7 @@
       "relation": "calls",
       "source": "app_routes_privacy_sections",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L531",
+      "source_location": "L533",
       "target": "app_routes_privacy_clicksettings",
       "weight": 1.0
     },
@@ -58005,7 +58005,7 @@
       "relation": "calls",
       "source": "tests_legal_test",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L118",
+      "source_location": "L119",
       "target": "tests_legal_test_legalcontext",
       "weight": 1.0
     },
@@ -58029,7 +58029,7 @@
       "relation": "calls",
       "source": "tests_legal_test",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L84",
+      "source_location": "L85",
       "target": "tests_legal_test_loaddetails",
       "weight": 1.0
     },
@@ -58041,7 +58041,7 @@
       "relation": "calls",
       "source": "tests_legal_test_loaddetails",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L77",
+      "source_location": "L78",
       "target": "tests_legal_test_legalcontext",
       "weight": 1.0
     },
@@ -58053,7 +58053,7 @@
       "relation": "calls",
       "source": "tests_legal_test_loaddetails",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L79",
+      "source_location": "L80",
       "target": "app_server_legal_server_legalloader",
       "weight": 1.0
     },
@@ -60969,7 +60969,7 @@
       "relation": "calls",
       "source": "tests_server_streaming_test",
       "source_file": "tests/server-streaming.test.ts",
-      "source_location": "L43",
+      "source_location": "L52",
       "target": "tests_server_streaming_test_finish",
       "weight": 1.0
     },
@@ -60981,7 +60981,7 @@
       "relation": "calls",
       "source": "tests_server_streaming_test",
       "source_file": "tests/server-streaming.test.ts",
-      "source_location": "L47",
+      "source_location": "L56",
       "target": "tests_server_streaming_test_render",
       "weight": 1.0
     },
@@ -60993,7 +60993,7 @@
       "relation": "calls",
       "source": "tests_server_streaming_test",
       "source_file": "tests/server-streaming.test.ts",
-      "source_location": "L57",
+      "source_location": "L66",
       "target": "tests_server_streaming_test_context",
       "weight": 1.0
     },
@@ -61005,7 +61005,7 @@
       "relation": "calls",
       "source": "tests_server_streaming_test_render",
       "source_file": "tests/server-streaming.test.ts",
-      "source_location": "L32",
+      "source_location": "L39",
       "target": "tests_server_streaming_test_context",
       "weight": 1.0
     },
@@ -176770,7 +176770,7 @@
       "relation": "contains",
       "source": "app_lib_conversions",
       "source_file": "app/lib/conversions.ts",
-      "source_location": "L20",
+      "source_location": "L24",
       "target": "app_lib_conversions_cta_events",
       "weight": 1.0
     },
@@ -176781,7 +176781,7 @@
       "relation": "contains",
       "source": "app_lib_conversions",
       "source_file": "app/lib/conversions.ts",
-      "source_location": "L28",
+      "source_location": "L32",
       "target": "app_lib_conversions_ctaevent",
       "weight": 1.0
     },
@@ -176792,7 +176792,7 @@
       "relation": "contains",
       "source": "app_lib_conversions",
       "source_file": "app/lib/conversions.ts",
-      "source_location": "L31",
+      "source_location": "L35",
       "target": "app_lib_conversions_trackcta",
       "weight": 1.0
     },
@@ -182490,7 +182490,7 @@
       "relation": "contains",
       "source": "app_routes_privacy",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L53",
+      "source_location": "L57",
       "target": "app_routes_privacy_meta",
       "weight": 1.0
     },
@@ -182501,8 +182501,8 @@
       "relation": "contains",
       "source": "app_routes_privacy",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L64",
-      "target": "app_routes_privacy_sections",
+      "source_location": "L645",
+      "target": "app_routes_privacy_privacy",
       "weight": 1.0
     },
     {
@@ -182512,8 +182512,8 @@
       "relation": "contains",
       "source": "app_routes_privacy",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L644",
-      "target": "app_routes_privacy_privacy",
+      "source_location": "L68",
+      "target": "app_routes_privacy_sections",
       "weight": 1.0
     },
     {
@@ -184217,8 +184217,8 @@
       "relation": "contains",
       "source": "app_server_api_conversions",
       "source_file": "app/server/api/conversions.ts",
-      "source_location": "L6",
-      "target": "app_server_api_conversions_clickschema",
+      "source_location": "L13",
+      "target": "app_server_api_conversions_conversionroutes",
       "weight": 1.0
     },
     {
@@ -184228,8 +184228,8 @@
       "relation": "contains",
       "source": "app_server_api_conversions",
       "source_file": "app/server/api/conversions.ts",
-      "source_location": "L9",
-      "target": "app_server_api_conversions_conversionroutes",
+      "source_location": "L6",
+      "target": "app_server_api_conversions_clickschema",
       "weight": 1.0
     },
     {
@@ -197461,17 +197461,6 @@
       "relation": "contains",
       "source": "docs_conversion_audit_conversion_and_mobile_audit",
       "source_file": "docs/conversion-audit.md",
-      "source_location": "L47",
-      "target": "docs_conversion_audit_production_privacy_checks",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "docs_conversion_audit_conversion_and_mobile_audit",
-      "source_file": "docs/conversion-audit.md",
       "source_location": "L5",
       "target": "docs_conversion_audit_existing_analytics",
       "weight": 1.0
@@ -197483,7 +197472,18 @@
       "relation": "contains",
       "source": "docs_conversion_audit_conversion_and_mobile_audit",
       "source_file": "docs/conversion-audit.md",
-      "source_location": "L56",
+      "source_location": "L50",
+      "target": "docs_conversion_audit_production_privacy_checks",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_conversion_audit_conversion_and_mobile_audit",
+      "source_file": "docs/conversion-audit.md",
+      "source_location": "L60",
       "target": "docs_conversion_audit_read_totals",
       "weight": 1.0
     },
@@ -197494,7 +197494,7 @@
       "relation": "contains",
       "source": "docs_conversion_audit_conversion_and_mobile_audit",
       "source_file": "docs/conversion-audit.md",
-      "source_location": "L68",
+      "source_location": "L72",
       "target": "docs_conversion_audit_mobile_evidence",
       "weight": 1.0
     },
@@ -204226,7 +204226,7 @@
       "relation": "contains",
       "source": "tests_legal_test",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L60",
+      "source_location": "L61",
       "target": "tests_legal_test_publicdetails",
       "weight": 1.0
     },
@@ -204237,7 +204237,7 @@
       "relation": "contains",
       "source": "tests_legal_test",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L66",
+      "source_location": "L67",
       "target": "tests_legal_test_legalcontext",
       "weight": 1.0
     },
@@ -204248,7 +204248,7 @@
       "relation": "contains",
       "source": "tests_legal_test",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L76",
+      "source_location": "L77",
       "target": "tests_legal_test_loaddetails",
       "weight": 1.0
     },
@@ -206888,7 +206888,7 @@
       "relation": "contains",
       "source": "tests_server_streaming_test",
       "source_file": "tests/server-streaming.test.ts",
-      "source_location": "L21",
+      "source_location": "L22",
       "target": "tests_server_streaming_test_context",
       "weight": 1.0
     },
@@ -206899,7 +206899,7 @@
       "relation": "contains",
       "source": "tests_server_streaming_test",
       "source_file": "tests/server-streaming.test.ts",
-      "source_location": "L27",
+      "source_location": "L34",
       "target": "tests_server_streaming_test_outcome",
       "weight": 1.0
     },
@@ -206910,7 +206910,7 @@
       "relation": "contains",
       "source": "tests_server_streaming_test",
       "source_file": "tests/server-streaming.test.ts",
-      "source_location": "L29",
+      "source_location": "L36",
       "target": "tests_server_streaming_test_render",
       "weight": 1.0
     },
@@ -214528,7 +214528,7 @@
       "relation": "indirect_call",
       "source": "tests_legal_test",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L51",
+      "source_location": "L52",
       "target": "app_routes_privacy_privacy",
       "weight": 1.0
     },
@@ -214540,7 +214540,7 @@
       "relation": "indirect_call",
       "source": "tests_legal_test",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L51",
+      "source_location": "L52",
       "target": "app_routes_terms_terms",
       "weight": 1.0
     },
@@ -217830,7 +217830,7 @@
       "label": "CtaEvent",
       "norm_label": "ctaevent",
       "source_file": "app/lib/conversions.ts",
-      "source_location": "L28"
+      "source_location": "L32"
     },
     {
       "_callable": true,
@@ -222582,7 +222582,7 @@
       "label": "Outcome",
       "norm_label": "outcome",
       "source_file": "tests/server-streaming.test.ts",
-      "source_location": "L27"
+      "source_location": "L34"
     },
     {
       "_callable": true,
@@ -235066,7 +235066,7 @@
       "label": "trackCta()",
       "norm_label": "trackcta()",
       "source_file": "app/lib/conversions.ts",
-      "source_location": "L31"
+      "source_location": "L35"
     },
     {
       "_callable": true,
@@ -238494,7 +238494,7 @@
       "label": "meta()",
       "norm_label": "meta()",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L53"
+      "source_location": "L57"
     },
     {
       "_callable": true,
@@ -238505,7 +238505,7 @@
       "label": "Privacy()",
       "norm_label": "privacy()",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L644"
+      "source_location": "L645"
     },
     {
       "_callable": true,
@@ -238516,7 +238516,7 @@
       "label": "sections()",
       "norm_label": "sections()",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L64"
+      "source_location": "L68"
     },
     {
       "_callable": true,
@@ -252728,14 +252728,14 @@
             "callee": "set",
             "file": "tests/legal.test.ts",
             "lang": "typescript",
-            "line": "L68",
+            "line": "L69",
             "receiver_type": "RouterContextProvider"
           }
         ]
       },
       "norm_label": "legalcontext()",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L66"
+      "source_location": "L67"
     },
     {
       "_callable": true,
@@ -252746,7 +252746,7 @@
       "label": "loadDetails()",
       "norm_label": "loaddetails()",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L76"
+      "source_location": "L77"
     },
     {
       "_callable": true,
@@ -254774,14 +254774,14 @@
             "callee": "set",
             "file": "tests/server-streaming.test.ts",
             "lang": "typescript",
-            "line": "L23",
+            "line": "L24",
             "receiver_type": "RouterContextProvider"
           }
         ]
       },
       "norm_label": "context()",
       "source_file": "tests/server-streaming.test.ts",
-      "source_location": "L21"
+      "source_location": "L22"
     },
     {
       "_callable": true,
@@ -254803,7 +254803,7 @@
       "label": "render()",
       "norm_label": "render()",
       "source_file": "tests/server-streaming.test.ts",
-      "source_location": "L29"
+      "source_location": "L36"
     },
     {
       "_callable": true,
@@ -259432,7 +259432,7 @@
       "label": "CTA_EVENTS",
       "norm_label": "cta_events",
       "source_file": "app/lib/conversions.ts",
-      "source_location": "L20"
+      "source_location": "L24"
     },
     {
       "_origin": "ast",
@@ -262062,7 +262062,7 @@
       "label": "conversionRoutes",
       "norm_label": "conversionroutes",
       "source_file": "app/server/api/conversions.ts",
-      "source_location": "L9"
+      "source_location": "L13"
     },
     {
       "_origin": "ast",
@@ -269396,7 +269396,7 @@
       "label": "publicDetails",
       "norm_label": "publicdetails",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L60"
+      "source_location": "L61"
     },
     {
       "_origin": "ast",
@@ -271840,7 +271840,7 @@
       "node_kind": "heading",
       "norm_label": "mobile evidence",
       "source_file": "docs/conversion-audit.md",
-      "source_location": "L68"
+      "source_location": "L72"
     },
     {
       "_origin": "ast",
@@ -271851,7 +271851,7 @@
       "node_kind": "heading",
       "norm_label": "production privacy checks",
       "source_file": "docs/conversion-audit.md",
-      "source_location": "L47"
+      "source_location": "L50"
     },
     {
       "_origin": "ast",
@@ -271862,7 +271862,7 @@
       "node_kind": "heading",
       "norm_label": "read totals",
       "source_file": "docs/conversion-audit.md",
-      "source_location": "L56"
+      "source_location": "L60"
     },
     {
       "_origin": "ast",

@@ -408,7 +408,8 @@ export function ChannelPanel({
     <div className="ch-panel" ref={panel}>
       <p className="muted">
         {t("channels.intro")}{" "}
-        {channels.some((channel) => channel.platform === "youtube" && channel.available) && t("channels.youtubeSchedule")}{" "}
+        {channels.some((channel) => channel.platform === "youtube" && channel.available) &&
+          t("channels.youtubeSchedule")}{" "}
         <Link to={`${paths.privacy}#data-we-collect`}>{t("legal.privacyPolicy")}</Link>
       </p>
       {stale && (

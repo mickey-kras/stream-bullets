@@ -83,7 +83,9 @@ test("desktop landing remains usable when WebGL is unavailable", async ({ page }
   await expect(page.getByRole("status")).toContainText("station preview is unavailable");
   const poster = page.locator(".station-poster");
   await expect(poster).toBeVisible();
-  expect(await poster.evaluate((image: HTMLImageElement): boolean => image.complete && image.naturalWidth > 0)).toBe(true);
+  expect(await poster.evaluate((image: HTMLImageElement): boolean => image.complete && image.naturalWidth > 0)).toBe(
+    true,
+  );
   await page.getByRole("banner").getByRole("button", { name: "Sign in / Sign up", exact: true }).click();
   await expect(page.getByRole("dialog", { name: "Sign in or sign up" })).toBeVisible();
   await page.getByRole("button", { name: "Close dialog" }).click();
@@ -162,7 +164,6 @@ for (const role of ["viewer", "owner"] as const) {
   });
 }
 
-
 test("the station stays visible without JavaScript on desktop and mobile", async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await newPage(context);
@@ -172,7 +173,9 @@ test("the station stays visible without JavaScript on desktop and mobile", async
     const poster = page.locator(".station-poster");
     await expect(poster).toBeVisible();
     await expect(poster).toBeInViewport();
-    expect(await poster.evaluate((image: HTMLImageElement): boolean => image.complete && image.naturalWidth > 0)).toBe(true);
+    expect(await poster.evaluate((image: HTMLImageElement): boolean => image.complete && image.naturalWidth > 0)).toBe(
+      true,
+    );
     await page.getByRole("link", { name: "Browse streamers", exact: true }).click();
     await expect(page).toHaveURL(/\/streamers$/);
     await expect(page.getByRole("heading", { name: "Streamers", exact: true })).toBeVisible();

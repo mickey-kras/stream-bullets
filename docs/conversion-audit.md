@@ -35,8 +35,11 @@ Totals store UTC day, fixed event name, and count only.
 They contain no account IDs, IPs, URLs, provider details, or content and remain after account deletion.
 Exports include both account flags. Account deletion removes them.
 
-Click requests accept fixed CTA names and a random UUID only. The endpoint rejects completion events and extra fields.
-Homepage clicks count only after the visitor enables statistics in Privacy. The choice expires after 180 days. DNT and GPC suppress these counts. Clients send no cookies or referrer. Retained receipts prevent repeat counts.
+Each click report contains a fixed button name, a random UUID, and the consent version.
+The endpoint rejects completion events and extra fields. Receipts prevent repeat counts.
+
+Homepage clicks count only after the visitor enables statistics in Privacy. The choice expires after 180 days.
+DNT and GPC suppress these counts. Clients send no cookies or referrer.
 
 Worker limits do not prevent fraud. The client never retries failed calls, which can undercount. Navigation still works.
 
@@ -46,12 +49,13 @@ Browsers store no visitor identifier.
 
 ## Production privacy checks
 
-After a deployment, open the public home page in a new browser profile. Check the document for the
-`no-transform` directive. Check the network panel for an injected beacon or a request to `/cdn-cgi/rum`.
-Disable automatic Web Analytics installation in the dashboard if the edge still injects a beacon.
-Select a homepage action. A new profile must send no click report. Enable click statistics under
-Privacy, repeat the action, then turn statistics off and repeat it again. Only the opted-in action
-should send a report. Check this again when a tag, analytics provider or Cloudflare setting changes.
+1. After deployment, open the home page in a new browser profile. Check the document for the `no-transform` directive.
+2. Check the network panel for a beacon or traffic to `/cdn-cgi/rum`. If the edge adds a beacon, disable automatic Web Analytics installation in the dashboard.
+3. Select a homepage action. A new profile must send no click report.
+4. Enable click statistics under Privacy and repeat the action. Check that the browser sends one report.
+5. Turn statistics off and repeat the action. Check that the browser sends no report.
+
+After changes to a tag, analytics provider, or Cloudflare setting, repeat these checks.
 
 ## Read totals
 

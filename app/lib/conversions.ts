@@ -8,8 +8,12 @@ export function privacySignal(headers: Headers): boolean {
 export function clickMeasurementAllowed(): boolean {
   try {
     const expires = Number(globalThis.localStorage.getItem(CLICK_STORAGE));
-    return Number.isSafeInteger(expires) && Date.now() < expires &&
-      navigator.doNotTrack !== "1" && Reflect.get(navigator, "globalPrivacyControl") !== true;
+    return (
+      Number.isSafeInteger(expires) &&
+      Date.now() < expires &&
+      navigator.doNotTrack !== "1" &&
+      Reflect.get(navigator, "globalPrivacyControl") !== true
+    );
   } catch {
     // A browser that blocks storage has no verifiable opt-in.
     return false;
