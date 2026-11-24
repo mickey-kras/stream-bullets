@@ -12,6 +12,10 @@ test("viewers see the feed, the calendar views on desktop only, and a stable col
   await expect(hero.getByRole("link", { name: "Mic shootout" })).toHaveAttribute("href", /entry=/);
   await expect(hero.getByRole("link", { name: /Watch on YouTube/ })).toBeVisible();
   await expect(page.locator(".sched-upcoming")).toContainText("Variety night");
+  // The "Up next" card spans the same width as the rows below it, also without a picture.
+  const heroWidth = (await hero.boundingBox())?.width ?? 0;
+  const rowWidth = (await page.locator(".sched-upcoming .sched-row").first().boundingBox())?.width ?? 0;
+  expect(Math.abs(heroWidth - rowWidth)).toBeLessThanOrEqual(1);
   await expect(page.locator(".sched-upcoming .series-note")).toContainText("every");
   await expect(page.locator(".sched-past").getByRole("link", { name: /Watch replay/ })).toHaveAttribute(
     "href",
