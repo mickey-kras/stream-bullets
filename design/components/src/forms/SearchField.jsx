@@ -1,4 +1,3 @@
-import React from "react";
 import { Icon } from "../core/Icon.jsx";
 
 export function SearchField({ label = "Search topics", placeholder = "Search topics…", className = "", ...rest }) {

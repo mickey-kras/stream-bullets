@@ -1,4 +1,3 @@
-import React from "react";
 import { Icon } from "../core/Icon.jsx";
 
 export function EmptyState({ title, icon, children, action, className = "" }) {

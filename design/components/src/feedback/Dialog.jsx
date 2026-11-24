@@ -1,18 +1,36 @@
-import React from "react";
+import { useEffect, useRef } from "react";
 import { IconButton } from "../core/IconButton.jsx";
 import { Button } from "../core/Button.jsx";
 
-export function Dialog({ open = true, onOpenChange, title, description, children, actions, cancel = true, cancelLabel = "Cancel", inline = false, className = "" }) {
-  React.useEffect(() => {
-    if (!open || inline) return undefined;
-    const k = (e) => { if (e.key === "Escape") onOpenChange && onOpenChange(false); };
-    document.addEventListener("keydown", k);
-    return () => document.removeEventListener("keydown", k);
-  }, [open, inline, onOpenChange]);
+// Native <dialog>: showModal() gives the top layer, focus containment, Escape and ::backdrop.
+// closedby="any" also closes it on a backdrop click where the browser supports the attribute.
+export function useModal(open, inline, onOpenChange) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const dialog = ref.current;
+    if (open && !inline && dialog && !dialog.open) dialog.showModal();
+  }, [open, inline]);
+  const onClose = () => onOpenChange?.(false);
+  return { ref, onClose, open: inline || undefined, closedby: inline ? undefined : "any" };
+}
+
+export function Dialog({
+  open = true,
+  onOpenChange,
+  title,
+  description,
+  children,
+  actions,
+  cancel = true,
+  cancelLabel = "Cancel",
+  inline = false,
+  className = "",
+}) {
+  const modal = useModal(open, inline, onOpenChange);
   if (!open) return null;
-  const close = () => onOpenChange && onOpenChange(false);
-  const box = (
-    <div className={`sb-dialog ${className}`.trim()} role="dialog" aria-modal={inline ? undefined : "true"} aria-label={title} data-inline={inline || undefined}>
+  const close = () => onOpenChange?.(false);
+  return (
+    <dialog {...modal} className={`sb-dialog ${className}`.trim()} aria-label={title} data-inline={inline || undefined}>
       <div className="sb-dialog-head">
         <h2 tabIndex={-1}>{title}</h2>
         <IconButton label="Close" icon="close" variant="bare" onClick={close} />
@@ -25,8 +43,6 @@ export function Dialog({ open = true, onOpenChange, title, description, children
           {actions}
         </div>
       )}
-    </div>
+    </dialog>
   );
-  if (inline) return box;
-  return <><div className="sb-backdrop" onClick={close} />{box}</>;
 }

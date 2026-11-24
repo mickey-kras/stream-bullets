@@ -20,7 +20,8 @@
     "test:e2e": "playwright test",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "wrangler d1 migrations apply DB --local",
-    "deploy": "pnpm build:production && wrangler deploy --config build/server/wrangler.json"
+    "deploy": "pnpm build:production && wrangler deploy --config build/server/wrangler.json",
+    "design:build": "node scripts/build-design.ts"
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "1.7.23",

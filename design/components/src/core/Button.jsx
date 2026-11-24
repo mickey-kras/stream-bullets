@@ -1,7 +1,18 @@
-import React from "react";
 import { Icon } from "./Icon.jsx";
 
-export function Button({ variant = "default", size = "md", font = "body", icon, iconEnd, landing = false, pressed, type = "button", className = "", children, ...rest }) {
+export function Button({
+  variant = "default",
+  size = "md",
+  font = "body",
+  icon,
+  iconEnd,
+  landing = false,
+  pressed,
+  type = "button",
+  className = "",
+  children,
+  ...rest
+}) {
   return (
     <button
       type={type}

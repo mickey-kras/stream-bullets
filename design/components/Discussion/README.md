@@ -5,7 +5,7 @@ Dashed lines divide the comments.
 
 ```jsx
 <Discussion count={24}>
-  <Comment name="TechNomad" role="Community member" preset={0} likes={27}>I've been running a local model on a mini PC…</Comment>
+  <Comment name="TechNomad" subtitle="Community member" preset={0} likes={27}>I've been running a local model on a mini PC…</Comment>
   <Composer />
 </Discussion>
 ```

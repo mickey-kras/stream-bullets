@@ -108,13 +108,12 @@ textarea.sb-input{resize:vertical}
 .sb-select-trigger[data-placeholder] .sb-select-value{color:var(--muted)}
 .sb-select-trigger .sb-chev{transition:transform var(--dur-fast) var(--ease-ui)}
 .sb-select-trigger[aria-expanded=true] .sb-chev{transform:rotate(180deg)}
-.sb-select-list{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:20;min-width:160px;max-height:264px;overflow-y:auto;margin:0;padding:6px;list-style:none;border:1px solid var(--c-6b7b72);border-radius:var(--radius-panel);background:var(--modal);box-shadow:var(--shadow-menu)}
-.sb-select-option{display:flex;align-items:center;gap:12px;min-height:42px;padding:8px 10px;border-radius:var(--radius-control);color:var(--cream);cursor:pointer;font:400 17px/1.2 var(--body)}
-.sb-select-option:hover{background:var(--btn-hover)}
-.sb-select-option[aria-selected=true]{color:var(--gold);font-weight:600}
+.sb-select-list{z-index:50;width:var(--radix-select-trigger-width);min-width:160px;max-height:min(264px,var(--radix-select-content-available-height));overflow-y:auto;margin:0;padding:6px;list-style:none;border:1px solid var(--c-6b7b72);border-radius:var(--radius-panel);background:var(--modal);box-shadow:var(--shadow-menu)}
+.sb-select-option{outline:none;display:flex;align-items:center;gap:12px;min-height:42px;padding:8px 10px;border-radius:var(--radius-control);color:var(--cream);cursor:pointer;font:400 17px/1.2 var(--body)}
+.sb-select-option[data-highlighted]{background:var(--btn-hover)}
+.sb-select-option[data-state=checked]{color:var(--gold);font-weight:600}
 .sb-select-option .sb-select-label{flex:1;min-width:0}
-.sb-select-option .sb-check{visibility:hidden;color:var(--gold)}
-.sb-select-option[aria-selected=true] .sb-check{visibility:visible}
+.sb-select-option .sb-check{display:inline-flex;color:var(--gold)}
 
 /* Choice (radio / checkbox card) */
 .sb-choice{display:flex;align-items:flex-start;gap:10px;margin:0;padding:10px 12px;min-height:var(--control-size);border:1px solid var(--input-border);border-radius:var(--radius-control);font-weight:600;font-size:var(--text-control);cursor:pointer}
@@ -123,7 +122,7 @@ textarea.sb-input{resize:vertical}
 .sb-choice small{display:block;color:var(--muted);font-weight:400;font-size:.8125rem;margin-top:2px}
 
 /* Tabs (segmented, .tabs) */
-.sb-tabs{display:inline-grid;grid-auto-flow:column;grid-auto-columns:1fr;max-width:100%;gap:0}
+.sb-tabs{border:0;margin:0;padding:0;min-width:0;display:inline-grid;grid-auto-flow:column;grid-auto-columns:1fr;max-width:100%;gap:0}
 .sb-tabs button{font:600 1.25rem/1 var(--heading);padding:9px clamp(12px,5vw,43px);min-height:var(--control-size);border:1px solid var(--tab-border);border-radius:0;background:var(--tab);color:var(--cream);cursor:pointer}
 .sb-tabs button:first-child{border-radius:var(--radius-control) 0 0 var(--radius-control)}
 .sb-tabs button:last-child{border-radius:0 var(--radius-control) var(--radius-control) 0}
@@ -131,8 +130,8 @@ textarea.sb-input{resize:vertical}
 .sb-tabs button[aria-pressed=true]{background:var(--grad-gold);color:var(--on-gold-2);border-color:var(--gold-lo)}
 
 /* ---------- Feedback ---------- */
-.sb-backdrop{position:fixed;inset:0;background:var(--backdrop);z-index:40;backdrop-filter:blur(3px)}
-.sb-dialog{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:41;width:min(560px,calc(100vw - 32px));max-height:calc(100dvh - 40px);overflow:auto;background:var(--modal);border:1px solid var(--c-6b7b72);border-radius:var(--radius-panel);padding:32px;box-shadow:var(--shadow-modal);color:var(--cream)}
+.sb-dialog::backdrop{background:var(--backdrop);backdrop-filter:blur(3px)}
+.sb-dialog{position:fixed;inset:auto;margin:0;max-width:none;left:50%;top:50%;transform:translate(-50%,-50%);z-index:41;width:min(560px,calc(100vw - 32px));max-height:calc(100dvh - 40px);overflow:auto;background:var(--modal);border:1px solid var(--c-6b7b72);border-radius:var(--radius-panel);padding:32px;box-shadow:var(--shadow-modal);color:var(--cream)}
 .sb-dialog[data-inline]{position:relative;left:auto;top:auto;transform:none;z-index:auto;max-height:none}
 .sb-dialog-head{position:sticky;top:0;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 4px;padding-block:8px;background:var(--modal)}
 .sb-dialog-head h2{margin:0;min-width:0;font:600 2.25rem/1.16 var(--heading);color:var(--gold);text-transform:uppercase;overflow-wrap:anywhere}

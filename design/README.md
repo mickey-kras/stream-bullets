@@ -10,12 +10,21 @@ Use it when you design or build an interface for the product.
 | `design-system.json` | The index of the Claude design system: its name, libraries, and asset groups |
 | `components/<Name>/README.md` | The guidelines and an example for one part of the interface |
 | `components/<Name>/preview.html` | The live preview of one part |
-| `components/src/` | The source of the parts, in JSX |
-| `components/bundle.js`, `bundle.css`, `index.d.ts` | The built parts, their styles, and their types |
+| `components/src/` | The source of the parts, in JSX. `src/index.js` lists the public parts. |
+| `components/bundle.css`, `index.d.ts` | The styles and the types of the parts |
 | `components/lib/` | React 18.3.1, which the previews load |
 | `components/WebsiteKit/`, `components/ObsOverlayKit/` | The UI kits of the website and the overlay |
 | `assets/<Group>/` | The logos, avatars, station images, and reference screenshots |
 | `fonts/` | The font files of Oswald, Figtree, and Onest |
+
+## Build
+
+`pnpm design:build` runs `scripts/build-design.ts`.
+It builds `components/src/` into `components/bundle.js`, and each UI kit into its `kit.js`.
+Git does not track these files. Build them before you copy the system to Claude or open a preview.
+A page that loads them supplies React 18 as the globals `React` and `ReactDOM`, and loads `bundle.js` before a kit.
+
+## Tokens
 
 The values in `app/styles/tokens.css` are the source for the application.
 When a value changes there, change `tokens.json` in the same change.

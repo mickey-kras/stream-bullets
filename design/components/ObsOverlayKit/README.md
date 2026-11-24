@@ -15,4 +15,6 @@ The stage is a grid of 16×9 cells of 120px.
 In the default layout, the chat is 5×7 cells (600×840) at the top left.
 The content uses the remaining area.
 
+`main.jsx` starts the kit. `pnpm design:build` builds it into `kit.js`, which `preview.html` loads.
+
 Sources: `app/components/overlay/*`, `app/components/overlay/wasteland/*`, and `docs/overlay-composition.md`.

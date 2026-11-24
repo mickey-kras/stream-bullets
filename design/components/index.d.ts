@@ -1,3 +1,12 @@
+// Types of the parts in src/index.js, for documentation.
+import type {
+  ButtonHTMLAttributes,
+  ChangeEventHandler,
+  InputHTMLAttributes,
+  MouseEventHandler,
+  ReactNode,
+} from "react";
+
 // Avatar.d.ts
 export interface AvatarProps {
   /** Uploaded photo URL. When absent a preset portrait renders. */
@@ -15,8 +24,6 @@ export interface AvatarProps {
 export function Avatar(props: AvatarProps): JSX.Element;
 
 // Button.d.ts
-import type { ReactNode, ButtonHTMLAttributes } from "react";
-import type { IconName } from "./Icon";
 /**
  * Native button with StreamBullets chrome: 1px #849291 border, 3px radius, teal gradient, 44px min height.
  * @startingPoint section="Core" subtitle="Default, gold, danger, ghost, link buttons" viewport="700x360"
@@ -41,15 +48,106 @@ export function Button(props: ButtonProps): JSX.Element;
 // Icon.d.ts
 /** Local glyphs (icon-paths.tsx) + Lucide names mapped in icon.tsx. */
 export type IconName =
-  | "topics" | "polls" | "schedule" | "about" | "community" | "google" | "twitch" | "tiktok" | "instagram" | "check" | "search" | "refresh"
-  | "reply" | "trash" | "flag" | "upload" | "download" | "zoom-in" | "zoom-out" | "chevron-down" | "chevron-up" | "thumbs-up" | "thumbs-up-filled"
-  | "thumbs-down" | "thumbs-down-filled" | "comment" | "cat-tech" | "cat-gaming" | "cat-creative" | "cat-chatting" | "search-none" | "tilt" | "play"
-  | "youtube" | "kick" | "discord" | "heart" | "gift" | "star" | "palette" | "megaphone" | "more" | "grip" | "up" | "down"
-  | "streamers" | "your-page" | "admin" | "home" | "user" | "pencil" | "mic" | "data" | "sign-in" | "sign-out" | "at-sign" | "plus" | "minus"
-  | "close" | "send" | "save" | "link" | "copy" | "external" | "image" | "crop" | "reset" | "chevron-left" | "chevron-right" | "arrow-right"
-  | "sort-top" | "sort-new" | "poll-choice" | "poll-binary" | "timer" | "live" | "eye" | "eye-off" | "stop" | "lock" | "overlay" | "wifi"
-  | "wifi-off" | "requests" | "key" | "approve" | "reject" | "mail" | "globe" | "shield-check" | "success" | "error" | "warning" | "pending"
-  | "rejected" | "idea" | "compass" | "privacy" | "terms" | "zap";
+  | "topics"
+  | "polls"
+  | "schedule"
+  | "about"
+  | "community"
+  | "google"
+  | "twitch"
+  | "tiktok"
+  | "instagram"
+  | "check"
+  | "search"
+  | "refresh"
+  | "reply"
+  | "trash"
+  | "flag"
+  | "upload"
+  | "download"
+  | "zoom-in"
+  | "zoom-out"
+  | "chevron-down"
+  | "chevron-up"
+  | "thumbs-up"
+  | "thumbs-up-filled"
+  | "thumbs-down"
+  | "thumbs-down-filled"
+  | "comment"
+  | "cat-tech"
+  | "cat-gaming"
+  | "cat-creative"
+  | "cat-chatting"
+  | "search-none"
+  | "tilt"
+  | "play"
+  | "youtube"
+  | "kick"
+  | "discord"
+  | "heart"
+  | "gift"
+  | "star"
+  | "palette"
+  | "megaphone"
+  | "more"
+  | "grip"
+  | "up"
+  | "down"
+  | "streamers"
+  | "your-page"
+  | "admin"
+  | "home"
+  | "user"
+  | "pencil"
+  | "mic"
+  | "data"
+  | "sign-in"
+  | "sign-out"
+  | "at-sign"
+  | "plus"
+  | "minus"
+  | "close"
+  | "send"
+  | "save"
+  | "link"
+  | "copy"
+  | "external"
+  | "image"
+  | "crop"
+  | "reset"
+  | "chevron-left"
+  | "chevron-right"
+  | "arrow-right"
+  | "sort-top"
+  | "sort-new"
+  | "poll-choice"
+  | "poll-binary"
+  | "timer"
+  | "live"
+  | "eye"
+  | "eye-off"
+  | "stop"
+  | "lock"
+  | "overlay"
+  | "wifi"
+  | "wifi-off"
+  | "requests"
+  | "key"
+  | "approve"
+  | "reject"
+  | "mail"
+  | "globe"
+  | "shield-check"
+  | "success"
+  | "error"
+  | "warning"
+  | "pending"
+  | "rejected"
+  | "idea"
+  | "compass"
+  | "privacy"
+  | "terms"
+  | "zap";
 /** 16 metadata/footer · 18 buttons/menus · 20 navigation/close · 24 categories/votes · 40 empty states. */
 export type IconSize = 14 | 16 | 18 | 20 | 24 | 32 | 40;
 export interface IconProps {
@@ -63,8 +161,6 @@ export interface IconProps {
 export function Icon(props: IconProps): JSX.Element;
 
 // IconButton.d.ts
-import type { ButtonHTMLAttributes } from "react";
-import type { IconName, IconSize } from "./Icon";
 export interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> {
   /** Accessible name and tooltip. Required. */
   label: string;
@@ -87,7 +183,6 @@ export interface LogoProps {
 export function Logo(props: LogoProps): JSX.Element;
 
 // Choice.d.ts
-import type { InputHTMLAttributes, ReactNode } from "react";
 export interface ChoiceProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type"> {
   type?: "radio" | "checkbox";
   label: ReactNode;
@@ -99,11 +194,12 @@ export function Choice(props: ChoiceProps): JSX.Element;
 /** Visible gold required marker; hidden from assistive tech (native required carries semantics). */
 export interface ReqProps {}
 export function Req(props: ReqProps): JSX.Element;
-export interface RequiredNoteProps { children?: React.ReactNode }
+export interface RequiredNoteProps {
+  children?: React.ReactNode;
+}
 export function RequiredNote(props: RequiredNoteProps): JSX.Element;
 
 // SearchField.d.ts
-import type { InputHTMLAttributes } from "react";
 export interface SearchFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   /** Visually hidden label. */
   label?: string;
@@ -112,8 +208,11 @@ export interface SearchFieldProps extends InputHTMLAttributes<HTMLInputElement> 
 export function SearchField(props: SearchFieldProps): JSX.Element;
 
 // Select.d.ts
-import type { IconName } from "../core/Icon";
-export interface SelectOption { value: string; label: string; icon?: IconName }
+export interface SelectOption {
+  value: string;
+  label: string;
+  icon?: IconName;
+}
 export interface SelectProps {
   options: readonly SelectOption[];
   value?: string;
@@ -128,7 +227,10 @@ export interface SelectProps {
 export function Select(props: SelectProps): JSX.Element;
 
 // Tabs.d.ts
-export interface TabsItem { value: string; label: string }
+export interface TabsItem {
+  value: string;
+  label: string;
+}
 export interface TabsProps {
   items: readonly TabsItem[];
   value?: string;
@@ -141,7 +243,6 @@ export interface TabsProps {
 export function Tabs(props: TabsProps): JSX.Element;
 
 // TextField.d.ts
-import type { InputHTMLAttributes } from "react";
 /**
  * Labelled input or textarea as used in dialogs and settings.
  */
@@ -157,7 +258,6 @@ export interface TextFieldProps extends Omit<InputHTMLAttributes<HTMLInputElemen
 export function TextField(props: TextFieldProps): JSX.Element;
 
 // Banner.d.ts
-import type { ReactNode } from "react";
 export interface BannerProps {
   /** frozen = ice-blue bar (page read-only); suspended = error bar. */
   tone?: "frozen" | "suspended";
@@ -167,7 +267,6 @@ export interface BannerProps {
 export function Banner(props: BannerProps): JSX.Element;
 
 // Dialog.d.ts
-import type { ReactNode } from "react";
 export interface DialogProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -186,8 +285,6 @@ export interface DialogProps {
 export function Dialog(props: DialogProps): JSX.Element | null;
 
 // EmptyState.d.ts
-import type { ReactNode } from "react";
-import type { IconName } from "../core/Icon";
 export interface EmptyStateProps {
   title: string;
   icon?: IconName;
@@ -207,7 +304,6 @@ export interface LivePillProps {
 export function LivePill(props: LivePillProps): JSX.Element;
 
 // Sheet.d.ts
-import type { ReactNode } from "react";
 export interface SheetProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -237,8 +333,6 @@ export interface ToastProps {
 export function Toast(props: ToastProps): JSX.Element;
 
 // Category.d.ts
-import type { ReactNode } from "react";
-import type { IconName } from "../core/Icon";
 export interface CategoryProps {
   /** cat-tech · cat-gaming · cat-creative · cat-chatting or any icon. */
   icon?: IconName;
@@ -248,7 +342,6 @@ export interface CategoryProps {
 export function Category(props: CategoryProps): JSX.Element;
 
 // Discussion.d.ts
-import type { ReactNode, ChangeEventHandler } from "react";
 export interface DiscussionProps {
   title?: string;
   count?: number;
@@ -261,7 +354,7 @@ export function Discussion(props: DiscussionProps): JSX.Element;
 export interface CommentProps {
   name: string;
   /** e.g. "Community member", "Streamer" */
-  role?: string;
+  subtitle?: string;
   preset?: number;
   time?: string;
   children: ReactNode;
@@ -284,8 +377,6 @@ export interface ComposerProps {
 export function Composer(props: ComposerProps): JSX.Element;
 
 // TopicChip.d.ts
-import type { ReactNode } from "react";
-import type { IconName } from "../core/Icon";
 export interface TopicChipProps {
   icon?: IconName;
   children: ReactNode;
@@ -297,8 +388,6 @@ export interface TopicChipProps {
 export function TopicChip(props: TopicChipProps): JSX.Element;
 
 // TopicDetail.d.ts
-import type { ReactNode } from "react";
-import type { IconName } from "../core/Icon";
 /**
  * Right-hand topic detail panel: category, title, author, body, votes; discussion goes in children.
  * @startingPoint section="Board" subtitle="Topic detail with votes and discussion" viewport="760x640"
@@ -323,7 +412,6 @@ export interface TopicDetailProps {
 export function TopicDetail(props: TopicDetailProps): JSX.Element;
 
 // TopicRow.d.ts
-import type { IconName } from "../core/Icon";
 /**
  * One row of the topic board list. Selected row fills gold.
  * @startingPoint section="Board" subtitle="Topic list rows with counts" viewport="700x420"
@@ -387,18 +475,27 @@ export interface PollCardProps {
   className?: string;
 }
 export function PollCard(props: PollCardProps): JSX.Element;
-export interface PollStatusProps { state?: "live" | "closed" | "revealed"; countdown?: string }
+export interface PollStatusProps {
+  state?: "live" | "closed" | "revealed";
+  countdown?: string;
+}
 export function PollStatus(props: PollStatusProps): JSX.Element;
-export interface PollResultsProps { options: readonly string[]; counts?: readonly number[]; myVote?: number | null; onVote?: (i: number) => void; disabled?: boolean; kind?: "choice" | "binary" }
+export interface PollResultsProps {
+  options: readonly string[];
+  counts?: readonly number[];
+  myVote?: number | null;
+  onVote?: (i: number) => void;
+  disabled?: boolean;
+  kind?: "choice" | "binary";
+}
 export function PollResults(props: PollResultsProps): JSX.Element;
 
 // AccountMenu.d.ts
-import type { IconName } from "../core/Icon";
 export type AccountMenuItem = { id: string; label: string; icon: IconName } | "divider";
 export interface AccountMenuProps {
   name: string;
   /** "Viewer", "Streamer · @handle", "Administrator" */
-  role?: string;
+  subtitle?: string;
   preset?: number;
   items?: readonly AccountMenuItem[];
   current?: string;
@@ -408,13 +505,17 @@ export interface AccountMenuProps {
 export function AccountMenu(props: AccountMenuProps): JSX.Element;
 
 // BackLink.d.ts
-import type { ReactNode, MouseEventHandler } from "react";
-export interface BackLinkProps { children?: ReactNode; href?: string; onClick?: MouseEventHandler<HTMLAnchorElement> }
+export interface BackLinkProps {
+  children?: ReactNode;
+  href?: string;
+  onClick?: MouseEventHandler<HTMLAnchorElement>;
+}
 export function BackLink(props: BackLinkProps): JSX.Element;
 
 // SiteFooter.d.ts
 export interface SiteFooterProps {
-  links?: readonly string[];
+  /** Default: Privacy, Terms, Report content and AI agents, with the paths of app/lib/shell.ts. */
+  links?: readonly { label: string; href: string }[];
   /** Current language name in its own script, e.g. "Deutsch". */
   language?: string;
   onLanguage?: () => void;
@@ -423,25 +524,25 @@ export interface SiteFooterProps {
 export function SiteFooter(props: SiteFooterProps): JSX.Element;
 
 // SiteHeader.d.ts
-import type { IconName } from "../core/Icon";
 /**
  * Generic site header (directory, legal, settings): wordmark, Figtree nav links, account avatar or Sign in.
  * @startingPoint section="Shell" subtitle="Site header with wordmark and account" viewport="1200x120"
  */
 export interface SiteHeaderProps {
   current?: string;
-  links?: readonly { id: string; label: string; icon?: IconName }[];
+  /** A link without href goes to #id. */
+  links?: readonly { id: string; label: string; icon?: IconName; href?: string }[];
+  /** Default "/". */
+  homeHref?: string;
   signedIn?: boolean;
   avatarPreset?: number;
   onSignIn?: () => void;
   onAccount?: () => void;
-  onNavigate?: (id: string) => void;
   className?: string;
 }
 export function SiteHeader(props: SiteHeaderProps): JSX.Element;
 
 // StreamerHeader.d.ts
-import type { ReactNode } from "react";
 /**
  * Streamer page header: SB mark | divider | streamer avatar + name, Oswald uppercase view tabs, Streamers link, gold CTA, account.
  * @startingPoint section="Shell" subtitle="Streamer page header with view tabs" viewport="1360x140"
@@ -450,14 +551,15 @@ export interface StreamerHeaderProps {
   name: string;
   preset?: number;
   current?: "topics" | "polls" | "schedule" | "about" | "community" | "overlay" | null;
-  onNavigate?: (view: string) => void;
+  /** The href of each link: a view id, "home" or "streamers". Default `#${id}`. */
+  hrefFor?: (id: string) => string;
   /** Show the red LIVE pill. */
   live?: boolean;
   /** On-air ticker strip text under the header while live. */
   ticker?: ReactNode;
   /** Page owner: adds the Overlay tab. */
   own?: boolean;
-  /** Replaces the default "Suggest a topic" CTA (null hides it). */
+  /** The action at the end of the header. The default is the gold Suggest a topic button. Null shows no action. */
   action?: ReactNode;
   signedIn?: boolean;
   avatarPreset?: number;

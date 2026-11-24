@@ -3,7 +3,8 @@
 This kit is a copy of the StreamBullets web app that you can click through.
 It shows the viewer side and the streamer side.
 
-The kit keeps the current screen in the `sb-kit-screen` key of `localStorage`.
+The links of the kit are hash links, such as `#polls`, so the back button of the browser works.
+The kit also keeps the current screen in the `sb-kit-screen` key of `localStorage`.
 
 | Screen | File | Source |
 | --- | --- | --- |
@@ -14,4 +15,6 @@ The kit keeps the current screen in the `sb-kit-screen` key of `localStorage`.
 
 `WebsiteApp.jsx` connects the dialog to suggest a topic, the account menu, and the toast.
 The Schedule, About, and Community tabs show a note. The kit does not copy them.
+
 `kit.css` holds the layout. The parts come from the bundle, `components/bundle.js`.
+`main.jsx` starts the kit. `pnpm design:build` builds it into `kit.js`, which `preview.html` loads.
