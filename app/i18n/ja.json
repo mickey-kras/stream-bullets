@@ -656,7 +656,7 @@
   "landing.getStarted": "はじめる",
   "landing.joinStreamer": "配信者として参加",
   "landing.station": "インタラクティブ放送局",
-  "landing.streamerBenefits": "視聴者からトピックを集め、アンケートを実施し、Twitch・YouTube・Kick のチャットを 1 つの OBS オーバーレイに表示できます。",
+  "landing.streamerBenefits": "視聴者から話題を集め、投票を実施できます。Google でのログインにはプロフィールとメールアドレスを使用します。YouTube を連携すると、OBS にライブチャットを、自分のページに配信予定を表示できます。OBS には Twitch と Kick のチャットも表示できます。",
   "landing.suggest": "トピックを提案",
   "landing.tagline": "トピックを提案。投票。配信をいっしょにつくろう。",
   "landing.title1": "あなたの声を、",

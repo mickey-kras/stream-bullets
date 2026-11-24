@@ -43,7 +43,7 @@ test("mobile landing is one screen with Browse streamers and the scene under the
   await expect(join).toHaveAttribute("href", "/?dialog=host");
   await expect(
     page.getByText(
-      "Collect topics from your viewers, run audience polls, and show your Twitch, YouTube and Kick chat in one OBS overlay.",
+      "Google sign-in uses your profile and email. Connect YouTube to show live chat in OBS and upcoming streams on your page.",
     ),
   ).toBeVisible();
   await join.click();
