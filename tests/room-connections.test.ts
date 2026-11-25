@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_LAYERS } from "../app/lib/overlay-layers";
-import { outputInBody, outputOf, outputTag, overlayOutput, OverlaySources } from "../app/server/room-connections";
+import {
+  keyRevokes,
+  outputInBody,
+  outputOf,
+  outputTag,
+  overlayOutput,
+  OverlaySources,
+} from "../app/server/room-connections";
 import type { OverlayPublic } from "../app/types";
 
 // The outputs of the OBS sockets of a room, and the times that the room keeps for them.
@@ -80,6 +87,16 @@ describe("the output of an OBS socket", (): void => {
     // A socket that a room from before the two outputs accepted.
     expect(outputOf(["role:owner", "overlay-key"])).toBe("horizontal");
     expect(outputOf([])).toBe("horizontal");
+  });
+
+  it("closes the sockets of the output of a new key, and each socket without an output tag", (): void => {
+    const vertical: string[] = ["activity", "overlay-key", outputTag("vertical")];
+    expect(keyRevokes(vertical, "vertical")).toBe(true);
+    expect(keyRevokes(vertical, "horizontal")).toBe(false);
+    expect(keyRevokes(["role:owner", "overlay-key", outputTag("horizontal")], "vertical")).toBe(false);
+    // The key of a socket from before the two outputs can be the key of each output.
+    expect(keyRevokes(["role:owner", "overlay-key"], "vertical")).toBe(true);
+    expect(keyRevokes(["role:owner", "overlay-key"], "horizontal")).toBe(true);
   });
 
   it("reads the output of a notice from its JSON body", async (): Promise<void> => {

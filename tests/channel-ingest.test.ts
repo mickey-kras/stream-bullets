@@ -34,7 +34,7 @@ import { recordRejectedWebhook, resetRoutes, WebhookRejected } from "../app/serv
 
 import { installFakeProviders, youtubeText, type FakeProviders, type ProviderCall } from "./helpers/channels";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
-import { installWorkersRuntime, RoomNamespace, serverSocketOf, type FakeSocket, type RoomState } from "./helpers/room";
+import { FakeSocket, installWorkersRuntime, RoomNamespace, serverSocketOf, type RoomState } from "./helpers/room";
 
 vi.mock("cloudflare:workers", () => import("./helpers/room"));
 
@@ -326,8 +326,12 @@ describe("ChannelIngest requests", (): void => {
     expect(overlay.ofType("unavailable")).toHaveLength(1);
     expect([owner.open, vertical.open]).toEqual([true, true]);
     expect(vertical.ofType("unavailable")).toHaveLength(0);
+    // An OBS socket from before the two outputs has no tag for its output: a new key for one output closes it.
+    const old = new FakeSocket();
+    state().acceptWebSocket(old, ["activity", "overlay-key"]);
     expect((await post("overlay-key", "twitch", { output: "vertical" })).status).toBe(204);
     expect([vertical.closeCode, vertical.closeReason]).toEqual([1001, "Overlay key revoked"]);
+    expect([old.closeCode, old.closeReason]).toEqual([1001, "Overlay key revoked"]);
     expect(owner.open).toBe(true);
     room().webSocketMessage(owner as unknown as WebSocket);
     expect(owner.closeCode).toBe(1008);

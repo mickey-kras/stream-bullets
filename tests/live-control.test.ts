@@ -17,7 +17,7 @@ import {
   type CellRect,
   type OverlayLayers,
 } from "../app/lib/overlay-layers";
-import { LAYOUT_LIMIT, presetCells, type OverlayLayouts } from "../app/lib/overlay-layouts";
+import { EMPTY_LAYOUTS, LAYOUT_LIMIT, presetCells, type OverlayLayouts } from "../app/lib/overlay-layouts";
 import { mashValue } from "../app/server/mash-sql";
 import { runMashAction } from "../app/server/mash.server";
 import { DEFAULT_OVERLAY, overlayPublic, overlayValue, type OverlayRow } from "../app/server/overlay-state";
@@ -30,7 +30,7 @@ import {
   type OverlayUpdate,
 } from "../app/server/overlay.server";
 import type { OverlayData, OverlayState, StreamEvent } from "../app/types";
-import { controlState } from "../app/components/overlay/overlay-control";
+import { controlLayouts, controlState } from "../app/components/overlay/overlay-control";
 import { loader as controlLoader } from "../app/routes/tools";
 import { apiCaller } from "./helpers/api";
 import { startOfQuotaWindow } from "./helpers/quota";
@@ -313,6 +313,16 @@ describe("overlay control state", (): void => {
     expect(controlState(saved, loaded, null)).toBe(loaded);
     expect(controlState(saved, { ...loaded, revision: 3 }, undefined)).toBe(saved);
     expect(controlState(saved, saved, overlayPublic({ ...saved, showResults: false }))).toBe(saved);
+  });
+
+  it("shows the newer of the layouts of this tab and the loaded layouts", (): void => {
+    const mine: OverlayLayouts = { ...EMPTY_LAYOUTS, horizontal: { active: "preset:chatting", saved: [] } };
+    const other: OverlayLayouts = { ...EMPTY_LAYOUTS, horizontal: { active: "preset:gameplay", saved: [] } };
+    // Another tab selected a layout: the page loaded again with a newer revision.
+    expect(controlLayouts({ layouts: mine, revision: 4 }, { layouts: other, revision: 5 })).toBe(other);
+    // A load that is not newer than the layout action of this tab does not replace its answer.
+    expect(controlLayouts({ layouts: mine, revision: 4 }, { layouts: other, revision: 4 })).toBe(mine);
+    expect(controlLayouts({ layouts: mine, revision: 4 }, { layouts: other, revision: 3 })).toBe(mine);
   });
 
   it("takes a newer live overlay from another tab and keeps the message draft", (): void => {

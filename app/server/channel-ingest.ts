@@ -39,7 +39,7 @@ import { ID_SQL, type IdTable } from "./channel-ingest-sql";
 import { type PlaygroundHost, playgroundOf } from "./playground-host";
 import { detached } from "../lib/detached";
 import type { Orientation } from "../lib/overlay-layers";
-import { outputInBody, outputOf, outputTag, overlayOutput } from "./room-connections";
+import { keyRevokes, outputInBody, outputTag, overlayOutput } from "./room-connections";
 import { NEW_YOUTUBE_STATE, type Connection, type YoutubeState } from "./channel-ingest-state";
 import {
   SNAPSHOT_SIZE,
@@ -318,7 +318,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     const output: Orientation | null = await outputInBody(request);
     if (!output) return reply("Invalid output", 400);
     this.overlayKeys += 1;
-    const mine = (socket: WebSocket): boolean => outputOf(this.ctx.getTags(socket)) === output;
+    const mine = (socket: WebSocket): boolean => keyRevokes(this.ctx.getTags(socket), output);
     this.closeSockets("Overlay key revoked", this.ctx.getWebSockets("overlay-key").filter(mine));
     return new Response(null, { status: 204 });
   }
