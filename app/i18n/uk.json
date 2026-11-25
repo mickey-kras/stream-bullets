@@ -1418,5 +1418,8 @@
   "tools.sections": "Розділи інструментів",
   "tools.tab.channels": "Канали",
   "account.tools": "Інструменти стримера",
-  "tools.eyebrow": "За мікрофоном · лише для вас"
+  "tools.eyebrow": "За мікрофоном · лише для вас",
+  "overlay.name.camera": "Рамка камери",
+  "overlay.camera.window": "Тут видно вашу камеру з OBS",
+  "overlay.camera.note": "У рамці прозоре вікно. В OBS розмістіть камеру під джерелом оверлея і задайте їй розмір вікна. StreamBullets ніколи не читає вашу камеру."
 }

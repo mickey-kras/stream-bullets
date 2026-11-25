@@ -1378,5 +1378,8 @@
   "tools.sections": "Seções das ferramentas",
   "tools.tab.channels": "Canais",
   "account.tools": "Ferramentas do streamer",
-  "tools.eyebrow": "Por trás do microfone · só para você"
+  "tools.eyebrow": "Por trás do microfone · só para você",
+  "overlay.name.camera": "Moldura da câmera",
+  "overlay.camera.window": "Sua câmera do OBS aparece aqui",
+  "overlay.camera.note": "A moldura tem uma janela transparente. No OBS, coloque sua câmera abaixo da fonte do overlay e deixe-a do tamanho da janela. O StreamBullets nunca lê sua câmera."
 }

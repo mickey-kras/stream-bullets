@@ -940,6 +940,7 @@ describe("overlay control", (): void => {
         orientation: "vertical",
         chat: { enabled: true, hideCommands: false, backgroundOpacity: 45 },
         characters: { enabled: true, timeout: 60, max: 40 },
+        camera: { enabled: false },
         items: DEFAULT_LAYERS.items,
         cells: horizontal({ chat: chatCell, poll: { c: 0, r: 0, w: 12, h: 8 } }),
       });

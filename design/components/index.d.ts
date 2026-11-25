@@ -1288,7 +1288,16 @@ export interface ChatLayerProps {
 export function ChatLayer(props: ChatLayerProps): JSX.Element;
 
 /** Layers of the overlay grid. */
-export type OverlayGridLayer = "chat" | "characters" | "poll" | "topic" | "next" | "message" | "card" | "support";
+export type OverlayGridLayer =
+  | "chat"
+  | "characters"
+  | "poll"
+  | "topic"
+  | "next"
+  | "message"
+  | "card"
+  | "support"
+  | "camera";
 /** Content source types of a stage. */
 export type OverlaySourceType = "auto" | "poll" | "topic" | "next" | "message" | "card" | "support";
 /** A rectangle in design pixels. */
@@ -1332,6 +1341,13 @@ export interface OverlayLayerProps {
 }
 /** A layer box at its cell; content layers get the fit box and stage. */
 export function OverlayLayer(props: OverlayLayerProps): JSX.Element;
+
+export interface OverlayCameraProps {
+  /** Text in the window, for the editor preview. The overlay page has none. */
+  hint?: string;
+}
+/** The camera frame: a frame with a clear window. Put it in an OverlayLayer with layer "camera". */
+export function OverlayCamera(props: OverlayCameraProps): JSX.Element;
 
 export interface OverlayQrProps {
   /** Encoded link. */

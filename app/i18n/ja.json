@@ -1358,5 +1358,8 @@
   "tools.sections": "配信者ツールのセクション",
   "tools.tab.channels": "チャンネル",
   "account.tools": "配信者ツール",
-  "tools.eyebrow": "マイクの向こう側 · あなた専用"
+  "tools.eyebrow": "マイクの向こう側 · あなた専用",
+  "overlay.name.camera": "カメラフレーム",
+  "overlay.camera.window": "ここに OBS のカメラが表示されます",
+  "overlay.camera.note": "フレームには透明な窓があります。OBS でカメラをオーバーレイのソースの下に置き、窓と同じ大きさにしてください。StreamBullets がカメラの映像を読み取ることはありません。"
 }

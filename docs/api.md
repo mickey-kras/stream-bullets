@@ -118,7 +118,7 @@ English also shows `error` for `step_up_required` and `other_key_required`.
 | Endpoint | Body | Response |
 | --- | --- | --- |
 | `GET /api/overlay` | - | `{overlay, data, handle}`. The `OverlayState` of the page of the signed-in owner, and the polls, topics, and cards for the pickers |
-| `POST /api/overlay` | `{action: "layers", write?, orientation?, chat?: {enabled?, hideCommands?, backgroundOpacity?}, characters?: {enabled?, timeout?, max?}, items?: {poll?, topic?, next?, message?, card?, support?}, cells?: {horizontal?, vertical?}}` | `{overlay}`. The whole new `OverlayState`, with `layers` |
+| `POST /api/overlay` | `{action: "layers", write?, orientation?, chat?: {enabled?, hideCommands?, backgroundOpacity?}, characters?: {enabled?, timeout?, max?}, items?: {poll?, topic?, next?, message?, card?, support?}, camera?: {enabled?}, cells?: {horizontal?, vertical?}}` | `{overlay}`. The whole new `OverlayState`, with `layers` |
 | `POST /api/overlay` | `{action: "showResults", on: boolean}` | `{overlay}`. The whole new `OverlayState`, with `showResults` |
 | `POST /api/overlay` | `{action: "message", text, style: "info" \| "hype"}` | `{overlay}`. The whole new `OverlayState`, with `message` and `messageStyle` |
 | `POST /api/overlay` | `{action: "chatTest", on: boolean}` | `{overlay}`. The whole new `OverlayState`, with `chatTestUntil` |
@@ -127,11 +127,11 @@ English also shows `error` for `step_up_required` and `other_key_required`.
 | `POST /api/overlay/characters` | `{op: "status" \| "test" \| "stopTest" \| "pause" \| "resume" \| "reset"}` or `{op: "remove", id}` | `{paused, testEndsAt}`. The state of the character playground |
 | `GET /@handle/overlay?key&layer&poll` | Optional `layer`: `content`, `chat`, or `characters`. Optional `poll`: a poll ID | The overlay page. Without `layer`, it shows the composition. With `layer`, it shows that part alone. An unknown value shows an empty page. |
 
-- The overlay shows only the layers on the grid: `chat`, `characters`, and the content layers.
+- The overlay shows only the layers on the grid: `chat`, `characters`, the content layers, and `camera`.
   The content layers are `poll`, `topic`, `next`, `message`, `card`, and `support`. Each content layer shows one content source.
   A layer is on stream when it has a cell in the selected orientation and its `enabled` value is `true`.
 - `orientation` is `horizontal` (a grid of 32 × 18 cells) or `vertical` (18 × 32 cells). A cell is 60 pixels.
-- Each orientation in `cells` holds `{chat?, characters?, poll?, topic?, next?, message?, card?, support?}`.
+- Each orientation in `cells` holds `{chat?, characters?, poll?, topic?, next?, message?, card?, support?, camera?}`.
   Each value is a cell rectangle `{c, r, w, h}` of whole cells, or `null`. With `null`, the layer is not on the grid.
   `c + w` is at most the number of columns, and `r + h` is at most the number of rows.
 - Each value in `items` holds the settings of one content layer: `{enabled?, ref?, backgroundOpacity?, qr?}`.
@@ -142,9 +142,11 @@ English also shows `error` for `step_up_required` and `other_key_required`.
   - `qr` shows a QR code in the card of the layer. A viewer scans it to open the public page of the item.
     The `message` layer accepts the value and never shows a code.
     See [QR code](overlay-composition.md#qr-code).
+- `camera` is the camera frame: a frame with a clear window. It has only the `enabled` value.
+  See [Camera frame](overlay-composition.md#camera-frame).
 - `chat.backgroundOpacity` is the opacity of the message cards in percent: an integer from 0 to 100 that is a multiple of 5.
   Other values return `400`. See [Message background](overlay-composition.md#message-background).
-- The minimum size is 6 × 4 cells for `chat`, 12 × 4 for `characters`, and 8 × 4 for each content layer.
+- The minimum size is 6 × 4 cells for `chat`, 12 × 4 for `characters`, 8 × 4 for each content layer, and 6 × 4 for `camera`.
 - After the merge, no two layers can overlap in an orientation. A layer without a cell does not count.
   A layer with a cell counts also while its `enabled` value is `false`.
 - The stored layers have a limit of 4000 characters. The server stores only the cells and the settings that are not the defaults.

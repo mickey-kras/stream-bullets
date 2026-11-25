@@ -88,6 +88,7 @@ test("the owner places layers on the grid by mouse and keyboard, and the layout 
     "+ Message banner",
     "+ Community card",
     "+ Support banner",
+    "+ Camera frame",
   ]);
   const panel = settings(editor);
   await expect(panel).toHaveAttribute("data-comp-props", "");

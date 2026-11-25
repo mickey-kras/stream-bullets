@@ -1418,5 +1418,8 @@
   "tools.sections": "Sekcje narzędzi",
   "tools.tab.channels": "Kanały",
   "account.tools": "Narzędzia streamera",
-  "tools.eyebrow": "Za mikrofonem · tylko dla ciebie"
+  "tools.eyebrow": "Za mikrofonem · tylko dla ciebie",
+  "overlay.name.camera": "Ramka kamery",
+  "overlay.camera.window": "Tutaj widać twoją kamerę z OBS",
+  "overlay.camera.note": "Ramka ma przezroczyste okno. W OBS umieść kamerę pod źródłem nakładki i nadaj jej rozmiar okna. StreamBullets nigdy nie odczytuje twojej kamery."
 }

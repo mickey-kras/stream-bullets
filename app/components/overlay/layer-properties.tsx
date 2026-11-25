@@ -271,13 +271,13 @@ function BackgroundRange({
   );
 }
 
-/** The background slider of a layer. The characters layer has none. */
+/** The background slider of a layer. The characters layer and the camera frame have none. */
 function LayerBackground({
   layer,
   layers,
   change,
 }: Readonly<{ layer: GridLayer; layers: OverlayLayers; change: ChangeLayers }>): ReactNode {
-  if (layer === "characters") return null;
+  if (layer === "characters" || layer === "camera") return null;
   if (layer === "chat")
     return (
       <BackgroundRange
@@ -308,7 +308,7 @@ function QrSetting({
   change,
 }: Readonly<{ layer: GridLayer; layers: OverlayLayers; change: ChangeLayers }>): ReactNode {
   const hintId: string = useId();
-  if (layer === "chat" || layer === "characters" || layer === "message") return null;
+  if (layer === "chat" || layer === "characters" || layer === "message" || layer === "camera") return null;
   return (
     <>
       <label className="choice">
@@ -404,7 +404,8 @@ export function LayerProperties({
           }
         />
       )}
-      {layer !== "chat" && layer !== "characters" && <ContentSettings layer={layer} {...props} />}
+      {layer === "camera" && <p className="muted ov-comp-note">{t("overlay.camera.note")}</p>}
+      {layer !== "chat" && layer !== "characters" && layer !== "camera" && <ContentSettings layer={layer} {...props} />}
       <QrSetting layer={layer} layers={layers} change={change} />
       <LayerBackground layer={layer} layers={layers} change={change} />
       <button type="button" onClick={() => onRemove(layer)} data-props-remove>

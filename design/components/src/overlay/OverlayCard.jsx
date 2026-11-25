@@ -6,7 +6,8 @@ import { largestRemainder } from "../../../../app/lib/percent.ts";
 import { Avatar } from "../core/Avatar.jsx";
 import { Icon } from "../core/Icon.jsx";
 
-const CHAT_OR_CHARACTERS = new Set(["chat", "characters"]);
+/** The layers without the fit box and the stage of a content layer. */
+const PLAIN_LAYERS = new Set(["chat", "characters", "camera"]);
 const number = new Intl.NumberFormat("en");
 const percent = new Intl.NumberFormat("en", { style: "percent", maximumFractionDigits: 0 });
 
@@ -82,7 +83,7 @@ function ContentCell({ type, children }) {
 /**
  * A layer box at its cell. `rect` is in design pixels (a cell is 60 × 60), `frame` is the design size of the
  * composition. The content is laid out in rect.w × rect.h design pixels and scales to the box width. A content
- * layer (not chat or characters) wraps its children in the fit box and the stage. `alone` fills the parent, as a
+ * layer (not chat, characters, or camera) wraps its children in the fit box and the stage. `alone` fills the parent, as a
  * per-layer OBS source does.
  */
 export function OverlayLayer({
@@ -104,7 +105,7 @@ export function OverlayLayer({
         width: share(rect.w, frame.w),
         height: share(rect.h, frame.h),
       };
-  const content = !CHAT_OR_CHARACTERS.has(layer);
+  const content = !PLAIN_LAYERS.has(layer);
   const opacity = backgroundOpacity ?? (content ? 100 : undefined);
   const style = opacity === undefined ? place : { ...place, "--ov-bg": String(opacity / 100) };
   return (
@@ -114,6 +115,14 @@ export function OverlayLayer({
       </div>
     </div>
   );
+}
+
+/* ---------- Camera frame: CameraFrame in app/components/overlay/overlay-composition.tsx ---------- */
+
+/** The camera frame: a frame with a clear window. `hint` is the text in the window of the editor preview. */
+export function OverlayCamera({ hint }) {
+  const text = hint ? <p className="ov-camera-hint">{hint}</p> : null;
+  return <div className="ov-camera">{text}</div>;
 }
 
 /* ---------- QR code: app/components/overlay/qr-code.tsx ---------- */

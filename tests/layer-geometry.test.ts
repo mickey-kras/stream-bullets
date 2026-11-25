@@ -124,6 +124,7 @@ describe("field-level patches", () => {
       orientation: "vertical",
       chat: { enabled: false, hideCommands: false, backgroundOpacity: 40 },
       characters: { enabled: true, timeout: 90, max: 12 },
+      camera: { enabled: true },
       items: before.items,
       cells: {
         horizontal: { ...before.cells.horizontal, chat: cell, poll: { c: 10, r: 0, w: 8, h: 4 } },
@@ -134,6 +135,7 @@ describe("field-level patches", () => {
       orientation: "vertical",
       chat: { enabled: false, hideCommands: false, backgroundOpacity: 40 },
       characters: { enabled: true, timeout: 90, max: 12 },
+      camera: { enabled: true },
       cells: { horizontal: { chat: cell, poll: { c: 10, r: 0, w: 8, h: 4 } } },
     });
     expect(

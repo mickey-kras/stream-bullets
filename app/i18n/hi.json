@@ -1378,5 +1378,8 @@
   "tools.sections": "स्ट्रीमर टूल के अनुभाग",
   "tools.tab.channels": "चैनल",
   "account.tools": "स्ट्रीमर टूल",
-  "tools.eyebrow": "माइक के पीछे · केवल आपके लिए"
+  "tools.eyebrow": "माइक के पीछे · केवल आपके लिए",
+  "overlay.name.camera": "कैमरा फ़्रेम",
+  "overlay.camera.window": "आपका OBS कैमरा यहाँ दिखेगा",
+  "overlay.camera.note": "फ़्रेम में एक पारदर्शी खिड़की है। OBS में अपने कैमरे को ओवरले सोर्स के नीचे रखें और उसे खिड़की जितना बड़ा करें। StreamBullets आपका कैमरा कभी नहीं पढ़ता।"
 }
