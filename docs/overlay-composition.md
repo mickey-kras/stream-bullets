@@ -417,6 +417,8 @@ The link of the other output continues to work. After a new key, update the OBS 
 
 ## OBS browser source
 
+For a guide in steps for a first use of OBS, see [OBS setup for the overlay](obs-setup.md).
+
 Set the size of the browser source for the composition to the frame size of its output:
 
 - For the horizontal output, use 1920 × 1080. A different 16:9 size, such as 1280 × 720, also works.
