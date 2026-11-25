@@ -184,7 +184,7 @@ The characters move and build only in the characters cell. To give the viewers l
 - The grid ends 30 world pixels below the top of the world. That space stays free for bubbles and badges.
 - Nobody builds in a door zone below row 5, or above the respawn pad below row 3. Thus the doors and the pad stay usable.
 - A steered character keeps its cell: no block goes there. A character that only walks around does not. A block lifts it.
-- A character that leaves goes through blocks. Thus a build cannot keep a character on screen.
+- Blocks do not stop a character that leaves. Thus a build cannot keep a character on screen.
 - The highest character on the builds gets a crown. It keeps the crown until a different character stands higher.
 
 ## Bubbles
