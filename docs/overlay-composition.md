@@ -179,6 +179,7 @@ Now the overlay shows only layers on the grid.
 
 The stored layers have a version (`v`). The current version is 3. Stored layers without this version are old.
 The server converts old layers each time it reads them. The result is always the same.
+
 Stored layers without a version are from before the overlay studio.
 For version 2, see [Cells of 120 pixels](#cells-of-120-pixels).
 
