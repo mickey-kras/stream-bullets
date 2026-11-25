@@ -128,10 +128,21 @@ export function EntryDetail({
       <p className="description">{entry.body}</p>
       <EntryTranslationControl entry={entry} />
       <IdeaOutcome entry={entry} />
-      <button type="button" className="open-discussion gold" onClick={onDiscuss}>
-        <Icon name="comment" size={18} />
-        {t("discussion.open")}
-      </button>
+      <div className="detail-actions">
+        <button type="button" className="open-discussion gold" onClick={onDiscuss}>
+          <Icon name="comment" size={18} />
+          {t("discussion.open")}
+        </button>
+        <EntryActions
+          entry={entry}
+          viewer={viewer}
+          owner={owner}
+          moderator={moderator}
+          writable={writable}
+          pending={pending}
+          onDelete={onDelete}
+        />
+      </div>
       <div className="votes">
         <VoteButtons
           reaction={entry.reaction}
@@ -142,15 +153,6 @@ export function EntryDetail({
         />
       </div>
       {!viewer && <p className="muted">{t(idea ? "ideas.signInHint" : "entry.signInHint")}</p>}
-      <EntryActions
-        entry={entry}
-        viewer={viewer}
-        owner={owner}
-        moderator={moderator}
-        writable={writable}
-        pending={pending}
-        onDelete={onDelete}
-      />
       {idea && moderator && (
         <IdeaStatusControl key={`${entry.id}:${entry.status}`} entry={entry} onSaved={onStatusSaved} />
       )}
