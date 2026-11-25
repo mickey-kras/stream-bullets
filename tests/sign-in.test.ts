@@ -38,7 +38,7 @@ describe("sign-in recovery", () => {
 describe("the reauthentication prompt", () => {
   it("shows only the provider buttons: no display name, no eligibility checkbox, no hint and no legal line", () => {
     const html: string = renderToStaticMarkup(
-      createElement(Reauthenticate, { providers: ["google", "twitch"], callbackURL: "/overlay-control" }),
+      createElement(Reauthenticate, { providers: ["google", "twitch"], callbackURL: "/tools" }),
     );
     expect(html.match(/<button/g)).toHaveLength(2);
     expect(html).toContain("Continue with Google");

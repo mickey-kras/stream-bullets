@@ -436,6 +436,13 @@ body > .site-footer .lang-switch span { opacity: 1; }
 @media (max-width: 480px) { .header-language-code { display: none; } }
 .header-end > button.header-language:hover, .header-end > button.notification-nav:hover { color: var(--gold); background: none; }
 .header-end > button.notification-nav .notification-badge { position: absolute; top: 2px; right: 0; }
+/* The boxes of the header controls are one gap apart, but their visible edges are not: the Streamers link has a
+   border, the language button has 8px of padding, and the notification icon has 12px of free room in its 44px box.
+   Beside the notification button, the two icon buttons move so that the three visible gaps are equal. */
+@media (min-width: 481px) {
+  .header-end:has(> button.notification-nav) > button.header-language { margin-left: 6px; }
+  .header-end > button.notification-nav { margin-left: -6px; }
+}
 /* A phone header gives its width to the streamer name: the avatar menu has the Streamers link. */
 @media (max-width: 480px) {
   header.streamer-header .header-end:has(.account-menu-wrap) > a.header-streamers { display: none !important; }

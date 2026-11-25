@@ -957,6 +957,8 @@ svg.icon-thumbs-up-filled, svg.icon-thumbs-down-filled { fill: currentColor; }
   .mash-overlay .mash-ring span { font-size: 42px; }
 }
 .ov-control { padding-top: 24px; }
+/* The section links of Streamer tools: in line with the head and the steps of the page. */
+.status-tabs.tools-tabs { display: flex; max-width: 1300px; margin: 16px auto 0; }
 .ov-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 20px; max-width: 1300px; margin: 0 auto; }
 .ov-frame { aspect-ratio: 16 / 9; overflow: hidden; border-radius: var(--radius-control); border: 2px solid var(--line); background: repeating-conic-gradient(var(--mock-check-a) 0 25%, var(--mock-check-b) 0 50%) 0 0 / 24px 24px; position: relative; }
 .ov-scaler { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform: scale(var(--ov-scale, .3)); transform-origin: 0 0; container-type: inline-size; visibility: hidden; }

@@ -10,7 +10,7 @@ They never read or change the `account` table of Better Auth or the linked login
 
 ## Data flow
 
-1. The owner selects **Connect** in **Overlay control**. The API makes a single-use state and a PKCE verifier.
+1. The owner selects **Connect** in the **Channels** section of **Streamer tools**. The API makes a single-use state and a PKCE verifier.
 2. The browser goes to the provider. The owner approves the permissions there.
 3. The provider sends the browser to `/channels/callback/:platform`. The server checks the state and the session.
 4. The server exchanges the code for tokens. It reads the channel identity from the provider.
@@ -109,9 +109,10 @@ Thus an open characters source keeps the YouTube poll alive, and each poll costs
 
 The playground runs only while at least one characters socket is open. See [Interactive characters](characters.md).
 
-## Channel health in Overlay control
+## Channel health in Streamer tools
 
-Step 1 of **Overlay control** shows the health of each platform while the page is open.
+The **Channels** section of **Streamer tools** shows the health of each platform while the page is open.
+The page says a change of health in each of its sections.
 The page gets the first list from its loader. It then reads `GET /api/channels` every 20 seconds.
 It reads only while the tab is visible.
 It reads at once when the tab shows again or when the browser is online again.
@@ -735,7 +736,7 @@ The D1 migrations `0027` and `0028` only add tables and a column. An older Worke
 | Stolen authorization code | PKCE S256 for YouTube and Kick. Twitch does not document PKCE for this flow. Thus the Twitch flow relies on the state and the client secret. |
 | Account substitution | A channel can belong to only one page (`UNIQUE(platform, external_id)`). The callback refuses a channel of another page and revokes the new token, except for a YouTube token (see Callback failures). |
 | Different channel on reconnect | The callback refuses it. The owner must disconnect first. |
-| Redirect abuse | The callback goes only to the fixed path `/overlay-control` with a short result code. It sends no code, state, or token in the URL. |
+| Redirect abuse | The callback goes only to the fixed path `/tools?view=channels` with a short result code. It sends no code, state, or token in the URL. |
 | Stolen session cookie | Connect, reconnect, and disconnect need a sign-in from the last 10 minutes (`reauth_required`). |
 | Cross-streamer access | Every operation uses the own page of the viewer. Each page has its own `ChannelIngest` object. Webhooks go to the page that owns the channel. |
 | Forged webhook | Twitch: HMAC-SHA256 with a constant-time comparison. Kick: RSA PKCS#1 v1.5 SHA-256 with the public key of Kick. The check runs on the raw body before parsing. |

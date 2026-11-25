@@ -52,7 +52,7 @@ export function accountMenuItems({ handle, admin = false, streamerHeader = false
   if (handle)
     items.push(
       { id: "your-page", label: "Your page", icon: "your-page", href: `/@${handle}` },
-      { id: "overlay", label: "Overlay control", icon: "overlay", href: "/overlay-control" },
+      { id: "tools", label: "Streamer tools", icon: "mic", href: "/tools" },
       dialog("page", "Edit your page", "pencil"),
       "divider",
     );

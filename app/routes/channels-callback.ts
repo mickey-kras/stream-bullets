@@ -1,5 +1,6 @@
 import { redirect, type LoaderFunctionArgs } from "react-router";
 import { appContext } from "../env";
+import { toolsPath } from "../lib/shell";
 import { requestViewer } from "../lib/shell.server";
 import type { ConnectResult } from "../lib/activity";
 import { completeConnect, platformSchema } from "../server/channels.server";
@@ -8,7 +9,7 @@ import { withRouteErrors } from "../server/route-errors.server";
 
 /**
  * `/channels/callback/:platform`: the provider sends the owner back here after a channel authorization. The
- * outcome goes to the fixed controls path as a short code; codes, tokens and states never appear in that URL.
+ * outcome goes to the Channels section of Streamer tools as a short code; codes, tokens and states never appear in that URL.
  */
 export const loader = withRouteErrors(async ({ request, params, context }: LoaderFunctionArgs) => {
   const app = context.get(appContext);
@@ -23,7 +24,7 @@ export const loader = withRouteErrors(async ({ request, params, context }: Loade
     if (!(error instanceof HttpError)) throw error;
     result = "failed";
   }
-  return redirect(`/overlay-control?channel=${platform.data}&result=${result}`, {
+  return redirect(`${toolsPath("channels")}&channel=${platform.data}&result=${result}`, {
     headers: { "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" },
   });
 });

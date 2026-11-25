@@ -139,7 +139,7 @@ test("briefly accepted connections do not renew the controller's automatic retry
     socket.onMessage(() => { void socket.close({ code: 1013, reason: "Seat reclaimed" }); });
   });
   await page.clock.install({ time: Date.now() });
-  await page.goto("/overlay-control");
+  await page.goto("/tools");
   await expect.poll(() => attempts).toBe(1);
   await page.clock.pauseAt(Date.now() + 1000);
   for (let connection: number = 1; connection <= 9; connection += 1) {
@@ -176,7 +176,7 @@ test("the owner's overlay controller offers reconnect after its retry budget exp
     }
   });
   await page.clock.install({ time: Date.now() });
-  await page.goto("/overlay-control");
+  await page.goto("/tools");
   await expect.poll(() => attempts).toBeGreaterThan(0);
   await page.clock.pauseAt(Date.now() + 1000);
   for (let failure: number = 0; failure < 9 && attempts < 9; failure += 1) {
