@@ -17,6 +17,7 @@ import {
   type CellRect,
   type OverlayLayers,
 } from "../app/lib/overlay-layers";
+import { LAYOUT_LIMIT, presetCells, type OverlayLayouts } from "../app/lib/overlay-layouts";
 import { mashValue } from "../app/server/mash-sql";
 import { runMashAction } from "../app/server/mash.server";
 import { DEFAULT_OVERLAY, overlayPublic, overlayValue, type OverlayRow } from "../app/server/overlay-state";
@@ -1404,6 +1405,116 @@ describe("overlay control", (): void => {
         expect(late.status).toBe(200);
         expect(roomCalls).toEqual([{ path: `/overlay?streamerId=${page}`, body: "" }]);
       });
+    });
+  });
+
+  describe("layouts", (): void => {
+    const chatCell: CellRect = { c: 0, r: 0, w: 10, h: 14 };
+    const layout = (action: Record<string, unknown>, user: string = "owner"): Promise<Response> =>
+      call("POST", "overlay/layouts", { user, body: action });
+    const state = async (response: Response): Promise<{ overlay: OverlayState; layouts: OverlayLayouts }> => {
+      expect(response.status).toBe(200);
+      return body<{ overlay: OverlayState; layouts: OverlayLayouts }>(response);
+    };
+    const select = { action: "select", output: "horizontal", keep: "My layout" };
+
+    beforeEach(async (): Promise<void> => {
+      await emptyOverlay();
+      await send({ action: "layers", chat: { enabled: true }, cells: { horizontal: { chat: chatCell } } });
+      roomCalls = [];
+      ingestCalls = [];
+    });
+
+    it("puts a preset on stream in one write, keeps the old layout, and tells OBS and the playground", async (): Promise<void> => {
+      const picked = await state(await layout({ ...select, id: "preset:gameplay" }));
+      expect(picked.overlay.layers.cells.horizontal).toEqual(presetCells("gameplay"));
+      expect(picked.overlay.revision).toBe(2);
+      expect(picked.layouts.horizontal.active).toBe("preset:gameplay");
+      const [kept, preset] = picked.layouts.horizontal.saved;
+      expect(kept).toMatchObject({ name: "My layout", cells: { ...emptyCells(), chat: chatCell } });
+      expect(kept.id).toMatch(/^[0-9a-f-]{36}$/);
+      expect(preset.id).toBe("preset:gameplay");
+      // The layers that the preset adds go on stream: OBS shows the layout at once.
+      expect(picked.overlay.layers.camera.enabled).toBe(true);
+      expect(roomCalls).toEqual([{ path: `/overlay?streamerId=${page}`, body: "" }]);
+      expect(ingestCalls.map((value) => value.path)).toEqual([`/playground-config?streamerId=${page}`]);
+      // The page and the API read the same layouts back.
+      const read = await body<{ overlay: OverlayState; layouts: OverlayLayouts }>(
+        await call("GET", "overlay", { user: "owner" }),
+      );
+      expect(read.layouts).toEqual(picked.layouts);
+      expect(read.overlay).toEqual(picked.overlay);
+      // Back to the first layout: its cells are on stream again.
+      const back = await state(await layout({ ...select, id: kept.id }));
+      expect(back.overlay.layers.cells.horizontal).toEqual({ ...emptyCells(), chat: chatCell });
+      expect(back.layouts.horizontal.saved).toHaveLength(2);
+    });
+
+    it("makes, renames and deletes a layout of the streamer", async (): Promise<void> => {
+      const made = await state(
+        await layout({ action: "create", output: "horizontal", name: " Raid night ", from: "current", keep: "My layout" }),
+      );
+      const [kept, mine] = made.layouts.horizontal.saved;
+      expect(mine.name).toBe("Raid night");
+      expect(made.layouts.horizontal.active).toBe(mine.id);
+      expect(made.overlay.layers.cells.horizontal).toEqual({ ...emptyCells(), chat: chatCell });
+      roomCalls = [];
+      // A new name and a deleted layout do not change the picture: OBS gets no message.
+      const renamed = await state(await layout({ action: "rename", output: "horizontal", id: kept.id, name: "Cozy" }));
+      expect(renamed.layouts.horizontal.saved[0].name).toBe("Cozy");
+      const deleted = await state(await layout({ action: "delete", output: "horizontal", id: kept.id }));
+      expect(deleted.layouts.horizontal.saved.map((item) => item.id)).toEqual([mine.id]);
+      expect(roomCalls).toEqual([]);
+      // The layout on stream cannot go.
+      expect((await layout({ action: "delete", output: "horizontal", id: mine.id })).status).toBe(400);
+      expect((await layout({ action: "rename", output: "horizontal", id: "preset:gameplay", name: "Mine" })).status).toBe(400);
+      expect((await layout({ ...select, id: "nothing" })).status).toBe(404);
+      expect((await layout({ action: "reset", output: "horizontal" })).status).toBe(400);
+    });
+
+    it("brings a changed preset back", async (): Promise<void> => {
+      await state(await layout({ ...select, id: "preset:chatting" }));
+      await send({ action: "layers", cells: { horizontal: { poll: null } } });
+      const reset = await state(await layout({ action: "reset", output: "horizontal" }));
+      expect(reset.overlay.layers.cells.horizontal).toEqual(presetCells("chatting"));
+    });
+
+    it("stops at the limit with a reason that the page can translate", async (): Promise<void> => {
+      for (let index = 0; index < LAYOUT_LIMIT; index += 1) {
+        const made = await layout({ action: "create", output: "horizontal", name: `L${index}`, from: "empty", keep: "My layout" });
+        // The first one also keeps the layout on stream, so the limit comes one step earlier.
+        expect(made.status, String(index)).toBe(index < LAYOUT_LIMIT - 1 ? 200 : 400);
+      }
+      const refused = await layout({ action: "create", output: "horizontal", name: "More", from: "empty", keep: "My layout" });
+      expect(await body<{ code: string }>(refused)).toMatchObject({ code: "layout_limit" });
+    });
+
+    it("ends a running chat test when the new layout has no chat on stream", async (): Promise<void> => {
+      expect((await send({ action: "chatTest", on: true })).status).toBe(200);
+      const empty = await state(
+        await layout({ action: "create", output: "horizontal", name: "Empty", from: "empty", keep: "My layout" }),
+      );
+      expect(empty.overlay.chatTestUntil).toBe(0);
+    });
+
+    it("takes only the owner and only valid actions", async (): Promise<void> => {
+      expect((await layout({ ...select, id: "preset:gameplay" }, "viewer")).status).toBe(404);
+      expect((await call("POST", "overlay/layouts", { body: { ...select, id: "preset:gameplay" } })).status).toBe(401);
+      for (const action of [
+        { ...select },
+        { ...select, id: "preset:gameplay", keep: "" },
+        { ...select, id: "preset:gameplay", output: "square" },
+        { ...select, id: "preset:gameplay", extra: true },
+        { action: "create", output: "horizontal", name: "N".repeat(41), from: "empty", keep: "My layout" },
+        { action: "create", output: "horizontal", name: "Name", from: "other", keep: "My layout" },
+        { action: "unknown", output: "horizontal" },
+      ])
+        expect((await layout(action)).status, JSON.stringify(action)).toBe(400);
+      // A page without saved state gets its first row.
+      await env.DB.prepare("DELETE FROM overlay_state WHERE streamer_id=?").bind(page).run();
+      const first = await state(await layout({ ...select, output: "vertical", id: "preset:vertical" }));
+      expect(first.overlay.layers.cells.vertical).toEqual(presetCells("vertical"));
+      expect(first.layouts.vertical.active).toBe("preset:vertical");
     });
   });
 

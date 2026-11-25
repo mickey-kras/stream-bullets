@@ -1,6 +1,7 @@
 import { disconnectAllChannels } from "./channels.server";
 import { parseStoredLayers } from "../lib/overlay-legacy";
 import type { OverlayLayers } from "../lib/overlay-layers";
+import { parseStoredLayouts, type OverlayLayouts } from "../lib/overlay-layouts";
 import { SYSTEM_USER_ID } from "../lib/system";
 import type { AppEnv } from "../env";
 import { getOrigin, HttpError } from "./http.server";
@@ -61,6 +62,7 @@ interface OverlayRow {
   message: string;
   message_style: string;
   layers: string;
+  layouts: string;
   updated_at: number;
 }
 
@@ -337,6 +339,7 @@ export interface AccountExport {
       message: string;
       messageStyle: string;
       layers: OverlayLayers;
+      layouts: OverlayLayouts;
       updatedAt: string;
     } | null;
   } | null;
@@ -677,6 +680,7 @@ function pageExport(
           message: overlay.message,
           messageStyle: overlay.message_style,
           layers: parseStoredLayers(overlay.layers),
+          layouts: parseStoredLayouts(overlay.layouts),
           updatedAt: iso(overlay.updated_at),
         }
       : null,
@@ -748,7 +752,7 @@ export async function exportAccount(env: AppEnv, userId: string): Promise<Accoun
       "SELECT links,note,status,created_at,updated_at,reviewed_at FROM streamer_applications WHERE user_id=?",
     ).bind(userId),
     env.DB.prepare(
-      `SELECT o.air,o.preview,o.position,o.size,o.instant,o.show_results,o.message,o.message_style,o.layers,o.updated_at
+      `SELECT o.air,o.preview,o.position,o.size,o.instant,o.show_results,o.message,o.message_style,o.layers,o.layouts,o.updated_at
         FROM overlay_state o JOIN streamers s ON s.id=o.streamer_id WHERE s.owner_id=?`,
     ).bind(userId),
   ]);

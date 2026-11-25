@@ -30621,7 +30621,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_mergecells",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L547",
+      "source_location": "L548",
       "target": "app_lib_overlay_layers_copycell",
       "weight": 1.0
     },
@@ -30633,7 +30633,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_mergecells",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L549",
+      "source_location": "L550",
       "target": "app_lib_overlay_layers_contentrecord",
       "weight": 1.0
     },
@@ -30645,7 +30645,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_mergelayers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L575",
+      "source_location": "L576",
       "target": "app_lib_overlay_layers_contentrecord",
       "weight": 1.0
     },
@@ -30657,7 +30657,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_mergelayers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L575",
+      "source_location": "L576",
       "target": "app_lib_overlay_layers_mergeitem",
       "weight": 1.0
     },
@@ -30669,7 +30669,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_mergelayers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L577",
+      "source_location": "L578",
       "target": "app_lib_overlay_layers_mergecells",
       "weight": 1.0
     },
@@ -30837,7 +30837,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_storedlayerstext",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L528",
+      "source_location": "L529",
       "target": "app_lib_overlay_layers_storeditem",
       "weight": 1.0
     },
@@ -30849,8 +30849,404 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_storedlayerstext",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L538",
+      "source_location": "L539",
       "target": "app_lib_overlay_layers_storedcells",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_createlayout",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L327",
+      "target": "app_lib_overlay_layouts_keptlive",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_createlayout",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L328",
+      "target": "app_lib_overlay_layouts_layouterror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_createlayout",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L328",
+      "target": "app_lib_overlay_layouts_owncount",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_createlayout",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L329",
+      "target": "app_lib_overlay_layers_emptycells",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_createlayout",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L332",
+      "target": "app_lib_overlay_layouts_withlayout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_deletelayout",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L356",
+      "target": "app_lib_overlay_layouts_layouterror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_keptlive",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L281",
+      "target": "app_lib_overlay_layouts_hascells",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_keptlive",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L282",
+      "target": "app_lib_overlay_layouts_layouterror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_keptlive",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L282",
+      "target": "app_lib_overlay_layouts_owncount",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_layoutchoices",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L214",
+      "target": "app_lib_overlay_layouts_outputpresets",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_layoutchoices",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L215",
+      "target": "app_lib_overlay_layouts_presetid",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_layoutchoices",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L223",
+      "target": "app_lib_overlay_layouts_presetcells",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_layoutchoices",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L223",
+      "target": "app_lib_overlay_layouts_samecells",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_layoutchoices",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L228",
+      "target": "app_lib_overlay_layouts_presetof",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_owncount",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L264",
+      "target": "app_lib_overlay_layouts_presetof",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_parsestoredlayouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L180",
+      "target": "app_lib_overlay_layouts_storedoutputschema",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_presetcells",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L107",
+      "target": "app_lib_overlay_layers_emptycells",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_presetof",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L102",
+      "target": "app_lib_overlay_layouts_presetid",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_renamelayout",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L338",
+      "target": "app_lib_overlay_layouts_layouterror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_renamelayout",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L338",
+      "target": "app_lib_overlay_layouts_presetof",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_resetlayout",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L367",
+      "target": "app_lib_overlay_layouts_presetof",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_resetlayout",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L368",
+      "target": "app_lib_overlay_layouts_layouterror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_resetlayout",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L369",
+      "target": "app_lib_overlay_layouts_presetcells",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_resetlayout",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L378",
+      "target": "app_lib_overlay_layouts_withlayout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_selectlayout",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L303",
+      "target": "app_lib_overlay_layouts_keptlive",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_selectlayout",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L305",
+      "target": "app_lib_overlay_layouts_presetof",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_selectlayout",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L307",
+      "target": "app_lib_overlay_layouts_layouterror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_selectlayout",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L308",
+      "target": "app_lib_overlay_layouts_presetcells",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_selectlayout",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L312",
+      "target": "app_lib_overlay_layouts_withlayout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_storedlayoutstext",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L189",
+      "target": "app_lib_overlay_layers_storedcells",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_storedoutputschema",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L145",
+      "target": "app_lib_overlay_layers_readcells",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_withlayout",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L293",
+      "target": "app_lib_overlay_layers_layerenabled",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_overlay_layouts_withlayout",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L294",
+      "target": "app_lib_layer_geometry_withenabled",
       "weight": 1.0
     },
     {
@@ -37785,7 +38181,7 @@
       "relation": "calls",
       "source": "app_server_account_server_accountprofile",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L698",
+      "source_location": "L702",
       "target": "app_server_account_server_parsejson",
       "weight": 1.0
     },
@@ -37797,7 +38193,7 @@
       "relation": "calls",
       "source": "app_server_account_server_accountprofile",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L704",
+      "source_location": "L708",
       "target": "app_server_account_server_iso",
       "weight": 1.0
     },
@@ -37809,7 +38205,7 @@
       "relation": "calls",
       "source": "app_server_account_server_deleteaccount",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L918",
+      "source_location": "L922",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -37821,7 +38217,7 @@
       "relation": "calls",
       "source": "app_server_account_server_deleteaccount",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L921",
+      "source_location": "L925",
       "target": "app_server_channels_server_disconnectallchannels",
       "weight": 1.0
     },
@@ -37833,7 +38229,7 @@
       "relation": "calls",
       "source": "app_server_account_server_deleteaccount",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L952",
+      "source_location": "L956",
       "target": "app_server_images_server_deleteimageobjects",
       "weight": 1.0
     },
@@ -37845,7 +38241,7 @@
       "relation": "calls",
       "source": "app_server_account_server_deleteaccount",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L960",
+      "source_location": "L964",
       "target": "app_server_live_server_notifyroom",
       "weight": 1.0
     },
@@ -37857,7 +38253,7 @@
       "relation": "calls",
       "source": "app_server_account_server_exportaccount",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L737",
+      "source_location": "L741",
       "target": "app_server_http_server_getorigin",
       "weight": 1.0
     },
@@ -37869,7 +38265,7 @@
       "relation": "calls",
       "source": "app_server_account_server_exportaccount",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L756",
+      "source_location": "L760",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -37881,7 +38277,7 @@
       "relation": "calls",
       "source": "app_server_account_server_exportaccount",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L761",
+      "source_location": "L765",
       "target": "app_server_account_server_readhistory",
       "weight": 1.0
     },
@@ -37893,7 +38289,7 @@
       "relation": "calls",
       "source": "app_server_account_server_exportaccount",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L771",
+      "source_location": "L775",
       "target": "app_server_account_server_iso",
       "weight": 1.0
     },
@@ -37905,7 +38301,7 @@
       "relation": "calls",
       "source": "app_server_account_server_exportaccount",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L773",
+      "source_location": "L777",
       "target": "app_server_account_server_accountprofile",
       "weight": 1.0
     },
@@ -37917,7 +38313,7 @@
       "relation": "calls",
       "source": "app_server_account_server_exportaccount",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L785",
+      "source_location": "L789",
       "target": "app_server_account_server_optionaliso",
       "weight": 1.0
     },
@@ -37929,7 +38325,7 @@
       "relation": "calls",
       "source": "app_server_account_server_exportaccount",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L795",
+      "source_location": "L799",
       "target": "app_server_account_server_exportchannels",
       "weight": 1.0
     },
@@ -37941,7 +38337,7 @@
       "relation": "calls",
       "source": "app_server_account_server_exportaccount",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L796",
+      "source_location": "L800",
       "target": "app_server_account_server_pageexport",
       "weight": 1.0
     },
@@ -37953,7 +38349,7 @@
       "relation": "calls",
       "source": "app_server_account_server_exportaccount",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L878",
+      "source_location": "L882",
       "target": "app_server_account_server_imagerecords",
       "weight": 1.0
     },
@@ -37965,7 +38361,7 @@
       "relation": "calls",
       "source": "app_server_account_server_exportchannels",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L731",
+      "source_location": "L735",
       "target": "app_server_account_server_iso",
       "weight": 1.0
     },
@@ -37977,7 +38373,7 @@
       "relation": "calls",
       "source": "app_server_account_server_exportchannels",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L732",
+      "source_location": "L736",
       "target": "app_server_account_server_optionaliso",
       "weight": 1.0
     },
@@ -37989,7 +38385,7 @@
       "relation": "calls",
       "source": "app_server_account_server_imagerecords",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L445",
+      "source_location": "L448",
       "target": "app_server_images_server_imagestoragekey",
       "weight": 1.0
     },
@@ -38001,7 +38397,7 @@
       "relation": "calls",
       "source": "app_server_account_server_optionaliso",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L426",
+      "source_location": "L429",
       "target": "app_server_account_server_iso",
       "weight": 1.0
     },
@@ -38013,7 +38409,7 @@
       "relation": "calls",
       "source": "app_server_account_server_pageexport",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L626",
+      "source_location": "L629",
       "target": "app_server_account_server_optionaliso",
       "weight": 1.0
     },
@@ -38025,7 +38421,7 @@
       "relation": "calls",
       "source": "app_server_account_server_pageexport",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L635",
+      "source_location": "L638",
       "target": "app_server_account_server_iso",
       "weight": 1.0
     },
@@ -38037,7 +38433,7 @@
       "relation": "calls",
       "source": "app_server_account_server_pageexport",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L671",
+      "source_location": "L674",
       "target": "app_server_account_server_parsejson",
       "weight": 1.0
     },
@@ -38049,8 +38445,20 @@
       "relation": "calls",
       "source": "app_server_account_server_pageexport",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L679",
+      "source_location": "L682",
       "target": "app_lib_overlay_legacy_parsestoredlayers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_account_server_pageexport",
+      "source_file": "app/server/account.server.ts",
+      "source_location": "L683",
+      "target": "app_lib_overlay_layouts_parsestoredlayouts",
       "weight": 1.0
     },
     {
@@ -47395,6 +47803,198 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "app_server_overlay_layouts_server_getlayouts",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L64",
+      "target": "app_lib_overlay_layouts_parsestoredlayouts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_overlay_layouts_server_nextlayoutstate",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L71",
+      "target": "app_lib_overlay_layouts_selectlayout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_overlay_layouts_server_nextlayoutstate",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L73",
+      "target": "app_lib_overlay_layouts_createlayout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_overlay_layouts_server_nextlayoutstate",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L74",
+      "target": "app_lib_overlay_layouts_resetlayout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_overlay_layouts_server_nextlayoutstate",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L77",
+      "target": "app_lib_overlay_layouts_renamelayout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_overlay_layouts_server_nextlayoutstate",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L78",
+      "target": "app_lib_overlay_layouts_deletelayout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_overlay_layouts_server_nextlayoutstate",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L81",
+      "target": "app_server_overlay_layouts_server_problemerror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_overlay_layouts_server_problemerror",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L51",
+      "target": "app_server_http_server_httperror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_overlay_layouts_server_updatelayouts",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L103",
+      "target": "app_server_access_server_assertstreamerwritable",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_overlay_layouts_server_updatelayouts",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L104",
+      "target": "app_server_http_server_httperror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_overlay_layouts_server_updatelayouts",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L109",
+      "target": "app_server_overlay_state_overlayvalue",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_overlay_layouts_server_updatelayouts",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L110",
+      "target": "app_lib_overlay_layouts_parsestoredlayouts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_overlay_layouts_server_updatelayouts",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L111",
+      "target": "app_server_overlay_layouts_server_nextlayoutstate",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_overlay_layouts_server_updatelayouts",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L112",
+      "target": "app_lib_overlay_layers_storedlayerstext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_overlay_layouts_server_updatelayouts",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L113",
+      "target": "app_lib_overlay_layouts_storedlayoutstext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_overlay_layouts_server_updatelayouts",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L120",
+      "target": "app_lib_overlay_layers_onanyoutput",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "app_server_overlay_server_checkedcard",
       "source_file": "app/server/overlay.server.ts",
       "source_location": "L95",
@@ -54897,7 +55497,7 @@
       "relation": "calls",
       "source": "db_schema_channelconnections",
       "source_file": "db/schema.ts",
-      "source_location": "L950",
+      "source_location": "L953",
       "target": "db_schema_enumcheck",
       "weight": 1.0
     },
@@ -54933,7 +55533,7 @@
       "relation": "calls",
       "source": "db_schema_entrymash",
       "source_file": "db/schema.ts",
-      "source_location": "L818",
+      "source_location": "L821",
       "target": "db_schema_enumcheck",
       "weight": 1.0
     },
@@ -54981,7 +55581,7 @@
       "relation": "calls",
       "source": "db_schema_overlaystate",
       "source_file": "db/schema.ts",
-      "source_location": "L756",
+      "source_location": "L759",
       "target": "db_schema_overlaysourcecheck",
       "weight": 1.0
     },
@@ -54993,7 +55593,7 @@
       "relation": "calls",
       "source": "db_schema_overlaystate",
       "source_file": "db/schema.ts",
-      "source_location": "L758",
+      "source_location": "L761",
       "target": "db_schema_enumcheck",
       "weight": 1.0
     },
@@ -55137,6 +55737,18 @@
       "relation": "calls",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
+      "source_location": "L1000",
+      "target": "tests_account_test_routecontext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_account_test",
+      "source_file": "tests/account.test.ts",
       "source_location": "L398",
       "target": "tests_account_test_seed",
       "weight": 1.0
@@ -55173,7 +55785,7 @@
       "relation": "calls",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L742",
+      "source_location": "L744",
       "target": "tests_account_test_linkedrows",
       "weight": 1.0
     },
@@ -55185,7 +55797,7 @@
       "relation": "calls",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L745",
+      "source_location": "L747",
       "target": "tests_account_test_zeroes",
       "weight": 1.0
     },
@@ -55197,7 +55809,7 @@
       "relation": "calls",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L973",
+      "source_location": "L975",
       "target": "tests_account_test_calldelete",
       "weight": 1.0
     },
@@ -55209,20 +55821,8 @@
       "relation": "calls",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L996",
-      "target": "tests_account_test_cookie",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "tests_account_test",
-      "source_file": "tests/account.test.ts",
       "source_location": "L998",
-      "target": "tests_account_test_routecontext",
+      "target": "tests_account_test_cookie",
       "weight": 1.0
     },
     {
@@ -60693,31 +61293,7 @@
       "relation": "calls",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1427",
-      "target": "tests_live_control_test_characterson",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "tests_live_control_test",
-      "source_file": "tests/live-control.test.ts",
-      "source_location": "L1438",
-      "target": "tests_live_control_test_characters",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "tests_live_control_test",
-      "source_file": "tests/live-control.test.ts",
-      "source_location": "L149",
+      "source_location": "L150",
       "target": "tests_live_control_test_seed",
       "weight": 1.0
     },
@@ -60729,7 +61305,31 @@
       "relation": "calls",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1690",
+      "source_location": "L1538",
+      "target": "tests_live_control_test_characterson",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_live_control_test",
+      "source_file": "tests/live-control.test.ts",
+      "source_location": "L1549",
+      "target": "tests_live_control_test_characters",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_live_control_test",
+      "source_file": "tests/live-control.test.ts",
+      "source_location": "L1801",
       "target": "tests_live_control_test_event",
       "weight": 1.0
     },
@@ -60741,7 +61341,7 @@
       "relation": "calls",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L581",
+      "source_location": "L582",
       "target": "tests_live_control_test_create",
       "weight": 1.0
     },
@@ -60753,7 +61353,7 @@
       "relation": "calls",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L602",
+      "source_location": "L603",
       "target": "tests_live_control_test_act",
       "weight": 1.0
     },
@@ -60765,7 +61365,7 @@
       "relation": "calls",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L603",
+      "source_location": "L604",
       "target": "tests_live_control_test_phase",
       "weight": 1.0
     },
@@ -60777,7 +61377,7 @@
       "relation": "calls",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L627",
+      "source_location": "L628",
       "target": "tests_live_control_test_body",
       "weight": 1.0
     },
@@ -60789,7 +61389,7 @@
       "relation": "calls",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L714",
+      "source_location": "L715",
       "target": "tests_live_control_test_storedrow",
       "weight": 1.0
     },
@@ -60801,7 +61401,7 @@
       "relation": "calls",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L718",
+      "source_location": "L719",
       "target": "tests_live_control_test_overlay",
       "weight": 1.0
     },
@@ -60813,7 +61413,7 @@
       "relation": "calls",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L718",
+      "source_location": "L719",
       "target": "tests_live_control_test_send",
       "weight": 1.0
     },
@@ -60825,7 +61425,7 @@
       "relation": "calls",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L776",
+      "source_location": "L777",
       "target": "tests_live_control_test_oldrow",
       "weight": 1.0
     },
@@ -60837,7 +61437,7 @@
       "relation": "calls",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L839",
+      "source_location": "L840",
       "target": "tests_live_control_test_racingenv",
       "weight": 1.0
     },
@@ -60849,7 +61449,7 @@
       "relation": "calls",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L918",
+      "source_location": "L919",
       "target": "tests_live_control_test_emptyoverlay",
       "weight": 1.0
     },
@@ -60861,7 +61461,7 @@
       "relation": "calls",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L957",
+      "source_location": "L958",
       "target": "tests_live_control_test_storedlayers",
       "weight": 1.0
     },
@@ -60873,7 +61473,7 @@
       "relation": "calls",
       "source": "tests_live_control_test_characterson",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1422",
+      "source_location": "L1533",
       "target": "tests_live_control_test_send",
       "weight": 1.0
     },
@@ -61151,6 +61751,30 @@
       "source_file": "tests/overlay-layers.test.ts",
       "source_location": "L82",
       "target": "app_lib_overlay_layers_storedlayerstext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L165",
+      "target": "tests_overlay_layouts_test_ids",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L176",
+      "target": "tests_overlay_layouts_test_problem",
       "weight": 1.0
     },
     {
@@ -66490,6 +67114,42 @@
       "confidence_score": 1.0,
       "context": "field",
       "relation": "references",
+      "source": "app_lib_overlay_layouts_layoutpreset",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L56",
+      "target": "app_lib_overlay_layers_orientation",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "relation": "references",
+      "source": "app_lib_overlay_layouts_layoutstate",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L254",
+      "target": "app_lib_overlay_layers_overlaylayers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "relation": "references",
+      "source": "app_lib_overlay_layouts_savedlayout",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L36",
+      "target": "app_lib_overlay_layers_layercells",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "relation": "references",
       "source": "app_lib_overlay_legacy_legacycontent",
       "source_file": "app/lib/overlay-legacy.ts",
       "source_location": "L37",
@@ -66744,8 +67404,20 @@
       "relation": "references",
       "source": "app_server_account_server_accountexport",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L288",
+      "source_location": "L290",
       "target": "app_lib_overlay_layers_overlaylayers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "relation": "references",
+      "source": "app_server_account_server_accountexport",
+      "source_file": "app/server/account.server.ts",
+      "source_location": "L290",
+      "target": "app_lib_overlay_layouts_overlaylayouts",
       "weight": 1.0
     },
     {
@@ -66756,7 +67428,7 @@
       "relation": "references",
       "source": "app_server_account_server_imagerecord",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L229",
+      "source_location": "L231",
       "target": "app_server_images_server_imagekind",
       "weight": 1.0
     },
@@ -67046,6 +67718,30 @@
       "source_file": "app/server/notify.server.ts",
       "source_location": "L27",
       "target": "app_types_streamerstatus",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "relation": "references",
+      "source": "app_server_overlay_layouts_server_layoutupdate",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L88",
+      "target": "app_types_overlaystate",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "relation": "references",
+      "source": "app_server_overlay_layouts_server_layoutupdate",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L89",
+      "target": "app_lib_overlay_layouts_overlaylayouts",
       "weight": 1.0
     },
     {
@@ -67634,6 +68330,30 @@
       "source_file": "app/components/tools/live-chat.tsx",
       "source_location": "L96",
       "target": "app_lib_activity_activityplatform",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "generic_arg",
+      "relation": "references",
+      "source": "app_lib_overlay_layouts_layoutpreset",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L57",
+      "target": "app_lib_overlay_layers_cellrect",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "generic_arg",
+      "relation": "references",
+      "source": "app_lib_overlay_layouts_layoutpreset",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L57",
+      "target": "app_lib_overlay_layers_gridlayer",
       "weight": 1.0
     },
     {
@@ -88623,6 +89343,138 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L2",
+      "target": "app_lib_layer_geometry_withenabled",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L3",
+      "target": "app_lib_overlay_layers_cellrect",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L3",
+      "target": "app_lib_overlay_layers_emptycells",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L3",
+      "target": "app_lib_overlay_layers_grid_layers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L3",
+      "target": "app_lib_overlay_layers_gridlayer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L3",
+      "target": "app_lib_overlay_layers_layercells",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L3",
+      "target": "app_lib_overlay_layers_layerenabled",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L3",
+      "target": "app_lib_overlay_layers_orientation",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L3",
+      "target": "app_lib_overlay_layers_overlaylayers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L3",
+      "target": "app_lib_overlay_layers_readcells",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L3",
+      "target": "app_lib_overlay_layers_storedcells",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
       "source": "app_lib_overlay_legacy",
       "source_file": "app/lib/overlay-legacy.ts",
       "source_location": "L1",
@@ -95262,7 +96114,19 @@
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
       "source_location": "L4",
-      "target": "app_lib_system_system_user_id",
+      "target": "app_lib_overlay_layouts_overlaylayouts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_account_server",
+      "source_file": "app/server/account.server.ts",
+      "source_location": "L4",
+      "target": "app_lib_overlay_layouts_parsestoredlayouts",
       "weight": 1.0
     },
     {
@@ -95274,6 +96138,18 @@
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
       "source_location": "L5",
+      "target": "app_lib_system_system_user_id",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_account_server",
+      "source_file": "app/server/account.server.ts",
+      "source_location": "L6",
       "target": "app_env_appenv",
       "weight": 1.0
     },
@@ -95285,7 +96161,7 @@
       "relation": "imports",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L6",
+      "source_location": "L7",
       "target": "app_server_http_server_getorigin",
       "weight": 1.0
     },
@@ -95297,7 +96173,7 @@
       "relation": "imports",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L6",
+      "source_location": "L7",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -95309,7 +96185,7 @@
       "relation": "imports",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L7",
+      "source_location": "L8",
       "target": "app_server_images_server_deleteimageobjects",
       "weight": 1.0
     },
@@ -95321,7 +96197,7 @@
       "relation": "imports",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L7",
+      "source_location": "L8",
       "target": "app_server_images_server_image_kinds",
       "weight": 1.0
     },
@@ -95333,7 +96209,7 @@
       "relation": "imports",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L7",
+      "source_location": "L8",
       "target": "app_server_images_server_imagekind",
       "weight": 1.0
     },
@@ -95345,7 +96221,7 @@
       "relation": "imports",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L7",
+      "source_location": "L8",
       "target": "app_server_images_server_imagestoragekey",
       "weight": 1.0
     },
@@ -95357,7 +96233,7 @@
       "relation": "imports",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L8",
+      "source_location": "L9",
       "target": "app_server_live_server_notifyroom",
       "weight": 1.0
     },
@@ -97674,6 +98550,42 @@
       "source": "app_server_api_live",
       "source_file": "app/server/api/live.ts",
       "source_location": "L12",
+      "target": "app_server_overlay_layouts_server_getlayouts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_api_live",
+      "source_file": "app/server/api/live.ts",
+      "source_location": "L12",
+      "target": "app_server_overlay_layouts_server_layoutactionschema",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_api_live",
+      "source_file": "app/server/api/live.ts",
+      "source_location": "L12",
+      "target": "app_server_overlay_layouts_server_updatelayouts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_api_live",
+      "source_file": "app/server/api/live.ts",
+      "source_location": "L13",
       "target": "app_server_api_router_apiroute",
       "weight": 1.0
     },
@@ -97685,7 +98597,7 @@
       "relation": "imports",
       "source": "app_server_api_live",
       "source_file": "app/server/api/live.ts",
-      "source_location": "L12",
+      "source_location": "L13",
       "target": "app_server_api_router_get",
       "weight": 1.0
     },
@@ -97697,7 +98609,7 @@
       "relation": "imports",
       "source": "app_server_api_live",
       "source_file": "app/server/api/live.ts",
-      "source_location": "L12",
+      "source_location": "L13",
       "target": "app_server_api_router_requireviewer",
       "weight": 1.0
     },
@@ -97709,7 +98621,7 @@
       "relation": "imports",
       "source": "app_server_api_live",
       "source_file": "app/server/api/live.ts",
-      "source_location": "L12",
+      "source_location": "L13",
       "target": "app_server_api_router_write",
       "weight": 1.0
     },
@@ -103939,6 +104851,306 @@
       "source_file": "app/server/overlay-key.server.ts",
       "source_location": "L8",
       "target": "app_server_http_server_httperror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L2",
+      "target": "app_env_appenv",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L20",
+      "target": "app_types_overlaystate",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L21",
+      "target": "app_server_access_server_assertstreamerwritable",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L22",
+      "target": "app_server_http_server_httperror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L23",
+      "target": "app_server_overlay_state_overlay_columns",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L23",
+      "target": "app_server_overlay_state_overlayrow",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L23",
+      "target": "app_server_overlay_state_overlayvalue",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L3",
+      "target": "app_lib_overlay_layers_onanyoutput",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L3",
+      "target": "app_lib_overlay_layers_orientations",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L3",
+      "target": "app_lib_overlay_layers_stored_layers_length",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L3",
+      "target": "app_lib_overlay_layers_storedlayerstext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L4",
+      "target": "app_lib_overlay_layouts_createlayout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L4",
+      "target": "app_lib_overlay_layouts_deletelayout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L4",
+      "target": "app_lib_overlay_layouts_layouterror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L4",
+      "target": "app_lib_overlay_layouts_layoutnameschema",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L4",
+      "target": "app_lib_overlay_layouts_layoutproblem",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L4",
+      "target": "app_lib_overlay_layouts_layoutstate",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L4",
+      "target": "app_lib_overlay_layouts_newlayout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L4",
+      "target": "app_lib_overlay_layouts_overlaylayouts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L4",
+      "target": "app_lib_overlay_layouts_parsestoredlayouts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L4",
+      "target": "app_lib_overlay_layouts_renamelayout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L4",
+      "target": "app_lib_overlay_layouts_resetlayout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L4",
+      "target": "app_lib_overlay_layouts_selectlayout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L4",
+      "target": "app_lib_overlay_layouts_stored_layouts_length",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L4",
+      "target": "app_lib_overlay_layouts_storedlayoutstext",
       "weight": 1.0
     },
     {
@@ -122154,7 +123366,31 @@
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
       "source_location": "L20",
-      "target": "app_server_mash_sql_mashvalue",
+      "target": "app_lib_overlay_layouts_layout_limit",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_live_control_test",
+      "source_file": "tests/live-control.test.ts",
+      "source_location": "L20",
+      "target": "app_lib_overlay_layouts_overlaylayouts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_live_control_test",
+      "source_file": "tests/live-control.test.ts",
+      "source_location": "L20",
+      "target": "app_lib_overlay_layouts_presetcells",
       "weight": 1.0
     },
     {
@@ -122166,6 +123402,18 @@
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
       "source_location": "L21",
+      "target": "app_server_mash_sql_mashvalue",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_live_control_test",
+      "source_file": "tests/live-control.test.ts",
+      "source_location": "L22",
       "target": "app_server_mash_server_runmashaction",
       "weight": 1.0
     },
@@ -122177,7 +123425,7 @@
       "relation": "imports",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L22",
+      "source_location": "L23",
       "target": "app_server_overlay_state_default_overlay",
       "weight": 1.0
     },
@@ -122189,7 +123437,7 @@
       "relation": "imports",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L22",
+      "source_location": "L23",
       "target": "app_server_overlay_state_overlaypublic",
       "weight": 1.0
     },
@@ -122201,7 +123449,7 @@
       "relation": "imports",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L22",
+      "source_location": "L23",
       "target": "app_server_overlay_state_overlayrow",
       "weight": 1.0
     },
@@ -122213,7 +123461,7 @@
       "relation": "imports",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L22",
+      "source_location": "L23",
       "target": "app_server_overlay_state_overlayvalue",
       "weight": 1.0
     },
@@ -122225,7 +123473,7 @@
       "relation": "imports",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L23",
+      "source_location": "L24",
       "target": "app_server_overlay_server_getoverlaydata",
       "weight": 1.0
     },
@@ -122237,7 +123485,7 @@
       "relation": "imports",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L23",
+      "source_location": "L24",
       "target": "app_server_overlay_server_getoverlaystate",
       "weight": 1.0
     },
@@ -122249,7 +123497,7 @@
       "relation": "imports",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L23",
+      "source_location": "L24",
       "target": "app_server_overlay_server_nextoverlaystate",
       "weight": 1.0
     },
@@ -122261,7 +123509,7 @@
       "relation": "imports",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L23",
+      "source_location": "L24",
       "target": "app_server_overlay_server_overlayupdate",
       "weight": 1.0
     },
@@ -122273,7 +123521,7 @@
       "relation": "imports",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L23",
+      "source_location": "L24",
       "target": "app_server_overlay_server_storedwrites",
       "weight": 1.0
     },
@@ -122285,7 +123533,7 @@
       "relation": "imports",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L23",
+      "source_location": "L24",
       "target": "app_server_overlay_server_updateoverlay",
       "weight": 1.0
     },
@@ -122297,7 +123545,7 @@
       "relation": "imports",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L31",
+      "source_location": "L32",
       "target": "app_types_overlaydata",
       "weight": 1.0
     },
@@ -122309,7 +123557,7 @@
       "relation": "imports",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L31",
+      "source_location": "L32",
       "target": "app_types_overlaystate",
       "weight": 1.0
     },
@@ -122321,7 +123569,7 @@
       "relation": "imports",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L31",
+      "source_location": "L32",
       "target": "app_types_streamevent",
       "weight": 1.0
     },
@@ -122333,7 +123581,7 @@
       "relation": "imports",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L32",
+      "source_location": "L33",
       "target": "app_components_overlay_use_overlay_state_controlstate",
       "weight": 1.0
     },
@@ -122345,7 +123593,7 @@
       "relation": "imports",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L33",
+      "source_location": "L34",
       "target": "app_routes_tools_loader",
       "weight": 1.0
     },
@@ -122357,7 +123605,7 @@
       "relation": "imports",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L34",
+      "source_location": "L35",
       "target": "tests_helpers_api_apicaller",
       "weight": 1.0
     },
@@ -122369,7 +123617,7 @@
       "relation": "imports",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L35",
+      "source_location": "L36",
       "target": "tests_helpers_quota_startofquotawindow",
       "weight": 1.0
     },
@@ -122381,7 +123629,7 @@
       "relation": "imports",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L36",
+      "source_location": "L37",
       "target": "tests_helpers_database_createtestdatabase",
       "weight": 1.0
     },
@@ -122393,7 +123641,7 @@
       "relation": "imports",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L36",
+      "source_location": "L37",
       "target": "tests_helpers_database_testdatabase",
       "weight": 1.0
     },
@@ -124279,6 +125527,426 @@
       "source_file": "tests/overlay-layers.test.ts",
       "source_location": "L45",
       "target": "app_lib_playground_protocol_frame_chars_max",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L14",
+      "target": "app_lib_overlay_layouts_createlayout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L14",
+      "target": "app_lib_overlay_layouts_deletelayout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L14",
+      "target": "app_lib_overlay_layouts_empty_layouts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L14",
+      "target": "app_lib_overlay_layouts_layout_limit",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L14",
+      "target": "app_lib_overlay_layouts_layout_presets",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L14",
+      "target": "app_lib_overlay_layouts_layoutchoice",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L14",
+      "target": "app_lib_overlay_layouts_layoutchoices",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L14",
+      "target": "app_lib_overlay_layouts_layouterror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L14",
+      "target": "app_lib_overlay_layouts_layoutnameschema",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L14",
+      "target": "app_lib_overlay_layouts_layoutproblem",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L14",
+      "target": "app_lib_overlay_layouts_layoutstate",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L14",
+      "target": "app_lib_overlay_layouts_outputpresets",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L14",
+      "target": "app_lib_overlay_layouts_overlaylayouts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L14",
+      "target": "app_lib_overlay_layouts_parsestoredlayouts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L14",
+      "target": "app_lib_overlay_layouts_preset_keys",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L14",
+      "target": "app_lib_overlay_layouts_presetcells",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L14",
+      "target": "app_lib_overlay_layouts_presetid",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L14",
+      "target": "app_lib_overlay_layouts_presetof",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L14",
+      "target": "app_lib_overlay_layouts_renamelayout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L14",
+      "target": "app_lib_overlay_layouts_resetlayout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L14",
+      "target": "app_lib_overlay_layouts_savedlayout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L14",
+      "target": "app_lib_overlay_layouts_selectlayout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L14",
+      "target": "app_lib_overlay_layouts_stored_layouts_length",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L14",
+      "target": "app_lib_overlay_layouts_storedlayoutstext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L14",
+      "target": "app_lib_overlay_layouts_unsaved_layout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L2",
+      "target": "app_lib_overlay_layers_cellfits",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L2",
+      "target": "app_lib_overlay_layers_cellrect",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L2",
+      "target": "app_lib_overlay_layers_default_layers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L2",
+      "target": "app_lib_overlay_layers_emptycells",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L2",
+      "target": "app_lib_overlay_layers_grid_layers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L2",
+      "target": "app_lib_overlay_layers_layercells",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L2",
+      "target": "app_lib_overlay_layers_layerenabled",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L2",
+      "target": "app_lib_overlay_layers_orientation",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L2",
+      "target": "app_lib_overlay_layers_overlappingpair",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L2",
+      "target": "app_lib_overlay_layers_overlaylayers",
       "weight": 1.0
     },
     {
@@ -144480,6 +146148,42 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports_from",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L1",
+      "target": "ref_zod",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L2",
+      "target": "app_lib_layer_geometry",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L3",
+      "target": "app_lib_overlay_layers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
       "source": "app_lib_overlay_legacy",
       "source_file": "app/lib/overlay-legacy.ts",
       "source_location": "L1",
@@ -148366,7 +150070,7 @@
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
       "source_location": "L4",
-      "target": "app_lib_system",
+      "target": "app_lib_overlay_layouts",
       "weight": 1.0
     },
     {
@@ -148378,6 +150082,18 @@
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
       "source_location": "L5",
+      "target": "app_lib_system",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_account_server",
+      "source_file": "app/server/account.server.ts",
+      "source_location": "L6",
       "target": "app_env",
       "type_only": true,
       "weight": 1.0
@@ -148390,7 +150106,7 @@
       "relation": "imports_from",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L6",
+      "source_location": "L7",
       "target": "app_server_http_server",
       "weight": 1.0
     },
@@ -148402,7 +150118,7 @@
       "relation": "imports_from",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L7",
+      "source_location": "L8",
       "target": "app_server_images_server",
       "weight": 1.0
     },
@@ -148414,7 +150130,7 @@
       "relation": "imports_from",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L8",
+      "source_location": "L9",
       "target": "app_server_live_server",
       "weight": 1.0
     },
@@ -149513,6 +151229,18 @@
       "source": "app_server_api_live",
       "source_file": "app/server/api/live.ts",
       "source_location": "L12",
+      "target": "app_server_overlay_layouts_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_api_live",
+      "source_file": "app/server/api/live.ts",
+      "source_location": "L13",
       "target": "app_server_api_router",
       "weight": 1.0
     },
@@ -152693,6 +154421,104 @@
       "source_file": "app/server/overlay-key.server.ts",
       "source_location": "L8",
       "target": "app_server_http_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L1",
+      "target": "ref_zod",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L2",
+      "target": "app_env",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L20",
+      "target": "app_types",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L21",
+      "target": "app_server_access_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L22",
+      "target": "app_server_http_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L23",
+      "target": "app_server_overlay_state",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L3",
+      "target": "app_lib_overlay_layers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L4",
+      "target": "app_lib_overlay_layouts",
       "weight": 1.0
     },
     {
@@ -162034,7 +163860,7 @@
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
       "source_location": "L20",
-      "target": "app_server_mash_sql",
+      "target": "app_lib_overlay_layouts",
       "weight": 1.0
     },
     {
@@ -162046,7 +163872,7 @@
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
       "source_location": "L21",
-      "target": "app_server_mash_server",
+      "target": "app_server_mash_sql",
       "weight": 1.0
     },
     {
@@ -162058,7 +163884,7 @@
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
       "source_location": "L22",
-      "target": "app_server_overlay_state",
+      "target": "app_server_mash_server",
       "weight": 1.0
     },
     {
@@ -162070,6 +163896,18 @@
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
       "source_location": "L23",
+      "target": "app_server_overlay_state",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_live_control_test",
+      "source_file": "tests/live-control.test.ts",
+      "source_location": "L24",
       "target": "app_server_overlay_server",
       "weight": 1.0
     },
@@ -162093,7 +163931,7 @@
       "relation": "imports_from",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L31",
+      "source_location": "L32",
       "target": "app_types",
       "type_only": true,
       "weight": 1.0
@@ -162106,7 +163944,7 @@
       "relation": "imports_from",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L32",
+      "source_location": "L33",
       "target": "app_components_overlay_overlay_control",
       "weight": 1.0
     },
@@ -162118,7 +163956,7 @@
       "relation": "imports_from",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L33",
+      "source_location": "L34",
       "target": "app_routes_tools",
       "weight": 1.0
     },
@@ -162130,7 +163968,7 @@
       "relation": "imports_from",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L34",
+      "source_location": "L35",
       "target": "tests_helpers_api",
       "weight": 1.0
     },
@@ -162142,7 +163980,7 @@
       "relation": "imports_from",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L35",
+      "source_location": "L36",
       "target": "tests_helpers_quota",
       "weight": 1.0
     },
@@ -162154,7 +163992,7 @@
       "relation": "imports_from",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L36",
+      "source_location": "L37",
       "target": "tests_helpers_database",
       "weight": 1.0
     },
@@ -163002,6 +164840,42 @@
       "source_file": "tests/overlay-layers.test.ts",
       "source_location": "L45",
       "target": "app_lib_playground_protocol",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L1",
+      "target": "ref_vitest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L14",
+      "target": "app_lib_overlay_layouts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L2",
+      "target": "app_lib_overlay_layers",
       "weight": 1.0
     },
     {
@@ -169173,7 +171047,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_actiontakenrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L127",
+      "source_location": "L129",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -169185,7 +171059,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_cardrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L86",
+      "source_location": "L88",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -169197,7 +171071,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_commentrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L176",
+      "source_location": "L178",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -169209,7 +171083,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_entryrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L163",
+      "source_location": "L165",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -169221,7 +171095,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_eventrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L67",
+      "source_location": "L69",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -169233,7 +171107,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_legacycommentrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L221",
+      "source_location": "L223",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -169245,7 +171119,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_legacyreactionrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L216",
+      "source_location": "L218",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -169257,7 +171131,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_legacyvoterow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L211",
+      "source_location": "L213",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -169269,7 +171143,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_likerow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L204",
+      "source_location": "L206",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -169281,7 +171155,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_linkrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L95",
+      "source_location": "L97",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -169293,7 +171167,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_mashtaprow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L102",
+      "source_location": "L104",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -169305,7 +171179,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_pagemoderationrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L121",
+      "source_location": "L123",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -169317,7 +171191,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_passkeyrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L112",
+      "source_location": "L114",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -169329,7 +171203,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_providerrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L148",
+      "source_location": "L150",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -169341,7 +171215,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_reactionrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L189",
+      "source_location": "L191",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -169353,7 +171227,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_reportrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L411",
+      "source_location": "L414",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -169365,7 +171239,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_sessionrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L155",
+      "source_location": "L157",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -169377,7 +171251,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_voterow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L196",
+      "source_location": "L198",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -187525,7 +189399,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L501",
+      "source_location": "L502",
       "target": "app_lib_overlay_layers_storedcells",
       "weight": 1.0
     },
@@ -187536,7 +189410,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L510",
+      "source_location": "L511",
       "target": "app_lib_overlay_layers_storeditem",
       "weight": 1.0
     },
@@ -187547,7 +189421,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L525",
+      "source_location": "L526",
       "target": "app_lib_overlay_layers_storedlayerstext",
       "weight": 1.0
     },
@@ -187569,7 +189443,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L543",
+      "source_location": "L544",
       "target": "app_lib_overlay_layers_mergecells",
       "weight": 1.0
     },
@@ -187580,7 +189454,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L552",
+      "source_location": "L553",
       "target": "app_lib_overlay_layers_mergeitem",
       "weight": 1.0
     },
@@ -187602,7 +189476,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L561",
+      "source_location": "L562",
       "target": "app_lib_overlay_layers_mergelayers",
       "weight": 1.0
     },
@@ -187624,7 +189498,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L588",
+      "source_location": "L589",
       "target": "app_lib_overlay_layers_parselayerparam",
       "weight": 1.0
     },
@@ -187635,7 +189509,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L595",
+      "source_location": "L596",
       "target": "app_lib_overlay_layers_layerurl",
       "weight": 1.0
     },
@@ -187725,6 +189599,413 @@
       "source_file": "app/lib/overlay-layers.ts",
       "source_location": "L96",
       "target": "app_lib_overlay_layers_overlaylayers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L101",
+      "target": "app_lib_overlay_layouts_presetof",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L106",
+      "target": "app_lib_overlay_layouts_presetcells",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L111",
+      "target": "app_lib_overlay_layouts_outputpresets",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L115",
+      "target": "app_lib_overlay_layouts_samecells",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L124",
+      "target": "app_lib_overlay_layouts_hascells",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L129",
+      "target": "app_lib_overlay_layouts_layoutnameschema",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L136",
+      "target": "app_lib_overlay_layouts_layoutid",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L138",
+      "target": "app_lib_overlay_layouts_storedoutputschema",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L171",
+      "target": "app_lib_overlay_layouts_parsestoredlayouts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L186",
+      "target": "app_lib_overlay_layouts_storedlayoutstext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L195",
+      "target": "app_lib_overlay_layouts_layoutchoice",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L208",
+      "target": "app_lib_overlay_layouts_unsaved_layout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L211",
+      "target": "app_lib_overlay_layouts_layoutchoices",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L243",
+      "target": "app_lib_overlay_layouts_layoutproblem",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L246",
+      "target": "app_lib_overlay_layouts_layouterror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L252",
+      "target": "app_lib_overlay_layouts_layoutstate",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L258",
+      "target": "app_lib_overlay_layouts_newlayout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L26",
+      "target": "app_lib_overlay_layouts_layout_limit",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L263",
+      "target": "app_lib_overlay_layouts_owncount",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L27",
+      "target": "app_lib_overlay_layouts_layout_name_length",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L271",
+      "target": "app_lib_overlay_layouts_keptlive",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L29",
+      "target": "app_lib_overlay_layouts_stored_layouts_length",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L290",
+      "target": "app_lib_overlay_layouts_withlayout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L302",
+      "target": "app_lib_overlay_layouts_selectlayout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L31",
+      "target": "app_lib_overlay_layouts_savedlayout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L320",
+      "target": "app_lib_overlay_layouts_createlayout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L337",
+      "target": "app_lib_overlay_layouts_renamelayout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L354",
+      "target": "app_lib_overlay_layouts_deletelayout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L365",
+      "target": "app_lib_overlay_layouts_resetlayout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L39",
+      "target": "app_lib_overlay_layouts_outputlayouts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L45",
+      "target": "app_lib_overlay_layouts_overlaylayouts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L47",
+      "target": "app_lib_overlay_layouts_empty_layouts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L52",
+      "target": "app_lib_overlay_layouts_preset_keys",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L53",
+      "target": "app_lib_overlay_layouts_presetkey",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L55",
+      "target": "app_lib_overlay_layouts_layoutpreset",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L61",
+      "target": "app_lib_overlay_layouts_layout_presets",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L96",
+      "target": "app_lib_overlay_layouts_presetid",
       "weight": 1.0
     },
     {
@@ -192673,7 +194954,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L102",
+      "source_location": "L104",
       "target": "app_server_account_server_mashtaprow",
       "weight": 1.0
     },
@@ -192684,18 +194965,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L11",
-      "target": "app_server_account_server_export_page_size",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_server_account_server",
-      "source_file": "app/server/account.server.ts",
-      "source_location": "L112",
+      "source_location": "L114",
       "target": "app_server_account_server_passkeyrow",
       "weight": 1.0
     },
@@ -192706,7 +194976,18 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L121",
+      "source_location": "L12",
+      "target": "app_server_account_server_export_page_size",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_account_server",
+      "source_file": "app/server/account.server.ts",
+      "source_location": "L123",
       "target": "app_server_account_server_pagemoderationrow",
       "weight": 1.0
     },
@@ -192717,7 +194998,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L127",
+      "source_location": "L129",
       "target": "app_server_account_server_actiontakenrow",
       "weight": 1.0
     },
@@ -192728,7 +195009,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L135",
+      "source_location": "L137",
       "target": "app_server_account_server_applicationrow",
       "weight": 1.0
     },
@@ -192739,7 +195020,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L144",
+      "source_location": "L146",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -192750,7 +195031,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L148",
+      "source_location": "L150",
       "target": "app_server_account_server_providerrow",
       "weight": 1.0
     },
@@ -192761,7 +195042,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L155",
+      "source_location": "L157",
       "target": "app_server_account_server_sessionrow",
       "weight": 1.0
     },
@@ -192772,7 +195053,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L163",
+      "source_location": "L165",
       "target": "app_server_account_server_entryrow",
       "weight": 1.0
     },
@@ -192783,7 +195064,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L176",
+      "source_location": "L178",
       "target": "app_server_account_server_commentrow",
       "weight": 1.0
     },
@@ -192794,7 +195075,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L189",
+      "source_location": "L191",
       "target": "app_server_account_server_reactionrow",
       "weight": 1.0
     },
@@ -192805,7 +195086,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L196",
+      "source_location": "L198",
       "target": "app_server_account_server_voterow",
       "weight": 1.0
     },
@@ -192816,18 +195097,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L20",
-      "target": "app_server_account_server_userrow",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_server_account_server",
-      "source_file": "app/server/account.server.ts",
-      "source_location": "L204",
+      "source_location": "L206",
       "target": "app_server_account_server_likerow",
       "weight": 1.0
     },
@@ -192838,7 +195108,18 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L211",
+      "source_location": "L21",
+      "target": "app_server_account_server_userrow",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_account_server",
+      "source_file": "app/server/account.server.ts",
+      "source_location": "L213",
       "target": "app_server_account_server_legacyvoterow",
       "weight": 1.0
     },
@@ -192849,7 +195130,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L216",
+      "source_location": "L218",
       "target": "app_server_account_server_legacyreactionrow",
       "weight": 1.0
     },
@@ -192860,7 +195141,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L221",
+      "source_location": "L223",
       "target": "app_server_account_server_legacycommentrow",
       "weight": 1.0
     },
@@ -192871,7 +195152,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L228",
+      "source_location": "L230",
       "target": "app_server_account_server_imagerecord",
       "weight": 1.0
     },
@@ -192882,7 +195163,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L236",
+      "source_location": "L238",
       "target": "app_server_account_server_signupacceptancerecord",
       "weight": 1.0
     },
@@ -192893,7 +195174,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L243",
+      "source_location": "L245",
       "target": "app_server_account_server_accountexport",
       "weight": 1.0
     },
@@ -192904,7 +195185,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L37",
+      "source_location": "L38",
       "target": "app_server_account_server_streamerrow",
       "weight": 1.0
     },
@@ -192915,7 +195196,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L409",
+      "source_location": "L412",
       "target": "app_server_account_server_deleted_author_snapshot",
       "weight": 1.0
     },
@@ -192926,7 +195207,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L411",
+      "source_location": "L414",
       "target": "app_server_account_server_reportrow",
       "weight": 1.0
     },
@@ -192937,7 +195218,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L421",
+      "source_location": "L424",
       "target": "app_server_account_server_iso",
       "weight": 1.0
     },
@@ -192948,7 +195229,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L425",
+      "source_location": "L428",
       "target": "app_server_account_server_optionaliso",
       "weight": 1.0
     },
@@ -192959,7 +195240,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L430",
+      "source_location": "L433",
       "target": "app_server_account_server_readall",
       "weight": 1.0
     },
@@ -192970,7 +195251,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L442",
+      "source_location": "L445",
       "target": "app_server_account_server_imagerecords",
       "weight": 1.0
     },
@@ -192981,7 +195262,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L464",
+      "source_location": "L467",
       "target": "app_server_account_server_readhistory",
       "weight": 1.0
     },
@@ -192992,7 +195273,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L54",
+      "source_location": "L55",
       "target": "app_server_account_server_overlayrow",
       "weight": 1.0
     },
@@ -193003,7 +195284,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L601",
+      "source_location": "L604",
       "target": "app_server_account_server_history",
       "weight": 1.0
     },
@@ -193014,7 +195295,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L603",
+      "source_location": "L606",
       "target": "app_server_account_server_parsejson",
       "weight": 1.0
     },
@@ -193025,7 +195306,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L612",
+      "source_location": "L615",
       "target": "app_server_account_server_pageexport",
       "weight": 1.0
     },
@@ -193036,7 +195317,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L67",
+      "source_location": "L69",
       "target": "app_server_account_server_eventrow",
       "weight": 1.0
     },
@@ -193047,7 +195328,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L688",
+      "source_location": "L692",
       "target": "app_server_account_server_accountprofile",
       "weight": 1.0
     },
@@ -193058,7 +195339,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L710",
+      "source_location": "L714",
       "target": "app_server_account_server_exportchannels",
       "weight": 1.0
     },
@@ -193069,7 +195350,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L736",
+      "source_location": "L740",
       "target": "app_server_account_server_exportaccount",
       "weight": 1.0
     },
@@ -193080,7 +195361,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L86",
+      "source_location": "L88",
       "target": "app_server_account_server_cardrow",
       "weight": 1.0
     },
@@ -193091,7 +195372,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L917",
+      "source_location": "L921",
       "target": "app_server_account_server_deleteaccount",
       "weight": 1.0
     },
@@ -193102,7 +195383,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L95",
+      "source_location": "L97",
       "target": "app_server_account_server_linkrow",
       "weight": 1.0
     },
@@ -193487,7 +195768,7 @@
       "relation": "contains",
       "source": "app_server_api_live",
       "source_file": "app/server/api/live.ts",
-      "source_location": "L16",
+      "source_location": "L17",
       "target": "app_server_api_live_liveroutes",
       "weight": 1.0
     },
@@ -199429,6 +201710,105 @@
       "source_file": "app/server/overlay-key.server.ts",
       "source_location": "L95",
       "target": "app_server_overlay_key_server_overlaykeyoutput",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L28",
+      "target": "app_server_overlay_layouts_server_output",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L29",
+      "target": "app_server_overlay_layouts_server_id",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L32",
+      "target": "app_server_overlay_layouts_server_layoutactionschema",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L47",
+      "target": "app_server_overlay_layouts_server_layoutaction",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L50",
+      "target": "app_server_overlay_layouts_server_problemerror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L60",
+      "target": "app_server_overlay_layouts_server_getlayouts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L68",
+      "target": "app_server_overlay_layouts_server_nextlayoutstate",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L87",
+      "target": "app_server_overlay_layouts_server_layoutupdate",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L97",
+      "target": "app_server_overlay_layouts_server_updatelayouts",
       "weight": 1.0
     },
     {
@@ -205543,7 +207923,7 @@
       "relation": "contains",
       "source": "db_schema",
       "source_file": "db/schema.ts",
-      "source_location": "L777",
+      "source_location": "L780",
       "target": "db_schema_overlaykeys",
       "weight": 1.0
     },
@@ -205554,7 +207934,7 @@
       "relation": "contains",
       "source": "db_schema",
       "source_file": "db/schema.ts",
-      "source_location": "L804",
+      "source_location": "L807",
       "target": "db_schema_entrymash",
       "weight": 1.0
     },
@@ -205565,7 +207945,7 @@
       "relation": "contains",
       "source": "db_schema",
       "source_file": "db/schema.ts",
-      "source_location": "L827",
+      "source_location": "L830",
       "target": "db_schema_mashtaps",
       "weight": 1.0
     },
@@ -205576,7 +207956,7 @@
       "relation": "contains",
       "source": "db_schema",
       "source_file": "db/schema.ts",
-      "source_location": "L852",
+      "source_location": "L855",
       "target": "db_schema_aiinterest",
       "weight": 1.0
     },
@@ -205587,7 +207967,7 @@
       "relation": "contains",
       "source": "db_schema",
       "source_file": "db/schema.ts",
-      "source_location": "L868",
+      "source_location": "L871",
       "target": "db_schema_aiinterestdaily",
       "weight": 1.0
     },
@@ -205609,7 +207989,7 @@
       "relation": "contains",
       "source": "db_schema",
       "source_file": "db/schema.ts",
-      "source_location": "L881",
+      "source_location": "L884",
       "target": "db_schema_imageversions",
       "weight": 1.0
     },
@@ -205620,7 +208000,7 @@
       "relation": "contains",
       "source": "db_schema",
       "source_file": "db/schema.ts",
-      "source_location": "L897",
+      "source_location": "L900",
       "target": "db_schema_conversiondaily",
       "weight": 1.0
     },
@@ -205631,7 +208011,7 @@
       "relation": "contains",
       "source": "db_schema",
       "source_file": "db/schema.ts",
-      "source_location": "L911",
+      "source_location": "L914",
       "target": "db_schema_conversionclicks",
       "weight": 1.0
     },
@@ -205642,7 +208022,7 @@
       "relation": "contains",
       "source": "db_schema",
       "source_file": "db/schema.ts",
-      "source_location": "L926",
+      "source_location": "L929",
       "target": "db_schema_channelconnections",
       "weight": 1.0
     },
@@ -205653,7 +208033,7 @@
       "relation": "contains",
       "source": "db_schema",
       "source_file": "db/schema.ts",
-      "source_location": "L962",
+      "source_location": "L965",
       "target": "db_schema_channeltokens",
       "weight": 1.0
     },
@@ -208029,7 +210409,7 @@
       "relation": "contains",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L769",
+      "source_location": "L771",
       "target": "tests_account_test_verificationseed",
       "weight": 1.0
     },
@@ -214343,7 +216723,7 @@
       "relation": "contains",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1411",
+      "source_location": "L1522",
       "target": "tests_live_control_test_characters",
       "weight": 1.0
     },
@@ -214354,7 +216734,7 @@
       "relation": "contains",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1420",
+      "source_location": "L1531",
       "target": "tests_live_control_test_characterson",
       "weight": 1.0
     },
@@ -214365,7 +216745,7 @@
       "relation": "contains",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L153",
+      "source_location": "L154",
       "target": "tests_live_control_test_emptyoverlay",
       "weight": 1.0
     },
@@ -214376,7 +216756,7 @@
       "relation": "contains",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1676",
+      "source_location": "L1787",
       "target": "tests_live_control_test_event",
       "weight": 1.0
     },
@@ -214387,7 +216767,7 @@
       "relation": "contains",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L563",
+      "source_location": "L564",
       "target": "tests_live_control_test_create",
       "weight": 1.0
     },
@@ -214398,7 +216778,7 @@
       "relation": "contains",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L570",
+      "source_location": "L571",
       "target": "tests_live_control_test_act",
       "weight": 1.0
     },
@@ -214409,7 +216789,7 @@
       "relation": "contains",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L574",
+      "source_location": "L575",
       "target": "tests_live_control_test_phase",
       "weight": 1.0
     },
@@ -214420,7 +216800,7 @@
       "relation": "contains",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L58",
+      "source_location": "L59",
       "target": "tests_live_control_test_call_cookie_context",
       "weight": 1.0
     },
@@ -214431,7 +216811,7 @@
       "relation": "contains",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L60",
+      "source_location": "L61",
       "target": "tests_live_control_test_body",
       "weight": 1.0
     },
@@ -214442,7 +216822,7 @@
       "relation": "contains",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L64",
+      "source_location": "L65",
       "target": "tests_live_control_test_seed",
       "weight": 1.0
     },
@@ -214453,7 +216833,7 @@
       "relation": "contains",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L680",
+      "source_location": "L681",
       "target": "tests_live_control_test_send",
       "weight": 1.0
     },
@@ -214464,7 +216844,7 @@
       "relation": "contains",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L684",
+      "source_location": "L685",
       "target": "tests_live_control_test_overlay",
       "weight": 1.0
     },
@@ -214475,7 +216855,7 @@
       "relation": "contains",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L689",
+      "source_location": "L690",
       "target": "tests_live_control_test_storedrow",
       "weight": 1.0
     },
@@ -214486,7 +216866,7 @@
       "relation": "contains",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L766",
+      "source_location": "L767",
       "target": "tests_live_control_test_oldrow",
       "weight": 1.0
     },
@@ -214497,7 +216877,7 @@
       "relation": "contains",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L850",
+      "source_location": "L851",
       "target": "tests_live_control_test_racingenv",
       "weight": 1.0
     },
@@ -214508,7 +216888,7 @@
       "relation": "contains",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L920",
+      "source_location": "L921",
       "target": "tests_live_control_test_storedlayers",
       "weight": 1.0
     },
@@ -214939,6 +217319,72 @@
       "source_file": "tests/overlay-layers.test.ts",
       "source_location": "L81",
       "target": "tests_overlay_layers_test_stored",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L44",
+      "target": "tests_overlay_layouts_test_chatcell",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L45",
+      "target": "tests_overlay_layouts_test_pollcell",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L46",
+      "target": "tests_overlay_layouts_test_keep",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L49",
+      "target": "tests_overlay_layouts_test_start",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L58",
+      "target": "tests_overlay_layouts_test_problem",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_overlay_layouts_test",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L68",
+      "target": "tests_overlay_layouts_test_ids",
       "weight": 1.0
     },
     {
@@ -218328,6 +220774,17 @@
       "source_file": "app/lib/comment-markdown.ts",
       "source_location": "L88",
       "target": "app_lib_comment_markdown_commenttokenizer_reflink",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "app_lib_overlay_layouts_layouterror",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L247",
+      "target": "app_lib_overlay_layouts_layouterror_constructor",
       "weight": 1.0
     },
     {
@@ -222833,7 +225290,7 @@
       "relation": "indirect_call",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L202",
+      "source_location": "L203",
       "target": "tests_fading_rows_test_row",
       "weight": 1.0
     },
@@ -222845,7 +225302,7 @@
       "relation": "indirect_call",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L312",
+      "source_location": "L313",
       "target": "tests_e2e_grid_helpers_saved",
       "weight": 1.0
     },
@@ -222857,7 +225314,7 @@
       "relation": "indirect_call",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L433",
+      "source_location": "L434",
       "target": "app_components_overlay_overlay_stage_overlaystage",
       "weight": 1.0
     },
@@ -222869,7 +225326,7 @@
       "relation": "indirect_call",
       "source": "tests_live_control_test_seed",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L102",
+      "source_location": "L103",
       "target": "tests_board_states_test_card",
       "weight": 1.0
     },
@@ -222881,7 +225338,7 @@
       "relation": "indirect_call",
       "source": "tests_live_control_test_seed",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L95",
+      "source_location": "L96",
       "target": "tests_tools_live_ui_test_topic",
       "weight": 1.0
     },
@@ -225077,7 +227534,7 @@
       "relation": "indirect_call",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L206",
+      "source_location": "L207",
       "target": "tests_layer_geometry_test_layers",
       "weight": 1.0
     },
@@ -225089,7 +227546,7 @@
       "relation": "indirect_call",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L708",
+      "source_location": "L709",
       "target": "tests_tools_live_ui_test_topic",
       "weight": 1.0
     },
@@ -225101,7 +227558,7 @@
       "relation": "indirect_call",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L710",
+      "source_location": "L711",
       "target": "tests_board_states_test_card",
       "weight": 1.0
     },
@@ -225933,6 +228390,21 @@
       "norm_label": "playgroundsim",
       "source_file": "app/lib/playground/sim.ts",
       "source_location": "L139"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "_ts_fields": {
+        "problem": "LayoutProblem"
+      },
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_layouterror",
+      "label": "LayoutError",
+      "norm_label": "layouterror",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L246"
     },
     {
       "_callable": true,
@@ -229051,6 +231523,114 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_lib_overlay_layouts_layoutchoice",
+      "label": "LayoutChoice",
+      "norm_label": "layoutchoice",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L195"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_layoutpreset",
+      "label": "LayoutPreset",
+      "norm_label": "layoutpreset",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L55"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_layoutproblem",
+      "label": "LayoutProblem",
+      "norm_label": "layoutproblem",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L243"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_layoutstate",
+      "label": "LayoutState",
+      "norm_label": "layoutstate",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L252"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_newlayout",
+      "label": "NewLayout",
+      "norm_label": "newlayout",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L258"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_outputlayouts",
+      "label": "OutputLayouts",
+      "norm_label": "outputlayouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L39"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_overlaylayouts",
+      "label": "OverlayLayouts",
+      "norm_label": "overlaylayouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L45"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_presetkey",
+      "label": "PresetKey",
+      "norm_label": "presetkey",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L53"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_savedlayout",
+      "label": "SavedLayout",
+      "norm_label": "savedlayout",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L31"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_lib_overlay_legacy_legacycontent",
       "label": "LegacyContent",
       "norm_label": "legacycontent",
@@ -229703,7 +232283,7 @@
       "label": "AccountExport",
       "norm_label": "accountexport",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L243"
+      "source_location": "L245"
     },
     {
       "_callable": true,
@@ -229715,7 +232295,7 @@
       "label": "ActionTakenRow",
       "norm_label": "actiontakenrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L127"
+      "source_location": "L129"
     },
     {
       "_callable": true,
@@ -229727,7 +232307,7 @@
       "label": "ApplicationRow",
       "norm_label": "applicationrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L135"
+      "source_location": "L137"
     },
     {
       "_callable": true,
@@ -229739,7 +232319,7 @@
       "label": "CardRow",
       "norm_label": "cardrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L86"
+      "source_location": "L88"
     },
     {
       "_callable": true,
@@ -229751,7 +232331,7 @@
       "label": "CommentRow",
       "norm_label": "commentrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L176"
+      "source_location": "L178"
     },
     {
       "_callable": true,
@@ -229763,7 +232343,7 @@
       "label": "EntryRow",
       "norm_label": "entryrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L163"
+      "source_location": "L165"
     },
     {
       "_callable": true,
@@ -229775,7 +232355,7 @@
       "label": "EventRow",
       "norm_label": "eventrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L67"
+      "source_location": "L69"
     },
     {
       "_callable": true,
@@ -229787,7 +232367,7 @@
       "label": "History",
       "norm_label": "history",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L601"
+      "source_location": "L604"
     },
     {
       "_callable": true,
@@ -229799,7 +232379,7 @@
       "label": "ImageRecord",
       "norm_label": "imagerecord",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L228"
+      "source_location": "L230"
     },
     {
       "_callable": true,
@@ -229811,7 +232391,7 @@
       "label": "LegacyCommentRow",
       "norm_label": "legacycommentrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L221"
+      "source_location": "L223"
     },
     {
       "_callable": true,
@@ -229823,7 +232403,7 @@
       "label": "LegacyReactionRow",
       "norm_label": "legacyreactionrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L216"
+      "source_location": "L218"
     },
     {
       "_callable": true,
@@ -229835,7 +232415,7 @@
       "label": "LegacyVoteRow",
       "norm_label": "legacyvoterow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L211"
+      "source_location": "L213"
     },
     {
       "_callable": true,
@@ -229847,7 +232427,7 @@
       "label": "LikeRow",
       "norm_label": "likerow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L204"
+      "source_location": "L206"
     },
     {
       "_callable": true,
@@ -229859,7 +232439,7 @@
       "label": "LinkRow",
       "norm_label": "linkrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L95"
+      "source_location": "L97"
     },
     {
       "_callable": true,
@@ -229871,7 +232451,7 @@
       "label": "MashTapRow",
       "norm_label": "mashtaprow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L102"
+      "source_location": "L104"
     },
     {
       "_callable": true,
@@ -229883,7 +232463,7 @@
       "label": "OverlayRow",
       "norm_label": "overlayrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L54"
+      "source_location": "L55"
     },
     {
       "_callable": true,
@@ -229895,7 +232475,7 @@
       "label": "PagedRow",
       "norm_label": "pagedrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L144"
+      "source_location": "L146"
     },
     {
       "_callable": true,
@@ -229907,7 +232487,7 @@
       "label": "PageModerationRow",
       "norm_label": "pagemoderationrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L121"
+      "source_location": "L123"
     },
     {
       "_callable": true,
@@ -229919,7 +232499,7 @@
       "label": "PasskeyRow",
       "norm_label": "passkeyrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L112"
+      "source_location": "L114"
     },
     {
       "_callable": true,
@@ -229931,7 +232511,7 @@
       "label": "ProviderRow",
       "norm_label": "providerrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L148"
+      "source_location": "L150"
     },
     {
       "_callable": true,
@@ -229943,7 +232523,7 @@
       "label": "ReactionRow",
       "norm_label": "reactionrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L189"
+      "source_location": "L191"
     },
     {
       "_callable": true,
@@ -229955,7 +232535,7 @@
       "label": "ReportRow",
       "norm_label": "reportrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L411"
+      "source_location": "L414"
     },
     {
       "_callable": true,
@@ -229967,7 +232547,7 @@
       "label": "SessionRow",
       "norm_label": "sessionrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L155"
+      "source_location": "L157"
     },
     {
       "_callable": true,
@@ -229979,7 +232559,7 @@
       "label": "SignupAcceptanceRecord",
       "norm_label": "signupacceptancerecord",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L236"
+      "source_location": "L238"
     },
     {
       "_callable": true,
@@ -229991,7 +232571,7 @@
       "label": "StreamerRow",
       "norm_label": "streamerrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L37"
+      "source_location": "L38"
     },
     {
       "_callable": true,
@@ -230003,7 +232583,7 @@
       "label": "UserRow",
       "norm_label": "userrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L20"
+      "source_location": "L21"
     },
     {
       "_callable": true,
@@ -230015,7 +232595,7 @@
       "label": "VoteRow",
       "norm_label": "voterow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L196"
+      "source_location": "L198"
     },
     {
       "_callable": true,
@@ -230844,6 +233424,30 @@
       "norm_label": "keyrow",
       "source_file": "app/server/overlay-key.server.ts",
       "source_location": "L69"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_overlay_layouts_server_layoutaction",
+      "label": "LayoutAction",
+      "norm_label": "layoutaction",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L47"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_overlay_layouts_server_layoutupdate",
+      "label": "LayoutUpdate",
+      "norm_label": "layoutupdate",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L87"
     },
     {
       "_callable": true,
@@ -232787,7 +235391,7 @@
       "label": "VerificationSeed",
       "norm_label": "verificationseed",
       "source_file": "tests/account.test.ts",
-      "source_location": "L769"
+      "source_location": "L771"
     },
     {
       "_callable": true,
@@ -247385,7 +249989,7 @@
       "label": "layerUrl()",
       "norm_label": "layerurl()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L595"
+      "source_location": "L596"
     },
     {
       "_callable": true,
@@ -247396,7 +250000,7 @@
       "label": "mergeCells()",
       "norm_label": "mergecells()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L543"
+      "source_location": "L544"
     },
     {
       "_callable": true,
@@ -247407,7 +250011,7 @@
       "label": "mergeItem()",
       "norm_label": "mergeitem()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L552"
+      "source_location": "L553"
     },
     {
       "_callable": true,
@@ -247418,7 +250022,7 @@
       "label": "mergeLayers()",
       "norm_label": "mergelayers()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L561"
+      "source_location": "L562"
     },
     {
       "_callable": true,
@@ -247462,7 +250066,7 @@
       "label": "parseLayerParam()",
       "norm_label": "parselayerparam()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L588"
+      "source_location": "L589"
     },
     {
       "_callable": true,
@@ -247539,7 +250143,7 @@
       "label": "storedCells()",
       "norm_label": "storedcells()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L501"
+      "source_location": "L502"
     },
     {
       "_callable": true,
@@ -247550,7 +250154,7 @@
       "label": "storedItem()",
       "norm_label": "storeditem()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L510"
+      "source_location": "L511"
     },
     {
       "_callable": true,
@@ -247572,7 +250176,216 @@
       "label": "storedLayersText()",
       "norm_label": "storedlayerstext()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L525"
+      "source_location": "L526"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_createlayout",
+      "label": "createLayout()",
+      "norm_label": "createlayout()",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L320"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_deletelayout",
+      "label": "deleteLayout()",
+      "norm_label": "deletelayout()",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L354"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_hascells",
+      "label": "hasCells()",
+      "norm_label": "hascells()",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L124"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_keptlive",
+      "label": "keptLive()",
+      "norm_label": "keptlive()",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L271"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_layoutchoices",
+      "label": "layoutChoices()",
+      "norm_label": "layoutchoices()",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L211"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_layouterror_constructor",
+      "label": ".constructor()",
+      "norm_label": ".constructor()",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L247"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_outputpresets",
+      "label": "outputPresets()",
+      "norm_label": "outputpresets()",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L111"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_owncount",
+      "label": "ownCount()",
+      "norm_label": "owncount()",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L263"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_parsestoredlayouts",
+      "label": "parseStoredLayouts()",
+      "norm_label": "parsestoredlayouts()",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L171"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_presetcells",
+      "label": "presetCells()",
+      "norm_label": "presetcells()",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L106"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_presetid",
+      "label": "presetId()",
+      "norm_label": "presetid()",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L96"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_presetof",
+      "label": "presetOf()",
+      "norm_label": "presetof()",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L101"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_renamelayout",
+      "label": "renameLayout()",
+      "norm_label": "renamelayout()",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L337"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_resetlayout",
+      "label": "resetLayout()",
+      "norm_label": "resetlayout()",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L365"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_samecells",
+      "label": "sameCells()",
+      "norm_label": "samecells()",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L115"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_selectlayout",
+      "label": "selectLayout()",
+      "norm_label": "selectlayout()",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L302"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_storedlayoutstext",
+      "label": "storedLayoutsText()",
+      "norm_label": "storedlayoutstext()",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L186"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_storedoutputschema",
+      "label": "storedOutputSchema()",
+      "norm_label": "storedoutputschema()",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L138"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_withlayout",
+      "label": "withLayout()",
+      "norm_label": "withlayout()",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L290"
     },
     {
       "_callable": true,
@@ -251033,7 +253846,7 @@
       "label": "accountProfile()",
       "norm_label": "accountprofile()",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L688"
+      "source_location": "L692"
     },
     {
       "_callable": true,
@@ -251044,7 +253857,7 @@
       "label": "deleteAccount()",
       "norm_label": "deleteaccount()",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L917"
+      "source_location": "L921"
     },
     {
       "_callable": true,
@@ -251055,7 +253868,7 @@
       "label": "exportAccount()",
       "norm_label": "exportaccount()",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L736"
+      "source_location": "L740"
     },
     {
       "_callable": true,
@@ -251066,7 +253879,7 @@
       "label": "exportChannels()",
       "norm_label": "exportchannels()",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L710"
+      "source_location": "L714"
     },
     {
       "_callable": true,
@@ -251077,7 +253890,7 @@
       "label": "imageRecords()",
       "norm_label": "imagerecords()",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L442"
+      "source_location": "L445"
     },
     {
       "_callable": true,
@@ -251088,7 +253901,7 @@
       "label": "iso()",
       "norm_label": "iso()",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L421"
+      "source_location": "L424"
     },
     {
       "_callable": true,
@@ -251099,7 +253912,7 @@
       "label": "optionalIso()",
       "norm_label": "optionaliso()",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L425"
+      "source_location": "L428"
     },
     {
       "_callable": true,
@@ -251110,7 +253923,7 @@
       "label": "pageExport()",
       "norm_label": "pageexport()",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L612"
+      "source_location": "L615"
     },
     {
       "_callable": true,
@@ -251121,7 +253934,7 @@
       "label": "parseJson()",
       "norm_label": "parsejson()",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L603"
+      "source_location": "L606"
     },
     {
       "_callable": true,
@@ -251132,7 +253945,7 @@
       "label": "readAll()",
       "norm_label": "readall()",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L430"
+      "source_location": "L433"
     },
     {
       "_callable": true,
@@ -251143,7 +253956,7 @@
       "label": "readHistory()",
       "norm_label": "readhistory()",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L464"
+      "source_location": "L467"
     },
     {
       "_callable": true,
@@ -256057,6 +258870,50 @@
       "norm_label": "showoverlaykey()",
       "source_file": "app/server/overlay-key.server.ts",
       "source_location": "L174"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_overlay_layouts_server_getlayouts",
+      "label": "getLayouts()",
+      "norm_label": "getlayouts()",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L60"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_overlay_layouts_server_nextlayoutstate",
+      "label": "nextLayoutState()",
+      "norm_label": "nextlayoutstate()",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L68"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_overlay_layouts_server_problemerror",
+      "label": "problemError()",
+      "norm_label": "problemerror()",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L50"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_overlay_layouts_server_updatelayouts",
+      "label": "updateLayouts()",
+      "norm_label": "updatelayouts()",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L97"
     },
     {
       "_callable": true,
@@ -264925,7 +267782,7 @@
       "label": "act()",
       "norm_label": "act()",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L570"
+      "source_location": "L571"
     },
     {
       "_callable": true,
@@ -264936,7 +267793,7 @@
       "label": "body()",
       "norm_label": "body()",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L60"
+      "source_location": "L61"
     },
     {
       "_callable": true,
@@ -264947,7 +267804,7 @@
       "label": "characters()",
       "norm_label": "characters()",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1411"
+      "source_location": "L1522"
     },
     {
       "_callable": true,
@@ -264958,7 +267815,7 @@
       "label": "charactersOn()",
       "norm_label": "characterson()",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1420"
+      "source_location": "L1531"
     },
     {
       "_callable": true,
@@ -264969,7 +267826,7 @@
       "label": "create()",
       "norm_label": "create()",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L563"
+      "source_location": "L564"
     },
     {
       "_callable": true,
@@ -264980,7 +267837,7 @@
       "label": "emptyOverlay()",
       "norm_label": "emptyoverlay()",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L153"
+      "source_location": "L154"
     },
     {
       "_callable": true,
@@ -264991,7 +267848,7 @@
       "label": "event()",
       "norm_label": "event()",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1676"
+      "source_location": "L1787"
     },
     {
       "_callable": true,
@@ -265002,7 +267859,7 @@
       "label": "oldRow()",
       "norm_label": "oldrow()",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L766"
+      "source_location": "L767"
     },
     {
       "_callable": true,
@@ -265013,7 +267870,7 @@
       "label": "overlay()",
       "norm_label": "overlay()",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L684"
+      "source_location": "L685"
     },
     {
       "_callable": true,
@@ -265024,7 +267881,7 @@
       "label": "phase()",
       "norm_label": "phase()",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L574"
+      "source_location": "L575"
     },
     {
       "_callable": true,
@@ -265035,7 +267892,7 @@
       "label": "racingEnv()",
       "norm_label": "racingenv()",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L850"
+      "source_location": "L851"
     },
     {
       "_callable": true,
@@ -265046,7 +267903,7 @@
       "label": "seed()",
       "norm_label": "seed()",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L64"
+      "source_location": "L65"
     },
     {
       "_callable": true,
@@ -265057,7 +267914,7 @@
       "label": "send()",
       "norm_label": "send()",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L680"
+      "source_location": "L681"
     },
     {
       "_callable": true,
@@ -265068,7 +267925,7 @@
       "label": "storedLayers()",
       "norm_label": "storedlayers()",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L920"
+      "source_location": "L921"
     },
     {
       "_callable": true,
@@ -265079,7 +267936,7 @@
       "label": "storedRow()",
       "norm_label": "storedrow()",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L689"
+      "source_location": "L690"
     },
     {
       "_callable": true,
@@ -265322,6 +268179,28 @@
       "norm_label": "withcells()",
       "source_file": "tests/overlay-layers.test.ts",
       "source_location": "L72"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_overlay_layouts_test_ids",
+      "label": "ids()",
+      "norm_label": "ids()",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L68"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_overlay_layouts_test_problem",
+      "label": "problem()",
+      "norm_label": "problem()",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L58"
     },
     {
       "_callable": true,
@@ -272490,6 +275369,106 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_lib_overlay_layouts",
+      "label": "overlay-layouts.ts",
+      "norm_label": "overlay-layouts.ts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_empty_layouts",
+      "label": "EMPTY_LAYOUTS",
+      "norm_label": "empty_layouts",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L47"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_layout_limit",
+      "label": "LAYOUT_LIMIT",
+      "norm_label": "layout_limit",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L26"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_layout_name_length",
+      "label": "LAYOUT_NAME_LENGTH",
+      "norm_label": "layout_name_length",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L27"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_layout_presets",
+      "label": "LAYOUT_PRESETS",
+      "norm_label": "layout_presets",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L61"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_layoutid",
+      "label": "layoutId",
+      "norm_label": "layoutid",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L136"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_layoutnameschema",
+      "label": "layoutNameSchema",
+      "norm_label": "layoutnameschema",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L129"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_preset_keys",
+      "label": "PRESET_KEYS",
+      "norm_label": "preset_keys",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L52"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_stored_layouts_length",
+      "label": "STORED_LAYOUTS_LENGTH",
+      "norm_label": "stored_layouts_length",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L29"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_overlay_layouts_unsaved_layout",
+      "label": "UNSAVED_LAYOUT",
+      "norm_label": "unsaved_layout",
+      "source_file": "app/lib/overlay-layouts.ts",
+      "source_location": "L208"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_lib_overlay_legacy",
       "label": "overlay-legacy.ts",
       "norm_label": "overlay-legacy.ts",
@@ -274364,7 +277343,7 @@
       "label": "DELETED_AUTHOR_SNAPSHOT",
       "norm_label": "deleted_author_snapshot",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L409"
+      "source_location": "L412"
     },
     {
       "_origin": "ast",
@@ -274374,7 +277353,7 @@
       "label": "EXPORT_PAGE_SIZE",
       "norm_label": "export_page_size",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L11"
+      "source_location": "L12"
     },
     {
       "_origin": "ast",
@@ -274664,7 +277643,7 @@
       "label": "liveRoutes",
       "norm_label": "liveroutes",
       "source_file": "app/server/api/live.ts",
-      "source_location": "L16"
+      "source_location": "L17"
     },
     {
       "_origin": "ast",
@@ -276510,6 +279489,46 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_server_overlay_layouts_server",
+      "label": "overlay-layouts.server.ts",
+      "norm_label": "overlay-layouts.server.ts",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_overlay_layouts_server_id",
+      "label": "id",
+      "norm_label": "id",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L29"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_overlay_layouts_server_layoutactionschema",
+      "label": "layoutActionSchema",
+      "norm_label": "layoutactionschema",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L32"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_overlay_layouts_server_output",
+      "label": "output",
+      "norm_label": "output",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L28"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_server_overlay_server",
       "label": "overlay.server.ts",
       "norm_label": "overlay.server.ts",
@@ -278254,7 +281273,7 @@
       "label": "aiInterest",
       "norm_label": "aiinterest",
       "source_file": "db/schema.ts",
-      "source_location": "L852"
+      "source_location": "L855"
     },
     {
       "_origin": "ast",
@@ -278264,7 +281283,7 @@
       "label": "aiInterestDaily",
       "norm_label": "aiinterestdaily",
       "source_file": "db/schema.ts",
-      "source_location": "L868"
+      "source_location": "L871"
     },
     {
       "_origin": "ast",
@@ -278294,7 +281313,7 @@
       "label": "channelConnections",
       "norm_label": "channelconnections",
       "source_file": "db/schema.ts",
-      "source_location": "L926"
+      "source_location": "L929"
     },
     {
       "_origin": "ast",
@@ -278304,7 +281323,7 @@
       "label": "channelTokens",
       "norm_label": "channeltokens",
       "source_file": "db/schema.ts",
-      "source_location": "L962"
+      "source_location": "L965"
     },
     {
       "_origin": "ast",
@@ -278374,7 +281393,7 @@
       "label": "conversionClicks",
       "norm_label": "conversionclicks",
       "source_file": "db/schema.ts",
-      "source_location": "L911"
+      "source_location": "L914"
     },
     {
       "_origin": "ast",
@@ -278384,7 +281403,7 @@
       "label": "conversionDaily",
       "norm_label": "conversiondaily",
       "source_file": "db/schema.ts",
-      "source_location": "L897"
+      "source_location": "L900"
     },
     {
       "_origin": "ast",
@@ -278424,7 +281443,7 @@
       "label": "entryMash",
       "norm_label": "entrymash",
       "source_file": "db/schema.ts",
-      "source_location": "L804"
+      "source_location": "L807"
     },
     {
       "_origin": "ast",
@@ -278474,7 +281493,7 @@
       "label": "imageVersions",
       "norm_label": "imageversions",
       "source_file": "db/schema.ts",
-      "source_location": "L881"
+      "source_location": "L884"
     },
     {
       "_origin": "ast",
@@ -278484,7 +281503,7 @@
       "label": "mashTaps",
       "norm_label": "mashtaps",
       "source_file": "db/schema.ts",
-      "source_location": "L827"
+      "source_location": "L830"
     },
     {
       "_origin": "ast",
@@ -278524,7 +281543,7 @@
       "label": "overlayKeys",
       "norm_label": "overlaykeys",
       "source_file": "db/schema.ts",
-      "source_location": "L777"
+      "source_location": "L780"
     },
     {
       "_origin": "ast",
@@ -282210,7 +285229,7 @@
       "label": "{ call, cookie, context }",
       "norm_label": "{ call, cookie, context }",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L58"
+      "source_location": "L59"
     },
     {
       "_origin": "ast",
@@ -282530,6 +285549,56 @@
       "norm_label": "topiccell",
       "source_file": "tests/overlay-layers.test.ts",
       "source_location": "L60"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_overlay_layouts_test",
+      "label": "overlay-layouts.test.ts",
+      "norm_label": "overlay-layouts.test.ts",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_overlay_layouts_test_chatcell",
+      "label": "chatCell",
+      "norm_label": "chatcell",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L44"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_overlay_layouts_test_keep",
+      "label": "keep",
+      "norm_label": "keep",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L46"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_overlay_layouts_test_pollcell",
+      "label": "pollCell",
+      "norm_label": "pollcell",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L45"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_overlay_layouts_test_start",
+      "label": "start",
+      "norm_label": "start",
+      "source_file": "tests/overlay-layouts.test.ts",
+      "source_location": "L49"
     },
     {
       "_origin": "ast",

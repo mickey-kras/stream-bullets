@@ -703,6 +703,8 @@ describe("tables added by migrations 0006–0012", (): void => {
             vertical: { ...DEFAULT_LAYERS.cells.vertical, chat: { c: 0, r: 16, w: 18, h: 10 } },
           },
         },
+        // The page has no saved layout.
+        layouts: { horizontal: { active: null, saved: [] }, vertical: { active: null, saved: [] } },
         updatedAt: new Date(now).toISOString(),
       },
     });
