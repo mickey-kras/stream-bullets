@@ -37,8 +37,9 @@ See [Authentication setup](docs/auth-setup.md) for production sign-in and admini
 - Newest uses stable cursors. Top sorts by likes minus dislikes. Votes can move entries between pages. Refresh for current order.
 - The Polls list has three groups in this order: active polls of the page owner, active polls of other people, all other polls.
 - Each of these groups lists the newest poll first. Top keeps the plain score order without groups.
-- The owner of a page gets **Tools** in the header. It opens **Streamer tools** at `/tools`, with the sections **Overlay** and **Channels**.
-- The old address `/overlay-control` redirects to `/tools`.
+- The owner of a page gets **Tools** in the header. It opens **Streamer tools** at `/tools`, with the sections **Live**, **Overlay**, and **Channels**.
+- The old address `/overlay-control` redirects to the **Overlay** section.
+- See [Streamer tools](docs/streamer-tools.md) for the **Live** section: the on-air controls and the merged chat.
 - `/@handle/overlay` shows the layers on the grid of the **Overlay** section of **Streamer tools**.
 - By default, the poll layer shows the latest active poll of the page owner. It never selects a viewer poll by itself.
 - The owner picks a viewer poll for the poll layer in the **Overlay** section. `?poll=<id>` also selects a poll. Public overlays cannot vote.

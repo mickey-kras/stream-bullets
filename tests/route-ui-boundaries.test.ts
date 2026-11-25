@@ -629,6 +629,7 @@ describe("overlay loader contracts", (): void => {
     );
     expect(moved("/overlay-control?view=channels")).toBe("/tools?view=channels");
     expect(moved("/overlay-control?view=unknown")).toBe("/tools?view=overlay");
+    expect(moved("/overlay-control?view=live")).toBe("/tools?view=live");
   });
 
   it("redirects signed-out control users and returns 404 to users without a page", async (): Promise<void> => {

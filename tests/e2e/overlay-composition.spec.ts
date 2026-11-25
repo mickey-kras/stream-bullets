@@ -639,7 +639,7 @@ test("the chat layer has the same geometry on the OBS composition and in the edi
   page.on("websocket", (socket) => {
     if (new URL(socket.url()).pathname.startsWith("/api/activity/")) activity.push(socket.url());
   });
-  await page.goto("/tools");
+  await page.goto("/tools?view=overlay");
   const frame = page.getByRole("region", { name: "Composition preview" });
   await expect(frame).toHaveAttribute("data-scaled", "true");
   const layer = frame.locator('.ov-layer[data-layer="chat"]');
@@ -766,7 +766,7 @@ test("with chat on, the OBS composition matches the editor preview at 1280x720 a
     const owner = await signedIn(browser, "featureowner", DESIGN_IP);
     const editor = await newPage(owner);
     await editor.setViewportSize({ width: 1440, height: 900 });
-    await editor.goto("/tools");
+    await editor.goto("/tools?view=overlay");
     const frame = editor.getByRole("region", { name: "Composition preview" });
     await expect(frame).toHaveAttribute("data-scaled", "true");
     await expect(frame.locator(".ov-stage > *").first()).toBeVisible();

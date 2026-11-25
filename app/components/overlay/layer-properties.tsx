@@ -22,7 +22,8 @@ import type { EditTiming } from "./use-layer-draft";
 // Must match overlay_state_message_check.
 export const OVERLAY_MESSAGE_MAX = 120;
 
-const STYLES: readonly [OverlayMessageStyle, MessageId][] = [
+/** The styles of the message banner and their names. */
+export const MESSAGE_STYLES: readonly [OverlayMessageStyle, MessageId][] = [
   ["info", "overlay.style.info"],
   ["hype", "overlay.style.hype"],
 ];
@@ -168,7 +169,7 @@ function MessageEditor({ state, busy, run }: Readonly<Pick<SettingsProps, "state
       <fieldset className="field ov-seg-field">
         <legend className="field-label">{t("overlay.messageStyle")}</legend>
         <div className="seg">
-          {STYLES.map(([style, id]) => (
+          {MESSAGE_STYLES.map(([style, id]) => (
             <button
               key={style}
               type="button"

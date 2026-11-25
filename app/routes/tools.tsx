@@ -1,6 +1,6 @@
 export { RouteErrorBoundary as ErrorBoundary } from "../components/route-error";
 import { withRouteErrors } from "../server/route-errors.server";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { redirect, useLoaderData, useRevalidator, useSearchParams, type LoaderFunctionArgs } from "react-router";
 import { appContext } from "../env";
 import { t } from "../i18n";
@@ -18,13 +18,16 @@ import { ChannelsStep, useChannelNews } from "../components/channels/channels-st
 import { ChatDeliveryContext, useLiveChannels } from "../components/channels/use-live-channels";
 import { deliversChat } from "../lib/channel-health";
 import { OverlayControl } from "../components/overlay/overlay-control";
+import { LiveSection } from "../components/tools/live-section";
 import { ToolsHead } from "../components/tools/tools-head";
-import type { OverlayPoll } from "../components/overlay/overlay-stage";
+import type { OverlayPoll, OverlayScene } from "../components/overlay/overlay-stage";
 import { StreamerHeader, streamerHeaderAppearance, type StreamerView } from "../components/shell/streamer-header";
 import { useRevalidateAt } from "../components/use-clock";
+import { ServerOffset } from "../lib/clock";
 import type { LiveSnapshot } from "../types";
 import "../components/overlay/wasteland/wasteland.css";
 import "../components/overlay/composition.css";
+import "../components/tools/live.css";
 
 export function meta() {
   return [{ title: `${t("tools.title")} · StreamBullets` }, { name: "robots", content: "noindex" }];
@@ -92,10 +95,31 @@ export default function ToolsPage(): ReactNode {
   );
   const current: LiveSnapshot = snapshot && snapshot.revision >= loaded.initial.revision ? snapshot : loaded.initial;
   const now: number = useServerTime(current.serverNow);
+  // Server time minus local time, measured one time for each loader answer, as the overlay page does.
+  const [offsets] = useState<ServerOffset>(() => new ServerOffset());
+  const serverOffset: number = offsets.for(loaded.initial.serverNow);
   // Refresh Up next at the loaded stream's start, even when its layer is off the grid.
   useRevalidateAt(loaded.initial.serverNow, loaded.data.next?.startsAt ?? null, revalidator.revalidate);
   const polls: OverlayPoll[] = [...current.polls];
   for (const poll of loaded.initial.polls) if (!polls.some((item) => item.id === poll.id)) polls.push(poll);
+  const scene: Omit<OverlayScene, "overlay"> = {
+    name: loaded.name,
+    handle: loaded.handle,
+    host: loaded.host,
+    origin: loaded.origin,
+    polls,
+    data: loaded.data,
+    now,
+  };
+  // The live room tells the OBS sources and takes changes only while it is connected.
+  const room = {
+    initial: loaded.state,
+    live: liveOverlay,
+    sources: status === "live" ? overlaySources : null,
+    connected: status === "live" || status === "connecting",
+    reconnect: status === "offline" ? reconnect : undefined,
+    scene,
+  };
   return (
     <>
       <StreamerHeader
@@ -108,31 +132,15 @@ export default function ToolsPage(): ReactNode {
       <main className="page-panel ov-control" id="main-content">
         <ToolsHead view={view} />
         <ChatDeliveryContext.Provider value={deliversChat(channels)}>
-          {view === "channels" ? (
+          {view === "live" && <LiveSection {...room} channels={channels} serverOffset={serverOffset} />}
+          {view === "overlay" && <OverlayControl {...room} hasOverlayKey={loaded.hasOverlayKey} />}
+          {view === "channels" && (
             <ChannelsStep
               channels={channels}
               stale={stale}
               providers={loaded.providers}
               signInProvider={loaded.signInProvider}
               result={resultMessage(search.get("channel"), search.get("result"))}
-            />
-          ) : (
-            <OverlayControl
-              initial={loaded.state}
-              live={liveOverlay}
-              hasOverlayKey={loaded.hasOverlayKey}
-              sources={status === "live" ? overlaySources : null}
-              connected={status === "live" || status === "connecting"}
-              reconnect={status === "offline" ? reconnect : undefined}
-              scene={{
-                name: loaded.name,
-                handle: loaded.handle,
-                host: loaded.host,
-                origin: loaded.origin,
-                polls,
-                data: loaded.data,
-                now,
-              }}
             />
           )}
         </ChatDeliveryContext.Provider>

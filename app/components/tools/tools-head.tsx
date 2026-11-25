@@ -4,6 +4,7 @@ import { t, type MessageId } from "../../i18n";
 import { toolsPath, toolsViews, type ToolsView } from "../../lib/shell";
 
 const viewLabel: Record<ToolsView, MessageId> = {
+  live: "tools.tab.live",
   overlay: "tools.tab.overlay",
   channels: "tools.tab.channels",
 };
