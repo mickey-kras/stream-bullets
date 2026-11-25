@@ -6,7 +6,7 @@ import { loadAtlas, type Atlas } from "./sprites";
 import type { PlaygroundView } from "./view";
 
 /** Design pixels per layout cell. */
-const CELL_DESIGN_PX = 120;
+const CELL_DESIGN_PX = 60;
 
 interface CharactersLayerProps {
   /** Layer size in layout cells. */

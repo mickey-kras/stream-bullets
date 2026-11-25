@@ -11,7 +11,7 @@ export const FEATURE_HOST = "(SELECT id FROM streamers WHERE handle='feature_hos
  * name is off the grid and has its default settings. The new revision makes the live room read the row again.
  */
 export function layersSql(layers: LayersPatch = {}): string {
-  const text: string = JSON.stringify({ v: 2, ...layers }).replaceAll("'", "''");
+  const text: string = JSON.stringify({ v: 3, ...layers }).replaceAll("'", "''");
   return `UPDATE overlay_state SET layers='${text}', chat_test_until=0, revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`;
 }
 
@@ -19,17 +19,17 @@ export function layersSql(layers: LayersPatch = {}): string {
 export const resetLayers: string = layersSql();
 
 /** The old default cells of the chat and the characters: the chat at the top left, the characters along the bottom. */
-export const CHAT_CELL: CellRect = { c: 0, r: 0, w: 5, h: 7 };
-export const CHARACTERS_CELL: CellRect = { c: 0, r: 7, w: 16, h: 2 };
+export const CHAT_CELL: CellRect = { c: 0, r: 0, w: 10, h: 14 };
+export const CHARACTERS_CELL: CellRect = { c: 0, r: 14, w: 32, h: 4 };
 /** The space beside CHAT_CELL and above CHARACTERS_CELL. */
-export const POLL_CELL: CellRect = { c: 5, r: 0, w: 11, h: 7 };
+export const POLL_CELL: CellRect = { c: 10, r: 0, w: 22, h: 14 };
 
 /**
  * The overlay of a page that the owner did not change: the poll layer shows the latest active poll. A spec that
  * changes the layers of the feature host restores this when it ends, for the specs after it.
  */
 export const defaultLayers: string = layersSql({
-  cells: { horizontal: { poll: POLL_CELL }, vertical: { poll: { c: 0, r: 0, w: 9, h: 8 } } },
+  cells: { horizontal: { poll: POLL_CELL }, vertical: { poll: { c: 0, r: 0, w: 18, h: 16 } } },
 });
 
 export function saved(page: Page): Promise<unknown> {

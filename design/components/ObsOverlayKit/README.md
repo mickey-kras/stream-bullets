@@ -1,7 +1,7 @@
 This kit shows the overlay that a streamer adds to OBS as a browser source (`/@handle/overlay?key=…`).
 
 The OBS page is 1920 × 1080 and transparent. All sizes in the stage are design pixels. `Stage.jsx` scales them.
-The stage is a grid of 16 × 9 cells of 120 pixels. Each layer has its own cell.
+The stage is a grid of 32 × 18 cells of 60 pixels. Each layer has its own cell.
 
 In the kit, the chat is 4 × 7 cells at the left. The poll is 11 × 6 cells and the other cards are 11 × 3 cells.
 

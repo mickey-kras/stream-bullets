@@ -221,7 +221,7 @@ test("the pickers of a layer change what it shows, hide poll results and recover
     `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,options,created_at,revealed) VALUES ('${pollId}',${FEATURE_HOST},(SELECT id FROM user WHERE name='featureowner'),'choice','Overlay picker poll','','','["Tea","Coffee"]',${now},0);`,
     `DELETE FROM app_rate_limits WHERE key='content:'||(SELECT id FROM user WHERE name='featureowner');`,
     // A smaller poll cell leaves room for the other layers of this test.
-    layersSql({ cells: { horizontal: { poll: { c: 8, r: 0, w: 8, h: 5 } } } }),
+    layersSql({ cells: { horizontal: { poll: { c: 16, r: 0, w: 16, h: 10 } } } }),
   ]);
   const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 90));
   // This case owns 203.0.113.140 so asset requests do not share another case's quota.
@@ -766,7 +766,7 @@ test("the control page moves Up next on when the stream it shows starts", async 
   const id = randomUUID();
   const now = Date.now();
   await runSql("upnext-soon", [
-    layersSql({ cells: { horizontal: { next: { c: 0, r: 0, w: 8, h: 3 } } } }),
+    layersSql({ cells: { horizontal: { next: { c: 0, r: 0, w: 16, h: 6 } } } }),
     `INSERT INTO stream_events(id,streamer_id,series_id,title,notes,starts_at,duration_min,platform,url,status,repeat_days,repeat_until,tz,created_at,updated_at) VALUES ('${id}',${FEATURE_HOST},NULL,'Soon stream','',${now + 20_000},30,'twitch','https://twitch.tv/feature_host','scheduled',0,NULL,'UTC',${now},${now});`,
   ]);
   const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 94));

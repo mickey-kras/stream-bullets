@@ -850,8 +850,8 @@ describe("live room snapshots", (): void => {
       ...DEFAULT_LAYERS,
       chat: { ...DEFAULT_LAYERS.chat, enabled: true, hideCommands: false },
       cells: {
-        horizontal: { ...emptyCells(), chat: { c: 0, r: 0, w: 5, h: 7 }, message: { c: 5, r: 0, w: 11, h: 3 } },
-        vertical: { ...emptyCells(), chat: { c: 0, r: 8, w: 9, h: 5 }, message: { c: 0, r: 0, w: 9, h: 3 } },
+        horizontal: { ...emptyCells(), chat: { c: 0, r: 0, w: 10, h: 14 }, message: { c: 10, r: 0, w: 22, h: 6 } },
+        vertical: { ...emptyCells(), chat: { c: 0, r: 16, w: 18, h: 10 }, message: { c: 0, r: 0, w: 18, h: 6 } },
       },
     });
     // The chat test end time reaches OBS the same way: 0 is no test.

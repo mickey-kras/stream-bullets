@@ -917,7 +917,7 @@
   "overlay.grid.cursor": "Columna {c}, fila {r}: {what}.",
   "overlay.grid.dropRemove": "Suelta aquí para quitar",
   "overlay.grid.empty": "vacía",
-  "overlay.grid.help": "Una celda mide 120 × 120 píxeles. Selecciona una capa colocada para ver sus controles. Arrastra la capa para moverla. Arrastra un control para cambiar su tamaño. Arrastra la capa a «Capas · una de cada» para quitarla. Teclado: las flechas mueven el cursor, Espacio o Intro recoge y suelta una capa, Mayús + flecha mueve la capa seleccionada una celda, Alt + flecha cambia su tamaño una celda desde la esquina inferior derecha, Supr o Retroceso quita la capa seleccionada, Esc cancela.",
+  "overlay.grid.help": "Una celda mide {px} × {px} píxeles. Selecciona una capa colocada para ver sus controles. Arrastra la capa para moverla. Arrastra un control para cambiar su tamaño. Arrastra la capa a «Capas · una de cada» para quitarla. Teclado: las flechas mueven el cursor, Espacio o Intro recoge y suelta una capa, Mayús + flecha mueve la capa seleccionada una celda, Alt + flecha cambia su tamaño una celda desde la esquina inferior derecha, Supr o Retroceso quita la capa seleccionada, Esc cancela.",
   "overlay.grid.horizontal": "Horizontal {cols} × {rows}",
   "overlay.grid.label": "Cuadrícula de diseño, {cols} columnas por {rows} filas",
   "overlay.grid.moved": "{layer} movido a la columna {c}, fila {r}, {w} × {h} celdas.",

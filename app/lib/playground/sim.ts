@@ -8,6 +8,7 @@ import {
   BUBBLE_MAX,
   BUBBLE_TICKS,
   BUILD_STEPS,
+  CELL_LOGICAL,
   CHARACTERS_TEST_TICKS,
   CHECKPOINT_MAX_LENGTH,
   COMMAND_BUBBLE_TICKS,
@@ -772,6 +773,7 @@ export class PlaygroundSim {
       testEndsAt: this.testEndsAt,
       timeoutSeconds: this.timeoutSeconds,
       visibleMax: this.maxVisible,
+      cell: CELL_LOGICAL,
       cellsW: this.world.cellsW,
       cellsH: this.world.cellsH,
       ground: groundString(this.terrain),
@@ -799,10 +801,12 @@ export class PlaygroundSim {
     const result = checkpointSchema.safeParse(value);
     if (!result.success) throw new Error(`playground checkpoint invalid: ${issueText(result.error)}`);
     const data: Checkpoint = result.data;
+    // A checkpoint with larger cells has the same world in more cells of today.
+    const scale: number = data.cell / CELL_LOGICAL;
     const sim = new PlaygroundSim({
       ...options,
-      cellsW: data.cellsW,
-      cellsH: data.cellsH,
+      cellsW: data.cellsW * scale,
+      cellsH: data.cellsH * scale,
       timeoutSeconds: data.timeoutSeconds,
       visibleMax: data.visibleMax,
     });
@@ -868,6 +872,8 @@ interface Checkpoint {
   testEndsAt: number | null;
   timeoutSeconds: number;
   visibleMax: number;
+  /** The logical px of one cell of `cellsW` and `cellsH`. */
+  cell: number;
   cellsW: number;
   cellsH: number;
   ground: string;
@@ -933,6 +939,8 @@ function fromRecord(record: ParticipantRecord, clock: number, walkSpread: number
 }
 
 const tick = z.number().int().min(-1e12).max(1e12);
+/** The logical px of a cell of 120 design px: the cell of a checkpoint without `cell`. */
+const COARSE_CELL_LOGICAL = 40;
 const finite = z.number().finite();
 const userId = z.string().min(1).max(128);
 
@@ -951,6 +959,8 @@ const checkpointSchema: z.ZodType<Checkpoint> = z
     timeoutSeconds: z.number().int().min(CHARACTERS_TIMEOUT.min).max(CHARACTERS_TIMEOUT.max),
     // A checkpoint from before this setting has no value: it takes the default.
     visibleMax: z.number().int().min(CHARACTERS_MAX.min).max(CHARACTERS_MAX.max).default(CHARACTERS_MAX.default),
+    // A checkpoint from before the cells of 60 design px has no value: its cells are twice as large.
+    cell: z.union([z.literal(CELL_LOGICAL), z.literal(COARSE_CELL_LOGICAL)]).default(COARSE_CELL_LOGICAL),
     cellsW: z.number().int(),
     cellsH: z.number().int(),
     ground: z.string().regex(/^[g0-3]*$/),
