@@ -585,6 +585,20 @@ describe("chatReducer: snapshots", () => {
     expect(state.rows.every((row) => row.phase === "shown")).toBe(true);
   });
 
+  it("keeps the rows that are not newer than the boundary of a snapshot, also of a short one", () => {
+    const opts: ChatOptions = { hideCommands: true, limits: { maxRows: 200 } };
+    const old = chat({ receivedAt: T0 - 50_000 });
+    const gone = chat({ receivedAt: T0 + 5 });
+    let state = send(initialChatState(), event(old), T0 - 50_000, opts);
+    state = send(state, event(gone), T0 + 5, opts);
+    // The server told its boundary: a short snapshot tells nothing about the row before it.
+    const short = Array.from({ length: 10 }, (_, i) => chat({ receivedAt: T0 + 10 + i, live: false }));
+    state = send(state, { type: "snapshot", events: short, replay: true, since: T0 }, T0 + 1000, opts);
+    expect(state.rows.some((row) => row.id === old.id)).toBe(true);
+    expect(state.rows.some((row) => row.id === gone.id)).toBe(false);
+    expect(state.rows).toHaveLength(11);
+  });
+
   it("flushes queued messages without animation, unless the snapshot removed them", () => {
     let state = initialChatState();
     const [a, b, c] = [chat({ receivedAt: T0 }), chat({ receivedAt: T0 + 1 }), chat({ receivedAt: T0 + 2 })];

@@ -43,15 +43,15 @@ function event(value: ActivityEvent): ActivityMessage {
   return { type: "event", event: value };
 }
 
-function snapshot(events: ActivityEvent[]): ActivityMessage {
-  return { type: "snapshot", events, replay: true };
+/** A snapshot. `since` is the receive time after which the producer still has each message that it keeps. */
+function snapshot(events: ActivityEvent[], since?: number): ActivityMessage {
+  return since === undefined
+    ? { type: "snapshot", events, replay: true }
+    : { type: "snapshot", events, replay: true, since };
 }
 
-/** Server time of the reducer calls: after each message of `chat`, and inside the time the producer keeps one. */
-const NOW = T0 + 60_000;
-
-function receive(state: LiveChatState, message: ActivityMessage, now: number = NOW): LiveChatState {
-  return liveChatReducer(state, { type: "message", message, now });
+function receive(state: LiveChatState, message: ActivityMessage): LiveChatState {
+  return liveChatReducer(state, { type: "message", message });
 }
 
 function run(messages: ActivityMessage[], from: LiveChatState = initialLiveChat()): LiveChatState {
@@ -172,42 +172,52 @@ describe("live chat log", (): void => {
     expect(state.removed.has(`twitch:m${MAX_REMOVED_IDS + 1}`)).toBe(true);
   });
 
-  it("adds the new messages of a reconnect snapshot and removes what was moderated in its window", (): void => {
+  it("adds the new messages of a reconnect snapshot and removes what was moderated after its boundary", (): void => {
     const before: LiveChatState = run([event(chat(1)), event(chat(2)), event(chat(3)), event(chat(4))]);
-    // The server has the messages 2, 4 and 5: message 3 was deleted while the page was away. The server keeps a
-    // message for 10 minutes, and message 1 is older than that, so the snapshot tells nothing about it.
-    const now: number = T0 + 9 * 60_000 + 1500;
-    const after: LiveChatState = receive(before, snapshot([chat(2), chat(4), chat(5, { live: false })]), now);
+    // The server has the messages 2, 4 and 5: message 3 was deleted while the page was away. The boundary is the
+    // time of message 1, so the snapshot tells nothing about it.
+    const since: number = T0 + 1000;
+    const after: LiveChatState = receive(before, snapshot([chat(2), chat(4), chat(5, { live: false })], since));
     expect(texts(after)).toEqual(["message 1", "message 2", "removed", "message 4", "message 5"]);
     expect(after.removed.has("twitch:m3")).toBe(true);
     // A snapshot never brings a removed message back.
-    expect(texts(receive(after, snapshot([chat(2), chat(3), chat(4), chat(5)]), now))).toEqual(texts(after));
+    expect(texts(receive(after, snapshot([chat(2), chat(3), chat(4), chat(5)], since)))).toEqual(texts(after));
   });
 
-  it("removes a moderated message that is older than each message of a snapshot that is not full", (): void => {
+  it("removes a moderated message that is older than each message of the snapshot", (): void => {
     const before: LiveChatState = run([event(chat(1)), event(chat(2)), event(chat(3))]);
-    expect(texts(receive(before, snapshot([chat(2), chat(3)])))).toEqual(["removed", "message 2", "message 3"]);
+    expect(texts(receive(before, snapshot([chat(2), chat(3)], T0)))).toEqual(["removed", "message 2", "message 3"]);
   });
 
-  it("removes the rows that the server no longer has when a snapshot has no chat", (): void => {
+  it("removes the rows after the boundary when a snapshot has no chat", (): void => {
     const before: LiveChatState = run([event(chat(1)), event(chat(2, { platform: "kick" }))]);
     // The chat was cleared while the page was away, and no message came after that.
-    const cleared: LiveChatState = receive(before, snapshot([]));
-    expect(texts(cleared)).toEqual(["removed", "removed"]);
-    expect(texts(receive(before, snapshot([{ kind: "status", platform: "twitch", status: "active" }])))).toEqual(
-      texts(cleared),
-    );
-    // The server keeps no message this long, so an empty snapshot tells nothing about the rows.
-    expect(receive(before, snapshot([]), T0 + 20 * 60_000)).toBe(before);
+    expect(texts(receive(before, snapshot([], T0)))).toEqual(["removed", "removed"]);
+    expect(texts(receive(before, snapshot([{ kind: "status", platform: "twitch", status: "active" }], T0)))).toEqual([
+      "removed",
+      "removed",
+    ]);
+    // The server keeps no message this old, so an empty snapshot tells nothing about the rows.
+    expect(receive(before, snapshot([], T0 + 2000))).toBe(before);
   });
 
-  it("starts the window of a full snapshot at its oldest message", (): void => {
+  it("keeps the rows that the size limit of the server pushed out", (): void => {
+    // The server keeps the newest 100 of 150 messages. Message 150 was deleted while the page was away.
+    const before: LiveChatState = run(Array.from({ length: 150 }, (_, n: number) => event(chat(n + 1))));
+    const kept: ActivityChat[] = Array.from({ length: 99 }, (_, n: number) => chat(n + 51));
+    const after: LiveChatState = receive(before, snapshot(kept, T0 + 50_000));
+    expect(after.rows.filter((row: LiveChatRow): boolean => row.removed).map((row) => row.id)).toEqual(["twitch:m150"]);
+  });
+
+  it("reads a snapshot without a boundary from its oldest message, and an empty one not at all", (): void => {
     const before: LiveChatState = run([event(chat(1)), event(chat(2)), event(chat(3)), event(chat(4))]);
-    // 100 messages: 3 and 5 to 103. Newer messages pushed the older ones out, so 1 and 2 tell nothing.
-    const full: ActivityChat[] = [chat(3), ...Array.from({ length: 99 }, (_, n: number) => chat(n + 5))];
-    const after: LiveChatState = receive(before, snapshot(full));
-    expect(texts(after).slice(0, 5)).toEqual(["message 1", "message 2", "message 3", "removed", "message 5"]);
-    expect(after.rows).toHaveLength(103);
+    expect(texts(receive(before, snapshot([chat(2), chat(4)])))).toEqual([
+      "message 1",
+      "message 2",
+      "removed",
+      "message 4",
+    ]);
+    expect(receive(before, snapshot([]))).toBe(before);
   });
 
   it("fills an empty log from the first snapshot", (): void => {

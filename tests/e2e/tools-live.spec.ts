@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { WebSocketRoute } from "@playwright/test";
+import type { Locator, WebSocketRoute } from "@playwright/test";
 import { newPage, close, test, expect, type Browser, type BrowserContext, type Page } from "./coverage";
 import { runSql } from "./fixtures";
 import { signedIn } from "./live-helpers";
@@ -491,6 +491,30 @@ test("on a phone the chat opens full screen, keeps the screen on, and Exit retur
   await page.keyboard.press("Escape");
   await expect(view).toHaveCount(0);
   await expect(open).toBeFocused();
+
+  // A paused list keeps the message that the streamer reads when the view opens and when it exits.
+  const firstShown = (log: Locator): Promise<string | null> =>
+    log.evaluate((element: Element): string | null => {
+      const top: number = element.getBoundingClientRect().top;
+      for (const row of element.querySelectorAll<HTMLElement>("[data-chat-row]"))
+        if (row.getBoundingClientRect().bottom > top + 1) return row.dataset.chatRow ?? null;
+      return null;
+    });
+  const panel = page.getByRole("log", { name: "Chat" });
+  await panel.evaluate((element: Element): void => {
+    const row = element.querySelectorAll<HTMLElement>("[data-chat-row]")[10];
+    element.scrollTop += row.getBoundingClientRect().top - element.getBoundingClientRect().top;
+  });
+  await expect(page.locator('[data-live-part="chat"] [data-chat-paused]')).toBeVisible();
+  const reading: string | null = await firstShown(panel);
+  expect(reading).not.toBeNull();
+  await open.click();
+  await expect(view).toBeVisible();
+  await expect(view.locator("[data-chat-paused]")).toBeVisible();
+  await expect.poll(() => firstShown(list)).toBe(reading);
+  await page.keyboard.press("Escape");
+  await expect(view).toHaveCount(0);
+  await expect.poll(() => firstShown(panel)).toBe(reading);
   await close(owner);
 });
 
