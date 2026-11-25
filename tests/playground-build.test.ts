@@ -144,6 +144,17 @@ describe("walking", () => {
     expect(s.p.mark).toBe(0);
   });
 
+  it("does not go on with a walk after a gap ended it in the middle of a fall", () => {
+    const s = stage();
+    s.run("!up");
+    s.run("!up");
+    s.sim.perform(s.p, "right", "", 5);
+    for (let i = 0; i < 60 && s.p.state !== "fall"; i++) s.tick();
+    expect([s.p.state, s.p.resume]).toEqual(["fall", true]);
+    s.sim.skip(30);
+    expect([s.p.state, s.p.resume, s.p.piloted]).toEqual(["walk", false, false]);
+  });
+
   it("stops at a door zone on the ground", () => {
     const s = stage();
     setState(s.p, "hold", { x: cellX(6), y: s.sim.world.gy });

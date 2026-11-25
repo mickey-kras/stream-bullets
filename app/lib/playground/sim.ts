@@ -521,7 +521,18 @@ export class PlaygroundSim implements SimHost {
     let r = 0;
     while (!fits(this.world, this.terrain, colOf(x), r)) r += 1;
     const y: number = floorY(this.world, r);
-    setState(p, "walk", { x, y, vx: 0, vy: 0, free: false, exitReason: null, mark: 0, piloted: false });
+    setState(p, "walk", {
+      x,
+      y,
+      vx: 0,
+      vy: 0,
+      free: false,
+      exitReason: null,
+      mark: 0,
+      piloted: false,
+      // A walk of some blocks that the gap ended does not go on after a later fall.
+      resume: false,
+    });
   }
 
   /** Shows a bubble. With BUBBLE_MAX bubbles already shown by others, the one closest to its end goes. */
