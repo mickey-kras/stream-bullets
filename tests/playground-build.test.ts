@@ -292,6 +292,21 @@ describe("building", () => {
     expect(s.p.mark).toBe(0);
   });
 
+  it("lays a plank over a hole in the ground from a build beside it, and the plank holds", () => {
+    const s = stage();
+    s.run("!up");
+    s.sim.terrain.tiles[START + 1].stage = 3;
+    // Without a build beside it, nothing goes over the hole.
+    s.sim.terrain.tiles[START + 5].stage = 3;
+    expect(canPlace(s.sim.world, s.sim.terrain, START + 5, 0)).toBe(false);
+    s.run("!bridge");
+    expect(s.block(START + 1, 0)?.kind).toBe("plank");
+    expect([s.col(), s.row()]).toEqual([START + 1, 1]);
+    s.tick(30);
+    expect(s.block(START + 1, 0)?.kind).toBe("plank");
+    expect(s.row()).toBe(1);
+  });
+
   it("keeps the doors and the respawn pad free", () => {
     const s = stage();
     const { world, terrain } = s.sim;

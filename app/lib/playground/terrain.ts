@@ -248,7 +248,8 @@ export function protectedCell(world: World, c: number, r: number): boolean {
 
 /** A block in this cell holds: it is on solid ground, or it touches another block, also at a corner. */
 function touches(world: World, terrain: Terrain, c: number, r: number): boolean {
-  if (r === 0) return solidAt(terrain, cellX(c));
+  // Over a hole in the ground, a block beside the cell holds the new block, as heldCells does.
+  if (r === 0 && solidAt(terrain, cellX(c))) return true;
   for (let dc = -1; dc <= 1; dc++) {
     for (let dr = -1; dr <= 1; dr++) if ((dc || dr) && blockAt(world, terrain, c + dc, r + dr)) return true;
   }

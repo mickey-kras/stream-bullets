@@ -31293,7 +31293,7 @@
       "relation": "calls",
       "source": "app_lib_playground_terrain_blocksstring",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L362",
+      "source_location": "L363",
       "target": "app_lib_playground_protocol_blockcode",
       "weight": 1.0
     },
@@ -31305,7 +31305,7 @@
       "relation": "calls",
       "source": "app_lib_playground_terrain_canplace",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L261",
+      "source_location": "L262",
       "target": "app_lib_playground_terrain_protectedcell",
       "weight": 1.0
     },
@@ -31317,7 +31317,7 @@
       "relation": "calls",
       "source": "app_lib_playground_terrain_canplace",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L261",
+      "source_location": "L262",
       "target": "app_lib_playground_terrain_touches",
       "weight": 1.0
     },
@@ -31365,7 +31365,7 @@
       "relation": "calls",
       "source": "app_lib_playground_terrain_droploose",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L326",
+      "source_location": "L327",
       "target": "app_lib_playground_terrain_heldcells",
       "weight": 1.0
     },
@@ -31377,7 +31377,7 @@
       "relation": "calls",
       "source": "app_lib_playground_terrain_droploose",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L333",
+      "source_location": "L334",
       "target": "app_lib_playground_terrain_removeblock",
       "weight": 1.0
     },
@@ -31389,7 +31389,7 @@
       "relation": "calls",
       "source": "app_lib_playground_terrain_droploose",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L339",
+      "source_location": "L340",
       "target": "app_lib_playground_terrain_flagstands",
       "weight": 1.0
     },
@@ -31413,32 +31413,8 @@
       "relation": "calls",
       "source": "app_lib_playground_terrain_flagstands",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L315",
+      "source_location": "L316",
       "target": "app_lib_playground_terrain_blockat",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_lib_playground_terrain_flagstands",
-      "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L315",
-      "target": "app_lib_playground_terrain_cellx",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_lib_playground_terrain_flagstands",
-      "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L315",
-      "target": "app_lib_playground_terrain_solidat",
       "weight": 1.0
     },
     {
@@ -31450,6 +31426,30 @@
       "source": "app_lib_playground_terrain_flagstands",
       "source_file": "app/lib/playground/terrain.ts",
       "source_location": "L316",
+      "target": "app_lib_playground_terrain_cellx",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_playground_terrain_flagstands",
+      "source_file": "app/lib/playground/terrain.ts",
+      "source_location": "L316",
+      "target": "app_lib_playground_terrain_solidat",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_playground_terrain_flagstands",
+      "source_file": "app/lib/playground/terrain.ts",
+      "source_location": "L317",
       "target": "app_lib_playground_terrain_wallat",
       "weight": 1.0
     },
@@ -31461,7 +31461,7 @@
       "relation": "calls",
       "source": "app_lib_playground_terrain_heldcells",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L301",
+      "source_location": "L302",
       "target": "app_lib_playground_terrain_blockat",
       "weight": 1.0
     },
@@ -31473,7 +31473,7 @@
       "relation": "calls",
       "source": "app_lib_playground_terrain_heldcells",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L305",
+      "source_location": "L306",
       "target": "app_lib_playground_terrain_cellx",
       "weight": 1.0
     },
@@ -31485,7 +31485,7 @@
       "relation": "calls",
       "source": "app_lib_playground_terrain_heldcells",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L305",
+      "source_location": "L306",
       "target": "app_lib_playground_terrain_solidat",
       "weight": 1.0
     },
@@ -31497,7 +31497,7 @@
       "relation": "calls",
       "source": "app_lib_playground_terrain_hitblock",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L287",
+      "source_location": "L288",
       "target": "app_lib_playground_terrain_blockat",
       "weight": 1.0
     },
@@ -31509,7 +31509,7 @@
       "relation": "calls",
       "source": "app_lib_playground_terrain_hitblock",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L290",
+      "source_location": "L291",
       "target": "app_lib_playground_terrain_removeblock",
       "weight": 1.0
     },
@@ -31521,7 +31521,7 @@
       "relation": "calls",
       "source": "app_lib_playground_terrain_placeblock",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L278",
+      "source_location": "L279",
       "target": "app_lib_playground_terrain_removeblock",
       "weight": 1.0
     },
@@ -31545,7 +31545,7 @@
       "relation": "calls",
       "source": "app_lib_playground_terrain_removeblock",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L265",
+      "source_location": "L266",
       "target": "app_lib_playground_terrain_blockat",
       "weight": 1.0
     },
@@ -31557,7 +31557,7 @@
       "relation": "calls",
       "source": "app_lib_playground_terrain_restoreblocks",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L384",
+      "source_location": "L385",
       "target": "app_lib_playground_protocol_blockof",
       "weight": 1.0
     },
@@ -31593,7 +31593,7 @@
       "relation": "calls",
       "source": "app_lib_playground_terrain_terrainview",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L405",
+      "source_location": "L406",
       "target": "app_lib_playground_terrain_groundstring",
       "weight": 1.0
     },
@@ -31605,7 +31605,7 @@
       "relation": "calls",
       "source": "app_lib_playground_terrain_terrainview",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L407",
+      "source_location": "L408",
       "target": "app_lib_playground_terrain_blocksstring",
       "weight": 1.0
     },
@@ -31665,7 +31665,7 @@
       "relation": "calls",
       "source": "app_lib_playground_terrain_touches",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L251",
+      "source_location": "L252",
       "target": "app_lib_playground_terrain_cellx",
       "weight": 1.0
     },
@@ -31677,7 +31677,7 @@
       "relation": "calls",
       "source": "app_lib_playground_terrain_touches",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L251",
+      "source_location": "L252",
       "target": "app_lib_playground_terrain_solidat",
       "weight": 1.0
     },
@@ -31689,7 +31689,7 @@
       "relation": "calls",
       "source": "app_lib_playground_terrain_touches",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L253",
+      "source_location": "L254",
       "target": "app_lib_playground_terrain_blockat",
       "weight": 1.0
     },
@@ -60885,7 +60885,7 @@
       "relation": "calls",
       "source": "tests_playground_build_test",
       "source_file": "tests/playground-build.test.ts",
-      "source_location": "L673",
+      "source_location": "L688",
       "target": "tests_playground_build_test_people",
       "weight": 1.0
     },
@@ -60897,7 +60897,7 @@
       "relation": "calls",
       "source": "tests_playground_build_test_people",
       "source_file": "tests/playground-build.test.ts",
-      "source_location": "L659",
+      "source_location": "L674",
       "target": "app_lib_playground_sim_playgroundsim",
       "weight": 1.0
     },
@@ -60909,7 +60909,7 @@
       "relation": "calls",
       "source": "tests_playground_build_test_people",
       "source_file": "tests/playground-build.test.ts",
-      "source_location": "L661",
+      "source_location": "L676",
       "target": "tests_playground_build_test_chat",
       "weight": 1.0
     },
@@ -186597,7 +186597,7 @@
       "relation": "contains",
       "source": "app_lib_playground_terrain",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L259",
+      "source_location": "L260",
       "target": "app_lib_playground_terrain_canplace",
       "weight": 1.0
     },
@@ -186608,7 +186608,7 @@
       "relation": "contains",
       "source": "app_lib_playground_terrain",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L264",
+      "source_location": "L265",
       "target": "app_lib_playground_terrain_removeblock",
       "weight": 1.0
     },
@@ -186619,7 +186619,7 @@
       "relation": "contains",
       "source": "app_lib_playground_terrain",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L272",
+      "source_location": "L273",
       "target": "app_lib_playground_terrain_placeblock",
       "weight": 1.0
     },
@@ -186630,7 +186630,7 @@
       "relation": "contains",
       "source": "app_lib_playground_terrain",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L286",
+      "source_location": "L287",
       "target": "app_lib_playground_terrain_hitblock",
       "weight": 1.0
     },
@@ -186641,7 +186641,7 @@
       "relation": "contains",
       "source": "app_lib_playground_terrain",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L295",
+      "source_location": "L296",
       "target": "app_lib_playground_terrain_heldcells",
       "weight": 1.0
     },
@@ -186652,7 +186652,7 @@
       "relation": "contains",
       "source": "app_lib_playground_terrain",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L314",
+      "source_location": "L315",
       "target": "app_lib_playground_terrain_flagstands",
       "weight": 1.0
     },
@@ -186674,7 +186674,7 @@
       "relation": "contains",
       "source": "app_lib_playground_terrain",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L324",
+      "source_location": "L325",
       "target": "app_lib_playground_terrain_droploose",
       "weight": 1.0
     },
@@ -186685,7 +186685,7 @@
       "relation": "contains",
       "source": "app_lib_playground_terrain",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L344",
+      "source_location": "L345",
       "target": "app_lib_playground_terrain_clearbuilds",
       "weight": 1.0
     },
@@ -186696,7 +186696,7 @@
       "relation": "contains",
       "source": "app_lib_playground_terrain",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L351",
+      "source_location": "L352",
       "target": "app_lib_playground_terrain_groundstring",
       "weight": 1.0
     },
@@ -186707,7 +186707,7 @@
       "relation": "contains",
       "source": "app_lib_playground_terrain",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L356",
+      "source_location": "L357",
       "target": "app_lib_playground_terrain_blocksstring",
       "weight": 1.0
     },
@@ -186718,7 +186718,7 @@
       "relation": "contains",
       "source": "app_lib_playground_terrain",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L367",
+      "source_location": "L368",
       "target": "app_lib_playground_terrain_blockorder",
       "weight": 1.0
     },
@@ -186729,7 +186729,7 @@
       "relation": "contains",
       "source": "app_lib_playground_terrain",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L379",
+      "source_location": "L380",
       "target": "app_lib_playground_terrain_restoreblocks",
       "weight": 1.0
     },
@@ -186740,7 +186740,7 @@
       "relation": "contains",
       "source": "app_lib_playground_terrain",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L399",
+      "source_location": "L400",
       "target": "app_lib_playground_terrain_terrainview",
       "weight": 1.0
     },
@@ -211908,7 +211908,7 @@
       "relation": "contains",
       "source": "tests_playground_build_test",
       "source_file": "tests/playground-build.test.ts",
-      "source_location": "L658",
+      "source_location": "L673",
       "target": "tests_playground_build_test_people",
       "weight": 1.0
     },
@@ -221258,7 +221258,7 @@
       "relation": "calls",
       "source": "tests_playground_build_test_people",
       "source_file": "tests/playground-build.test.ts",
-      "source_location": "L661",
+      "source_location": "L676",
       "target": "app_lib_playground_sim_playgroundsim_receive",
       "weight": 1.0
     },
@@ -221270,7 +221270,7 @@
       "relation": "calls",
       "source": "tests_playground_build_test_people",
       "source_file": "tests/playground-build.test.ts",
-      "source_location": "L663",
+      "source_location": "L678",
       "target": "app_lib_playground_sim_playgroundsim_list",
       "weight": 1.0
     },
@@ -244867,7 +244867,7 @@
       "label": "blockOrder()",
       "norm_label": "blockorder()",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L367"
+      "source_location": "L368"
     },
     {
       "_callable": true,
@@ -244878,7 +244878,7 @@
       "label": "blocksString()",
       "norm_label": "blocksstring()",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L356"
+      "source_location": "L357"
     },
     {
       "_callable": true,
@@ -244889,7 +244889,7 @@
       "label": "canPlace()",
       "norm_label": "canplace()",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L259"
+      "source_location": "L260"
     },
     {
       "_callable": true,
@@ -244922,7 +244922,7 @@
       "label": "clearBuilds()",
       "norm_label": "clearbuilds()",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L344"
+      "source_location": "L345"
     },
     {
       "_callable": true,
@@ -244966,7 +244966,7 @@
       "label": "dropLoose()",
       "norm_label": "droploose()",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L324"
+      "source_location": "L325"
     },
     {
       "_callable": true,
@@ -244999,7 +244999,7 @@
       "label": "flagStands()",
       "norm_label": "flagstands()",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L314"
+      "source_location": "L315"
     },
     {
       "_callable": true,
@@ -245021,7 +245021,7 @@
       "label": "groundString()",
       "norm_label": "groundstring()",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L351"
+      "source_location": "L352"
     },
     {
       "_callable": true,
@@ -245032,7 +245032,7 @@
       "label": "heldCells()",
       "norm_label": "heldcells()",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L295"
+      "source_location": "L296"
     },
     {
       "_callable": true,
@@ -245054,7 +245054,7 @@
       "label": "hitBlock()",
       "norm_label": "hitblock()",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L286"
+      "source_location": "L287"
     },
     {
       "_callable": true,
@@ -245065,7 +245065,7 @@
       "label": "placeBlock()",
       "norm_label": "placeblock()",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L272"
+      "source_location": "L273"
     },
     {
       "_callable": true,
@@ -245087,7 +245087,7 @@
       "label": "removeBlock()",
       "norm_label": "removeblock()",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L264"
+      "source_location": "L265"
     },
     {
       "_callable": true,
@@ -245098,7 +245098,7 @@
       "label": "restoreBlocks()",
       "norm_label": "restoreblocks()",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L379"
+      "source_location": "L380"
     },
     {
       "_callable": true,
@@ -245153,7 +245153,7 @@
       "label": "terrainView()",
       "norm_label": "terrainview()",
       "source_file": "app/lib/playground/terrain.ts",
-      "source_location": "L399"
+      "source_location": "L400"
     },
     {
       "_callable": true,
@@ -262052,7 +262052,7 @@
       "label": "people()",
       "norm_label": "people()",
       "source_file": "tests/playground-build.test.ts",
-      "source_location": "L658"
+      "source_location": "L673"
     },
     {
       "_callable": true,
