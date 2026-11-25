@@ -146,7 +146,7 @@ export function LiveSection({
           <LiveMessage key={`${state.message}:${state.messageStyle}`} state={state} busy={busy} send={send} />
         </div>
         <div className="tl-col tl-col-chat">
-          <LiveChat feed={feed} delivers={deliversChat(channels)} />
+          <LiveChat feed={feed} delivers={deliversChat(channels)} now={scene.now} />
         </div>
       </div>
     </>

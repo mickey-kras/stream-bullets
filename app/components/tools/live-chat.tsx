@@ -1,15 +1,8 @@
 import { useEffect, useLayoutEffect, useReducer, useRef, useState, type ReactNode, type UIEvent } from "react";
 import { ScrollArea } from "radix-ui";
 import { t, type MessageId } from "../../i18n";
-import type { ActivityFragment, ActivityPlatform } from "../../lib/activity";
-import {
-  initialLiveChat,
-  liveChatReducer,
-  newSince,
-  shownRows,
-  type LiveChatRow,
-  type LiveChatState,
-} from "../../lib/live-chat";
+import type { ActivityFragment, ActivityMessage, ActivityPlatform } from "../../lib/activity";
+import { initialLiveChat, liveChatReducer, newSince, shownRows, type LiveChatRow } from "../../lib/live-chat";
 import { toolsPath } from "../../lib/shell";
 import type { ActivityFeed, ActivityFeedStatus } from "../overlay/activity-feed";
 import { ChatFragment } from "../overlay/chat-layer";
@@ -68,15 +61,25 @@ function ChatRow({ row }: Readonly<{ row: LiveChatRow }>): ReactNode {
  * The merged chat of the connected platforms, for the owner. New messages keep the newest in view. A scroll up, or
  * the pause button, pauses the list: it then keeps its place and counts the new messages. "Jump to latest" resumes
  * it. The pause and the platform filters are local to this browser. A moderated message keeps its row and loses
- * its text, also while the list is paused.
+ * its text, also while the list is paused. `now` is server time.
  */
-export function LiveChat({ feed, delivers }: Readonly<{ feed: ActivityFeed; delivers: boolean }>): ReactNode {
-  const [state, receive] = useReducer(liveChatReducer, undefined, initialLiveChat);
+export function LiveChat({
+  feed,
+  delivers,
+  now,
+}: Readonly<{ feed: ActivityFeed; delivers: boolean; now: number }>): ReactNode {
+  const [state, dispatch] = useReducer(liveChatReducer, undefined, initialLiveChat);
   const { subscribe } = feed;
-  useEffect(() => subscribe(receive), [subscribe]);
+  const clock = useRef<number>(now);
+  useEffect(() => {
+    clock.current = now;
+  }, [now]);
+  useEffect(
+    () => subscribe((message: ActivityMessage): void => dispatch({ type: "message", message, now: clock.current })),
+    [subscribe],
+  );
   const [hidden, setHidden] = useState<ReadonlySet<ActivityPlatform>>(new Set<ActivityPlatform>());
-  // The newest row at the time of the pause: later rows wait. Null while the chat follows the newest message.
-  const [pausedAt, setPausedAt] = useState<number | null>(null);
+  const { pausedAt } = state;
   const list = useRef<HTMLDivElement | null>(null);
   const rows: LiveChatRow[] = shownRows(state.rows, hidden).filter(
     (row: LiveChatRow): boolean => pausedAt === null || row.seq <= pausedAt,
@@ -88,11 +91,10 @@ export function LiveChat({ feed, delivers }: Readonly<{ feed: ActivityFeed; deli
     if (element && pausedAt === null) element.scrollTop = element.scrollHeight;
   }, [last, pausedAt]);
 
-  const pause = (current: LiveChatState): void => setPausedAt(current.seq);
   const scrolled = (event: UIEvent<HTMLDivElement>): void => {
     const element: HTMLDivElement = event.currentTarget;
     const below: number = element.scrollHeight - element.scrollTop - element.clientHeight;
-    if (pausedAt === null && below > PAUSE_DISTANCE) pause(state);
+    if (pausedAt === null && below > PAUSE_DISTANCE) dispatch({ type: "pause" });
   };
   const toggle = (platform: ActivityPlatform): void =>
     setHidden((current: ReadonlySet<ActivityPlatform>): ReadonlySet<ActivityPlatform> => {
@@ -161,14 +163,14 @@ export function LiveChat({ feed, delivers }: Readonly<{ feed: ActivityFeed; deli
         {pausedAt === null ? (
           <>
             <span className="muted">{t("tools.live.chat.hint")}</span>
-            <button type="button" className="small-button" data-chat-pause onClick={() => pause(state)}>
+            <button type="button" className="small-button" data-chat-pause onClick={() => dispatch({ type: "pause" })}>
               {t("tools.live.chat.pause")}
             </button>
           </>
         ) : (
           <>
             <span data-chat-paused>{t("tools.live.chat.paused", { count: waiting })}</span>
-            <button type="button" className="small-button" data-chat-jump onClick={() => setPausedAt(null)}>
+            <button type="button" className="small-button" data-chat-jump onClick={() => dispatch({ type: "resume" })}>
               {t("tools.live.chat.jump")}
             </button>
           </>
