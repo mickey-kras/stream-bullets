@@ -1,5 +1,5 @@
 import type { ActivityChat, ActivityEvent, ActivityFragment, ActivityMessage, ActivityPlatform } from "./activity";
-import { FULL_SNAPSHOT, MAX_REMOVED_IDS, displayFragments } from "./chat-feed";
+import { MAX_REMOVED_IDS, displayFragments } from "./chat-feed";
 
 /**
  * The merged chat of the Live section of Streamer tools as a pure state machine (issue #1030). It reads the same
@@ -7,12 +7,6 @@ import { FULL_SNAPSHOT, MAX_REMOVED_IDS, displayFragments } from "./chat-feed";
  * messages push it out, nothing animates, and a moderated message stays in its place and says that it was removed.
  * It never runs a chat command.
  */
-
-/**
- * The producer keeps a message for 10 minutes (SNAPSHOT_MAX_AGE_MS in channel-ingest-limits.ts). The log uses one
- * minute less, because the clock of this page can be late.
- */
-const SNAPSHOT_KEPT_MS = 9 * 60_000;
 
 export const LIVE_CHAT_LIMITS = {
   /** The newest rows that the log keeps. A paused log also keeps the rows that it showed at the pause. */
@@ -48,11 +42,7 @@ export interface LiveChatState {
   pausedAt: number | null;
 }
 
-/** `now` is server time. */
-export type LiveChatAction =
-  | { type: "message"; message: ActivityMessage; now: number }
-  | { type: "pause" }
-  | { type: "resume" };
+export type LiveChatAction = { type: "message"; message: ActivityMessage } | { type: "pause" } | { type: "resume" };
 
 export function initialLiveChat(): LiveChatState {
   return { seq: 0, rows: [], removed: new Set<string>(), pausedAt: null };
@@ -131,18 +121,16 @@ function receiveEvent(state: LiveChatState, event: ActivityEvent): LiveChatState
 }
 
 /**
- * A reconnect snapshot. A row in the window of the snapshot that the snapshot does not have was moderated while this
- * page was away. A full snapshot starts at its oldest message. A snapshot that is not full, also an empty one, has
- * each message that the producer keeps, so its window is the time for which the producer keeps a message. The
- * snapshot tells nothing about older rows: they stay.
+ * A reconnect snapshot. The snapshot has each message that the producer keeps and that is newer than `since`. A
+ * newer row that the snapshot does not have was moderated while this page was away. The snapshot tells nothing
+ * about older rows: they stay. A producer from before `since` sends none: then the snapshot tells only about the
+ * rows that are newer than its oldest message.
  */
-function receiveSnapshot(state: LiveChatState, events: readonly ActivityEvent[], now: number): LiveChatState {
+function receiveSnapshot(state: LiveChatState, events: readonly ActivityEvent[], since?: number): LiveChatState {
   const chats: ActivityChat[] = events.filter((event: ActivityEvent): event is ActivityChat => event.kind === "chat");
+  if (since === undefined && chats.length === 0) return state;
   const ids = new Set<string>(chats.map((chat: ActivityChat): string => chat.id));
-  const windowStart: number =
-    chats.length >= FULL_SNAPSHOT
-      ? Math.min(...chats.map((chat: ActivityChat): number => chat.receivedAt))
-      : now - SNAPSHOT_KEPT_MS;
+  const windowStart: number = since ?? Math.min(...chats.map((chat: ActivityChat): number => chat.receivedAt));
   const gone = (row: LiveChatRow): boolean => !ids.has(row.id) && row.receivedAt > windowStart;
   let next: LiveChatState = moderate(state, gone, null);
   for (const chat of chats) next = receiveChat(next, chat);
@@ -153,8 +141,8 @@ function receiveSnapshot(state: LiveChatState, events: readonly ActivityEvent[],
 export function liveChatReducer(state: LiveChatState, action: LiveChatAction): LiveChatState {
   if (action.type === "pause") return state.pausedAt === null ? { ...state, pausedAt: state.seq } : state;
   if (action.type === "resume") return { ...state, pausedAt: null, rows: newest(state.rows, null) };
-  const { message, now } = action;
-  if (message.type === "snapshot") return receiveSnapshot(state, message.events, now);
+  const { message } = action;
+  if (message.type === "snapshot") return receiveSnapshot(state, message.events, message.since);
   if (message.type === "event") return receiveEvent(state, message.event);
   return state;
 }
