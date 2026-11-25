@@ -299,6 +299,15 @@ describe("Live section", (): void => {
     expect(empty).toContain("No layer is on stream.");
   });
 
+  it("marks the window of the camera frame in the preview", (): void => {
+    const framed: OverlayLayers = {
+      ...onGrid,
+      camera: { enabled: true },
+      cells: { ...onGrid.cells, horizontal: { ...onGrid.cells.horizontal, camera: { c: 20, r: 12, w: 12, h: 6 } } },
+    };
+    expect(section({ initial: stateOf(framed) })).toContain("Your OBS camera shows here");
+  });
+
   it("says that live updates are away, and offers a reconnect when the page stopped trying", (): void => {
     expect(section({ connected: false })).toContain("Overlay disconnected, retrying…");
     const offline: string = section({ connected: false, reconnect: (): void => undefined });

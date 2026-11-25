@@ -27057,7 +27057,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_section_livepreview",
       "source_file": "app/components/tools/live-section.tsx",
-      "source_location": "L109",
+      "source_location": "L110",
       "target": "app_lib_shell_toolspath",
       "weight": 1.0
     },
@@ -27141,7 +27141,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_section_livesection",
       "source_file": "app/components/tools/live-section.tsx",
-      "source_location": "L149",
+      "source_location": "L150",
       "target": "app_components_overlay_use_overlay_state_useoverlaystate",
       "weight": 1.0
     },
@@ -27153,7 +27153,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_section_livesection",
       "source_file": "app/components/tools/live-section.tsx",
-      "source_location": "L152",
+      "source_location": "L153",
       "target": "app_lib_overlay_layers_onstream",
       "weight": 1.0
     },
@@ -27165,7 +27165,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_section_livesection",
       "source_file": "app/components/tools/live-section.tsx",
-      "source_location": "L153",
+      "source_location": "L154",
       "target": "app_components_overlay_activity_feed_useactivityfeed",
       "weight": 1.0
     },
@@ -27177,7 +27177,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_section_livesection",
       "source_file": "app/components/tools/live-section.tsx",
-      "source_location": "L156",
+      "source_location": "L157",
       "target": "app_components_overlay_connection_note_connectionnote",
       "weight": 1.0
     },
@@ -27189,7 +27189,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_section_livesection",
       "source_file": "app/components/tools/live-section.tsx",
-      "source_location": "L159",
+      "source_location": "L160",
       "target": "app_components_tools_live_section_livestatus",
       "weight": 1.0
     },
@@ -27201,7 +27201,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_section_livesection",
       "source_file": "app/components/tools/live-section.tsx",
-      "source_location": "L160",
+      "source_location": "L161",
       "target": "app_components_tools_live_section_livepreview",
       "weight": 1.0
     },
@@ -27213,7 +27213,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_section_livesection",
       "source_file": "app/components/tools/live-section.tsx",
-      "source_location": "L167",
+      "source_location": "L168",
       "target": "app_components_tools_live_poll_livepoll",
       "weight": 1.0
     },
@@ -27225,7 +27225,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_section_livesection",
       "source_file": "app/components/tools/live-section.tsx",
-      "source_location": "L168",
+      "source_location": "L169",
       "target": "app_components_tools_live_topics_livetopics",
       "weight": 1.0
     },
@@ -27237,7 +27237,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_section_livesection",
       "source_file": "app/components/tools/live-section.tsx",
-      "source_location": "L169",
+      "source_location": "L170",
       "target": "app_components_tools_live_message_livemessage",
       "weight": 1.0
     },
@@ -27249,7 +27249,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_section_livesection",
       "source_file": "app/components/tools/live-section.tsx",
-      "source_location": "L172",
+      "source_location": "L173",
       "target": "app_components_tools_live_chat_livechat",
       "weight": 1.0
     },
@@ -27261,7 +27261,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_section_livesection",
       "source_file": "app/components/tools/live-section.tsx",
-      "source_location": "L172",
+      "source_location": "L173",
       "target": "app_lib_channel_health_deliverschat",
       "weight": 1.0
     },
@@ -179909,7 +179909,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_section",
       "source_file": "app/components/tools/live-section.tsx",
-      "source_location": "L126",
+      "source_location": "L127",
       "target": "app_components_tools_live_section_livesection",
       "weight": 1.0
     },
@@ -240613,7 +240613,7 @@
       "label": "LiveSection()",
       "norm_label": "livesection()",
       "source_file": "app/components/tools/live-section.tsx",
-      "source_location": "L126"
+      "source_location": "L127"
     },
     {
       "_callable": true,
