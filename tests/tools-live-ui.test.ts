@@ -267,7 +267,7 @@ describe("message banner", (): void => {
 
 describe("chat panel", (): void => {
   function part(status: ActivityFeed["status"], delivers: boolean): string {
-    return renderToStaticMarkup(createElement(LiveChat, { feed: { ...feed, status }, delivers, now: 0 }));
+    return renderToStaticMarkup(createElement(LiveChat, { feed: { ...feed, status }, delivers }));
   }
 
   it("starts empty and following, with each platform shown", (): void => {
@@ -397,7 +397,7 @@ describe("full-screen chat", (): void => {
 
   it("offers the full-screen view from the chat part when the page can open it", (): void => {
     const part = (more: Partial<Parameters<typeof LiveChat>[0]>): string =>
-      renderToStaticMarkup(createElement(LiveChat, { feed, delivers: true, now: 0, ...more }));
+      renderToStaticMarkup(createElement(LiveChat, { feed, delivers: true, ...more }));
     expect(part({})).not.toContain("Open chat full screen");
     expect(part({ onFull: nothing })).toContain("Open chat full screen");
     // While the view is open, the page under it has no list.

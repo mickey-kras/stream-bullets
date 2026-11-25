@@ -3,7 +3,8 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import { SAMPLE_CHAT } from "../app/lib/chat-feed";
 import type { AppEnv } from "../app/env";
 import { MAX_ACTIVITY_MESSAGE_LENGTH, parseActivityMessage, quotaDay, type ActivityChat, type ActivityEvent } from "../app/lib/activity";
-import { ChannelIngest, snapshotMessage } from "../app/server/channel-ingest";
+import { ChannelIngest } from "../app/server/channel-ingest";
+import { snapshotMessage } from "../app/server/channel-ingest-events";
 import {
   ADMISSION_BURST,
   BACKOFF_MAX_MS,
@@ -97,6 +98,13 @@ function state(): RoomState {
 
 function room(): ChannelIngest {
   return ingest.entry(page).room;
+}
+
+/** The boundary of the snapshot a consumer that connects now receives: it has each kept message that is newer. */
+async function snapshotSince(): Promise<number | undefined> {
+  const [first] = (await listen()).messages<{ type: string; since?: number }>();
+  expect(first.type).toBe("snapshot");
+  return first.since;
 }
 
 /** The snapshot a consumer that connects now receives. */
@@ -202,18 +210,20 @@ describe("snapshotMessage", (): void => {
   it("keeps a full snapshot of large messages inside the consumer limit, newest first", (): void => {
     const events = Array.from({ length: 100 }, (_, index) => emoteChat(index));
     expect(JSON.stringify({ type: "snapshot", events, replay: true }).length).toBeGreaterThan(MAX_ACTIVITY_MESSAGE_LENGTH);
-    const message = snapshotMessage(events);
+    const message = snapshotMessage(events, 0);
     expect(message.length).toBeLessThanOrEqual(MAX_ACTIVITY_MESSAGE_LENGTH);
     const parsed = parseActivityMessage(message);
-    expect(parsed?.type).toBe("snapshot");
-    const kept = parsed?.type === "snapshot" ? parsed.events : [];
+    if (parsed?.type !== "snapshot") throw new Error("The message is not a snapshot.");
+    const kept = parsed.events;
     expect(kept.length).toBeGreaterThan(0);
     expect(kept.at(-1)).toMatchObject({ messageId: "m99" });
+    // The boundary is the newest message that was left out: the snapshot tells nothing about it or older ones.
+    expect(parsed.since).toBe(events.length - kept.length - 1);
   });
 
   it("sends a small snapshot whole", (): void => {
     const events = [emoteChat(1), emoteChat(2)];
-    expect(snapshotMessage(events)).toBe(JSON.stringify({ type: "snapshot", events, replay: true }));
+    expect(snapshotMessage(events, 7)).toBe(JSON.stringify({ type: "snapshot", events, replay: true, since: 7 }));
   });
 });
 
@@ -274,7 +284,10 @@ describe("ChannelIngest requests", (): void => {
     // A header that names no output is not the word of the Worker for a key.
     for (const value of ["1", "diagonal"])
       expect((await stub.fetch(url("subscribe"), { headers: { Upgrade: "websocket", "X-SB-Overlay": value } })).status).toBe(403);
-    expect(overlay.messages()).toEqual([{ type: "snapshot", events: [], replay: true }]);
+    const [first, ...rest] = overlay.messages<{ since?: number }>();
+    expect(first).toMatchObject({ type: "snapshot", events: [], replay: true });
+    expect(first.since).toBeLessThanOrEqual(Date.now() - SNAPSHOT_MAX_AGE_MS);
+    expect(rest).toEqual([]);
     for (let index = 1; index < MAX_SOCKETS; index++) await listen();
     expect((await stub.fetch(url("subscribe"), { headers: { Upgrade: "websocket", "X-SB-Owner": "1" } })).status).toBe(429);
   });
@@ -404,6 +417,30 @@ describe("ChannelIngest deliveries", (): void => {
     expect(events[0].id).toBe("twitch:m50");
     vi.spyOn(Date, "now").mockReturnValue(start + SNAPSHOT_MAX_AGE_MS + 1);
     expect(await snapshot()).toEqual([]);
+  });
+
+  it("tells a consumer from which receive time the snapshot has each kept message", async (): Promise<void> => {
+    await addConnection("twitch");
+    await addConnection("kick");
+    const start = Date.now();
+    vi.spyOn(Date, "now").mockReturnValue(start);
+    // A quiet chat: the snapshot has each message of the time that the object keeps one.
+    await deliver("d0", [chat("m0", "u", "twitch", start - 5000)]);
+    expect(await snapshotSince()).toBe(start - SNAPSHOT_MAX_AGE_MS);
+    // The size limit removes the two oldest messages. A deleted message does not move the boundary.
+    const more = Array.from({ length: SNAPSHOT_SIZE + 1 }, (_, n) => chat(`n${n}`, "u", "twitch", start - 4000 + n));
+    for (let at = 0; at < more.length; at += 50) await deliver(`d${at + 1}`, more.slice(at, at + 50));
+    expect(await snapshotSince()).toBe(start - 4000);
+    await deliver("del", [{ kind: "delete", platform: "twitch", messageId: `n${SNAPSHOT_SIZE}`, receivedAt: start }]);
+    expect(await snapshot()).toHaveLength(SNAPSHOT_SIZE - 1);
+    expect(await snapshotSince()).toBe(start - 4000);
+    // The messages of a disconnected platform go without moderation: the boundary moves past them.
+    await deliver("k1", [chat("k1", "a", "kick", start - 10)], "kick");
+    await post("disconnect", "kick");
+    expect(await snapshotSince()).toBe(start - 10);
+    // After the time that the object keeps a message, the boundary follows the clock again.
+    vi.spyOn(Date, "now").mockReturnValue(start + SNAPSHOT_MAX_AGE_MS);
+    expect(await snapshotSince()).toBe(start);
   });
 
   it("expires stored messages with the alarm, also when no further delivery comes", async (): Promise<void> => {
