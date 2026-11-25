@@ -14,7 +14,7 @@ export function streamerHref(handle) {
   return (id) => {
     if (id === "home") return "/";
     if (id === "streamers") return "/streamers";
-    if (id === "overlay") return "/overlay-control";
+    if (id === "tools") return "/tools";
     if (id === "page") return `/@${handle}`;
     return `/@${handle}?view=${id}`;
   };
@@ -103,13 +103,13 @@ export function StreamerHeader({
         {own && (
           <a
             className="nav-tab"
-            href={href("overlay")}
-            aria-label="Overlay"
-            title="Overlay"
-            aria-current={current === "overlay" ? "page" : undefined}
+            href={href("tools")}
+            aria-label="Tools"
+            title="Tools"
+            aria-current={current === "tools" ? "page" : undefined}
           >
-            <Icon name="overlay" size={20} />
-            <span className="nav-label">Overlay</span>
+            <Icon name="mic" size={20} />
+            <span className="nav-label">Tools</span>
           </a>
         )}
       </nav>

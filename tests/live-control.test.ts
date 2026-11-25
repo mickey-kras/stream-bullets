@@ -30,7 +30,7 @@ import {
 } from "../app/server/overlay.server";
 import type { OverlayData, OverlayState, StreamEvent } from "../app/types";
 import { controlState } from "../app/components/overlay/overlay-control";
-import { loader as controlLoader } from "../app/routes/overlay-control";
+import { loader as controlLoader } from "../app/routes/tools";
 import { apiCaller } from "./helpers/api";
 import { startOfQuotaWindow } from "./helpers/quota";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
@@ -1136,7 +1136,7 @@ describe("overlay control", (): void => {
       await send({ action: "layers", items: { topic: { enabled: false } } });
       expect(await topics()).not.toContain(topic);
       // The control page loads the topic of the layer also while the layer is off stream, for its picker.
-      const url = `${origin}/overlay-control`;
+      const url = `${origin}/tools`;
       const request = new Request(url, { headers: { cookie: await cookie("owner") } });
       const loaded = await controlLoader({ request, params: {}, context: context(), url: new URL(url), pattern: "" });
       expect(loaded.state.layers.items.topic).toMatchObject({ enabled: false, ref: topic });

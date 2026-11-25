@@ -1,7 +1,7 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { Link } from "react-router";
 import { t, type MessageId } from "../../i18n";
-import { paths } from "../../lib/shell";
+import { toolsPath } from "../../lib/shell";
 import type { Entry, LiveSnapshot, SortOrder, StreamEvent, Viewer } from "../../types";
 import type { LiveStatus } from "../live";
 import { EmptyState } from "../common";
@@ -261,9 +261,9 @@ export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
       <div className={`poll-toolbar${selected ? " is-single" : ""}${battle && owner ? " owner-tools" : ""}`}>
         <PollToolbarStart props={props} battle={battle} phase={phase} />
         {owner && (
-          <Link className="text-link" to={paths.overlayControl}>
+          <Link className="text-link" to={toolsPath("overlay")}>
             <Icon name="overlay" size={16} />
-            {t("account.overlayControl")}
+            {t("tools.tab.overlay")}
           </Link>
         )}
       </div>
@@ -287,19 +287,21 @@ export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
           <h2 className="sr-only">
             {t("polls.discussionOf")} {selected.title}
           </h2>
-          <EntryActions
-            entry={selected}
-            viewer={viewer}
-            owner={owner}
-            moderator={props.moderator}
-            writable={writable}
-            pending={props.pending.has(selected.id)}
-            onDelete={props.onDeleteSelected}
-          />
-          <button type="button" className="open-discussion gold" onClick={() => props.onDiscussionFocus(selected)}>
-            <Icon name="comment" size={18} />
-            {t("discussion.open")}
-          </button>
+          <div className="detail-actions">
+            <button type="button" className="open-discussion gold" onClick={() => props.onDiscussionFocus(selected)}>
+              <Icon name="comment" size={18} />
+              {t("discussion.open")}
+            </button>
+            <EntryActions
+              entry={selected}
+              viewer={viewer}
+              owner={owner}
+              moderator={props.moderator}
+              writable={writable}
+              pending={props.pending.has(selected.id)}
+              onDelete={props.onDeleteSelected}
+            />
+          </div>
           {props.discussion(selected)}
         </div>
       )}

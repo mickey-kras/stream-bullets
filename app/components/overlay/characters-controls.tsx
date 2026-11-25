@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode, type RefObject } from "react";
 import { t, tAround, type MessageId, type MessageVars } from "../../i18n";
 import { CHARACTERS_MAX, CHARACTERS_TIMEOUT } from "../../lib/overlay-layers";
+import { channelsSectionPath } from "../../lib/shell";
 import {
   type ModeView,
   type PlaygroundControl,
@@ -429,7 +430,7 @@ export function CharactersControls({
           {feed ? (
             <>
               {linkBefore}
-              <a className="text-link" href="#channels-title">
+              <a className="text-link" href={channelsSectionPath}>
                 {t("overlay.comp.chatSourceLink")}
               </a>
               {linkAfter}
