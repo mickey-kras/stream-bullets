@@ -68,6 +68,7 @@ for (const width of [320, 390]) {
       const open = await page.getByRole("button", { name: "Open discussion", exact: true }).boundingBox();
       const remove = await page.getByRole("button", { name: "Delete topic", exact: true }).boundingBox();
       expect(remove?.width ?? 0).toBe(44);
+      expect(remove?.height).toBe(open?.height);
       expect(remove?.x ?? 0).toBeGreaterThanOrEqual((open?.x ?? 0) + (open?.width ?? 0));
       expect(remove?.y ?? 0).toBeLessThan((open?.y ?? 0) + (open?.height ?? 0));
       expect((remove?.y ?? 0) + (remove?.height ?? 0)).toBeGreaterThan(open?.y ?? 0);

@@ -1703,7 +1703,7 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 .discussion-focus-bar { display: none; }
 .open-discussion { display: none; }
 /* Open discussion is at the left. The delete and report controls are at the right of the same row. */
-.detail-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-top: 14px; }
+.detail-actions { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px 10px; margin-top: 14px; }
 .detail-actions > .content-actions { margin-top: 0; margin-left: auto; }
 .comment-meta strong, .comment-meta time, .reply-mention { min-width: 0; overflow-wrap: anywhere; }
 .comment-direct { flex-wrap: wrap; gap: 4px 10px; }
