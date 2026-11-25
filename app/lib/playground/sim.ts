@@ -342,7 +342,12 @@ export class PlaygroundSim implements SimHost {
   /** Removes all builds (blocks, stairs, planks and flags). The characters stay and fall to the ground. */
   clearBuilds(): void {
     clearBuilds(this.terrain);
-    for (const p of this.participants.values()) p.job = null;
+    for (const p of this.participants.values()) {
+      const working: boolean = p.job !== null && (p.state === "dig" || p.state === "build");
+      p.job = null;
+      // A dig or a build without its work would hit the ground: the action ends with the work.
+      if (working) this.rest(p);
+    }
   }
 
   /**
@@ -482,6 +487,13 @@ export class PlaygroundSim implements SimHost {
         this.participants.delete(p.key);
     }
     if (this.testEndsAt !== null && this.clock >= this.testEndsAt) this.stopTest();
+    this.dropFlags();
+  }
+
+  /** A flag goes with its owner: a ban, a removal, the end of a test or an expiry leaves no flag behind. */
+  private dropFlags(): void {
+    const owners = new Set<number>(this.visible().map((p: Participant): number => p.id));
+    this.terrain.flags = this.terrain.flags.filter((flag: Flag): boolean => owners.has(flag.id));
   }
 
   /** Frees the slot at once. */
@@ -818,6 +830,7 @@ export class PlaygroundSim implements SimHost {
    * the crowd choice uses for ties and the rotation.
    */
   checkpoint(): string {
+    this.dropFlags();
     let kept: Participant[] = this.list();
     // The drop order: the participants without a slot, the most recent message first, so the end goes first.
     const droppable: Participant[] = kept

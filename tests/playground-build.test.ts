@@ -418,6 +418,37 @@ describe("breaking", () => {
     expect(["flat", "hold"]).toContain(s.p.state);
   });
 
+  it("ends a dig when the owner clears the builds, so the ground stays whole", () => {
+    const s = stage();
+    for (const c of [1, 2]) s.put(START + c, 0);
+    s.sim.perform(s.p, "dig", "", 2, 1);
+    s.tick(10);
+    expect(s.p.state).toBe("dig");
+    s.sim.clearBuilds();
+    expect(s.p.state).toBe("hold");
+    s.tick(120);
+    expect(s.sim.terrain.tiles.every((tile) => tile.stage === 0)).toBe(true);
+    expect(s.row()).toBe(0);
+  });
+
+  it("drops the flag of a participant that a ban, a test end or an expiry forgets", () => {
+    const s = stage();
+    for (let i = 0; i < 45; i++) {
+      s.sim.receive(chat("kick", `flagger${i}`, "hello"));
+      const owner = s.sim.list().at(-1) as Participant;
+      s.sim.terrain.flags.push({ id: owner.id, c: 8 + (i % 20), r: 0 });
+      s.sim.receive({ kind: "ban", platform: "kick", userId: `flagger${i}`, until: null, receivedAt: 0 });
+    }
+    s.run("!flag");
+    expect(s.sim.terrain.flags).toHaveLength(46);
+    // The checkpoint keeps only the flag of the character that is there, so a restore accepts it.
+    const restored = PlaygroundSim.restore(s.sim.checkpoint(), { rng: mulberry32(1) });
+    expect(restored.terrain.flags).toEqual([{ id: s.p.id, c: START, r: 0 }]);
+    s.sim.terrain.flags.push({ id: 9999, c: 9, r: 0 });
+    s.tick(31);
+    expect(s.sim.terrain.flags).toEqual([{ id: s.p.id, c: START, r: 0 }]);
+  });
+
   it("clears all builds and lets the characters fall", () => {
     const s = stage();
     for (let i = 0; i < 3; i++) s.run("!up");
