@@ -25642,18 +25642,6 @@
       "source": "app_components_streamer_entry_detail_entrydetail",
       "source_file": "app/components/streamer/entry-detail.tsx",
       "source_location": "L136",
-      "target": "app_components_streamer_vote_buttons_votebuttons",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_streamer_entry_detail_entrydetail",
-      "source_file": "app/components/streamer/entry-detail.tsx",
-      "source_location": "L145",
       "target": "app_components_streamer_entry_detail_entryactions",
       "weight": 1.0
     },
@@ -25665,7 +25653,19 @@
       "relation": "calls",
       "source": "app_components_streamer_entry_detail_entrydetail",
       "source_file": "app/components/streamer/entry-detail.tsx",
-      "source_location": "L155",
+      "source_location": "L147",
+      "target": "app_components_streamer_vote_buttons_votebuttons",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_streamer_entry_detail_entrydetail",
+      "source_file": "app/components/streamer/entry-detail.tsx",
+      "source_location": "L157",
       "target": "app_components_ideas_idea_status_control_ideastatuscontrol",
       "weight": 1.0
     },
@@ -26025,7 +26025,7 @@
       "relation": "calls",
       "source": "app_components_streamer_polls_view_pollsview",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L290",
+      "source_location": "L295",
       "target": "app_components_streamer_entry_detail_entryactions",
       "weight": 1.0
     },
@@ -26073,7 +26073,7 @@
       "relation": "calls",
       "source": "app_components_streamer_polls_view_usebattlephase",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L311",
+      "source_location": "L313",
       "target": "app_components_mash_use_mash_usemashview",
       "weight": 1.0
     },
@@ -26085,7 +26085,7 @@
       "relation": "calls",
       "source": "app_components_streamer_polls_view_usepollsmainclass",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L319",
+      "source_location": "L321",
       "target": "app_components_streamer_polls_view_usebattlephase",
       "weight": 1.0
     },
@@ -58377,7 +58377,7 @@
       "relation": "calls",
       "source": "tests_e2e_mobile_discussion_spec",
       "source_file": "tests/e2e/mobile-discussion.spec.ts",
-      "source_location": "L134",
+      "source_location": "L148",
       "target": "tests_e2e_mobile_discussion_spec_touchscroll",
       "weight": 1.0
     },
@@ -181903,7 +181903,7 @@
       "relation": "contains",
       "source": "app_components_streamer_polls_view",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L310",
+      "source_location": "L312",
       "target": "app_components_streamer_polls_view_usebattlephase",
       "weight": 1.0
     },
@@ -181914,7 +181914,7 @@
       "relation": "contains",
       "source": "app_components_streamer_polls_view",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L317",
+      "source_location": "L319",
       "target": "app_components_streamer_polls_view_usepollsmainclass",
       "weight": 1.0
     },
@@ -243835,7 +243835,7 @@
       "label": "useBattlePhase()",
       "norm_label": "usebattlephase()",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L310"
+      "source_location": "L312"
     },
     {
       "_callable": true,
@@ -243846,7 +243846,7 @@
       "label": "usePollsMainClass()",
       "norm_label": "usepollsmainclass()",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L317"
+      "source_location": "L319"
     },
     {
       "_callable": true,

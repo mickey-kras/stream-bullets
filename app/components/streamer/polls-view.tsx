@@ -287,19 +287,21 @@ export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
           <h2 className="sr-only">
             {t("polls.discussionOf")} {selected.title}
           </h2>
-          <EntryActions
-            entry={selected}
-            viewer={viewer}
-            owner={owner}
-            moderator={props.moderator}
-            writable={writable}
-            pending={props.pending.has(selected.id)}
-            onDelete={props.onDeleteSelected}
-          />
-          <button type="button" className="open-discussion gold" onClick={() => props.onDiscussionFocus(selected)}>
-            <Icon name="comment" size={18} />
-            {t("discussion.open")}
-          </button>
+          <div className="detail-actions">
+            <button type="button" className="open-discussion gold" onClick={() => props.onDiscussionFocus(selected)}>
+              <Icon name="comment" size={18} />
+              {t("discussion.open")}
+            </button>
+            <EntryActions
+              entry={selected}
+              viewer={viewer}
+              owner={owner}
+              moderator={props.moderator}
+              writable={writable}
+              pending={props.pending.has(selected.id)}
+              onDelete={props.onDeleteSelected}
+            />
+          </div>
           {props.discussion(selected)}
         </div>
       )}
