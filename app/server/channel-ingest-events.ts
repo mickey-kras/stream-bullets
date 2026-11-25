@@ -11,13 +11,22 @@ export function banKey(event: Extract<ActivityEvent, { kind: "ban" }>): string {
 /**
  * The snapshot as one socket message. The oldest messages are left out until it fits the consumer's message limit,
  * so a reconnecting consumer always gets the newest history.
+ *
+ * `since` is a receive time: the snapshot has each kept message that is newer. A message that is left out moves it
+ * forward. A consumer reads a newer message of its own that the snapshot does not have as moderated.
  */
-export function snapshotMessage(events: readonly ActivityChat[]): string {
+export function snapshotMessage(events: readonly ActivityChat[], since: number): string {
   let start = 0;
-  let message = JSON.stringify({ type: "snapshot", events, replay: true });
+  let message = JSON.stringify({ type: "snapshot", events, replay: true, since });
   while (message.length > MAX_ACTIVITY_MESSAGE_LENGTH && start < events.length) {
     start += Math.max(1, Math.ceil((events.length - start) / 10));
-    message = JSON.stringify({ type: "snapshot", events: events.slice(start), replay: true });
+    const left: number[] = events.slice(0, start).map((event: ActivityChat): number => event.receivedAt);
+    message = JSON.stringify({
+      type: "snapshot",
+      events: events.slice(start),
+      replay: true,
+      since: Math.max(since, ...left),
+    });
   }
   return message;
 }

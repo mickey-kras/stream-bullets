@@ -14,7 +14,6 @@ import {
   type ChannelStatusCode,
 } from "../lib/activity";
 import { banKey, eventForBroadcast, snapshotMessage } from "./channel-ingest-events";
-export { snapshotMessage } from "./channel-ingest-events";
 import { youtubeEvents } from "./channel-normalize";
 import {
   channelIdentity,
@@ -35,7 +34,7 @@ import { channelsOff, loadTokens, replaceTokens, type StoredTokens } from "./cha
 import { HttpError } from "./http.server";
 import { sampleChatAt } from "../lib/chat-feed";
 import { validateTestEnvironment } from "./test-environment-config";
-import { ID_SQL, type IdTable } from "./channel-ingest-sql";
+import { EVENTS, ID_SQL, type IdTable } from "./channel-ingest-sql";
 import { type PlaygroundHost, playgroundOf } from "./playground-host";
 import { detached } from "../lib/detached";
 import type { Orientation } from "../lib/overlay-layers";
@@ -158,9 +157,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
 
   private createTables(): void {
     const sql = this.ctx.storage.sql;
-    sql.exec(`CREATE TABLE IF NOT EXISTS events (seq INTEGER PRIMARY KEY AUTOINCREMENT,
-      platform TEXT NOT NULL, message_id TEXT NOT NULL, user_id TEXT NOT NULL, received_at INTEGER NOT NULL,
-      body TEXT NOT NULL)`);
+    EVENTS.create(sql);
     // Delivery and chat message ids, for deduplication; and deleted message ids, kept apart so that a burst of
     // new ids can never push them out early.
     for (const table of ["seen", "deleted"] as const) {
@@ -239,7 +236,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     const tags = output ? ["activity", "overlay-key", outputTag(output)] : ["activity", "owner"];
     const characters = new URL(request.url).searchParams.get("characters") === "1";
     this.ctx.acceptWebSocket(server, characters ? [...tags, "characters"] : tags);
-    this.send(server, snapshotMessage(this.snapshot(Date.now())));
+    this.send(server, this.snapshot(Date.now()));
     if (characters) await this.playground.open(server);
     await this.listeningStarted(first, Date.now());
     return new Response(null, { status: 101, webSocket: client });
@@ -352,19 +349,19 @@ export class ChannelIngest extends DurableObject<AppEnv> {
 
   // Ingestion -----------------------------------------------------------------------------------------------------
 
-  /** The chat messages a reconnecting consumer gets. They are marked not live: commands in them never run again. */
-  private snapshot(now: number): ActivityChat[] {
+  /** The snapshot a reconnecting consumer gets. Its messages are marked not live: commands in them never run again. */
+  private snapshot(now: number): string {
     this.prune(now);
-    return this.ctx.storage.sql
-      .exec<EventRow>("SELECT body FROM events ORDER BY seq")
-      .toArray()
-      .map((row: EventRow): ActivityChat => ({ ...(JSON.parse(row.body) as ActivityChat), live: false }));
+    const sql = this.ctx.storage.sql;
+    const rows: EventRow[] = sql.exec<EventRow>("SELECT body FROM events ORDER BY seq").toArray();
+    const events = rows.map((row): ActivityChat => ({ ...(JSON.parse(row.body) as ActivityChat), live: false }));
+    return snapshotMessage(events, Math.max(now - SNAPSHOT_MAX_AGE_MS, EVENTS.cut(sql)));
   }
 
   private prune(now: number): void {
     const sql = this.ctx.storage.sql;
     sql.exec("DELETE FROM events WHERE received_at < ?", now - SNAPSHOT_MAX_AGE_MS);
-    sql.exec("DELETE FROM events WHERE seq NOT IN (SELECT seq FROM events ORDER BY seq DESC LIMIT ?)", SNAPSHOT_SIZE);
+    EVENTS.trim(sql, SNAPSHOT_SIZE);
     for (const table of ["seen", "deleted"] as const) {
       let count = (this.counts.get(table) ?? 0) - this.deleteIds(ID_SQL[table].expire, now - SEEN_TTL_MS);
       if (count > SEEN_MAX) count -= this.deleteIds(ID_SQL[table].trim, count - SEEN_MAX);
@@ -733,7 +730,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     else await this.ctx.storage.delete(key);
     if (platform === "youtube") await this.ctx.storage.delete("youtube");
     await this.ctx.storage.delete(`repair:${platform}`);
-    this.ctx.storage.sql.exec("DELETE FROM events WHERE platform=?", platform);
+    EVENTS.dropPlatform(this.ctx.storage.sql, platform);
     this.broadcast({ kind: "status", platform, status: "disconnected" });
     return { revoked, unsubscribed };
   }

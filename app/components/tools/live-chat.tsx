@@ -101,29 +101,32 @@ export interface ChatModel {
   status: ActivityFeedStatus;
 }
 
+/** The id of the first row that shows in the view of `list`. Null: the list has no rows. */
+function firstInView(list: HTMLElement): string | null {
+  const top: number = list.getBoundingClientRect().top;
+  for (const row of list.querySelectorAll<HTMLElement>("[data-chat-row]"))
+    if (row.getBoundingClientRect().bottom > top + 1) return row.dataset.chatRow ?? null;
+  return null;
+}
+
 /**
  * The merged chat of the connected platforms, for the owner. New messages keep the newest in view. A scroll up, or
  * the pause button, pauses the list: it then keeps its place and counts the new messages. "Jump to latest" resumes
  * it. The pause and the platform filters are local to this browser. A moderated message keeps its row and loses
- * its text, also while the list is paused. `now` is server time.
+ * its text, also while the list is paused.
  */
-export function useChatModel(feed: ActivityFeed, now: number): ChatModel {
+export function useChatModel(feed: ActivityFeed): ChatModel {
   const [state, dispatch] = useReducer(liveChatReducer, undefined, initialLiveChat);
   const { subscribe } = feed;
-  const clock = useRef<number>(now);
-  useEffect(() => {
-    clock.current = now;
-  }, [now]);
-  useEffect(
-    () => subscribe((message: ActivityMessage): void => dispatch({ type: "message", message, now: clock.current })),
-    [subscribe],
-  );
+  useEffect(() => subscribe((message: ActivityMessage): void => dispatch({ type: "message", message })), [subscribe]);
   const [hidden, setHidden] = useState<ReadonlySet<ActivityPlatform>>(new Set<ActivityPlatform>());
   const { pausedAt } = state;
   const element = useRef<HTMLDivElement | null>(null);
   // The last scroll position, to tell a scroll up from a list that only changed its size.
   const top = useRef<number>(0);
   const following = useRef<boolean>(true);
+  // The first row in view of a list that the streamer scrolled while it is paused. Null: the list is at its end.
+  const anchor = useRef<string | null>(null);
   const sizes = useRef<ResizeObserver | null>(null);
   const rows: LiveChatRow[] = shownRows(state.rows, hidden).filter(
     (row: LiveChatRow): boolean => pausedAt === null || row.seq <= pausedAt,
@@ -135,10 +138,12 @@ export function useChatModel(feed: ActivityFeed, now: number): ChatModel {
   }, []);
   useLayoutEffect(() => {
     following.current = pausedAt === null;
+    if (pausedAt === null) anchor.current = null;
     const current: HTMLDivElement | null = element.current;
     if (current && pausedAt === null) toEnd(current);
   }, [last, pausedAt, toEnd]);
   // A list that comes on screen starts at its end: the panel after a load, the full-screen view when it opens.
+  // A paused list starts at the row that the streamer reads, so the place stays when the view opens or exits.
   // While the list follows, it also stays at its end when its size changes: a new text size, a turn of the phone.
   const list = useCallback(
     (next: HTMLDivElement | null): void => {
@@ -146,7 +151,14 @@ export function useChatModel(feed: ActivityFeed, now: number): ChatModel {
       sizes.current = null;
       element.current = next;
       if (!next) return;
-      toEnd(next);
+      const row: HTMLElement | null =
+        anchor.current === null
+          ? null
+          : next.querySelector<HTMLElement>(`[data-chat-row="${CSS.escape(anchor.current)}"]`);
+      if (row) {
+        next.scrollTop += row.getBoundingClientRect().top - next.getBoundingClientRect().top;
+        top.current = next.scrollTop;
+      } else toEnd(next);
       if (typeof ResizeObserver !== "function") return;
       const observer = new ResizeObserver((): void => {
         if (following.current) toEnd(next);
@@ -164,7 +176,9 @@ export function useChatModel(feed: ActivityFeed, now: number): ChatModel {
     const up: boolean = current.scrollTop < top.current - 1;
     top.current = current.scrollTop;
     const below: number = current.scrollHeight - current.scrollTop - current.clientHeight;
-    if (pausedAt === null && up && below > PAUSE_DISTANCE) dispatch({ type: "pause" });
+    const pauses: boolean = pausedAt === null && up && below > PAUSE_DISTANCE;
+    if (pauses) dispatch({ type: "pause" });
+    if (pauses || pausedAt !== null) anchor.current = firstInView(current);
   };
   const toggle = (platform: ActivityPlatform): void =>
     setHidden((current: ReadonlySet<ActivityPlatform>): ReadonlySet<ActivityPlatform> => {
@@ -474,22 +488,19 @@ function FullChat({
 export function LiveChat({
   feed,
   delivers,
-  now,
   full = false,
   onFull,
   onAir = null,
 }: Readonly<{
   feed: ActivityFeed;
   delivers: boolean;
-  /** Server time. */
-  now: number;
   /** True while the full-screen view is open. The page keeps this in its address. */
   full?: boolean;
   /** Opens or exits the full-screen view. Without it the part has no button for the view. */
   onFull?: (open: boolean) => void;
   onAir?: string | null;
 }>): ReactNode {
-  const chat: ChatModel = useChatModel(feed, now);
+  const chat: ChatModel = useChatModel(feed);
   return (
     <LivePart name="chat" title={t("tools.live.chat")}>
       <ChatFilters chat={chat} />
