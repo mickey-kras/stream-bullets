@@ -144,7 +144,7 @@ English also shows `error` for `step_up_required` and `other_key_required`.
     See [QR code](overlay-composition.md#qr-code).
 - `chat.backgroundOpacity` is the opacity of the message cards in percent: an integer from 0 to 100 that is a multiple of 5.
   Other values return `400`. See [Message background](overlay-composition.md#message-background).
-- The minimum size is 3 × 2 cells for `chat`, 6 × 2 for `characters`, and 4 × 2 for each content layer.
+- The minimum size is 6 × 4 cells for `chat`, 12 × 4 for `characters`, and 8 × 4 for each content layer.
 - After the merge, no two layers can overlap in an orientation. A layer without a cell does not count.
   A layer with a cell counts also while its `enabled` value is `false`.
 - The stored layers have a limit of 4000 characters. The server stores only the cells and the settings that are not the defaults.
