@@ -1,5 +1,5 @@
 import type { ActivityChat, ActivityEvent, ActivityFragment, ActivityMessage, ActivityPlatform } from "./activity";
-import { MAX_REMOVED_IDS, displayFragments } from "./chat-feed";
+import { FULL_SNAPSHOT, MAX_REMOVED_IDS, displayFragments } from "./chat-feed";
 
 /**
  * The merged chat of the Live section of Streamer tools as a pure state machine (issue #1030). It reads the same
@@ -8,8 +8,14 @@ import { MAX_REMOVED_IDS, displayFragments } from "./chat-feed";
  * It never runs a chat command.
  */
 
+/**
+ * The producer keeps a message for 10 minutes (SNAPSHOT_MAX_AGE_MS in channel-ingest-limits.ts). The log uses one
+ * minute less, because the clock of this page can be late.
+ */
+const SNAPSHOT_KEPT_MS = 9 * 60_000;
+
 export const LIVE_CHAT_LIMITS = {
-  /** The newest rows that the log keeps. */
+  /** The newest rows that the log keeps. A paused log also keeps the rows that it showed at the pause. */
   maxRows: 500,
   /** The longest message that a platform sends is shorter, so the owner reads the whole text. */
   maxDisplayChars: 500,
@@ -38,10 +44,18 @@ export interface LiveChatState {
   rows: LiveChatRow[];
   /** Ids of moderated messages, so a late duplicate never shows a removed message. */
   removed: ReadonlySet<string>;
+  /** The newest row at the time of the pause: later rows wait. Null while the log follows the newest message. */
+  pausedAt: number | null;
 }
 
+/** `now` is server time. */
+export type LiveChatAction =
+  | { type: "message"; message: ActivityMessage; now: number }
+  | { type: "pause" }
+  | { type: "resume" };
+
 export function initialLiveChat(): LiveChatState {
-  return { seq: 0, rows: [], removed: new Set<string>() };
+  return { seq: 0, rows: [], removed: new Set<string>(), pausedAt: null };
 }
 
 function toRow(chat: ActivityChat, seq: number): LiveChatRow {
@@ -66,14 +80,17 @@ function remember(removed: ReadonlySet<string>, ids: readonly string[]): Readonl
   return new Set<string>(next.slice(Math.max(0, next.length - MAX_REMOVED_IDS)));
 }
 
-function newest(rows: LiveChatRow[]): LiveChatRow[] {
-  return rows.length > LIVE_CHAT_LIMITS.maxRows ? rows.slice(rows.length - LIVE_CHAT_LIMITS.maxRows) : rows;
+/** The rows to keep. New messages never push out a row that a paused log shows, so the list stays in its place. */
+function newest(rows: LiveChatRow[], pausedAt: number | null): LiveChatRow[] {
+  const max: number = LIVE_CHAT_LIMITS.maxRows;
+  const held: number = pausedAt === null ? 0 : rows.filter((row: LiveChatRow): boolean => row.seq <= pausedAt).length;
+  return rows.length - held > max ? [...rows.slice(0, held), ...rows.slice(rows.length - max)] : rows;
 }
 
 function receiveChat(state: LiveChatState, chat: ActivityChat): LiveChatState {
   if (state.removed.has(chat.id) || state.rows.some((row: LiveChatRow): boolean => row.id === chat.id)) return state;
   const seq: number = state.seq + 1;
-  return { ...state, seq, rows: newest([...state.rows, toRow(chat, seq)]) };
+  return { ...state, seq, rows: newest([...state.rows, toRow(chat, seq)], state.pausedAt) };
 }
 
 /** Marks the rows that `match` names as removed. `id` is a message that may arrive later. */
@@ -115,23 +132,30 @@ function receiveEvent(state: LiveChatState, event: ActivityEvent): LiveChatState
 }
 
 /**
- * A reconnect snapshot. A row that is newer than the oldest message of the snapshot, and that the snapshot does not
- * have, was moderated while this page was away. The snapshot tells nothing about older rows: they stay.
+ * A reconnect snapshot. A row in the window of the snapshot that the snapshot does not have was moderated while this
+ * page was away. A full snapshot starts at its oldest message. A snapshot that is not full, also an empty one, has
+ * each message that the producer keeps, so its window is the time for which the producer keeps a message. The
+ * snapshot tells nothing about older rows: they stay.
  */
-function receiveSnapshot(state: LiveChatState, events: readonly ActivityEvent[]): LiveChatState {
+function receiveSnapshot(state: LiveChatState, events: readonly ActivityEvent[], now: number): LiveChatState {
   const chats: ActivityChat[] = events.filter((event: ActivityEvent): event is ActivityChat => event.kind === "chat");
-  if (chats.length === 0) return state;
   const ids = new Set<string>(chats.map((chat: ActivityChat): string => chat.id));
-  const windowStart: number = Math.min(...chats.map((chat: ActivityChat): number => chat.receivedAt));
+  const windowStart: number =
+    chats.length >= FULL_SNAPSHOT
+      ? Math.min(...chats.map((chat: ActivityChat): number => chat.receivedAt))
+      : now - SNAPSHOT_KEPT_MS;
   const gone = (row: LiveChatRow): boolean => !ids.has(row.id) && row.receivedAt > windowStart;
   let next: LiveChatState = moderate(state, gone, null);
   for (const chat of chats) next = receiveChat(next, chat);
   return next;
 }
 
-/** The next state of the log after one message of the activity socket. Playground frames change nothing. */
-export function liveChatReducer(state: LiveChatState, message: ActivityMessage): LiveChatState {
-  if (message.type === "snapshot") return receiveSnapshot(state, message.events);
+/** The next state of the log. Of the messages of the activity socket, playground frames change nothing. */
+export function liveChatReducer(state: LiveChatState, action: LiveChatAction): LiveChatState {
+  if (action.type === "pause") return state.pausedAt === null ? { ...state, pausedAt: state.seq } : state;
+  if (action.type === "resume") return { ...state, pausedAt: null, rows: newest(state.rows, null) };
+  const { message, now } = action;
+  if (message.type === "snapshot") return receiveSnapshot(state, message.events, now);
   if (message.type === "event") return receiveEvent(state, message.event);
   return state;
 }

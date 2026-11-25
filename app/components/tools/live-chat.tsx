@@ -13,7 +13,7 @@ import {
 } from "react";
 import { Dialog as RadixDialog, ScrollArea } from "radix-ui";
 import { t, type MessageId } from "../../i18n";
-import type { ActivityFragment, ActivityPlatform } from "../../lib/activity";
+import type { ActivityFragment, ActivityMessage, ActivityPlatform } from "../../lib/activity";
 import {
   CHAT_TEXT_SIZES,
   chatTextStep,
@@ -107,15 +107,21 @@ export interface ChatModel {
  * The merged chat of the connected platforms, for the owner. New messages keep the newest in view. A scroll up, or
  * the pause button, pauses the list: it then keeps its place and counts the new messages. "Jump to latest" resumes
  * it. The pause and the platform filters are local to this browser. A moderated message keeps its row and loses
- * its text, also while the list is paused.
+ * its text, also while the list is paused. `now` is server time.
  */
-export function useChatModel(feed: ActivityFeed): ChatModel {
-  const [state, receive] = useReducer(liveChatReducer, undefined, initialLiveChat);
+export function useChatModel(feed: ActivityFeed, now: number): ChatModel {
+  const [state, dispatch] = useReducer(liveChatReducer, undefined, initialLiveChat);
   const { subscribe } = feed;
-  useEffect(() => subscribe(receive), [subscribe]);
+  const clock = useRef<number>(now);
+  useEffect(() => {
+    clock.current = now;
+  }, [now]);
+  useEffect(
+    () => subscribe((message: ActivityMessage): void => dispatch({ type: "message", message, now: clock.current })),
+    [subscribe],
+  );
   const [hidden, setHidden] = useState<ReadonlySet<ActivityPlatform>>(new Set<ActivityPlatform>());
-  // The newest row at the time of the pause: later rows wait. Null while the chat follows the newest message.
-  const [pausedAt, setPausedAt] = useState<number | null>(null);
+  const { pausedAt } = state;
   const element = useRef<HTMLDivElement | null>(null);
   // The last scroll position, to tell a scroll up from a list that only changed its size.
   const top = useRef<number>(0);
@@ -160,7 +166,7 @@ export function useChatModel(feed: ActivityFeed): ChatModel {
     const up: boolean = current.scrollTop < top.current - 1;
     top.current = current.scrollTop;
     const below: number = current.scrollHeight - current.scrollTop - current.clientHeight;
-    if (pausedAt === null && up && below > PAUSE_DISTANCE) setPausedAt(state.seq);
+    if (pausedAt === null && up && below > PAUSE_DISTANCE) dispatch({ type: "pause" });
   };
   const toggle = (platform: ActivityPlatform): void =>
     setHidden((current: ReadonlySet<ActivityPlatform>): ReadonlySet<ActivityPlatform> => {
@@ -172,8 +178,8 @@ export function useChatModel(feed: ActivityFeed): ChatModel {
     rows,
     paused: pausedAt !== null,
     waiting: pausedAt === null ? 0 : newSince(state.rows, pausedAt, hidden),
-    pause: (): void => setPausedAt(state.seq),
-    jump: (): void => setPausedAt(null),
+    pause: (): void => dispatch({ type: "pause" }),
+    jump: (): void => dispatch({ type: "resume" }),
     hidden,
     toggle,
     list,
@@ -474,19 +480,22 @@ function FullChat({
 export function LiveChat({
   feed,
   delivers,
+  now,
   full = false,
   onFull,
   onAir = null,
 }: Readonly<{
   feed: ActivityFeed;
   delivers: boolean;
+  /** Server time. */
+  now: number;
   /** True while the full-screen view is open. The page keeps this in its address. */
   full?: boolean;
   /** Opens or exits the full-screen view. Without it the part has no button for the view. */
   onFull?: (open: boolean) => void;
   onAir?: string | null;
 }>): ReactNode {
-  const chat: ChatModel = useChatModel(feed);
+  const chat: ChatModel = useChatModel(feed, now);
   return (
     <LivePart name="chat" title={t("tools.live.chat")}>
       <ChatFilters chat={chat} />

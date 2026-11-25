@@ -120,6 +120,7 @@ Thus the switch adds no call to a platform.
 Before the two outputs, a page had one link, and the editor selected the orientation that OBS showed.
 Migration `0046` keeps that picture. The link of a page that showed the vertical orientation is now the link of the vertical output.
 Each other link is the link of the horizontal output.
+An OBS source that connected before the two outputs connects again one time when a link of the page changes.
 
 | Layer | Minimum size in cells | Minimum size in pixels |
 | --- | --- | --- |
@@ -207,10 +208,14 @@ To show the camera in the frame, do these steps:
 
 1. In the editor, add the camera frame to the grid. Give it the place and the size of the camera picture.
 2. In OBS, move the camera source below the overlay source in the list of sources.
-3. In OBS, give the camera source the place and the size of the cell of the frame.
+3. In OBS, give the camera source the place and the size of the window of the frame.
 
 The frame covers 19 design pixels at each edge of its cell. The remaining area of the cell is the window.
+Thus the window starts 19 design pixels from the left edge and the top edge of the cell.
+Its width and its height are 38 design pixels less than those of the cell.
+
 The window has round corners. Thus the frame hides the corners of the camera picture.
+The outer corners of the frame are also round. A camera picture as large as the cell shows outside them.
 The label of the layer on the grid gives the size of the cell in design pixels.
 
 In the editor, the window shows the text **Your OBS camera shows here**. The overlay page never shows this text.
@@ -268,6 +273,9 @@ A preset that you change keeps your version. The list then shows **preset, chang
 
 **Save as a new layout** and **New layout…** make a layout with your name.
 It starts from a copy of the layout on stream or from an empty grid, and it goes on stream.
+
+A layout action first saves the edits of the grid. The grid takes no edit until the action ends.
+When a different tab changes the layouts, the list shows the new layouts without a load of the page.
 
 **Rename or delete layouts** opens the list of your layouts. Each layout can get a new name.
 You cannot delete the layout on stream. Select a different layout first.

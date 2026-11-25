@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_LAYERS } from "../app/lib/overlay-layers";
 import {
   keyOf,
+  keyRevokes,
   keyTags,
   outputInBody,
   outputOf,
@@ -90,6 +91,22 @@ describe("the output of an OBS socket", (): void => {
     // A socket that a room from before the two outputs accepted.
     expect(outputOf(["role:owner", "overlay-key"])).toBe("horizontal");
     expect(outputOf([])).toBe("horizontal");
+  });
+
+  it("closes the sockets of the output of a new key, and each socket without an output tag", (): void => {
+    const vertical: string[] = ["activity", "overlay-key", outputTag("vertical")];
+    expect(keyRevokes(vertical, "vertical")).toBe(true);
+    expect(keyRevokes(vertical, "horizontal")).toBe(false);
+    expect(keyRevokes(["role:owner", "overlay-key", outputTag("horizontal")], "vertical")).toBe(false);
+    // The key of a socket from before the two outputs can be the key of each output.
+    expect(keyRevokes(["role:owner", "overlay-key"], "vertical")).toBe(true);
+    expect(keyRevokes(["role:owner", "overlay-key"], "horizontal")).toBe(true);
+    // The dock key closes the dock sockets only, and an output key never closes a dock or an owner socket.
+    expect(keyRevokes(["role:owner", "dock-key"], "dock")).toBe(true);
+    expect(keyRevokes(["role:owner", "overlay-key"], "dock")).toBe(false);
+    expect(keyRevokes(vertical, "dock")).toBe(false);
+    expect(keyRevokes(["role:owner", "dock-key"], "vertical")).toBe(false);
+    expect(keyRevokes(["activity", "owner"], "horizontal")).toBe(false);
   });
 
   it("reads the output of a notice from its JSON body", async (): Promise<void> => {

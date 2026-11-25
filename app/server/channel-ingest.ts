@@ -38,7 +38,7 @@ import { validateTestEnvironment } from "./test-environment-config";
 import { ID_SQL, type IdTable } from "./channel-ingest-sql";
 import { type PlaygroundHost, playgroundOf } from "./playground-host";
 import { detached } from "../lib/detached";
-import { keyOf, keyTags, outputInBody, socketKey, type SocketKey } from "./room-connections";
+import { keyRevokes, keyTags, outputInBody, socketKey, type SocketKey } from "./room-connections";
 import { NEW_YOUTUBE_STATE, type Connection, type YoutubeState } from "./channel-ingest-state";
 import {
   SNAPSHOT_SIZE,
@@ -317,7 +317,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     const output: SocketKey | null = await outputInBody(request);
     if (!output) return reply("Invalid output", 400);
     this.overlayKeys += 1;
-    const mine = (socket: WebSocket): boolean => keyOf(this.ctx.getTags(socket)) === output;
+    const mine = (socket: WebSocket): boolean => keyRevokes(this.ctx.getTags(socket), output);
     this.closeSockets("Overlay key revoked", this.ctx.getWebSockets("activity").filter(mine));
     return new Response(null, { status: 204 });
   }
