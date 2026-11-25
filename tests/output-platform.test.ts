@@ -34,6 +34,13 @@ describe("the events of one platform", (): void => {
   it("keeps a snapshot with the events of the platform only, in their sequence", (): void => {
     const snapshot: ActivityMessage = { type: "snapshot", events: [...SAMPLE_CHAT], replay: true };
     expect(messageForPlatform(snapshot, "twitch")).toEqual({ type: "snapshot", events: twitch, replay: true });
+    // The boundary of the server stays: the snapshot still tells nothing about an older message.
+    expect(messageForPlatform({ ...snapshot, since: 5 }, "twitch")).toEqual({
+      type: "snapshot",
+      events: twitch,
+      replay: true,
+      since: 5,
+    });
     // A snapshot without an event of the platform is an empty snapshot, not nothing: it replaces the old rows.
     const none: ActivityMessage = { type: "snapshot", events: others, replay: true };
     expect(messageForPlatform(none, "twitch")).toEqual({ type: "snapshot", events: [], replay: true });
