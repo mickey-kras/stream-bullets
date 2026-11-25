@@ -42,7 +42,7 @@ For a layer without a place, the part shows a note and a link to the **Overlay**
 
 The part gives the health of each channel in words: connected, needs attention, or not connected.
 For a channel that needs attention, it also gives the problem.
-One line gives the OBS sources that are connected with the overlay link, or when the last source went away.
+One line gives the number of OBS sources that use the overlay link, or the time when the last source went away.
 
 ### What OBS shows
 
