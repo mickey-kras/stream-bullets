@@ -160,10 +160,14 @@ To show the camera in the frame, do these steps:
 
 1. In the editor, add the camera frame to the grid. Give it the place and the size of the camera picture.
 2. In OBS, move the camera source below the overlay source in the list of sources.
-3. In OBS, give the camera source the place and the size of the cell of the frame.
+3. In OBS, give the camera source the place and the size of the window of the frame.
 
 The frame covers 19 design pixels at each edge of its cell. The remaining area of the cell is the window.
+Thus the window starts 19 design pixels from the left edge and the top edge of the cell.
+Its width and its height are 38 design pixels less than those of the cell.
+
 The window has round corners. Thus the frame hides the corners of the camera picture.
+The outer corners of the frame are also round. A camera picture as large as the cell shows outside them.
 The label of the layer on the grid gives the size of the cell in design pixels.
 
 In the editor, the window shows the text **Your OBS camera shows here**. The overlay page never shows this text.
