@@ -22,6 +22,7 @@ import {
   leaseOf,
   oldest,
   outputInBody,
+  keyRevokes,
   outputOf,
   outputTag,
   overlayOutput,
@@ -350,7 +351,9 @@ export class PollRoom extends DurableObject<AppEnv> {
   private async overlayKeyRevoked(request: Request): Promise<Response> {
     const output: Orientation | null = await outputInBody(request);
     if (!output) return response("Invalid output", 400);
-    const sources = this.sourceSockets(output);
+    const sources = this.activeSockets("overlay-key").filter((socket: WebSocket): boolean =>
+      keyRevokes(this.ctx.getTags(socket), output),
+    );
     for (const socket of sources) {
       this.send(socket, JSON.stringify({ type: "unavailable" }));
       if (socket.readyState === WebSocket.OPEN) socket.close(1001, "Overlay key revoked");
