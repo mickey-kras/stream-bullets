@@ -19,8 +19,8 @@ export function loader(args: LoaderFunctionArgs): LegalDetails & { signal: boole
 }
 
 function subscribeToClickChoice(listener: () => void): () => void {
-  window.addEventListener("storage", listener);
-  return () => window.removeEventListener("storage", listener);
+  globalThis.addEventListener("storage", listener);
+  return () => globalThis.removeEventListener("storage", listener);
 }
 
 function ClickSettings({ signal }: Readonly<{ signal: boolean }>): ReactNode {
@@ -31,7 +31,7 @@ function ClickSettings({ signal }: Readonly<{ signal: boolean }>): ReactNode {
       if (allow) localStorage.setItem(CLICK_STORAGE, String(Date.now() + 180 * 86_400_000));
       else localStorage.removeItem(CLICK_STORAGE);
       // Native storage events notify other tabs. Notify this document too.
-      window.dispatchEvent(new Event("storage"));
+      globalThis.dispatchEvent(new Event("storage"));
       setError("");
     } catch {
       setError(t("legal.clicks.error"));
