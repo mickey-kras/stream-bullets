@@ -64,6 +64,13 @@ for (const width of [320, 390]) {
       const row = await page.locator(".discussion > .composer").boundingBox();
       expect(field?.width ?? 0).toBeGreaterThanOrEqual((row?.width ?? width) - 1);
       expect(post?.y ?? 0).toBeGreaterThanOrEqual((field?.y ?? 0) + (field?.height ?? 0));
+      // The delete control is an icon at the right of the Open discussion row.
+      const open = await page.getByRole("button", { name: "Open discussion", exact: true }).boundingBox();
+      const remove = await page.getByRole("button", { name: "Delete topic", exact: true }).boundingBox();
+      expect(remove?.width ?? 0).toBe(44);
+      expect(remove?.x ?? 0).toBeGreaterThanOrEqual((open?.x ?? 0) + (open?.width ?? 0));
+      expect(remove?.y ?? 0).toBeLessThan((open?.y ?? 0) + (open?.height ?? 0));
+      expect((remove?.y ?? 0) + (remove?.height ?? 0)).toBeGreaterThan(open?.y ?? 0);
       await page.getByRole("button", { name: "Open discussion", exact: true }).tap();
       await expect(page).toHaveURL(/discussion=1/);
       await expect(page.getByRole("button", { name: "Back to topic", exact: true })).toBeFocused();
