@@ -3,7 +3,17 @@ import { newPage, close } from "./coverage";
 import { randomUUID } from "node:crypto";
 import { test, expect, type Page } from "./coverage";
 import { runSql, signedIn as fixtureSignedIn } from "./fixtures";
-import { CHAT_CELL, POLL_CELL, chip, defaultLayers, layersSql, placeLayer, saved, settings } from "./grid-helpers";
+import {
+  CHAT_CELL,
+  POLL_CELL,
+  chip,
+  defaultLayers,
+  layersSql,
+  noKeysSql,
+  placeLayer,
+  saved,
+  settings,
+} from "./grid-helpers";
 import { origin, shots, signedIn } from "./live-helpers";
 import { clientAddress, clientIp } from "./client-ips";
 
@@ -121,19 +131,21 @@ test("the owner copies the private overlay link, and a new link revokes the old 
   await control.goto("/tools?view=overlay");
   // Step 2 shows the link controls without a click.
   await expect(control.getByRole("region", { name: "2 Add to OBS" })).toBeVisible();
-  await control.getByRole("button", { name: "Create overlay link" }).click();
-  const field = control.locator("[data-ov-url]");
+  // Each output has its own link. This is the link of the horizontal output.
+  const link = control.getByRole("region", { name: "Horizontal output" });
+  await link.getByRole("button", { name: "Create overlay link" }).click();
+  const field = link.locator("[data-ov-url]");
   await expect(field).toHaveValue(/^http:\/\/localhost:5173\/@feature_host\/overlay\?key=[\w-]{43}$/);
-  await control.getByRole("button", { name: "Copy overlay URL" }).click();
+  await link.getByRole("button", { name: "Copy overlay URL: Horizontal output" }).click();
   const oldUrl: string = await control.evaluate(() => navigator.clipboard.readText());
   expect(oldUrl).toBe(await field.inputValue());
   const oldKey: string = new URL(oldUrl).searchParams.get("key") ?? "";
   // After a reload the link is hidden, and the owner can see the same link again.
   await control.reload();
   await expect(field).toHaveCount(0);
-  await control.getByRole("button", { name: "Show link", exact: true }).click();
+  await link.getByRole("button", { name: "Show link", exact: true }).click();
   await expect(field).toHaveValue(oldUrl);
-  await expect(control.getByRole("button", { name: "Show link", exact: true })).toHaveCount(0);
+  await expect(link.getByRole("button", { name: "Show link", exact: true })).toHaveCount(0);
 
   // OBS has no session; its network already holds ten guest sockets.
   const obs = await browser.newContext({
@@ -150,12 +162,13 @@ test("the owner copies the private overlay link, and a new link revokes the old 
   await expect(source.locator("[data-overlay-type]")).toBeVisible();
   await expect(source.locator(".overlay-connection")).toHaveCount(0);
   // The control page shows the OBS source that came in with the key.
-  const sources = control.locator("[data-ov-sources]");
+  const sources = link.locator("[data-ov-sources]");
   await expect(sources).toHaveText("OBS is connected: 1 source.");
 
-  await control.getByRole("button", { name: "Regenerate link" }).click();
+  await link.getByRole("button", { name: "Regenerate link" }).click();
   const confirm = control.getByRole("dialog", { name: "Regenerate the overlay link?" });
   await expect(confirm).toContainText("OBS");
+  await expect(confirm).toContainText("The link of the other output keeps working.");
   await confirm.getByRole("button", { name: "Regenerate link" }).click();
   await expect(field).not.toHaveValue(oldUrl);
   const newKey: string = new URL(await field.inputValue()).searchParams.get("key") ?? "";
@@ -165,6 +178,92 @@ test("the owner copies the private overlay link, and a new link revokes the old 
   expect(await liveSockets(crowd, 1, oldKey)).toEqual(["refused"]);
   expect(await liveSockets(crowd, 1, newKey)).toEqual(["open"]);
   await Promise.all([close(owner), close(obs)]);
+  await runSql("overlay-control-link-restore", [noKeysSql]);
+});
+
+test("each output has its own link: both are on stream, and a new link for one leaves the other connected", async ({
+  browser,
+}) => {
+  // The poll is on the grid of the two outputs, at different cells. The editor shows the horizontal output.
+  const tall = { c: 2, r: 2, w: 14, h: 8 };
+  await runSql("overlay-control-outputs", [
+    noKeysSql,
+    layersSql({ cells: { horizontal: { poll: POLL_CELL }, vertical: { poll: tall } } }),
+  ]);
+  const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 97));
+  const control = await newPage(owner);
+  await control.goto("/tools?view=overlay");
+  const wide = control.getByRole("region", { name: "Horizontal output" });
+  const high = control.getByRole("region", { name: "Vertical output" });
+  await expect(wide.locator("[data-ov-sources]")).toHaveCount(0);
+  await wide.getByRole("button", { name: "Create overlay link" }).click();
+  await expect(wide.locator("[data-ov-url]")).toHaveValue(/\?key=[\w-]{43}$/);
+  const wideUrl: string = await wide.locator("[data-ov-url]").inputValue();
+  await high.getByRole("button", { name: "Create overlay link" }).click();
+  await expect(high.locator("[data-ov-url]")).toHaveValue(/\?key=[\w-]{43}$/);
+  const highUrl: string = await high.locator("[data-ov-url]").inputValue();
+  expect(highUrl).not.toBe(wideUrl);
+  // The new vertical link did not change the horizontal link.
+  await expect(wide.locator("[data-ov-url]")).toHaveValue(wideUrl);
+  // No source uses a link yet. The room can hold the time of a source of an earlier spec.
+  await expect(wide.locator("[data-ov-sources]")).toHaveAttribute("data-ov-sources", "0");
+  await expect(high.locator("[data-ov-sources]")).toHaveAttribute("data-ov-sources", "0");
+
+  // Two OBS sources at the same time: each link shows the layout of its output, at half size.
+  const obs = await browser.newContext({
+    baseURL: origin,
+    extraHTTPHeaders: { "CF-Connecting-IP": clientAddress("overlay-control", 98) },
+  });
+  const wideSource = await newPage(obs);
+  await wideSource.setViewportSize({ width: 960, height: 540 });
+  await wideSource.goto(wideUrl);
+  const highSource = await newPage(obs);
+  await highSource.setViewportSize({ width: 540, height: 960 });
+  await highSource.goto(highUrl);
+  const pollBox = async (page: Page): Promise<{ x: number; y: number; width: number; height: number }> => {
+    const layer = page.locator('.ov-layer[data-layer="poll"]');
+    await expect(layer).toBeVisible();
+    const box = await layer.boundingBox();
+    if (!box) throw new Error("The poll layer has no box.");
+    return box;
+  };
+  const near = (actual: number, expected: number): void => expect(Math.abs(actual - expected)).toBeLessThanOrEqual(2);
+  const wideBox = await pollBox(wideSource);
+  near(wideBox.x, (POLL_CELL.c * 60) / 2);
+  near(wideBox.width, (POLL_CELL.w * 60) / 2);
+  const highBox = await pollBox(highSource);
+  near(highBox.x, (tall.c * 60) / 2);
+  near(highBox.y, (tall.r * 60) / 2);
+  near(highBox.width, (tall.w * 60) / 2);
+  near(highBox.height, (tall.h * 60) / 2);
+  await expect(wide.locator("[data-ov-sources]")).toHaveText("OBS is connected: 1 source.");
+  await expect(high.locator("[data-ov-sources]")).toHaveText("OBS is connected: 1 source.");
+
+  // The switch of the editor selects the output to edit. OBS does not change.
+  const editor = control.locator("[data-composition-editor]");
+  const save = saved(control);
+  await editor.getByRole("button", { name: "Vertical 18 × 32" }).click();
+  await save;
+  await expect(editor.getByRole("region", { name: "Composition preview" })).toHaveAttribute(
+    "data-orientation",
+    "vertical",
+  );
+  near((await pollBox(wideSource)).width, (POLL_CELL.w * 60) / 2);
+  near((await pollBox(highSource)).width, (tall.w * 60) / 2);
+
+  // A new vertical link stops the old vertical link only.
+  await high.getByRole("button", { name: "Regenerate link" }).click();
+  await control
+    .getByRole("dialog", { name: "Regenerate the overlay link?" })
+    .getByRole("button", { name: "Regenerate link" })
+    .click();
+  await expect(high.locator("[data-ov-url]")).not.toHaveValue(highUrl);
+  await expect(highSource.locator(".overlay-connection")).toContainText("Reconnecting");
+  await expect(high.locator("[data-ov-sources]")).toContainText("OBS is not connected. Last seen");
+  await expect(wide.locator("[data-ov-sources]")).toHaveText("OBS is connected: 1 source.");
+  await expect(wideSource.locator(".overlay-connection")).toHaveCount(0);
+  await Promise.all([close(owner), close(obs)]);
+  await runSql("overlay-control-outputs-restore", [noKeysSql, defaultLayers]);
 });
 
 test("an OBS source with a refused key stops its chat feed retries", async ({ browser }) => {
@@ -352,7 +451,7 @@ test("Streamer tools has the Overlay section with two numbered steps and the Cha
       control
         .getByRole("region", { name: "2 Add to OBS" })
         .getByRole("button", { name: /overlay link|Regenerate link/ }),
-    ).toBeVisible();
+    ).toHaveCount(2);
 
     // The Channels section has the channel cards alone, without a step number. No document loads for it.
     let documents: number = 0;

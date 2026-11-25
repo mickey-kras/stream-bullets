@@ -595,7 +595,9 @@ The logs hold only fixed codes, platforms, and counts. They never hold an ID, a 
 
 ## Overlay key
 
-The activity socket accepts only the current overlay key of the page or the signed-in owner.
+The activity socket accepts only a current overlay key of the page or the signed-in owner.
+Each output of the overlay has its own key. See [Outputs](overlay-composition.md#outputs).
+
 The key gives read access to the live room and the activity feed. It gives no access to the account,
 to channel management, or to provider tokens. A new overlay key closes the sockets that used the old key.
 The overlay page sends no `Referer`.
@@ -753,7 +755,7 @@ The D1 migrations `0027` and `0028` only add tables and a column. An older Worke
 | Quota exhaustion | A shared daily budget and a budget for each page. Polls run only while a consumer listens. A stored next poll time, and backoff on errors. |
 | Replay of old commands | The live window: a message that the platform sent more than 30 seconds before it arrived is not live. Snapshot messages are never live. |
 | Suspended page | The object drops deliveries, stops polling, and closes the activity sockets. |
-| Leaked overlay key | The owner makes a new key. The old key stops at once for the live room and the activity feed. |
+| Leaked overlay key | The owner makes a new key for that output. The old key stops at once for the live room and the activity feed. |
 
 ### Residual risks
 

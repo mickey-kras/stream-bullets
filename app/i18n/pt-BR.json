@@ -929,7 +929,7 @@
   "overlay.grid.notResized": "Não foi redimensionado.",
   "overlay.grid.obsSize": "Configure a fonte de navegador do OBS para {w} × {h} nesta orientação.",
   "overlay.grid.orientation": "Orientação da tela",
-  "overlay.grid.orientationNote": "O OBS muda para esta orientação na hora. Cada orientação mantém o próprio layout.",
+  "overlay.grid.orientationNote": "Escolha a saída que você quer editar. Cada saída tem o próprio layout e o próprio link do OBS. As duas saídas ficam ao vivo ao mesmo tempo.",
   "overlay.grid.outside": "Ele sai da grade.",
   "overlay.grid.palette": "Camadas · uma de cada",
   "overlay.grid.paletteHint": "Selecione uma camada para adicioná-la no primeiro lugar livre. Ou arraste a camada para a grade. Para tirar uma camada da grade, arraste a camada de volta para cá. Selecione uma camada da grade para alterá-la.",
@@ -950,7 +950,7 @@
   "overlay.keyNotKept": "Este link não pode ser mostrado de novo. Gere outro para ter um link que você possa ver de novo depois.",
   "overlay.keyShow": "Mostrar link",
   "overlay.keyMade": "Novo link do overlay pronto. Copie-o para o OBS.",
-  "overlay.keyNone": "Crie um link privado do overlay para o OBS. Com ele, o overlay sempre entra na sala ao vivo, mesmo lotada.",
+  "overlay.keyNone": "Cada saída tem o próprio link privado para o OBS. Use um link ou os dois. Com um link, o overlay sempre entra na sala ao vivo, mesmo lotada.",
   "overlay.keyOnce": "Copie este link no OBS. Mantenha-o privado: quem o tiver ocupa o lugar do seu overlay.",
   "overlay.keyRegenerate": "Gerar novo link",
   "overlay.label": "Overlay de {name}",
@@ -975,7 +975,7 @@
   "overlay.noPolls": "Primeiro crie uma enquete ou Mash Battle na sua página.",
   "overlay.noTopics": "Ainda não há tópicos.",
   "overlay.notRevealed": "Resultados ainda não revelados",
-  "overlay.obsHelp": "Adicione uma fonte de navegador no OBS: largura 1920, altura 1080. Você nunca precisa mudá-la. Troque o que ela mostra aqui.",
+  "overlay.obsHelp": "Adicione uma fonte de navegador no OBS: largura {w}, altura {h}. Você nunca precisa mudá-la. Troque o que ela mostra aqui.",
   "overlay.offline": "Atualizações ao vivo offline.",
   "overlay.pickCard": "Cartão da comunidade",
   "overlay.pickPoll": "Enquete",
@@ -1440,5 +1440,8 @@
   "tools.live.chat.larger": "Texto maior",
   "tools.live.chat.smaller": "Texto menor",
   "tools.live.chat.onAir": "No ar: {title}",
-  "tools.live.chat.screenOff": "Este navegador não consegue manter a tela ligada. Desative o bloqueio de tela do seu aparelho enquanto faz a live."
+  "tools.live.chat.screenOff": "Este navegador não consegue manter a tela ligada. Desative o bloqueio de tela do seu aparelho enquanto faz a live.",
+  "overlay.output.horizontal": "Saída horizontal",
+  "overlay.output.vertical": "Saída vertical",
+  "overlay.keyConfirmOther": "O link da outra saída continua funcionando."
 }

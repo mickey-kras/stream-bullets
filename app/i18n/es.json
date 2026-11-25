@@ -929,7 +929,7 @@
   "overlay.grid.notResized": "No cambió de tamaño.",
   "overlay.grid.obsSize": "Ajusta la fuente de navegador de OBS a {w} × {h} para esta orientación.",
   "overlay.grid.orientation": "Orientación de pantalla",
-  "overlay.grid.orientationNote": "OBS cambia a esta orientación al instante. Cada orientación guarda su propio diseño.",
+  "overlay.grid.orientationNote": "Elige la salida que quieres editar. Cada salida tiene su propio diseño y su propio enlace de OBS. Las dos salidas están en directo a la vez.",
   "overlay.grid.outside": "Se sale de la cuadrícula.",
   "overlay.grid.palette": "Capas · una de cada",
   "overlay.grid.paletteHint": "Selecciona una capa para añadirla en el primer sitio libre. O arrástrala a la cuadrícula. Para quitar una capa, arrástrala de la cuadrícula hasta aquí. Selecciona una capa colocada para cambiarla.",
@@ -950,7 +950,7 @@
   "overlay.keyNotKept": "Este enlace no se puede volver a mostrar. Regenéralo para obtener un enlace que puedas ver de nuevo más tarde.",
   "overlay.keyShow": "Mostrar enlace",
   "overlay.keyMade": "Nuevo enlace del overlay listo. Cópialo en OBS.",
-  "overlay.keyNone": "Crea un enlace privado del overlay para OBS. Con él, el overlay siempre entra en la sala en directo, aunque esté llena.",
+  "overlay.keyNone": "Cada salida tiene su propio enlace privado para OBS. Usa un enlace o los dos. Con un enlace, el overlay siempre entra en la sala en directo, aunque esté llena.",
   "overlay.keyOnce": "Copia este enlace en OBS. Mantenlo privado: cualquiera que lo tenga ocupa el lugar de tu overlay.",
   "overlay.keyRegenerate": "Regenerar enlace",
   "overlay.label": "Overlay de {name}",
@@ -975,7 +975,7 @@
   "overlay.noPolls": "Primero crea una encuesta o Mash Battle en tu página.",
   "overlay.noTopics": "Aún no hay temas.",
   "overlay.notRevealed": "Resultados aún no revelados",
-  "overlay.obsHelp": "Añade una fuente de navegador en OBS: ancho 1920, alto 1080. Nunca tendrás que cambiarla. Cambia lo que muestra desde aquí.",
+  "overlay.obsHelp": "Añade una fuente de navegador en OBS: ancho {w}, alto {h}. Nunca tendrás que cambiarla. Cambia lo que muestra desde aquí.",
   "overlay.offline": "Actualizaciones en vivo desconectadas.",
   "overlay.pickCard": "Tarjeta de comunidad",
   "overlay.pickPoll": "Encuesta",
@@ -1440,5 +1440,8 @@
   "tools.live.chat.larger": "Texto más grande",
   "tools.live.chat.smaller": "Texto más pequeño",
   "tools.live.chat.onAir": "En el aire: {title}",
-  "tools.live.chat.screenOff": "Este navegador no puede mantener la pantalla encendida. Desactiva el bloqueo de pantalla de tu dispositivo mientras haces stream."
+  "tools.live.chat.screenOff": "Este navegador no puede mantener la pantalla encendida. Desactiva el bloqueo de pantalla de tu dispositivo mientras haces stream.",
+  "overlay.output.horizontal": "Salida horizontal",
+  "overlay.output.vertical": "Salida vertical",
+  "overlay.keyConfirmOther": "El enlace de la otra salida sigue funcionando."
 }

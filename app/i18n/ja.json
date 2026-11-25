@@ -915,7 +915,7 @@
   "overlay.grid.notResized": "サイズを変更しませんでした。",
   "overlay.grid.obsSize": "この向きでは OBS のブラウザソースを {w} × {h} に設定してください。",
   "overlay.grid.orientation": "画面の向き",
-  "overlay.grid.orientationNote": "OBS はすぐにこの向きに切り替わります。向きごとに別のレイアウトが保存されます。",
+  "overlay.grid.orientationNote": "編集する出力を選びます。出力ごとに別のレイアウトと OBS リンクがあります。2 つの出力は同時に配信されます。",
   "overlay.grid.outside": "グリッドからはみ出します。",
   "overlay.grid.palette": "レイヤー · 各 1 つ",
   "overlay.grid.paletteHint": "レイヤーを選ぶと、最初の空いている場所に追加されます。グリッドにドラッグすることもできます。レイヤーを外すには、グリッドからここにドラッグして戻します。配置済みのレイヤーを選ぶと、設定を変更できます。",
@@ -936,7 +936,7 @@
   "overlay.keyNotKept": "このリンクは再表示できません。再生成すると、あとで再表示できるリンクになります。",
   "overlay.keyShow": "リンクを表示",
   "overlay.keyMade": "新しいオーバーレイリンクができました。OBS にコピーしてください。",
-  "overlay.keyNone": "OBS 用の非公開オーバーレイリンクを作成します。これがあれば、ライブルームが満員でもオーバーレイは必ず接続できます。",
+  "overlay.keyNone": "出力ごとに OBS 用の非公開リンクがあります。1 つだけでも両方でも使えます。リンクがあれば、ライブルームが満員でもオーバーレイは必ず接続できます。",
   "overlay.keyOnce": "このリンクを OBS にコピーしてください。非公開にしてください。リンクを持つ人はあなたのオーバーレイの場所を使えます。",
   "overlay.keyRegenerate": "リンクを再発行",
   "overlay.label": "{name} のオーバーレイ",
@@ -961,7 +961,7 @@
   "overlay.noPolls": "まずページで投票または Mash Battle を作成してください。",
   "overlay.noTopics": "まだトピックはありません。",
   "overlay.notRevealed": "結果はまだ公開されていません",
-  "overlay.obsHelp": "OBS でブラウザソースを追加します（幅 1920、高さ 1080）。変更は不要です。表示内容はここで切り替えます。",
+  "overlay.obsHelp": "OBS でブラウザソースを追加します（幅 {w}、高さ {h}）。変更は不要です。表示内容はここで切り替えます。",
   "overlay.offline": "ライブ更新オフライン。",
   "overlay.pickCard": "コミュニティカード",
   "overlay.pickPoll": "投票",
@@ -1420,5 +1420,8 @@
   "tools.live.chat.larger": "文字を大きく",
   "tools.live.chat.smaller": "文字を小さく",
   "tools.live.chat.onAir": "配信に表示中: {title}",
-  "tools.live.chat.screenOff": "このブラウザーでは画面を点灯したままにできません。配信中はデバイスの画面ロックをオフにしてください。"
+  "tools.live.chat.screenOff": "このブラウザーでは画面を点灯したままにできません。配信中はデバイスの画面ロックをオフにしてください。",
+  "overlay.output.horizontal": "横の出力",
+  "overlay.output.vertical": "縦の出力",
+  "overlay.keyConfirmOther": "もう一方の出力のリンクはそのまま使えます。"
 }

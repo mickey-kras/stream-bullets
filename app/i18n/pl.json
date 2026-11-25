@@ -957,7 +957,7 @@
   "overlay.grid.notResized": "Nie zmieniono rozmiaru.",
   "overlay.grid.obsSize": "Ustaw źródło przeglądarki OBS na {w} × {h} dla tej orientacji.",
   "overlay.grid.orientation": "Orientacja ekranu",
-  "overlay.grid.orientationNote": "OBS od razu przełącza się na tę orientację. Każda orientacja ma własny układ.",
+  "overlay.grid.orientationNote": "Wybierz wyjście do edycji. Każde wyjście ma własny układ i własny link OBS. Oba wyjścia są na streamie jednocześnie.",
   "overlay.grid.outside": "Wychodzi poza siatkę.",
   "overlay.grid.palette": "Warstwy · po jednej",
   "overlay.grid.paletteHint": "Wybierz warstwę, aby dodać ją w pierwszym wolnym miejscu. Albo przeciągnij ją na siatkę. Aby usunąć warstwę, przeciągnij ją z siatki z powrotem tutaj. Wybierz warstwę z siatki, aby ją zmienić.",
@@ -978,7 +978,7 @@
   "overlay.keyNotKept": "Tego linku nie można pokazać ponownie. Wygeneruj go od nowa, aby dostać link, który później zobaczysz ponownie.",
   "overlay.keyShow": "Pokaż link",
   "overlay.keyMade": "Nowy link nakładki gotowy. Skopiuj go do OBS.",
-  "overlay.keyNone": "Utwórz prywatny link nakładki dla OBS. Dzięki niemu nakładka zawsze wejdzie do pokoju na żywo, nawet gdy jest pełny.",
+  "overlay.keyNone": "Każde wyjście ma własny prywatny link dla OBS. Użyj jednego linku albo obu. Dzięki linkowi nakładka zawsze wejdzie do pokoju na żywo, nawet gdy jest pełny.",
   "overlay.keyOnce": "Skopiuj ten link do OBS. Zachowaj go dla siebie: każdy, kto go ma, zajmie miejsce twojej nakładki.",
   "overlay.keyRegenerate": "Wygeneruj nowy link",
   "overlay.label": "Nakładka: {name}",
@@ -1003,7 +1003,7 @@
   "overlay.noPolls": "Najpierw utwórz ankietę lub Mash Battle na swojej stronie.",
   "overlay.noTopics": "Nie ma jeszcze tematów.",
   "overlay.notRevealed": "Wyniki jeszcze nieujawnione",
-  "overlay.obsHelp": "Dodaj w OBS źródło przeglądarki: szerokość 1920, wysokość 1080. Nigdy nie trzeba go zmieniać. To, co pokazuje, przełączasz tutaj.",
+  "overlay.obsHelp": "Dodaj w OBS źródło przeglądarki: szerokość {w}, wysokość {h}. Nigdy nie trzeba go zmieniać. To, co pokazuje, przełączasz tutaj.",
   "overlay.offline": "Aktualizacje na żywo niedostępne.",
   "overlay.pickCard": "Karta społeczności",
   "overlay.pickPoll": "Ankieta",
@@ -1480,5 +1480,8 @@
   "tools.live.chat.larger": "Większy tekst",
   "tools.live.chat.smaller": "Mniejszy tekst",
   "tools.live.chat.onAir": "Na antenie: {title}",
-  "tools.live.chat.screenOff": "Ta przeglądarka nie może utrzymać włączonego ekranu. Wyłącz blokadę ekranu urządzenia na czas streamu."
+  "tools.live.chat.screenOff": "Ta przeglądarka nie może utrzymać włączonego ekranu. Wyłącz blokadę ekranu urządzenia na czas streamu.",
+  "overlay.output.horizontal": "Wyjście poziome",
+  "overlay.output.vertical": "Wyjście pionowe",
+  "overlay.keyConfirmOther": "Link drugiego wyjścia działa dalej."
 }

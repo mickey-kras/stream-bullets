@@ -625,6 +625,13 @@
 }
 
 /* ---------- Per-layer overlay URLs (overlay-link.tsx) ---------- */
+/* The link of one output. A line divides the two outputs. */
+.ov-url-output {
+  display: grid;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
 .ov-url-layers {
   display: grid;
   gap: 8px;

@@ -4,12 +4,15 @@ import { runSql } from "./fixtures";
 import {
   CHARACTERS_CELL,
   CHAT_CELL,
+  VERTICAL_KEY,
   chip,
   defaultLayers,
   layersSql,
+  noKeysSql,
   saved,
   settings,
   storedLayers,
+  verticalKeySql,
 } from "./grid-helpers";
 import { signedIn } from "./live-helpers";
 import { clientIp } from "./client-ips";
@@ -244,6 +247,47 @@ for (const [name, path, viewport] of [
     await close(page);
   });
 }
+
+test("the vertical output shows the one playground whole inside its cell, at the bottom", async ({ browser }) => {
+  // The playground has the size of the horizontal cell, 32 x 4 cells. The vertical cell is 18 x 6 cells.
+  const tall = { c: 0, r: 26, w: 18, h: 6 };
+  await runSql("characters-vertical", [
+    layersSql({
+      characters: { enabled: true },
+      cells: { horizontal: { characters: CHARACTERS_CELL }, vertical: { characters: tall } },
+    }),
+    verticalKeySql(),
+  ]);
+  try {
+    const frames: Frames = playground(4, 12);
+    // Half of 1080 x 1920.
+    const page = await obsPage(browser, OBS_IP, { width: 540, height: 960 });
+    await mockFeed(page, () => [SNAPSHOT, frames.full, ...frames.ticks]);
+    await page.goto(`/@feature_host/overlay?key=${VERTICAL_KEY}`);
+    const layer = page.locator('.ov-layer[data-layer="characters"]');
+    const canvas = layer.locator("canvas.characters-layer");
+    await expect.poll(() => painted(canvas)).toBeGreaterThan(500);
+    // The canvas has the size of the playground, not of the cell.
+    await expect(canvas).toHaveAttribute("width", "1920");
+    await expect(canvas).toHaveAttribute("height", "240");
+    // The layer is at its vertical cell, and the picture fits inside it on the ground of the cell.
+    const box = await layer.boundingBox();
+    if (!box) throw new Error("The characters layer has no box.");
+    const near = (actual: number, expected: number): void => expect(Math.abs(actual - expected)).toBeLessThanOrEqual(2);
+    near(box.x, 0);
+    near(box.y, (tall.r * 60) / 2);
+    near(box.width, 540);
+    near(box.height, (tall.h * 60) / 2);
+    const fit: string[] = await canvas.evaluate((element: Element): string[] => {
+      const style: CSSStyleDeclaration = getComputedStyle(element);
+      return [style.objectFit, style.objectPosition];
+    });
+    expect(fit).toEqual(["contain", "50% 100%"]);
+    await close(page);
+  } finally {
+    await runSql("characters-vertical-restore", [noKeysSql]);
+  }
+});
 
 test("a refresh draws the playground again from the new socket's full frame, never from tick frames alone", async ({
   browser,

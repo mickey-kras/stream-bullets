@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { t } from "../../i18n";
-import { onStream, type OverlayLayers } from "../../lib/overlay-layers";
+import { onAnyOutput, type OverlayLayers } from "../../lib/overlay-layers";
 import { paths } from "../../lib/shell";
 import type { OverlayData, OverlayState } from "../../types";
 import type { OverlayScene } from "../overlay/overlay-stage";
@@ -36,7 +36,7 @@ export function LiveTopics({
 }>): ReactNode {
   const layers: OverlayLayers = state.layers;
   const ref: string | null = layers.items.topic.ref;
-  const onAir: boolean = onStream(layers, "topic");
+  const onAir: boolean = onAnyOutput(layers, "topic");
   const canShow: boolean = placed(layers, "topic");
   const topics: Topic[] = liveTopics(scene.data.topics, ref);
   return (

@@ -1,5 +1,6 @@
 import { useId, type ReactNode } from "react";
 import { t } from "../../i18n";
+import type { Orientation } from "../../lib/overlay-layers";
 import type { OverlayPublic, OverlayState } from "../../types";
 import type { OverlaySources } from "../live";
 import { CompositionEditor } from "./composition-editor";
@@ -26,7 +27,7 @@ export function OverlayControl({
   live?: OverlayPublic | null;
   scene: Omit<OverlayScene, "overlay">;
   // Private-link existence only; never return its key.
-  hasOverlayKey: boolean;
+  hasOverlayKey: Readonly<Record<Orientation, boolean>>;
   // The connected OBS sources, from the live room. Null while the room did not tell.
   sources?: OverlaySources | null;
   // Offline changes save but reach OBS after reconnect.

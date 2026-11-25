@@ -786,6 +786,13 @@ export const overlayKeys = sqliteTable(
     // The id of the encryption key.
     keyId: text("key_id"),
     createdAt: integer("created_at").notNull(),
+    // The output of the key above: `horizontal` or `vertical` (app/server/overlay-key.server.ts validates it).
+    output: text("output").notNull().default("horizontal"),
+    // The key of the other output, with the same parts. Null: the other output has no key.
+    otherKeyHash: text("other_key_hash"),
+    otherKeySealed: text("other_key_sealed"),
+    otherKeyId: text("other_key_id"),
+    otherCreatedAt: integer("other_created_at"),
   },
   (table) => [
     check("overlay_keys_hash_check", sql`length(${table.keyHash}) = 64 AND ${table.keyHash} NOT GLOB '*[^0-9a-f]*'`),

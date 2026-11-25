@@ -929,7 +929,7 @@
   "overlay.grid.notResized": "Non redimensionné.",
   "overlay.grid.obsSize": "Réglez la source navigateur OBS sur {w} × {h} pour cette orientation.",
   "overlay.grid.orientation": "Orientation de l’écran",
-  "overlay.grid.orientationNote": "OBS passe tout de suite à cette orientation. Chaque orientation garde sa propre disposition.",
+  "overlay.grid.orientationNote": "Choisissez la sortie à modifier. Chaque sortie a sa propre disposition et son propre lien OBS. Les deux sorties sont à l’antenne en même temps.",
   "overlay.grid.outside": "Il dépasse de la grille.",
   "overlay.grid.palette": "Calques · un de chaque",
   "overlay.grid.paletteHint": "Sélectionnez un calque pour l’ajouter à la première place libre. Ou faites-le glisser sur la grille. Pour retirer un calque, faites-le glisser de la grille jusqu’ici. Sélectionnez un calque placé pour le modifier.",
@@ -950,7 +950,7 @@
   "overlay.keyNotKept": "Ce lien ne peut pas être affiché de nouveau. Régénérez-le pour obtenir un lien que vous pourrez revoir plus tard.",
   "overlay.keyShow": "Afficher le lien",
   "overlay.keyMade": "Nouveau lien d’overlay prêt. Copiez-le dans OBS.",
-  "overlay.keyNone": "Créez un lien privé d’overlay pour OBS. Avec lui, l’overlay entre toujours dans le salon en direct, même plein.",
+  "overlay.keyNone": "Chaque sortie a son propre lien privé pour OBS. Utilisez un lien ou les deux. Avec un lien, l’overlay entre toujours dans le salon en direct, même plein.",
   "overlay.keyOnce": "Copiez ce lien dans OBS. Gardez-le privé : toute personne qui l’a prend la place de votre overlay.",
   "overlay.keyRegenerate": "Régénérer le lien",
   "overlay.label": "Overlay de {name}",
@@ -975,7 +975,7 @@
   "overlay.noPolls": "Créez d’abord un sondage ou une Mash Battle sur votre page.",
   "overlay.noTopics": "Aucun sujet pour l’instant.",
   "overlay.notRevealed": "Résultats pas encore révélés",
-  "overlay.obsHelp": "Ajoutez une source Navigateur dans OBS : largeur 1920, hauteur 1080. Inutile de la modifier ensuite. Changez ce qu’elle affiche ici.",
+  "overlay.obsHelp": "Ajoutez une source Navigateur dans OBS : largeur {w}, hauteur {h}. Inutile de la modifier ensuite. Changez ce qu’elle affiche ici.",
   "overlay.offline": "Mises à jour en direct hors ligne.",
   "overlay.pickCard": "Carte Communauté",
   "overlay.pickPoll": "Sondage",
@@ -1440,5 +1440,8 @@
   "tools.live.chat.larger": "Texte plus grand",
   "tools.live.chat.smaller": "Texte plus petit",
   "tools.live.chat.onAir": "À l’antenne : {title}",
-  "tools.live.chat.screenOff": "Ce navigateur ne peut pas garder l’écran allumé. Désactivez le verrouillage de l’écran de votre appareil pendant le direct."
+  "tools.live.chat.screenOff": "Ce navigateur ne peut pas garder l’écran allumé. Désactivez le verrouillage de l’écran de votre appareil pendant le direct.",
+  "overlay.output.horizontal": "Sortie horizontale",
+  "overlay.output.vertical": "Sortie verticale",
+  "overlay.keyConfirmOther": "Le lien de l’autre sortie continue de fonctionner."
 }

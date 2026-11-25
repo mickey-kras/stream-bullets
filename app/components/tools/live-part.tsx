@@ -1,6 +1,6 @@
 import { useId, type ReactNode } from "react";
 import { t, type MessageId } from "../../i18n";
-import type { GridLayer, OverlayLayers } from "../../lib/overlay-layers";
+import { ORIENTATIONS, type GridLayer, type Orientation, type OverlayLayers } from "../../lib/overlay-layers";
 import { toolsPath } from "../../lib/shell";
 import { StepHeading } from "../overlay/step-heading";
 
@@ -19,9 +19,9 @@ export function LivePart({
   );
 }
 
-/** True when `layer` has a cell in the selected orientation, so "Show on stream" can put it on air. */
+/** True when `layer` has a cell in an output, so "Show on stream" can put it on air. */
 export function placed(layers: OverlayLayers, layer: GridLayer): boolean {
-  return layers.cells[layers.orientation][layer] !== null;
+  return ORIENTATIONS.some((output: Orientation): boolean => layers.cells[output][layer] !== null);
 }
 
 const NOT_ON_GRID: Readonly<Record<"poll" | "topic" | "message", MessageId>> = {

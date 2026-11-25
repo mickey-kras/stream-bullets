@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { onStream, type LayersPatch } from "../../lib/overlay-layers";
+import { onAnyOutput, type LayersPatch } from "../../lib/overlay-layers";
 import type { OverlayPublic, OverlayState } from "../../types";
 import { errorMessage, postJson } from "../api";
 import { useToast } from "../ui/toast";
@@ -14,7 +14,7 @@ export function controlState(
 ): OverlayState {
   const base: OverlayState = loaded.revision > saved.revision ? loaded : saved;
   if (!live || live.revision <= base.revision) return base;
-  return { ...live, message: onStream(live.layers, "message") ? live.message : base.message };
+  return { ...live, message: onAnyOutput(live.layers, "message") ? live.message : base.message };
 }
 
 /** A change of some layer fields, as POST /api/overlay takes it. */

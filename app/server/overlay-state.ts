@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { OVERLAY_MESSAGE_STYLES, OVERLAY_POSITIONS, OVERLAY_SIZES, OVERLAY_SOURCES } from "../../db/enums";
 import { LEGACY_DEFAULT, parseStoredLayers } from "../lib/overlay-legacy";
-import { onStream } from "../lib/overlay-layers";
+import { onAnyOutput } from "../lib/overlay-layers";
 import type { OverlayPublic, OverlayState } from "../types";
 
 // `air`, `position` and `size` are from before the overlay studio. The server reads them only to convert an old
@@ -33,12 +33,11 @@ export const DEFAULT_OVERLAY: OverlayState = {
   revision: 0,
 };
 
-// SQL for a row of `overlay_state`: true when the content layer `layer` (an SQL value) has a cell in the selected
-// orientation. It does not read `enabled`: one more reload of the overlay does no harm.
+// SQL for a row of `overlay_state`: true when the content layer `layer` (an SQL value) has a cell in an output. The
+// two outputs are on stream at the same time. It does not read `enabled`: one more reload of the overlay does no harm.
 export function placedLayerSql(layer: string): string {
-  return `json_type(layers, '$.cells.'
-    || CASE WHEN json_extract(layers,'$.orientation')='vertical' THEN 'vertical' ELSE 'horizontal' END
-    || '.' || ${layer})='object'`;
+  return `(json_type(layers, '$.cells.horizontal.' || ${layer})='object'
+    OR json_type(layers, '$.cells.vertical.' || ${layer})='object')`;
 }
 
 const sourceSchema = z.object({ type: z.enum(OVERLAY_SOURCES), ref: z.string().min(1).max(64).nullable() }).strict();
@@ -69,11 +68,12 @@ export function overlayValue(row: OverlayRow | null | undefined): OverlayState {
   };
 }
 
-// Public overlay: the message is public only while the message layer is on stream. Otherwise it is a draft.
+// Public overlay: the message is public only while the message layer is on stream in an output. Otherwise it is a
+// draft.
 export function overlayPublic(state: OverlayState): OverlayPublic {
   return {
     showResults: state.showResults,
-    message: onStream(state.layers, "message") ? state.message : "",
+    message: onAnyOutput(state.layers, "message") ? state.message : "",
     messageStyle: state.messageStyle,
     layers: state.layers,
     chatTestUntil: state.chatTestUntil,

@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import type { Locator } from "@playwright/test";
 import type { Page } from "./coverage";
 import type { CellRect, GridLayer, LayersPatch, OverlayLayers } from "../../app/lib/overlay-layers";
@@ -14,6 +15,22 @@ export function layersSql(layers: LayersPatch = {}): string {
   const text: string = JSON.stringify({ v: 3, ...layers }).replaceAll("'", "''");
   return `UPDATE overlay_state SET layers='${text}', chat_test_until=0, revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`;
 }
+
+/** A key of the vertical output for a spec. It has the form of a real key: 43 characters. */
+export const VERTICAL_KEY: string = "V".repeat(43);
+
+/**
+ * SQL that gives the feature host the vertical key VERTICAL_KEY. A horizontal key of the page stays: the vertical
+ * key then goes to the second slot of the row.
+ */
+export function verticalKeySql(): string {
+  const hash: string = createHash("sha256").update(VERTICAL_KEY).digest("hex");
+  return `INSERT INTO overlay_keys (streamer_id, output, key_hash, created_at) VALUES (${FEATURE_HOST}, 'vertical', '${hash}', 0)
+    ON CONFLICT(streamer_id) DO UPDATE SET other_key_hash=excluded.key_hash, other_created_at=0;`;
+}
+
+/** SQL that takes each overlay key of the feature host away. Other specs start without a key. */
+export const noKeysSql: string = `DELETE FROM overlay_keys WHERE streamer_id=${FEATURE_HOST};`;
 
 /** No layer on the grid, and the chat and the characters off. */
 export const resetLayers: string = layersSql();
