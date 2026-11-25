@@ -26517,7 +26517,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_chatfilters",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L185",
+      "source_location": "L206",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -26529,7 +26529,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_chatlist",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L224",
+      "source_location": "L245",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -26541,7 +26541,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_chatlist",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L231",
+      "source_location": "L252",
       "target": "app_components_tools_live_chat_chatrow",
       "weight": 1.0
     },
@@ -26553,7 +26553,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_chatnotes",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L267",
+      "source_location": "L288",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -26565,7 +26565,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_chatnotes",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L268",
+      "source_location": "L289",
       "target": "app_lib_shell_toolspath",
       "weight": 1.0
     },
@@ -26577,7 +26577,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_chatpause",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L245",
+      "source_location": "L266",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -26625,7 +26625,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_fullchat",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L417",
+      "source_location": "L438",
       "target": "app_components_tools_use_wake_lock_usewakelock",
       "weight": 1.0
     },
@@ -26637,7 +26637,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_fullchat",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L418",
+      "source_location": "L439",
       "target": "app_components_tools_live_chat_usechattextsize",
       "weight": 1.0
     },
@@ -26649,7 +26649,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_fullchat",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L419",
+      "source_location": "L440",
       "target": "app_components_ui_dialog_usereturnfocus",
       "weight": 1.0
     },
@@ -26661,7 +26661,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_fullchat",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L455",
+      "source_location": "L476",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -26673,7 +26673,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_fullchat",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L456",
+      "source_location": "L477",
       "target": "app_components_tools_live_chat_fullchatview",
       "weight": 1.0
     },
@@ -26685,7 +26685,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_fullchatview",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L347",
+      "source_location": "L368",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -26697,7 +26697,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_fullchatview",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L348",
+      "source_location": "L369",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -26709,7 +26709,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_fullchatview",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L372",
+      "source_location": "L393",
       "target": "app_components_tools_live_chat_chatfilters",
       "weight": 1.0
     },
@@ -26721,7 +26721,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_fullchatview",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L374",
+      "source_location": "L395",
       "target": "app_components_tools_live_chat_chatpause",
       "weight": 1.0
     },
@@ -26733,7 +26733,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_fullchatview",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L383",
+      "source_location": "L404",
       "target": "app_components_tools_live_chat_chatnotes",
       "weight": 1.0
     },
@@ -26745,7 +26745,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_fullchatview",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L389",
+      "source_location": "L410",
       "target": "app_components_tools_live_chat_chatlist",
       "weight": 1.0
     },
@@ -26757,7 +26757,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_livechat",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L482",
+      "source_location": "L503",
       "target": "app_components_tools_live_chat_usechatmodel",
       "weight": 1.0
     },
@@ -26769,7 +26769,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_livechat",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L484",
+      "source_location": "L505",
       "target": "app_components_tools_live_part_livepart",
       "weight": 1.0
     },
@@ -26781,7 +26781,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_livechat",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L484",
+      "source_location": "L505",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -26793,7 +26793,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_livechat",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L485",
+      "source_location": "L506",
       "target": "app_components_tools_live_chat_chatfilters",
       "weight": 1.0
     },
@@ -26805,7 +26805,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_livechat",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L486",
+      "source_location": "L507",
       "target": "app_components_tools_live_chat_chatnotes",
       "weight": 1.0
     },
@@ -26817,7 +26817,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_livechat",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L487",
+      "source_location": "L508",
       "target": "app_components_tools_live_chat_chatlist",
       "weight": 1.0
     },
@@ -26829,7 +26829,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_livechat",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L494",
+      "source_location": "L515",
       "target": "app_components_tools_live_chat_chatpause",
       "weight": 1.0
     },
@@ -26841,7 +26841,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_livechat",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L499",
+      "source_location": "L520",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -26853,7 +26853,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_livechat",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L504",
+      "source_location": "L525",
       "target": "app_components_tools_live_chat_fullchat",
       "weight": 1.0
     },
@@ -26865,7 +26865,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_storedsize",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L299",
+      "source_location": "L320",
       "target": "app_lib_live_chat_chattextstep",
       "weight": 1.0
     },
@@ -26877,7 +26877,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_usechatmodel",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L121",
+      "source_location": "L131",
       "target": "app_lib_live_chat_shownrows",
       "weight": 1.0
     },
@@ -26889,7 +26889,19 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_usechatmodel",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L171",
+      "source_location": "L181",
+      "target": "app_components_tools_live_chat_firstinview",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_tools_live_chat_usechatmodel",
+      "source_file": "app/components/tools/live-chat.tsx",
+      "source_location": "L192",
       "target": "app_lib_live_chat_newsince",
       "weight": 1.0
     },
@@ -26901,7 +26913,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_usechattextsize",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L317",
+      "source_location": "L338",
       "target": "app_lib_live_chat_chattextstep",
       "weight": 1.0
     },
@@ -26913,7 +26925,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_usechattextsize",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L318",
+      "source_location": "L339",
       "target": "app_components_tools_live_chat_keepsize",
       "weight": 1.0
     },
@@ -26925,7 +26937,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_chat_usechattextsize",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L318",
+      "source_location": "L339",
       "target": "app_lib_live_chat_nextchattextstep",
       "weight": 1.0
     },
@@ -180288,7 +180300,18 @@
       "relation": "contains",
       "source": "app_components_tools_live_chat",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L110",
+      "source_location": "L105",
+      "target": "app_components_tools_live_chat_firstinview",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_tools_live_chat",
+      "source_file": "app/components/tools/live-chat.tsx",
+      "source_location": "L118",
       "target": "app_components_tools_live_chat_usechatmodel",
       "weight": 1.0
     },
@@ -180299,7 +180322,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_chat",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L182",
+      "source_location": "L203",
       "target": "app_components_tools_live_chat_chatfilters",
       "weight": 1.0
     },
@@ -180310,7 +180333,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_chat",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L204",
+      "source_location": "L225",
       "target": "app_components_tools_live_chat_chatlist",
       "weight": 1.0
     },
@@ -180321,7 +180344,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_chat",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L241",
+      "source_location": "L262",
       "target": "app_components_tools_live_chat_chatpause",
       "weight": 1.0
     },
@@ -180332,7 +180355,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_chat",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L261",
+      "source_location": "L282",
       "target": "app_components_tools_live_chat_chatnotes",
       "weight": 1.0
     },
@@ -180343,7 +180366,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_chat",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L284",
+      "source_location": "L305",
       "target": "app_components_tools_live_chat_sizelisteners",
       "weight": 1.0
     },
@@ -180354,7 +180377,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_chat",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L287",
+      "source_location": "L308",
       "target": "app_components_tools_live_chat_subscribesize",
       "weight": 1.0
     },
@@ -180365,7 +180388,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_chat",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L296",
+      "source_location": "L317",
       "target": "app_components_tools_live_chat_storedsize",
       "weight": 1.0
     },
@@ -180376,7 +180399,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_chat",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L305",
+      "source_location": "L326",
       "target": "app_components_tools_live_chat_keepsize",
       "weight": 1.0
     },
@@ -180387,7 +180410,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_chat",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L316",
+      "source_location": "L337",
       "target": "app_components_tools_live_chat_usechattextsize",
       "weight": 1.0
     },
@@ -180398,7 +180421,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_chat",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L325",
+      "source_location": "L346",
       "target": "app_components_tools_live_chat_fullchatview",
       "weight": 1.0
     },
@@ -180420,7 +180443,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_chat",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L406",
+      "source_location": "L427",
       "target": "app_components_tools_live_chat_fullchat",
       "weight": 1.0
     },
@@ -180442,7 +180465,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_chat",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L467",
+      "source_location": "L488",
       "target": "app_components_tools_live_chat_livechat",
       "weight": 1.0
     },
@@ -219424,7 +219447,7 @@
       "relation": "indirect_call",
       "source": "app_components_tools_live_chat_usechatmodel",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L111",
+      "source_location": "L119",
       "target": "app_lib_live_chat_initiallivechat",
       "weight": 1.0
     },
@@ -219436,7 +219459,7 @@
       "relation": "indirect_call",
       "source": "app_components_tools_live_chat_usechatmodel",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L111",
+      "source_location": "L119",
       "target": "app_lib_live_chat_livechatreducer",
       "weight": 1.0
     },
@@ -219448,7 +219471,7 @@
       "relation": "indirect_call",
       "source": "app_components_tools_live_chat_usechattextsize",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L317",
+      "source_location": "L338",
       "target": "app_components_tools_live_chat_storedsize",
       "weight": 1.0
     },
@@ -219460,7 +219483,7 @@
       "relation": "indirect_call",
       "source": "app_components_tools_live_chat_usechattextsize",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L317",
+      "source_location": "L338",
       "target": "app_components_tools_live_chat_subscribesize",
       "weight": 1.0
     },
@@ -241329,7 +241352,7 @@
       "label": "ChatFilters()",
       "norm_label": "chatfilters()",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L182"
+      "source_location": "L203"
     },
     {
       "_callable": true,
@@ -241340,7 +241363,7 @@
       "label": "ChatList()",
       "norm_label": "chatlist()",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L204"
+      "source_location": "L225"
     },
     {
       "_callable": true,
@@ -241351,7 +241374,7 @@
       "label": "ChatNotes()",
       "norm_label": "chatnotes()",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L261"
+      "source_location": "L282"
     },
     {
       "_callable": true,
@@ -241362,7 +241385,7 @@
       "label": "ChatPause()",
       "norm_label": "chatpause()",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L241"
+      "source_location": "L262"
     },
     {
       "_callable": true,
@@ -241380,11 +241403,40 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_components_tools_live_chat_firstinview",
+      "label": "firstInView()",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "getBoundingClientRect",
+            "file": "app/components/tools/live-chat.tsx",
+            "lang": "typescript",
+            "line": "L106",
+            "receiver_type": "HTMLElement"
+          },
+          {
+            "callee": "querySelectorAll",
+            "file": "app/components/tools/live-chat.tsx",
+            "lang": "typescript",
+            "line": "L107",
+            "receiver_type": "HTMLElement"
+          }
+        ]
+      },
+      "norm_label": "firstinview()",
+      "source_file": "app/components/tools/live-chat.tsx",
+      "source_location": "L105"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_components_tools_live_chat_fullchat",
       "label": "FullChat()",
       "norm_label": "fullchat()",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L406"
+      "source_location": "L427"
     },
     {
       "_callable": true,
@@ -241395,7 +241447,7 @@
       "label": "FullChatView()",
       "norm_label": "fullchatview()",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L325"
+      "source_location": "L346"
     },
     {
       "_callable": true,
@@ -241406,7 +241458,7 @@
       "label": "keepSize()",
       "norm_label": "keepsize()",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L305"
+      "source_location": "L326"
     },
     {
       "_callable": true,
@@ -241417,7 +241469,7 @@
       "label": "LiveChat()",
       "norm_label": "livechat()",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L467"
+      "source_location": "L488"
     },
     {
       "_callable": true,
@@ -241428,7 +241480,7 @@
       "label": "storedSize()",
       "norm_label": "storedsize()",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L296"
+      "source_location": "L317"
     },
     {
       "_callable": true,
@@ -241439,7 +241491,7 @@
       "label": "subscribeSize()",
       "norm_label": "subscribesize()",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L287"
+      "source_location": "L308"
     },
     {
       "_callable": true,
@@ -241454,14 +241506,14 @@
             "callee": "observe",
             "file": "app/components/tools/live-chat.tsx",
             "lang": "typescript",
-            "line": "L147",
+            "line": "L166",
             "receiver_type": "ResizeObserver"
           }
         ]
       },
       "norm_label": "usechatmodel()",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L110"
+      "source_location": "L118"
     },
     {
       "_callable": true,
@@ -241472,7 +241524,7 @@
       "label": "useChatTextSize()",
       "norm_label": "usechattextsize()",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L316"
+      "source_location": "L337"
     },
     {
       "_callable": true,
@@ -267390,7 +267442,7 @@
       "label": "sizeListeners",
       "norm_label": "sizelisteners",
       "source_file": "app/components/tools/live-chat.tsx",
-      "source_location": "L284"
+      "source_location": "L305"
     },
     {
       "_origin": "ast",
@@ -278024,6 +278076,27 @@
             "lang": "typescript",
             "line": "L287",
             "receiver_type": "WebSocketRoute"
+          },
+          {
+            "callee": "evaluate",
+            "file": "tests/e2e/tools-live.spec.ts",
+            "lang": "typescript",
+            "line": "L497",
+            "receiver_type": "Locator"
+          },
+          {
+            "callee": "getBoundingClientRect",
+            "file": "tests/e2e/tools-live.spec.ts",
+            "lang": "typescript",
+            "line": "L498",
+            "receiver_type": "Element"
+          },
+          {
+            "callee": "querySelectorAll",
+            "file": "tests/e2e/tools-live.spec.ts",
+            "lang": "typescript",
+            "line": "L499",
+            "receiver_type": "Element"
           }
         ]
       },

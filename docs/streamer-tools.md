@@ -114,6 +114,7 @@ The view has these controls:
 - **Exit** closes the view. The **Live** section is then at the same place as before. The Escape key does the same.
 - **Smaller text** and **Larger text** change the text size in five steps. The device keeps the size.
 - The platform buttons and the pause work as in the chat part.
+  A paused list keeps the message that the streamer reads when the view opens and when it closes.
 
 One line gives the item on stream: the poll, or the topic, or the message banner.
 With the phone upright, the controls are above the chat.
