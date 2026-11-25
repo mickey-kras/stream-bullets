@@ -40,8 +40,62 @@ export interface ActivityChat {
   live: boolean;
 }
 
+/**
+ * The support events. A gift is one event for a gift bundle. `reactions` is one event for a group of reactions.
+ * `tip` is a direct tip through StreamBullets: it is not from a platform.
+ */
+export const SUPPORT_KINDS = [
+  "follow",
+  "subscription",
+  "membership",
+  "gift",
+  "raid",
+  "bits",
+  "super_chat",
+  "super_sticker",
+  "kicks",
+  "tip",
+  "reactions",
+] as const;
+export type SupportKind = (typeof SUPPORT_KINDS)[number];
+
+/** The kinds whose amount is money. Their amount is in micros of `currency`: 1 000 000 is one unit. */
+export const MONEY_KINDS: ReadonlySet<SupportKind> = new Set<SupportKind>(["super_chat", "super_sticker", "tip"]);
+
+/** Where a support event comes from: a platform, or `direct` for a tip through StreamBullets. */
+export type SupportSource = ActivityPlatform | "direct";
+
+export interface ActivitySupport {
+  kind: SupportKind;
+  /** `${platform}:${deliveryId}`: unique across platforms. The same delivery never makes a second event. */
+  id: string;
+  platform: SupportSource;
+  /** The ID that the provider gave this delivery. A provider sends the same ID again for a retry. */
+  deliveryId: string;
+  /** The supporter as a participant of the platform. Null: anonymous, or the platform does not say. */
+  sender: { id: string; displayName: string } | null;
+  /** True when the supporter asked to stay anonymous. An anonymous event has no sender. */
+  anonymous: boolean;
+  /**
+   * The amount in the native unit of the kind: months for a subscription and a membership, gifts in a bundle,
+   * viewers of a raid, Bits, KICKs, reactions in a group, and micros of `currency` for money. Null for a follow.
+   */
+  amount: number | null;
+  /** The ISO 4217 code for a money kind. Null for each other kind: no conversion between units. */
+  currency: string | null;
+  /** The text that the supporter sent with it. Untrusted, as chat text. */
+  text?: string;
+  receivedAt: number;
+  /**
+   * True for an event that the server sends again: a replay of the owner, a test, or the snapshot of a reconnect.
+   * A consumer can show a replay. It never counts a replay for a goal, a report, or revenue.
+   */
+  replay: boolean;
+}
+
 export type ActivityEvent =
   | ActivityChat
+  | ActivitySupport
   | { kind: "delete"; platform: ActivityPlatform; messageId: string; receivedAt: number }
   /** `until` is null for a permanent ban, else the end of the timeout. */
   | {
@@ -162,8 +216,43 @@ const chatSchema = z.object({
   live: z.boolean(),
 });
 
+const supportShape = {
+  id: z.string().min(1).max(160),
+  deliveryId: id,
+  sender: z.object({ id, displayName: z.string().max(100) }).nullable(),
+  anonymous: z.boolean(),
+  text: z.string().max(MAX_TEXT_LENGTH).optional(),
+  receivedAt: time,
+  replay: z.boolean(),
+};
+const amount = z.number().int().positive().max(Number.MAX_SAFE_INTEGER);
+const currency = z.string().regex(/^[A-Z]{3}$/);
+
+/** The kinds with an amount that is a count: months, gifts, viewers, Bits, KICKs, or reactions. */
+const COUNT_KINDS = ["subscription", "membership", "gift", "raid", "bits", "kicks", "reactions"] as const;
+
+/**
+ * A support event. The amount and the currency must agree with the kind, the ID must be the platform and the
+ * delivery ID, an anonymous event must have no sender, and only a tip is direct.
+ */
+const supportSchema: z.ZodType<ActivitySupport> = z
+  .union([
+    z.object({ ...supportShape, kind: z.literal("follow"), platform, amount: z.null(), currency: z.null() }),
+    z.object({ ...supportShape, kind: z.enum(COUNT_KINDS), platform, amount, currency: z.null() }),
+    z.object({ ...supportShape, kind: z.enum(["super_chat", "super_sticker"]), platform, amount, currency }),
+    z.object({ ...supportShape, kind: z.literal("tip"), platform: z.literal("direct"), amount, currency }),
+  ])
+  .refine((event: ActivitySupport): boolean => event.id === `${event.platform}:${event.deliveryId}`)
+  .refine((event: ActivitySupport): boolean => !event.anonymous || event.sender === null);
+
+/** True for a support event. */
+export function isSupport(event: ActivityEvent): event is ActivitySupport {
+  return SUPPORT_KINDS.some((kind: SupportKind): boolean => kind === event.kind);
+}
+
 export const activityEventSchema: z.ZodType<ActivityEvent> = z.union([
   chatSchema,
+  supportSchema,
   z.object({ kind: z.literal("delete"), platform, messageId: id, receivedAt: time }),
   z.object({
     kind: z.literal("ban"),
@@ -195,7 +284,8 @@ export type ActivityMessage =
 
 /**
  * `message` with the events of one platform only, or null when no part of it is left. Each event of the feed has a
- * platform. A snapshot stays, with the events of the platform. A playground frame and `unavailable` are not events
+ * platform, or is a direct tip: a direct tip is not from the platform. A snapshot stays, with the events of the
+ * platform. A playground frame and `unavailable` are not events
  * of a platform and stay: `viewForPlatform` selects the characters.
  */
 export function messageForPlatform(message: ActivityMessage, platform: ActivityPlatform): ActivityMessage | null {
@@ -205,11 +295,79 @@ export function messageForPlatform(message: ActivityMessage, platform: ActivityP
   return events.length === message.events.length ? message : { ...message, events };
 }
 
-const messageSchema: z.ZodType<Exclude<ActivityMessage, PlaygroundFrame>> = z.union([
-  z.object({ type: z.literal("snapshot"), events: z.array(activityEventSchema).max(200), replay: z.literal(true) }),
+const EVENT_KINDS: ReadonlySet<string> = new Set<string>([
+  "chat",
+  "delete",
+  "ban",
+  "clear",
+  "clear_user",
+  "status",
+  ...SUPPORT_KINDS,
+]);
+
+/** True for an event of a kind that this version does not know: a newer server sent it. */
+function unknownKind(event: unknown): boolean {
+  const kind: unknown = typeof event === "object" && event !== null ? (event as { kind?: unknown }).kind : undefined;
+  return typeof kind === "string" && !EVENT_KINDS.has(kind);
+}
+
+// A consumer ignores the kinds that it does not know. Thus a snapshot keeps its other events, and a newer server
+// never empties the chat of an older page. An event of a known kind that is not valid still refuses its message.
+const snapshotEvents = z
+  .array(z.unknown())
+  .max(200)
+  .transform((events: unknown[]): unknown[] => events.filter((event: unknown): boolean => !unknownKind(event)))
+  .pipe(z.array(activityEventSchema));
+
+const messageSchema: z.ZodType<Exclude<ActivityMessage, PlaygroundFrame>, unknown> = z.union([
+  z.object({ type: z.literal("snapshot"), events: snapshotEvents, replay: z.literal(true) }),
   z.object({ type: z.literal("event"), event: activityEventSchema }),
   z.object({ type: z.literal("unavailable") }),
 ]);
+
+/** The largest number of delivery IDs that `acceptDelivery` keeps for one page. */
+export const DELIVERIES_KEPT = 2000;
+
+/**
+ * Whether a support event is new, and the IDs to keep after it. A provider sends a delivery again after a timeout
+ * or an error. The second delivery has the same ID, and it must make no second event. `seen` holds the IDs of the
+ * newest events, the oldest first.
+ */
+export function acceptDelivery(
+  seen: readonly string[],
+  event: ActivitySupport,
+): { accepted: boolean; seen: readonly string[] } {
+  if (seen.includes(event.id)) return { accepted: false, seen };
+  return { accepted: true, seen: [...seen, event.id].slice(-DELIVERIES_KEPT) };
+}
+
+/** The sums of support, for a goal or a report. Money has one sum for each currency: no conversion. */
+export interface SupportTotals {
+  /** The number of events of each kind. */
+  events: Partial<Record<SupportKind, number>>;
+  /** The sum of the amounts of each kind that is not money, in its native unit. */
+  amounts: Partial<Record<SupportKind, number>>;
+  /** The sum of the money amounts for each currency, in micros. */
+  money: Record<string, number>;
+}
+
+/**
+ * The totals of `events`. Each event counts one time: a replay never counts, and an ID that comes again never
+ * counts again. Thus a replayed alert never changes a goal or a revenue record.
+ */
+export function supportTotals(events: readonly ActivitySupport[]): SupportTotals {
+  const totals: SupportTotals = { events: {}, amounts: {}, money: {} };
+  const counted = new Set<string>();
+  for (const event of events) {
+    if (event.replay || counted.has(event.id)) continue;
+    counted.add(event.id);
+    totals.events[event.kind] = (totals.events[event.kind] ?? 0) + 1;
+    if (event.amount === null) continue;
+    if (event.currency !== null) totals.money[event.currency] = (totals.money[event.currency] ?? 0) + event.amount;
+    else totals.amounts[event.kind] = (totals.amounts[event.kind] ?? 0) + event.amount;
+  }
+  return totals;
+}
 
 /** The longest socket message a consumer accepts. The producer trims a snapshot to fit. */
 export const MAX_ACTIVITY_MESSAGE_LENGTH = 512 * 1024;
