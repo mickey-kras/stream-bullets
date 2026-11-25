@@ -171,6 +171,41 @@ describe("walking", () => {
     expect(s.p.x).toBe(x);
   });
 
+  it("ends a dig at once with stop, so the hits that are left do not break the ground", () => {
+    const s = stage();
+    for (const c of [1, 2, 3]) s.put(START + c, 0);
+    s.sim.perform(s.p, "dig", "", 3, 1);
+    s.tick(90);
+    expect(s.p.state).toBe("dig");
+    s.p.lastCommand = -1000;
+    s.sim.receive(chat("twitch", "builder", "!stop"));
+    expect(s.p.state).toBe("hold");
+    s.tick(120);
+    expect(s.sim.terrain.tiles.every((tile) => tile.stage === 0)).toBe(true);
+    expect(s.sim.terrain.count).toBe(2);
+    expect(s.row()).toBe(0);
+  });
+
+  it("does not stop a character on its way in: it takes commands after it comes in", () => {
+    const sim = new PlaygroundSim({ cellsW: 16, cellsH: 9, rng: mulberry32(2), walkSpread: 0 });
+    sim.resumeAfter(0);
+    sim.tick();
+    sim.receive(chat("kick", "entrant", "!right"));
+    const p = sim.list()[0];
+    for (let i = 0; i < 40; i++) sim.tick();
+    expect([p.state, p.free]).toEqual(["walk", true]);
+    p.lastCommand = -1000;
+    sim.receive(chat("kick", "entrant", "!stop"));
+    // The stop takes the queued walk. The character still walks in, and then it takes the next command.
+    expect([p.state, p.free, p.pending]).toEqual(["walk", true, null]);
+    for (let i = 0; i < 120; i++) sim.tick();
+    expect(p.free).toBe(false);
+    p.lastCommand = -1000;
+    sim.receive(chat("kick", "entrant", "!wave"));
+    sim.tick();
+    expect(p.state).toBe("wave");
+  });
+
   it("takes one more block when another steered character stands at the target", () => {
     const s = stage();
     s.sim.receive(chat("kick", "other", "hello"));

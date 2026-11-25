@@ -175,6 +175,14 @@ const FIXED_STATES: ReadonlySet<CharState | "away"> = new Set<CharState | "away"
   "respawn",
   "boom",
 ]);
+/** A stop ends these states at once. The other actions have a short, fixed end. */
+const HALTED_STATES: ReadonlySet<CharState | "away"> = new Set<CharState | "away">([
+  "step",
+  "walk",
+  "idle",
+  "dig",
+  "build",
+]);
 /** The states in which a character stands on a floor: it can wear the crown and stop a walk beside it. */
 const STANDING_STATES: ReadonlySet<CharState | "away"> = new Set<CharState | "away">([
   "hold",
@@ -675,12 +683,15 @@ export class PlaygroundSim {
     this.rest(p);
   }
 
-  /** A stop: the queued command and the work go, and a walk of some blocks ends where the character is. */
+  /**
+   * A stop: the queued command and the work go, and a walk, a dig or a build ends where the character is. A character
+   * that walks in or out keeps its walk: it stands still only inside the walking limits.
+   */
   private halt(p: Participant): void {
     Object.assign(p, { pending: null, job: null, resume: false });
-    if (!p.admitted || p.state === "away") return;
+    if (!p.admitted || p.state === "away" || p.free) return;
     p.piloted = true;
-    if (p.state === "step" || p.state === "walk" || p.state === "idle") setState(p, "hold");
+    if (HALTED_STATES.has(p.state)) setState(p, "hold");
   }
 
   /** Throws a character: it flies to `dir` and falls. Its work ends. */
