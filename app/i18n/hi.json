@@ -1488,5 +1488,21 @@
   "overlay.guide.platforms.1": "Twitch को हॉरिज़ॉन्टल आउटपुट मिलता है। वर्टिकल आउटपुट भी Twitch को भेजने के लिए OBS में Settings और फिर Stream खोलें, Enhanced Broadcasting चालू करें और Additional Canvas में अपना वर्टिकल कैनवास चुनें।",
   "overlay.guide.platforms.2": "YouTube और Kick पर एक साथ स्ट्रीम करने के लिए ऐसा प्लगइन इंस्टॉल करें जो और आउटपुट जोड़ता है, जैसे Aitum Multistream। हर प्लेटफ़ॉर्म के लिए एक आउटपुट जोड़ें।",
   "overlay.guide.platforms.3": "किसी दूसरे प्लेटफ़ॉर्म पर वर्टिकल स्ट्रीम के लिए उस प्लगइन में एक और आउटपुट जोड़ें और उसके लिए वर्टिकल कैनवास चुनें।",
-  "overlay.guide.platforms.4": "“{channels}” में जाँचें कि हर चैनल कनेक्टेड दिख रहा है।"
+  "overlay.guide.platforms.4": "“{channels}” में जाँचें कि हर चैनल कनेक्टेड दिख रहा है।",
+  "dock.title": "OBS डॉक",
+  "dock.heading": "लाइव कंट्रोल: {name}",
+  "overlay.dock.title": "OBS के अंदर से अपनी स्ट्रीम नियंत्रित करें",
+  "overlay.dock.body": "डॉक लाइव कंट्रोल वाला एक छोटा पेज है: पोल, टॉपिक, मैसेज बैनर और चैट। OBS में Docks खोलें, फिर Custom Browser Docks, और डॉक लिंक पेस्ट करें।",
+  "overlay.dock.private": "यह लिंक आपकी स्ट्रीम का नियंत्रण देता है। डॉक को स्क्रीन से बाहर रखें: इसे किसी सीन में कैप्चर न करें और लिंक साझा न करें।",
+  "overlay.dock.create": "डॉक लिंक बनाएँ",
+  "overlay.dock.regenerate": "डॉक लिंक फिर से बनाएँ",
+  "overlay.dock.once": "इस लिंक को अभी OBS में कॉपी करें। यह केवल एक बार दिखता है।",
+  "overlay.dock.made": "आपका डॉक लिंक छिपा है। नया लिंक पाने के लिए इसे फिर से बनाएँ। तब पुराना लिंक काम करना बंद कर देगा।",
+  "overlay.dock.url": "डॉक लिंक",
+  "overlay.dock.copy": "डॉक लिंक कॉपी करें",
+  "overlay.dock.confirmTitle": "डॉक लिंक फिर से बनाएँ?",
+  "overlay.dock.confirmBody": "पुराना लिंक तुरंत काम करना बंद कर देता है और हर खुला डॉक बंद हो जाता है। नया लिंक OBS में पेस्ट करें।",
+  "overlay.dock.ready": "नया डॉक लिंक तैयार है। इसे OBS में कॉपी करें।",
+  "dock.closed.title": "यह डॉक लिंक काम नहीं करता",
+  "dock.closed.body": "स्ट्रीमर टूल्स के ओवरले सेक्शन में नया डॉक लिंक बनाएँ और उसे OBS में पेस्ट करें।"
 }

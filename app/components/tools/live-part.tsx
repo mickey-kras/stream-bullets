@@ -1,7 +1,8 @@
-import { useId, type ReactNode } from "react";
+import { useContext, useId, type ReactNode } from "react";
 import { t, type MessageId } from "../../i18n";
 import { ORIENTATIONS, type GridLayer, type Orientation, type OverlayLayers } from "../../lib/overlay-layers";
 import { toolsPath } from "../../lib/shell";
+import { ControlApiContext } from "../overlay/control-api";
 import { StepHeading } from "../overlay/step-heading";
 
 /** One part of the Live section: a titled panel. `name` is for styles and tests. */
@@ -35,12 +36,16 @@ const NOT_ON_GRID: Readonly<Record<"poll" | "topic" | "message", MessageId>> = {
  * opens the Overlay section, where the owner puts the layer on the grid.
  */
 export function NotOnGrid({ layer }: Readonly<{ layer: "poll" | "topic" | "message" }>): ReactNode {
+  // The dock has no session, so a link to Streamer tools leads nowhere there.
+  const session: boolean = useContext(ControlApiContext).key === null;
   return (
     <p className="muted tl-note" data-live-not-on-grid={layer}>
       {t(NOT_ON_GRID[layer])}{" "}
-      <a className="text-link" href={toolsPath("overlay")}>
-        {t("tools.live.openOverlay")}
-      </a>
+      {session && (
+        <a className="text-link" href={toolsPath("overlay")}>
+          {t("tools.live.openOverlay")}
+        </a>
+      )}
     </p>
   );
 }

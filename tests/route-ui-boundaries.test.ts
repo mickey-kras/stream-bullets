@@ -23,6 +23,7 @@ import * as community from "../app/server/community.server";
 import * as support from "../app/server/support.server";
 import * as overlay from "../app/server/overlay.server";
 import { EMPTY_LAYOUTS } from "../app/lib/overlay-layouts";
+import * as dockKey from "../app/server/dock-key.server";
 import * as overlayKey from "../app/server/overlay-key.server";
 import * as overlayLayouts from "../app/server/overlay-layouts.server";
 import * as channels from "../app/server/channels.server";
@@ -96,6 +97,10 @@ vi.mock("../app/server/overlay.server", async (original) => ({
   ...(await original<typeof import("../app/server/overlay.server")>()),
   getOverlayState: vi.fn(),
   getOverlayData: vi.fn(),
+}));
+vi.mock("../app/server/dock-key.server", async (original) => ({
+  ...(await original<typeof import("../app/server/dock-key.server")>()),
+  hasDockKey: vi.fn(),
 }));
 vi.mock("../app/server/overlay-layouts.server", async (original) => ({
   ...(await original<typeof import("../app/server/overlay-layouts.server")>()),
@@ -278,6 +283,7 @@ beforeEach((): void => {
   vi.mocked(overlay.getOverlayData).mockResolvedValue({ polls: [], topics: [], cards: [], next: null, support: null });
   vi.mocked(overlayKey.overlayKeyOutputs).mockResolvedValue({ horizontal: false, vertical: false });
   vi.mocked(overlayLayouts.getLayouts).mockResolvedValue(EMPTY_LAYOUTS);
+  vi.mocked(dockKey.hasDockKey).mockResolvedValue(false);
   vi.mocked(overlayKey.overlayKeyOutput).mockResolvedValue(null);
   vi.mocked(channels.listConnections).mockResolvedValue([]);
   vi.mocked(account.signInProvider).mockResolvedValue(null);
@@ -759,6 +765,7 @@ describe("overlay loader contracts", (): void => {
       origin: "https://stream.example.test",
       hasOverlayKey: { horizontal: false, vertical: false },
       layouts: EMPTY_LAYOUTS,
+      hasDockKey: false,
       channels: [],
     });
     expect(result.state.layers).toEqual({ ...picked, orientation: "vertical" });

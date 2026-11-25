@@ -10,6 +10,7 @@ import { signInProvider } from "../server/api/account";
 import { configuredProviders } from "../server/auth.server";
 import { listConnections } from "../server/channels.server";
 import { getOverlaySnapshot, getOwnStreamer } from "../server/data.server";
+import { hasDockKey } from "../server/dock-key.server";
 import { overlayKeyOutputs } from "../server/overlay-key.server";
 import { getLayouts } from "../server/overlay-layouts.server";
 import { getOverlayData, getOverlayState } from "../server/overlay.server";
@@ -71,6 +72,7 @@ export const loader = withRouteErrors(async ({ request, context }: LoaderFunctio
     host: new URL(origin).host,
     origin: new URL(origin).origin,
     hasOverlayKey: await overlayKeyOutputs(app.env, streamer.id),
+    hasDockKey: await hasDockKey(app.env, streamer.id),
     layouts: await getLayouts(app.env, streamer.id),
     channels: await listConnections(app.env, streamer.id),
     providers: configuredProviders(app.env),
@@ -150,7 +152,12 @@ export default function ToolsPage(): ReactNode {
             <LiveSection {...room} channels={channels} chatFull={search.get("chat") === "full"} onChatFull={showChat} />
           )}
           {view === "overlay" && (
-            <OverlayControl {...room} hasOverlayKey={loaded.hasOverlayKey} layouts={loaded.layouts} />
+            <OverlayControl
+              {...room}
+              hasOverlayKey={loaded.hasOverlayKey}
+              hasDockKey={loaded.hasDockKey}
+              layouts={loaded.layouts}
+            />
           )}
           {view === "channels" && (
             <ChannelsStep

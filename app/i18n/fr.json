@@ -1488,5 +1488,21 @@
   "overlay.guide.platforms.1": "Twitch reçoit la sortie horizontale. Pour envoyer aussi la sortie verticale à Twitch, ouvrez Settings puis Stream dans OBS, activez Enhanced Broadcasting et choisissez votre canevas vertical dans Additional Canvas.",
   "overlay.guide.platforms.2": "Pour diffuser sur YouTube et Kick en même temps, installez un plugin qui ajoute des sorties, par exemple Aitum Multistream. Ajoutez une sortie par plateforme.",
   "overlay.guide.platforms.3": "Pour un stream vertical sur une autre plateforme, ajoutez une sortie de plus dans ce plugin et choisissez le canevas vertical pour elle.",
-  "overlay.guide.platforms.4": "Dans « {channels} », vérifiez que chaque chaîne est indiquée comme connectée."
+  "overlay.guide.platforms.4": "Dans « {channels} », vérifiez que chaque chaîne est indiquée comme connectée.",
+  "dock.title": "Dock OBS",
+  "dock.heading": "Contrôles en direct : {name}",
+  "overlay.dock.title": "Contrôlez votre stream depuis OBS",
+  "overlay.dock.body": "Le dock est une petite page avec les contrôles en direct : le sondage, les sujets, la bannière de message et le chat. Dans OBS, ouvrez Docks, puis Custom Browser Docks, et collez le lien du dock.",
+  "overlay.dock.private": "Ce lien donne le contrôle de votre stream. Gardez le dock hors écran : ne le capturez dans aucune scène et ne partagez pas le lien.",
+  "overlay.dock.create": "Créer le lien du dock",
+  "overlay.dock.regenerate": "Régénérer le lien du dock",
+  "overlay.dock.once": "Copiez ce lien dans OBS maintenant. Il ne s’affiche qu’une fois.",
+  "overlay.dock.made": "Le lien de votre dock est masqué. Régénérez-le pour obtenir un nouveau lien. L’ancien lien cessera alors de fonctionner.",
+  "overlay.dock.url": "Lien du dock",
+  "overlay.dock.copy": "Copier le lien du dock",
+  "overlay.dock.confirmTitle": "Régénérer le lien du dock ?",
+  "overlay.dock.confirmBody": "L’ancien lien cesse de fonctionner immédiatement et chaque dock ouvert se ferme. Collez le nouveau lien dans OBS.",
+  "overlay.dock.ready": "Nouveau lien du dock prêt. Copiez-le dans OBS.",
+  "dock.closed.title": "Ce lien du dock ne fonctionne pas",
+  "dock.closed.body": "Créez un nouveau lien du dock dans les outils du streamer, section Overlay, et collez-le dans OBS."
 }

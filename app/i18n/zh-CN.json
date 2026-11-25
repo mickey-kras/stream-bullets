@@ -1468,5 +1468,21 @@
   "overlay.guide.platforms.1": "Twitch 接收横向输出。若也要把纵向输出发送到 Twitch，请在 OBS 中依次打开 Settings 和 Stream，开启 Enhanced Broadcasting，并在 Additional Canvas 中选择你的纵向画布。",
   "overlay.guide.platforms.2": "要同时在 YouTube 和 Kick 直播，请安装一个可添加更多输出的插件，例如 Aitum Multistream。为每个平台添加一个输出。",
   "overlay.guide.platforms.3": "要在其他平台进行纵向直播，请在该插件中再添加一个输出，并为它选择纵向画布。",
-  "overlay.guide.platforms.4": "在“{channels}”中检查每个频道是否显示为已连接。"
+  "overlay.guide.platforms.4": "在“{channels}”中检查每个频道是否显示为已连接。",
+  "dock.title": "OBS 停靠窗口",
+  "dock.heading": "直播控制：{name}",
+  "overlay.dock.title": "在 OBS 内控制你的直播",
+  "overlay.dock.body": "停靠窗口是一个带有直播控制的小页面：投票、话题、消息横幅和聊天。在 OBS 中依次打开 Docks 和 Custom Browser Docks，然后粘贴停靠窗口链接。",
+  "overlay.dock.private": "此链接可以控制你的直播。请不要让停靠窗口出现在画面中：不要在场景中捕获它，也不要分享链接。",
+  "overlay.dock.create": "创建停靠窗口链接",
+  "overlay.dock.regenerate": "重新生成停靠窗口链接",
+  "overlay.dock.once": "现在就把此链接复制到 OBS。它只显示一次。",
+  "overlay.dock.made": "你的停靠窗口链接已隐藏。重新生成即可获得新链接，旧链接随即失效。",
+  "overlay.dock.url": "停靠窗口链接",
+  "overlay.dock.copy": "复制停靠窗口链接",
+  "overlay.dock.confirmTitle": "重新生成停靠窗口链接？",
+  "overlay.dock.confirmBody": "旧链接会立即失效，每个打开的停靠窗口都会关闭。请把新链接粘贴到 OBS。",
+  "overlay.dock.ready": "新的停靠窗口链接已就绪。请复制到 OBS。",
+  "dock.closed.title": "此停靠窗口链接无效",
+  "dock.closed.body": "请在主播工具的叠加层部分创建新的停靠窗口链接，并粘贴到 OBS。"
 }

@@ -661,6 +661,7 @@
 /* The link of one output, then the OBS guide and the Twitch switches. A line divides the parts. */
 .ov-url-output,
 .ov-url-guide,
+.ov-url-dock,
 .ov-url-twitch {
   display: grid;
   gap: 10px;

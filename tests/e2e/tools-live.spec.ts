@@ -4,7 +4,15 @@ import { newPage, close, test, expect, type Browser, type BrowserContext, type P
 import { runSql } from "./fixtures";
 import { signedIn } from "./live-helpers";
 import { clientIp } from "./client-ips";
-import { CHARACTERS_CELL, CHAT_CELL, FEATURE_HOST, POLL_CELL, defaultLayers, layersSql } from "./grid-helpers";
+import {
+  CHARACTERS_CELL,
+  CHAT_CELL,
+  FEATURE_HOST,
+  POLL_CELL,
+  defaultLayers,
+  layersSql,
+  noKeysSql,
+} from "./grid-helpers";
 import type { OverlayState } from "../../app/types";
 
 // The Live section of Streamer tools: the owner runs the stream from one page, and each change reaches OBS at once.
@@ -14,6 +22,8 @@ const CHAT_IP = clientIp("tools-live", 43);
 const RECONNECT_IP = clientIp("tools-live", 44);
 const OBS_IP = clientIp("tools-live", 45);
 const PHONE_IP = clientIp("tools-live", 46);
+const DOCK_OWNER_IP = clientIp("tools-live", 47);
+const DOCK_IP = clientIp("tools-live", 48);
 
 const now: number = Date.now();
 const entry = (id: string, kind: "choice" | "topic", title: string, age: number): string =>
@@ -515,4 +525,96 @@ test("the full-screen chat says how to keep the screen on, and follows the full 
   await expect(view).toHaveCount(0);
   await expect(page).not.toHaveURL(/chat=full/);
   await close(owner);
+});
+
+const noDockKey = `DELETE FROM dock_keys WHERE streamer_id=${FEATURE_HOST};`;
+
+test("the OBS dock runs the live controls with its own link in a narrow panel, and a new link closes the open dock", async ({
+  browser,
+}) => {
+  await runSql("tools-live-dock", [noDockKey, noKeysSql]);
+  const owner = await signedIn(browser, "featureowner", DOCK_OWNER_IP);
+  const tools = await newPage(owner);
+  await tools.goto("/tools?view=overlay");
+  // The dock has its own closed section in "Add to OBS". Its text tells the owner to keep the dock off screen.
+  const section = tools.locator("[data-ov-dock]");
+  await expect(section).not.toHaveAttribute("open");
+  await section.getByText("Control your stream from inside OBS").click();
+  await expect(section.locator("[data-ov-dock-private]")).toHaveText(
+    "The link gives control of your stream. Keep the dock off screen: do not capture it in a scene, and do not share the link.",
+  );
+  await section.getByRole("button", { name: "Create dock link" }).click();
+  const field = section.locator("[data-ov-dock-url]");
+  await expect(field).toHaveValue(/\/@feature_host\/dock\?key=[\w-]{43}$/);
+  const dockUrl: string = await field.inputValue();
+  await expect(section).toContainText("It shows only once.");
+
+  // The dock in OBS: no session, 300 px wide, and no site header or footer.
+  const dock = await newPage(browser, {
+    viewport: { width: 300, height: 720 },
+    extraHTTPHeaders: { "CF-Connecting-IP": `192.0.2.${DOCK_IP}` },
+  });
+  await dock.goto(dockUrl);
+  await expect(dock.locator("[data-dock]")).toBeVisible();
+  await expect(dock.getByRole("heading", { level: 1 })).toHaveText("Live controls: Feature host");
+  await expect(dock.locator("body > header, .site-footer")).toHaveCount(0);
+  for (const part of ["poll", "topics", "message", "chat"])
+    await expect(dock.locator(`[data-live-part="${part}"]`)).toBeVisible();
+  expect(await dock.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+  // No part is wider than the panel, and the panel scrolls to its last part.
+  const widest: number = await dock.evaluate(() =>
+    Math.max(
+      ...[...document.querySelectorAll("[data-dock] *")].map((element) => element.getBoundingClientRect().right),
+    ),
+  );
+  expect(widest).toBeLessThanOrEqual(300);
+  await dock.locator('[data-live-part="chat"]').scrollIntoViewIfNeeded();
+  await expect(dock.locator('[data-live-part="chat"]')).toBeInViewport();
+  await expect(dock.locator("[data-live-poll-title]")).toHaveText("Tea or coffee");
+
+  // An action in the dock shows in Live without a reload, and the reverse.
+  const live = await newPage(owner);
+  await live.goto("/tools?view=live");
+  const liveResults = live.locator("[data-live-poll-results]");
+  const dockResults = dock.locator("[data-live-poll-results]");
+  await expect(liveResults).toHaveText("Reveal results");
+  await dockResults.click();
+  await expect(dockResults).toHaveText("Hide results");
+  await expect(liveResults).toHaveText("Hide results");
+  expect((await overlay(owner)).showResults).toBe(true);
+  await liveResults.click();
+  await expect(dockResults).toHaveText("Reveal results");
+
+  // A key that is not the dock key opens nothing: a wrong key, and the key of an overlay link.
+  expect((await dock.request.get(`/@feature_host/dock?key=${"A".repeat(43)}`)).status()).toBe(404);
+  expect((await dock.request.get("/@feature_host/dock")).status()).toBe(404);
+  await tools
+    .getByRole("region", { name: "Horizontal output" })
+    .getByRole("button", { name: "Create overlay link" })
+    .click();
+  const overlayField = tools.locator("[data-ov-url]");
+  await expect(overlayField).toHaveValue(/\?key=[\w-]{43}$/);
+  const overlayKey: string = new URL(await overlayField.inputValue()).searchParams.get("key") ?? "";
+  expect((await dock.request.get(`/@feature_host/dock?key=${overlayKey}`)).status()).toBe(404);
+  const refused = await dock.request.post("/api/dock/feature_host/overlay", {
+    data: { action: "showResults", on: true },
+    headers: { "X-SB-Dock-Key": overlayKey, Origin: new URL(dockUrl).origin },
+  });
+  expect(refused.status()).toBe(403);
+  expect((await overlay(owner)).showResults).toBe(false);
+
+  // A new dock link closes the open dock at once: its controls go, and it tells the owner what to do.
+  await section.getByRole("button", { name: "Regenerate dock link" }).click();
+  const confirm = tools.getByRole("dialog", { name: "Regenerate the dock link?" });
+  await expect(confirm).toContainText("each open dock closes");
+  await confirm.getByRole("button", { name: "Regenerate dock link" }).click();
+  await expect(field).not.toHaveValue(dockUrl);
+  await expect(dock.locator("[data-dock-closed]")).toBeVisible();
+  await expect(dock.locator("[data-dock-closed]")).toContainText("This dock link does not work");
+  await expect(dock.locator("[data-live-part]")).toHaveCount(0);
+  // The new link opens the dock again.
+  await dock.goto(await field.inputValue());
+  await expect(dock.locator("[data-live-poll-title]")).toHaveText("Tea or coffee");
+  await Promise.all([close(owner), close(dock)]);
+  await runSql("tools-live-dock-restore", [noDockKey, noKeysSql]);
 });

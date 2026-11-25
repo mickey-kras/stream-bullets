@@ -25,7 +25,7 @@ import { type ShellData } from "./lib/shell";
 import "./styles.css";
 
 // OBS routes omit site chrome.
-const bareRoutes: ReadonlySet<string> = new Set(["routes/overlay"]);
+const bareRoutes: ReadonlySet<string> = new Set(["routes/overlay", "routes/dock"]);
 
 // Shared header, account menu and footer data.
 export const loader = withRouteErrors(async ({ request, context }: LoaderFunctionArgs): Promise<ShellData> => {

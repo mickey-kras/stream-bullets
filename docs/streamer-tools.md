@@ -136,3 +136,44 @@ A new message fades in. The Motion setting of the site and of the system stop th
 
 Alerts and support events are not in this section yet.
 The full-screen chat has no highlight for them yet.
+
+## OBS dock
+
+The OBS dock is a small page with the live controls, for a custom browser dock in OBS.
+The streamer changes the stream there and does not go to a browser.
+The dock has these parts of **Live**, in one column: the poll, the topics, the message banner, and the chat with its pause.
+It is usable from a width of 300 pixels. It scrolls in its panel.
+
+An action in the dock shows in **Live** at once, and an action in **Live** shows in the dock at once.
+The dock does not show the preview, the channel health, and the layout. For those, use **Streamer tools** in a browser.
+
+### Dock link
+
+The step **Add to OBS** of the **Overlay** section has a closed section, **Control your stream from inside OBS**.
+**Create dock link** makes a private link: `https://<origin>/@<handle>/dock?key=<key>`.
+The link shows one time. The server keeps only the SHA-256 hash of the key.
+
+In OBS, open `Docks`. Select `Custom Browser Docks`, and paste the link.
+
+The link gives control of the stream. Keep the dock off screen: do not capture it in a scene, and do not share the link.
+**Regenerate dock link** makes a new key. The old link stops at once, and each open dock shows that its link does not work.
+
+### What the dock key allows
+
+The dock page has no session. Each call of the dock to the server has the dock key in the `X-SB-Dock-Key` header.
+The key allows only these changes:
+
+- The switch for the poll results, and the end of the voting of a poll.
+- The text and the style of the message banner.
+- For the poll, the topic, and the message banner: the switch **Show on stream**, the picked item, and the QR code.
+
+The server refuses each other change with `403`: the layout, the outputs, the chat, the characters, the links, and the layouts.
+The dock key is not a session. It gives no access to the account, to channel management, or to an overlay link.
+
+The dock key and the overlay keys are different keys in different tables.
+An overlay key never opens the dock and never allows a control action. The dock key never opens the overlay as an OBS source.
+A wrong key, a page that does not exist, and a suspended page get the same answer.
+
+In the live room and in the activity feed, a dock has the seat and the data of the owner.
+It uses one of the 10 priority seats. See [live capacity](live-room-capacity.md).
+The dock link sends no `Referer`.

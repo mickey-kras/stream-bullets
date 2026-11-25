@@ -22,6 +22,7 @@ export function OverlayControl({
   live,
   scene,
   hasOverlayKey,
+  hasDockKey,
   layouts: initialLayouts,
   sources = null,
   connected = true,
@@ -33,6 +34,8 @@ export function OverlayControl({
   scene: Omit<OverlayScene, "overlay">;
   // Private-link existence only; never return its key.
   hasOverlayKey: Readonly<Record<Orientation, boolean>>;
+  // True when the page has a link for the OBS dock.
+  hasDockKey: boolean;
   // The saved layouts of each output, as the page loaded them.
   layouts: OverlayLayouts;
   // The connected OBS sources, from the live room. Null while the room did not tell.
@@ -79,6 +82,7 @@ export function OverlayControl({
         <StepHeading step={2} id={obsId} title={t("overlay.step.obs")} />
         <OverlayLink
           hasKey={hasOverlayKey}
+          hasDock={hasDockKey}
           layers={state.layers}
           sources={sources}
           now={scene.now}

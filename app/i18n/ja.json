@@ -1468,5 +1468,21 @@
   "overlay.guide.platforms.1": "Twitch には横の出力が送られます。縦の出力も Twitch に送るには、OBS で Settings、Stream の順に開き、Enhanced Broadcasting をオンにして、Additional Canvas で縦のキャンバスを選びます。",
   "overlay.guide.platforms.2": "YouTube と Kick に同時配信するには、出力を追加するプラグイン（例: Aitum Multistream）をインストールします。プラットフォームごとに出力を 1 つ追加します。",
   "overlay.guide.platforms.3": "ほかのプラットフォームで縦配信をするには、そのプラグインで出力をもう 1 つ追加し、縦のキャンバスを選びます。",
-  "overlay.guide.platforms.4": "「{channels}」で、各チャンネルが接続済みと表示されていることを確認します。"
+  "overlay.guide.platforms.4": "「{channels}」で、各チャンネルが接続済みと表示されていることを確認します。",
+  "dock.title": "OBS ドック",
+  "dock.heading": "ライブ操作: {name}",
+  "overlay.dock.title": "OBS の中から配信を操作する",
+  "overlay.dock.body": "ドックは、投票、トピック、メッセージバナー、チャットのライブ操作をまとめた小さなページです。OBS で Docks、Custom Browser Docks の順に開き、ドックのリンクを貼り付けます。",
+  "overlay.dock.private": "このリンクで配信を操作できます。ドックは画面に映さないでください。シーンでキャプチャしたり、リンクを共有したりしないでください。",
+  "overlay.dock.create": "ドックのリンクを作成",
+  "overlay.dock.regenerate": "ドックのリンクを再生成",
+  "overlay.dock.once": "このリンクを今すぐ OBS にコピーしてください。表示されるのは一度だけです。",
+  "overlay.dock.made": "ドックのリンクは非表示です。新しいリンクが必要な場合は再生成してください。古いリンクは使えなくなります。",
+  "overlay.dock.url": "ドックのリンク",
+  "overlay.dock.copy": "ドックのリンクをコピー",
+  "overlay.dock.confirmTitle": "ドックのリンクを再生成しますか？",
+  "overlay.dock.confirmBody": "古いリンクはすぐに使えなくなり、開いているドックはすべて閉じます。新しいリンクを OBS に貼り付けてください。",
+  "overlay.dock.ready": "新しいドックのリンクができました。OBS にコピーしてください。",
+  "dock.closed.title": "このドックのリンクは使えません",
+  "dock.closed.body": "配信者ツールのオーバーレイのセクションで新しいドックのリンクを作成し、OBS に貼り付けてください。"
 }
