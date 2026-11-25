@@ -277,7 +277,7 @@ export const activityEventSchema: z.ZodType<ActivityEvent> = z.union([
  * for characters (`?characters=1`) also gets playground frames (playground/protocol.ts).
  */
 export type ActivityMessage =
-  | { type: "snapshot"; events: ActivityEvent[]; replay: true }
+  | { type: "snapshot"; events: ActivityEvent[]; replay: true; since?: number }
   | { type: "event"; event: ActivityEvent }
   | { type: "unavailable" }
   | PlaygroundFrame;
@@ -320,7 +320,12 @@ const snapshotEvents = z
   .pipe(z.array(activityEventSchema));
 
 const messageSchema: z.ZodType<Exclude<ActivityMessage, PlaygroundFrame>, unknown> = z.union([
-  z.object({ type: z.literal("snapshot"), events: snapshotEvents, replay: z.literal(true) }),
+  z.object({
+    type: z.literal("snapshot"),
+    events: snapshotEvents,
+    replay: z.literal(true),
+    since: z.number().finite().optional(),
+  }),
   z.object({ type: z.literal("event"), event: activityEventSchema }),
   z.object({ type: z.literal("unavailable") }),
 ]);

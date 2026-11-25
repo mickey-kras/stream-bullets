@@ -69,7 +69,7 @@ The feed never merges participants across platforms.
 
 The socket sends these messages:
 
-- `{"type":"snapshot","events":[...],"replay":true}` once, when the socket opens.
+- `{"type":"snapshot","events":[...],"replay":true,"since":0}` once, when the socket opens.
 - `{"type":"event","event":{...}}` for each live event.
 - `{"type":"unavailable"}` before the server closes the socket. This occurs when the overlay key changes,
   when an administrator suspends the page, and when the owner deletes the account.
@@ -79,6 +79,16 @@ Thus the server accepts a connection with a wrong or revoked key and closes it a
 
 Each chat message in a snapshot has `live: false`. A consumer must not run a command from such a message.
 Thus a reconnect never runs an old command again.
+
+`since` is a receive time. The snapshot has each message that the server keeps and that is newer than `since`.
+A consumer that has a newer message, which is not in the snapshot, knows that a moderator removed it.
+The snapshot tells nothing about a message that is not newer than `since`.
+The server keeps the newest 100 messages for 10 minutes. `since` is the newest of these times:
+
+- The time 10 minutes before the snapshot.
+- The receive time of the newest message that the limit of 100 removed.
+- The receive time of the newest message of a platform that the owner disconnected.
+- The receive time of the newest message that the size limit of the snapshot left out.
 
 A live chat message also has `live: false` when the platform sent it more than 30 seconds before the server
 received it (`LIVE_WINDOW_MS`). Thus a late provider retry never runs an old command.

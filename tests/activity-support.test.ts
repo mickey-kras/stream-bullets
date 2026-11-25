@@ -125,7 +125,7 @@ describe("a consumer and the kinds that it does not know", (): void => {
     const overlay: ChatState = initialChatState();
     expect(chatReducer(overlay, { type: "message", message: event, now: 1000 }, { hideCommands: false })).toBe(overlay);
     const live: LiveChatState = initialLiveChat();
-    expect(liveChatReducer(live, { type: "message", message: event, now: 1000 })).toBe(live);
+    expect(liveChatReducer(live, { type: "message", message: event })).toBe(live);
   });
 
   it("does not show a direct tip or the support of a different platform in an output for Twitch only", (): void => {

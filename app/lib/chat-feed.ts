@@ -41,7 +41,7 @@ export type ChatLimits = { readonly [K in keyof typeof CHAT_LIMITS]: number };
 export const MAX_REMOVED_IDS = 1_000;
 
 /** The snapshot size of the producer (SNAPSHOT_SIZE in channel-ingest-limits.ts). A full snapshot has a window. */
-export const FULL_SNAPSHOT = 100;
+const FULL_SNAPSHOT = 100;
 
 export type RowPhase = "entering" | "shown" | "removed" | "leaving";
 
@@ -395,15 +395,20 @@ function receiveSnapshot(
   now: number,
   serverOffset: number,
   options: ChatOptions,
+  since?: number,
 ): ChatState {
   const limits: ChatLimits = limitsOf(options);
   const chats: ActivityChat[] = events.filter((event: ActivityEvent): event is ActivityChat => event.kind === "chat");
   const ids = new Set<string>(chats.map((chat: ActivityChat): string => chat.id));
+  // The snapshot tells nothing about a row that is not newer than `since`. A producer from before `since` sends
+  // none: then a full snapshot has a window that starts at its oldest message.
   const windowStart: number =
     chats.length >= FULL_SNAPSHOT
       ? Math.min(...chats.map((chat: ActivityChat): number => chat.receivedAt))
       : Number.NEGATIVE_INFINITY;
-  const confirmed = (row: ChatRow): boolean => !active(row) || ids.has(row.id) || row.receivedAt < windowStart;
+  const outside = (row: ChatRow): boolean =>
+    since === undefined ? row.receivedAt < windowStart : row.receivedAt <= since;
+  const confirmed = (row: ChatRow): boolean => !active(row) || ids.has(row.id) || outside(row);
   // Queued messages enter at once: the snapshot already holds anything newer.
   const flushed: ChatRow[] = state.pending
     .filter(confirmed)
@@ -447,7 +452,7 @@ function reduce(state: ChatState, action: Exclude<ChatAction, { type: "reset" }>
   if (message.type !== "snapshot" && message.type !== "event") return state;
   const next: ChatState =
     message.type === "snapshot"
-      ? receiveSnapshot(state, message.events, now, action.serverOffset ?? 0, options)
+      ? receiveSnapshot(state, message.events, now, action.serverOffset ?? 0, options, message.since)
       : receiveEvent(state, message.event, now, options);
   return advance(next, now, limits);
 }
