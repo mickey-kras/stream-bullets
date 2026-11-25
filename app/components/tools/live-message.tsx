@@ -41,6 +41,8 @@ export function LiveMessage({
           id={inputId}
           maxLength={OVERLAY_MESSAGE_MAX}
           value={text}
+          // A save puts a new form here. No edit during the save, so the new form does not drop one.
+          readOnly={busy}
           onChange={(event) => setText(event.currentTarget.value)}
           data-live-message
         />
@@ -48,7 +50,13 @@ export function LiveMessage({
           <legend className="field-label">{t("overlay.messageStyle")}</legend>
           <div className="seg">
             {MESSAGE_STYLES.map(([value, id]) => (
-              <button key={value} type="button" aria-pressed={style === value} onClick={() => setStyle(value)}>
+              <button
+                key={value}
+                type="button"
+                aria-pressed={style === value}
+                disabled={busy}
+                onClick={() => setStyle(value)}
+              >
                 {t(id)}
               </button>
             ))}

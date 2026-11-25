@@ -26661,7 +26661,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_message_livemessage",
       "source_file": "app/components/tools/live-message.tsx",
-      "source_location": "L57",
+      "source_location": "L65",
       "target": "app_components_tools_live_part_placed",
       "weight": 1.0
     },
@@ -26673,7 +26673,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_message_livemessage",
       "source_file": "app/components/tools/live-message.tsx",
-      "source_location": "L68",
+      "source_location": "L76",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -26685,7 +26685,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_message_livemessage",
       "source_file": "app/components/tools/live-message.tsx",
-      "source_location": "L85",
+      "source_location": "L93",
       "target": "app_components_tools_live_part_notongrid",
       "weight": 1.0
     },
@@ -62637,7 +62637,7 @@
       "relation": "calls",
       "source": "tests_tools_live_ui_test",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L275",
+      "source_location": "L283",
       "target": "tests_tools_live_ui_test_section",
       "weight": 1.0
     },
@@ -62709,7 +62709,7 @@
       "relation": "calls",
       "source": "tests_tools_live_ui_test_section",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L268",
+      "source_location": "L276",
       "target": "tests_tools_live_ui_test_stateof",
       "weight": 1.0
     },
@@ -62721,7 +62721,7 @@
       "relation": "calls",
       "source": "tests_tools_live_ui_test_section",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L270",
+      "source_location": "L278",
       "target": "tests_tools_live_ui_test_sceneof",
       "weight": 1.0
     },
@@ -213388,7 +213388,7 @@
       "relation": "contains",
       "source": "tests_tools_live_ui_test",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L267",
+      "source_location": "L275",
       "target": "tests_tools_live_ui_test_section",
       "weight": 1.0
     },
@@ -219320,6 +219320,18 @@
       "confidence_score": 0.85,
       "context": "argument",
       "relation": "indirect_call",
+      "source": "tests_tools_live_ui_test",
+      "source_file": "tests/tools-live-ui.test.ts",
+      "source_location": "L217",
+      "target": "app_components_tools_live_message_livemessage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
       "source": "tests_tools_live_ui_test_part",
       "source_file": "tests/tools-live-ui.test.ts",
       "source_location": "L163",
@@ -219346,7 +219358,7 @@
       "relation": "indirect_call",
       "source": "tests_tools_live_ui_test_part",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L234",
+      "source_location": "L242",
       "target": "app_components_tools_live_chat_livechat",
       "weight": 1.0
     },
@@ -219370,7 +219382,7 @@
       "relation": "indirect_call",
       "source": "tests_tools_live_ui_test_section",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L270",
+      "source_location": "L278",
       "target": "app_components_tools_live_section_livesection",
       "weight": 1.0
     },
@@ -221204,6 +221216,18 @@
       "confidence_score": 0.85,
       "context": "collection",
       "relation": "indirect_call",
+      "source": "tests_tools_live_ui_test",
+      "source_file": "tests/tools-live-ui.test.ts",
+      "source_location": "L217",
+      "target": "tests_tools_live_ui_test_send",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "collection",
+      "relation": "indirect_call",
       "source": "tests_tools_live_ui_test_part",
       "source_file": "tests/tools-live-ui.test.ts",
       "source_location": "L163",
@@ -221242,7 +221266,7 @@
       "relation": "indirect_call",
       "source": "tests_tools_live_ui_test_section",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L270",
+      "source_location": "L278",
       "target": "tests_channels_test_channels",
       "weight": 1.0
     },
@@ -262250,7 +262274,7 @@
       "label": "section()",
       "norm_label": "section()",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L267"
+      "source_location": "L275"
     },
     {
       "_callable": true,
