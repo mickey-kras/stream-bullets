@@ -549,11 +549,9 @@ describe("live room admission", (): void => {
       seenAt: 1234,
       outputs: { horizontal: { count: 1, seenAt: 1234 }, vertical: { count: 0, seenAt: null } },
     });
-    // A new key for the vertical output leaves the old socket. A new horizontal key closes it.
+    // The key of the old socket can be the key of each output: a new key for one output closes it.
     await post("overlay-key", { output: "vertical" });
-    expect(old.open).toBe(true);
-    await post("overlay-key", { output: "horizontal" });
-    expect(old.open).toBe(false);
+    expect([old.closeCode, old.closeReason]).toEqual([1001, "Overlay key revoked"]);
   });
 
   it("tells the owner how many OBS sources are connected and when one was last seen", async (): Promise<void> => {

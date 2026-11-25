@@ -47,8 +47,15 @@ function snapshot(events: ActivityEvent[]): ActivityMessage {
   return { type: "snapshot", events, replay: true };
 }
 
+/** Server time of the reducer calls: after each message of `chat`, and inside the time the producer keeps one. */
+const NOW = T0 + 60_000;
+
+function receive(state: LiveChatState, message: ActivityMessage, now: number = NOW): LiveChatState {
+  return liveChatReducer(state, { type: "message", message, now });
+}
+
 function run(messages: ActivityMessage[], from: LiveChatState = initialLiveChat()): LiveChatState {
-  return messages.reduce(liveChatReducer, from);
+  return messages.reduce((state: LiveChatState, message: ActivityMessage) => receive(state, message), from);
 }
 
 function texts(state: LiveChatState): string[] {
@@ -118,7 +125,7 @@ describe("live chat log", (): void => {
     expect(state.rows[0]).toMatchObject({ id: "twitch:m1", removed: true, badges: [], fragments: [] });
     expect([...state.removed]).toEqual(["twitch:m1", "twitch:m9"]);
     // A second delete of the same message changes nothing.
-    const again: LiveChatState = liveChatReducer(
+    const again: LiveChatState = receive(
       state,
       event({ kind: "delete", platform: "twitch", messageId: "m1", receivedAt: T0 }),
     );
@@ -145,23 +152,21 @@ describe("live chat log", (): void => {
     expect(texts(cleared)).toEqual(["message 1", "message 2", "removed", "message 4"]);
     // A ban of a viewer without messages changes nothing.
     const none: LiveChatState = run(start);
-    expect(
-      liveChatReducer(none, event({ kind: "ban", platform: "kick", userId: "u1", until: 5, receivedAt: T0 })),
-    ).toBe(none);
+    expect(receive(none, event({ kind: "ban", platform: "kick", userId: "u1", until: 5, receivedAt: T0 }))).toBe(none);
   });
 
   it("removes each message of a cleared platform, and ignores status events, frames and an unavailable feed", (): void => {
     const start: LiveChatState = run([event(chat(1)), event(chat(2, { platform: "kick" }))]);
-    const cleared: LiveChatState = liveChatReducer(start, event({ kind: "clear", platform: "twitch", receivedAt: T0 }));
+    const cleared: LiveChatState = receive(start, event({ kind: "clear", platform: "twitch", receivedAt: T0 }));
     expect(texts(cleared)).toEqual(["removed", "message 2"]);
-    expect(liveChatReducer(start, event({ kind: "status", platform: "twitch", status: "error" }))).toBe(start);
-    expect(liveChatReducer(start, { type: "unavailable" })).toBe(start);
+    expect(receive(start, event({ kind: "status", platform: "twitch", status: "error" }))).toBe(start);
+    expect(receive(start, { type: "unavailable" })).toBe(start);
   });
 
   it("forgets the oldest removed ids above the limit", (): void => {
     let state: LiveChatState = initialLiveChat();
     for (let n = 0; n < MAX_REMOVED_IDS + 2; n++)
-      state = liveChatReducer(state, event({ kind: "delete", platform: "twitch", messageId: `m${n}`, receivedAt: T0 }));
+      state = receive(state, event({ kind: "delete", platform: "twitch", messageId: `m${n}`, receivedAt: T0 }));
     expect(state.removed.size).toBe(MAX_REMOVED_IDS);
     expect(state.removed.has("twitch:m0")).toBe(false);
     expect(state.removed.has(`twitch:m${MAX_REMOVED_IDS + 1}`)).toBe(true);
@@ -169,23 +174,73 @@ describe("live chat log", (): void => {
 
   it("adds the new messages of a reconnect snapshot and removes what was moderated in its window", (): void => {
     const before: LiveChatState = run([event(chat(1)), event(chat(2)), event(chat(3)), event(chat(4))]);
-    // The server has the messages 2, 4 and 5: message 3 was deleted while the page was away. Message 1 is older
-    // than the snapshot, so the snapshot tells nothing about it.
-    const after: LiveChatState = liveChatReducer(before, snapshot([chat(2), chat(4), chat(5, { live: false })]));
+    // The server has the messages 2, 4 and 5: message 3 was deleted while the page was away. The server keeps a
+    // message for 10 minutes, and message 1 is older than that, so the snapshot tells nothing about it.
+    const now: number = T0 + 9 * 60_000 + 1500;
+    const after: LiveChatState = receive(before, snapshot([chat(2), chat(4), chat(5, { live: false })]), now);
     expect(texts(after)).toEqual(["message 1", "message 2", "removed", "message 4", "message 5"]);
     expect(after.removed.has("twitch:m3")).toBe(true);
     // A snapshot never brings a removed message back.
-    expect(texts(liveChatReducer(after, snapshot([chat(2), chat(3), chat(4), chat(5)])))).toEqual(texts(after));
+    expect(texts(receive(after, snapshot([chat(2), chat(3), chat(4), chat(5)]), now))).toEqual(texts(after));
   });
 
-  it("keeps the log when a snapshot has no chat", (): void => {
-    const before: LiveChatState = run([event(chat(1))]);
-    expect(liveChatReducer(before, snapshot([]))).toBe(before);
-    expect(liveChatReducer(before, snapshot([{ kind: "status", platform: "twitch", status: "active" }]))).toBe(before);
+  it("removes a moderated message that is older than each message of a snapshot that is not full", (): void => {
+    const before: LiveChatState = run([event(chat(1)), event(chat(2)), event(chat(3))]);
+    expect(texts(receive(before, snapshot([chat(2), chat(3)])))).toEqual(["removed", "message 2", "message 3"]);
+  });
+
+  it("removes the rows that the server no longer has when a snapshot has no chat", (): void => {
+    const before: LiveChatState = run([event(chat(1)), event(chat(2, { platform: "kick" }))]);
+    // The chat was cleared while the page was away, and no message came after that.
+    const cleared: LiveChatState = receive(before, snapshot([]));
+    expect(texts(cleared)).toEqual(["removed", "removed"]);
+    expect(texts(receive(before, snapshot([{ kind: "status", platform: "twitch", status: "active" }])))).toEqual(
+      texts(cleared),
+    );
+    // The server keeps no message this long, so an empty snapshot tells nothing about the rows.
+    expect(receive(before, snapshot([]), T0 + 20 * 60_000)).toBe(before);
+  });
+
+  it("starts the window of a full snapshot at its oldest message", (): void => {
+    const before: LiveChatState = run([event(chat(1)), event(chat(2)), event(chat(3)), event(chat(4))]);
+    // 100 messages: 3 and 5 to 103. Newer messages pushed the older ones out, so 1 and 2 tell nothing.
+    const full: ActivityChat[] = [chat(3), ...Array.from({ length: 99 }, (_, n: number) => chat(n + 5))];
+    const after: LiveChatState = receive(before, snapshot(full));
+    expect(texts(after).slice(0, 5)).toEqual(["message 1", "message 2", "message 3", "removed", "message 5"]);
+    expect(after.rows).toHaveLength(103);
   });
 
   it("fills an empty log from the first snapshot", (): void => {
     expect(texts(run([snapshot([chat(1), chat(2)])]))).toEqual(["message 1", "message 2"]);
+  });
+});
+
+describe("paused live chat log", (): void => {
+  const pause = (state: LiveChatState): LiveChatState => liveChatReducer(state, { type: "pause" });
+  const resume = (state: LiveChatState): LiveChatState => liveChatReducer(state, { type: "resume" });
+  const many = (from: number, count: number): ActivityMessage[] =>
+    Array.from({ length: count }, (_, n: number) => event(chat(from + n)));
+
+  it("keeps the rows that it shows while more messages arrive than the log keeps", (): void => {
+    const paused: LiveChatState = pause(run(many(0, 3)));
+    expect(paused.pausedAt).toBe(3);
+    // A second pause does not move the place.
+    expect(pause(run([event(chat(3))], paused))).toMatchObject({ pausedAt: 3 });
+    const busy: LiveChatState = run(many(3, LIVE_CHAT_LIMITS.maxRows + 20), paused);
+    expect(texts(busy).slice(0, 4)).toEqual(["message 0", "message 1", "message 2", "message 23"]);
+    expect(busy.rows).toHaveLength(3 + LIVE_CHAT_LIMITS.maxRows);
+    expect(newSince(busy.rows, 3, new Set())).toBe(LIVE_CHAT_LIMITS.maxRows);
+    // Moderation still reaches a row that the pause keeps.
+    const banned: LiveChatState = run(
+      [event({ kind: "ban", platform: "twitch", userId: "u1", until: null, receivedAt: T0 })],
+      busy,
+    );
+    expect(texts(banned).slice(0, 3)).toEqual(["message 0", "removed", "message 2"]);
+    // Jump to latest keeps the newest rows only.
+    const resumed: LiveChatState = resume(banned);
+    expect(resumed.pausedAt).toBeNull();
+    expect(resumed.rows).toHaveLength(LIVE_CHAT_LIMITS.maxRows);
+    expect(texts(resumed)[0]).toBe("message 23");
   });
 });
 

@@ -87,6 +87,17 @@ export function outputOf(tags: readonly string[]): Orientation {
   return tags.includes(outputTag("vertical")) ? "vertical" : "horizontal";
 }
 
+/**
+ * Whether a new `key` closes the socket with these tags. An OBS socket from before the two outputs has no output
+ * tag, and its key can be the key of each output. Thus each new output key closes it. It connects again with its
+ * key, and then it has the tag of its output.
+ */
+export function keyRevokes(tags: readonly string[], key: SocketKey): boolean {
+  if (key === "dock" || !tags.includes("overlay-key")) return keyOf(tags) === key;
+  const tagged: boolean = ORIENTATIONS.some((name: Orientation): boolean => tags.includes(outputTag(name)));
+  return !tagged || outputOf(tags) === key;
+}
+
 interface SeenTimes {
   all: number | null;
   outputs: Record<Orientation, number | null>;

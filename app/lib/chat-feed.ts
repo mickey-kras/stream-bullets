@@ -41,7 +41,7 @@ export type ChatLimits = { readonly [K in keyof typeof CHAT_LIMITS]: number };
 export const MAX_REMOVED_IDS = 1_000;
 
 /** The snapshot size of the producer (SNAPSHOT_SIZE in channel-ingest-limits.ts). A full snapshot has a window. */
-const FULL_SNAPSHOT = 100;
+export const FULL_SNAPSHOT = 100;
 
 export type RowPhase = "entering" | "shown" | "removed" | "leaving";
 

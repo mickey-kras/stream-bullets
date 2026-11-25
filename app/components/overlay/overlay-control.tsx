@@ -16,6 +16,17 @@ import { useOverlayState } from "./use-overlay-state";
 
 export { controlState } from "./use-overlay-state";
 
+/** Layouts, with the revision of the overlay state that they came with. */
+export interface LayoutsAt {
+  layouts: OverlayLayouts;
+  revision: number;
+}
+
+/** The newest layouts: of a layout action of this tab, or loaded again after another tab changed them. */
+export function controlLayouts(saved: LayoutsAt, loaded: LayoutsAt): OverlayLayouts {
+  return loaded.revision > saved.revision ? loaded.layouts : saved.layouts;
+}
+
 // The Overlay section of Streamer tools. POST /api/overlay saves control changes; live room updates OBS immediately.
 export function OverlayControl({
   initial,
@@ -46,7 +57,9 @@ export function OverlayControl({
 }>): ReactNode {
   const { state, busy, run, keepNewest } = useOverlayState(initial, live);
   const toast = useToast();
-  const [layouts, setLayouts] = useState<OverlayLayouts>(initialLayouts);
+  const loadedLayouts: LayoutsAt = { layouts: initialLayouts, revision: initial.revision };
+  const [savedLayouts, setSavedLayouts] = useState<LayoutsAt>(loadedLayouts);
+  const layouts: OverlayLayouts = controlLayouts(savedLayouts, loadedLayouts);
   const [layoutBusy, setLayoutBusy] = useState<boolean>(false);
   // A layout action changes the layers and the layouts in one request.
   const layoutAct: LayoutAct = async (action: LayoutAction): Promise<boolean> => {
@@ -54,7 +67,7 @@ export function OverlayControl({
     try {
       const saved = await postJson<{ overlay: OverlayState; layouts: OverlayLayouts }>("/api/overlay/layouts", action);
       keepNewest(saved.overlay);
-      setLayouts(saved.layouts);
+      setSavedLayouts({ layouts: saved.layouts, revision: saved.overlay.revision });
       return true;
     } catch (error: unknown) {
       toast(errorMessage(error), { tone: "error" });
