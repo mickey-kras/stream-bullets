@@ -1758,8 +1758,10 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
   .thread.has-replies::before { left: 14px; }
   .replies > li > .comment::before { left: -7px; width: 5px; }
   .discussion > .composer { gap: 8px; flex-wrap: wrap; }
-  .discussion > .composer > :is(textarea, .mention-input) { flex: 1 1 100%; }
+  .discussion > .composer > :is(textarea, .mention-input, .comment-input) { flex: 1 1 100%; }
   .discussion > .composer > button { margin-left: auto; }
+  .discussion > .composer .ed-content { min-height: 86px; }
+  .discussion > .composer textarea { min-height: 88px; }
   .composer textarea { overflow-wrap: anywhere; touch-action: auto; overscroll-behavior-y: auto; max-height: min(150px, 30dvh); }
   .discussion-focus { position: fixed; z-index: 20; top: var(--discussion-top, 0px); left: 0; width: 100%; height: var(--discussion-height, 100dvh); padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); background: var(--bg); display: flex; flex-direction: column; min-height: 0; }
   body:has(.discussion-focus) > .site-footer, .discussion-focus > :is(.site-header, .fab) { display: none !important; }

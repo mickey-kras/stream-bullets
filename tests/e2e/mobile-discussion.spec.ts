@@ -58,6 +58,12 @@ for (const width of [320, 390]) {
       await expect(page.locator("article.comment")).toHaveCount(24);
       const composer = commentBox(page, "Write a comment");
       await composer.fill("Keep this mobile draft.");
+      // The comment field takes the full row. The Post button is below it.
+      const field = await page.locator(".discussion > .composer > .comment-input").boundingBox();
+      const post = await page.locator(".discussion > .composer > button").boundingBox();
+      const row = await page.locator(".discussion > .composer").boundingBox();
+      expect(field?.width ?? 0).toBeGreaterThanOrEqual((row?.width ?? width) - 1);
+      expect(post?.y ?? 0).toBeGreaterThanOrEqual((field?.y ?? 0) + (field?.height ?? 0));
       await page.getByRole("button", { name: "Open discussion", exact: true }).tap();
       await expect(page).toHaveURL(/discussion=1/);
       await expect(page.getByRole("button", { name: "Back to topic", exact: true })).toBeFocused();
