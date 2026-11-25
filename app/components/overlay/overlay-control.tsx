@@ -25,7 +25,7 @@ export function controlState(
   return { ...live, message: onStream(live.layers, "message") ? live.message : base.message };
 }
 
-// POST /api/overlay saves control changes; live room updates OBS immediately.
+// The Overlay section of Streamer tools. POST /api/overlay saves control changes; live room updates OBS immediately.
 export function OverlayControl({
   initial,
   live,
@@ -34,7 +34,6 @@ export function OverlayControl({
   sources = null,
   connected = true,
   reconnect,
-  channels,
 }: Readonly<{
   initial: OverlayState;
   // Latest live overlay state includes changes from other tabs.
@@ -47,8 +46,6 @@ export function OverlayControl({
   // Offline changes save but reach OBS after reconnect.
   connected?: boolean;
   reconnect?: () => void;
-  // The channel connections section: the first step of the page.
-  channels?: ReactNode;
 }>): ReactNode {
   const toast = useToast();
   const [saved, setSaved] = useState<OverlayState>(initial);
@@ -80,12 +77,6 @@ export function OverlayControl({
   };
   return (
     <>
-      <div className="ov-head">
-        <div>
-          <span className="eyebrow">{t("overlay.eyebrow")}</span>
-          <h1>{t("overlay.controlTitle")}</h1>
-        </div>
-      </div>
       {!connected && (
         <p className="ov-conn">
           <Icon name="wifi-off" size={18} />
@@ -99,10 +90,9 @@ export function OverlayControl({
           )}
         </p>
       )}
-      {channels}
       <CompositionEditor scene={view} state={state} busy={busy} run={run} onSaved={keepNewest} />
       <section className="ov-step" aria-labelledby={obsId} data-step="obs">
-        <StepHeading step={3} id={obsId} title={t("overlay.step.obs")} />
+        <StepHeading step={2} id={obsId} title={t("overlay.step.obs")} />
         <OverlayLink hasKey={hasOverlayKey} layers={state.layers} sources={sources} now={scene.now} />
       </section>
     </>

@@ -74,7 +74,7 @@ test("each content layer goes on the grid one time with its real content, and OB
   const owner = await signedIn(browser, "featureowner", PLACE_IP);
   const page = await newPage(owner);
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/overlay-control");
+  await page.goto("/tools");
   const editor = page.locator("[data-composition-editor]");
   const frame = editor.getByRole("region", { name: "Composition preview" });
   await expect(frame).toHaveAttribute("data-scaled", "true");
@@ -184,7 +184,7 @@ test("Show on stream and the background of a layer reach the OBS page at once", 
   const owner = await signedIn(browser, "featureowner", STREAM_IP);
   const page = await newPage(owner);
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/overlay-control");
+  await page.goto("/tools");
   const editor = page.locator("[data-composition-editor]");
   const frame = editor.getByRole("region", { name: "Composition preview" });
   const panel = settings(editor);
@@ -262,7 +262,7 @@ test("the poll layer shows a QR code in OBS by default, and its switch removes i
   const owner = await signedIn(browser, "featureowner", QR_IP);
   const page = await newPage(owner);
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/overlay-control");
+  await page.goto("/tools");
   const editor = page.locator("[data-composition-editor]");
   const frame = editor.getByRole("region", { name: "Composition preview" });
   const previewCode = frame.locator('.ov-layer[data-layer="poll"] [data-overlay-qr]');
@@ -341,7 +341,7 @@ test("one Start test starts and stops the chat test and the characters test toge
     if (request.method() === "POST" && new URL(request.url()).pathname === "/api/overlay")
       actions.push(request.postDataJSON());
   });
-  await page.goto("/overlay-control");
+  await page.goto("/tools");
   const editor = page.locator("[data-composition-editor]");
   await expect.poll(() => controls).toEqual(["status"]);
   // The studio has one test button, in the toolbar.
@@ -417,7 +417,7 @@ test("state from before the studio shows as layers: the source that was on air, 
     // The control page shows the same layers, and no control from before the studio.
     const page = await newPage(owner);
     await page.setViewportSize({ width: 1440, height: 1000 });
-    await page.goto("/overlay-control");
+    await page.goto("/tools");
     const editor = page.locator("[data-composition-editor]");
     await expect(chip(editor, "chat")).toHaveText("ChatPlaced");
     await expect(chip(editor, "message")).toHaveText("Message bannerPlaced");
@@ -475,7 +475,7 @@ test("at 390 px the studio stacks the palette, the grid and the settings, and th
   const owner = await signedIn(browser, "featureowner", PHONE_IP);
   const page = await newPage(owner);
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/overlay-control");
+  await page.goto("/tools");
   const editor = page.locator("[data-composition-editor]");
   const frame = editor.getByRole("region", { name: "Composition preview" });
   await expect(frame).toHaveAttribute("data-scaled", "true");
@@ -545,7 +545,7 @@ test("the keyboard alone places, selects, changes and removes a layer", async ({
   const owner = await signedIn(browser, "featureowner", KEYS_IP);
   const page = await newPage(owner);
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/overlay-control");
+  await page.goto("/tools");
   const editor = page.locator("[data-composition-editor]");
   const grid = gridButton(editor, "Layout grid, 32 columns by 18 rows");
   const status = editor.locator("[data-grid-status]");

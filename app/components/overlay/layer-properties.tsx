@@ -2,6 +2,7 @@ import { useContext, useId, useState, type FormEvent, type ReactNode } from "rea
 import { t, tAround, type MessageId } from "../../i18n";
 import { withEnabled, withItem } from "../../lib/layer-geometry";
 import { MASH_NAME } from "../../lib/mash";
+import { channelsSectionPath } from "../../lib/shell";
 import {
   LAYER_BACKGROUND,
   layerEnabled,
@@ -201,7 +202,7 @@ function ChatSettings({ layers, change }: Readonly<Pick<SettingsProps, "layers" 
           <Icon name="warning" size={16} />
           <span>
             {downBefore}
-            <a className="text-link" href="#channels-title">
+            <a className="text-link" href={channelsSectionPath}>
               {t("overlay.comp.chatDownLink")}
             </a>
             {downAfter}
@@ -210,7 +211,7 @@ function ChatSettings({ layers, change }: Readonly<Pick<SettingsProps, "layers" 
       )}
       <p className="muted ov-comp-note" data-comp-chat-source>
         {sourceBefore}
-        <a className="text-link" href="#channels-title">
+        <a className="text-link" href={channelsSectionPath}>
           {t("overlay.comp.chatSourceLink")}
         </a>
         {sourceAfter}

@@ -43,10 +43,10 @@ export function accountMenuRows(
         current: pathname === paths.streamer(shell.ownStreamer.handle),
       },
       {
-        to: paths.overlayControl,
-        label: "account.overlayControl",
-        icon: "overlay",
-        current: pathname === paths.overlayControl,
+        to: paths.tools,
+        label: "account.tools",
+        icon: "mic",
+        current: pathname === paths.tools,
       },
       dialog("page", "account.editPage", "pencil"),
     ]);

@@ -72,7 +72,7 @@ function placedLayers(layers: OverlayLayers, layer: GridLayer, rect: CellRect, t
 }
 
 /**
- * Step 2 of Overlay control: the overlay studio. A toolbar sets the orientation and the preview background and
+ * Step 1 of the Overlay section of Streamer tools: the overlay studio. A toolbar sets the orientation and the preview background and
  * starts the test. Below it are the layer palette, the layout grid of the selected orientation over a preview of
  * what OBS shows, and the settings of the selected layer. The preview plays sample chat. While the characters layer
  * is on stream, it opens the owner's characters socket and shows the live playground. Layer edits go live at once.
@@ -147,7 +147,7 @@ export function CompositionEditor({
 
   return (
     <section className="ov-step ov-comp" aria-labelledby={buildId} data-step="build" data-composition-editor>
-      <StepHeading step={2} id={buildId} title={t("overlay.step.build")} />
+      <StepHeading step={1} id={buildId} title={t("overlay.step.build")} />
       <div className="ov-comp-bar">
         <fieldset className="ov-seg-field">
           <legend className="sr-only">{t("overlay.grid.orientation")}</legend>

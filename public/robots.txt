@@ -9,6 +9,7 @@ User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /admin
+Disallow: /tools
 Disallow: /overlay-control
 Disallow: /*/overlay
 Disallow: /*?dialog=

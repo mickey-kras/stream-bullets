@@ -1,14 +1,16 @@
-# Overlay control
+# Streamer tools: the Overlay section
 
-Overlay control is the page where a streamer builds the OBS overlay, at `/overlay-control`.
-Overlay is a tab of the streamer header. Only the page owner sees it.
-The two images are screenshots of the real app with test data.
+Streamer tools is the page where a streamer runs the stream, at `/tools`.
+Tools is a tab of the streamer header. Only the page owner sees it.
+The page has the sections Overlay and Channels. The old address `/overlay-control` redirects to the page.
+The two images are screenshots of the Overlay section of the real app with test data.
 
-## Steps
+## Sections
 
-1. **Connect channels**: the Twitch, YouTube, and Kick cards. Each card shows the platform icon and the state of the connection.
-2. **Build your overlay**: the studio.
-3. **Add to OBS**: the private overlay link.
+- **Overlay**: the streamer builds the OBS overlay in two steps.
+  1. **Build your overlay**: the studio.
+  2. **Add to OBS**: the private overlay link.
+- **Channels**: the Twitch, YouTube, and Kick cards. Each card shows the platform icon and the state of the connection.
 
 ## Studio
 

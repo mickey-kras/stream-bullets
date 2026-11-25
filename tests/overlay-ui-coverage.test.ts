@@ -124,10 +124,12 @@ describe("overlay control page", () => {
     return renderToStaticMarkup(createElement(OverlayControl, { initial, scene, hasOverlayKey: false, connected }));
   }
 
-  it("has the studio as step 2 and the OBS link as step 3, without the old live control", () => {
+  it("has the studio as step 1 and the OBS link as step 2, without the page head and the old live control", () => {
     const html: string = control();
-    expect(html).toContain('<span class="ov-step-num">2</span> Build your overlay</h2>');
-    expect(html).toContain('<span class="ov-step-num">3</span> Add to OBS</h2>');
+    expect(html).toContain('<span class="ov-step-num">1</span> Build your overlay</h2>');
+    expect(html).toContain('<span class="ov-step-num">2</span> Add to OBS</h2>');
+    // The route gives the page its head and its section links.
+    expect(html).not.toContain("<h1");
     expect(html.match(/class="ov-step-num"/g)).toHaveLength(2);
     expect(html).toContain("Changes go live right away");
     for (const gone of ["data-ov-monitor", "data-ov-take", "ov-take-dock", "ov-sources", "<kbd", "Instant switch"])
@@ -286,7 +288,7 @@ describe("settings of the selected layer", () => {
       );
     const warning: string = chatSettings(true, false);
     expect(warning).toMatch(
-      /<p class="ch-problem ov-comp-note" data-comp-chat-down="true"><svg[^>]*icon-warning[^>]*>.*?<\/svg><span>No channel delivers chat right now\. See <a class="text-link" href="#channels-title">step 1<\/a>\.<\/span><\/p>/,
+      /<p class="ch-problem ov-comp-note" data-comp-chat-down="true"><svg[^>]*icon-warning[^>]*>.*?<\/svg><span>No channel delivers chat right now\. See <a class="text-link" href="\/tools\?view=channels#channels-title">Channels<\/a>\.<\/span><\/p>/,
     );
     // Off stream, with a healthy channel, or without live channel data, the line does not show.
     expect(chatSettings(false, false)).not.toContain("data-comp-chat-down");
@@ -402,7 +404,7 @@ describe("settings of the selected layer", () => {
     const html: string = settings("chat");
     expect(html).toContain("Hide chat commands (!jump)");
     expect(html).toContain('data-props-commands="true" checked=""');
-    expect(html).toContain('<a class="text-link" href="#channels-title">Connect channels</a>');
+    expect(html).toContain('<a class="text-link" href="/tools?view=channels#channels-title">Connect channels</a>');
     expect(settings("poll")).not.toContain("data-props-commands");
   });
 
@@ -957,12 +959,12 @@ describe("the channel cards", (): void => {
   function cards(channels: ChannelView[]): string[] {
     const Stub = createRoutesStub([
       {
-        path: "/overlay-control",
+        path: "/tools",
         Component: () =>
           createElement(ChannelPanel, { channels, providers: ["google"], signInProvider: "google", result: null }),
       },
     ]);
-    const markup: string = renderToStaticMarkup(createElement(Stub, { initialEntries: ["/overlay-control"] }));
+    const markup: string = renderToStaticMarkup(createElement(Stub, { initialEntries: ["/tools"] }));
     return markup.split('<li class="ch-item"').slice(1);
   }
 
@@ -1057,7 +1059,7 @@ describe("the channel cards", (): void => {
     const panel = (stale: boolean): string => {
       const Stub = createRoutesStub([
         {
-          path: "/overlay-control",
+          path: "/tools",
           Component: () =>
             createElement(ChannelPanel, {
               channels: offered,
@@ -1068,7 +1070,7 @@ describe("the channel cards", (): void => {
             }),
         },
       ]);
-      return renderToStaticMarkup(createElement(Stub, { initialEntries: ["/overlay-control"] }));
+      return renderToStaticMarkup(createElement(Stub, { initialEntries: ["/tools"] }));
     };
     expect(panel(true)).toContain(
       '<p class="muted" data-channels-stale="true">Status could not be refreshed. Next try in a moment.</p>',
