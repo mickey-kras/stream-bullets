@@ -67,6 +67,7 @@ import {
   type TerrainView,
 } from "./protocol";
 import {
+  blockOrder,
   blocksString,
   cellX,
   clearBuilds,
@@ -539,6 +540,9 @@ export class PlaygroundSim implements SimHost {
 
   /** After a landing: a walk of some blocks that went off an edge goes on. */
   private landed(p: Participant): void {
+    // A character that fell on its way out is not on that walk any more. If its time is still up, it leaves again
+    // from where it stands. If a new message came in the fall, it stays and takes commands.
+    if (p.exitReason !== null) Object.assign(p, { free: false, exitReason: null });
     if (p.resume) setState(p, "step", { vx: 0, vy: 0, resume: false });
     else this.rest(p);
   }
@@ -867,6 +871,7 @@ export class PlaygroundSim implements SimHost {
       ground: groundString(this.terrain),
       repairs,
       blocks: blocksString(this.world, this.terrain),
+      order: blockOrder(this.terrain),
       flags: this.terrain.flags.map((flag: Flag): [number, number, number] => [flag.id, flag.c, flag.r]),
       registry,
       restrictions,

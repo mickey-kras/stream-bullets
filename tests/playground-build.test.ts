@@ -7,6 +7,7 @@ import { mulberry32, PlaygroundSim, parseCommand, setState } from "../app/lib/pl
 import {
   type Block,
   blockAt,
+  blockOrder,
   blocksString,
   canPlace,
   cellX,
@@ -447,6 +448,36 @@ describe("breaking", () => {
     s.sim.terrain.flags.push({ id: 9999, c: 9, r: 0 });
     s.tick(31);
     expect(s.sim.terrain.flags).toEqual([{ id: s.p.id, c: START, r: 0 }]);
+  });
+
+  it("keeps the building order in the checkpoint, so the same oldest block goes after a restore", () => {
+    const s = stage();
+    // Built from right to left: the oldest block has the highest cell number.
+    for (const c of [30, 20, 10]) s.put(c, 0);
+    const restored = PlaygroundSim.restore(s.sim.checkpoint(), { rng: mulberry32(1) });
+    const order = (sim: PlaygroundSim): number[] => blockOrder(sim.terrain);
+    expect(order(restored)).toEqual([30, 20, 10]);
+    expect(order(restored)).toEqual(order(s.sim));
+    // A checkpoint from before the order, and an order with a wrong cell, give the rows from the ground up.
+    const old = JSON.parse(s.sim.checkpoint()) as Record<string, unknown>;
+    delete old.order;
+    expect(order(PlaygroundSim.restore(JSON.stringify(old), { rng: mulberry32(1) }))).toEqual([10, 20, 30]);
+    old.order = [20, 999, 20];
+    expect(order(PlaygroundSim.restore(JSON.stringify(old), { rng: mulberry32(1) }))).toEqual([20, 10, 30]);
+  });
+
+  it("lets a character that fell on its way out take commands after a new message", () => {
+    const s = stage();
+    s.run("!up");
+    s.run("!up");
+    // The time of the character is up: it walks to the exit, off its build.
+    Object.assign(s.p, { lastChat: s.sim.clock - 2000, admittedAt: -1000 });
+    for (let i = 0; i < 400 && s.p.state !== "fall"; i++) s.sim.tick();
+    expect([s.p.state, s.p.free, s.p.exitReason]).toEqual(["fall", true, "timeout"]);
+    s.p.lastCommand = -1000;
+    s.sim.receive(chat("twitch", "builder", "!wave"));
+    for (let i = 0; i < 80 && s.p.state !== "wave"; i++) s.sim.tick();
+    expect([s.p.state, s.p.free, s.p.exitReason]).toEqual(["wave", false, null]);
   });
 
   it("clears all builds and lets the characters fall", () => {

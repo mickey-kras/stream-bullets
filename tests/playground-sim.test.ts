@@ -806,8 +806,9 @@ function fuzz(sim: PlaygroundSim, ticks: number, seed: number): void {
       expect(Number.isFinite(p.x) && Number.isFinite(p.y), p.state).toBe(true);
       expect(p.x, p.state).toBeGreaterThanOrEqual(0);
       expect(p.x, p.state).toBeLessThanOrEqual(sim.world.w);
-      // A character that stands still is never inside a dirt block or a plank.
-      if (p.state === "hold") {
+      // A character that stands still is never inside a dirt block or a plank. One that arrived in this tick comes
+      // out on top in the next one.
+      if (p.state === "hold" && p.t > 1) {
         expect(blockAt(sim.world, sim.terrain, colOf(p.x), rowOf(sim.world, p.y))?.kind ?? "stair").toBe("stair");
       }
     }

@@ -363,17 +363,35 @@ export function blocksString(world: World, terrain: Terrain): string {
     .join("");
 }
 
-/** Puts the blocks of a `blocksString` text into an empty terrain, in building order from the ground up. Throws when the text does not fit the grid. */
-export function restoreBlocks(world: World, terrain: Terrain, text: string): void {
+/** The cells of the blocks in building order, the oldest first: at the limit the first one goes. */
+export function blockOrder(terrain: Terrain): number[] {
+  return terrain.blocks
+    .flatMap((block: Block | null, i: number): [number, number][] => (block ? [[block.seq, i]] : []))
+    .sort((a: [number, number], b: [number, number]): number => a[0] - b[0])
+    .map(([, i]: [number, number]): number => i);
+}
+
+/**
+ * Puts the blocks of a `blocksString` text into an empty terrain. `order` (see blockOrder) gives the building order.
+ * A block that `order` does not name is newer than the named ones, in rows from the ground up. Throws when the text
+ * does not fit the grid.
+ */
+export function restoreBlocks(world: World, terrain: Terrain, text: string, order: readonly number[] = []): void {
   if (text.length > terrain.blocks.length || text.length % Math.max(1, world.cols) !== 0) {
     throw new Error(`playground blocks do not fit the grid: ${text.length}`);
   }
   for (const [i, code] of Array.from(text).entries()) {
     const cell = blockOf(code);
     if (!cell) continue;
-    terrain.seq += 1;
-    terrain.blocks[i] = { ...cell, seq: terrain.seq };
+    terrain.blocks[i] = { ...cell, seq: 0 };
     terrain.count += 1;
+  }
+  const cells: number[] = terrain.blocks.flatMap((block: Block | null, i: number): number[] => (block ? [i] : []));
+  for (const i of [...order, ...cells]) {
+    const block: Block | null | undefined = terrain.blocks[i];
+    if (block?.seq !== 0) continue;
+    terrain.seq += 1;
+    block.seq = terrain.seq;
   }
   terrain.loose = terrain.count > 0;
 }

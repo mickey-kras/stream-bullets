@@ -23,7 +23,7 @@ export function restoreTerrain(world: World, terrain: Terrain, data: Checkpoint)
     if (index >= tiles.length) throw new Error(`playground checkpoint repair outside the ground: ${index}`);
     tiles[index].repairAt = repairAt;
   }
-  restoreBlocks(world, terrain, data.blocks);
+  restoreBlocks(world, terrain, data.blocks, data.order);
   terrain.flags = data.flags
     .filter(([, c, r]): boolean => c < world.cols && r <= world.rows)
     .map(([id, c, r]): Flag => ({ id, c, r }));
@@ -60,6 +60,8 @@ export interface Checkpoint {
   ground: string;
   repairs: [number, number][];
   blocks: string;
+  /** The cells of the blocks in building order (see blockOrder). */
+  order: number[];
   flags: [number, number, number][];
   registry: ParticipantRecord[];
   restrictions: [string, number][];
@@ -148,6 +150,8 @@ export const checkpointSchema: z.ZodType<Checkpoint> = z
       .string()
       .max(FRAME_BLOCKS_MAX)
       .regex(/^[.a-r]*$/),
+    // A checkpoint without the order takes the blocks in rows from the ground up.
+    order: z.array(z.number().int().min(0).max(FRAME_BLOCKS_MAX)).max(FRAME_BLOCKS_MAX).default([]),
     flags: z.array(z.tuple([z.number().int().min(1), cell, cell])).max(VISIBLE_MAX),
     registry: z
       .array(
