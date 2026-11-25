@@ -1430,5 +1430,12 @@
   "tools.live.chat.hint": "Faites défiler vers le haut pour mettre en pause.",
   "tools.live.chat.pause": "Mettre le chat en pause",
   "tools.live.chat.paused": "Chat en pause. Nouveaux messages : {count}",
-  "tools.live.chat.jump": "Aller au plus récent"
+  "tools.live.chat.jump": "Aller au plus récent",
+  "tools.live.chat.full": "Ouvrir le chat en plein écran",
+  "tools.live.chat.fullTitle": "Chat en plein écran",
+  "tools.live.chat.exit": "Quitter",
+  "tools.live.chat.larger": "Texte plus grand",
+  "tools.live.chat.smaller": "Texte plus petit",
+  "tools.live.chat.onAir": "À l’antenne : {title}",
+  "tools.live.chat.screenOff": "Ce navigateur ne peut pas garder l’écran allumé. Désactivez le verrouillage de l’écran de votre appareil pendant le direct."
 }

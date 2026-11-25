@@ -4,13 +4,14 @@ import { describe, expect, it } from "vitest";
 import type { ActivityFeed } from "../app/components/overlay/activity-feed";
 import type { OverlayPoll, OverlayScene } from "../app/components/overlay/overlay-stage";
 import type { ControlAction } from "../app/components/overlay/use-overlay-state";
-import { LiveChat } from "../app/components/tools/live-chat";
+import { FullChatView, LiveChat, type ChatModel } from "../app/components/tools/live-chat";
 import { LiveMessage } from "../app/components/tools/live-message";
 import { NotOnGrid, placed } from "../app/components/tools/live-part";
 import { LivePoll } from "../app/components/tools/live-poll";
-import { LiveSection } from "../app/components/tools/live-section";
+import { LiveSection, onAirTitle } from "../app/components/tools/live-section";
 import { LIVE_TOPICS, LiveTopics, liveTopics } from "../app/components/tools/live-topics";
 import type { ChannelView } from "../app/lib/channel-health";
+import type { LiveChatRow } from "../app/lib/live-chat";
 import { DEFAULT_LAYERS, emptyCells, type CellRect, type OverlayLayers } from "../app/lib/overlay-layers";
 import type { OverlayData, OverlayState } from "../app/types";
 
@@ -253,6 +254,112 @@ describe("chat panel", (): void => {
     const none: string = part("live", false);
     expect(none).toContain("No channel delivers chat right now.");
     expect(none).toContain('href="/tools?view=channels"');
+  });
+});
+
+describe("full-screen chat", (): void => {
+  const row: LiveChatRow = {
+    id: "twitch:m1",
+    seq: 1,
+    platform: "twitch",
+    userId: "u1",
+    name: "Viewer 1",
+    badges: [],
+    fragments: [{ type: "text", text: "hello" }],
+    truncated: false,
+    receivedAt: 1,
+    removed: false,
+  };
+  const nothing = (): void => undefined;
+
+  function model(more: Partial<ChatModel> = {}): ChatModel {
+    return {
+      rows: [row],
+      paused: false,
+      waiting: 0,
+      pause: nothing,
+      jump: nothing,
+      hidden: new Set(),
+      toggle: nothing,
+      list: nothing,
+      scrolled: nothing,
+      status: "live",
+      ...more,
+    };
+  }
+
+  function view(more: Partial<Parameters<typeof FullChatView>[0]> = {}): string {
+    return renderToStaticMarkup(
+      createElement(FullChatView, {
+        chat: model(),
+        delivers: true,
+        onAir: null,
+        wake: "on",
+        step: 2,
+        onStep: nothing,
+        onExit: nothing,
+        ...more,
+      }),
+    );
+  }
+
+  it("has Exit, the text sizes, the platform buttons, the pause and the chat at the selected size", (): void => {
+    const html: string = view();
+    expect(html).toContain("Exit");
+    expect(html).toContain('aria-label="Smaller text"');
+    expect(html).toContain('aria-label="Larger text"');
+    expect(html.match(/data-chat-filter=/g)).toHaveLength(3);
+    expect(html).toContain("Pause chat");
+    expect(html).toContain("hello");
+    expect(html).toContain("font-size:1.25rem");
+    expect(html).not.toContain("data-chat-wake");
+    expect(html).not.toContain("data-chat-on-air");
+  });
+
+  it("stops the text size buttons at the smallest and the largest size", (): void => {
+    expect(view({ step: 0 })).toMatch(/aria-label="Smaller text" disabled=""/);
+    expect(view({ step: 0 })).not.toMatch(/aria-label="Larger text" disabled=""/);
+    expect(view({ step: 4 })).toMatch(/aria-label="Larger text" disabled=""/);
+    expect(view({ step: 4 })).toContain("font-size:2rem");
+  });
+
+  it("shows the item on stream in one line, the count of a paused chat, and how to keep the screen on", (): void => {
+    const html: string = view({
+      onAir: "Tea or coffee",
+      chat: model({ paused: true, waiting: 4 }),
+      wake: "unsupported",
+    });
+    expect(html).toContain("On air: Tea or coffee");
+    expect(html).toContain("Chat paused. New messages: 4");
+    expect(html).toContain("Jump to latest");
+    expect(html).toContain("This browser cannot keep the screen on.");
+    expect(view({ wake: "off" })).toContain('data-chat-wake="off"');
+    expect(view({ delivers: false })).toContain("No channel delivers chat right now.");
+  });
+
+  it("names what is on stream: the poll, else the topic, else the message banner", (): void => {
+    const topics = [topic(1)];
+    const state: OverlayState = stateOf(layersWith({ topic: { ...onGrid.items.topic, ref: "t1" } }), {
+      message: "BRB",
+    });
+    const scene: OverlayScene = sceneOf(state, { data: { ...data, topics } });
+    expect(onAirTitle(scene, state.layers)).toBe("Poll p1");
+    const noPoll: OverlayLayers = layersWith({ poll: { ...onGrid.items.poll, enabled: false } }, state.layers);
+    expect(onAirTitle(scene, noPoll)).toBe("Topic 1");
+    const noTopic: OverlayLayers = layersWith({ topic: { ...onGrid.items.topic, enabled: false } }, noPoll);
+    expect(onAirTitle(scene, noTopic)).toBe("BRB");
+    expect(onAirTitle(sceneOf(stateOf(noTopic)), noTopic)).toBeNull();
+    expect(onAirTitle(scene, DEFAULT_LAYERS)).toBeNull();
+  });
+
+  it("offers the full-screen view from the chat part when the page can open it", (): void => {
+    const part = (more: Partial<Parameters<typeof LiveChat>[0]>): string =>
+      renderToStaticMarkup(createElement(LiveChat, { feed, delivers: true, ...more }));
+    expect(part({})).not.toContain("Open chat full screen");
+    expect(part({ onFull: nothing })).toContain("Open chat full screen");
+    // While the view is open, the page under it has no list.
+    expect(part({ onFull: nothing, full: true })).not.toContain('role="log"');
+    expect(part({ onFull: nothing, full: false })).toContain('role="log"');
   });
 });
 

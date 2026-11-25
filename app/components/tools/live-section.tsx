@@ -1,7 +1,16 @@
 import { useRef, type ReactNode } from "react";
 import { t, type MessageId } from "../../i18n";
 import { channelHealth, deliversChat, type ChannelHealth, type ChannelView } from "../../lib/channel-health";
-import { CELL_PX, GRID, GRID_LAYERS, onStream, type GridLayer, type OverlayLayers } from "../../lib/overlay-layers";
+import {
+  CELL_PX,
+  GRID,
+  GRID_LAYERS,
+  onStream,
+  placedContent,
+  type GridLayer,
+  type OverlayLayers,
+  type PlacedContent,
+} from "../../lib/overlay-layers";
 import { toolsPath } from "../../lib/shell";
 import type { OverlayPublic, OverlayState } from "../../types";
 import { PLATFORM_NAMES, channelProblem } from "../channels/channel-panel";
@@ -10,7 +19,7 @@ import { useActivityFeed, type ActivityFeed } from "../overlay/activity-feed";
 import { ConnectionNote } from "../overlay/connection-note";
 import { CHARACTERS_READY, OverlayComposition, frameStyle } from "../overlay/overlay-composition";
 import { sourcesText } from "../overlay/overlay-link";
-import type { OverlayScene } from "../overlay/overlay-stage";
+import { overlayPoll, type OverlayScene } from "../overlay/overlay-stage";
 import { useDesignScale } from "../overlay/use-design-scale";
 import { useOverlayState } from "../overlay/use-overlay-state";
 import { PlatformIcon } from "../overlay/wasteland/glyphs";
@@ -105,6 +114,23 @@ function LivePreview({
 }
 
 /**
+ * What is on stream, in one line for the full-screen chat: the poll, else the topic, else the message banner. Null
+ * when none of them shows.
+ */
+export function onAirTitle(scene: OverlayScene, layers: OverlayLayers): string | null {
+  const shown: PlacedContent[] = placedContent(layers);
+  const poll: PlacedContent | undefined = shown.find((item: PlacedContent): boolean => item.layer === "poll");
+  const pollTitle: string | undefined = poll && overlayPoll(poll.source, scene.polls, scene.now)?.title;
+  if (pollTitle) return pollTitle;
+  const topic: PlacedContent | undefined = shown.find((item: PlacedContent): boolean => item.layer === "topic");
+  const topicTitle: string | undefined =
+    topic && scene.data.topics.find((item): boolean => item.id === topic.source.ref)?.title;
+  if (topicTitle) return topicTitle;
+  const message: boolean = shown.some((item: PlacedContent): boolean => item.layer === "message");
+  return message && scene.overlay.message !== "" ? scene.overlay.message : null;
+}
+
+/**
  * The Live section of Streamer tools: what the owner runs a stream from. The on-air controls save through
  * POST /api/overlay, and the live room sends each change to OBS at once. After a reconnect the page shows the state
  * of the server again. The pause and the filters of the chat stay in this browser.
@@ -117,6 +143,8 @@ export function LiveSection({
   sources = null,
   connected = true,
   reconnect,
+  chatFull = false,
+  onChatFull,
 }: Readonly<{
   initial: OverlayState;
   // Latest live overlay state includes changes from other tabs.
@@ -128,6 +156,9 @@ export function LiveSection({
   // Offline changes save but reach OBS after reconnect.
   connected?: boolean;
   reconnect?: () => void;
+  // The full-screen chat. The page keeps it in its address, so a phone can open it from the home screen.
+  chatFull?: boolean;
+  onChatFull?: (open: boolean) => void;
 }>): ReactNode {
   const { state, busy, send, run } = useOverlayState(initial, live);
   const view: OverlayScene = { ...scene, overlay: state };
@@ -146,7 +177,13 @@ export function LiveSection({
           <LiveMessage key={`${state.message}:${state.messageStyle}`} state={state} busy={busy} send={send} />
         </div>
         <div className="tl-col tl-col-chat">
-          <LiveChat feed={feed} delivers={deliversChat(channels)} />
+          <LiveChat
+            feed={feed}
+            delivers={deliversChat(channels)}
+            full={chatFull}
+            onFull={onChatFull}
+            onAir={onAirTitle(view, state.layers)}
+          />
         </div>
       </div>
     </>

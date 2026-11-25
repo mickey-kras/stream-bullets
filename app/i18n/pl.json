@@ -1470,5 +1470,12 @@
   "tools.live.chat.hint": "Przewiń w górę, aby wstrzymać.",
   "tools.live.chat.pause": "Wstrzymaj czat",
   "tools.live.chat.paused": "Czat wstrzymany. Nowe wiadomości: {count}",
-  "tools.live.chat.jump": "Przejdź do najnowszych"
+  "tools.live.chat.jump": "Przejdź do najnowszych",
+  "tools.live.chat.full": "Otwórz czat na pełnym ekranie",
+  "tools.live.chat.fullTitle": "Czat na pełnym ekranie",
+  "tools.live.chat.exit": "Wyjdź",
+  "tools.live.chat.larger": "Większy tekst",
+  "tools.live.chat.smaller": "Mniejszy tekst",
+  "tools.live.chat.onAir": "Na antenie: {title}",
+  "tools.live.chat.screenOff": "Ta przeglądarka nie może utrzymać włączonego ekranu. Wyłącz blokadę ekranu urządzenia na czas streamu."
 }

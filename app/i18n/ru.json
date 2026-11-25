@@ -1470,5 +1470,12 @@
   "tools.live.chat.hint": "Прокрутите вверх, чтобы поставить на паузу.",
   "tools.live.chat.pause": "Поставить чат на паузу",
   "tools.live.chat.paused": "Чат на паузе. Новых сообщений: {count}",
-  "tools.live.chat.jump": "К последним сообщениям"
+  "tools.live.chat.jump": "К последним сообщениям",
+  "tools.live.chat.full": "Открыть чат на весь экран",
+  "tools.live.chat.fullTitle": "Чат на весь экран",
+  "tools.live.chat.exit": "Выйти",
+  "tools.live.chat.larger": "Крупнее текст",
+  "tools.live.chat.smaller": "Мельче текст",
+  "tools.live.chat.onAir": "В эфире: {title}",
+  "tools.live.chat.screenOff": "Этот браузер не может держать экран включённым. Отключите блокировку экрана на устройстве на время стрима."
 }

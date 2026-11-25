@@ -28,6 +28,11 @@ import "../components/overlay/wasteland/wasteland.css";
 import "../components/overlay/composition.css";
 import "../components/tools/live.css";
 
+// Streamer tools can go on the home screen of a phone. It then opens the full-screen chat without browser bars.
+export function links(): { rel: string; href: string }[] {
+  return [{ rel: "manifest", href: "/tools.webmanifest" }];
+}
+
 export function meta() {
   return [{ title: `${t("tools.title")} · StreamBullets` }, { name: "robots", content: "noindex" }];
 }
@@ -81,7 +86,7 @@ export default function ToolsPage(): ReactNode {
   // The Channels section and the chat layer settings of the Overlay section read the same live channel list.
   const { channels, stale } = useLiveChannels(loaded.channels);
   useChannelNews(channels);
-  const [search] = useSearchParams();
+  const [search, setSearch] = useSearchParams();
   const view: ToolsView = toolsView(search.get("view"));
   useLiveRevalidation(status, snapshot?.revision, revalidator.revalidate);
   // Reload changes from other tabs; live messages omit the message draft.
@@ -116,6 +121,17 @@ export default function ToolsPage(): ReactNode {
     reconnect: status === "offline" ? reconnect : undefined,
     scene,
   };
+  // The full-screen chat of Live is in the address: Back exits it, and a phone can open it from the home screen.
+  const showChat = (open: boolean): void =>
+    setSearch(
+      (current: URLSearchParams): URLSearchParams => {
+        const next = new URLSearchParams(current);
+        if (open) next.set("chat", "full");
+        else next.delete("chat");
+        return next;
+      },
+      { replace: !open, preventScrollReset: true },
+    );
   return (
     <>
       <StreamerHeader
@@ -128,7 +144,9 @@ export default function ToolsPage(): ReactNode {
       <main className="page-panel ov-control" id="main-content">
         <ToolsHead view={view} />
         <ChatDeliveryContext.Provider value={deliversChat(channels)}>
-          {view === "live" && <LiveSection {...room} channels={channels} />}
+          {view === "live" && (
+            <LiveSection {...room} channels={channels} chatFull={search.get("chat") === "full"} onChatFull={showChat} />
+          )}
           {view === "overlay" && <OverlayControl {...room} hasOverlayKey={loaded.hasOverlayKey} />}
           {view === "channels" && (
             <ChannelsStep

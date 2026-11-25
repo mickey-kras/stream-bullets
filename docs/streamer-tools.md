@@ -101,4 +101,36 @@ This also applies during a pause of the list.
 The chat uses the activity feed of the owner. See [channel connections](channel-connections.md).
 The owner can use the list with a keyboard: the list takes the focus, and the arrow keys scroll it.
 
+### Full-screen chat
+
+**Open chat full screen** shows the chat on the full screen. It is for a phone that stands in front of the streamer.
+The view is in the address: `/tools?view=live&chat=full`. Thus the Back button of the browser also closes it.
+
+The view has these controls:
+
+- **Exit** closes the view. The **Live** section is then at the same place as before. The Escape key does the same.
+- **Smaller text** and **Larger text** change the text size in five steps. The device keeps the size.
+- The platform buttons and the pause work as in the chat part.
+
+One line gives the item on stream: the poll, or the topic, or the message banner.
+With the phone upright, the controls are above the chat.
+With the phone on its side, the controls are in a rail at the side, and the chat has the full height.
+
+The view asks the browser for a screen wake lock, so the screen stays on while the view is open.
+The browser takes the lock away when the page goes out of view. The view gets the lock again when the page shows again.
+**Exit** releases the lock.
+In a browser without the wake lock, or when the browser refuses the lock, the view shows a note.
+The note tells the streamer to stop the screen lock of the device.
+
+If the browser can show an element on the full screen, the view asks for that. Then the browser bars go away too.
+If the streamer leaves the full screen of the browser, the view closes.
+Safari on iPhone cannot show an element on the full screen. There, the view covers the page and its bars.
+
+The page has a web app manifest, `public/tools.webmanifest`, with `display: standalone`.
+A streamer can add **Streamer tools** to the home screen of a phone.
+It then opens the full-screen chat without browser bars.
+
+A new message fades in. The Motion setting of the site and of the system stop this motion.
+
 Alerts and support events are not in this section yet.
+The full-screen chat has no highlight for them yet.

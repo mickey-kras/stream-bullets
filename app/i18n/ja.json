@@ -1410,5 +1410,12 @@
   "tools.live.chat.hint": "上にスクロールすると一時停止します。",
   "tools.live.chat.pause": "チャットを一時停止",
   "tools.live.chat.paused": "チャットを一時停止中。新着メッセージ: {count}",
-  "tools.live.chat.jump": "最新へ移動"
+  "tools.live.chat.jump": "最新へ移動",
+  "tools.live.chat.full": "チャットを全画面で開く",
+  "tools.live.chat.fullTitle": "チャット（全画面）",
+  "tools.live.chat.exit": "終了",
+  "tools.live.chat.larger": "文字を大きく",
+  "tools.live.chat.smaller": "文字を小さく",
+  "tools.live.chat.onAir": "配信に表示中: {title}",
+  "tools.live.chat.screenOff": "このブラウザーでは画面を点灯したままにできません。配信中はデバイスの画面ロックをオフにしてください。"
 }

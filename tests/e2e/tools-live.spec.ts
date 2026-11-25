@@ -13,6 +13,7 @@ const TOPIC_IP = clientIp("tools-live", 42);
 const CHAT_IP = clientIp("tools-live", 43);
 const RECONNECT_IP = clientIp("tools-live", 44);
 const OBS_IP = clientIp("tools-live", 45);
+const PHONE_IP = clientIp("tools-live", 46);
 
 const now: number = Date.now();
 const entry = (id: string, kind: "choice" | "topic", title: string, age: number): string =>
@@ -307,5 +308,211 @@ test("after a reconnect Live shows the on-air state of the server", async ({ bro
   await expect(status).toContainText("Off air");
   await expect(status).toContainText("Results show on stream");
   await expect(poll.getByRole("button", { name: "Put on air" })).toBeVisible();
+  await close(owner);
+});
+
+/**
+ * A phone browser for the full-screen chat. `wake` is the Screen Wake Lock API of the page: a recorder, or absent as
+ * in a browser without it. `fullscreen` is the Fullscreen API: absent as on iPhone Safari, or a fake that works.
+ */
+async function phone(
+  owner: BrowserContext,
+  options: { wake: boolean; fullscreen: boolean },
+): Promise<{ page: Page; sockets: WebSocketRoute[] }> {
+  const page = await newPage(owner);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript((given: { wake: boolean; fullscreen: boolean }): void => {
+    const record = { requests: 0, releases: 0, release: (): void => undefined };
+    Object.assign(globalThis, { wakeRecord: record });
+    if (given.wake)
+      Object.defineProperty(Navigator.prototype, "wakeLock", {
+        configurable: true,
+        value: {
+          request: (): Promise<unknown> => {
+            record.requests += 1;
+            const sentinel = new EventTarget();
+            record.release = (): void => {
+              sentinel.dispatchEvent(new Event("release"));
+            };
+            return Promise.resolve(
+              Object.assign(sentinel, {
+                release: (): Promise<void> => {
+                  record.releases += 1;
+                  return Promise.resolve();
+                },
+              }),
+            );
+          },
+        },
+      });
+    else Reflect.deleteProperty(Navigator.prototype, "wakeLock");
+    let element: Element | null = null;
+    Object.defineProperty(Document.prototype, "fullscreenElement", { configurable: true, get: () => element });
+    const leave = (): Promise<void> => {
+      element = null;
+      document.dispatchEvent(new Event("fullscreenchange"));
+      return Promise.resolve();
+    };
+    Object.assign(globalThis, { leaveFullscreen: leave });
+    Document.prototype.exitFullscreen = leave;
+    const enter = (next: Element): Promise<void> => {
+      element = next;
+      document.dispatchEvent(new Event("fullscreenchange"));
+      return Promise.resolve();
+    };
+    if (given.fullscreen)
+      Element.prototype.requestFullscreen = function request(this: Element): Promise<void> {
+        return enter(this);
+      };
+    else Reflect.deleteProperty(Element.prototype, "requestFullscreen");
+  }, options);
+  const sockets: WebSocketRoute[] = [];
+  const platforms = ["twitch", "youtube", "kick"] as const;
+  await page.routeWebSocket("**/api/activity/**", (socket: WebSocketRoute) => {
+    sockets.push(socket);
+    const events = Array.from({ length: 40 }, (_, n: number) => chat(n, platforms[n % 3]));
+    socket.send(JSON.stringify({ type: "snapshot", events, replay: true }));
+  });
+  return { page, sockets };
+}
+
+const wakeRecord = (page: Page): Promise<{ requests: number; releases: number }> =>
+  page.evaluate(() => {
+    const { requests, releases } = (globalThis as unknown as { wakeRecord: { requests: number; releases: number } })
+      .wakeRecord;
+    return { requests, releases };
+  });
+
+test("on a phone the chat opens full screen, keeps the screen on, and Exit returns to the same place", async ({
+  browser,
+}) => {
+  const owner = await signedIn(browser, "featureowner", PHONE_IP);
+  // No Fullscreen API, as on iPhone Safari: the view covers the page itself.
+  const { page, sockets } = await phone(owner, { wake: true, fullscreen: false });
+  await page.goto("/tools?view=live");
+  // Streamer tools can go on the home screen: it then opens the full-screen chat without browser bars.
+  await expect(page.locator('link[rel="manifest"]')).toHaveAttribute("href", "/tools.webmanifest");
+  const manifest = await page.request.get("/tools.webmanifest");
+  expect(manifest.ok()).toBe(true);
+  expect(await manifest.json()).toMatchObject({ display: "standalone", start_url: "/tools?view=live&chat=full" });
+
+  const open = page.getByRole("button", { name: "Open chat full screen" });
+  await open.scrollIntoViewIfNeeded();
+  const place: number = await page.evaluate((): number => document.scrollingElement?.scrollTop ?? 0);
+  await open.click();
+  await expect(page).toHaveURL(/[?&]chat=full/);
+  const view = page.getByRole("dialog", { name: "Chat, full screen" });
+  await expect(view).toBeVisible();
+  // The view fills the screen: the bars of the site are under it.
+  expect(await view.boundingBox()).toEqual({ x: 0, y: 0, width: 390, height: 844 });
+  const covered: boolean[] = await page.evaluate((): boolean[] =>
+    [
+      [20, 20],
+      [370, 20],
+      [195, 830],
+    ].map(([x, y]: number[]): boolean => document.elementFromPoint(x, y)?.closest('[role="dialog"]') !== null),
+  );
+  expect(covered).toEqual([true, true, true]);
+  // The screen stays on.
+  await expect.poll(async () => (await wakeRecord(page)).requests).toBe(1);
+  await expect(view.locator("[data-chat-wake]")).toHaveCount(0);
+  // Portrait: the controls are above the chat. The list is at its end.
+  const rail = view.locator(".tl-full-rail");
+  const list = view.getByRole("log", { name: "Chat" });
+  await expect(list.locator("[data-chat-row]")).toHaveCount(40);
+  const portrait = { rail: await rail.boundingBox(), list: await list.boundingBox() };
+  expect(portrait.rail?.width).toBe(390);
+  expect((portrait.list?.y ?? 0) >= (portrait.rail?.y ?? 0) + (portrait.rail?.height ?? 0)).toBe(true);
+  const fromEnd = (): Promise<number> =>
+    list.evaluate((element: Element): number => element.scrollHeight - element.scrollTop - element.clientHeight);
+  await expect.poll(fromEnd).toBeLessThan(2);
+  // The poll on stream, in one line.
+  await expect(view.locator("[data-chat-on-air]")).toHaveText("On air: Tea or coffee");
+
+  // Larger text. The device keeps the size.
+  const size = (): Promise<string> =>
+    view.locator(".tl-chat-list").evaluate((element: Element): string => getComputedStyle(element).fontSize);
+  const before: number = Number.parseFloat(await size());
+  await view.getByRole("button", { name: "Larger text" }).click();
+  await expect.poll(async () => Number.parseFloat(await size())).toBeGreaterThan(before);
+  const larger: string = await size();
+  // The pause and the filters work as on the page.
+  await view.getByRole("button", { name: "Pause chat" }).click();
+  sockets[0].send(JSON.stringify({ type: "event", event: chat(40, "kick") }));
+  await expect(view.locator("[data-chat-paused]")).toHaveText("Chat paused. New messages: 1");
+  await view.getByRole("button", { name: "Jump to latest" }).click();
+  await expect(list.locator("[data-chat-row]")).toHaveCount(41);
+  await view.getByRole("button", { name: "Kick" }).click();
+  await expect(list.locator('[data-chat-row][data-platform="kick"]')).toHaveCount(0);
+
+  // The browser takes the lock away when the page is hidden. The view asks again when the page shows again.
+  await page.evaluate((): void => {
+    Object.defineProperty(document, "visibilityState", { configurable: true, get: () => "hidden" });
+    (globalThis as unknown as { wakeRecord: { release: () => void } }).wakeRecord.release();
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await expect(view.locator('[data-chat-wake="off"]')).toHaveCount(1);
+  expect((await wakeRecord(page)).requests).toBe(1);
+  await page.evaluate((): void => {
+    Object.defineProperty(document, "visibilityState", { configurable: true, get: () => "visible" });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await expect.poll(async () => (await wakeRecord(page)).requests).toBe(2);
+  await expect(view.locator("[data-chat-wake]")).toHaveCount(0);
+
+  // Landscape: the controls are in a rail at the side, and the chat has the full height.
+  await page.setViewportSize({ width: 844, height: 390 });
+  await expect.poll(async () => (await rail.boundingBox())?.height).toBe(390);
+  const side = { rail: await rail.boundingBox(), list: await list.boundingBox() };
+  expect(side.rail?.width).toBeLessThan(220);
+  expect((side.list?.x ?? 0) >= (side.rail?.width ?? 0)).toBe(true);
+  expect(await view.boundingBox()).toEqual({ x: 0, y: 0, width: 844, height: 390 });
+  await page.setViewportSize({ width: 390, height: 844 });
+
+  // A load of the address opens the view again, with the stored text size.
+  await page.reload();
+  await expect(view).toBeVisible();
+  await expect.poll(size).toBe(larger);
+  await expect.poll(async () => (await wakeRecord(page)).requests).toBe(1);
+
+  // Exit returns to Live at the same place, releases the lock, and puts the focus on the button of the view.
+  await page.evaluate((top: number): void => {
+    if (document.scrollingElement) document.scrollingElement.scrollTop = top;
+  }, place);
+  await view.getByRole("button", { name: "Exit" }).click();
+  await expect(view).toHaveCount(0);
+  await expect(page).not.toHaveURL(/chat=full/);
+  await expect(page).toHaveURL(/[?&]view=live/);
+  expect((await wakeRecord(page)).releases).toBe(1);
+  await expect(page.getByRole("log", { name: "Chat" })).toBeVisible();
+  // Escape exits too.
+  await open.click();
+  await expect(view).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(view).toHaveCount(0);
+  await expect(open).toBeFocused();
+  await close(owner);
+});
+
+test("the full-screen chat says how to keep the screen on, and follows the full screen of the browser", async ({
+  browser,
+}) => {
+  const owner = await signedIn(browser, "featureowner", PHONE_IP);
+  // A browser without the wake lock, and with the Fullscreen API.
+  const { page } = await phone(owner, { wake: false, fullscreen: true });
+  await page.goto("/tools?view=live");
+  await page.getByRole("button", { name: "Open chat full screen" }).click();
+  const view = page.getByRole("dialog", { name: "Chat, full screen" });
+  await expect(view.locator('[data-chat-wake="unsupported"]')).toHaveText(
+    "This browser cannot keep the screen on. Turn off the screen lock of your device while you stream.",
+  );
+  // The view asked the browser for full screen.
+  await expect
+    .poll(() => page.evaluate((): boolean => document.fullscreenElement?.getAttribute("role") === "dialog"))
+    .toBe(true);
+  // The streamer leaves the full screen of the browser: the view exits too.
+  await page.evaluate(() => (globalThis as unknown as { leaveFullscreen: () => Promise<void> }).leaveFullscreen());
+  await expect(view).toHaveCount(0);
+  await expect(page).not.toHaveURL(/chat=full/);
   await close(owner);
 });
