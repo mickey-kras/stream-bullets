@@ -276263,6 +276263,20 @@
             "lang": "typescript",
             "line": "L216",
             "receiver_type": "WebSocketRoute"
+          },
+          {
+            "callee": "close",
+            "file": "tests/e2e/tools-live.spec.ts",
+            "lang": "typescript",
+            "line": "L283",
+            "receiver_type": "WebSocketRoute"
+          },
+          {
+            "callee": "connectToServer",
+            "file": "tests/e2e/tools-live.spec.ts",
+            "lang": "typescript",
+            "line": "L286",
+            "receiver_type": "WebSocketRoute"
           }
         ]
       },

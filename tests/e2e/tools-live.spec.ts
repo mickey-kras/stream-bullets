@@ -275,13 +275,25 @@ test("after a reconnect Live shows the on-air state of the server", async ({ bro
   const owner = await signedIn(browser, "featureowner", RECONNECT_IP);
   const page = await newPage(owner);
   await page.setViewportSize({ width: 1440, height: 1000 });
+  // The test holds the live socket of the page, so it can take the connection away and give it back.
+  let down: boolean = false;
+  const open: WebSocketRoute[] = [];
+  await page.routeWebSocket("**/api/live/feature_host", async (socket: WebSocketRoute) => {
+    if (down) {
+      await socket.close({ code: 1013, reason: "Test outage" });
+      return;
+    }
+    socket.connectToServer();
+    open.push(socket);
+  });
   await page.goto("/tools?view=live");
   const poll = page.locator('[data-live-part="poll"]');
   const status = poll.locator("[data-live-poll-status]");
   await expect(status).toContainText("On air");
   await expect(poll.getByRole("button", { name: "Reveal results" })).toBeVisible();
   // The connection goes away. Another device changes the state meanwhile.
-  await owner.setOffline(true);
+  down = true;
+  for (const socket of open) await socket.close({ code: 1013, reason: "Test outage" });
   await expect(page.locator(".ov-conn")).toContainText("Overlay disconnected, retrying…");
   const other = await signedIn(browser, "featureowner", RECONNECT_IP);
   for (const data of [
@@ -290,7 +302,7 @@ test("after a reconnect Live shows the on-air state of the server", async ({ bro
   ])
     expect((await other.request.post("/api/overlay", { data })).ok()).toBe(true);
   await close(other);
-  await owner.setOffline(false);
+  down = false;
   await expect(page.locator(".ov-conn")).toHaveCount(0, { timeout: 30_000 });
   await expect(status).toContainText("Off air");
   await expect(status).toContainText("Results show on stream");
