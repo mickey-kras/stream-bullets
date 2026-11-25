@@ -1413,5 +1413,12 @@
   "tools.live.chat.hint": "向上滚动即可暂停。",
   "tools.live.chat.pause": "暂停聊天",
   "tools.live.chat.paused": "聊天已暂停。新消息：{count}",
-  "tools.live.chat.jump": "跳到最新"
+  "tools.live.chat.jump": "跳到最新",
+  "tools.live.chat.full": "全屏打开聊天",
+  "tools.live.chat.fullTitle": "全屏聊天",
+  "tools.live.chat.exit": "退出",
+  "tools.live.chat.larger": "放大文字",
+  "tools.live.chat.smaller": "缩小文字",
+  "tools.live.chat.onAir": "直播中显示：{title}",
+  "tools.live.chat.screenOff": "此浏览器无法保持屏幕常亮。直播期间请关闭设备的屏幕锁定。"
 }

@@ -2,10 +2,14 @@ import { describe, expect, it } from "vitest";
 import type { ActivityChat, ActivityEvent, ActivityMessage, ActivityPlatform } from "../app/lib/activity";
 import { MAX_REMOVED_IDS } from "../app/lib/chat-feed";
 import {
+  CHAT_TEXT_DEFAULT,
+  CHAT_TEXT_SIZES,
   LIVE_CHAT_LIMITS,
+  chatTextStep,
   initialLiveChat,
   liveChatReducer,
   newSince,
+  nextChatTextStep,
   shownRows,
   type LiveChatRow,
   type LiveChatState,
@@ -271,5 +275,24 @@ describe("live chat filters and the count of a paused chat", (): void => {
     expect(newSince(state.rows, 2, new Set())).toBe(2);
     expect(newSince(state.rows, 2, new Set<ActivityPlatform>(["youtube"]))).toBe(1);
     expect(newSince(state.rows, 5, new Set())).toBe(0);
+  });
+});
+
+describe("text size of the full-screen chat", (): void => {
+  it("starts above the page text size and reads a stored step", (): void => {
+    expect(CHAT_TEXT_SIZES[CHAT_TEXT_DEFAULT]).toBeGreaterThan(1);
+    expect(chatTextStep("0")).toBe(0);
+    expect(chatTextStep(String(CHAT_TEXT_SIZES.length - 1))).toBe(CHAT_TEXT_SIZES.length - 1);
+    for (const stored of [null, undefined, "", "big", "1.5", "-1", String(CHAT_TEXT_SIZES.length)])
+      expect(chatTextStep(stored), String(stored)).toBe(CHAT_TEXT_DEFAULT);
+  });
+
+  it("steps one size at a time and stops at each end", (): void => {
+    expect(nextChatTextStep(1, 1)).toBe(2);
+    expect(nextChatTextStep(1, -1)).toBe(0);
+    expect(nextChatTextStep(0, -1)).toBe(0);
+    const last: number = CHAT_TEXT_SIZES.length - 1;
+    expect(nextChatTextStep(last, 1)).toBe(last);
+    expect([...CHAT_TEXT_SIZES]).toEqual([...CHAT_TEXT_SIZES].sort((a: number, b: number): number => a - b));
   });
 });

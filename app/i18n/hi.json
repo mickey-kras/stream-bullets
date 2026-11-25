@@ -1433,5 +1433,12 @@
   "tools.live.chat.hint": "रोकने के लिए ऊपर स्क्रॉल करें।",
   "tools.live.chat.pause": "चैट रोकें",
   "tools.live.chat.paused": "चैट रुकी है। नए संदेश: {count}",
-  "tools.live.chat.jump": "सबसे नए पर जाएँ"
+  "tools.live.chat.jump": "सबसे नए पर जाएँ",
+  "tools.live.chat.full": "चैट फ़ुल स्क्रीन में खोलें",
+  "tools.live.chat.fullTitle": "चैट, फ़ुल स्क्रीन",
+  "tools.live.chat.exit": "बाहर निकलें",
+  "tools.live.chat.larger": "बड़ा टेक्स्ट",
+  "tools.live.chat.smaller": "छोटा टेक्स्ट",
+  "tools.live.chat.onAir": "ऑन एयर: {title}",
+  "tools.live.chat.screenOff": "यह ब्राउज़र स्क्रीन को चालू नहीं रख सकता। स्ट्रीम के दौरान अपने डिवाइस का स्क्रीन लॉक बंद रखें।"
 }

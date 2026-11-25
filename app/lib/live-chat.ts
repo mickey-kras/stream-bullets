@@ -156,3 +156,20 @@ export function shownRows(rows: readonly LiveChatRow[], hidden: ReadonlySet<Acti
 export function newSince(rows: readonly LiveChatRow[], seq: number, hidden: ReadonlySet<ActivityPlatform>): number {
   return shownRows(rows, hidden).filter((row: LiveChatRow): boolean => row.seq > seq && !row.removed).length;
 }
+
+/** The text sizes of the full-screen chat, as a factor of the normal size. The owner steps through them. */
+export const CHAT_TEXT_SIZES: readonly number[] = [0.875, 1, 1.25, 1.5, 2];
+/** The step that the view starts with: larger than the page text, for a phone that stands on a desk. */
+export const CHAT_TEXT_DEFAULT = 2;
+
+/** The step that a stored value names, or the default for a value that is not a step. */
+export function chatTextStep(stored: string | null | undefined): number {
+  const step: number = Number(stored);
+  const known: boolean = stored !== null && stored !== undefined && stored !== "" && Number.isInteger(step);
+  return known && step >= 0 && step < CHAT_TEXT_SIZES.length ? step : CHAT_TEXT_DEFAULT;
+}
+
+/** The next step in a direction, inside the list of sizes. */
+export function nextChatTextStep(step: number, direction: 1 | -1): number {
+  return Math.max(0, Math.min(CHAT_TEXT_SIZES.length - 1, step + direction));
+}

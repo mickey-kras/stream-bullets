@@ -1433,5 +1433,12 @@
   "tools.live.chat.hint": "Desplázate hacia arriba para pausar.",
   "tools.live.chat.pause": "Pausar chat",
   "tools.live.chat.paused": "Chat en pausa. Mensajes nuevos: {count}",
-  "tools.live.chat.jump": "Ir a lo más reciente"
+  "tools.live.chat.jump": "Ir a lo más reciente",
+  "tools.live.chat.full": "Abrir el chat a pantalla completa",
+  "tools.live.chat.fullTitle": "Chat a pantalla completa",
+  "tools.live.chat.exit": "Salir",
+  "tools.live.chat.larger": "Texto más grande",
+  "tools.live.chat.smaller": "Texto más pequeño",
+  "tools.live.chat.onAir": "En el aire: {title}",
+  "tools.live.chat.screenOff": "Este navegador no puede mantener la pantalla encendida. Desactiva el bloqueo de pantalla de tu dispositivo mientras haces stream."
 }

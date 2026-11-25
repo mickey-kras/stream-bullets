@@ -1433,5 +1433,12 @@
   "tools.live.chat.hint": "Zum Pausieren nach oben scrollen.",
   "tools.live.chat.pause": "Chat pausieren",
   "tools.live.chat.paused": "Chat pausiert. Neue Nachrichten: {count}",
-  "tools.live.chat.jump": "Zum Neuesten springen"
+  "tools.live.chat.jump": "Zum Neuesten springen",
+  "tools.live.chat.full": "Chat im Vollbild öffnen",
+  "tools.live.chat.fullTitle": "Chat im Vollbild",
+  "tools.live.chat.exit": "Schließen",
+  "tools.live.chat.larger": "Größerer Text",
+  "tools.live.chat.smaller": "Kleinerer Text",
+  "tools.live.chat.onAir": "Auf Sendung: {title}",
+  "tools.live.chat.screenOff": "Dieser Browser kann den Bildschirm nicht eingeschaltet lassen. Schalte die Bildschirmsperre deines Geräts aus, solange du streamst."
 }

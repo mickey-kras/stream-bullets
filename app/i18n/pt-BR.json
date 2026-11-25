@@ -1433,5 +1433,12 @@
   "tools.live.chat.hint": "Role para cima para pausar.",
   "tools.live.chat.pause": "Pausar chat",
   "tools.live.chat.paused": "Chat pausado. Mensagens novas: {count}",
-  "tools.live.chat.jump": "Ir para as mais recentes"
+  "tools.live.chat.jump": "Ir para as mais recentes",
+  "tools.live.chat.full": "Abrir o chat em tela cheia",
+  "tools.live.chat.fullTitle": "Chat em tela cheia",
+  "tools.live.chat.exit": "Sair",
+  "tools.live.chat.larger": "Texto maior",
+  "tools.live.chat.smaller": "Texto menor",
+  "tools.live.chat.onAir": "No ar: {title}",
+  "tools.live.chat.screenOff": "Este navegador não consegue manter a tela ligada. Desative o bloqueio de tela do seu aparelho enquanto faz a live."
 }

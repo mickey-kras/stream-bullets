@@ -1473,5 +1473,12 @@
   "tools.live.chat.hint": "Прокрутіть угору, щоб поставити на паузу.",
   "tools.live.chat.pause": "Поставити чат на паузу",
   "tools.live.chat.paused": "Чат на паузі. Нових повідомлень: {count}",
-  "tools.live.chat.jump": "До останніх повідомлень"
+  "tools.live.chat.jump": "До останніх повідомлень",
+  "tools.live.chat.full": "Відкрити чат на весь екран",
+  "tools.live.chat.fullTitle": "Чат на весь екран",
+  "tools.live.chat.exit": "Вийти",
+  "tools.live.chat.larger": "Більший текст",
+  "tools.live.chat.smaller": "Менший текст",
+  "tools.live.chat.onAir": "В ефірі: {title}",
+  "tools.live.chat.screenOff": "Цей браузер не може тримати екран увімкненим. Вимкніть блокування екрана на пристрої на час стриму."
 }
