@@ -9,7 +9,8 @@ import { allContentSources, onAnyOutput } from "../../lib/overlay-layers";
 import { playgroundControlSchema, playgroundStatusSchema } from "../../lib/playground/protocol";
 import { overlayKeySchema, regenerateOverlayKey, showOverlayKey } from "../overlay-key.server";
 import { getOverlayData, getOverlayState, overlayActionSchema, sourceTopics, updateOverlay } from "../overlay.server";
-import { getLayouts, layoutActionSchema, updateLayouts } from "../overlay-layouts.server";
+import { layoutActionSchema } from "../../lib/overlay-layouts";
+import { getLayouts, updateLayouts } from "../overlay-layouts.server";
 import { get, requireViewer, write, type ApiRoute } from "./router";
 
 // Mash controls use HTTP; taps use the live WebSocket. Create battles with `POST /api/streamers/:handle

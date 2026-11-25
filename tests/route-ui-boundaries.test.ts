@@ -22,7 +22,9 @@ import * as schedule from "../app/server/schedule.server";
 import * as community from "../app/server/community.server";
 import * as support from "../app/server/support.server";
 import * as overlay from "../app/server/overlay.server";
+import { EMPTY_LAYOUTS } from "../app/lib/overlay-layouts";
 import * as overlayKey from "../app/server/overlay-key.server";
+import * as overlayLayouts from "../app/server/overlay-layouts.server";
 import * as channels from "../app/server/channels.server";
 import * as account from "../app/server/api/account";
 import * as featured from "../app/server/featured-streamer.server";
@@ -94,6 +96,10 @@ vi.mock("../app/server/overlay.server", async (original) => ({
   ...(await original<typeof import("../app/server/overlay.server")>()),
   getOverlayState: vi.fn(),
   getOverlayData: vi.fn(),
+}));
+vi.mock("../app/server/overlay-layouts.server", async (original) => ({
+  ...(await original<typeof import("../app/server/overlay-layouts.server")>()),
+  getLayouts: vi.fn(),
 }));
 vi.mock("../app/server/overlay-key.server", async (original) => ({
   ...(await original<typeof import("../app/server/overlay-key.server")>()),
@@ -271,6 +277,7 @@ beforeEach((): void => {
   vi.mocked(overlay.getOverlayState).mockResolvedValue(DEFAULT_OVERLAY);
   vi.mocked(overlay.getOverlayData).mockResolvedValue({ polls: [], topics: [], cards: [], next: null, support: null });
   vi.mocked(overlayKey.overlayKeyOutputs).mockResolvedValue({ horizontal: false, vertical: false });
+  vi.mocked(overlayLayouts.getLayouts).mockResolvedValue(EMPTY_LAYOUTS);
   vi.mocked(overlayKey.overlayKeyOutput).mockResolvedValue(null);
   vi.mocked(channels.listConnections).mockResolvedValue([]);
   vi.mocked(account.signInProvider).mockResolvedValue(null);
@@ -751,6 +758,7 @@ describe("overlay loader contracts", (): void => {
       host: "stream.example.test",
       origin: "https://stream.example.test",
       hasOverlayKey: { horizontal: false, vertical: false },
+      layouts: EMPTY_LAYOUTS,
       channels: [],
     });
     expect(result.state.layers).toEqual({ ...picked, orientation: "vertical" });

@@ -14,11 +14,13 @@ import {
   type Orientation,
 } from "../../lib/overlay-layers";
 import type { OverlayState } from "../../types";
+import type { OverlayLayouts } from "../../lib/overlay-layouts";
 import { announce } from "../a11y/announcer";
 import { motionReduced } from "../station/motion";
 import { type ActivityFeed, useActivityFeed } from "./activity-feed";
 import { type CharactersControl, useCharactersControl } from "./characters-controls";
 import { LayerPalette } from "./layer-palette";
+import { LayoutPicker, type LayoutAct } from "./layout-picker";
 import { LayerProperties, type ChangeLayers, type OverlayAction } from "./layer-properties";
 import { LAYER_NAMES, LayoutGrid, type LayoutGridHandle, type PreviewBackground, type RemoveDrop } from "./layout-grid";
 import { CHARACTERS_READY } from "./overlay-composition";
@@ -83,6 +85,9 @@ export function CompositionEditor({
   busy,
   run,
   onSaved,
+  layouts,
+  layoutBusy,
+  layoutAct,
 }: Readonly<{
   scene: OverlayScene;
   /** The newest saved or live state, with the layers. */
@@ -92,6 +97,11 @@ export function CompositionEditor({
   /** Saves a setting that is not in the layers: the poll results switch or the message. */
   run: (action: OverlayAction) => void;
   onSaved: (overlay: OverlayState) => void;
+  /** The saved layouts of each output, and the layout on stream. */
+  layouts: OverlayLayouts;
+  /** True while a layout action saves. */
+  layoutBusy: boolean;
+  layoutAct: LayoutAct;
 }>): ReactNode {
   const { layers } = state;
   const buildId: string = useId();
@@ -197,6 +207,7 @@ export function CompositionEditor({
       <p className="muted ov-comp-note" id={orientationNoteId} data-comp-orientation-note>
         {t("overlay.grid.orientationNote")}
       </p>
+      <LayoutPicker output={orientation} layers={shown} layouts={layouts} busy={layoutBusy} act={layoutAct} />
       <div className="ov-studio">
         <LayerPalette
           placed={placed}

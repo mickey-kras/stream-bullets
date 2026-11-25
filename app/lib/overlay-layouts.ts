@@ -2,6 +2,7 @@ import { z } from "zod";
 import { withEnabled } from "./layer-geometry";
 import {
   GRID_LAYERS,
+  ORIENTATIONS,
   emptyCells,
   layerEnabled,
   readCells,
@@ -134,6 +135,27 @@ export const layoutNameSchema = z
   .regex(/^[^\p{Cc}\p{Zl}\p{Zp}]+$/u);
 
 const layoutId = z.string().min(1).max(64);
+
+// The actions of `POST /api/overlay/layouts`.
+const output = z.enum(ORIENTATIONS);
+
+// `keep` is the name for the layout on stream when it is not saved yet: it then becomes a layout of the streamer.
+export const layoutActionSchema = z.discriminatedUnion("action", [
+  z.object({ action: z.literal("select"), output, id: layoutId, keep: layoutNameSchema }).strict(),
+  z
+    .object({
+      action: z.literal("create"),
+      output,
+      name: layoutNameSchema,
+      from: z.enum(["empty", "current"]),
+      keep: layoutNameSchema,
+    })
+    .strict(),
+  z.object({ action: z.literal("rename"), output, id: layoutId, name: layoutNameSchema }).strict(),
+  z.object({ action: z.literal("delete"), output, id: layoutId }).strict(),
+  z.object({ action: z.literal("reset"), output }).strict(),
+]);
+export type LayoutAction = z.infer<typeof layoutActionSchema>;
 
 function storedOutputSchema(output: Orientation): z.ZodType<OutputLayouts, unknown> {
   const saved = z

@@ -1,17 +1,16 @@
-import { z } from "zod";
 import type { AppEnv } from "../env";
-import { ORIENTATIONS, STORED_LAYERS_LENGTH, onAnyOutput, storedLayersText } from "../lib/overlay-layers";
+import { STORED_LAYERS_LENGTH, onAnyOutput, storedLayersText } from "../lib/overlay-layers";
 import {
   LayoutError,
   STORED_LAYOUTS_LENGTH,
   createLayout,
   deleteLayout,
-  layoutNameSchema,
   parseStoredLayouts,
   renameLayout,
   resetLayout,
   selectLayout,
   storedLayoutsText,
+  type LayoutAction,
   type LayoutProblem,
   type LayoutState,
   type NewLayout,
@@ -24,27 +23,6 @@ import { OVERLAY_COLUMNS, overlayValue, type OverlayRow } from "./overlay-state"
 
 // The layouts of the overlay: `POST /api/overlay/layouts`. The rules are in app/lib/overlay-layouts.ts. A layout
 // action changes the layers and the layouts in one write, so OBS never shows a layout that the list does not have.
-
-const output = z.enum(ORIENTATIONS);
-const id = z.string().min(1).max(64);
-
-// `keep` is the name for the layout on stream when it is not saved yet: it then becomes a layout of the streamer.
-export const layoutActionSchema = z.discriminatedUnion("action", [
-  z.object({ action: z.literal("select"), output, id, keep: layoutNameSchema }).strict(),
-  z
-    .object({
-      action: z.literal("create"),
-      output,
-      name: layoutNameSchema,
-      from: z.enum(["empty", "current"]),
-      keep: layoutNameSchema,
-    })
-    .strict(),
-  z.object({ action: z.literal("rename"), output, id, name: layoutNameSchema }).strict(),
-  z.object({ action: z.literal("delete"), output, id }).strict(),
-  z.object({ action: z.literal("reset"), output }).strict(),
-]);
-export type LayoutAction = z.infer<typeof layoutActionSchema>;
 
 /** The error for a layout action that the rules refuse. */
 function problemError(problem: LayoutProblem): HttpError {
