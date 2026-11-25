@@ -61749,7 +61749,7 @@
       "relation": "calls",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1548",
+      "source_location": "L1551",
       "target": "tests_live_control_test_characterson",
       "weight": 1.0
     },
@@ -61761,7 +61761,7 @@
       "relation": "calls",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1559",
+      "source_location": "L1562",
       "target": "tests_live_control_test_characters",
       "weight": 1.0
     },
@@ -61773,7 +61773,7 @@
       "relation": "calls",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1811",
+      "source_location": "L1814",
       "target": "tests_live_control_test_event",
       "weight": 1.0
     },
@@ -61917,7 +61917,7 @@
       "relation": "calls",
       "source": "tests_live_control_test_characterson",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1543",
+      "source_location": "L1546",
       "target": "tests_live_control_test_send",
       "weight": 1.0
     },
@@ -209490,7 +209490,7 @@
       "relation": "contains",
       "source": "docs_api_api_reference",
       "source_file": "docs/api.md",
-      "source_location": "L231",
+      "source_location": "L232",
       "target": "docs_api_later_phases",
       "weight": 1.0
     },
@@ -209501,7 +209501,7 @@
       "relation": "contains",
       "source": "docs_api_api_reference",
       "source_file": "docs/api.md",
-      "source_location": "L238",
+      "source_location": "L239",
       "target": "docs_api_discussion_updates",
       "weight": 1.0
     },
@@ -209512,7 +209512,7 @@
       "relation": "contains",
       "source": "docs_api_api_reference",
       "source_file": "docs/api.md",
-      "source_location": "L276",
+      "source_location": "L277",
       "target": "docs_api_comment_translation",
       "weight": 1.0
     },
@@ -209523,7 +209523,7 @@
       "relation": "contains",
       "source": "docs_api_api_reference",
       "source_file": "docs/api.md",
-      "source_location": "L311",
+      "source_location": "L312",
       "target": "docs_api_translation_of_new_content",
       "weight": 1.0
     },
@@ -209534,7 +209534,7 @@
       "relation": "contains",
       "source": "docs_api_api_reference",
       "source_file": "docs/api.md",
-      "source_location": "L325",
+      "source_location": "L326",
       "target": "docs_api_topic_and_poll_translation",
       "weight": 1.0
     },
@@ -209545,7 +209545,7 @@
       "relation": "contains",
       "source": "docs_api_api_reference",
       "source_file": "docs/api.md",
-      "source_location": "L343",
+      "source_location": "L344",
       "target": "docs_api_page_text_translation",
       "weight": 1.0
     },
@@ -209567,7 +209567,7 @@
       "relation": "contains",
       "source": "docs_api_api_reference",
       "source_file": "docs/api.md",
-      "source_location": "L364",
+      "source_location": "L365",
       "target": "docs_api_markdown_in_comments",
       "weight": 1.0
     },
@@ -218191,7 +218191,7 @@
       "relation": "contains",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1532",
+      "source_location": "L1535",
       "target": "tests_live_control_test_characters",
       "weight": 1.0
     },
@@ -218213,7 +218213,7 @@
       "relation": "contains",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1541",
+      "source_location": "L1544",
       "target": "tests_live_control_test_characterson",
       "weight": 1.0
     },
@@ -218224,7 +218224,7 @@
       "relation": "contains",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1797",
+      "source_location": "L1800",
       "target": "tests_live_control_test_event",
       "weight": 1.0
     },
@@ -229518,7 +229518,7 @@
       "relation": "references",
       "source": "docs_api_discussion_updates",
       "source_file": "docs/api.md",
-      "source_location": "L250",
+      "source_location": "L251",
       "target": "app_types_notificationsnapshot",
       "weight": 1.0
     },
@@ -229626,7 +229626,7 @@
       "relation": "references",
       "source": "docs_api_later_phases",
       "source_file": "docs/api.md",
-      "source_location": "L236",
+      "source_location": "L237",
       "target": "app_server_access_server_assertstreamerwritable",
       "weight": 1.0
     },
@@ -229650,7 +229650,7 @@
       "relation": "references",
       "source": "docs_api_markdown_in_comments",
       "source_file": "docs/api.md",
-      "source_location": "L402",
+      "source_location": "L403",
       "target": "app_lib_comment_markdown_parsecommentmarkdown",
       "weight": 1.0
     },
@@ -229686,7 +229686,7 @@
       "relation": "references",
       "source": "docs_api_later_phases",
       "source_file": "docs/api.md",
-      "source_location": "L235",
+      "source_location": "L236",
       "target": "app_server_api_router_write",
       "weight": 1.0
     }
@@ -269539,7 +269539,7 @@
       "label": "characters()",
       "norm_label": "characters()",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1532"
+      "source_location": "L1535"
     },
     {
       "_callable": true,
@@ -269550,7 +269550,7 @@
       "label": "charactersOn()",
       "norm_label": "characterson()",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1541"
+      "source_location": "L1544"
     },
     {
       "_callable": true,
@@ -269583,7 +269583,7 @@
       "label": "event()",
       "norm_label": "event()",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1797"
+      "source_location": "L1800"
     },
     {
       "_callable": true,
@@ -285596,7 +285596,7 @@
             "callee": "continue",
             "file": "tests/e2e/overlay-studio.spec.ts",
             "lang": "typescript",
-            "line": "L901",
+            "line": "L915",
             "receiver_type": "Route"
           }
         ]
@@ -288382,7 +288382,7 @@
       "node_kind": "heading",
       "norm_label": "comment translation",
       "source_file": "docs/api.md",
-      "source_location": "L276"
+      "source_location": "L277"
     },
     {
       "_origin": "ast",
@@ -288393,7 +288393,7 @@
       "node_kind": "heading",
       "norm_label": "discussion updates",
       "source_file": "docs/api.md",
-      "source_location": "L238"
+      "source_location": "L239"
     },
     {
       "_origin": "ast",
@@ -288404,7 +288404,7 @@
       "node_kind": "heading",
       "norm_label": "later phases",
       "source_file": "docs/api.md",
-      "source_location": "L231"
+      "source_location": "L232"
     },
     {
       "_origin": "ast",
@@ -288415,7 +288415,7 @@
       "node_kind": "heading",
       "norm_label": "markdown in comments",
       "source_file": "docs/api.md",
-      "source_location": "L364"
+      "source_location": "L365"
     },
     {
       "_origin": "ast",
@@ -288459,7 +288459,7 @@
       "node_kind": "heading",
       "norm_label": "page text translation",
       "source_file": "docs/api.md",
-      "source_location": "L343"
+      "source_location": "L344"
     },
     {
       "_origin": "ast",
@@ -288492,7 +288492,7 @@
       "node_kind": "heading",
       "norm_label": "topic and poll translation",
       "source_file": "docs/api.md",
-      "source_location": "L325"
+      "source_location": "L326"
     },
     {
       "_origin": "ast",
@@ -288503,7 +288503,7 @@
       "node_kind": "heading",
       "norm_label": "translation of new content",
       "source_file": "docs/api.md",
-      "source_location": "L311"
+      "source_location": "L312"
     },
     {
       "_origin": "ast",
