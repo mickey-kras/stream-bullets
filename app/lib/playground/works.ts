@@ -279,8 +279,11 @@ export class Works {
       this.sim.giveUp(p, p.job?.done ?? false);
       return;
     }
-    if (p.t < DURATION.dig) return;
     const job: Job | null = p.job;
+    // The block of the work is gone: this hit broke it, or it had damage from before and broke early. The step is
+    // complete, and work of more blocks goes on.
+    const broke: boolean = job !== null && job.r >= 0 && !blockAt(this.world, this.terrain, job.c, job.r);
+    if (p.t < DURATION.dig && !broke) return;
     if (!job) {
       this.sim.rest(p);
       return;

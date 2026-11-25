@@ -31785,7 +31785,7 @@
       "relation": "calls",
       "source": "app_lib_playground_works_works_build",
       "source_file": "app/lib/playground/works.ts",
-      "source_location": "L317",
+      "source_location": "L320",
       "target": "app_lib_playground_works_works_place",
       "weight": 1.0
     },
@@ -31797,7 +31797,7 @@
       "relation": "calls",
       "source": "app_lib_playground_works_works_build",
       "source_file": "app/lib/playground/works.ts",
-      "source_location": "L322",
+      "source_location": "L325",
       "target": "app_lib_playground_terrain_floory",
       "weight": 1.0
     },
@@ -31809,7 +31809,7 @@
       "relation": "calls",
       "source": "app_lib_playground_works_works_build",
       "source_file": "app/lib/playground/works.ts",
-      "source_location": "L324",
+      "source_location": "L327",
       "target": "app_lib_playground_core_setstate",
       "weight": 1.0
     },
@@ -31917,19 +31917,7 @@
       "relation": "calls",
       "source": "app_lib_playground_works_works_dig",
       "source_file": "app/lib/playground/works.ts",
-      "source_location": "L291",
-      "target": "app_lib_playground_works_works_row",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_lib_playground_works_works_dig",
-      "source_file": "app/lib/playground/works.ts",
-      "source_location": "L293",
+      "source_location": "L285",
       "target": "app_lib_playground_terrain_blockat",
       "weight": 1.0
     },
@@ -31941,32 +31929,8 @@
       "relation": "calls",
       "source": "app_lib_playground_works_works_dig",
       "source_file": "app/lib/playground/works.ts",
-      "source_location": "L293",
-      "target": "app_lib_playground_terrain_cellx",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_lib_playground_works_works_dig",
-      "source_file": "app/lib/playground/works.ts",
-      "source_location": "L293",
-      "target": "app_lib_playground_terrain_solidat",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_lib_playground_works_works_dig",
-      "source_file": "app/lib/playground/works.ts",
       "source_location": "L294",
-      "target": "app_lib_playground_terrain_fits",
+      "target": "app_lib_playground_works_works_row",
       "weight": 1.0
     },
     {
@@ -31978,6 +31942,42 @@
       "source": "app_lib_playground_works_works_dig",
       "source_file": "app/lib/playground/works.ts",
       "source_location": "L296",
+      "target": "app_lib_playground_terrain_cellx",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_playground_works_works_dig",
+      "source_file": "app/lib/playground/works.ts",
+      "source_location": "L296",
+      "target": "app_lib_playground_terrain_solidat",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_playground_works_works_dig",
+      "source_file": "app/lib/playground/works.ts",
+      "source_location": "L297",
+      "target": "app_lib_playground_terrain_fits",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_playground_works_works_dig",
+      "source_file": "app/lib/playground/works.ts",
+      "source_location": "L299",
       "target": "app_lib_playground_core_setstate",
       "weight": 1.0
     },
@@ -32229,7 +32229,7 @@
       "relation": "calls",
       "source": "app_lib_playground_works_works_place",
       "source_file": "app/lib/playground/works.ts",
-      "source_location": "L305",
+      "source_location": "L308",
       "target": "app_lib_playground_works_works_canbuild",
       "weight": 1.0
     },
@@ -32241,7 +32241,7 @@
       "relation": "calls",
       "source": "app_lib_playground_works_works_place",
       "source_file": "app/lib/playground/works.ts",
-      "source_location": "L308",
+      "source_location": "L311",
       "target": "app_lib_playground_terrain_placeblock",
       "weight": 1.0
     },
@@ -60885,7 +60885,7 @@
       "relation": "calls",
       "source": "tests_playground_build_test",
       "source_file": "tests/playground-build.test.ts",
-      "source_location": "L650",
+      "source_location": "L660",
       "target": "tests_playground_build_test_people",
       "weight": 1.0
     },
@@ -60897,7 +60897,7 @@
       "relation": "calls",
       "source": "tests_playground_build_test_people",
       "source_file": "tests/playground-build.test.ts",
-      "source_location": "L636",
+      "source_location": "L646",
       "target": "app_lib_playground_sim_playgroundsim",
       "weight": 1.0
     },
@@ -60909,7 +60909,7 @@
       "relation": "calls",
       "source": "tests_playground_build_test_people",
       "source_file": "tests/playground-build.test.ts",
-      "source_location": "L638",
+      "source_location": "L648",
       "target": "tests_playground_build_test_chat",
       "weight": 1.0
     },
@@ -164429,7 +164429,7 @@
       "relation": "references",
       "source": "app_lib_playground_works_works_build",
       "source_file": "app/lib/playground/works.ts",
-      "source_location": "L315",
+      "source_location": "L318",
       "target": "app_lib_playground_crowd_participant",
       "weight": 1.0
     },
@@ -164597,7 +164597,7 @@
       "relation": "references",
       "source": "app_lib_playground_works_works_place",
       "source_file": "app/lib/playground/works.ts",
-      "source_location": "L300",
+      "source_location": "L303",
       "target": "app_lib_playground_crowd_job",
       "weight": 1.0
     },
@@ -164609,7 +164609,7 @@
       "relation": "references",
       "source": "app_lib_playground_works_works_place",
       "source_file": "app/lib/playground/works.ts",
-      "source_location": "L300",
+      "source_location": "L303",
       "target": "app_lib_playground_crowd_participant",
       "weight": 1.0
     },
@@ -211908,7 +211908,7 @@
       "relation": "contains",
       "source": "tests_playground_build_test",
       "source_file": "tests/playground-build.test.ts",
-      "source_location": "L635",
+      "source_location": "L645",
       "target": "tests_playground_build_test_people",
       "weight": 1.0
     },
@@ -215550,7 +215550,7 @@
       "relation": "method",
       "source": "app_lib_playground_works_works",
       "source_file": "app/lib/playground/works.ts",
-      "source_location": "L300",
+      "source_location": "L303",
       "target": "app_lib_playground_works_works_place",
       "weight": 1.0
     },
@@ -215561,7 +215561,7 @@
       "relation": "method",
       "source": "app_lib_playground_works_works",
       "source_file": "app/lib/playground/works.ts",
-      "source_location": "L315",
+      "source_location": "L318",
       "target": "app_lib_playground_works_works_build",
       "weight": 1.0
     },
@@ -220190,7 +220190,7 @@
       "relation": "calls",
       "source": "app_lib_playground_works_works_build",
       "source_file": "app/lib/playground/works.ts",
-      "source_location": "L318",
+      "source_location": "L321",
       "target": "app_lib_playground_core_simhost_giveup",
       "weight": 1.0
     },
@@ -220202,7 +220202,7 @@
       "relation": "calls",
       "source": "app_lib_playground_works_works_build",
       "source_file": "app/lib/playground/works.ts",
-      "source_location": "L322",
+      "source_location": "L325",
       "target": "app_lib_playground_motion_motion_tween",
       "weight": 1.0
     },
@@ -220214,7 +220214,7 @@
       "relation": "calls",
       "source": "app_lib_playground_works_works_build",
       "source_file": "app/lib/playground/works.ts",
-      "source_location": "L323",
+      "source_location": "L326",
       "target": "app_lib_playground_motion_motion_walkon",
       "weight": 1.0
     },
@@ -220250,7 +220250,7 @@
       "relation": "calls",
       "source": "app_lib_playground_works_works_dig",
       "source_file": "app/lib/playground/works.ts",
-      "source_location": "L285",
+      "source_location": "L288",
       "target": "app_lib_playground_core_simhost_rest",
       "weight": 1.0
     },
@@ -220262,7 +220262,7 @@
       "relation": "calls",
       "source": "app_lib_playground_works_works_dig",
       "source_file": "app/lib/playground/works.ts",
-      "source_location": "L295",
+      "source_location": "L298",
       "target": "app_lib_playground_motion_motion_walkon",
       "weight": 1.0
     },
@@ -221258,7 +221258,7 @@
       "relation": "calls",
       "source": "tests_playground_build_test_people",
       "source_file": "tests/playground-build.test.ts",
-      "source_location": "L638",
+      "source_location": "L648",
       "target": "app_lib_playground_sim_playgroundsim_receive",
       "weight": 1.0
     },
@@ -221270,7 +221270,7 @@
       "relation": "calls",
       "source": "tests_playground_build_test_people",
       "source_file": "tests/playground-build.test.ts",
-      "source_location": "L640",
+      "source_location": "L650",
       "target": "app_lib_playground_sim_playgroundsim_list",
       "weight": 1.0
     },
@@ -245252,7 +245252,7 @@
       "label": ".build()",
       "norm_label": ".build()",
       "source_file": "app/lib/playground/works.ts",
-      "source_location": "L315"
+      "source_location": "L318"
     },
     {
       "_callable": true,
@@ -245395,7 +245395,7 @@
       "label": ".place()",
       "norm_label": ".place()",
       "source_file": "app/lib/playground/works.ts",
-      "source_location": "L300"
+      "source_location": "L303"
     },
     {
       "_callable": true,
@@ -262052,7 +262052,7 @@
       "label": "people()",
       "norm_label": "people()",
       "source_file": "tests/playground-build.test.ts",
-      "source_location": "L635"
+      "source_location": "L645"
     },
     {
       "_callable": true,

@@ -359,6 +359,16 @@ describe("breaking", () => {
     expect(s.p.mark).toBeGreaterThan(0);
   });
 
+  it("goes on with a dig of more blocks after a block that had damage breaks early", () => {
+    const s = stage();
+    for (const c of [1, 2, 3]) s.put(START + c, 0);
+    (s.block(START + 1, 0) as Block).stage = 2;
+    s.run("!dig right 3");
+    for (const c of [1, 2, 3]) expect(s.block(START + c, 0)).toBeNull();
+    expect(s.col()).toBe(START + 2);
+    expect(s.p.mark).toBe(0);
+  });
+
   it("still digs a hole in the ground dirt, and not in a girder", () => {
     const s = stage();
     s.sim.perform(s.p, "dig");
