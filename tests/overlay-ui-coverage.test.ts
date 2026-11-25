@@ -40,7 +40,7 @@ const data: OverlayData = { polls: [], topics: [], cards: [], next: null, suppor
 const placed: OverlayLayers = {
   ...DEFAULT_LAYERS,
   cells: {
-    horizontal: { ...emptyCells(), chat: { c: 0, r: 0, w: 5, h: 7 }, poll: { c: 5, r: 0, w: 11, h: 7 } },
+    horizontal: { ...emptyCells(), chat: { c: 0, r: 0, w: 10, h: 14 }, poll: { c: 10, r: 0, w: 22, h: 14 } },
     vertical: emptyCells(),
   },
 };
@@ -211,7 +211,7 @@ describe("overlay control page", () => {
     expect(controlState(state, loaded, live)).toEqual({ ...live, message: "Unsaved banner" });
     expect(controlState(loaded, state, state)).toBe(loaded);
     expect(controlState(state, loaded, null)).toBe(loaded);
-    const cells = { ...placed.cells, horizontal: { ...placed.cells.horizontal, message: { c: 0, r: 7, w: 4, h: 2 } } };
+    const cells = { ...placed.cells, horizontal: { ...placed.cells.horizontal, message: { c: 0, r: 14, w: 8, h: 4 } } };
     const onStream: OverlayState = { ...live, layers: { ...placed, cells }, message: "On stream" };
     expect(controlState(state, loaded, onStream).message).toBe("On stream");
   });
@@ -822,12 +822,12 @@ describe("layers in the composition", () => {
     cells: {
       horizontal: {
         ...emptyCells(),
-        chat: { c: 0, r: 0, w: 5, h: 7 },
-        characters: { c: 0, r: 7, w: 16, h: 2 },
-        poll: { c: 8, r: 0, w: 8, h: 3 },
-        topic: { c: 5, r: 0, w: 3, h: 3 },
-        message: { c: 5, r: 3, w: 4, h: 2 },
-        support: { c: 9, r: 3, w: 4, h: 2 },
+        chat: { c: 0, r: 0, w: 10, h: 14 },
+        characters: { c: 0, r: 14, w: 32, h: 4 },
+        poll: { c: 16, r: 0, w: 16, h: 6 },
+        topic: { c: 10, r: 0, w: 6, h: 6 },
+        message: { c: 10, r: 6, w: 8, h: 4 },
+        support: { c: 18, r: 6, w: 8, h: 4 },
       },
       vertical: emptyCells(),
     },

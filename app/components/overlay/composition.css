@@ -132,7 +132,7 @@
 }
 
 /* ---------- Layout grid (layout-grid.tsx) ----------
-   The grid boxes sit in the scaler in design pixels: a cell is 120 px. Lines and labels divide by --ov-scale. */
+   The grid boxes sit in the scaler in design pixels: a cell is 60 px. Lines and labels divide by --ov-scale. */
 /* The toolbar: orientation, preview background, the test and the live note. Its controls have one height. */
 .ov-comp-bar {
   display: flex;
@@ -190,7 +190,7 @@
   background-image:
     linear-gradient(to right, rgb(255 255 255 / 0.18) calc(1px / var(--ov-scale, 1)), transparent 0),
     linear-gradient(to bottom, rgb(255 255 255 / 0.18) calc(1px / var(--ov-scale, 1)), transparent 0);
-  background-size: 120px 120px;
+  background-size: 60px 60px;
 }
 .ov-grid-box {
   position: absolute;

@@ -921,7 +921,7 @@
   "overlay.grid.cursor": "Colonne {c}, ligne {r} : {what}.",
   "overlay.grid.dropRemove": "Déposez ici pour retirer",
   "overlay.grid.empty": "vide",
-  "overlay.grid.help": "Une cellule fait 120 × 120 pixels. Sélectionnez un calque placé pour afficher ses poignées. Faites glisser le calque pour le déplacer. Faites glisser une poignée pour le redimensionner. Faites glisser le calque sur « Calques · un de chaque » pour le retirer. Clavier : les flèches déplacent le curseur, Espace ou Entrée prend et pose un calque, Maj + flèche déplace le calque sélectionné d’une cellule, Alt + flèche le redimensionne d’une cellule par son coin inférieur droit, Suppr ou Retour arrière retire le calque sélectionné, Échap annule.",
+  "overlay.grid.help": "Une cellule fait {px} × {px} pixels. Sélectionnez un calque placé pour afficher ses poignées. Faites glisser le calque pour le déplacer. Faites glisser une poignée pour le redimensionner. Faites glisser le calque sur « Calques · un de chaque » pour le retirer. Clavier : les flèches déplacent le curseur, Espace ou Entrée prend et pose un calque, Maj + flèche déplace le calque sélectionné d’une cellule, Alt + flèche le redimensionne d’une cellule par son coin inférieur droit, Suppr ou Retour arrière retire le calque sélectionné, Échap annule.",
   "overlay.grid.horizontal": "Horizontal {cols} × {rows}",
   "overlay.grid.label": "Grille de mise en page, {cols} colonnes sur {rows} lignes",
   "overlay.grid.moved": "{layer} déplacé en colonne {c}, ligne {r}, {w} × {h} cellules.",

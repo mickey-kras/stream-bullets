@@ -921,7 +921,7 @@
   "overlay.grid.cursor": "Coluna {c}, linha {r}: {what}.",
   "overlay.grid.dropRemove": "Solte aqui para tirar da grade",
   "overlay.grid.empty": "vazia",
-  "overlay.grid.help": "Uma célula tem 120 × 120 pixels. Selecione uma camada posicionada para ver as alças dela. Arraste a camada para movê-la. Arraste uma alça para redimensioná-la. Arraste a camada para “Camadas · uma de cada” para tirá-la da grade. Teclado: as setas movem o cursor, Espaço ou Enter pega e solta uma camada, Shift + seta move a camada selecionada uma célula, Alt + seta redimensiona a camada uma célula pelo canto inferior direito, Delete ou Backspace tira a camada selecionada da grade, Esc cancela.",
+  "overlay.grid.help": "Uma célula tem {px} × {px} pixels. Selecione uma camada posicionada para ver as alças dela. Arraste a camada para movê-la. Arraste uma alça para redimensioná-la. Arraste a camada para “Camadas · uma de cada” para tirá-la da grade. Teclado: as setas movem o cursor, Espaço ou Enter pega e solta uma camada, Shift + seta move a camada selecionada uma célula, Alt + seta redimensiona a camada uma célula pelo canto inferior direito, Delete ou Backspace tira a camada selecionada da grade, Esc cancela.",
   "overlay.grid.horizontal": "Horizontal {cols} × {rows}",
   "overlay.grid.label": "Grade de layout, {cols} colunas por {rows} linhas",
   "overlay.grid.moved": "{layer} movido para a coluna {c}, linha {r}, {w} × {h} células.",

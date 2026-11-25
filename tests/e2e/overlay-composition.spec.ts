@@ -87,7 +87,7 @@ test("an unknown layer renders an empty transparent page", async ({ page }) => {
 });
 
 // A chat cell at the right edge.
-const CHAT_CELL: CellRect = { c: 12, r: 2, w: 4, h: 5 };
+const CHAT_CELL: CellRect = { c: 24, r: 4, w: 8, h: 10 };
 const CHAT_RECT: LayerRect = cellPixels(CHAT_CELL);
 const chatAt = (cell: CellRect): LayersPatch => ({ chat: { enabled: true }, cells: { horizontal: { chat: cell } } });
 const DEFAULT_CHAT: LayerRect = cellPixels(DEFAULT_CHAT_CELL);
@@ -396,7 +396,7 @@ test.describe("merged chat on the overlay", () => {
       await expect(source.rows).toHaveCount(3);
       const canvas = source.page.locator(".ov-layer-canvas");
       const resized = await owner.request.post("/api/overlay", {
-        data: { action: "layers", ...chatAt({ c: 10, r: 0, w: 6, h: 7 }) },
+        data: { action: "layers", ...chatAt({ c: 20, r: 0, w: 12, h: 14 }) },
       });
       expect(resized.status()).toBe(200);
       await expect(canvas).toHaveCSS("height", "840px");
@@ -857,7 +857,7 @@ test("a vertical layout fills a 1080x1920 source and shows each layer inside its
   await setLayers("overlay-vertical", {
     orientation: "vertical",
     chat: { enabled: true },
-    cells: { vertical: { chat: { c: 0, r: 8, w: 9, h: 5 }, poll: { c: 1, r: 1, w: 7, h: 4 } } },
+    cells: { vertical: { chat: { c: 0, r: 16, w: 18, h: 10 }, poll: { c: 2, r: 2, w: 14, h: 8 } } },
   });
   try {
     // Half of 1080x1920: every design pixel is half a screen pixel.

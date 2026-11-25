@@ -130,7 +130,7 @@ English also shows `error` for `step_up_required` and `other_key_required`.
 - The overlay shows only the layers on the grid: `chat`, `characters`, and the content layers.
   The content layers are `poll`, `topic`, `next`, `message`, `card`, and `support`. Each content layer shows one content source.
   A layer is on stream when it has a cell in the selected orientation and its `enabled` value is `true`.
-- `orientation` is `horizontal` (a grid of 16 × 9 cells) or `vertical` (9 × 16 cells). A cell is 120 pixels.
+- `orientation` is `horizontal` (a grid of 32 × 18 cells) or `vertical` (18 × 32 cells). A cell is 60 pixels.
 - Each orientation in `cells` holds `{chat?, characters?, poll?, topic?, next?, message?, card?, support?}`.
   Each value is a cell rectangle `{c, r, w, h}` of whole cells, or `null`. With `null`, the layer is not on the grid.
   `c + w` is at most the number of columns, and `r + h` is at most the number of rows.

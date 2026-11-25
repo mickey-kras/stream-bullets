@@ -1,15 +1,15 @@
 import { catch as fallback, z } from "zod";
 
 // Overlay layers sit on a grid of square cells. The streamer picks the orientation of the frame: horizontal is
-// 1920x1080 (16 x 9 cells), vertical is 1080x1920 (9 x 16 cells). Each orientation keeps its own layout.
-export const CELL_PX = 120;
+// 1920x1080 (32 x 18 cells), vertical is 1080x1920 (18 x 32 cells). Each orientation keeps its own layout.
+export const CELL_PX = 60;
 
 export const ORIENTATIONS = ["horizontal", "vertical"] as const;
 export type Orientation = (typeof ORIENTATIONS)[number];
 
 export const GRID: Readonly<Record<Orientation, Readonly<{ cols: number; rows: number }>>> = {
-  horizontal: { cols: 16, rows: 9 },
-  vertical: { cols: 9, rows: 16 },
+  horizontal: { cols: 32, rows: 18 },
+  vertical: { cols: 18, rows: 32 },
 };
 
 /** The values of `?layer=` on the OBS URL. `content` is all the content layers together. */
@@ -103,11 +103,11 @@ export interface LayersPatch {
   cells?: Partial<Record<Orientation, CellsPatch>>;
 }
 
-const CONTENT_MIN = { w: 4, h: 2 } as const;
+const CONTENT_MIN = { w: 8, h: 4 } as const;
 
 export const MIN_CELLS: Readonly<Record<GridLayer, Readonly<{ w: number; h: number }>>> = {
-  chat: { w: 3, h: 2 },
-  characters: { w: 6, h: 2 },
+  chat: { w: 6, h: 4 },
+  characters: { w: 12, h: 4 },
   poll: CONTENT_MIN,
   topic: CONTENT_MIN,
   next: CONTENT_MIN,
@@ -409,10 +409,10 @@ export const storedLayersSchema: z.ZodType<OverlayLayers, unknown> = fallback(
 );
 
 /**
- * The version of the stored `layers` JSON text that storedLayersText writes (`v`). A text without this version is
- * from before the overlay studio: see app/lib/overlay-legacy.ts.
+ * The version of the stored `layers` JSON text that storedLayersText writes (`v`). Version 3 has cells of 60 px.
+ * A text without this version is older: app/lib/overlay-legacy.ts converts it.
  */
-export const LAYERS_VERSION = 2;
+export const LAYERS_VERSION = 3;
 
 // Match `overlay_state_layers_check`.
 export const STORED_LAYERS_LENGTH = 4000;

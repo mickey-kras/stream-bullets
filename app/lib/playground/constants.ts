@@ -13,10 +13,10 @@ export const PIXEL_SCALE = 3;
 /** Logical px per grid cell (a cell is CELL_PX design px). The world is CELL_LOGICAL * cell width and height. */
 export const CELL_LOGICAL = CELL_PX / PIXEL_SCALE;
 /** The characters cell size limits, in cells. Smaller cells give no usable route. */
-export const CELLS_W_MIN = 6;
-export const CELLS_W_MAX = 16;
-export const CELLS_H_MIN = 2;
-export const CELLS_H_MAX = 16;
+export const CELLS_W_MIN = 12;
+export const CELLS_W_MAX = 32;
+export const CELLS_H_MIN = 4;
+export const CELLS_H_MAX = 32;
 
 /** Ground tile width and the ground position: the ground is this far above the bottom of the world. */
 export const TILE = 16;

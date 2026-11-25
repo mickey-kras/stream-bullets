@@ -949,7 +949,7 @@
   "overlay.grid.cursor": "Kolumna {c}, wiersz {r}: {what}.",
   "overlay.grid.dropRemove": "Upuść tutaj, aby usunąć",
   "overlay.grid.empty": "pusta",
-  "overlay.grid.help": "Komórka ma 120 × 120 pikseli. Wybierz umieszczoną warstwę, aby zobaczyć jej uchwyty. Przeciągnij warstwę, aby ją przesunąć. Przeciągnij uchwyt, aby zmienić jej rozmiar. Przeciągnij warstwę na „Warstwy · po jednej”, aby ją usunąć. Klawiatura: strzałki przesuwają kursor, Spacja lub Enter podnosi i odkłada warstwę, Shift + strzałka przesuwa wybraną warstwę o jedną komórkę, Alt + strzałka zmienia jej rozmiar o jedną komórkę od prawego dolnego rogu, Delete lub Backspace usuwa wybraną warstwę, Esc anuluje.",
+  "overlay.grid.help": "Komórka ma {px} × {px} pikseli. Wybierz umieszczoną warstwę, aby zobaczyć jej uchwyty. Przeciągnij warstwę, aby ją przesunąć. Przeciągnij uchwyt, aby zmienić jej rozmiar. Przeciągnij warstwę na „Warstwy · po jednej”, aby ją usunąć. Klawiatura: strzałki przesuwają kursor, Spacja lub Enter podnosi i odkłada warstwę, Shift + strzałka przesuwa wybraną warstwę o jedną komórkę, Alt + strzałka zmienia jej rozmiar o jedną komórkę od prawego dolnego rogu, Delete lub Backspace usuwa wybraną warstwę, Esc anuluje.",
   "overlay.grid.horizontal": "Poziomo {cols} × {rows}",
   "overlay.grid.label": "Siatka układu, {cols} kolumn na {rows} wierszy",
   "overlay.grid.moved": "Przesunięto: {layer} do kolumny {c}, wiersza {r}, {w} × {h} komórek.",

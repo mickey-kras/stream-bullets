@@ -80,11 +80,11 @@ test("each content layer goes on the grid one time with its real content, and OB
   // Each chip puts its layer at the first free place: four in the first two rows, then the next two rows.
   const places: Record<ContentLayer, string> = {
     poll: "column 1, row 1",
-    topic: "column 5, row 1",
-    next: "column 9, row 1",
-    message: "column 13, row 1",
-    card: "column 1, row 3",
-    support: "column 5, row 3",
+    topic: "column 9, row 1",
+    next: "column 17, row 1",
+    message: "column 25, row 1",
+    card: "column 1, row 5",
+    support: "column 9, row 5",
   };
   const names: Record<ContentLayer, string> = {
     poll: "Poll",
@@ -96,7 +96,7 @@ test("each content layer goes on the grid one time with its real content, and OB
   };
   for (const layer of CONTENT_LAYERS) {
     await placeLayer(page, editor, layer);
-    await expect(status).toHaveText(`${names[layer]} placed at ${places[layer]}, 4 × 2 cells.`);
+    await expect(status).toHaveText(`${names[layer]} placed at ${places[layer]}, 8 × 4 cells.`);
     await expect(chip(editor, layer)).toHaveText(`${names[layer]}Placed`);
     await expect(settings(editor)).toHaveAttribute("data-comp-props", layer);
     await expect(settings(editor).getByRole("checkbox", { name: "Show on stream" })).toBeChecked();
@@ -133,12 +133,12 @@ test("each content layer goes on the grid one time with its real content, and OB
   const stored: OverlayLayers = await storedLayers(page);
   expect(stored.cells.horizontal).toEqual({
     ...emptyCells(),
-    poll: { c: 0, r: 0, w: 4, h: 2 },
-    topic: { c: 4, r: 0, w: 4, h: 2 },
-    next: { c: 8, r: 0, w: 4, h: 2 },
-    message: { c: 12, r: 0, w: 4, h: 2 },
-    card: { c: 0, r: 2, w: 4, h: 2 },
-    support: { c: 4, r: 2, w: 4, h: 2 },
+    poll: { c: 0, r: 0, w: 8, h: 4 },
+    topic: { c: 8, r: 0, w: 8, h: 4 },
+    next: { c: 16, r: 0, w: 8, h: 4 },
+    message: { c: 24, r: 0, w: 8, h: 4 },
+    card: { c: 0, r: 4, w: 8, h: 4 },
+    support: { c: 8, r: 4, w: 8, h: 4 },
   });
   expect(stored.cells.vertical).toEqual(emptyCells());
 
@@ -426,8 +426,8 @@ test("state from before the studio shows as layers: the source that was on air, 
     expect(converted.chat.enabled).toBe(true);
     expect(converted.items.message.enabled).toBe(true);
     expect(converted.cells).toEqual({
-      horizontal: { ...emptyCells(), chat: CHAT_CELL, message: { c: 5, r: 0, w: 11, h: 3 } },
-      vertical: { ...emptyCells(), chat: { c: 0, r: 8, w: 9, h: 5 }, message: { c: 0, r: 0, w: 9, h: 3 } },
+      horizontal: { ...emptyCells(), chat: CHAT_CELL, message: { c: 10, r: 0, w: 22, h: 6 } },
+      vertical: { ...emptyCells(), chat: { c: 0, r: 16, w: 18, h: 10 }, message: { c: 0, r: 0, w: 18, h: 6 } },
     });
     await chip(editor, "message").click();
     await expect(page.locator("[data-ov-message]")).toHaveValue("Back soon");
@@ -455,7 +455,7 @@ test("state from before the studio shows as layers: the source that was on air, 
     await page.reload();
     await expect(chip(editor, "poll")).toHaveText("PollPlaced");
     await expect(editor.locator('.ov-layer[data-layer="poll"] [data-overlay-mash]')).toBeVisible();
-    expect((await storedLayers(page)).cells.horizontal.poll).toEqual({ c: 0, r: 0, w: 16, h: 9 });
+    expect((await storedLayers(page)).cells.horizontal.poll).toEqual({ c: 0, r: 0, w: 32, h: 18 });
   } finally {
     await runSql("overlay-studio-legacy-restore", [
       `UPDATE overlay_state SET air='{"type":"auto","ref":null}', preview='{"type":"auto","ref":null}', position='lower', size='m', instant=0, message='' WHERE streamer_id=${FEATURE_HOST};`,
@@ -507,7 +507,7 @@ test("at 390 px the studio stacks the palette, the grid and the settings, and th
   }
   // The same holds with the vertical frame and with the settings of the characters, the longest panel.
   let save = saved(page);
-  await editor.getByRole("button", { name: "Vertical 9 × 16" }).click();
+  await editor.getByRole("button", { name: "Vertical 18 × 32" }).click();
   await save;
   await expect(frame).toHaveAttribute("data-orientation", "vertical");
   await page.route("**/api/overlay/characters", (route: Route) =>
@@ -524,7 +524,7 @@ test("at 390 px the studio stacks the palette, the grid and the settings, and th
   // On a wide screen the three parts are side by side.
   await page.setViewportSize({ width: 1440, height: 1000 });
   save = saved(page);
-  await editor.getByRole("button", { name: "Horizontal 16 × 9" }).click();
+  await editor.getByRole("button", { name: "Horizontal 32 × 18" }).click();
   await save;
   await expect(frame).toHaveAttribute("data-scaled", "true");
   const wide = {
@@ -545,18 +545,18 @@ test("the keyboard alone places, selects, changes and removes a layer", async ({
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/overlay-control");
   const editor = page.locator("[data-composition-editor]");
-  const grid = gridButton(editor, "Layout grid, 16 columns by 9 rows");
+  const grid = gridButton(editor, "Layout grid, 32 columns by 18 rows");
   const status = editor.locator("[data-grid-status]");
   const panel = settings(editor);
   // Tab goes through the toolbar, then the chips in their order, then the grid.
-  await editor.getByRole("button", { name: "Horizontal 16 × 9" }).focus();
+  await editor.getByRole("button", { name: "Horizontal 32 × 18" }).focus();
   const order: string[] = [];
   for (let step = 0; step < 12; step += 1) {
     await page.keyboard.press("Tab");
     order.push(await page.evaluate(() => (document.activeElement?.textContent ?? "").trim()));
   }
   expect(order).toEqual([
-    "Vertical 9 × 16",
+    "Vertical 18 × 32",
     "Transparent",
     "Sample game",
     "Start test",
@@ -577,7 +577,7 @@ test("the keyboard alone places, selects, changes and removes a layer", async ({
   let save = saved(page);
   await page.keyboard.press("Enter");
   await save;
-  await expect(status).toHaveText("Topic placed at column 1, row 1, 4 × 2 cells.");
+  await expect(status).toHaveText("Topic placed at column 1, row 1, 8 × 4 cells.");
   await expect(grid).toBeFocused();
   await expect(panel).toHaveAttribute("data-comp-props", "topic");
   // The settings are a named region after the grid. Tab goes to its first control.
@@ -629,11 +629,11 @@ test("the keyboard alone places, selects, changes and removes a layer", async ({
   await grid.focus();
   save = saved(page);
   await page.keyboard.press("Shift+ArrowDown");
-  await expect(status).toHaveText("Topic moved to column 1, row 2, 4 × 2 cells.");
+  await expect(status).toHaveText("Topic moved to column 1, row 2, 8 × 4 cells.");
   await page.keyboard.press("Alt+ArrowRight");
-  await expect(status).toHaveText("Topic resized to 5 × 2 cells at column 1, row 2.");
+  await expect(status).toHaveText("Topic resized to 9 × 4 cells at column 1, row 2.");
   await save;
-  await expect.poll(async () => (await storedLayers(page)).cells.horizontal.topic).toEqual({ c: 0, r: 1, w: 5, h: 2 });
+  await expect.poll(async () => (await storedLayers(page)).cells.horizontal.topic).toEqual({ c: 0, r: 1, w: 9, h: 4 });
 
   // A second layer: the cursor selects it. Space picks up the layer at the cursor, and Escape puts it back.
   await chip(editor, "support").focus();
@@ -642,9 +642,9 @@ test("the keyboard alone places, selects, changes and removes a layer", async ({
   await save;
   await expect(panel).toHaveAttribute("data-comp-props", "support");
   await expect(grid).toBeFocused();
-  // The support banner is at the first free place: column 1, row 1 is free above the topic.
-  await expect(grid).toHaveAccessibleName("Column 6, row 1: Support banner.");
-  for (let step = 0; step < 5; step += 1) await page.keyboard.press("ArrowLeft");
+  // The support banner is at the first free place: beside the topic, which has columns 1 to 9.
+  await expect(grid).toHaveAccessibleName("Column 10, row 1: Support banner.");
+  for (let step = 0; step < 9; step += 1) await page.keyboard.press("ArrowLeft");
   await page.keyboard.press("ArrowDown");
   await expect(status).toHaveText("Column 1, row 2: Topic.");
   await page.keyboard.press("Space");
