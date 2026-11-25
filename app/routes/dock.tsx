@@ -110,7 +110,7 @@ function DockControls({
       <LivePoll scene={view} state={state} busy={busy} run={run} />
       <LiveTopics scene={view} state={state} busy={busy} run={run} />
       <LiveMessage key={`${state.message}:${state.messageStyle}`} state={state} busy={busy} send={send} />
-      <LiveChat feed={feed} delivers={delivers} now={scene.now} onAir={onAirTitle(view, state.layers)} />
+      <LiveChat feed={feed} delivers={delivers} onAir={onAirTitle(view, state.layers)} />
     </>
   );
 }
