@@ -274,6 +274,9 @@ A preset that you change keeps your version. The list then shows **preset, chang
 **Save as a new layout** and **New layout…** make a layout with your name.
 It starts from a copy of the layout on stream or from an empty grid, and it goes on stream.
 
+A layout action first saves the edits of the grid. The grid takes no edit until the action ends.
+When a different tab changes the layouts, the list shows the new layouts without a load of the page.
+
 **Rename or delete layouts** opens the list of your layouts. Each layout can get a new name.
 You cannot delete the layout on stream. Select a different layout first.
 Each output can have 8 layouts of the streamer. The presets do not count.

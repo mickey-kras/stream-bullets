@@ -84,6 +84,8 @@ export function useLayerDraft(
   status: SaveStatus;
   error: EditorError | null;
   edit: (change: (current: OverlayLayers) => OverlayLayers, when: EditTiming) => void;
+  /** Saves the edits not sent yet, and waits until no save runs. A failed save shows its error as usual. */
+  flush: () => Promise<void>;
 } {
   // Every unconfirmed local field (sent or not), and the subset not sent yet.
   const [draft, setDraft] = useState<LayersPatch>({});
@@ -208,6 +210,12 @@ export function useLayerDraft(
     else timer.current = setTimeout((): void => void save(), SAVE_IDLE_MS);
   };
 
+  const flush = async (): Promise<void> => {
+    void save();
+    // A save that ends starts the next one for the edits made meanwhile, so look again after each.
+    while (inflight.current) await inflight.current.done;
+  };
+
   const shown: OverlayLayers = useMemo(() => mergeLayers(layers, draft), [layers, draft]);
-  return { shown, status, error, edit };
+  return { shown, status, error, edit, flush };
 }

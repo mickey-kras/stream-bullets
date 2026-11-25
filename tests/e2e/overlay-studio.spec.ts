@@ -892,6 +892,28 @@ test("the owner picks a preset in the list, changes it, resets it, and keeps lay
   // The layouts hold after a load, and the other output has its own list.
   await page.reload();
   await expect(list).toHaveText("Raid night");
+
+  // A layout action waits for a grid edit that still saves. Else the edit would change the layout that comes.
+  const order: string[] = [];
+  await page.route("**/api/overlay", async (route) => {
+    await new Promise<void>((resolve) => setTimeout(resolve, 700));
+    order.push("grid edit");
+    await route.continue();
+  });
+  page.on("request", (request) => {
+    if (new URL(request.url()).pathname === "/api/overlay/layouts") order.push("layout action");
+  });
+  await page.locator('[data-comp-layer="poll"]').click();
+  const slider = page.locator("[data-props-background]").getByRole("slider", { name: "Background" });
+  await slider.focus();
+  await page.keyboard.press("ArrowLeft");
+  await list.click();
+  done = layoutSaved(page);
+  await page.getByRole("option", { name: "Gameplay · preset" }).click();
+  await done;
+  expect(order).toEqual(["grid edit", "layout action"]);
+  await page.unroute("**/api/overlay");
+  await expect(list).toHaveText("Gameplay · preset");
   const outputSaved = saved(page);
   await editor.getByRole("button", { name: "Vertical 18 × 32" }).click();
   await outputSaved;
