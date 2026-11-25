@@ -941,6 +941,7 @@ describe("overlay control", (): void => {
           chat: { hideCommands: false, backgroundOpacity: 45 },
           characters: { enabled: true },
           cells: { horizontal: { poll: { c: 0, r: 0, w: 12, h: 8 } } },
+          twitchOnly: { vertical: true },
         }),
       );
       expect(second.layers).toEqual({
@@ -948,6 +949,7 @@ describe("overlay control", (): void => {
         chat: { enabled: true, hideCommands: false, backgroundOpacity: 45 },
         characters: { enabled: true, timeout: 60, max: 40 },
         camera: { enabled: false },
+        twitchOnly: { horizontal: false, vertical: true },
         items: DEFAULT_LAYERS.items,
         cells: horizontal({ chat: chatCell, poll: { c: 0, r: 0, w: 12, h: 8 } }),
       });

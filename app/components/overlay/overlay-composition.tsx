@@ -2,6 +2,7 @@ import {
   memo,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useSyncExternalStore,
   type CSSProperties,
@@ -9,7 +10,7 @@ import {
   type RefObject,
 } from "react";
 import { t } from "../../i18n";
-import type { ActivityChat } from "../../lib/activity";
+import type { ActivityChat, ActivityPlatform } from "../../lib/activity";
 import { chatTestLeft } from "../../lib/chat-test";
 import type { ChatView } from "../../lib/fading-rows";
 import {
@@ -19,6 +20,7 @@ import {
   layerPixels,
   onStream,
   placedContent,
+  shownPlatform,
   type ContentSource,
   type GridLayer,
   type LayerRect,
@@ -27,9 +29,10 @@ import {
   type Orientation,
   type PlacedContent,
 } from "../../lib/overlay-layers";
-import type { ActivityFeed } from "./activity-feed";
+import { usePlatformFeed, type ActivityFeed } from "./activity-feed";
 import { CharactersLayer } from "./characters/characters-layer";
 import { usePlaygroundSource } from "./characters/use-playground";
+import { viewForPlatform, type PlaygroundView } from "./characters/view";
 import { ChatLayer } from "./chat-layer";
 import { OverlayStage, type OverlayScene } from "./overlay-stage";
 import { useChat } from "./use-chat";
@@ -41,6 +44,8 @@ export interface OverlayLayerSlotProps {
   feed: ActivityFeed | null;
   /** The layer's cell in design pixels. Its content is laid out in rect.w x rect.h design pixels. */
   rect: LayerRect;
+  /** The one platform whose characters show, or null for all platforms. */
+  platform?: ActivityPlatform | null;
 }
 
 /**
@@ -57,8 +62,15 @@ function charactersFailed(error: Error): void {
 }
 
 /** The characters layer: the playground of the feed's frames. */
-export function CharactersSlot({ feed, rect }: Readonly<OverlayLayerSlotProps>): ReactNode {
-  const source = usePlaygroundSource(feed);
+export function CharactersSlot({ feed, rect, platform = null }: Readonly<OverlayLayerSlotProps>): ReactNode {
+  const all = usePlaygroundSource(feed);
+  const source = useCallback(
+    (now: number): PlaygroundView | null => {
+      const view: PlaygroundView | null = all(now);
+      return view && platform ? viewForPlatform(view, platform) : view;
+    },
+    [all, platform],
+  );
   return (
     <CharactersLayer
       columns={rect.w / CELL_PX}
@@ -364,11 +376,19 @@ export function OverlayComposition({
   const chat: LayerRect | null = onStream(layers, "chat") ? layerPixels(layers, "chat") : null;
   const characters: LayerRect | null = onStream(layers, "characters") ? layerPixels(layers, "characters") : null;
   const camera: LayerRect | null = onStream(layers, "camera") ? layerPixels(layers, "camera") : null;
+  // An output that shows Twitch only drops the chat and the characters of the other platforms. A preview does the
+  // same, so the owner sees what the output shows.
+  const platform: ActivityPlatform | null = shownPlatform(layers);
+  const chatFeed: ActivityFeed | null = usePlatformFeed(feed, platform);
+  const chatSamples: readonly ActivityChat[] | undefined = useMemo(
+    () => (platform && samples ? samples.filter((row: ActivityChat): boolean => row.platform === platform) : samples),
+    [samples, platform],
+  );
   return (
-    <div className="ov-composition" data-overlay-only={only ?? undefined}>
+    <div className="ov-composition" data-overlay-only={only ?? undefined} data-overlay-platform={platform ?? undefined}>
       {shows("characters") && characters && (
         <LayerBox layer="characters" rect={characters} frame={frame} alone={alone}>
-          <CharactersSlot feed={charactersFeed} rect={characters} />
+          <CharactersSlot feed={charactersFeed} rect={characters} platform={platform} />
         </LayerBox>
       )}
       {shows("content") && <ContentLayers scene={scene} layers={layers} frame={frame} />}
@@ -380,10 +400,10 @@ export function OverlayComposition({
       {shows("chat") && chat && (
         <LayerBox layer="chat" rect={chat} frame={frame} alone={alone}>
           <ChatSlot
-            feed={feed}
+            feed={chatFeed}
             hideCommands={layers.chat.hideCommands}
             backgroundOpacity={layers.chat.backgroundOpacity}
-            samples={samples}
+            samples={chatSamples}
             serverOffset={serverOffset}
             testUntil={testUntil}
           />

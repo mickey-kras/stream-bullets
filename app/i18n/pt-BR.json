@@ -1443,5 +1443,9 @@
   "tools.live.chat.screenOff": "Este navegador não consegue manter a tela ligada. Desative o bloqueio de tela do seu aparelho enquanto faz a live.",
   "overlay.output.horizontal": "Saída horizontal",
   "overlay.output.vertical": "Saída vertical",
-  "overlay.keyConfirmOther": "O link da outra saída continua funcionando."
+  "overlay.keyConfirmOther": "O link da outra saída continua funcionando.",
+  "overlay.twitch.title": "Você transmite na Twitch e em outras plataformas ao mesmo tempo?",
+  "overlay.twitch.body": "As regras da Twitch para transmissões simultâneas não permitem chat de outras plataformas na sua live da Twitch. Com a opção ativada, essa saída mostra só o chat e os personagens da Twitch. Enquetes, tópicos e o banner de mensagem não mudam. A seção “Ao vivo” sempre mostra todas as plataformas.",
+  "overlay.twitch.horizontal": "Mostrar só o chat da Twitch na saída horizontal",
+  "overlay.twitch.vertical": "Mostrar só o chat da Twitch na saída vertical"
 }

@@ -47,6 +47,8 @@ One line gives the number of OBS sources that use the overlay link, or the time 
 ### What OBS shows
 
 The preview shows the composition of the output that the editor shows, with the real content and the real chat.
+If that output shows Twitch chat only, the preview does the same.
+See [Twitch chat only](overlay-composition.md#twitch-chat-only).
 It uses the activity feed of the owner, without an overlay key.
 
 ### Poll

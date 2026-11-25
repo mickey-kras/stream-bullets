@@ -100,6 +100,11 @@ export interface OverlayLayers {
   camera: CameraLayer;
   items: Record<ContentLayer, ContentItem>;
   cells: Record<Orientation, LayerCells>;
+  /**
+   * For each output: true when the output shows chat and characters from Twitch only. The default is the merged
+   * chat of all platforms. See `shownPlatform`.
+   */
+  twitchOnly: Record<Orientation, boolean>;
 }
 
 export type CellsPatch = Partial<LayerCells>;
@@ -110,6 +115,7 @@ export interface LayersPatch {
   characters?: Partial<CharactersLayer>;
   camera?: Partial<CameraLayer>;
   items?: Partial<Record<ContentLayer, Partial<ContentItem>>>;
+  twitchOnly?: Partial<Record<Orientation, boolean>>;
   cells?: Partial<Record<Orientation, CellsPatch>>;
 }
 
@@ -161,6 +167,7 @@ export const DEFAULT_LAYERS: OverlayLayers = {
     horizontal: emptyCells(),
     vertical: emptyCells(),
   },
+  twitchOnly: { horizontal: false, vertical: false },
 };
 
 /** The design size of a frame. */
@@ -273,6 +280,15 @@ export function allContentSources(layers: OverlayLayers): ContentSource[] {
 }
 
 /**
+ * The one platform whose chat and characters the output `layers.orientation` shows, or null for all platforms. The
+ * Twitch rules for a simulcast do not allow chat of other platforms on the Twitch stream, so the owner can limit an
+ * output to Twitch. Polls, topics, and the message banner do not change.
+ */
+export function shownPlatform(layers: OverlayLayers): "twitch" | null {
+  return layers.twitchOnly[layers.orientation] ? "twitch" : null;
+}
+
+/**
  * The cell that gives the character playground its size. One playground serves the two outputs: it takes the
  * horizontal cell, or the vertical cell when the layer is not on the horizontal grid. The other output shows the
  * same playground, made smaller to fit its cell.
@@ -367,6 +383,7 @@ export const layersPatchSchema = z
       })
       .strict()
       .optional(),
+    twitchOnly: z.object({ horizontal: z.boolean().optional(), vertical: z.boolean().optional() }).strict().optional(),
   })
   .strict();
 
@@ -453,6 +470,13 @@ export const storedLayersSchema: z.ZodType<OverlayLayers, unknown> = fallback(
         vertical: readCells("vertical", cells.vertical),
       }),
     ),
+    twitchOnly: fallback(
+      z.object({
+        horizontal: fallback(z.boolean(), DEFAULT_LAYERS.twitchOnly.horizontal),
+        vertical: fallback(z.boolean(), DEFAULT_LAYERS.twitchOnly.vertical),
+      }),
+      (): Record<Orientation, boolean> => ({ ...DEFAULT_LAYERS.twitchOnly }),
+    ),
   }),
   (): OverlayLayers => ({
     orientation: DEFAULT_LAYERS.orientation,
@@ -461,6 +485,7 @@ export const storedLayersSchema: z.ZodType<OverlayLayers, unknown> = fallback(
     camera: { ...DEFAULT_LAYERS.camera },
     items: defaultItems(),
     cells: { horizontal: emptyCells(), vertical: emptyCells() },
+    twitchOnly: { ...DEFAULT_LAYERS.twitchOnly },
   }),
 );
 
@@ -494,8 +519,8 @@ function storedItem(layer: ContentLayer, item: ContentItem): Partial<ContentItem
 
 /**
  * The `layers` JSON text to store. It leaves out what the lenient read fills in: a layer without a cell, each
- * content layer setting at its default, and a camera frame that is off. Thus the text stays short. The caller checks it against
- * STORED_LAYERS_LENGTH.
+ * content layer setting at its default, a camera frame that is off, and the Twitch switches when the two are off.
+ * Thus the text stays short. The caller checks it against STORED_LAYERS_LENGTH.
  */
 export function storedLayersText(layers: OverlayLayers): string {
   const items: LayersPatch["items"] = {};
@@ -511,6 +536,7 @@ export function storedLayersText(layers: OverlayLayers): string {
     camera: layers.camera.enabled === DEFAULT_LAYERS.camera.enabled ? undefined : layers.camera,
     items: Object.keys(items).length > 0 ? items : undefined,
     cells: { horizontal: storedCells(layers.cells.horizontal), vertical: storedCells(layers.cells.vertical) },
+    twitchOnly: layers.twitchOnly.horizontal || layers.twitchOnly.vertical ? layers.twitchOnly : undefined,
   });
 }
 
@@ -550,6 +576,10 @@ export function mergeLayers(current: OverlayLayers, patch: LayersPatch): Overlay
     cells: {
       horizontal: mergeCells(current.cells.horizontal, patch.cells?.horizontal),
       vertical: mergeCells(current.cells.vertical, patch.cells?.vertical),
+    },
+    twitchOnly: {
+      horizontal: patch.twitchOnly?.horizontal ?? current.twitchOnly.horizontal,
+      vertical: patch.twitchOnly?.vertical ?? current.twitchOnly.vertical,
     },
   };
 }

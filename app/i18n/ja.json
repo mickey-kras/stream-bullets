@@ -1423,5 +1423,9 @@
   "tools.live.chat.screenOff": "このブラウザーでは画面を点灯したままにできません。配信中はデバイスの画面ロックをオフにしてください。",
   "overlay.output.horizontal": "横の出力",
   "overlay.output.vertical": "縦の出力",
-  "overlay.keyConfirmOther": "もう一方の出力のリンクはそのまま使えます。"
+  "overlay.keyConfirmOther": "もう一方の出力のリンクはそのまま使えます。",
+  "overlay.twitch.title": "Twitch とほかのプラットフォームで同時に配信していますか？",
+  "overlay.twitch.body": "Twitch の同時配信ルールでは、Twitch の配信にほかのプラットフォームのチャットを表示できません。スイッチをオンにすると、その出力には Twitch のチャットとキャラクターだけが表示されます。投票、トピック、メッセージバナーは変わりません。「ライブ」には常にすべてのプラットフォームが表示されます。",
+  "overlay.twitch.horizontal": "横の出力に Twitch のチャットだけを表示",
+  "overlay.twitch.vertical": "縦の出力に Twitch のチャットだけを表示"
 }

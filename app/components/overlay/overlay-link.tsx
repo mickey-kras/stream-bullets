@@ -86,15 +86,21 @@ export function OverlayLink({
   layers,
   sources,
   now,
+  busy,
+  onTwitchOnly,
 }: Readonly<{
   /** Which outputs have a link. */
   hasKey: Readonly<Record<Orientation, boolean>>;
-  /** The newest saved or live layers, for the source sizes. */
+  /** The newest saved or live layers, for the source sizes and the Twitch switches. */
   layers: OverlayLayers;
   /** The connected OBS sources. Null while the live room did not tell. */
   sources: OverlaySources | null;
   /** The server time, for the age of the last connection. */
   now: number;
+  /** True while a change saves. */
+  busy: boolean;
+  /** Saves whether one output shows chat and characters from Twitch only. */
+  onTwitchOnly: (output: Orientation, on: boolean) => void;
 }>): ReactNode {
   return (
     <div className="ov-url">
@@ -112,7 +118,46 @@ export function OverlayLink({
           now={now}
         />
       ))}
+      <TwitchOnly layers={layers} busy={busy} onChange={onTwitchOnly} />
     </div>
+  );
+}
+
+const TWITCH_ONLY: Readonly<Record<Orientation, MessageId>> = {
+  horizontal: "overlay.twitch.horizontal",
+  vertical: "overlay.twitch.vertical",
+};
+
+/**
+ * The closed section for a streamer who sends the stream to Twitch and to other platforms: one switch for each
+ * output. With the switch on, the output shows chat and characters from Twitch only. The default is the merged chat.
+ */
+function TwitchOnly({
+  layers,
+  busy,
+  onChange,
+}: Readonly<{
+  layers: OverlayLayers;
+  busy: boolean;
+  onChange: (output: Orientation, on: boolean) => void;
+}>): ReactNode {
+  return (
+    <details className="ch-details ov-url-twitch" data-ov-twitch>
+      <summary>{t("overlay.twitch.title")}</summary>
+      <p className="muted">{t("overlay.twitch.body")}</p>
+      {ORIENTATIONS.map((output: Orientation) => (
+        <label className="choice" key={output}>
+          <input
+            type="checkbox"
+            checked={layers.twitchOnly[output]}
+            disabled={busy}
+            onChange={(event) => onChange(output, event.currentTarget.checked)}
+            data-ov-twitch-only={output}
+          />
+          <span>{t(TWITCH_ONLY[output])}</span>
+        </label>
+      ))}
+    </details>
   );
 }
 

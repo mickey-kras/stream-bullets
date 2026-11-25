@@ -266,6 +266,48 @@ test("each output has its own link: both are on stream, and a new link for one l
   await runSql("overlay-control-outputs-restore", [noKeysSql, defaultLayers]);
 });
 
+test("the Twitch switch of one output saves that output only, in a section that is closed at first", async ({
+  browser,
+}) => {
+  await runSql("overlay-control-twitch", [layersSql({})]);
+  const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 97));
+  const control = await newPage(owner);
+  await control.goto("/tools?view=overlay");
+  const section = control.locator("[data-ov-twitch]");
+  const wide = section.getByRole("checkbox", { name: "Show Twitch chat only on the horizontal output" });
+  const high = section.getByRole("checkbox", { name: "Show Twitch chat only on the vertical output" });
+  // The section is closed: a streamer on one platform does not need it.
+  await expect(section).not.toHaveAttribute("open");
+  await expect(high).toBeHidden();
+  await section.getByText("Streaming to Twitch and other platforms at once?").click();
+  await expect(section).toContainText("The Twitch rules for simulcasts do not allow chat from other platforms");
+  await expect(wide).not.toBeChecked();
+  await expect(high).not.toBeChecked();
+  const bodies: unknown[] = [];
+  control.on("request", (request: Request) => {
+    if (request.method() === "POST" && new URL(request.url()).pathname === "/api/overlay")
+      bodies.push(request.postDataJSON());
+  });
+  // The switch shows the saved state: it changes when the save returns.
+  let save = saved(control);
+  await high.click();
+  await save;
+  await expect(high).toBeChecked();
+  await expect(wide).not.toBeChecked();
+  expect(bodies).toEqual([{ action: "layers", twitchOnly: { vertical: true } }]);
+  // The state holds after a load, and the other output did not change.
+  await control.reload();
+  await control.locator("[data-ov-twitch]").getByText("Streaming to Twitch and other platforms at once?").click();
+  await expect(high).toBeChecked();
+  await expect(wide).not.toBeChecked();
+  save = saved(control);
+  await high.click();
+  await save;
+  await expect(high).not.toBeChecked();
+  await close(owner);
+  await runSql("overlay-control-twitch-restore", [defaultLayers]);
+});
+
 test("an OBS source with a refused key stops its chat feed retries", async ({ browser }) => {
   await runSql("overlay-control-refused-key", [
     layersSql({ chat: { enabled: true }, cells: { horizontal: { chat: CHAT_CELL } } }),

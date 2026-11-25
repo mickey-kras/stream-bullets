@@ -33,6 +33,7 @@ import {
   parseLayerParam,
   placedContent,
   playgroundCell,
+  shownPlatform,
   storedLayersSchema,
   storedLayersText,
   type CellRect,
@@ -121,6 +122,7 @@ describe("grid and defaults", (): void => {
         horizontal: { ...none, support: null, camera: null },
         vertical: { ...none, support: null, camera: null },
       },
+      twitchOnly: { horizontal: false, vertical: false },
     });
     expect(emptyCells()).toEqual(DEFAULT_LAYERS.cells.horizontal);
     expect(emptyCells()).not.toBe(emptyCells());
@@ -283,6 +285,7 @@ describe("stored layers", (): void => {
         },
         vertical: { ...emptyCells(), characters: { c: 0, r: 28, w: 18, h: 4 }, message: { c: 0, r: 8, w: 18, h: 4 } },
       },
+      twitchOnly: { horizontal: true, vertical: false },
     };
     expect(storedLayersSchema.parse(layers)).toEqual(layers);
   });
@@ -442,6 +445,7 @@ describe("stored layers", (): void => {
         support: changed,
       },
       cells: { horizontal: cells, vertical: cells },
+      twitchOnly: { horizontal: true, vertical: true },
     };
     expect(storedLayersText(full).length).toBeGreaterThan(1000);
     expect(storedLayersText(full).length).toBeLessThan(STORED_LAYERS_LENGTH / 2);
@@ -482,6 +486,56 @@ describe("stored layers", (): void => {
     expect(storedLayersSchema.parse(stored(layers))).toEqual(layers);
     expect(storedLayersSchema.parse(stored(DEFAULT_LAYERS))).toEqual(DEFAULT_LAYERS);
     expect(storedLayersSchema.parse(stored(LAID))).toEqual(LAID);
+  });
+});
+
+describe("Twitch chat only on an output", (): void => {
+  it("is off for the two outputs by default: each output shows the merged chat", (): void => {
+    expect(DEFAULT_LAYERS.twitchOnly).toEqual({ horizontal: false, vertical: false });
+    for (const output of ORIENTATIONS) expect(shownPlatform(forOutput(DEFAULT_LAYERS, output))).toBeNull();
+    expect(storedLayersSchema.parse({}).twitchOnly).toEqual({ horizontal: false, vertical: false });
+  });
+
+  it("changes one output and leaves the other output as it is", (): void => {
+    const vertical: OverlayLayers = mergeLayers(DEFAULT_LAYERS, { twitchOnly: { vertical: true } });
+    expect(vertical.twitchOnly).toEqual({ horizontal: false, vertical: true });
+    expect(shownPlatform(forOutput(vertical, "vertical"))).toBe("twitch");
+    expect(shownPlatform(forOutput(vertical, "horizontal"))).toBeNull();
+    const both: OverlayLayers = mergeLayers(vertical, { twitchOnly: { horizontal: true } });
+    expect(both.twitchOnly).toEqual({ horizontal: true, vertical: true });
+    expect(mergeLayers(both, { twitchOnly: { vertical: false } }).twitchOnly).toEqual({
+      horizontal: true,
+      vertical: false,
+    });
+    // A patch without the switches keeps them.
+    expect(mergeLayers(both, { chat: { enabled: true } }).twitchOnly).toEqual({ horizontal: true, vertical: true });
+  });
+
+  it("stores the switches only while one is on, and reads an invalid value as off", (): void => {
+    expect(storedLayersText(DEFAULT_LAYERS)).not.toContain("twitchOnly");
+    const on: OverlayLayers = mergeLayers(DEFAULT_LAYERS, { twitchOnly: { vertical: true } });
+    expect(stored(on)).toMatchObject({ twitchOnly: { horizontal: false, vertical: true } });
+    expect(storedLayersSchema.parse(JSON.parse(storedLayersText(on))).twitchOnly).toEqual({
+      horizontal: false,
+      vertical: true,
+    });
+    for (const value of ["yes", 1, null, [], { vertical: "yes" }, { horizontal: 1 }])
+      expect(storedLayersSchema.parse({ twitchOnly: value }).twitchOnly).toEqual({
+        horizontal: false,
+        vertical: false,
+      });
+    // One valid switch stays when the other one is invalid.
+    expect(storedLayersSchema.parse({ twitchOnly: { horizontal: true, vertical: "no" } }).twitchOnly).toEqual({
+      horizontal: true,
+      vertical: false,
+    });
+  });
+
+  it("takes only booleans for the two outputs in a patch", (): void => {
+    expect(layersPatchSchema.parse({ twitchOnly: { vertical: true } })).toEqual({ twitchOnly: { vertical: true } });
+    expect(layersPatchSchema.parse({ twitchOnly: {} })).toEqual({ twitchOnly: {} });
+    for (const twitchOnly of [true, { vertical: "yes" }, { vertical: 1 }, { square: true }, { vertical: null }])
+      expect(layersPatchSchema.safeParse({ twitchOnly }).success).toBe(false);
   });
 });
 
