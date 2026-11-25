@@ -1415,5 +1415,8 @@
   "discussion.markAnswered": "Oznacz jako odpowiedziany",
   "discussion.unmarkAnswered": "Usuń oznaczenie odpowiedzi",
   "discussion.answerTime": "Znacznik czasu w sekundach",
-  "page.answerLead": "Odpowiedziane komentarze: znacznik czasu przed oznaczeniem, w minutach"
+  "page.answerLead": "Odpowiedziane komentarze: znacznik czasu przed oznaczeniem, w minutach",
+  "overlay.name.camera": "Ramka kamery",
+  "overlay.camera.window": "Tutaj widać twoją kamerę z OBS",
+  "overlay.camera.note": "Ramka ma przezroczyste okno. W OBS umieść kamerę pod źródłem nakładki i nadaj jej rozmiar okna. StreamBullets nigdy nie odczytuje twojej kamery."
 }

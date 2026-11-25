@@ -1375,5 +1375,8 @@
   "discussion.markAnswered": "जवाब दिया गया के रूप में चिह्नित करें",
   "discussion.unmarkAnswered": "जवाब का निशान हटाएं",
   "discussion.answerTime": "सेकंड में समय",
-  "page.answerLead": "जवाब दी गई टिप्पणियां: निशान से पहले का समय, मिनटों में"
+  "page.answerLead": "जवाब दी गई टिप्पणियां: निशान से पहले का समय, मिनटों में",
+  "overlay.name.camera": "कैमरा फ़्रेम",
+  "overlay.camera.window": "आपका OBS कैमरा यहाँ दिखेगा",
+  "overlay.camera.note": "फ़्रेम में एक पारदर्शी खिड़की है। OBS में अपने कैमरे को ओवरले सोर्स के नीचे रखें और उसे खिड़की जितना बड़ा करें। StreamBullets आपका कैमरा कभी नहीं पढ़ता।"
 }

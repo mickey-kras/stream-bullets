@@ -11889,7 +11889,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layer_properties_layerproperties",
       "source_file": "app/components/overlay/layer-properties.tsx",
-      "source_location": "L406",
+      "source_location": "L407",
       "target": "app_components_overlay_layer_properties_contentsettings",
       "weight": 1.0
     },
@@ -11901,7 +11901,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layer_properties_layerproperties",
       "source_file": "app/components/overlay/layer-properties.tsx",
-      "source_location": "L407",
+      "source_location": "L408",
       "target": "app_components_overlay_layer_properties_qrsetting",
       "weight": 1.0
     },
@@ -11913,7 +11913,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layer_properties_layerproperties",
       "source_file": "app/components/overlay/layer-properties.tsx",
-      "source_location": "L408",
+      "source_location": "L409",
       "target": "app_components_overlay_layer_properties_layerbackground",
       "weight": 1.0
     },
@@ -12081,7 +12081,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_belowminimum",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L129",
+      "source_location": "L130",
       "target": "app_lib_layer_geometry_resizecell",
       "weight": 1.0
     },
@@ -12093,7 +12093,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_boxstyle",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L166",
+      "source_location": "L167",
       "target": "app_lib_overlay_layers_cellpixels",
       "weight": 1.0
     },
@@ -12105,7 +12105,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_cursortext",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L157",
+      "source_location": "L158",
       "target": "app_lib_layer_geometry_layerat",
       "weight": 1.0
     },
@@ -12117,7 +12117,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_cursortext",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L158",
+      "source_location": "L159",
       "target": "app_components_overlay_layout_grid_name",
       "weight": 1.0
     },
@@ -12129,7 +12129,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_cursortext",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L158",
+      "source_location": "L159",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -12141,7 +12141,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_dragshape",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L118",
+      "source_location": "L119",
       "target": "app_lib_layer_geometry_dropcell",
       "weight": 1.0
     },
@@ -12153,7 +12153,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_dragshape",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L121",
+      "source_location": "L122",
       "target": "app_lib_layer_geometry_movecell",
       "weight": 1.0
     },
@@ -12165,7 +12165,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_dragshape",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L122",
+      "source_location": "L123",
       "target": "app_lib_layer_geometry_resizecell",
       "weight": 1.0
     },
@@ -12177,7 +12177,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_gridhit_3ac12e2e5bff",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L185",
+      "source_location": "L186",
       "target": "app_components_overlay_layout_grid_inbox",
       "weight": 1.0
     },
@@ -12189,7 +12189,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L252",
+      "source_location": "L253",
       "target": "app_components_overlay_use_design_scale_usedesignscale",
       "weight": 1.0
     },
@@ -12201,7 +12201,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L254",
+      "source_location": "L255",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -12213,7 +12213,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L280",
+      "source_location": "L281",
       "target": "app_components_overlay_layout_grid_gridhit_3ac12e2e5bff",
       "weight": 1.0
     },
@@ -12225,7 +12225,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L285",
+      "source_location": "L286",
       "target": "app_lib_layer_geometry_handleat",
       "weight": 1.0
     },
@@ -12237,7 +12237,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L290",
+      "source_location": "L291",
       "target": "app_lib_layer_geometry_layerat",
       "weight": 1.0
     },
@@ -12249,7 +12249,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L301",
+      "source_location": "L302",
       "target": "app_lib_layer_geometry_handlelines",
       "weight": 1.0
     },
@@ -12261,7 +12261,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L319",
+      "source_location": "L320",
       "target": "app_components_overlay_layout_grid_removedrop_19fb442981a9",
       "weight": 1.0
     },
@@ -12273,7 +12273,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L321",
+      "source_location": "L322",
       "target": "app_components_overlay_layout_grid_inbox",
       "weight": 1.0
     },
@@ -12285,7 +12285,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L327",
+      "source_location": "L328",
       "target": "app_components_overlay_layout_grid_name",
       "weight": 1.0
     },
@@ -12297,7 +12297,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L337",
+      "source_location": "L338",
       "target": "app_components_overlay_layout_grid_dragshape",
       "weight": 1.0
     },
@@ -12309,7 +12309,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L343",
+      "source_location": "L344",
       "target": "app_components_overlay_layout_grid_samerect",
       "weight": 1.0
     },
@@ -12321,7 +12321,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L345",
+      "source_location": "L346",
       "target": "app_components_overlay_layout_grid_belowminimum",
       "weight": 1.0
     },
@@ -12333,7 +12333,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L346",
+      "source_location": "L347",
       "target": "app_components_overlay_layout_grid_smalltext",
       "weight": 1.0
     },
@@ -12345,7 +12345,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L349",
+      "source_location": "L350",
       "target": "app_lib_layer_geometry_placeproblem_58c492526df9",
       "weight": 1.0
     },
@@ -12357,7 +12357,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L351",
+      "source_location": "L352",
       "target": "app_components_overlay_layout_grid_notkept",
       "weight": 1.0
     },
@@ -12369,7 +12369,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L355",
+      "source_location": "L356",
       "target": "app_components_overlay_layout_grid_placetext",
       "weight": 1.0
     },
@@ -12381,7 +12381,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L404",
+      "source_location": "L405",
       "target": "app_components_overlay_layout_grid_cursortext",
       "weight": 1.0
     },
@@ -12393,7 +12393,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L426",
+      "source_location": "L427",
       "target": "app_lib_layer_geometry_growcell",
       "weight": 1.0
     },
@@ -12405,7 +12405,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L429",
+      "source_location": "L430",
       "target": "app_lib_layer_geometry_movecell",
       "weight": 1.0
     },
@@ -12417,7 +12417,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L499",
+      "source_location": "L500",
       "target": "app_lib_layer_geometry_firstfreecell",
       "weight": 1.0
     },
@@ -12429,7 +12429,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L524",
+      "source_location": "L525",
       "target": "app_lib_layer_geometry_withcell",
       "weight": 1.0
     },
@@ -12441,7 +12441,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L536",
+      "source_location": "L537",
       "target": "app_components_overlay_overlay_composition_framestyle",
       "weight": 1.0
     },
@@ -12453,7 +12453,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L539",
+      "source_location": "L540",
       "target": "app_components_overlay_overlay_composition_overlaycomposition",
       "weight": 1.0
     },
@@ -12465,7 +12465,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L551",
+      "source_location": "L553",
       "target": "app_lib_overlay_layers_cellpixels",
       "weight": 1.0
     },
@@ -12477,7 +12477,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L559",
+      "source_location": "L561",
       "target": "app_lib_overlay_layers_layerenabled",
       "weight": 1.0
     },
@@ -12489,7 +12489,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L560",
+      "source_location": "L562",
       "target": "app_components_overlay_layout_grid_boxstyle",
       "weight": 1.0
     },
@@ -12501,7 +12501,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_name",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L137",
+      "source_location": "L138",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -12513,7 +12513,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_notkept",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L152",
+      "source_location": "L153",
       "target": "app_components_overlay_layout_grid_problemtext",
       "weight": 1.0
     },
@@ -12525,19 +12525,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_notkept",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L152",
-      "target": "app_i18n_index_t",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_overlay_layout_grid_problemtext",
-      "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L145",
+      "source_location": "L153",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -12550,7 +12538,7 @@
       "source": "app_components_overlay_layout_grid_problemtext",
       "source_file": "app/components/overlay/layout-grid.tsx",
       "source_location": "L146",
-      "target": "app_components_overlay_layout_grid_name",
+      "target": "app_i18n_index_t",
       "weight": 1.0
     },
     {
@@ -12562,6 +12550,18 @@
       "source": "app_components_overlay_layout_grid_problemtext",
       "source_file": "app/components/overlay/layout-grid.tsx",
       "source_location": "L147",
+      "target": "app_components_overlay_layout_grid_name",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_overlay_layout_grid_problemtext",
+      "source_file": "app/components/overlay/layout-grid.tsx",
+      "source_location": "L148",
       "target": "app_components_overlay_layout_grid_smalltext",
       "weight": 1.0
     },
@@ -12573,7 +12573,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_smalltext",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L141",
+      "source_location": "L142",
       "target": "app_components_overlay_layout_grid_name",
       "weight": 1.0
     },
@@ -12585,7 +12585,19 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_smalltext",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L141",
+      "source_location": "L142",
+      "target": "app_i18n_index_t",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_overlay_overlay_composition_cameraframe",
+      "source_file": "app/components/overlay/overlay-composition.tsx",
+      "source_location": "L260",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -12633,7 +12645,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_composition_chatslot",
       "source_file": "app/components/overlay/overlay-composition.tsx",
-      "source_location": "L299",
+      "source_location": "L316",
       "target": "app_components_overlay_overlay_composition_usechatteston",
       "weight": 1.0
     },
@@ -12645,7 +12657,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_composition_chatslot",
       "source_file": "app/components/overlay/overlay-composition.tsx",
-      "source_location": "L300",
+      "source_location": "L317",
       "target": "app_components_overlay_use_chat_usechat",
       "weight": 1.0
     },
@@ -12657,7 +12669,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_composition_chatslot",
       "source_file": "app/components/overlay/overlay-composition.tsx",
-      "source_location": "L304",
+      "source_location": "L321",
       "target": "app_components_overlay_chat_layer_chatlayer",
       "weight": 1.0
     },
@@ -12669,7 +12681,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_composition_chatslot",
       "source_file": "app/components/overlay/overlay-composition.tsx",
-      "source_location": "L307",
+      "source_location": "L324",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -12825,7 +12837,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_composition_overlaycomposition",
       "source_file": "app/components/overlay/overlay-composition.tsx",
-      "source_location": "L343",
+      "source_location": "L363",
       "target": "app_lib_overlay_layers_framesize",
       "weight": 1.0
     },
@@ -12837,7 +12849,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_composition_overlaycomposition",
       "source_file": "app/components/overlay/overlay-composition.tsx",
-      "source_location": "L344",
+      "source_location": "L364",
       "target": "app_lib_overlay_layers_layerpixels",
       "weight": 1.0
     },
@@ -12849,7 +12861,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_composition_overlaycomposition",
       "source_file": "app/components/overlay/overlay-composition.tsx",
-      "source_location": "L344",
+      "source_location": "L364",
       "target": "app_lib_overlay_layers_onstream",
       "weight": 1.0
     },
@@ -12861,7 +12873,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_composition_overlaycomposition",
       "source_file": "app/components/overlay/overlay-composition.tsx",
-      "source_location": "L349",
+      "source_location": "L370",
       "target": "app_components_overlay_overlay_composition_layerbox",
       "weight": 1.0
     },
@@ -12873,7 +12885,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_composition_overlaycomposition",
       "source_file": "app/components/overlay/overlay-composition.tsx",
-      "source_location": "L350",
+      "source_location": "L371",
       "target": "app_components_overlay_overlay_composition_charactersslot",
       "weight": 1.0
     },
@@ -12885,7 +12897,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_composition_overlaycomposition",
       "source_file": "app/components/overlay/overlay-composition.tsx",
-      "source_location": "L353",
+      "source_location": "L374",
       "target": "app_components_overlay_overlay_composition_contentlayers",
       "weight": 1.0
     },
@@ -12897,7 +12909,19 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_composition_overlaycomposition",
       "source_file": "app/components/overlay/overlay-composition.tsx",
-      "source_location": "L356",
+      "source_location": "L377",
+      "target": "app_components_overlay_overlay_composition_cameraframe",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_overlay_overlay_composition_overlaycomposition",
+      "source_file": "app/components/overlay/overlay-composition.tsx",
+      "source_location": "L382",
       "target": "app_components_overlay_overlay_composition_chatslot",
       "weight": 1.0
     },
@@ -12909,7 +12933,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_composition_usechatteston",
       "source_file": "app/components/overlay/overlay-composition.tsx",
-      "source_location": "L256",
+      "source_location": "L273",
       "target": "app_lib_chat_test_chattestleft",
       "weight": 1.0
     },
@@ -28413,7 +28437,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_compact",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L83",
+      "source_location": "L84",
       "target": "app_lib_layer_geometry_compactitems",
       "weight": 1.0
     },
@@ -28425,7 +28449,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_compact",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L88",
+      "source_location": "L89",
       "target": "app_lib_layer_geometry_copycells",
       "weight": 1.0
     },
@@ -28449,7 +28473,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_diffitems",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L106",
+      "source_location": "L107",
       "target": "app_lib_layer_geometry_diffitem",
       "weight": 1.0
     },
@@ -28461,7 +28485,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_difflayers",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L112",
+      "source_location": "L113",
       "target": "app_lib_layer_geometry_diffitems",
       "weight": 1.0
     },
@@ -28473,7 +28497,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_difflayers",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L128",
+      "source_location": "L130",
       "target": "app_lib_layer_geometry_samecell",
       "weight": 1.0
     },
@@ -28485,7 +28509,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_difflayers",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L132",
+      "source_location": "L134",
       "target": "app_lib_layer_geometry_compact",
       "weight": 1.0
     },
@@ -28497,7 +28521,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_dropcell",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L383",
+      "source_location": "L388",
       "target": "app_lib_layer_geometry_movecell",
       "weight": 1.0
     },
@@ -28509,7 +28533,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_firstfreecell",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L401",
+      "source_location": "L406",
       "target": "app_lib_layer_geometry_placeproblem_58c492526df9",
       "weight": 1.0
     },
@@ -28521,7 +28545,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_growcell",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L343",
+      "source_location": "L348",
       "target": "app_lib_layer_geometry_resizecell",
       "weight": 1.0
     },
@@ -28533,7 +28557,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_handleat",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L370",
+      "source_location": "L375",
       "target": "app_lib_layer_geometry_sideat",
       "weight": 1.0
     },
@@ -28545,7 +28569,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_isemptypatch",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L190",
+      "source_location": "L194",
       "target": "app_lib_layer_geometry_compact",
       "weight": 1.0
     },
@@ -28557,7 +28581,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_layersaction_a1e1e0548f1e",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L195",
+      "source_location": "L199",
       "target": "app_lib_layer_geometry_compact",
       "weight": 1.0
     },
@@ -28569,7 +28593,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_mergepatches",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L143",
+      "source_location": "L145",
       "target": "app_lib_layer_geometry_compact",
       "weight": 1.0
     },
@@ -28581,7 +28605,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_mergepatches",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L147",
+      "source_location": "L150",
       "target": "app_lib_layer_geometry_mergeitems",
       "weight": 1.0
     },
@@ -28593,7 +28617,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_placeproblem",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L272",
+      "source_location": "L277",
       "target": "app_lib_overlay_layers_cellsoverlap",
       "weight": 1.0
     },
@@ -28605,7 +28629,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_placeproblem",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L274",
+      "source_location": "L279",
       "target": "app_lib_overlay_layers_cellfits",
       "weight": 1.0
     },
@@ -28617,7 +28641,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_placeproblem_58c492526df9",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L272",
+      "source_location": "L277",
       "target": "app_lib_overlay_layers_cellsoverlap",
       "weight": 1.0
     },
@@ -28629,7 +28653,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_placeproblem_58c492526df9",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L274",
+      "source_location": "L279",
       "target": "app_lib_overlay_layers_cellfits",
       "weight": 1.0
     },
@@ -28641,7 +28665,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_removesentcells",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L157",
+      "source_location": "L160",
       "target": "app_lib_layer_geometry_samecell",
       "weight": 1.0
     },
@@ -28653,7 +28677,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_resizecell",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L336",
+      "source_location": "L341",
       "target": "app_lib_layer_geometry_resizespan",
       "weight": 1.0
     },
@@ -28665,7 +28689,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_withenabled",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L233",
+      "source_location": "L238",
       "target": "app_lib_layer_geometry_withitem",
       "weight": 1.0
     },
@@ -28677,7 +28701,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_withoutsent",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L175",
+      "source_location": "L178",
       "target": "app_lib_layer_geometry_compact",
       "weight": 1.0
     },
@@ -28689,7 +28713,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_withoutsent",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L176",
+      "source_location": "L179",
       "target": "app_lib_layer_geometry_removesentfields",
       "weight": 1.0
     },
@@ -28701,7 +28725,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_withoutsent",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L184",
+      "source_location": "L188",
       "target": "app_lib_layer_geometry_removesentcells",
       "weight": 1.0
     },
@@ -28713,7 +28737,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_withplaced",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L417",
+      "source_location": "L422",
       "target": "app_lib_layer_geometry_placeproblem_58c492526df9",
       "weight": 1.0
     },
@@ -28725,7 +28749,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_withplaced",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L418",
+      "source_location": "L423",
       "target": "app_lib_layer_geometry_withcell",
       "weight": 1.0
     },
@@ -28737,7 +28761,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_withplaced",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L419",
+      "source_location": "L424",
       "target": "app_lib_layer_geometry_withenabled",
       "weight": 1.0
     },
@@ -28749,7 +28773,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_withremoved",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L243",
+      "source_location": "L248",
       "target": "app_lib_layer_geometry_withcell",
       "weight": 1.0
     },
@@ -28821,7 +28845,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_cellschema",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L248",
+      "source_location": "L263",
       "target": "app_lib_overlay_layers_cellfits",
       "weight": 1.0
     },
@@ -28833,7 +28857,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_cellspatchschema",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L256",
+      "source_location": "L271",
       "target": "app_lib_overlay_layers_cellschema",
       "weight": 1.0
     },
@@ -28845,7 +28869,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_cellspatchschema",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L258",
+      "source_location": "L273",
       "target": "app_lib_overlay_layers_contentrecord",
       "weight": 1.0
     },
@@ -28857,7 +28881,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_cellspatchschema",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L261",
+      "source_location": "L277",
       "target": "app_lib_overlay_layers_overlappingpair",
       "weight": 1.0
     },
@@ -28869,7 +28893,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_contentsources",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L233",
+      "source_location": "L248",
       "target": "app_lib_overlay_layers_placedcontent_5847423c4ceb",
       "weight": 1.0
     },
@@ -28881,7 +28905,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_defaultitems",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L351",
+      "source_location": "L369",
       "target": "app_lib_overlay_layers_contentrecord",
       "weight": 1.0
     },
@@ -28893,7 +28917,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_emptycells",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L133",
+      "source_location": "L145",
       "target": "app_lib_overlay_layers_contentrecord",
       "weight": 1.0
     },
@@ -28905,7 +28929,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_itempatchschema",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L282",
+      "source_location": "L298",
       "target": "app_lib_overlay_layers_refschema",
       "weight": 1.0
     },
@@ -28917,7 +28941,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_layerpixels",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L192",
+      "source_location": "L205",
       "target": "app_lib_overlay_layers_cellpixels",
       "weight": 1.0
     },
@@ -28929,7 +28953,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_mergecells",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L464",
+      "source_location": "L488",
       "target": "app_lib_overlay_layers_copycell",
       "weight": 1.0
     },
@@ -28941,7 +28965,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_mergecells",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L466",
+      "source_location": "L490",
       "target": "app_lib_overlay_layers_contentrecord",
       "weight": 1.0
     },
@@ -28953,7 +28977,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_mergelayers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L491",
+      "source_location": "L516",
       "target": "app_lib_overlay_layers_contentrecord",
       "weight": 1.0
     },
@@ -28965,7 +28989,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_mergelayers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L491",
+      "source_location": "L516",
       "target": "app_lib_overlay_layers_mergeitem",
       "weight": 1.0
     },
@@ -28977,7 +29001,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_mergelayers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L493",
+      "source_location": "L518",
       "target": "app_lib_overlay_layers_mergecells",
       "weight": 1.0
     },
@@ -28989,7 +29013,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_onstream",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L216",
+      "source_location": "L231",
       "target": "app_lib_overlay_layers_layerenabled",
       "weight": 1.0
     },
@@ -29001,7 +29025,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_overlappingpair",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L185",
+      "source_location": "L198",
       "target": "app_lib_overlay_layers_cellsoverlap",
       "weight": 1.0
     },
@@ -29013,7 +29037,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_readcell",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L328",
+      "source_location": "L345",
       "target": "app_lib_overlay_layers_cellfits",
       "weight": 1.0
     },
@@ -29025,7 +29049,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_readcell",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L328",
+      "source_location": "L345",
       "target": "app_lib_overlay_layers_copycell",
       "weight": 1.0
     },
@@ -29037,7 +29061,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_readcells",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L339",
+      "source_location": "L356",
       "target": "app_lib_overlay_layers_readcell",
       "weight": 1.0
     },
@@ -29049,7 +29073,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_readcells",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L340",
+      "source_location": "L357",
       "target": "app_lib_overlay_layers_cellsoverlap",
       "weight": 1.0
     },
@@ -29061,7 +29085,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_readcells",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L347",
+      "source_location": "L364",
       "target": "app_lib_overlay_layers_contentrecord",
       "weight": 1.0
     },
@@ -29073,7 +29097,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_storeditemschema",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L360",
+      "source_location": "L378",
       "target": "app_lib_overlay_layers_refschema",
       "weight": 1.0
     },
@@ -29085,7 +29109,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_storedlayersschema",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L397",
+      "source_location": "L419",
       "target": "app_lib_overlay_layers_readcells",
       "weight": 1.0
     },
@@ -29097,7 +29121,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_storedlayersschema",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L406",
+      "source_location": "L429",
       "target": "app_lib_overlay_layers_defaultitems",
       "weight": 1.0
     },
@@ -29109,7 +29133,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_storedlayersschema",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L407",
+      "source_location": "L430",
       "target": "app_lib_overlay_layers_emptycells",
       "weight": 1.0
     },
@@ -29121,7 +29145,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_storedlayerstext",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L447",
+      "source_location": "L470",
       "target": "app_lib_overlay_layers_storeditem",
       "weight": 1.0
     },
@@ -29133,7 +29157,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_storedlayerstext",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L456",
+      "source_location": "L480",
       "target": "app_lib_overlay_layers_storedcells",
       "weight": 1.0
     },
@@ -55833,7 +55857,7 @@
       "relation": "calls",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L142",
+      "source_location": "L143",
       "target": "tests_e2e_composition_editor_spec_dragcells",
       "weight": 1.0
     },
@@ -55845,7 +55869,7 @@
       "relation": "calls",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L329",
+      "source_location": "L330",
       "target": "tests_e2e_composition_editor_spec_withoutwrite",
       "weight": 1.0
     },
@@ -55857,7 +55881,7 @@
       "relation": "calls",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L569",
+      "source_location": "L570",
       "target": "tests_e2e_composition_editor_spec_writes",
       "weight": 1.0
     },
@@ -55869,7 +55893,7 @@
       "relation": "calls",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L607",
+      "source_location": "L608",
       "target": "tests_e2e_composition_editor_spec_cardlook",
       "weight": 1.0
     },
@@ -55881,7 +55905,7 @@
       "relation": "calls",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L722",
+      "source_location": "L723",
       "target": "tests_e2e_composition_editor_spec_realtask",
       "weight": 1.0
     },
@@ -55893,7 +55917,7 @@
       "relation": "calls",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L745",
+      "source_location": "L746",
       "target": "tests_e2e_composition_editor_spec_nudgeright",
       "weight": 1.0
     },
@@ -55905,7 +55929,7 @@
       "relation": "calls",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L748",
+      "source_location": "L749",
       "target": "tests_e2e_composition_editor_spec_storedchatcolumn",
       "weight": 1.0
     },
@@ -55917,7 +55941,7 @@
       "relation": "calls",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L797",
+      "source_location": "L798",
       "target": "tests_e2e_composition_editor_spec_leaveinapp",
       "weight": 1.0
     },
@@ -55929,7 +55953,7 @@
       "relation": "calls",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L827",
+      "source_location": "L828",
       "target": "tests_e2e_composition_editor_spec_carryright",
       "weight": 1.0
     },
@@ -55941,7 +55965,7 @@
       "relation": "calls",
       "source": "tests_e2e_composition_editor_spec_storedchatcolumn",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L780",
+      "source_location": "L781",
       "target": "tests_e2e_grid_helpers_storedlayers",
       "weight": 1.0
     },
@@ -56169,7 +56193,7 @@
       "relation": "calls",
       "source": "tests_e2e_layout_widgets_spec",
       "source_file": "tests/e2e/layout-widgets.spec.ts",
-      "source_location": "L89",
+      "source_location": "L90",
       "target": "tests_e2e_layout_widgets_spec_openeditor",
       "weight": 1.0
     },
@@ -56613,7 +56637,7 @@
       "relation": "calls",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L146",
+      "source_location": "L148",
       "target": "tests_e2e_overlay_studio_spec_obspage",
       "weight": 1.0
     },
@@ -56625,7 +56649,7 @@
       "relation": "calls",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L149",
+      "source_location": "L151",
       "target": "tests_e2e_overlay_studio_spec_layernames",
       "weight": 1.0
     },
@@ -56637,8 +56661,20 @@
       "relation": "calls",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L326",
+      "source_location": "L328",
       "target": "tests_e2e_overlay_studio_spec_emptyfeed",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_e2e_overlay_studio_spec",
+      "source_file": "tests/e2e/overlay-studio.spec.ts",
+      "source_location": "L756",
+      "target": "tests_e2e_overlay_studio_spec_alphaat",
       "weight": 1.0
     },
     {
@@ -56649,7 +56685,7 @@
       "relation": "calls",
       "source": "tests_e2e_overlay_studio_spec_obspage",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L53",
+      "source_location": "L55",
       "target": "tests_e2e_coverage_newpage",
       "weight": 1.0
     },
@@ -56661,7 +56697,7 @@
       "relation": "calls",
       "source": "tests_e2e_overlay_studio_spec_obspage",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L57",
+      "source_location": "L59",
       "target": "tests_e2e_overlay_studio_spec_emptyfeed",
       "weight": 1.0
     },
@@ -58401,7 +58437,7 @@
       "relation": "calls",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1417",
+      "source_location": "L1418",
       "target": "tests_live_control_test_characterson",
       "weight": 1.0
     },
@@ -58413,7 +58449,7 @@
       "relation": "calls",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1428",
+      "source_location": "L1429",
       "target": "tests_live_control_test_characters",
       "weight": 1.0
     },
@@ -58437,7 +58473,7 @@
       "relation": "calls",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1648",
+      "source_location": "L1649",
       "target": "tests_live_control_test_event",
       "weight": 1.0
     },
@@ -58569,7 +58605,7 @@
       "relation": "calls",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L947",
+      "source_location": "L948",
       "target": "tests_live_control_test_storedlayers",
       "weight": 1.0
     },
@@ -58581,7 +58617,7 @@
       "relation": "calls",
       "source": "tests_live_control_test_characterson",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1412",
+      "source_location": "L1413",
       "target": "tests_live_control_test_send",
       "weight": 1.0
     },
@@ -58809,7 +58845,7 @@
       "relation": "calls",
       "source": "tests_overlay_layers_test",
       "source_file": "tests/overlay-layers.test.ts",
-      "source_location": "L128",
+      "source_location": "L133",
       "target": "tests_overlay_layers_test_withcells",
       "weight": 1.0
     },
@@ -58821,7 +58857,7 @@
       "relation": "calls",
       "source": "tests_overlay_layers_test",
       "source_file": "tests/overlay-layers.test.ts",
-      "source_location": "L455",
+      "source_location": "L464",
       "target": "tests_overlay_layers_test_stored",
       "weight": 1.0
     },
@@ -58917,7 +58953,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L245",
+      "source_location": "L246",
       "target": "tests_overlay_ui_coverage_test_settings",
       "weight": 1.0
     },
@@ -58929,7 +58965,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L278",
+      "source_location": "L282",
       "target": "tests_overlay_ui_coverage_test_playground",
       "weight": 1.0
     },
@@ -58941,7 +58977,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L453",
+      "source_location": "L457",
       "target": "tests_overlay_ui_coverage_test_test",
       "weight": 1.0
     },
@@ -58953,7 +58989,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L510",
+      "source_location": "L514",
       "target": "tests_overlay_ui_coverage_test_palette",
       "weight": 1.0
     },
@@ -58965,7 +59001,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L540",
+      "source_location": "L544",
       "target": "tests_overlay_ui_coverage_test_layout",
       "weight": 1.0
     },
@@ -58977,7 +59013,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L558",
+      "source_location": "L562",
       "target": "tests_overlay_ui_coverage_test_poll",
       "weight": 1.0
     },
@@ -58989,7 +59025,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L570",
+      "source_location": "L574",
       "target": "tests_overlay_ui_coverage_test_stage",
       "weight": 1.0
     },
@@ -59001,7 +59037,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L857",
+      "source_location": "L861",
       "target": "tests_overlay_ui_coverage_test_composition",
       "weight": 1.0
     },
@@ -59013,7 +59049,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L858",
+      "source_location": "L862",
       "target": "tests_overlay_ui_coverage_test_boxes",
       "weight": 1.0
     },
@@ -59025,7 +59061,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L943",
+      "source_location": "L970",
       "target": "tests_overlay_ui_coverage_test_cards",
       "weight": 1.0
     },
@@ -59037,7 +59073,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test_settings",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L234",
+      "source_location": "L235",
       "target": "tests_overlay_ui_coverage_test_playground",
       "weight": 1.0
     },
@@ -59049,7 +59085,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L443",
+      "source_location": "L447",
       "target": "tests_overlay_ui_coverage_test_playground",
       "weight": 1.0
     },
@@ -63300,7 +63336,7 @@
       "relation": "references",
       "source": "app_components_overlay_layout_grid_gridhit",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L172",
+      "source_location": "L173",
       "target": "app_lib_layer_geometry_gridpoint",
       "weight": 1.0
     },
@@ -63312,7 +63348,7 @@
       "relation": "references",
       "source": "app_components_overlay_layout_grid_layoutgridhandle",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L73",
+      "source_location": "L74",
       "target": "app_lib_overlay_layers_gridlayer",
       "weight": 1.0
     },
@@ -63792,7 +63828,7 @@
       "relation": "references",
       "source": "app_lib_layer_geometry_resize",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L297",
+      "source_location": "L302",
       "target": "app_lib_overlay_layers_cellrect",
       "weight": 1.0
     },
@@ -113057,79 +113093,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L2",
-      "target": "tests_e2e_coverage_browser",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_e2e_overlay_studio_spec",
-      "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L2",
-      "target": "tests_e2e_coverage_close",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_e2e_overlay_studio_spec",
-      "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L2",
-      "target": "tests_e2e_coverage_expect",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_e2e_overlay_studio_spec",
-      "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L2",
-      "target": "tests_e2e_coverage_newpage",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_e2e_overlay_studio_spec",
-      "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L2",
-      "target": "tests_e2e_coverage_page",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_e2e_overlay_studio_spec",
-      "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L2",
-      "target": "tests_e2e_coverage_ts_tests_e2e_coverage_test",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_e2e_overlay_studio_spec",
-      "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L20",
+      "source_location": "L21",
       "target": "tests_e2e_live_helpers_signedin",
       "weight": 1.0
     },
@@ -113141,7 +113105,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L21",
+      "source_location": "L22",
       "target": "app_lib_overlay_layers_content_layers",
       "weight": 1.0
     },
@@ -113153,7 +113117,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L21",
+      "source_location": "L22",
       "target": "app_lib_overlay_layers_contentlayer",
       "weight": 1.0
     },
@@ -113165,7 +113129,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L21",
+      "source_location": "L22",
       "target": "app_lib_overlay_layers_emptycells",
       "weight": 1.0
     },
@@ -113177,7 +113141,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L21",
+      "source_location": "L22",
       "target": "app_lib_overlay_layers_overlaylayers",
       "weight": 1.0
     },
@@ -113190,7 +113154,67 @@
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
       "source_location": "L3",
-      "target": "tests_e2e_client_ips_clientip",
+      "target": "tests_e2e_coverage_browser",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_overlay_studio_spec",
+      "source_file": "tests/e2e/overlay-studio.spec.ts",
+      "source_location": "L3",
+      "target": "tests_e2e_coverage_close",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_overlay_studio_spec",
+      "source_file": "tests/e2e/overlay-studio.spec.ts",
+      "source_location": "L3",
+      "target": "tests_e2e_coverage_expect",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_overlay_studio_spec",
+      "source_file": "tests/e2e/overlay-studio.spec.ts",
+      "source_location": "L3",
+      "target": "tests_e2e_coverage_newpage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_overlay_studio_spec",
+      "source_file": "tests/e2e/overlay-studio.spec.ts",
+      "source_location": "L3",
+      "target": "tests_e2e_coverage_page",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_overlay_studio_spec",
+      "source_file": "tests/e2e/overlay-studio.spec.ts",
+      "source_location": "L3",
+      "target": "tests_e2e_coverage_ts_tests_e2e_coverage_test",
       "weight": 1.0
     },
     {
@@ -113202,6 +113226,18 @@
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
       "source_location": "L4",
+      "target": "tests_e2e_client_ips_clientip",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_overlay_studio_spec",
+      "source_file": "tests/e2e/overlay-studio.spec.ts",
+      "source_location": "L5",
       "target": "tests_e2e_fixtures_runsql",
       "weight": 1.0
     },
@@ -113213,7 +113249,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "tests_e2e_grid_helpers_characters_cell",
       "weight": 1.0
     },
@@ -113225,7 +113261,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "tests_e2e_grid_helpers_chat_cell",
       "weight": 1.0
     },
@@ -113237,7 +113273,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "tests_e2e_grid_helpers_chip",
       "weight": 1.0
     },
@@ -113249,7 +113285,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "tests_e2e_grid_helpers_defaultlayers",
       "weight": 1.0
     },
@@ -113261,7 +113297,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "tests_e2e_grid_helpers_feature_host",
       "weight": 1.0
     },
@@ -113273,7 +113309,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "tests_e2e_grid_helpers_gridbutton",
       "weight": 1.0
     },
@@ -113285,7 +113321,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "tests_e2e_grid_helpers_layerssql",
       "weight": 1.0
     },
@@ -113297,7 +113333,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "tests_e2e_grid_helpers_placelayer",
       "weight": 1.0
     },
@@ -113309,7 +113345,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "tests_e2e_grid_helpers_poll_cell",
       "weight": 1.0
     },
@@ -113321,7 +113357,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "tests_e2e_grid_helpers_resetlayers",
       "weight": 1.0
     },
@@ -113333,7 +113369,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "tests_e2e_grid_helpers_saved",
       "weight": 1.0
     },
@@ -113345,7 +113381,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "tests_e2e_grid_helpers_settings",
       "weight": 1.0
     },
@@ -113357,7 +113393,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "tests_e2e_grid_helpers_storedlayers",
       "weight": 1.0
     },
@@ -152630,6 +152666,18 @@
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
       "source_location": "L1",
+      "target": "ref_node_zlib",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_overlay_studio_spec",
+      "source_file": "tests/e2e/overlay-studio.spec.ts",
+      "source_location": "L2",
       "target": "ref_playwright_test",
       "type_only": true,
       "weight": 1.0
@@ -152642,19 +152690,7 @@
       "relation": "imports_from",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L2",
-      "target": "tests_e2e_coverage",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports_from",
-      "source": "tests_e2e_overlay_studio_spec",
-      "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L20",
+      "source_location": "L21",
       "target": "tests_e2e_live_helpers",
       "weight": 1.0
     },
@@ -152666,7 +152702,7 @@
       "relation": "imports_from",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L21",
+      "source_location": "L22",
       "target": "app_lib_overlay_layers",
       "weight": 1.0
     },
@@ -152679,7 +152715,7 @@
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
       "source_location": "L3",
-      "target": "tests_e2e_client_ips",
+      "target": "tests_e2e_coverage",
       "weight": 1.0
     },
     {
@@ -152691,7 +152727,7 @@
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
       "source_location": "L4",
-      "target": "tests_e2e_fixtures",
+      "target": "tests_e2e_client_ips",
       "weight": 1.0
     },
     {
@@ -152703,6 +152739,18 @@
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
       "source_location": "L5",
+      "target": "tests_e2e_fixtures",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_overlay_studio_spec",
+      "source_file": "tests/e2e/overlay-studio.spec.ts",
+      "source_location": "L6",
       "target": "tests_e2e_grid_helpers",
       "weight": 1.0
     },
@@ -167663,7 +167711,7 @@
       "relation": "contains",
       "source": "app_components_overlay_layout_grid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L100",
+      "source_location": "L101",
       "target": "app_components_overlay_layout_grid_drag",
       "weight": 1.0
     },
@@ -167674,7 +167722,7 @@
       "relation": "contains",
       "source": "app_components_overlay_layout_grid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L105",
+      "source_location": "L106",
       "target": "app_components_overlay_layout_grid_not_kept",
       "weight": 1.0
     },
@@ -167685,7 +167733,7 @@
       "relation": "contains",
       "source": "app_components_overlay_layout_grid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L110",
+      "source_location": "L111",
       "target": "app_components_overlay_layout_grid_kept",
       "weight": 1.0
     },
@@ -167696,7 +167744,7 @@
       "relation": "contains",
       "source": "app_components_overlay_layout_grid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L117",
+      "source_location": "L118",
       "target": "app_components_overlay_layout_grid_dragshape",
       "weight": 1.0
     },
@@ -167707,7 +167755,7 @@
       "relation": "contains",
       "source": "app_components_overlay_layout_grid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L126",
+      "source_location": "L127",
       "target": "app_components_overlay_layout_grid_belowminimum",
       "weight": 1.0
     },
@@ -167718,7 +167766,7 @@
       "relation": "contains",
       "source": "app_components_overlay_layout_grid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L132",
+      "source_location": "L133",
       "target": "app_components_overlay_layout_grid_samerect",
       "weight": 1.0
     },
@@ -167729,7 +167777,7 @@
       "relation": "contains",
       "source": "app_components_overlay_layout_grid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L136",
+      "source_location": "L137",
       "target": "app_components_overlay_layout_grid_name",
       "weight": 1.0
     },
@@ -167740,7 +167788,7 @@
       "relation": "contains",
       "source": "app_components_overlay_layout_grid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L140",
+      "source_location": "L141",
       "target": "app_components_overlay_layout_grid_smalltext",
       "weight": 1.0
     },
@@ -167751,7 +167799,7 @@
       "relation": "contains",
       "source": "app_components_overlay_layout_grid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L144",
+      "source_location": "L145",
       "target": "app_components_overlay_layout_grid_problemtext",
       "weight": 1.0
     },
@@ -167762,7 +167810,7 @@
       "relation": "contains",
       "source": "app_components_overlay_layout_grid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L151",
+      "source_location": "L152",
       "target": "app_components_overlay_layout_grid_notkept",
       "weight": 1.0
     },
@@ -167773,7 +167821,7 @@
       "relation": "contains",
       "source": "app_components_overlay_layout_grid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L156",
+      "source_location": "L157",
       "target": "app_components_overlay_layout_grid_cursortext",
       "weight": 1.0
     },
@@ -167784,7 +167832,7 @@
       "relation": "contains",
       "source": "app_components_overlay_layout_grid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L161",
+      "source_location": "L162",
       "target": "app_components_overlay_layout_grid_placetext",
       "weight": 1.0
     },
@@ -167795,7 +167843,7 @@
       "relation": "contains",
       "source": "app_components_overlay_layout_grid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L165",
+      "source_location": "L166",
       "target": "app_components_overlay_layout_grid_boxstyle",
       "weight": 1.0
     },
@@ -167806,7 +167854,7 @@
       "relation": "contains",
       "source": "app_components_overlay_layout_grid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L171",
+      "source_location": "L172",
       "target": "app_components_overlay_layout_grid_gridhit",
       "weight": 1.0
     },
@@ -167817,7 +167865,7 @@
       "relation": "contains",
       "source": "app_components_overlay_layout_grid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L177",
+      "source_location": "L178",
       "target": "app_components_overlay_layout_grid_inbox",
       "weight": 1.0
     },
@@ -167828,7 +167876,7 @@
       "relation": "contains",
       "source": "app_components_overlay_layout_grid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L181",
+      "source_location": "L182",
       "target": "app_components_overlay_layout_grid_gridhit_3ac12e2e5bff",
       "weight": 1.0
     },
@@ -167839,7 +167887,7 @@
       "relation": "contains",
       "source": "app_components_overlay_layout_grid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L190",
+      "source_location": "L191",
       "target": "app_components_overlay_layout_grid_removedrop_19fb442981a9",
       "weight": 1.0
     },
@@ -167850,7 +167898,7 @@
       "relation": "contains",
       "source": "app_components_overlay_layout_grid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L213",
+      "source_location": "L214",
       "target": "app_components_overlay_layout_grid_layoutgrid",
       "weight": 1.0
     },
@@ -167883,7 +167931,7 @@
       "relation": "contains",
       "source": "app_components_overlay_layout_grid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L69",
+      "source_location": "L70",
       "target": "app_components_overlay_layout_grid_removedrop",
       "weight": 1.0
     },
@@ -167894,7 +167942,7 @@
       "relation": "contains",
       "source": "app_components_overlay_layout_grid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L71",
+      "source_location": "L72",
       "target": "app_components_overlay_layout_grid_layoutgridhandle",
       "weight": 1.0
     },
@@ -167905,7 +167953,7 @@
       "relation": "contains",
       "source": "app_components_overlay_layout_grid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L82",
+      "source_location": "L83",
       "target": "app_components_overlay_layout_grid_arrows",
       "weight": 1.0
     },
@@ -167916,7 +167964,7 @@
       "relation": "contains",
       "source": "app_components_overlay_layout_grid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L92",
+      "source_location": "L93",
       "target": "app_components_overlay_layout_grid_remove_keys",
       "weight": 1.0
     },
@@ -167994,6 +168042,17 @@
       "source": "app_components_overlay_overlay_composition",
       "source_file": "app/components/overlay/overlay-composition.tsx",
       "source_location": "L255",
+      "target": "app_components_overlay_overlay_composition_cameraframe",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_overlay_overlay_composition",
+      "source_file": "app/components/overlay/overlay-composition.tsx",
+      "source_location": "L272",
       "target": "app_components_overlay_overlay_composition_usechatteston",
       "weight": 1.0
     },
@@ -168004,7 +168063,7 @@
       "relation": "contains",
       "source": "app_components_overlay_overlay_composition",
       "source_file": "app/components/overlay/overlay-composition.tsx",
-      "source_location": "L282",
+      "source_location": "L299",
       "target": "app_components_overlay_overlay_composition_chatslot",
       "weight": 1.0
     },
@@ -168015,7 +168074,7 @@
       "relation": "contains",
       "source": "app_components_overlay_overlay_composition",
       "source_file": "app/components/overlay/overlay-composition.tsx",
-      "source_location": "L322",
+      "source_location": "L340",
       "target": "app_components_overlay_overlay_composition_overlaycomposition",
       "weight": 1.0
     },
@@ -177266,7 +177325,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L104",
+      "source_location": "L105",
       "target": "app_lib_layer_geometry_diffitems",
       "weight": 1.0
     },
@@ -177277,7 +177336,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L111",
+      "source_location": "L112",
       "target": "app_lib_layer_geometry_difflayers",
       "weight": 1.0
     },
@@ -177288,7 +177347,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L135",
+      "source_location": "L137",
       "target": "app_lib_layer_geometry_mergeitems",
       "weight": 1.0
     },
@@ -177299,7 +177358,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L142",
+      "source_location": "L144",
       "target": "app_lib_layer_geometry_mergepatches",
       "weight": 1.0
     },
@@ -177310,7 +177369,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L155",
+      "source_location": "L158",
       "target": "app_lib_layer_geometry_removesentcells",
       "weight": 1.0
     },
@@ -177321,7 +177380,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L161",
+      "source_location": "L164",
       "target": "app_lib_layer_geometry_removesentfields",
       "weight": 1.0
     },
@@ -177332,7 +177391,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L174",
+      "source_location": "L177",
       "target": "app_lib_layer_geometry_withoutsent",
       "weight": 1.0
     },
@@ -177343,7 +177402,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L189",
+      "source_location": "L193",
       "target": "app_lib_layer_geometry_isemptypatch",
       "weight": 1.0
     },
@@ -177354,7 +177413,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L194",
+      "source_location": "L198",
       "target": "app_lib_layer_geometry_layersaction_a1e1e0548f1e",
       "weight": 1.0
     },
@@ -177365,7 +177424,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L199",
+      "source_location": "L203",
       "target": "app_lib_layer_geometry_withcell",
       "weight": 1.0
     },
@@ -177376,7 +177435,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L210",
+      "source_location": "L214",
       "target": "app_lib_layer_geometry_spancells",
       "weight": 1.0
     },
@@ -177387,7 +177446,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L220",
+      "source_location": "L224",
       "target": "app_lib_layer_geometry_movecell",
       "weight": 1.0
     },
@@ -177398,7 +177457,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L230",
+      "source_location": "L234",
       "target": "app_lib_layer_geometry_withenabled",
       "weight": 1.0
     },
@@ -177409,7 +177468,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L237",
+      "source_location": "L242",
       "target": "app_lib_layer_geometry_withitem",
       "weight": 1.0
     },
@@ -177420,7 +177479,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L242",
+      "source_location": "L247",
       "target": "app_lib_layer_geometry_withremoved",
       "weight": 1.0
     },
@@ -177431,7 +177490,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L247",
+      "source_location": "L252",
       "target": "app_lib_layer_geometry_layerat",
       "weight": 1.0
     },
@@ -177442,7 +177501,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L256",
+      "source_location": "L261",
       "target": "app_lib_layer_geometry_placeproblem",
       "weight": 1.0
     },
@@ -177453,30 +177512,8 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L262",
+      "source_location": "L267",
       "target": "app_lib_layer_geometry_placeproblem_58c492526df9",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_layer_geometry",
-      "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L278",
-      "target": "app_lib_layer_geometry_resize_handles",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_layer_geometry",
-      "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L279",
-      "target": "app_lib_layer_geometry_resizehandle",
       "weight": 1.0
     },
     {
@@ -177497,8 +177534,8 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L281",
-      "target": "app_lib_layer_geometry_side",
+      "source_location": "L283",
+      "target": "app_lib_layer_geometry_resize_handles",
       "weight": 1.0
     },
     {
@@ -177509,6 +177546,28 @@
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
       "source_location": "L284",
+      "target": "app_lib_layer_geometry_resizehandle",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_layer_geometry",
+      "source_file": "app/lib/layer-geometry.ts",
+      "source_location": "L286",
+      "target": "app_lib_layer_geometry_side",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_layer_geometry",
+      "source_file": "app/lib/layer-geometry.ts",
+      "source_location": "L289",
       "target": "app_lib_layer_geometry_handle_sides",
       "weight": 1.0
     },
@@ -177519,7 +177578,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L296",
+      "source_location": "L301",
       "target": "app_lib_layer_geometry_resize",
       "weight": 1.0
     },
@@ -177530,7 +177589,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L301",
+      "source_location": "L306",
       "target": "app_lib_layer_geometry_span",
       "weight": 1.0
     },
@@ -177541,7 +177600,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L308",
+      "source_location": "L313",
       "target": "app_lib_layer_geometry_resizespan",
       "weight": 1.0
     },
@@ -177552,7 +177611,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L326",
+      "source_location": "L331",
       "target": "app_lib_layer_geometry_resizecell",
       "weight": 1.0
     },
@@ -177574,7 +177633,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L342",
+      "source_location": "L347",
       "target": "app_lib_layer_geometry_growcell",
       "weight": 1.0
     },
@@ -177585,7 +177644,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L347",
+      "source_location": "L352",
       "target": "app_lib_layer_geometry_handlelines",
       "weight": 1.0
     },
@@ -177596,7 +177655,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L357",
+      "source_location": "L362",
       "target": "app_lib_layer_geometry_sideat",
       "weight": 1.0
     },
@@ -177607,7 +177666,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L369",
+      "source_location": "L374",
       "target": "app_lib_layer_geometry_handleat",
       "weight": 1.0
     },
@@ -177618,7 +177677,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L381",
+      "source_location": "L386",
       "target": "app_lib_layer_geometry_dropcell",
       "weight": 1.0
     },
@@ -177640,7 +177699,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L390",
+      "source_location": "L395",
       "target": "app_lib_layer_geometry_firstfreecell",
       "weight": 1.0
     },
@@ -177651,7 +177710,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L410",
+      "source_location": "L415",
       "target": "app_lib_layer_geometry_withplaced",
       "weight": 1.0
     },
@@ -177739,7 +177798,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L95",
+      "source_location": "L96",
       "target": "app_lib_layer_geometry_diffitem",
       "weight": 1.0
     },
@@ -178058,7 +178117,29 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L106",
+      "source_location": "L105",
+      "target": "app_lib_overlay_layers_cellspatch",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layers",
+      "source_file": "app/lib/overlay-layers.ts",
+      "source_location": "L107",
+      "target": "app_lib_overlay_layers_layerspatch",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layers",
+      "source_file": "app/lib/overlay-layers.ts",
+      "source_location": "L116",
       "target": "app_lib_overlay_layers_content_min",
       "weight": 1.0
     },
@@ -178069,7 +178150,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L108",
+      "source_location": "L118",
       "target": "app_lib_overlay_layers_min_cells",
       "weight": 1.0
     },
@@ -178080,7 +178161,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L120",
+      "source_location": "L132",
       "target": "app_lib_overlay_layers_contentrecord",
       "weight": 1.0
     },
@@ -178091,7 +178172,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L132",
+      "source_location": "L144",
       "target": "app_lib_overlay_layers_emptycells",
       "weight": 1.0
     },
@@ -178102,7 +178183,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L136",
+      "source_location": "L148",
       "target": "app_lib_overlay_layers_defaultitem",
       "weight": 1.0
     },
@@ -178113,30 +178194,8 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L142",
-      "target": "app_lib_overlay_layers_default_layers",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_overlay_layers",
-      "source_file": "app/lib/overlay-layers.ts",
       "source_location": "L154",
-      "target": "app_lib_overlay_layers_framesize",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_overlay_layers",
-      "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L158",
-      "target": "app_lib_overlay_layers_cellpixels",
+      "target": "app_lib_overlay_layers_default_layers",
       "weight": 1.0
     },
     {
@@ -178157,19 +178216,8 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L162",
-      "target": "app_lib_overlay_layers_copycell",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_overlay_layers",
-      "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L166",
-      "target": "app_lib_overlay_layers_cellsoverlap",
+      "source_location": "L167",
+      "target": "app_lib_overlay_layers_framesize",
       "weight": 1.0
     },
     {
@@ -178191,6 +178239,39 @@
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
       "source_location": "L171",
+      "target": "app_lib_overlay_layers_cellpixels",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layers",
+      "source_file": "app/lib/overlay-layers.ts",
+      "source_location": "L175",
+      "target": "app_lib_overlay_layers_copycell",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layers",
+      "source_file": "app/lib/overlay-layers.ts",
+      "source_location": "L179",
+      "target": "app_lib_overlay_layers_cellsoverlap",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layers",
+      "source_file": "app/lib/overlay-layers.ts",
+      "source_location": "L184",
       "target": "app_lib_overlay_layers_cellfits",
       "weight": 1.0
     },
@@ -178201,30 +178282,8 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L178",
+      "source_location": "L191",
       "target": "app_lib_overlay_layers_overlappingpair",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_overlay_layers",
-      "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L190",
-      "target": "app_lib_overlay_layers_layerpixels",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_overlay_layers",
-      "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L196",
-      "target": "app_lib_overlay_layers_contentsource",
       "weight": 1.0
     },
     {
@@ -178245,8 +178304,19 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L202",
-      "target": "app_lib_overlay_layers_placedcontent",
+      "source_location": "L203",
+      "target": "app_lib_overlay_layers_layerpixels",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layers",
+      "source_file": "app/lib/overlay-layers.ts",
+      "source_location": "L209",
+      "target": "app_lib_overlay_layers_contentsource",
       "weight": 1.0
     },
     {
@@ -178267,7 +178337,18 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L210",
+      "source_location": "L215",
+      "target": "app_lib_overlay_layers_placedcontent",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layers",
+      "source_file": "app/lib/overlay-layers.ts",
+      "source_location": "L223",
       "target": "app_lib_overlay_layers_layerenabled",
       "weight": 1.0
     },
@@ -178278,7 +178359,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L215",
+      "source_location": "L230",
       "target": "app_lib_overlay_layers_onstream",
       "weight": 1.0
     },
@@ -178289,30 +178370,8 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L220",
+      "source_location": "L235",
       "target": "app_lib_overlay_layers_placedcontent_5847423c4ceb",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_overlay_layers",
-      "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L232",
-      "target": "app_lib_overlay_layers_contentsources",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_overlay_layers",
-      "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L236",
-      "target": "app_lib_overlay_layers_cellshape",
       "weight": 1.0
     },
     {
@@ -178333,8 +178392,8 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L243",
-      "target": "app_lib_overlay_layers_cellschema",
+      "source_location": "L247",
+      "target": "app_lib_overlay_layers_contentsources",
       "weight": 1.0
     },
     {
@@ -178355,63 +178414,30 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L253",
+      "source_location": "L251",
+      "target": "app_lib_overlay_layers_cellshape",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layers",
+      "source_file": "app/lib/overlay-layers.ts",
+      "source_location": "L258",
+      "target": "app_lib_overlay_layers_cellschema",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layers",
+      "source_file": "app/lib/overlay-layers.ts",
+      "source_location": "L268",
       "target": "app_lib_overlay_layers_cellspatchschema",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_overlay_layers",
-      "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L264",
-      "target": "app_lib_overlay_layers_charactertimeout",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_overlay_layers",
-      "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L265",
-      "target": "app_lib_overlay_layers_charactermax",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_overlay_layers",
-      "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L266",
-      "target": "app_lib_overlay_layers_layerbackground",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_overlay_layers",
-      "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L274",
-      "target": "app_lib_overlay_layers_refschema",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_overlay_layers",
-      "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L278",
-      "target": "app_lib_overlay_layers_itempatchschema",
       "weight": 1.0
     },
     {
@@ -178432,7 +178458,62 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L293",
+      "source_location": "L280",
+      "target": "app_lib_overlay_layers_charactertimeout",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layers",
+      "source_file": "app/lib/overlay-layers.ts",
+      "source_location": "L281",
+      "target": "app_lib_overlay_layers_charactermax",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layers",
+      "source_file": "app/lib/overlay-layers.ts",
+      "source_location": "L282",
+      "target": "app_lib_overlay_layers_layerbackground",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layers",
+      "source_file": "app/lib/overlay-layers.ts",
+      "source_location": "L290",
+      "target": "app_lib_overlay_layers_refschema",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layers",
+      "source_file": "app/lib/overlay-layers.ts",
+      "source_location": "L294",
+      "target": "app_lib_overlay_layers_itempatchschema",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layers",
+      "source_file": "app/lib/overlay-layers.ts",
+      "source_location": "L309",
       "target": "app_lib_overlay_layers_layerspatchschema",
       "weight": 1.0
     },
@@ -178443,7 +178524,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L323",
+      "source_location": "L340",
       "target": "app_lib_overlay_layers_storedcell",
       "weight": 1.0
     },
@@ -178454,7 +178535,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L326",
+      "source_location": "L343",
       "target": "app_lib_overlay_layers_readcell",
       "weight": 1.0
     },
@@ -178465,30 +178546,8 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L335",
+      "source_location": "L352",
       "target": "app_lib_overlay_layers_readcells",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_overlay_layers",
-      "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L350",
-      "target": "app_lib_overlay_layers_defaultitems",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_overlay_layers",
-      "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L355",
-      "target": "app_lib_overlay_layers_storeditemschema",
       "weight": 1.0
     },
     {
@@ -178509,7 +178568,29 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L372",
+      "source_location": "L368",
+      "target": "app_lib_overlay_layers_defaultitems",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layers",
+      "source_file": "app/lib/overlay-layers.ts",
+      "source_location": "L373",
+      "target": "app_lib_overlay_layers_storeditemschema",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layers",
+      "source_file": "app/lib/overlay-layers.ts",
+      "source_location": "L390",
       "target": "app_lib_overlay_layers_storedlayersschema",
       "weight": 1.0
     },
@@ -178520,41 +178601,8 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L415",
+      "source_location": "L438",
       "target": "app_lib_overlay_layers_layers_version",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_overlay_layers",
-      "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L418",
-      "target": "app_lib_overlay_layers_stored_layers_length",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_overlay_layers",
-      "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L420",
-      "target": "app_lib_overlay_layers_storedcells",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_overlay_layers",
-      "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L429",
-      "target": "app_lib_overlay_layers_storeditem",
       "weight": 1.0
     },
     {
@@ -178575,8 +178623,30 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L444",
-      "target": "app_lib_overlay_layers_storedlayerstext",
+      "source_location": "L441",
+      "target": "app_lib_overlay_layers_stored_layers_length",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layers",
+      "source_file": "app/lib/overlay-layers.ts",
+      "source_location": "L443",
+      "target": "app_lib_overlay_layers_storedcells",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layers",
+      "source_file": "app/lib/overlay-layers.ts",
+      "source_location": "L452",
+      "target": "app_lib_overlay_layers_storeditem",
       "weight": 1.0
     },
     {
@@ -178597,7 +178667,18 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L460",
+      "source_location": "L467",
+      "target": "app_lib_overlay_layers_storedlayerstext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layers",
+      "source_file": "app/lib/overlay-layers.ts",
+      "source_location": "L484",
       "target": "app_lib_overlay_layers_mergecells",
       "weight": 1.0
     },
@@ -178608,19 +178689,8 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L469",
+      "source_location": "L493",
       "target": "app_lib_overlay_layers_mergeitem",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_overlay_layers",
-      "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L478",
-      "target": "app_lib_overlay_layers_mergelayers",
       "weight": 1.0
     },
     {
@@ -178641,7 +178711,18 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L500",
+      "source_location": "L502",
+      "target": "app_lib_overlay_layers_mergelayers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layers",
+      "source_file": "app/lib/overlay-layers.ts",
+      "source_location": "L525",
       "target": "app_lib_overlay_layers_parselayerparam",
       "weight": 1.0
     },
@@ -178652,7 +178733,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L507",
+      "source_location": "L532",
       "target": "app_lib_overlay_layers_layerurl",
       "weight": 1.0
     },
@@ -178729,8 +178810,8 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L75",
-      "target": "app_lib_overlay_layers_contentitem",
+      "source_location": "L78",
+      "target": "app_lib_overlay_layers_cameralayer",
       "weight": 1.0
     },
     {
@@ -178751,7 +178832,18 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L86",
+      "source_location": "L83",
+      "target": "app_lib_overlay_layers_contentitem",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layers",
+      "source_file": "app/lib/overlay-layers.ts",
+      "source_location": "L94",
       "target": "app_lib_overlay_layers_ref_layers",
       "weight": 1.0
     },
@@ -178762,30 +178854,8 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L88",
-      "target": "app_lib_overlay_layers_overlaylayers",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_overlay_layers",
-      "source_file": "app/lib/overlay-layers.ts",
       "source_location": "L96",
-      "target": "app_lib_overlay_layers_cellspatch",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_overlay_layers",
-      "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L98",
-      "target": "app_lib_overlay_layers_layerspatch",
+      "target": "app_lib_overlay_layers_overlaylayers",
       "weight": 1.0
     },
     {
@@ -196549,7 +196619,7 @@
       "relation": "contains",
       "source": "docs_api_api_reference",
       "source_file": "docs/api.md",
-      "source_location": "L198",
+      "source_location": "L200",
       "target": "docs_api_later_phases",
       "weight": 1.0
     },
@@ -196560,7 +196630,7 @@
       "relation": "contains",
       "source": "docs_api_api_reference",
       "source_file": "docs/api.md",
-      "source_location": "L205",
+      "source_location": "L207",
       "target": "docs_api_discussion_updates",
       "weight": 1.0
     },
@@ -196582,7 +196652,7 @@
       "relation": "contains",
       "source": "docs_api_api_reference",
       "source_file": "docs/api.md",
-      "source_location": "L243",
+      "source_location": "L245",
       "target": "docs_api_comment_translation",
       "weight": 1.0
     },
@@ -196593,7 +196663,7 @@
       "relation": "contains",
       "source": "docs_api_api_reference",
       "source_file": "docs/api.md",
-      "source_location": "L278",
+      "source_location": "L280",
       "target": "docs_api_translation_of_new_content",
       "weight": 1.0
     },
@@ -196604,7 +196674,7 @@
       "relation": "contains",
       "source": "docs_api_api_reference",
       "source_file": "docs/api.md",
-      "source_location": "L292",
+      "source_location": "L294",
       "target": "docs_api_topic_and_poll_translation",
       "weight": 1.0
     },
@@ -196615,7 +196685,7 @@
       "relation": "contains",
       "source": "docs_api_api_reference",
       "source_file": "docs/api.md",
-      "source_location": "L310",
+      "source_location": "L312",
       "target": "docs_api_page_text_translation",
       "weight": 1.0
     },
@@ -196626,7 +196696,7 @@
       "relation": "contains",
       "source": "docs_api_api_reference",
       "source_file": "docs/api.md",
-      "source_location": "L331",
+      "source_location": "L333",
       "target": "docs_api_markdown_in_comments",
       "weight": 1.0
     },
@@ -197869,7 +197939,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_chat_behavior",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L571",
+      "source_location": "L595",
       "target": "docs_overlay_composition_chat_appearance",
       "weight": 1.0
     },
@@ -197880,7 +197950,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_chat_behavior",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L600",
+      "source_location": "L624",
       "target": "docs_overlay_composition_message_background",
       "weight": 1.0
     },
@@ -197891,7 +197961,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_chat_behavior",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L618",
+      "source_location": "L642",
       "target": "docs_overlay_composition_moderation",
       "weight": 1.0
     },
@@ -197902,7 +197972,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_chat_behavior",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L629",
+      "source_location": "L653",
       "target": "docs_overlay_composition_commands",
       "weight": 1.0
     },
@@ -197913,7 +197983,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_chat_behavior",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L638",
+      "source_location": "L662",
       "target": "docs_overlay_composition_reconnection",
       "weight": 1.0
     },
@@ -197924,7 +197994,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_editor",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L381",
+      "source_location": "L404",
       "target": "docs_overlay_composition_add_and_remove_a_layer",
       "weight": 1.0
     },
@@ -197935,7 +198005,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_editor",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L410",
+      "source_location": "L433",
       "target": "docs_overlay_composition_settings_of_the_selected_layer",
       "weight": 1.0
     },
@@ -197946,7 +198016,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_editor",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L440",
+      "source_location": "L464",
       "target": "docs_overlay_composition_keyboard",
       "weight": 1.0
     },
@@ -197957,7 +198027,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_editor",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L463",
+      "source_location": "L487",
       "target": "docs_overlay_composition_how_the_content_follows_the_size",
       "weight": 1.0
     },
@@ -197968,7 +198038,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_editor",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L484",
+      "source_location": "L508",
       "target": "docs_overlay_composition_saves",
       "weight": 1.0
     },
@@ -197979,7 +198049,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_grid_and_orientation",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L118",
+      "source_location": "L121",
       "target": "docs_overlay_composition_qr_code",
       "weight": 1.0
     },
@@ -197990,7 +198060,18 @@
       "relation": "contains",
       "source": "docs_overlay_composition_grid_and_orientation",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L150",
+      "source_location": "L153",
+      "target": "docs_overlay_composition_camera_frame",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_overlay_composition_grid_and_orientation",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L173",
       "target": "docs_overlay_composition_canvas",
       "weight": 1.0
     },
@@ -198001,7 +198082,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_grid_and_orientation",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L160",
+      "source_location": "L183",
       "target": "docs_overlay_composition_stored_values",
       "weight": 1.0
     },
@@ -198012,7 +198093,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_grid_and_orientation",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L90",
+      "source_location": "L92",
       "target": "docs_overlay_composition_layer_settings",
       "weight": 1.0
     },
@@ -198023,7 +198104,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_obs_browser_source",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L314",
+      "source_location": "L337",
       "target": "docs_overlay_composition_live_room_seats",
       "weight": 1.0
     },
@@ -198034,7 +198115,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L173",
+      "source_location": "L196",
       "target": "docs_overlay_composition_state_from_before_the_overlay_studio",
       "weight": 1.0
     },
@@ -198045,7 +198126,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L237",
+      "source_location": "L260",
       "target": "docs_overlay_composition_cells_of_120_pixels",
       "weight": 1.0
     },
@@ -198056,7 +198137,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L258",
+      "source_location": "L281",
       "target": "docs_overlay_composition_urls",
       "weight": 1.0
     },
@@ -198078,7 +198159,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L294",
+      "source_location": "L317",
       "target": "docs_overlay_composition_obs_browser_source",
       "weight": 1.0
     },
@@ -198089,7 +198170,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L322",
+      "source_location": "L345",
       "target": "docs_overlay_composition_editor",
       "weight": 1.0
     },
@@ -198100,7 +198181,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L507",
+      "source_location": "L531",
       "target": "docs_overlay_composition_test",
       "weight": 1.0
     },
@@ -198111,7 +198192,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L547",
+      "source_location": "L571",
       "target": "docs_overlay_composition_chat_behavior",
       "weight": 1.0
     },
@@ -198122,7 +198203,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L57",
+      "source_location": "L58",
       "target": "docs_overlay_composition_grid_and_orientation",
       "weight": 1.0
     },
@@ -198133,7 +198214,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L656",
+      "source_location": "L680",
       "target": "docs_overlay_composition_youtube_quota_and_sockets",
       "weight": 1.0
     },
@@ -198144,7 +198225,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L672",
+      "source_location": "L696",
       "target": "docs_overlay_composition_security",
       "weight": 1.0
     },
@@ -198155,7 +198236,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L687",
+      "source_location": "L711",
       "target": "docs_overlay_composition_limits_and_known_gaps",
       "weight": 1.0
     },
@@ -201301,7 +201382,7 @@
       "relation": "contains",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L579",
+      "source_location": "L580",
       "target": "tests_e2e_composition_editor_spec_cardlook",
       "weight": 1.0
     },
@@ -201312,7 +201393,7 @@
       "relation": "contains",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L684",
+      "source_location": "L685",
       "target": "tests_e2e_composition_editor_spec_realtask",
       "weight": 1.0
     },
@@ -201323,7 +201404,7 @@
       "relation": "contains",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L753",
+      "source_location": "L754",
       "target": "tests_e2e_composition_editor_spec_leaveinapp",
       "weight": 1.0
     },
@@ -201334,7 +201415,7 @@
       "relation": "contains",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L764",
+      "source_location": "L765",
       "target": "tests_e2e_composition_editor_spec_nudgeright",
       "weight": 1.0
     },
@@ -201345,7 +201426,7 @@
       "relation": "contains",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L772",
+      "source_location": "L773",
       "target": "tests_e2e_composition_editor_spec_carryright",
       "weight": 1.0
     },
@@ -201356,7 +201437,7 @@
       "relation": "contains",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L779",
+      "source_location": "L780",
       "target": "tests_e2e_composition_editor_spec_storedchatcolumn",
       "weight": 1.0
     },
@@ -202478,7 +202559,7 @@
       "relation": "contains",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L25",
+      "source_location": "L26",
       "target": "tests_e2e_overlay_studio_spec_place_ip",
       "weight": 1.0
     },
@@ -202489,7 +202570,7 @@
       "relation": "contains",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L26",
+      "source_location": "L27",
       "target": "tests_e2e_overlay_studio_spec_stream_ip",
       "weight": 1.0
     },
@@ -202500,7 +202581,7 @@
       "relation": "contains",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L27",
+      "source_location": "L28",
       "target": "tests_e2e_overlay_studio_spec_test_ip",
       "weight": 1.0
     },
@@ -202511,7 +202592,7 @@
       "relation": "contains",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L28",
+      "source_location": "L29",
       "target": "tests_e2e_overlay_studio_spec_legacy_ip",
       "weight": 1.0
     },
@@ -202522,7 +202603,7 @@
       "relation": "contains",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L29",
+      "source_location": "L30",
       "target": "tests_e2e_overlay_studio_spec_phone_ip",
       "weight": 1.0
     },
@@ -202533,7 +202614,7 @@
       "relation": "contains",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L30",
+      "source_location": "L31",
       "target": "tests_e2e_overlay_studio_spec_keys_ip",
       "weight": 1.0
     },
@@ -202544,7 +202625,7 @@
       "relation": "contains",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L31",
+      "source_location": "L32",
       "target": "tests_e2e_overlay_studio_spec_obs_ip",
       "weight": 1.0
     },
@@ -202555,7 +202636,7 @@
       "relation": "contains",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L32",
+      "source_location": "L33",
       "target": "tests_e2e_overlay_studio_spec_qr_ip",
       "weight": 1.0
     },
@@ -202566,7 +202647,18 @@
       "relation": "contains",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L46",
+      "source_location": "L34",
+      "target": "tests_e2e_overlay_studio_spec_camera_ip",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_overlay_studio_spec",
+      "source_file": "tests/e2e/overlay-studio.spec.ts",
+      "source_location": "L48",
       "target": "tests_e2e_overlay_studio_spec_emptyfeed",
       "weight": 1.0
     },
@@ -202577,7 +202669,7 @@
       "relation": "contains",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L52",
+      "source_location": "L54",
       "target": "tests_e2e_overlay_studio_spec_obspage",
       "weight": 1.0
     },
@@ -202588,8 +202680,19 @@
       "relation": "contains",
       "source": "tests_e2e_overlay_studio_spec",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L63",
+      "source_location": "L65",
       "target": "tests_e2e_overlay_studio_spec_layernames",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_overlay_studio_spec",
+      "source_file": "tests/e2e/overlay-studio.spec.ts",
+      "source_location": "L688",
+      "target": "tests_e2e_overlay_studio_spec_alphaat",
       "weight": 1.0
     },
     {
@@ -204766,7 +204869,7 @@
       "relation": "contains",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1401",
+      "source_location": "L1402",
       "target": "tests_live_control_test_characters",
       "weight": 1.0
     },
@@ -204777,7 +204880,7 @@
       "relation": "contains",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1410",
+      "source_location": "L1411",
       "target": "tests_live_control_test_characterson",
       "weight": 1.0
     },
@@ -204799,7 +204902,7 @@
       "relation": "contains",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1634",
+      "source_location": "L1635",
       "target": "tests_live_control_test_event",
       "weight": 1.0
     },
@@ -205393,7 +205496,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L221",
+      "source_location": "L222",
       "target": "tests_overlay_ui_coverage_test_settings",
       "weight": 1.0
     },
@@ -205426,7 +205529,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L437",
+      "source_location": "L441",
       "target": "tests_overlay_ui_coverage_test_test",
       "weight": 1.0
     },
@@ -205448,7 +205551,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L503",
+      "source_location": "L507",
       "target": "tests_overlay_ui_coverage_test_palette",
       "weight": 1.0
     },
@@ -205459,7 +205562,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L522",
+      "source_location": "L526",
       "target": "tests_overlay_ui_coverage_test_layout",
       "weight": 1.0
     },
@@ -205514,7 +205617,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L846",
+      "source_location": "L850",
       "target": "tests_overlay_ui_coverage_test_composition",
       "weight": 1.0
     },
@@ -205525,7 +205628,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L850",
+      "source_location": "L854",
       "target": "tests_overlay_ui_coverage_test_boxes",
       "weight": 1.0
     },
@@ -205536,7 +205639,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L930",
+      "source_location": "L957",
       "target": "tests_overlay_ui_coverage_test_cards",
       "weight": 1.0
     },
@@ -211642,7 +211745,7 @@
       "relation": "references",
       "source": "docs_overlay_composition",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L171",
+      "source_location": "L194",
       "target": "docs_api",
       "weight": 1.0
     },
@@ -211653,7 +211756,7 @@
       "relation": "references",
       "source": "docs_overlay_composition",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L320",
+      "source_location": "L343",
       "target": "docs_live_room_capacity",
       "weight": 1.0
     },
@@ -212147,7 +212250,7 @@
       "relation": "indirect_call",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L146",
+      "source_location": "L159",
       "target": "app_lib_overlay_layers_defaultitem",
       "weight": 1.0
     },
@@ -212159,7 +212262,7 @@
       "relation": "indirect_call",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L312",
+      "source_location": "L329",
       "target": "app_lib_overlay_layers_itempatchschema",
       "weight": 1.0
     },
@@ -212171,7 +212274,7 @@
       "relation": "indirect_call",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L391",
+      "source_location": "L413",
       "target": "app_lib_overlay_layers_defaultitems",
       "weight": 1.0
     },
@@ -212183,7 +212286,7 @@
       "relation": "indirect_call",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L391",
+      "source_location": "L413",
       "target": "app_lib_overlay_layers_storeditemschema",
       "weight": 1.0
     },
@@ -212615,7 +212718,7 @@
       "relation": "indirect_call",
       "source": "tests_layer_geometry_test",
       "source_file": "tests/layer-geometry.test.ts",
-      "source_location": "L263",
+      "source_location": "L265",
       "target": "app_components_station_shapes_box",
       "weight": 1.0
     },
@@ -212819,7 +212922,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1035",
+      "source_location": "L1062",
       "target": "app_components_channels_channel_panel_channelpanel",
       "weight": 1.0
     },
@@ -212843,7 +212946,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L270",
+      "source_location": "L274",
       "target": "app_components_overlay_layer_properties_layerproperties",
       "weight": 1.0
     },
@@ -212855,7 +212958,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L618",
+      "source_location": "L622",
       "target": "tests_playground_protocol_test_full",
       "weight": 1.0
     },
@@ -212867,7 +212970,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L753",
+      "source_location": "L757",
       "target": "app_components_overlay_overlay_composition_charactersslot",
       "weight": 1.0
     },
@@ -212879,8 +212982,20 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L857",
+      "source_location": "L861",
       "target": "tests_layer_geometry_test_layers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L932",
+      "target": "app_components_overlay_overlay_composition_overlaycomposition",
       "weight": 1.0
     },
     {
@@ -212891,7 +213006,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_cards",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L935",
+      "source_location": "L962",
       "target": "app_components_channels_channel_panel_channelpanel",
       "weight": 1.0
     },
@@ -212903,7 +213018,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_composition",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L847",
+      "source_location": "L851",
       "target": "app_components_overlay_overlay_composition_overlaycomposition",
       "weight": 1.0
     },
@@ -212927,7 +213042,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_layout",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L524",
+      "source_location": "L528",
       "target": "app_components_overlay_layout_grid_layoutgrid",
       "weight": 1.0
     },
@@ -212939,7 +213054,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_palette",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L505",
+      "source_location": "L509",
       "target": "app_components_overlay_layer_palette_layerpalette",
       "weight": 1.0
     },
@@ -212951,7 +213066,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_settings",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L226",
+      "source_location": "L227",
       "target": "app_components_overlay_layer_properties_layerproperties",
       "weight": 1.0
     },
@@ -212975,7 +213090,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L439",
+      "source_location": "L443",
       "target": "app_components_overlay_studio_test_studiotest",
       "weight": 1.0
     },
@@ -214775,8 +214890,20 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L276",
+      "source_location": "L280",
       "target": "tests_overlay_ui_coverage_test_nothing",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "collection",
+      "relation": "indirect_call",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L932",
+      "target": "app_components_channels_channel_panel_channelpanel_shown",
       "weight": 1.0
     },
     {
@@ -214787,7 +214914,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_composition",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L847",
+      "source_location": "L851",
       "target": "app_components_channels_channel_panel_channelpanel_shown",
       "weight": 1.0
     },
@@ -214799,7 +214926,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_layout",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L530",
+      "source_location": "L534",
       "target": "tests_overlay_ui_coverage_test_nothing",
       "weight": 1.0
     },
@@ -214811,7 +214938,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_palette",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L505",
+      "source_location": "L509",
       "target": "tests_overlay_ui_coverage_test_nothing",
       "weight": 1.0
     },
@@ -214835,7 +214962,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_settings",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L232",
+      "source_location": "L233",
       "target": "tests_overlay_ui_coverage_test_nothing",
       "weight": 1.0
     },
@@ -214847,7 +214974,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L444",
+      "source_location": "L448",
       "target": "tests_overlay_ui_coverage_test_nothing",
       "weight": 1.0
     },
@@ -215123,7 +215250,7 @@
       "relation": "references",
       "source": "docs_api_discussion_updates",
       "source_file": "docs/api.md",
-      "source_location": "L217",
+      "source_location": "L219",
       "target": "app_types_notificationsnapshot",
       "weight": 1.0
     },
@@ -215135,7 +215262,7 @@
       "relation": "references",
       "source": "docs_api_overlay_layers",
       "source_file": "docs/api.md",
-      "source_location": "L181",
+      "source_location": "L183",
       "target": "app_types_overlaypublic",
       "weight": 1.0
     },
@@ -215231,7 +215358,7 @@
       "relation": "references",
       "source": "docs_api_later_phases",
       "source_file": "docs/api.md",
-      "source_location": "L203",
+      "source_location": "L205",
       "target": "app_server_access_server_assertstreamerwritable",
       "weight": 1.0
     },
@@ -215255,7 +215382,7 @@
       "relation": "references",
       "source": "docs_api_markdown_in_comments",
       "source_file": "docs/api.md",
-      "source_location": "L369",
+      "source_location": "L371",
       "target": "app_lib_comment_markdown_parsecommentmarkdown",
       "weight": 1.0
     },
@@ -215279,7 +215406,7 @@
       "relation": "references",
       "source": "docs_api_later_phases",
       "source_file": "docs/api.md",
-      "source_location": "L202",
+      "source_location": "L204",
       "target": "app_server_api_router_write",
       "weight": 1.0
     }
@@ -216577,7 +216704,7 @@
       "label": "Drag",
       "norm_label": "drag",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L100"
+      "source_location": "L101"
     },
     {
       "_callable": true,
@@ -216589,7 +216716,7 @@
       "label": "GridHit",
       "norm_label": "gridhit",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L171"
+      "source_location": "L172"
     },
     {
       "_callable": true,
@@ -216601,7 +216728,7 @@
       "label": "LayoutGridHandle",
       "norm_label": "layoutgridhandle",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L71"
+      "source_location": "L72"
     },
     {
       "_callable": true,
@@ -216625,7 +216752,7 @@
       "label": "RemoveDrop",
       "norm_label": "removedrop",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L69"
+      "source_location": "L70"
     },
     {
       "_callable": true,
@@ -218209,7 +218336,7 @@
       "label": "PlaceProblem",
       "norm_label": "placeproblem",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L256"
+      "source_location": "L261"
     },
     {
       "_callable": true,
@@ -218221,7 +218348,7 @@
       "label": "Resize",
       "norm_label": "resize",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L296"
+      "source_location": "L301"
     },
     {
       "_callable": true,
@@ -218233,7 +218360,7 @@
       "label": "ResizeHandle",
       "norm_label": "resizehandle",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L279"
+      "source_location": "L284"
     },
     {
       "_callable": true,
@@ -218245,7 +218372,7 @@
       "label": "Side",
       "norm_label": "side",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L281"
+      "source_location": "L286"
     },
     {
       "_callable": true,
@@ -218257,7 +218384,7 @@
       "label": "Span",
       "norm_label": "span",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L301"
+      "source_location": "L306"
     },
     {
       "_callable": true,
@@ -218289,6 +218416,18 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_lib_overlay_layers_cameralayer",
+      "label": "CameraLayer",
+      "norm_label": "cameralayer",
+      "source_file": "app/lib/overlay-layers.ts",
+      "source_location": "L78"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_lib_overlay_layers_cellrect",
       "label": "CellRect",
       "norm_label": "cellrect",
@@ -218305,7 +218444,7 @@
       "label": "CellsPatch",
       "norm_label": "cellspatch",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L96"
+      "source_location": "L105"
     },
     {
       "_callable": true,
@@ -218341,7 +218480,7 @@
       "label": "ContentItem",
       "norm_label": "contentitem",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L75"
+      "source_location": "L83"
     },
     {
       "_callable": true,
@@ -218365,7 +218504,7 @@
       "label": "ContentSource",
       "norm_label": "contentsource",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L196"
+      "source_location": "L209"
     },
     {
       "_callable": true,
@@ -218413,7 +218552,7 @@
       "label": "LayersPatch",
       "norm_label": "layerspatch",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L98"
+      "source_location": "L107"
     },
     {
       "_callable": true,
@@ -218449,7 +218588,7 @@
       "label": "OverlayLayers",
       "norm_label": "overlaylayers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L88"
+      "source_location": "L96"
     },
     {
       "_callable": true,
@@ -218461,7 +218600,7 @@
       "label": "PlacedContent",
       "norm_label": "placedcontent",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L202"
+      "source_location": "L215"
     },
     {
       "_callable": true,
@@ -227680,7 +227819,7 @@
       "label": "belowMinimum()",
       "norm_label": "belowminimum()",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L126"
+      "source_location": "L127"
     },
     {
       "_callable": true,
@@ -227691,7 +227830,7 @@
       "label": "boxStyle()",
       "norm_label": "boxstyle()",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L165"
+      "source_location": "L166"
     },
     {
       "_callable": true,
@@ -227702,7 +227841,7 @@
       "label": "cursorText()",
       "norm_label": "cursortext()",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L156"
+      "source_location": "L157"
     },
     {
       "_callable": true,
@@ -227713,7 +227852,7 @@
       "label": "dragShape()",
       "norm_label": "dragshape()",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L117"
+      "source_location": "L118"
     },
     {
       "_callable": true,
@@ -227724,7 +227863,7 @@
       "label": "gridHit()",
       "norm_label": "gridhit()",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L181"
+      "source_location": "L182"
     },
     {
       "_callable": true,
@@ -227735,7 +227874,7 @@
       "label": "inBox()",
       "norm_label": "inbox()",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L177"
+      "source_location": "L178"
     },
     {
       "_callable": true,
@@ -227746,7 +227885,7 @@
       "label": "LayoutGrid()",
       "norm_label": "layoutgrid()",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L213"
+      "source_location": "L214"
     },
     {
       "_callable": true,
@@ -227757,7 +227896,7 @@
       "label": "name()",
       "norm_label": "name()",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L136"
+      "source_location": "L137"
     },
     {
       "_callable": true,
@@ -227768,7 +227907,7 @@
       "label": "notKept()",
       "norm_label": "notkept()",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L151"
+      "source_location": "L152"
     },
     {
       "_callable": true,
@@ -227779,7 +227918,7 @@
       "label": "placeText()",
       "norm_label": "placetext()",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L161"
+      "source_location": "L162"
     },
     {
       "_callable": true,
@@ -227790,7 +227929,7 @@
       "label": "problemText()",
       "norm_label": "problemtext()",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L144"
+      "source_location": "L145"
     },
     {
       "_callable": true,
@@ -227801,7 +227940,7 @@
       "label": "removeDrop()",
       "norm_label": "removedrop()",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L190"
+      "source_location": "L191"
     },
     {
       "_callable": true,
@@ -227812,7 +227951,7 @@
       "label": "sameRect()",
       "norm_label": "samerect()",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L132"
+      "source_location": "L133"
     },
     {
       "_callable": true,
@@ -227823,7 +227962,18 @@
       "label": "smallText()",
       "norm_label": "smalltext()",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L140"
+      "source_location": "L141"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_overlay_overlay_composition_cameraframe",
+      "label": "CameraFrame()",
+      "norm_label": "cameraframe()",
+      "source_file": "app/components/overlay/overlay-composition.tsx",
+      "source_location": "L255"
     },
     {
       "_callable": true,
@@ -227911,7 +228061,7 @@
       "label": "OverlayComposition()",
       "norm_label": "overlaycomposition()",
       "source_file": "app/components/overlay/overlay-composition.tsx",
-      "source_location": "L322"
+      "source_location": "L340"
     },
     {
       "_callable": true,
@@ -227933,7 +228083,7 @@
       "label": "useChatTestOn()",
       "norm_label": "usechatteston()",
       "source_file": "app/components/overlay/overlay-composition.tsx",
-      "source_location": "L255"
+      "source_location": "L272"
     },
     {
       "_callable": true,
@@ -235430,7 +235580,7 @@
       "label": "diffItem()",
       "norm_label": "diffitem()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L95"
+      "source_location": "L96"
     },
     {
       "_callable": true,
@@ -235441,7 +235591,7 @@
       "label": "diffItems()",
       "norm_label": "diffitems()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L104"
+      "source_location": "L105"
     },
     {
       "_callable": true,
@@ -235452,7 +235602,7 @@
       "label": "diffLayers()",
       "norm_label": "difflayers()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L111"
+      "source_location": "L112"
     },
     {
       "_callable": true,
@@ -235463,7 +235613,7 @@
       "label": "dropCell()",
       "norm_label": "dropcell()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L381"
+      "source_location": "L386"
     },
     {
       "_callable": true,
@@ -235474,7 +235624,7 @@
       "label": "firstFreeCell()",
       "norm_label": "firstfreecell()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L390"
+      "source_location": "L395"
     },
     {
       "_callable": true,
@@ -235485,7 +235635,7 @@
       "label": "growCell()",
       "norm_label": "growcell()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L342"
+      "source_location": "L347"
     },
     {
       "_callable": true,
@@ -235496,7 +235646,7 @@
       "label": "handleAt()",
       "norm_label": "handleat()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L369"
+      "source_location": "L374"
     },
     {
       "_callable": true,
@@ -235507,7 +235657,7 @@
       "label": "handleLines()",
       "norm_label": "handlelines()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L347"
+      "source_location": "L352"
     },
     {
       "_callable": true,
@@ -235518,7 +235668,7 @@
       "label": "isEmptyPatch()",
       "norm_label": "isemptypatch()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L189"
+      "source_location": "L193"
     },
     {
       "_callable": true,
@@ -235529,7 +235679,7 @@
       "label": "layerAt()",
       "norm_label": "layerat()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L247"
+      "source_location": "L252"
     },
     {
       "_callable": true,
@@ -235540,7 +235690,7 @@
       "label": "layersAction()",
       "norm_label": "layersaction()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L194"
+      "source_location": "L198"
     },
     {
       "_callable": true,
@@ -235551,7 +235701,7 @@
       "label": "mergeItems()",
       "norm_label": "mergeitems()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L135"
+      "source_location": "L137"
     },
     {
       "_callable": true,
@@ -235562,7 +235712,7 @@
       "label": "mergePatches()",
       "norm_label": "mergepatches()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L142"
+      "source_location": "L144"
     },
     {
       "_callable": true,
@@ -235573,7 +235723,7 @@
       "label": "moveCell()",
       "norm_label": "movecell()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L220"
+      "source_location": "L224"
     },
     {
       "_callable": true,
@@ -235584,7 +235734,7 @@
       "label": "placeProblem()",
       "norm_label": "placeproblem()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L262"
+      "source_location": "L267"
     },
     {
       "_callable": true,
@@ -235595,7 +235745,7 @@
       "label": "removeSentCells()",
       "norm_label": "removesentcells()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L155"
+      "source_location": "L158"
     },
     {
       "_callable": true,
@@ -235606,7 +235756,7 @@
       "label": "removeSentFields()",
       "norm_label": "removesentfields()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L161"
+      "source_location": "L164"
     },
     {
       "_callable": true,
@@ -235617,7 +235767,7 @@
       "label": "resizeCell()",
       "norm_label": "resizecell()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L326"
+      "source_location": "L331"
     },
     {
       "_callable": true,
@@ -235628,7 +235778,7 @@
       "label": "resizeSpan()",
       "norm_label": "resizespan()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L308"
+      "source_location": "L313"
     },
     {
       "_callable": true,
@@ -235650,7 +235800,7 @@
       "label": "sideAt()",
       "norm_label": "sideat()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L357"
+      "source_location": "L362"
     },
     {
       "_callable": true,
@@ -235661,7 +235811,7 @@
       "label": "spanCells()",
       "norm_label": "spancells()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L210"
+      "source_location": "L214"
     },
     {
       "_callable": true,
@@ -235672,7 +235822,7 @@
       "label": "withCell()",
       "norm_label": "withcell()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L199"
+      "source_location": "L203"
     },
     {
       "_callable": true,
@@ -235683,7 +235833,7 @@
       "label": "withEnabled()",
       "norm_label": "withenabled()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L230"
+      "source_location": "L234"
     },
     {
       "_callable": true,
@@ -235694,7 +235844,7 @@
       "label": "withItem()",
       "norm_label": "withitem()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L237"
+      "source_location": "L242"
     },
     {
       "_callable": true,
@@ -235705,7 +235855,7 @@
       "label": "withoutSent()",
       "norm_label": "withoutsent()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L174"
+      "source_location": "L177"
     },
     {
       "_callable": true,
@@ -235716,7 +235866,7 @@
       "label": "withPlaced()",
       "norm_label": "withplaced()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L410"
+      "source_location": "L415"
     },
     {
       "_callable": true,
@@ -235727,7 +235877,7 @@
       "label": "withRemoved()",
       "norm_label": "withremoved()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L242"
+      "source_location": "L247"
     },
     {
       "_callable": true,
@@ -235837,7 +235987,7 @@
       "label": "cellFits()",
       "norm_label": "cellfits()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L171"
+      "source_location": "L184"
     },
     {
       "_callable": true,
@@ -235848,7 +235998,7 @@
       "label": "cellPixels()",
       "norm_label": "cellpixels()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L158"
+      "source_location": "L171"
     },
     {
       "_callable": true,
@@ -235859,7 +236009,7 @@
       "label": "cellSchema()",
       "norm_label": "cellschema()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L243"
+      "source_location": "L258"
     },
     {
       "_callable": true,
@@ -235870,7 +236020,7 @@
       "label": "cellsOverlap()",
       "norm_label": "cellsoverlap()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L166"
+      "source_location": "L179"
     },
     {
       "_callable": true,
@@ -235881,7 +236031,7 @@
       "label": "cellsPatchSchema()",
       "norm_label": "cellspatchschema()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L253"
+      "source_location": "L268"
     },
     {
       "_callable": true,
@@ -235892,7 +236042,7 @@
       "label": "contentRecord()",
       "norm_label": "contentrecord()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L120"
+      "source_location": "L132"
     },
     {
       "_callable": true,
@@ -235903,7 +236053,7 @@
       "label": "contentSources()",
       "norm_label": "contentsources()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L232"
+      "source_location": "L247"
     },
     {
       "_callable": true,
@@ -235914,7 +236064,7 @@
       "label": "copyCell()",
       "norm_label": "copycell()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L162"
+      "source_location": "L175"
     },
     {
       "_callable": true,
@@ -235925,7 +236075,7 @@
       "label": "defaultItem()",
       "norm_label": "defaultitem()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L136"
+      "source_location": "L148"
     },
     {
       "_callable": true,
@@ -235936,7 +236086,7 @@
       "label": "defaultItems()",
       "norm_label": "defaultitems()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L350"
+      "source_location": "L368"
     },
     {
       "_callable": true,
@@ -235947,7 +236097,7 @@
       "label": "emptyCells()",
       "norm_label": "emptycells()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L132"
+      "source_location": "L144"
     },
     {
       "_callable": true,
@@ -235958,7 +236108,7 @@
       "label": "frameSize()",
       "norm_label": "framesize()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L154"
+      "source_location": "L167"
     },
     {
       "_callable": true,
@@ -235969,7 +236119,7 @@
       "label": "itemPatchSchema()",
       "norm_label": "itempatchschema()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L278"
+      "source_location": "L294"
     },
     {
       "_callable": true,
@@ -235980,7 +236130,7 @@
       "label": "layerEnabled()",
       "norm_label": "layerenabled()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L210"
+      "source_location": "L223"
     },
     {
       "_callable": true,
@@ -235991,7 +236141,7 @@
       "label": "layerPixels()",
       "norm_label": "layerpixels()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L190"
+      "source_location": "L203"
     },
     {
       "_callable": true,
@@ -236002,7 +236152,7 @@
       "label": "layerUrl()",
       "norm_label": "layerurl()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L507"
+      "source_location": "L532"
     },
     {
       "_callable": true,
@@ -236013,7 +236163,7 @@
       "label": "mergeCells()",
       "norm_label": "mergecells()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L460"
+      "source_location": "L484"
     },
     {
       "_callable": true,
@@ -236024,7 +236174,7 @@
       "label": "mergeItem()",
       "norm_label": "mergeitem()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L469"
+      "source_location": "L493"
     },
     {
       "_callable": true,
@@ -236035,7 +236185,7 @@
       "label": "mergeLayers()",
       "norm_label": "mergelayers()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L478"
+      "source_location": "L502"
     },
     {
       "_callable": true,
@@ -236046,7 +236196,7 @@
       "label": "onStream()",
       "norm_label": "onstream()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L215"
+      "source_location": "L230"
     },
     {
       "_callable": true,
@@ -236057,7 +236207,7 @@
       "label": "overlappingPair()",
       "norm_label": "overlappingpair()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L178"
+      "source_location": "L191"
     },
     {
       "_callable": true,
@@ -236068,7 +236218,7 @@
       "label": "parseLayerParam()",
       "norm_label": "parselayerparam()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L500"
+      "source_location": "L525"
     },
     {
       "_callable": true,
@@ -236079,7 +236229,7 @@
       "label": "placedContent()",
       "norm_label": "placedcontent()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L220"
+      "source_location": "L235"
     },
     {
       "_callable": true,
@@ -236090,7 +236240,7 @@
       "label": "readCell()",
       "norm_label": "readcell()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L326"
+      "source_location": "L343"
     },
     {
       "_callable": true,
@@ -236101,7 +236251,7 @@
       "label": "readCells()",
       "norm_label": "readcells()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L335"
+      "source_location": "L352"
     },
     {
       "_callable": true,
@@ -236112,7 +236262,7 @@
       "label": "refSchema()",
       "norm_label": "refschema()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L274"
+      "source_location": "L290"
     },
     {
       "_callable": true,
@@ -236123,7 +236273,7 @@
       "label": "storedCells()",
       "norm_label": "storedcells()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L420"
+      "source_location": "L443"
     },
     {
       "_callable": true,
@@ -236134,7 +236284,7 @@
       "label": "storedItem()",
       "norm_label": "storeditem()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L429"
+      "source_location": "L452"
     },
     {
       "_callable": true,
@@ -236145,7 +236295,7 @@
       "label": "storedItemSchema()",
       "norm_label": "storeditemschema()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L355"
+      "source_location": "L373"
     },
     {
       "_callable": true,
@@ -236156,7 +236306,7 @@
       "label": "storedLayersText()",
       "norm_label": "storedlayerstext()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L444"
+      "source_location": "L467"
     },
     {
       "_callable": true,
@@ -250342,14 +250492,14 @@
             "callee": "querySelector",
             "file": "tests/e2e/composition-editor.spec.ts",
             "lang": "typescript",
-            "line": "L584",
+            "line": "L585",
             "receiver_type": "Element"
           }
         ]
       },
       "norm_label": "cardlook()",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L579"
+      "source_location": "L580"
     },
     {
       "_callable": true,
@@ -250360,7 +250510,7 @@
       "label": "carryRight()",
       "norm_label": "carryright()",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L772"
+      "source_location": "L773"
     },
     {
       "_callable": true,
@@ -250382,7 +250532,7 @@
       "label": "leaveInApp()",
       "norm_label": "leaveinapp()",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L753"
+      "source_location": "L754"
     },
     {
       "_callable": true,
@@ -250393,7 +250543,7 @@
       "label": "nudgeRight()",
       "norm_label": "nudgeright()",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L764"
+      "source_location": "L765"
     },
     {
       "_callable": true,
@@ -250404,7 +250554,7 @@
       "label": "realTask()",
       "norm_label": "realtask()",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L684"
+      "source_location": "L685"
     },
     {
       "_callable": true,
@@ -250415,7 +250565,7 @@
       "label": "storedChatColumn()",
       "norm_label": "storedchatcolumn()",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L779"
+      "source_location": "L780"
     },
     {
       "_callable": true,
@@ -251261,6 +251411,35 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_e2e_overlay_studio_spec_alphaat",
+      "label": "alphaAt()",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "getUint32",
+            "file": "tests/e2e/overlay-studio.spec.ts",
+            "lang": "typescript",
+            "line": "L695",
+            "receiver_type": "DataView"
+          },
+          {
+            "callee": "set",
+            "file": "tests/e2e/overlay-studio.spec.ts",
+            "lang": "typescript",
+            "line": "L703",
+            "receiver_type": "Uint8Array"
+          }
+        ]
+      },
+      "norm_label": "alphaat()",
+      "source_file": "tests/e2e/overlay-studio.spec.ts",
+      "source_location": "L688"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_e2e_overlay_studio_spec_emptyfeed",
       "label": "emptyFeed()",
       "metadata": {
@@ -251269,14 +251448,14 @@
             "callee": "send",
             "file": "tests/e2e/overlay-studio.spec.ts",
             "lang": "typescript",
-            "line": "L48",
+            "line": "L50",
             "receiver_type": "WebSocketRoute"
           }
         ]
       },
       "norm_label": "emptyfeed()",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L46"
+      "source_location": "L48"
     },
     {
       "_callable": true,
@@ -251291,14 +251470,14 @@
             "callee": "getAttribute",
             "file": "tests/e2e/overlay-studio.spec.ts",
             "lang": "typescript",
-            "line": "L66",
+            "line": "L68",
             "receiver_type": "Locator"
           }
         ]
       },
       "norm_label": "layernames()",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L63"
+      "source_location": "L65"
     },
     {
       "_callable": true,
@@ -251309,7 +251488,7 @@
       "label": "obsPage()",
       "norm_label": "obspage()",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L52"
+      "source_location": "L54"
     },
     {
       "_callable": true,
@@ -253209,7 +253388,7 @@
       "label": "characters()",
       "norm_label": "characters()",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1401"
+      "source_location": "L1402"
     },
     {
       "_callable": true,
@@ -253220,7 +253399,7 @@
       "label": "charactersOn()",
       "norm_label": "characterson()",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1410"
+      "source_location": "L1411"
     },
     {
       "_callable": true,
@@ -253253,7 +253432,7 @@
       "label": "event()",
       "norm_label": "event()",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1634"
+      "source_location": "L1635"
     },
     {
       "_callable": true,
@@ -253627,7 +253806,7 @@
       "label": "boxes()",
       "norm_label": "boxes()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L850"
+      "source_location": "L854"
     },
     {
       "_callable": true,
@@ -253638,7 +253817,7 @@
       "label": "cards()",
       "norm_label": "cards()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L930"
+      "source_location": "L957"
     },
     {
       "_callable": true,
@@ -253649,7 +253828,7 @@
       "label": "composition()",
       "norm_label": "composition()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L846"
+      "source_location": "L850"
     },
     {
       "_callable": true,
@@ -253671,7 +253850,7 @@
       "label": "layout()",
       "norm_label": "layout()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L522"
+      "source_location": "L526"
     },
     {
       "_callable": true,
@@ -253693,7 +253872,7 @@
       "label": "palette()",
       "norm_label": "palette()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L503"
+      "source_location": "L507"
     },
     {
       "_callable": true,
@@ -253726,7 +253905,7 @@
       "label": "settings()",
       "norm_label": "settings()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L221"
+      "source_location": "L222"
     },
     {
       "_callable": true,
@@ -253748,7 +253927,7 @@
       "label": "test()",
       "norm_label": "test()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L437"
+      "source_location": "L441"
     },
     {
       "_callable": true,
@@ -257314,7 +257493,7 @@
       "label": "ARROWS",
       "norm_label": "arrows",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L82"
+      "source_location": "L83"
     },
     {
       "_origin": "ast",
@@ -257324,7 +257503,7 @@
       "label": "KEPT",
       "norm_label": "kept",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L110"
+      "source_location": "L111"
     },
     {
       "_origin": "ast",
@@ -257344,7 +257523,7 @@
       "label": "NOT_KEPT",
       "norm_label": "not_kept",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L105"
+      "source_location": "L106"
     },
     {
       "_origin": "ast",
@@ -257354,7 +257533,7 @@
       "label": "REMOVE_KEYS",
       "norm_label": "remove_keys",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L92"
+      "source_location": "L93"
     },
     {
       "_origin": "ast",
@@ -257384,7 +257563,7 @@
       "label": "ChatSlot",
       "norm_label": "chatslot",
       "source_file": "app/components/overlay/overlay-composition.tsx",
-      "source_location": "L282"
+      "source_location": "L299"
     },
     {
       "_origin": "ast",
@@ -259815,7 +259994,7 @@
       "label": "HANDLE_SIDES",
       "norm_label": "handle_sides",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L284"
+      "source_location": "L289"
     },
     {
       "_origin": "ast",
@@ -259835,7 +260014,7 @@
       "label": "RESIZE_HANDLES",
       "norm_label": "resize_handles",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L278"
+      "source_location": "L283"
     },
     {
       "_origin": "ast",
@@ -260055,7 +260234,7 @@
       "label": "cellShape",
       "norm_label": "cellshape",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L236"
+      "source_location": "L251"
     },
     {
       "_origin": "ast",
@@ -260065,7 +260244,7 @@
       "label": "characterMax",
       "norm_label": "charactermax",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L265"
+      "source_location": "L281"
     },
     {
       "_origin": "ast",
@@ -260095,7 +260274,7 @@
       "label": "characterTimeout",
       "norm_label": "charactertimeout",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L264"
+      "source_location": "L280"
     },
     {
       "_origin": "ast",
@@ -260125,7 +260304,7 @@
       "label": "CONTENT_MIN",
       "norm_label": "content_min",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L106"
+      "source_location": "L116"
     },
     {
       "_origin": "ast",
@@ -260135,7 +260314,7 @@
       "label": "DEFAULT_LAYERS",
       "norm_label": "default_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L142"
+      "source_location": "L154"
     },
     {
       "_origin": "ast",
@@ -260175,7 +260354,7 @@
       "label": "layerBackground",
       "norm_label": "layerbackground",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L266"
+      "source_location": "L282"
     },
     {
       "_origin": "ast",
@@ -260185,7 +260364,7 @@
       "label": "LAYERS_VERSION",
       "norm_label": "layers_version",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L415"
+      "source_location": "L438"
     },
     {
       "_origin": "ast",
@@ -260195,7 +260374,7 @@
       "label": "layersPatchSchema",
       "norm_label": "layerspatchschema",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L293"
+      "source_location": "L309"
     },
     {
       "_origin": "ast",
@@ -260205,7 +260384,7 @@
       "label": "MIN_CELLS",
       "norm_label": "min_cells",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L108"
+      "source_location": "L118"
     },
     {
       "_origin": "ast",
@@ -260235,7 +260414,7 @@
       "label": "REF_LAYERS",
       "norm_label": "ref_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L86"
+      "source_location": "L94"
     },
     {
       "_origin": "ast",
@@ -260245,7 +260424,7 @@
       "label": "STORED_LAYERS_LENGTH",
       "norm_label": "stored_layers_length",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L418"
+      "source_location": "L441"
     },
     {
       "_origin": "ast",
@@ -260255,7 +260434,7 @@
       "label": "storedCell",
       "norm_label": "storedcell",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L323"
+      "source_location": "L340"
     },
     {
       "_origin": "ast",
@@ -260265,7 +260444,7 @@
       "label": "storedLayersSchema",
       "norm_label": "storedlayersschema",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L372"
+      "source_location": "L390"
     },
     {
       "_origin": "ast",
@@ -267610,7 +267789,7 @@
             "callee": "scrollIntoView",
             "file": "tests/e2e/composition-editor.spec.ts",
             "lang": "typescript",
-            "line": "L102",
+            "line": "L103",
             "receiver_type": "Element"
           }
         ]
@@ -268040,14 +268219,14 @@
             "callee": "scrollIntoView",
             "file": "tests/e2e/layout-widgets.spec.ts",
             "lang": "typescript",
-            "line": "L96",
+            "line": "L97",
             "receiver_type": "Element"
           },
           {
             "callee": "boundingBox",
             "file": "tests/e2e/layout-widgets.spec.ts",
             "lang": "typescript",
-            "line": "L219",
+            "line": "L220",
             "receiver_type": "Locator"
           }
         ]
@@ -268477,49 +268656,56 @@
             "callee": "getBoundingClientRect",
             "file": "tests/e2e/overlay-studio.spec.ts",
             "lang": "typescript",
-            "line": "L153",
+            "line": "L155",
             "receiver_type": "Locator"
           },
           {
             "callee": "evaluate",
             "file": "tests/e2e/overlay-studio.spec.ts",
             "lang": "typescript",
-            "line": "L196",
+            "line": "L198",
             "receiver_type": "Locator"
           },
           {
             "callee": "closest",
             "file": "tests/e2e/overlay-studio.spec.ts",
             "lang": "typescript",
-            "line": "L284",
+            "line": "L286",
             "receiver_type": "Element"
           },
           {
             "callee": "getBoundingClientRect",
             "file": "tests/e2e/overlay-studio.spec.ts",
             "lang": "typescript",
-            "line": "L288",
+            "line": "L290",
             "receiver_type": "Element"
           },
           {
             "callee": "request",
             "file": "tests/e2e/overlay-studio.spec.ts",
             "lang": "typescript",
-            "line": "L331",
+            "line": "L333",
             "receiver_type": "Route"
           },
           {
             "callee": "fulfill",
             "file": "tests/e2e/overlay-studio.spec.ts",
             "lang": "typescript",
-            "line": "L335",
+            "line": "L337",
             "receiver_type": "Route"
           },
           {
             "callee": "boundingBox",
             "file": "tests/e2e/overlay-studio.spec.ts",
             "lang": "typescript",
-            "line": "L487",
+            "line": "L489",
+            "receiver_type": "Locator"
+          },
+          {
+            "callee": "locator",
+            "file": "tests/e2e/overlay-studio.spec.ts",
+            "lang": "typescript",
+            "line": "L749",
             "receiver_type": "Locator"
           }
         ]
@@ -268532,11 +268718,21 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_e2e_overlay_studio_spec_camera_ip",
+      "label": "CAMERA_IP",
+      "norm_label": "camera_ip",
+      "source_file": "tests/e2e/overlay-studio.spec.ts",
+      "source_location": "L34"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_e2e_overlay_studio_spec_keys_ip",
       "label": "KEYS_IP",
       "norm_label": "keys_ip",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L30"
+      "source_location": "L31"
     },
     {
       "_origin": "ast",
@@ -268546,7 +268742,7 @@
       "label": "LEGACY_IP",
       "norm_label": "legacy_ip",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L28"
+      "source_location": "L29"
     },
     {
       "_origin": "ast",
@@ -268556,7 +268752,7 @@
       "label": "OBS_IP",
       "norm_label": "obs_ip",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L31"
+      "source_location": "L32"
     },
     {
       "_origin": "ast",
@@ -268566,7 +268762,7 @@
       "label": "PHONE_IP",
       "norm_label": "phone_ip",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L29"
+      "source_location": "L30"
     },
     {
       "_origin": "ast",
@@ -268576,7 +268772,7 @@
       "label": "PLACE_IP",
       "norm_label": "place_ip",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L25"
+      "source_location": "L26"
     },
     {
       "_origin": "ast",
@@ -268586,7 +268782,7 @@
       "label": "QR_IP",
       "norm_label": "qr_ip",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L32"
+      "source_location": "L33"
     },
     {
       "_origin": "ast",
@@ -268596,7 +268792,7 @@
       "label": "STREAM_IP",
       "norm_label": "stream_ip",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L26"
+      "source_location": "L27"
     },
     {
       "_origin": "ast",
@@ -268606,7 +268802,7 @@
       "label": "TEST_IP",
       "norm_label": "test_ip",
       "source_file": "tests/e2e/overlay-studio.spec.ts",
-      "source_location": "L27"
+      "source_location": "L28"
     },
     {
       "_origin": "ast",
@@ -270939,7 +271135,7 @@
       "node_kind": "heading",
       "norm_label": "comment translation",
       "source_file": "docs/api.md",
-      "source_location": "L243"
+      "source_location": "L245"
     },
     {
       "_origin": "ast",
@@ -270950,7 +271146,7 @@
       "node_kind": "heading",
       "norm_label": "discussion updates",
       "source_file": "docs/api.md",
-      "source_location": "L205"
+      "source_location": "L207"
     },
     {
       "_origin": "ast",
@@ -270961,7 +271157,7 @@
       "node_kind": "heading",
       "norm_label": "later phases",
       "source_file": "docs/api.md",
-      "source_location": "L198"
+      "source_location": "L200"
     },
     {
       "_origin": "ast",
@@ -270972,7 +271168,7 @@
       "node_kind": "heading",
       "norm_label": "markdown in comments",
       "source_file": "docs/api.md",
-      "source_location": "L331"
+      "source_location": "L333"
     },
     {
       "_origin": "ast",
@@ -271005,7 +271201,7 @@
       "node_kind": "heading",
       "norm_label": "page text translation",
       "source_file": "docs/api.md",
-      "source_location": "L310"
+      "source_location": "L312"
     },
     {
       "_origin": "ast",
@@ -271038,7 +271234,7 @@
       "node_kind": "heading",
       "norm_label": "topic and poll translation",
       "source_file": "docs/api.md",
-      "source_location": "L292"
+      "source_location": "L294"
     },
     {
       "_origin": "ast",
@@ -271049,7 +271245,7 @@
       "node_kind": "heading",
       "norm_label": "translation of new content",
       "source_file": "docs/api.md",
-      "source_location": "L278"
+      "source_location": "L280"
     },
     {
       "_origin": "ast",
@@ -272347,7 +272543,18 @@
       "node_kind": "heading",
       "norm_label": "add and remove a layer",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L381"
+      "source_location": "L404"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_overlay_composition_camera_frame",
+      "label": "Camera frame",
+      "node_kind": "heading",
+      "norm_label": "camera frame",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L153"
     },
     {
       "_origin": "ast",
@@ -272358,7 +272565,7 @@
       "node_kind": "heading",
       "norm_label": "canvas",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L150"
+      "source_location": "L173"
     },
     {
       "_origin": "ast",
@@ -272369,7 +272576,7 @@
       "node_kind": "heading",
       "norm_label": "cells of 120 pixels",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L237"
+      "source_location": "L260"
     },
     {
       "_origin": "ast",
@@ -272380,7 +272587,7 @@
       "node_kind": "heading",
       "norm_label": "chat appearance",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L571"
+      "source_location": "L595"
     },
     {
       "_origin": "ast",
@@ -272391,7 +272598,7 @@
       "node_kind": "heading",
       "norm_label": "chat behavior",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L547"
+      "source_location": "L571"
     },
     {
       "_origin": "ast",
@@ -272402,7 +272609,7 @@
       "node_kind": "heading",
       "norm_label": "commands",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L629"
+      "source_location": "L653"
     },
     {
       "_origin": "ast",
@@ -272413,7 +272620,7 @@
       "node_kind": "heading",
       "norm_label": "editor",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L322"
+      "source_location": "L345"
     },
     {
       "_origin": "ast",
@@ -272424,7 +272631,7 @@
       "node_kind": "heading",
       "norm_label": "grid and orientation",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L57"
+      "source_location": "L58"
     },
     {
       "_origin": "ast",
@@ -272435,7 +272642,7 @@
       "node_kind": "heading",
       "norm_label": "how the content follows the size",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L463"
+      "source_location": "L487"
     },
     {
       "_origin": "ast",
@@ -272446,7 +272653,7 @@
       "node_kind": "heading",
       "norm_label": "keyboard",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L440"
+      "source_location": "L464"
     },
     {
       "_origin": "ast",
@@ -272457,7 +272664,7 @@
       "node_kind": "heading",
       "norm_label": "layer settings",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L90"
+      "source_location": "L92"
     },
     {
       "_origin": "ast",
@@ -272479,7 +272686,7 @@
       "node_kind": "heading",
       "norm_label": "limits and known gaps",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L687"
+      "source_location": "L711"
     },
     {
       "_origin": "ast",
@@ -272490,7 +272697,7 @@
       "node_kind": "heading",
       "norm_label": "live-room seats",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L314"
+      "source_location": "L337"
     },
     {
       "_origin": "ast",
@@ -272501,7 +272708,7 @@
       "node_kind": "heading",
       "norm_label": "message background",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L600"
+      "source_location": "L624"
     },
     {
       "_origin": "ast",
@@ -272512,7 +272719,7 @@
       "node_kind": "heading",
       "norm_label": "moderation",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L618"
+      "source_location": "L642"
     },
     {
       "_origin": "ast",
@@ -272523,7 +272730,7 @@
       "node_kind": "heading",
       "norm_label": "obs browser source",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L294"
+      "source_location": "L317"
     },
     {
       "_origin": "ast",
@@ -272545,7 +272752,7 @@
       "node_kind": "heading",
       "norm_label": "qr code",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L118"
+      "source_location": "L121"
     },
     {
       "_origin": "ast",
@@ -272556,7 +272763,7 @@
       "node_kind": "heading",
       "norm_label": "reconnection",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L638"
+      "source_location": "L662"
     },
     {
       "_origin": "ast",
@@ -272567,7 +272774,7 @@
       "node_kind": "heading",
       "norm_label": "saves",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L484"
+      "source_location": "L508"
     },
     {
       "_origin": "ast",
@@ -272578,7 +272785,7 @@
       "node_kind": "heading",
       "norm_label": "security",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L672"
+      "source_location": "L696"
     },
     {
       "_origin": "ast",
@@ -272589,7 +272796,7 @@
       "node_kind": "heading",
       "norm_label": "settings of the selected layer",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L410"
+      "source_location": "L433"
     },
     {
       "_origin": "ast",
@@ -272600,7 +272807,7 @@
       "node_kind": "heading",
       "norm_label": "state from before the overlay studio",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L173"
+      "source_location": "L196"
     },
     {
       "_origin": "ast",
@@ -272611,7 +272818,7 @@
       "node_kind": "heading",
       "norm_label": "stored values",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L160"
+      "source_location": "L183"
     },
     {
       "_origin": "ast",
@@ -272622,7 +272829,7 @@
       "node_kind": "heading",
       "norm_label": "test",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L507"
+      "source_location": "L531"
     },
     {
       "_origin": "ast",
@@ -272633,7 +272840,7 @@
       "node_kind": "heading",
       "norm_label": "urls",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L258"
+      "source_location": "L281"
     },
     {
       "_origin": "ast",
@@ -272644,7 +272851,7 @@
       "node_kind": "heading",
       "norm_label": "youtube quota and sockets",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L656"
+      "source_location": "L680"
     },
     {
       "_origin": "ast",

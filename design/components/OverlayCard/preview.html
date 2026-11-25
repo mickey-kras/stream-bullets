@@ -1,4 +1,4 @@
-<!-- @dsCard group="Overlay" height=1010 subtitle="On-air content layers: poll, Mash Battle, topic, up next, message, community, support" -->
+<!-- @dsCard group="Overlay" height=1060 subtitle="On-air content layers: poll, Mash Battle, topic, up next, message, community, support, camera frame" -->
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
@@ -11,7 +11,7 @@ body{margin:0;padding:20px;background:repeating-conic-gradient(var(--mock-check-
 </head><body>
 <div id="root"></div>
 <script type="text/babel">
-const { OverlayComposition, OverlayLayer, OverlayCard, OverlayPoll, OverlayMash } = window.StreamBulletsDesignSystem_e1d9fa;
+const { OverlayComposition, OverlayLayer, OverlayCard, OverlayPoll, OverlayMash, OverlayCamera } = window.StreamBulletsDesignSystem_e1d9fa;
 const SCALE = 0.5;
 const QR = "https://streambullets.com/@sunny?view=polls&entry=demo";
 
@@ -52,6 +52,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     </Cell>
     <Cell name="Community card" layer="card" cols={16} rows={6}>
       <OverlayCard kind="card" streamer="Sunny" title="Join the Discord" body="Clips, schedule changes and the homelab build log." cta="Join us" ctaTarget="https://discord.gg/sunny" />
+    </Cell>
+    <Cell name="Camera frame" layer="camera" cols={10} rows={7}>
+      <OverlayCamera hint="Your OBS camera shows here" />
     </Cell>
   </div>
 );

@@ -28,7 +28,7 @@ The code is in these files:
 
 ## Layers
 
-The composition has eight layers. Each layer can be on the grid one time.
+The composition has nine layers. Each layer can be on the grid one time.
 
 | Layer | Name in the editor | What it shows |
 | --- | --- | --- |
@@ -40,12 +40,13 @@ The composition has eight layers. Each layer can be on the grid one time.
 | `message` | Message banner | A short text of the owner, in the info style or the hype style |
 | `card` | Community card | The first Community card, or a card that the owner picks |
 | `support` | Support banner | The first support link |
+| `camera` | Camera frame | A frame with a clear window for the camera source in OBS. See [Camera frame](#camera-frame). |
 
 `poll`, `topic`, `next`, `message`, `card`, and `support` are the content layers.
 
 A layer is on stream when it has a cell in the selected orientation and its `enabled` setting is on.
 In the editor, the `enabled` setting is **Show on stream**.
-The characters are at the bottom, then the content layers, and the chat is on top.
+The characters are at the bottom, then the content layers and the camera frame, and the chat is on top.
 Layers cannot overlap, so this sequence shows only at shared edges.
 
 No layer is on the grid by default. The chat layer and the characters layer are off by default.
@@ -78,6 +79,7 @@ A layer can be on the grid of one orientation and off the grid of the other.
 | `chat` | 6 × 4 | 360 × 240 |
 | `characters` | 12 × 4 | 720 × 240 |
 | Each content layer | 8 × 4 | 480 × 240 |
+| `camera` | 6 × 4 | 360 × 240 |
 
 The characters cell sets the size of the playground world: each cell is 20 × 20 world pixels.
 A wide cell gives a long ground. A tall cell gives more sky above the ground.
@@ -96,6 +98,7 @@ Each layer has the `enabled` setting. The other settings are these:
 | `chat` | `hideCommands` and `backgroundOpacity`. See [Commands](#commands) and [Message background](#message-background). |
 | `characters` | `timeout` and `max`. See [Interactive characters](characters.md). |
 | Each content layer | `ref`, `backgroundOpacity`, and `qr` |
+| `camera` | No other setting. See [Camera frame](#camera-frame). |
 
 The settings of a content layer are these:
 
@@ -143,9 +146,29 @@ A viewer scans the QR code with a phone. The phone then opens the public page of
 - The API accepts `qr` for the `message` layer, but that layer never shows a code.
 
 The stored layers have a limit of 4000 characters. The server stores only what is not a default.
-All eight layers on the grid of the two orientations, with each setting changed, need less than half of the limit.
+All nine layers on the grid of the two orientations, with each setting changed, need less than half of the limit.
 Migration `0032` raised the limit from 1000 characters. It builds the `overlay_state` table again and keeps all rows.
 An older Worker can use the new table.
+
+### Camera frame
+
+The camera frame is a frame around a clear window. The overlay does not show a camera picture.
+StreamBullets does not use the camera of the streamer, and it does not ask for the camera permission.
+The camera is a source of the streamer in OBS.
+
+To show the camera in the frame, do these steps:
+
+1. In the editor, add the camera frame to the grid. Give it the place and the size of the camera picture.
+2. In OBS, move the camera source below the overlay source in the list of sources.
+3. In OBS, give the camera source the place and the size of the cell of the frame.
+
+The frame covers 19 design pixels at each edge of its cell. The remaining area of the cell is the window.
+The window has round corners. Thus the frame hides the corners of the camera picture.
+The label of the layer on the grid gives the size of the cell in design pixels.
+
+In the editor, the window shows the text **Your OBS camera shows here**. The overlay page never shows this text.
+The camera frame has no `ref`, no background setting, and no QR code.
+The frame is a part of the content source (`layer=content`).
 
 ### Canvas
 
@@ -165,7 +188,7 @@ The overlay reads stored and broadcast layers leniently. Thus a value from an ol
 - A field with an incorrect value takes its default value.
 - A cell outside the grid or below the minimum size reads as no cell.
 - A cell that overlaps an earlier layer reads as no cell.
-  The sequence is `chat`, `characters`, `poll`, `topic`, `next`, `message`, `card`, `support`.
+  The sequence is `chat`, `characters`, `poll`, `topic`, `next`, `message`, `card`, `support`, `camera`.
 - A layer with an incorrect value takes the defaults of that layer.
 
 The API is strict for changes. See [Overlay layers](api.md#overlay-layers).
@@ -275,8 +298,8 @@ A chat source or a characters source keeps the aspect ratio of its cell and uses
 It aligns the layer with the bottom-right corner of the viewport. Thus the newest chat rows are always visible.
 The free space stays transparent, at the left or at the top.
 
-A content source (`layer=content`) shows all the content layers on stream, without the chat and the characters.
-Each content layer stays at its cell in the canvas of the selected orientation, as in the composition.
+A content source (`layer=content`) shows all the content layers and the camera frame on stream, without the chat and the characters.
+Each of these layers stays at its cell in the canvas of the selected orientation, as in the composition.
 Thus a content source has the frame size, not the size of one layer.
 
 An unknown `layer` value shows an empty transparent page. It never shows an error.
@@ -380,7 +403,7 @@ Then the editor does not keep the change. A message under the grid gives the rea
 
 ### Add and remove a layer
 
-The palette shows one chip for each of the eight layers.
+The palette shows one chip for each of the nine layers.
 The chip of a layer on the grid of the selected orientation shows **Placed**.
 Each layer can be on the grid one time.
 
@@ -427,6 +450,7 @@ The settings show the name of the selected layer and these controls:
 | **Remove from grid** | All | Takes the layer off the grid. |
 
 Up next and the support banner have no picker. The characters layer has no background.
+The camera frame shows only a note about the camera source in OBS. See [Camera frame](#camera-frame).
 Without a selected layer, the settings show a hint.
 
 The chat settings show a warning when the chat layer is on stream and no connected platform is healthy.

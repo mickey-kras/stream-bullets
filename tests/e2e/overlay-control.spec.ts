@@ -342,6 +342,7 @@ test("the page is a flow of three numbered steps, with the channels first and co
       "+ Message banner",
       "+ Community card",
       "+ Support banner",
+      "+ Camera frame",
     ]);
     await expect(build.getByRole("region", { name: "Composition preview" })).toBeVisible();
     await expect(build.getByRole("region", { name: "No layer selected" })).toBeVisible();

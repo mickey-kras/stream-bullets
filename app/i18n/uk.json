@@ -1415,5 +1415,8 @@
   "discussion.markAnswered": "Позначити як відповідь надано",
   "discussion.unmarkAnswered": "Зняти позначку «Відповідь надано»",
   "discussion.answerTime": "Мітка часу в секундах",
-  "page.answerLead": "Коментарі з відповіддю: мітка часу до позначки, у хвилинах"
+  "page.answerLead": "Коментарі з відповіддю: мітка часу до позначки, у хвилинах",
+  "overlay.name.camera": "Рамка камери",
+  "overlay.camera.window": "Тут видно вашу камеру з OBS",
+  "overlay.camera.note": "У рамці прозоре вікно. В OBS розмістіть камеру під джерелом оверлея і задайте їй розмір вікна. StreamBullets ніколи не читає вашу камеру."
 }

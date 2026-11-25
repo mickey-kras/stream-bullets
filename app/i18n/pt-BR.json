@@ -1375,5 +1375,8 @@
   "discussion.markAnswered": "Marcar como respondido",
   "discussion.unmarkAnswered": "Remover a marca de respondido",
   "discussion.answerTime": "Marcação de tempo em segundos",
-  "page.answerLead": "Comentários respondidos: marcação de tempo antes da marca, em minutos"
+  "page.answerLead": "Comentários respondidos: marcação de tempo antes da marca, em minutos",
+  "overlay.name.camera": "Moldura da câmera",
+  "overlay.camera.window": "Sua câmera do OBS aparece aqui",
+  "overlay.camera.note": "A moldura tem uma janela transparente. No OBS, coloque sua câmera abaixo da fonte do overlay e deixe-a do tamanho da janela. O StreamBullets nunca lê sua câmera."
 }

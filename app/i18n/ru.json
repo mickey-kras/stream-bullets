@@ -1415,5 +1415,8 @@
   "discussion.markAnswered": "Отметить как отвеченный",
   "discussion.unmarkAnswered": "Снять отметку «Отвечено»",
   "discussion.answerTime": "Метка времени в секундах",
-  "page.answerLead": "Отвеченные комментарии: метка времени до отметки, в минутах"
+  "page.answerLead": "Отвеченные комментарии: метка времени до отметки, в минутах",
+  "overlay.name.camera": "Рамка камеры",
+  "overlay.camera.window": "Здесь видна ваша камера из OBS",
+  "overlay.camera.note": "В рамке прозрачное окно. В OBS поместите камеру под источником оверлея и задайте ей размер окна. StreamBullets никогда не читает вашу камеру."
 }

@@ -159,10 +159,11 @@ describe("overlay control page", () => {
       ...GRID_LAYERS,
     ]);
     const marked: boolean[] = chips.map((chip: string): boolean => chip.includes('data-placed="true"'));
-    expect(marked).toEqual([true, false, true, false, false, false, false, false]);
+    expect(marked).toEqual([true, false, true, false, false, false, false, false, false]);
     for (const name of ["Chat", "Characters", "Poll", "Topic", "Up next", "Message banner", "Community card"])
       expect(html).toContain(`<span class="ov-palette-name">${name}</span>`);
     expect(html).toContain('<span class="ov-palette-name">Support banner</span>');
+    expect(html).toContain('<span class="ov-palette-name">Camera frame</span>');
     expect(html.match(/class="ov-palette-placed">Placed</g)).toHaveLength(2);
     // A placed chip is a toggle for the selection. A chip of a layer off the grid adds the layer.
     expect(chips[0]).toContain('aria-pressed="false"');
@@ -256,9 +257,12 @@ describe("settings of the selected layer", () => {
     expect(html).toMatch(new RegExp(`<h3 class="ov-props-name" id="[^"]+">${t(LAYER_NAMES[layer])}</h3>`));
     expect(html).toContain("Show on stream");
     expect(html).toMatch(/<button type="button" data-props-remove="true">Remove from grid<\/button>/);
-    // The characters have no background. The chat, the characters and the message banner have no QR code.
-    expect(html.includes("data-props-background")).toBe(layer !== "characters");
-    expect(html.includes("data-props-qr")).toBe(layer !== "chat" && layer !== "characters" && layer !== "message");
+    // The characters and the camera frame have no background. They, the chat and the message banner have no QR code.
+    const plain: boolean = layer === "characters" || layer === "camera";
+    expect(html.includes("data-props-background")).toBe(!plain);
+    expect(html.includes("data-props-qr")).toBe(!plain && layer !== "chat" && layer !== "message");
+    // The camera frame says where the camera goes.
+    expect(html.includes("put your camera under the overlay source")).toBe(layer === "camera");
   });
 
   it("warns in the chat settings when the chat is on stream and no channel delivers chat", () => {
@@ -911,6 +915,29 @@ describe("layers in the composition", () => {
     const characters: OverlayLayers = { ...layers, characters: { ...layers.characters, enabled: true } };
     expect(boxes(composition(characters, "characters"))).toEqual(["characters left:0;top:0;width:100%;height:100%"]);
     expect(boxes(composition(characters))[0]).toMatch(/^characters left:0%;top:77\./);
+  });
+
+  it("shows the camera frame with a clear window, and the text of the window only in a preview", () => {
+    const framed: OverlayLayers = {
+      ...layers,
+      camera: { enabled: true },
+      cells: { ...layers.cells, horizontal: { ...layers.cells.horizontal, camera: { c: 20, r: 12, w: 12, h: 6 } } },
+    };
+    const html: string = composition(framed);
+    expect(boxes(html).at(-2)).toBe("camera left:62.5%;top:66.66666666666666%;width:37.5%;height:33.33333333333333%");
+    // The frame is an empty element: the window has no fill, no picture and no text on the overlay page.
+    expect(html).toContain('<div class="ov-camera" data-overlay-camera="true"></div>');
+    expect(html).not.toContain("Your OBS camera shows here");
+    const preview: string = renderToStaticMarkup(
+      createElement(OverlayComposition, { scene: shown, layers: framed, only: null, feed: null, cameraHint: true }),
+    );
+    expect(preview).toContain('<p class="ov-camera-hint" data-camera-hint="true">Your OBS camera shows here</p>');
+    // The frame goes with the content layers of a per-layer source, and not with the chat.
+    expect(boxes(composition(framed, "content")).map((box: string): string => box.split(" ")[0])).toContain("camera");
+    expect(composition(framed, "chat")).not.toContain("ov-camera");
+    // Off, or without a cell, the frame does not show.
+    expect(composition({ ...framed, camera: { enabled: false } })).not.toContain("ov-camera");
+    expect(composition({ ...layers, camera: { enabled: true } })).not.toContain("ov-camera");
   });
 
   it("uses the design canvas for the composition and for the content layers alone", () => {

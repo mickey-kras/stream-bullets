@@ -1355,5 +1355,8 @@
   "discussion.markAnswered": "标记为已回答",
   "discussion.unmarkAnswered": "取消已回答标记",
   "discussion.answerTime": "时间点（秒）",
-  "page.answerLead": "已回答的评论：标记前的时间点（分钟）"
+  "page.answerLead": "已回答的评论：标记前的时间点（分钟）",
+  "overlay.name.camera": "摄像头边框",
+  "overlay.camera.window": "你的 OBS 摄像头会显示在这里",
+  "overlay.camera.note": "边框中间是透明的窗口。在 OBS 中，把摄像头放在叠加层来源的下方，并调整到与窗口一样大。StreamBullets 从不读取你的摄像头。"
 }

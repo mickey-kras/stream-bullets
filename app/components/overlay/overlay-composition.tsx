@@ -248,6 +248,23 @@ function ContentLayers({
 }
 
 /**
+ * The camera frame: a frame with a clear window. The streamer puts the camera in OBS under the overlay source and
+ * makes it as large as the window. The inner edge of the frame is round, so the frame covers the corners of the
+ * camera picture. `hint` shows a text in the window of the editor preview. The text never shows on stream.
+ */
+function CameraFrame({ hint }: Readonly<{ hint: boolean }>): ReactNode {
+  return (
+    <div className="ov-camera" data-overlay-camera>
+      {hint && (
+        <p className="ov-camera-hint" data-camera-hint>
+          {t("overlay.camera.window")}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/**
  * Whether a chat test that ends at `until` (server time) runs now. `serverOffset` is server time minus local time.
  * A local timer ends it at the end time, also without a new server message. Off on the server and during hydration,
  * so the page hydrates without a mismatch.
@@ -317,7 +334,8 @@ const ChatSlot = memo(function ChatSlot({
  * per-layer source: the chat or the characters fill the viewport, and `content` is the content layers at their
  * cells. Null renders them all.
  * `testUntil` is the server time when the chat test ends. `charactersFeed` replaces `feed` for the characters: the
- * editor preview plays sample chat but shows the live playground.
+ * editor preview plays sample chat but shows the live playground. The camera frame is part of `content`.
+ * `cameraHint` marks the window of the camera frame for the owner: a preview sets it, and the overlay page never.
  */
 export function OverlayComposition({
   scene,
@@ -328,6 +346,7 @@ export function OverlayComposition({
   samples,
   serverOffset = 0,
   testUntil = 0,
+  cameraHint = false,
 }: Readonly<{
   scene: OverlayScene;
   layers: OverlayLayers;
@@ -337,12 +356,14 @@ export function OverlayComposition({
   samples?: readonly ActivityChat[];
   serverOffset?: number;
   testUntil?: number;
+  cameraHint?: boolean;
 }>): ReactNode {
   const shows = (layer: OverlayLayer): boolean => only === null || only === layer;
   const alone: boolean = only === "chat" || only === "characters";
   const frame = frameSize(layers.orientation);
   const chat: LayerRect | null = onStream(layers, "chat") ? layerPixels(layers, "chat") : null;
   const characters: LayerRect | null = onStream(layers, "characters") ? layerPixels(layers, "characters") : null;
+  const camera: LayerRect | null = onStream(layers, "camera") ? layerPixels(layers, "camera") : null;
   return (
     <div className="ov-composition" data-overlay-only={only ?? undefined}>
       {shows("characters") && characters && (
@@ -351,6 +372,11 @@ export function OverlayComposition({
         </LayerBox>
       )}
       {shows("content") && <ContentLayers scene={scene} layers={layers} frame={frame} />}
+      {shows("content") && camera && (
+        <LayerBox layer="camera" rect={camera} frame={frame} alone={false}>
+          <CameraFrame hint={cameraHint} />
+        </LayerBox>
+      )}
       {shows("chat") && chat && (
         <LayerBox layer="chat" rect={chat} frame={frame} alone={alone}>
           <ChatSlot

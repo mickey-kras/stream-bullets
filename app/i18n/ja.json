@@ -1355,5 +1355,8 @@
   "discussion.markAnswered": "回答済みにする",
   "discussion.unmarkAnswered": "回答済みの印を外す",
   "discussion.answerTime": "タイムコード（秒）",
-  "page.answerLead": "回答済みのコメント：印を付ける前のタイムコード（分）"
+  "page.answerLead": "回答済みのコメント：印を付ける前のタイムコード（分）",
+  "overlay.name.camera": "カメラフレーム",
+  "overlay.camera.window": "ここに OBS のカメラが表示されます",
+  "overlay.camera.note": "フレームには透明な窓があります。OBS でカメラをオーバーレイのソースの下に置き、窓と同じ大きさにしてください。StreamBullets がカメラの映像を読み取ることはありません。"
 }
