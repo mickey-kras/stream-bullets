@@ -96,6 +96,7 @@ See [Interactive characters](characters.md).
 Before the two outputs, a page had one link, and the editor selected the orientation that OBS showed.
 Migration `0046` keeps that picture. The link of a page that showed the vertical orientation is now the link of the vertical output.
 Each other link is the link of the horizontal output.
+An OBS source that connected before the two outputs connects again one time when a link of the page changes.
 
 | Layer | Minimum size in cells | Minimum size in pixels |
 | --- | --- | --- |
