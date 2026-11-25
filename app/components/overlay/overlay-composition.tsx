@@ -315,6 +315,7 @@ const ChatSlot = memo(function ChatSlot({
   samples,
   serverOffset,
   testUntil,
+  platform,
 }: Readonly<{
   feed: ActivityFeed | null;
   /** A boolean, not the layer object: a new layers snapshot (a poll update) keeps the memo when the flag is the same. */
@@ -324,9 +325,11 @@ const ChatSlot = memo(function ChatSlot({
   samples?: readonly ActivityChat[];
   serverOffset: number;
   testUntil: number;
+  /** The one platform that the output shows, also in a chat test. Null: each platform. */
+  platform: ActivityPlatform | null;
 }>): ReactNode {
   const test: boolean = useChatTestOn(testUntil, serverOffset);
-  const chat: ChatView = useChat({ feed, samples, hideCommands, serverOffset, test });
+  const chat: ChatView = useChat({ feed, samples, hideCommands, serverOffset, test, platform });
   // A new list when a test starts or ends: the cards of the other chat go at once and nothing on screen slides in.
   return (
     <>
@@ -406,6 +409,7 @@ export function OverlayComposition({
             samples={chatSamples}
             serverOffset={serverOffset}
             testUntil={testUntil}
+            platform={platform}
           />
         </LayerBox>
       )}
