@@ -564,6 +564,8 @@ export class PlaygroundSim implements SimHost {
     if (!p.admitted || p.state === "away" || p.free) return;
     p.piloted = true;
     if (HALTED_STATES.has(p.state)) setState(p, "hold");
+    // A climb in the middle of a walk ends on top of its block. The walk does not go on.
+    else if (p.state === "climb") p.after = "hold";
   }
 
   /** Starts a command action. The caller makes sure the character is walking or standing inside the walking limits. */

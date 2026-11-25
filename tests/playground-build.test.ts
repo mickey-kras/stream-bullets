@@ -207,6 +207,19 @@ describe("walking", () => {
     expect(p.state).toBe("wave");
   });
 
+  it("ends a walk with stop in the middle of a climb: the character stays on top of the block", () => {
+    const s = stage();
+    s.put(START + 2, 0);
+    s.sim.perform(s.p, "right", "", 10);
+    for (let i = 0; i < 80 && s.p.state !== "climb"; i++) s.tick();
+    expect(s.p.state).toBe("climb");
+    s.p.lastCommand = -1000;
+    s.sim.receive(chat("twitch", "builder", "!stop"));
+    s.tick(60);
+    expect(s.p.state).toBe("hold");
+    expect([s.col(), s.row()]).toEqual([START + 2, 1]);
+  });
+
   it("takes one more block when another steered character stands at the target", () => {
     const s = stage();
     s.sim.receive(chat("kick", "other", "hello"));

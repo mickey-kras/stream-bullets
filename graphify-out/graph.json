@@ -30357,7 +30357,7 @@
       "relation": "calls",
       "source": "app_lib_playground_sim_playgroundsim_checkpoint",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L837",
+      "source_location": "L839",
       "target": "app_lib_playground_sim_playgroundsim_dropflags",
       "weight": 1.0
     },
@@ -30369,7 +30369,7 @@
       "relation": "calls",
       "source": "app_lib_playground_sim_playgroundsim_checkpoint",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L847",
+      "source_location": "L849",
       "target": "app_lib_playground_sim_playgroundsim_snapshot",
       "weight": 1.0
     },
@@ -30465,7 +30465,7 @@
       "relation": "calls",
       "source": "app_lib_playground_sim_playgroundsim_extras",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L771",
+      "source_location": "L773",
       "target": "app_lib_playground_terrain_cellx",
       "weight": 1.0
     },
@@ -30477,7 +30477,7 @@
       "relation": "calls",
       "source": "app_lib_playground_sim_playgroundsim_extras",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L771",
+      "source_location": "L773",
       "target": "app_lib_playground_terrain_floory",
       "weight": 1.0
     },
@@ -30489,7 +30489,7 @@
       "relation": "calls",
       "source": "app_lib_playground_sim_playgroundsim_fullframe",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L806",
+      "source_location": "L808",
       "target": "app_lib_playground_sim_playgroundsim_chars",
       "weight": 1.0
     },
@@ -30501,7 +30501,7 @@
       "relation": "calls",
       "source": "app_lib_playground_sim_playgroundsim_fullframe",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L806",
+      "source_location": "L808",
       "target": "app_lib_playground_sim_playgroundsim_visible",
       "weight": 1.0
     },
@@ -30513,7 +30513,7 @@
       "relation": "calls",
       "source": "app_lib_playground_sim_playgroundsim_fullframe",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L807",
+      "source_location": "L809",
       "target": "app_lib_playground_sim_playgroundsim_sections",
       "weight": 1.0
     },
@@ -30573,7 +30573,7 @@
       "relation": "calls",
       "source": "app_lib_playground_sim_playgroundsim_perform",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L574",
+      "source_location": "L576",
       "target": "app_lib_playground_sim_playgroundsim_say",
       "weight": 1.0
     },
@@ -30813,7 +30813,7 @@
       "relation": "calls",
       "source": "app_lib_playground_sim_playgroundsim_restore",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L896",
+      "source_location": "L898",
       "target": "app_lib_playground_checkpoint_issuetext",
       "weight": 1.0
     },
@@ -30825,7 +30825,7 @@
       "relation": "calls",
       "source": "app_lib_playground_sim_playgroundsim_restore",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L898",
+      "source_location": "L900",
       "target": "app_lib_playground_sim_playgroundsim",
       "weight": 1.0
     },
@@ -30837,7 +30837,7 @@
       "relation": "calls",
       "source": "app_lib_playground_sim_playgroundsim_restore",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L905",
+      "source_location": "L907",
       "target": "app_lib_playground_checkpoint_restoreterrain",
       "weight": 1.0
     },
@@ -30849,7 +30849,7 @@
       "relation": "calls",
       "source": "app_lib_playground_sim_playgroundsim_restore",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L914",
+      "source_location": "L916",
       "target": "app_lib_playground_checkpoint_fromrecord",
       "weight": 1.0
     },
@@ -30873,7 +30873,7 @@
       "relation": "calls",
       "source": "app_lib_playground_sim_playgroundsim_sections",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L783",
+      "source_location": "L785",
       "target": "app_lib_playground_sim_playgroundsim_visible",
       "weight": 1.0
     },
@@ -30885,7 +30885,7 @@
       "relation": "calls",
       "source": "app_lib_playground_sim_playgroundsim_sections",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L793",
+      "source_location": "L795",
       "target": "app_lib_playground_terrain_terrainview",
       "weight": 1.0
     },
@@ -30897,7 +30897,7 @@
       "relation": "calls",
       "source": "app_lib_playground_sim_playgroundsim_sections",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L794",
+      "source_location": "L796",
       "target": "app_lib_playground_sim_playgroundsim_extras",
       "weight": 1.0
     },
@@ -31065,7 +31065,7 @@
       "relation": "calls",
       "source": "app_lib_playground_sim_playgroundsim_snapshot",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L871",
+      "source_location": "L873",
       "target": "app_lib_playground_terrain_groundstring",
       "weight": 1.0
     },
@@ -31077,7 +31077,7 @@
       "relation": "calls",
       "source": "app_lib_playground_sim_playgroundsim_snapshot",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L873",
+      "source_location": "L875",
       "target": "app_lib_playground_terrain_blocksstring",
       "weight": 1.0
     },
@@ -31089,7 +31089,7 @@
       "relation": "calls",
       "source": "app_lib_playground_sim_playgroundsim_snapshot",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L874",
+      "source_location": "L876",
       "target": "app_lib_playground_terrain_blockorder",
       "weight": 1.0
     },
@@ -31101,7 +31101,7 @@
       "relation": "calls",
       "source": "app_lib_playground_sim_playgroundsim_step",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L615",
+      "source_location": "L617",
       "target": "app_lib_playground_sim_playgroundsim_walkturn",
       "weight": 1.0
     },
@@ -31209,7 +31209,7 @@
       "relation": "calls",
       "source": "app_lib_playground_sim_playgroundsim_tickframe",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L818",
+      "source_location": "L820",
       "target": "app_lib_playground_sim_playgroundsim_chars",
       "weight": 1.0
     },
@@ -31221,7 +31221,7 @@
       "relation": "calls",
       "source": "app_lib_playground_sim_playgroundsim_tickframe",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L818",
+      "source_location": "L820",
       "target": "app_lib_playground_sim_playgroundsim_visible",
       "weight": 1.0
     },
@@ -31233,7 +31233,7 @@
       "relation": "calls",
       "source": "app_lib_playground_sim_playgroundsim_tickframe",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L820",
+      "source_location": "L822",
       "target": "app_lib_playground_sim_playgroundsim_sections",
       "weight": 1.0
     },
@@ -31245,7 +31245,7 @@
       "relation": "calls",
       "source": "app_lib_playground_sim_playgroundsim_timed",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L649",
+      "source_location": "L651",
       "target": "app_lib_playground_sim_playgroundsim_rest",
       "weight": 1.0
     },
@@ -31257,7 +31257,7 @@
       "relation": "calls",
       "source": "app_lib_playground_sim_playgroundsim_walkturn",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L627",
+      "source_location": "L629",
       "target": "app_lib_playground_core_setstate",
       "weight": 1.0
     },
@@ -31269,7 +31269,7 @@
       "relation": "calls",
       "source": "app_lib_playground_sim_playgroundsim_walkturn",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L637",
+      "source_location": "L639",
       "target": "app_lib_playground_sim_playgroundsim_say",
       "weight": 1.0
     },
@@ -31281,7 +31281,7 @@
       "relation": "calls",
       "source": "app_lib_playground_sim_playgroundsim_walkturn",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L643",
+      "source_location": "L645",
       "target": "app_lib_playground_sim_playgroundsim_perform",
       "weight": 1.0
     },
@@ -60885,7 +60885,7 @@
       "relation": "calls",
       "source": "tests_playground_build_test",
       "source_file": "tests/playground-build.test.ts",
-      "source_location": "L660",
+      "source_location": "L673",
       "target": "tests_playground_build_test_people",
       "weight": 1.0
     },
@@ -60897,7 +60897,7 @@
       "relation": "calls",
       "source": "tests_playground_build_test_people",
       "source_file": "tests/playground-build.test.ts",
-      "source_location": "L646",
+      "source_location": "L659",
       "target": "app_lib_playground_sim_playgroundsim",
       "weight": 1.0
     },
@@ -60909,7 +60909,7 @@
       "relation": "calls",
       "source": "tests_playground_build_test_people",
       "source_file": "tests/playground-build.test.ts",
-      "source_location": "L648",
+      "source_location": "L661",
       "target": "tests_playground_build_test_chat",
       "weight": 1.0
     },
@@ -66984,7 +66984,7 @@
       "relation": "references",
       "source": "app_lib_playground_sim_playgroundsim",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L583",
+      "source_location": "L585",
       "target": "app_lib_playground_crowd_command",
       "weight": 1.0
     },
@@ -66996,7 +66996,7 @@
       "relation": "references",
       "source": "app_lib_playground_sim_playgroundsim",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L583",
+      "source_location": "L585",
       "target": "app_lib_playground_crowd_participant",
       "weight": 1.0
     },
@@ -67008,7 +67008,7 @@
       "relation": "references",
       "source": "app_lib_playground_sim_playgroundsim",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L654",
+      "source_location": "L656",
       "target": "app_lib_playground_protocol_charstate",
       "weight": 1.0
     },
@@ -164165,7 +164165,7 @@
       "relation": "references",
       "source": "app_lib_playground_sim_playgroundsim_chars",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L747",
+      "source_location": "L749",
       "target": "app_lib_playground_crowd_participant",
       "weight": 1.0
     },
@@ -164213,7 +164213,7 @@
       "relation": "references",
       "source": "app_lib_playground_sim_playgroundsim_extras",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L763",
+      "source_location": "L765",
       "target": "app_lib_playground_crowd_participant",
       "weight": 1.0
     },
@@ -164261,7 +164261,7 @@
       "relation": "references",
       "source": "app_lib_playground_sim_playgroundsim_perform",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L570",
+      "source_location": "L572",
       "target": "app_lib_playground_crowd_command",
       "weight": 1.0
     },
@@ -164273,7 +164273,7 @@
       "relation": "references",
       "source": "app_lib_playground_sim_playgroundsim_perform",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L570",
+      "source_location": "L572",
       "target": "app_lib_playground_crowd_participant",
       "weight": 1.0
     },
@@ -164381,7 +164381,7 @@
       "relation": "references",
       "source": "app_lib_playground_sim_playgroundsim_snapshot",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L857",
+      "source_location": "L859",
       "target": "app_lib_playground_checkpoint_participantrecord",
       "weight": 1.0
     },
@@ -164393,7 +164393,7 @@
       "relation": "references",
       "source": "app_lib_playground_sim_playgroundsim_step",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L607",
+      "source_location": "L609",
       "target": "app_lib_playground_crowd_participant",
       "weight": 1.0
     },
@@ -164405,7 +164405,7 @@
       "relation": "references",
       "source": "app_lib_playground_sim_playgroundsim_walkturn",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L623",
+      "source_location": "L625",
       "target": "app_lib_playground_crowd_participant",
       "weight": 1.0
     },
@@ -166269,7 +166269,7 @@
       "relation": "references",
       "source": "app_lib_playground_sim_playgroundsim_chars",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L747",
+      "source_location": "L749",
       "target": "app_lib_playground_protocol_chartuple",
       "weight": 1.0
     },
@@ -166281,7 +166281,7 @@
       "relation": "references",
       "source": "app_lib_playground_sim_playgroundsim_extras",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L763",
+      "source_location": "L765",
       "target": "app_lib_playground_protocol_extrasview",
       "weight": 1.0
     },
@@ -166293,7 +166293,7 @@
       "relation": "references",
       "source": "app_lib_playground_sim_playgroundsim_fullframe",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L800",
+      "source_location": "L802",
       "target": "app_lib_playground_protocol_playgroundfullframe",
       "weight": 1.0
     },
@@ -166329,7 +166329,7 @@
       "relation": "references",
       "source": "app_lib_playground_sim_playgroundsim_sections",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L776",
+      "source_location": "L778",
       "target": "app_lib_playground_protocol_bubbleview",
       "weight": 1.0
     },
@@ -166341,7 +166341,7 @@
       "relation": "references",
       "source": "app_lib_playground_sim_playgroundsim_sections",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L776",
+      "source_location": "L778",
       "target": "app_lib_playground_protocol_extrasview",
       "weight": 1.0
     },
@@ -166353,7 +166353,7 @@
       "relation": "references",
       "source": "app_lib_playground_sim_playgroundsim_sections",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L776",
+      "source_location": "L778",
       "target": "app_lib_playground_protocol_modeview",
       "weight": 1.0
     },
@@ -166365,7 +166365,7 @@
       "relation": "references",
       "source": "app_lib_playground_sim_playgroundsim_sections",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L776",
+      "source_location": "L778",
       "target": "app_lib_playground_protocol_rosterentry",
       "weight": 1.0
     },
@@ -166377,7 +166377,7 @@
       "relation": "references",
       "source": "app_lib_playground_sim_playgroundsim_sections",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L776",
+      "source_location": "L778",
       "target": "app_lib_playground_protocol_terrainview",
       "weight": 1.0
     },
@@ -166389,7 +166389,7 @@
       "relation": "references",
       "source": "app_lib_playground_sim_playgroundsim_snapshot",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L857",
+      "source_location": "L859",
       "target": "app_lib_playground_checkpoint_checkpoint",
       "weight": 1.0
     },
@@ -166401,7 +166401,7 @@
       "relation": "references",
       "source": "app_lib_playground_sim_playgroundsim_tickframe",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L812",
+      "source_location": "L814",
       "target": "app_lib_playground_protocol_playgroundtickframe",
       "weight": 1.0
     },
@@ -166413,7 +166413,7 @@
       "relation": "references",
       "source": "app_lib_playground_sim_playgroundsim_timed",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L647",
+      "source_location": "L649",
       "target": "app_lib_playground_crowd_participant",
       "weight": 1.0
     },
@@ -166425,7 +166425,7 @@
       "relation": "references",
       "source": "app_lib_playground_sim_playgroundsim_visible",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L743",
+      "source_location": "L745",
       "target": "app_lib_playground_crowd_participant",
       "weight": 1.0
     },
@@ -211908,7 +211908,7 @@
       "relation": "contains",
       "source": "tests_playground_build_test",
       "source_file": "tests/playground-build.test.ts",
-      "source_location": "L645",
+      "source_location": "L658",
       "target": "tests_playground_build_test_people",
       "weight": 1.0
     },
@@ -215286,7 +215286,7 @@
       "relation": "method",
       "source": "app_lib_playground_sim_playgroundsim",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L570",
+      "source_location": "L572",
       "target": "app_lib_playground_sim_playgroundsim_perform",
       "weight": 1.0
     },
@@ -215297,7 +215297,7 @@
       "relation": "method",
       "source": "app_lib_playground_sim_playgroundsim",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L607",
+      "source_location": "L609",
       "target": "app_lib_playground_sim_playgroundsim_step",
       "weight": 1.0
     },
@@ -215308,7 +215308,7 @@
       "relation": "method",
       "source": "app_lib_playground_sim_playgroundsim",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L623",
+      "source_location": "L625",
       "target": "app_lib_playground_sim_playgroundsim_walkturn",
       "weight": 1.0
     },
@@ -215319,7 +215319,7 @@
       "relation": "method",
       "source": "app_lib_playground_sim_playgroundsim",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L647",
+      "source_location": "L649",
       "target": "app_lib_playground_sim_playgroundsim_timed",
       "weight": 1.0
     },
@@ -215330,7 +215330,7 @@
       "relation": "method",
       "source": "app_lib_playground_sim_playgroundsim",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L743",
+      "source_location": "L745",
       "target": "app_lib_playground_sim_playgroundsim_visible",
       "weight": 1.0
     },
@@ -215341,7 +215341,7 @@
       "relation": "method",
       "source": "app_lib_playground_sim_playgroundsim",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L747",
+      "source_location": "L749",
       "target": "app_lib_playground_sim_playgroundsim_chars",
       "weight": 1.0
     },
@@ -215352,7 +215352,7 @@
       "relation": "method",
       "source": "app_lib_playground_sim_playgroundsim",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L763",
+      "source_location": "L765",
       "target": "app_lib_playground_sim_playgroundsim_extras",
       "weight": 1.0
     },
@@ -215363,7 +215363,7 @@
       "relation": "method",
       "source": "app_lib_playground_sim_playgroundsim",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L776",
+      "source_location": "L778",
       "target": "app_lib_playground_sim_playgroundsim_sections",
       "weight": 1.0
     },
@@ -215374,7 +215374,7 @@
       "relation": "method",
       "source": "app_lib_playground_sim_playgroundsim",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L800",
+      "source_location": "L802",
       "target": "app_lib_playground_sim_playgroundsim_fullframe",
       "weight": 1.0
     },
@@ -215385,7 +215385,7 @@
       "relation": "method",
       "source": "app_lib_playground_sim_playgroundsim",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L812",
+      "source_location": "L814",
       "target": "app_lib_playground_sim_playgroundsim_tickframe",
       "weight": 1.0
     },
@@ -215396,7 +215396,7 @@
       "relation": "method",
       "source": "app_lib_playground_sim_playgroundsim",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L836",
+      "source_location": "L838",
       "target": "app_lib_playground_sim_playgroundsim_checkpoint",
       "weight": 1.0
     },
@@ -215407,7 +215407,7 @@
       "relation": "method",
       "source": "app_lib_playground_sim_playgroundsim",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L857",
+      "source_location": "L859",
       "target": "app_lib_playground_sim_playgroundsim_snapshot",
       "weight": 1.0
     },
@@ -215418,7 +215418,7 @@
       "relation": "method",
       "source": "app_lib_playground_sim_playgroundsim",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L885",
+      "source_location": "L887",
       "target": "app_lib_playground_sim_playgroundsim_restore",
       "weight": 1.0
     },
@@ -218930,7 +218930,7 @@
       "relation": "indirect_call",
       "source": "app_lib_playground_sim_playgroundsim_checkpoint",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L847",
+      "source_location": "L849",
       "target": "app_lib_playground_checkpoint_torecord",
       "weight": 1.0
     },
@@ -220118,7 +220118,7 @@
       "relation": "calls",
       "source": "app_lib_playground_sim_playgroundsim_restore",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L919",
+      "source_location": "L921",
       "target": "app_lib_playground_sim_playgroundsim_visible",
       "weight": 1.0
     },
@@ -220130,7 +220130,7 @@
       "relation": "calls",
       "source": "app_lib_playground_sim_playgroundsim_restore",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L921",
+      "source_location": "L923",
       "target": "app_lib_playground_sim_playgroundsim_settle",
       "weight": 1.0
     },
@@ -221258,7 +221258,7 @@
       "relation": "calls",
       "source": "tests_playground_build_test_people",
       "source_file": "tests/playground-build.test.ts",
-      "source_location": "L648",
+      "source_location": "L661",
       "target": "app_lib_playground_sim_playgroundsim_receive",
       "weight": 1.0
     },
@@ -221270,7 +221270,7 @@
       "relation": "calls",
       "source": "tests_playground_build_test_people",
       "source_file": "tests/playground-build.test.ts",
-      "source_location": "L650",
+      "source_location": "L663",
       "target": "app_lib_playground_sim_playgroundsim_list",
       "weight": 1.0
     },
@@ -244262,7 +244262,7 @@
       "label": ".chars()",
       "norm_label": ".chars()",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L747"
+      "source_location": "L749"
     },
     {
       "_callable": true,
@@ -244284,7 +244284,7 @@
       "label": ".checkpoint()",
       "norm_label": ".checkpoint()",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L836"
+      "source_location": "L838"
     },
     {
       "_callable": true,
@@ -244372,7 +244372,7 @@
       "label": ".extras()",
       "norm_label": ".extras()",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L763"
+      "source_location": "L765"
     },
     {
       "_callable": true,
@@ -244394,7 +244394,7 @@
       "label": ".fullFrame()",
       "norm_label": ".fullframe()",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L800"
+      "source_location": "L802"
     },
     {
       "_callable": true,
@@ -244460,7 +244460,7 @@
       "label": ".perform()",
       "norm_label": ".perform()",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L570"
+      "source_location": "L572"
     },
     {
       "_callable": true,
@@ -244570,7 +244570,7 @@
       "label": ".restore()",
       "norm_label": ".restore()",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L885"
+      "source_location": "L887"
     },
     {
       "_callable": true,
@@ -244647,7 +244647,7 @@
       "label": ".sections()",
       "norm_label": ".sections()",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L776"
+      "source_location": "L778"
     },
     {
       "_callable": true,
@@ -244713,7 +244713,7 @@
       "label": ".snapshot()",
       "norm_label": ".snapshot()",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L857"
+      "source_location": "L859"
     },
     {
       "_callable": true,
@@ -244735,7 +244735,7 @@
       "label": ".step()",
       "norm_label": ".step()",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L607"
+      "source_location": "L609"
     },
     {
       "_callable": true,
@@ -244790,7 +244790,7 @@
       "label": ".tickFrame()",
       "norm_label": ".tickframe()",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L812"
+      "source_location": "L814"
     },
     {
       "_callable": true,
@@ -244801,7 +244801,7 @@
       "label": ".timed()",
       "norm_label": ".timed()",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L647"
+      "source_location": "L649"
     },
     {
       "_callable": true,
@@ -244823,7 +244823,7 @@
       "label": ".visible()",
       "norm_label": ".visible()",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L743"
+      "source_location": "L745"
     },
     {
       "_callable": true,
@@ -244845,7 +244845,7 @@
       "label": ".walkTurn()",
       "norm_label": ".walkturn()",
       "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L623"
+      "source_location": "L625"
     },
     {
       "_callable": true,
@@ -262052,7 +262052,7 @@
       "label": "people()",
       "norm_label": "people()",
       "source_file": "tests/playground-build.test.ts",
-      "source_location": "L645"
+      "source_location": "L658"
     },
     {
       "_callable": true,
