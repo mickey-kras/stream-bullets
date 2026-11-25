@@ -273,7 +273,7 @@
   }
 }
 
-/* ---------- The poll on stream: sized from its cell, so it stays readable from 4 x 2 cells up ---------- */
+/* ---------- The poll on stream: sized from its cell, so it stays readable from 8 x 4 cells up ---------- */
 .ov-stage > .ov-poll {
   height: 100%;
   padding: 0;

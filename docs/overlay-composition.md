@@ -56,12 +56,12 @@ The theme is separate from the layout and the behavior. The overlay has one them
 
 ## Grid and orientation
 
-The streamer selects the orientation of the frame. Each orientation has a grid of square cells of 120 pixels:
+The streamer selects the orientation of the frame. Each orientation has a grid of square cells of 60 pixels:
 
 | Orientation | Frame | Grid |
 | --- | --- | --- |
-| `horizontal` (default) | 1920 × 1080 | 16 columns × 9 rows |
-| `vertical` | 1080 × 1920 | 9 columns × 16 rows |
+| `horizontal` (default) | 1920 × 1080 | 32 columns × 18 rows |
+| `vertical` | 1080 × 1920 | 18 columns × 32 rows |
 
 A layer on the grid has one cell rectangle in that orientation.
 A rectangle has four integers: column `c`, row `r`, width `w`, and height `h`, all in cells.
@@ -73,15 +73,15 @@ Each orientation keeps its own layout. When you change the orientation, the layo
 The overlay shows only the selected orientation.
 A layer can be on the grid of one orientation and off the grid of the other.
 
-| Layer | Minimum size |
-| --- | --- |
-| `chat` | 3 × 2 |
-| `characters` | 6 × 2 |
-| Each content layer | 4 × 2 |
+| Layer | Minimum size in cells | Minimum size in pixels |
+| --- | --- | --- |
+| `chat` | 6 × 4 | 360 × 240 |
+| `characters` | 12 × 4 | 720 × 240 |
+| Each content layer | 8 × 4 | 480 × 240 |
 
-The characters cell sets the size of the playground world: each cell is 40 × 40 world pixels.
+The characters cell sets the size of the playground world: each cell is 20 × 20 world pixels.
 A wide cell gives a long ground. A tall cell gives more sky above the ground.
-In a small cell, such as the minimum of 6 × 2 cells, up to 40 characters stand close together on a short ground.
+In a small cell, such as the minimum of 12 × 4 cells, up to 40 characters stand close together on a short ground.
 Give the characters a wide cell when your chat is busy.
 
 A content layer shows its content in the middle of its cell, at the full width of the cell.
@@ -177,8 +177,11 @@ The owner changed the source with **Preview** and **Take**.
 The chat layer and the characters layer always had a cell, and an optional `content` layer gave the source a cell.
 Now the overlay shows only layers on the grid.
 
-The stored layers have a version (`v`). The current version is 2. Stored layers without this version are old.
+The stored layers have a version (`v`). The current version is 3. Stored layers without this version are old.
 The server converts old layers each time it reads them. The result is always the same.
+
+Stored layers without a version are from before the overlay studio.
+For version 2, see [Cells of 120 pixels](#cells-of-120-pixels).
 
 The first time the overlay page or **Streamer tools** reads the state, the server stores the result.
 Each save also stores the current version. Thus the conversion happens one time.
@@ -208,7 +211,8 @@ The conversion has these rules:
 
 The layer goes to the old `content` cell of an orientation, if that orientation had one.
 If not, the old position and size give the cell. A poll filled the frame and did not use the position.
-Each cell in this table is `c`, `r`, `w` × `h`:
+Each cell in this table is `c`, `r`, `w` × `h`, in cells of 120 pixels.
+The layer gets the same place in cells of 60 pixels: see [Cells of 120 pixels](#cells-of-120-pixels).
 
 | Old position | Horizontal S | Horizontal M | Horizontal L | Vertical S | Vertical M | Vertical L |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -229,6 +233,27 @@ A scene with only the chat or the characters looks the same as before.
 A scene with a source on air shows the same source, in its cell and not in the full frame.
 An OBS source that was open during the deploy loads the new page by itself after some failed updates.
 Refresh an open OBS source one time after the deploy to get the new page at once.
+
+## Cells of 120 pixels
+
+Until version 2, a cell was 120 pixels: 16 columns × 9 rows in the horizontal orientation.
+Version 3 has cells of 60 pixels. The frame did not change.
+
+The server converts each old cell rectangle: `c`, `r`, `w`, and `h` become two times larger.
+Thus each old cell is 2 × 2 cells, and each layer keeps its place and its size in pixels.
+The minimum sizes are two times larger in cells and the same in pixels.
+A cell that the old grid did not keep also reads as no cell after the conversion.
+
+The conversion uses the version, as the conversion of the state from before the overlay studio does.
+For stored layers without a version, the server converts the cells first. Then the rules above apply.
+The first read stores the result at version 3. The revision of the overlay does not change.
+
+The characters world keeps its size: a cell of the playground is 20 × 20 world pixels, and each old cell was 40 × 40.
+The playground also reads a checkpoint with the old cells as the same world.
+
+An overlay page or a **Streamer tools** page that was open during the deploy has the old grid.
+It shows the layers at incorrect places until you load it again.
+Refresh each open OBS source one time after the deploy.
 
 ## URLs
 
@@ -338,7 +363,7 @@ In the toolbar, select **Transparent** or **Sample game** for the preview backgr
 
 To change the layout, do these steps:
 
-1. In the toolbar, select **Horizontal 16 × 9** or **Vertical 9 × 16**.
+1. In the toolbar, select **Horizontal 32 × 18** or **Vertical 18 × 32**.
    OBS changes to the new orientation at once. Each orientation keeps its own layout.
 2. To select a layer, press it on the grid, or select its chip in the palette.
    The selected layer shows eight handles: four on its corners and four on its edges.

@@ -1,6 +1,6 @@
 The overlay card shows the content of one content layer in OBS.
 
-Sizes are design pixels at 1080p. A grid cell is 120 × 120 design pixels.
+Sizes are design pixels at 1080p. A grid cell is 60 × 60 design pixels.
 Put each card in an `OverlayLayer`. The layer scales the card to its cell and makes it smaller when it does not fit.
 
 | Part | Content |

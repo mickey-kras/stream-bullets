@@ -70,7 +70,7 @@ interface Proto {
 }
 
 function proto(rng: () => number = () => 0.9): Proto {
-  const sim = new PlaygroundSim({ cellsW: 16, cellsH: 3, rng, walkSpread: 0 });
+  const sim = new PlaygroundSim({ cellsW: 32, cellsH: 6, rng, walkSpread: 0 });
   for (let i = 0; i < 70; i++) sim.receive(chat(viewer(i), "registered"));
   const chars: Participant[] = sim.list();
   for (const [i, c] of chars.entries()) Object.assign(c, { score: i < 40 ? 40 - i : 0, scoreAt: 0, lastScored: -90 });
@@ -111,7 +111,7 @@ describe("prototype scenarios (640 x 120 world)", () => {
   });
 
   it("caps at the configured maximum, with the same split", () => {
-    const sim = new PlaygroundSim({ cellsW: 16, cellsH: 3, rng: () => 0.9, walkSpread: 0, visibleMax: 5 });
+    const sim = new PlaygroundSim({ cellsW: 32, cellsH: 6, rng: () => 0.9, walkSpread: 0, visibleMax: 5 });
     sim.resumeAfter(0);
     const viewers: Viewer[] = Array.from({ length: 20 }, (_, i: number) => viewer(i));
     for (const v of viewers) sim.receive(chat(v, "hi"));
@@ -400,7 +400,7 @@ describe("prototype scenarios (640 x 120 world)", () => {
 });
 
 /** A running playground with `count` viewers who each said hello at tick 0. The greetings are not queued. */
-function crowd(count: number, cellsW = 16, cellsH = 2, seed = 1): { sim: PlaygroundSim; viewers: Viewer[] } {
+function crowd(count: number, cellsW = 32, cellsH = 4, seed = 1): { sim: PlaygroundSim; viewers: Viewer[] } {
   const sim = new PlaygroundSim({ cellsW, cellsH, rng: mulberry32(seed) });
   sim.resumeAfter(0);
   const viewers: Viewer[] = Array.from({ length: count }, (_, i: number) => viewer(i));
@@ -672,9 +672,9 @@ describe("controls", () => {
     const { sim, viewers } = crowd(2);
     const p = find(sim, viewers[0]) as Participant;
     setState(p, "jump", { x: sim.world.xmax });
-    sim.resize(16, 2);
+    sim.resize(32, 4);
     expect(p.state).toBe("jump");
-    sim.resize(9, 3);
+    sim.resize(18, 6);
     expect(sim.world.w).toBe(360);
     expect(p.x).toBe(sim.world.xmax);
     expect(p.state).toBe("walk");
@@ -708,7 +708,7 @@ describe("registry and admission", () => {
   });
 
   it("does not let repeated messages jump the queue", () => {
-    const sim = new PlaygroundSim({ cellsW: 16, cellsH: 2, rng: () => 0.9 });
+    const sim = new PlaygroundSim({ cellsW: 32, cellsH: 4, rng: () => 0.9 });
     sim.resumeAfter(0);
     const viewers: Viewer[] = Array.from({ length: 60 }, (_, i: number) => viewer(i));
     for (const v of viewers) sim.receive(chat(v, "hello"));
@@ -756,7 +756,7 @@ describe("registry and admission", () => {
   });
 
   it("cuts a long name with an ellipsis", () => {
-    const sim = new PlaygroundSim({ cellsW: 16, cellsH: 2, rng: mulberry32(1) });
+    const sim = new PlaygroundSim({ cellsW: 32, cellsH: 4, rng: mulberry32(1) });
     sim.resumeAfter(0);
     sim.receive(chat({ platform: "twitch", userId: "long", name: "A".repeat(30) }, "hi"));
     sim.receive(chat({ platform: "twitch", userId: "fits", name: "B".repeat(24) }, "hi"));
@@ -807,20 +807,21 @@ function fuzz(sim: PlaygroundSim, ticks: number, seed: number): void {
 
 describe("seeded fuzz", () => {
   it("keeps at most 40 visible and ends every action over 10k ticks with bursts", () => {
-    const sim = new PlaygroundSim({ cellsW: 16, cellsH: 2, rng: mulberry32(42) });
+    const sim = new PlaygroundSim({ cellsW: 32, cellsH: 4, rng: mulberry32(42) });
     sim.resumeAfter(0);
     fuzz(sim, 10_000, 42);
   });
 
   for (const [cellsW, cellsH] of [
-    [6, 2],
-    [9, 3],
-    [16, 2],
+    [12, 4],
+    [13, 5],
+    [18, 6],
+    [32, 4],
   ] as const) {
     it(`runs in a ${cellsW} x ${cellsH} cell world`, () => {
       const world = createWorld(cellsW, cellsH);
-      expect(world.w).toBe(cellsW * 40);
-      expect(world.gy).toBe(cellsH * 40 - 18);
+      expect(world.w).toBe(cellsW * 20);
+      expect(world.gy).toBe(cellsH * 20 - 18);
       expect(world.xmin).toBeLessThan(world.xmax);
       const sim = new PlaygroundSim({ cellsW, cellsH, rng: mulberry32(cellsW) });
       expect(tileAt(sim.terrain, world.padX)?.kind).toBe("g");
@@ -833,10 +834,11 @@ describe("seeded fuzz", () => {
   }
 
   it("refuses cell sizes outside the limits", () => {
-    expect(() => createWorld(5, 2)).toThrow(RangeError);
-    expect(() => createWorld(17, 2)).toThrow(RangeError);
-    expect(() => createWorld(6, 1)).toThrow(RangeError);
-    expect(() => createWorld(6.5, 2)).toThrow(RangeError);
+    expect(() => createWorld(11, 4)).toThrow(RangeError);
+    expect(() => createWorld(33, 4)).toThrow(RangeError);
+    expect(() => createWorld(12, 3)).toThrow(RangeError);
+    expect(() => createWorld(12, 33)).toThrow(RangeError);
+    expect(() => createWorld(12.5, 4)).toThrow(RangeError);
   });
 });
 
@@ -891,7 +893,7 @@ describe("frames", () => {
 
 describe("checkpoint", () => {
   it("round-trips the registry, terrain and restrictions without actions", () => {
-    const { sim, viewers } = crowd(50, 16, 2, 3);
+    const { sim, viewers } = crowd(50, 32, 4, 3);
     for (let i = 0; i < 400; i++) sim.tick();
     const p = find(sim, viewers[0]) as Participant;
     setState(p, "dig", { x: 240, dir: 1 });
@@ -931,7 +933,7 @@ describe("checkpoint", () => {
   });
 
   it("keeps the registration order, so the crowd choice after a restore is the same", () => {
-    const { sim } = crowd(60, 16, 2, 3);
+    const { sim } = crowd(60, 32, 4, 3);
     for (let i = 0; i < 400; i++) sim.tick();
     // Late messages from the last registered viewers would move them ahead in a recency order.
     const late: Participant[] = sim.list().slice(-5);
@@ -945,7 +947,7 @@ describe("checkpoint", () => {
   });
 
   it("stays within its bound with hostile ids and names, keeping slots and restrictions first", () => {
-    const sim = new PlaygroundSim({ cellsW: 16, cellsH: 2, rng: () => 0.5 });
+    const sim = new PlaygroundSim({ cellsW: 32, cellsH: 4, rng: () => 0.5 });
     sim.resumeAfter(0);
     const long = (i: number): Viewer => ({
       platform: "youtube",
@@ -961,6 +963,22 @@ describe("checkpoint", () => {
     const back = PlaygroundSim.restore(raw, { rng: () => 0.5 });
     expect(admitted(back)).toHaveLength(VISIBLE_MAX);
     expect(back.restrictions.size).toBeLessThanOrEqual(RESTRICTED_MAX);
+  });
+
+  it("reads a checkpoint with cells of 120 px as the same world", () => {
+    const { sim } = crowd(5, 32, 4, 3);
+    for (let i = 0; i < 50; i++) sim.tick();
+    const now = JSON.parse(sim.checkpoint()) as Record<string, unknown>;
+    expect(now.cell).toBe(20);
+    const old: Record<string, unknown> = { ...now, cellsW: 16, cellsH: 2 };
+    delete old.cell;
+    const back = PlaygroundSim.restore(JSON.stringify(old), { rng: mulberry32(3) });
+    expect([back.world.cellsW, back.world.cellsH, back.world.w, back.world.h]).toEqual([32, 4, 640, 80]);
+    expect(back.terrain.tiles).toHaveLength(sim.terrain.tiles.length);
+    expect(JSON.parse(back.checkpoint())).toMatchObject({ cell: 20, cellsW: 32, cellsH: 4, ground: now.ground });
+    expect(() => PlaygroundSim.restore(JSON.stringify({ ...now, cell: 30 }), { rng: mulberry32(3) })).toThrow(
+      "playground checkpoint invalid",
+    );
   });
 
   it("refuses a malformed checkpoint", () => {
@@ -1006,7 +1024,7 @@ describe("characters test script", () => {
   });
 
   it("plays through the simulation within the cap and ends by itself", () => {
-    const sim = new PlaygroundSim({ cellsW: 16, cellsH: 2, rng: mulberry32(5) });
+    const sim = new PlaygroundSim({ cellsW: 32, cellsH: 4, rng: mulberry32(5) });
     sim.resumeAfter(0);
     sim.startTest();
     const script = testCrowdScript(5, T0);

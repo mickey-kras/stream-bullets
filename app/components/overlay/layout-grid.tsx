@@ -608,7 +608,7 @@ export function LayoutGrid({
         </div>
       </section>
       <p className="muted ov-comp-help" id={helpId}>
-        {t("overlay.grid.help")}
+        {t("overlay.grid.help", { px: CELL_PX })}
       </p>
       <p className="ov-grid-status" data-grid-status data-bad={status.bad || undefined} aria-live="polite">
         {status.text}

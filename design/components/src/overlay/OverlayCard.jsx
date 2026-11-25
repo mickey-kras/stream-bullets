@@ -80,7 +80,7 @@ function ContentCell({ type, children }) {
 }
 
 /**
- * A layer box at its cell. `rect` is in design pixels (a cell is 120 × 120), `frame` is the design size of the
+ * A layer box at its cell. `rect` is in design pixels (a cell is 60 × 60), `frame` is the design size of the
  * composition. The content is laid out in rect.w × rect.h design pixels and scales to the box width. A content
  * layer (not chat or characters) wraps its children in the fit box and the stage. `alone` fills the parent, as a
  * per-layer OBS source does.

@@ -668,8 +668,8 @@ describe("overlay updates", (): void => {
       layers: {
         ...DEFAULT_LAYERS,
         cells: {
-          horizontal: { ...emptyCells(), message: { c: 0, r: 0, w: 16, h: 3 } },
-          vertical: { ...emptyCells(), message: { c: 0, r: 0, w: 9, h: 3 } },
+          horizontal: { ...emptyCells(), message: { c: 0, r: 0, w: 32, h: 6 } },
+          vertical: { ...emptyCells(), message: { c: 0, r: 0, w: 18, h: 6 } },
         },
       },
       chatTestUntil: 0,

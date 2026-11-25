@@ -33,7 +33,7 @@ export const FRAME_CHARS_MAX = 40;
 export const FRAME_BUBBLES_MAX = 4;
 /** Temporary stair steps in a frame. Equal to STAIRS_MAX in constants.ts. */
 export const FRAME_STAIRS_MAX = 60;
-/** Ground tiles in a frame: the widest world (16 cells of 40 px) has 40 tiles of 16 px. */
+/** Ground tiles in a frame: the widest world (32 cells of 20 px) has 40 tiles of 16 px. */
 export const FRAME_TILES_MAX = 64;
 
 /**

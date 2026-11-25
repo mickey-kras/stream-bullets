@@ -72,9 +72,9 @@ interface Frames {
   without: (id: number) => string;
 }
 
-/** Frames of the real simulation: `viewers` chatters on a 16 x 2 playground, a few seconds after they spoke. */
+/** Frames of the real simulation: `viewers` chatters on a 32 x 4 playground, a few seconds after they spoke. */
 function playground(seed: number, viewers: number): Frames {
-  const sim = new PlaygroundSim({ cellsW: 16, cellsH: 2, rng: mulberry32(seed) });
+  const sim = new PlaygroundSim({ cellsW: 32, cellsH: 4, rng: mulberry32(seed) });
   sim.resumeAfter(0);
   for (let user = 1; user <= viewers; user += 1) sim.receive(chat(user));
   for (let i = 0; i < 120; i += 1) sim.tick();
@@ -97,7 +97,7 @@ function playground(seed: number, viewers: number): Frames {
 
 /** Viewers who only talk (no commands, so nobody jumps): 4 of them speak, one at length. */
 function talkers(cellsW: number): string {
-  const sim = new PlaygroundSim({ cellsW, cellsH: 2, rng: mulberry32(9) });
+  const sim = new PlaygroundSim({ cellsW, cellsH: 4, rng: mulberry32(9) });
   sim.resumeAfter(0);
   for (let user = 1; user <= 10; user += 1) sim.receive(chat(user, "hello wasteland"));
   for (let i = 0; i < 150; i += 1) sim.tick();
@@ -118,7 +118,7 @@ function talkers(cellsW: number): string {
 }
 
 /**
- * A full frame of 40 visible characters on a `cellsW` x 2 playground. The speakers say `lines` (each with its own
+ * A full frame of 40 visible characters on a `cellsW` x 4 playground. The speakers say `lines` (each with its own
  * name), and stand `spread` logical px apart from x = `at`, so their bubbles stand off their heads.
  */
 function crowd(
@@ -126,7 +126,7 @@ function crowd(
   lines: readonly { name: string; text: string }[],
   options: { at: number; spread: number; test?: boolean },
 ): string {
-  const sim = new PlaygroundSim({ cellsW, cellsH: 2, rng: mulberry32(4) });
+  const sim = new PlaygroundSim({ cellsW, cellsH: 4, rng: mulberry32(4) });
   sim.resumeAfter(0);
   const say = (index: number, text: string): void =>
     sim.receive({ ...chat(41 + index, text), user: { id: `speaker-${index}`, displayName: lines[index].name } });
@@ -504,7 +504,7 @@ test("a test started in another tab shows here: frames with the test make the ed
 }) => {
   await setLayers("characters-other-tab", CHARACTERS_ON);
   const frames: Frames = playground(6, 3);
-  const testing = new PlaygroundSim({ cellsW: 16, cellsH: 2, rng: mulberry32(6) });
+  const testing = new PlaygroundSim({ cellsW: 32, cellsH: 4, rng: mulberry32(6) });
   testing.resumeAfter(0);
   testing.startTest();
   const owner = await signedIn(browser, "featureowner", OTHER_TAB_IP);
@@ -640,7 +640,7 @@ test("bubbles over a crowd: leader lines to clustered speakers, room for the tes
     {
       name: "leader-lines-1920",
       width: 1920,
-      cellsW: 16,
+      cellsW: 32,
       lines: [1, 2, 3, 4].map((n: number) => ({
         name: `Scav ${n}`,
         text: n === 2 ? long : `line ${n} from the crowd`,
@@ -652,7 +652,7 @@ test("bubbles over a crowd: leader lines to clustered speakers, room for the tes
     {
       name: "badge-band-720",
       width: 720,
-      cellsW: 6,
+      cellsW: 12,
       lines: [{ name: "Corner scav", text: long }],
       at: 228,
       spread: 0,
@@ -661,7 +661,7 @@ test("bubbles over a crowd: leader lines to clustered speakers, room for the tes
     {
       name: "rtl-1920",
       width: 1920,
-      cellsW: 16,
+      cellsW: 32,
       lines: [
         { name: "דנה!", text: "שלום לכולם, מה שלומכם היום?" },
         { name: "«سارة»", text: "مرحبا يا أصدقاء، كيف حالكم؟" },
@@ -675,7 +675,7 @@ test("bubbles over a crowd: leader lines to clustered speakers, room for the tes
   for (const scene of cases) {
     await setLayers(`characters-${scene.name}`, {
       characters: { enabled: true },
-      cells: { horizontal: { characters: { c: 0, r: 7, w: scene.cellsW, h: 2 } } },
+      cells: { horizontal: { characters: { c: 0, r: 14, w: scene.cellsW, h: 4 } } },
     });
     const page = await obsPage(browser, CROWD_IP, { width: scene.width, height: 240 });
     const errors: string[] = [];
@@ -706,13 +706,13 @@ test("bubbles over a crowd: leader lines to clustered speakers, room for the tes
 });
 
 for (const [width, cellsW] of [
-  [1920, 16],
-  [720, 6],
+  [1920, 32],
+  [720, 12],
 ] as const) {
   test(`bubbles carry the platform glyph and name of their speakers at ${width} x 240`, async ({ browser }) => {
     await setLayers(`characters-bubbles-${width}`, {
       characters: { enabled: true },
-      cells: { horizontal: { characters: { c: 0, r: 7, w: cellsW, h: 2 } } },
+      cells: { horizontal: { characters: { c: 0, r: 14, w: cellsW, h: 4 } } },
     });
     const page = await obsPage(browser, BUBBLE_IP, { width, height: 240 });
     const errors: string[] = [];
