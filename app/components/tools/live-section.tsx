@@ -180,6 +180,7 @@ export function LiveSection({
           <LiveChat
             feed={feed}
             delivers={deliversChat(channels)}
+            now={scene.now}
             full={chatFull}
             onFull={onChatFull}
             onAir={onAirTitle(view, state.layers)}
