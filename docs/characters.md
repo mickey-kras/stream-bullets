@@ -118,7 +118,7 @@ The sides are `left`, `right`, `l`, and `r`. Capital letters make no difference.
 
 | Command | Other words | Action |
 | --- | --- | --- |
-| `!left`, `!right` | `!l`, `!r` | Walk 1 block to that side. `!right 3` walks 3 blocks. The character goes up 1 block alone. At an edge it walks off and falls, and then walks on. It stops at a higher wall and at a door zone. |
+| `!left`, `!right` | `!l`, `!r` | Walk 1 block to that side. `!right 3` walks 3 blocks. The character goes up 1 block alone. At an edge it walks off and falls. After the fall, the walk continues. It stops at a higher wall and at a door zone. |
 | `!look left`, `!look right` | `!turn` | Turn to that side without a step. `!turn` turns around. |
 | `!stop` | | Stop a walk, and stop work of more than one block. It works at once. |
 | `!jump` | | Jump to the side that the character faces. The jump goes as high as a wall of 2 blocks. |
@@ -179,7 +179,7 @@ The characters move and build only in the characters cell. To give the viewers l
 - A block holds when it is on solid ground or touches another block, also at a corner.
 - A block that does not hold falls 1 row each 3 ticks. A block that lands on a character breaks, and the character lies flat for a moment.
 - A block over a hole in the ground falls out.
-- Nothing removes a build with time. `!dig` and `!boom` break builds. A dig breaks a block with 3 hits: it cracks two times and then breaks.
+- Nothing removes a build with time. `!dig` and `!boom` break builds. A dig breaks a block with 3 hits. The block cracks two times. The third hit breaks it.
 - At the block limit, the oldest block goes for each new block.
 - The grid ends 30 world pixels below the top of the world. That space stays free for bubbles and badges.
 - Nobody builds in a door zone below row 5, or above the respawn pad below row 3. Thus the doors and the pad stay usable.
