@@ -39067,6 +39067,66 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "app_server_api_dock_dockaction",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L44",
+      "target": "app_server_http_server_httperror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_api_dock_dockpage",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L24",
+      "target": "app_server_data_server_getstreamer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_api_dock_dockpage",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L27",
+      "target": "app_server_access_server_isstreamerlisted",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_api_dock_dockpage",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L28",
+      "target": "app_server_dock_key_server_dockkeymatches",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_api_dock_dockpage",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L29",
+      "target": "app_server_http_server_httperror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "app_server_api_router_dispatch",
       "source_file": "app/server/api/router.ts",
       "source_location": "L103",
@@ -60585,7 +60645,7 @@
       "relation": "calls",
       "source": "tests_helpers_api_apicaller",
       "source_file": "tests/helpers/api.ts",
-      "source_location": "L51",
+      "source_location": "L53",
       "target": "app_routes_api_action",
       "weight": 1.0
     },
@@ -60597,7 +60657,7 @@
       "relation": "calls",
       "source": "tests_helpers_api_apicaller",
       "source_file": "tests/helpers/api.ts",
-      "source_location": "L51",
+      "source_location": "L53",
       "target": "app_routes_api_loader",
       "weight": 1.0
     },
@@ -62169,7 +62229,7 @@
       "relation": "calls",
       "source": "tests_overlay_key_test",
       "source_file": "tests/overlay-key.test.ts",
-      "source_location": "L101",
+      "source_location": "L102",
       "target": "tests_overlay_key_test_seed",
       "weight": 1.0
     },
@@ -62181,7 +62241,7 @@
       "relation": "calls",
       "source": "tests_overlay_key_test",
       "source_file": "tests/overlay-key.test.ts",
-      "source_location": "L154",
+      "source_location": "L155",
       "target": "tests_overlay_key_test_newurl",
       "weight": 1.0
     },
@@ -62193,7 +62253,7 @@
       "relation": "calls",
       "source": "tests_overlay_key_test",
       "source_file": "tests/overlay-key.test.ts",
-      "source_location": "L279",
+      "source_location": "L280",
       "target": "tests_overlay_key_test_regenerate",
       "weight": 1.0
     },
@@ -62205,7 +62265,7 @@
       "relation": "calls",
       "source": "tests_overlay_key_test",
       "source_file": "tests/overlay-key.test.ts",
-      "source_location": "L352",
+      "source_location": "L353",
       "target": "tests_overlay_key_test_columns",
       "weight": 1.0
     },
@@ -62217,8 +62277,20 @@
       "relation": "calls",
       "source": "tests_overlay_key_test",
       "source_file": "tests/overlay-key.test.ts",
-      "source_location": "L433",
+      "source_location": "L434",
       "target": "tests_overlay_key_test_shown",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_overlay_key_test",
+      "source_file": "tests/overlay-key.test.ts",
+      "source_location": "L531",
+      "target": "tests_overlay_key_test_dockurl",
       "weight": 1.0
     },
     {
@@ -62229,7 +62301,7 @@
       "relation": "calls",
       "source": "tests_overlay_key_test_newurl",
       "source_file": "tests/overlay-key.test.ts",
-      "source_location": "L40",
+      "source_location": "L41",
       "target": "tests_overlay_key_test_regenerate",
       "weight": 1.0
     },
@@ -66456,7 +66528,7 @@
       "relation": "re_exports",
       "source": "app_server_api_index",
       "source_file": "app/server/api/index.ts",
-      "source_location": "L37",
+      "source_location": "L39",
       "target": "app_server_api_router",
       "weight": 1.0
     },
@@ -98631,6 +98703,270 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L10",
+      "target": "app_server_api_router_apiroute",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L10",
+      "target": "app_server_api_router_openwrite",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L10",
+      "target": "app_server_api_router_write",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L2",
+      "target": "app_env_appenv",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L3",
+      "target": "app_types_streamer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L4",
+      "target": "app_server_access_server_isstreamerlisted",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L5",
+      "target": "app_server_data_server_consumemutationquota",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L5",
+      "target": "app_server_data_server_getownstreamer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L5",
+      "target": "app_server_data_server_getstreamer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L5",
+      "target": "app_server_data_server_mutateentry",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L6",
+      "target": "app_server_dock_key_server_dockkeymatches",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L6",
+      "target": "app_server_dock_key_server_regeneratedockkey",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L7",
+      "target": "app_server_http_server_getorigin",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L7",
+      "target": "app_server_http_server_httperror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L7",
+      "target": "app_server_http_server_json",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L7",
+      "target": "app_server_http_server_readjson",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L8",
+      "target": "app_server_live_server_notifydockkey",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L8",
+      "target": "app_server_live_server_notifyoverlay",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L8",
+      "target": "app_server_live_server_notifyroom",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L9",
+      "target": "app_server_overlay_server_overlayaction",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L9",
+      "target": "app_server_overlay_server_overlayactionschema",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L9",
+      "target": "app_server_overlay_server_updateoverlay",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
       "source": "app_server_api_entries",
       "source_file": "app/server/api/entries.ts",
       "source_location": "L11",
@@ -99150,7 +99486,7 @@
       "source": "app_server_api_index",
       "source_file": "app/server/api/index.ts",
       "source_location": "L10",
-      "target": "app_server_api_live_liveroutes",
+      "target": "app_server_api_dock_dockroutes",
       "weight": 1.0
     },
     {
@@ -99162,7 +99498,7 @@
       "source": "app_server_api_index",
       "source_file": "app/server/api/index.ts",
       "source_location": "L11",
-      "target": "app_server_api_notifications_notificationroutes",
+      "target": "app_server_api_live_liveroutes",
       "weight": 1.0
     },
     {
@@ -99174,7 +99510,7 @@
       "source": "app_server_api_index",
       "source_file": "app/server/api/index.ts",
       "source_location": "L12",
-      "target": "app_server_api_moderation_moderationroutes",
+      "target": "app_server_api_notifications_notificationroutes",
       "weight": 1.0
     },
     {
@@ -99186,7 +99522,7 @@
       "source": "app_server_api_index",
       "source_file": "app/server/api/index.ts",
       "source_location": "L13",
-      "target": "app_server_api_router_apiroute",
+      "target": "app_server_api_moderation_moderationroutes",
       "weight": 1.0
     },
     {
@@ -99198,7 +99534,7 @@
       "source": "app_server_api_index",
       "source_file": "app/server/api/index.ts",
       "source_location": "L14",
-      "target": "app_server_api_schedule_scheduleroutes",
+      "target": "app_server_api_router_apiroute",
       "weight": 1.0
     },
     {
@@ -99210,6 +99546,18 @@
       "source": "app_server_api_index",
       "source_file": "app/server/api/index.ts",
       "source_location": "L15",
+      "target": "app_server_api_schedule_scheduleroutes",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_api_index",
+      "source_file": "app/server/api/index.ts",
+      "source_location": "L16",
       "target": "app_server_api_streamers_streamerroutes",
       "weight": 1.0
     },
@@ -125814,6 +126162,30 @@
       "source": "tests_overlay_key_test",
       "source_file": "tests/overlay-key.test.ts",
       "source_location": "L17",
+      "target": "app_server_dock_key_server_dockkeymatches",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_key_test",
+      "source_file": "tests/overlay-key.test.ts",
+      "source_location": "L17",
+      "target": "app_server_dock_key_server_hasdockkey",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_key_test",
+      "source_file": "tests/overlay-key.test.ts",
+      "source_location": "L18",
       "target": "tests_helpers_api_apicaller",
       "weight": 1.0
     },
@@ -125825,7 +126197,7 @@
       "relation": "imports",
       "source": "tests_overlay_key_test",
       "source_file": "tests/overlay-key.test.ts",
-      "source_location": "L18",
+      "source_location": "L19",
       "target": "tests_helpers_database_createtestdatabase",
       "weight": 1.0
     },
@@ -125837,7 +126209,7 @@
       "relation": "imports",
       "source": "tests_overlay_key_test",
       "source_file": "tests/overlay-key.test.ts",
-      "source_location": "L18",
+      "source_location": "L19",
       "target": "tests_helpers_database_testdatabase",
       "weight": 1.0
     },
@@ -152117,6 +152489,128 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports_from",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L1",
+      "target": "ref_zod",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L10",
+      "target": "app_server_api_router",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L2",
+      "target": "app_env",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L3",
+      "target": "app_types",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L4",
+      "target": "app_server_access_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L5",
+      "target": "app_server_data_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L6",
+      "target": "app_server_dock_key_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L7",
+      "target": "app_server_http_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L8",
+      "target": "app_server_live_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L9",
+      "target": "app_server_overlay_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
       "source": "app_server_api_entries",
       "source_file": "app/server/api/entries.ts",
       "source_location": "L1",
@@ -152349,7 +152843,7 @@
       "source": "app_server_api_index",
       "source_file": "app/server/api/index.ts",
       "source_location": "L10",
-      "target": "app_server_api_live",
+      "target": "app_server_api_dock",
       "weight": 1.0
     },
     {
@@ -152361,7 +152855,7 @@
       "source": "app_server_api_index",
       "source_file": "app/server/api/index.ts",
       "source_location": "L11",
-      "target": "app_server_api_notifications",
+      "target": "app_server_api_live",
       "weight": 1.0
     },
     {
@@ -152373,7 +152867,7 @@
       "source": "app_server_api_index",
       "source_file": "app/server/api/index.ts",
       "source_location": "L12",
-      "target": "app_server_api_moderation",
+      "target": "app_server_api_notifications",
       "weight": 1.0
     },
     {
@@ -152385,7 +152879,7 @@
       "source": "app_server_api_index",
       "source_file": "app/server/api/index.ts",
       "source_location": "L13",
-      "target": "app_server_api_router",
+      "target": "app_server_api_moderation",
       "weight": 1.0
     },
     {
@@ -152397,7 +152891,7 @@
       "source": "app_server_api_index",
       "source_file": "app/server/api/index.ts",
       "source_location": "L14",
-      "target": "app_server_api_schedule",
+      "target": "app_server_api_router",
       "weight": 1.0
     },
     {
@@ -152409,6 +152903,18 @@
       "source": "app_server_api_index",
       "source_file": "app/server/api/index.ts",
       "source_location": "L15",
+      "target": "app_server_api_schedule",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_api_index",
+      "source_file": "app/server/api/index.ts",
+      "source_location": "L16",
       "target": "app_server_api_streamers",
       "weight": 1.0
     },
@@ -166090,7 +166596,7 @@
       "source": "tests_overlay_key_test",
       "source_file": "tests/overlay-key.test.ts",
       "source_location": "L17",
-      "target": "tests_helpers_api",
+      "target": "app_server_dock_key_server",
       "weight": 1.0
     },
     {
@@ -166102,6 +166608,18 @@
       "source": "tests_overlay_key_test",
       "source_file": "tests/overlay-key.test.ts",
       "source_location": "L18",
+      "target": "tests_helpers_api",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_overlay_key_test",
+      "source_file": "tests/overlay-key.test.ts",
+      "source_location": "L19",
       "target": "tests_helpers_database",
       "weight": 1.0
     },
@@ -172168,7 +172686,7 @@
       "relation": "re_exports",
       "source": "app_server_api_index",
       "source_file": "app/server/api/index.ts",
-      "source_location": "L37",
+      "source_location": "L39",
       "target": "app_server_api_router_dispatch",
       "weight": 1.0
     },
@@ -197354,6 +197872,72 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "contains",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L17",
+      "target": "app_server_api_dock_dock_key_header",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L23",
+      "target": "app_server_api_dock_dockpage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L34",
+      "target": "app_server_api_dock_dock_layers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L35",
+      "target": "app_server_api_dock_dock_fields",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L42",
+      "target": "app_server_api_dock_dockaction",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_api_dock",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L55",
+      "target": "app_server_api_dock_dockroutes",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
       "source": "app_server_api_entries",
       "source_file": "app/server/api/entries.ts",
       "source_location": "L26",
@@ -197378,7 +197962,7 @@
       "relation": "contains",
       "source": "app_server_api_index",
       "source_file": "app/server/api/index.ts",
-      "source_location": "L20",
+      "source_location": "L21",
       "target": "app_server_api_index_apiroutes",
       "weight": 1.0
     },
@@ -217112,7 +217696,7 @@
       "relation": "contains",
       "source": "tests_helpers_api",
       "source_file": "tests/helpers/api.ts",
-      "source_location": "L15",
+      "source_location": "L17",
       "target": "tests_helpers_api_apicaller",
       "weight": 1.0
     },
@@ -218960,7 +219544,7 @@
       "relation": "contains",
       "source": "tests_overlay_key_test",
       "source_file": "tests/overlay-key.test.ts",
-      "source_location": "L305",
+      "source_location": "L306",
       "target": "tests_overlay_key_test_keycolumns",
       "weight": 1.0
     },
@@ -218971,7 +219555,7 @@
       "relation": "contains",
       "source": "tests_overlay_key_test",
       "source_file": "tests/overlay-key.test.ts",
-      "source_location": "L315",
+      "source_location": "L316",
       "target": "tests_overlay_key_test_columns",
       "weight": 1.0
     },
@@ -218982,18 +219566,7 @@
       "relation": "contains",
       "source": "tests_overlay_key_test",
       "source_file": "tests/overlay-key.test.ts",
-      "source_location": "L32",
-      "target": "tests_overlay_key_test_call",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "tests_overlay_key_test",
-      "source_file": "tests/overlay-key.test.ts",
-      "source_location": "L324",
+      "source_location": "L325",
       "target": "tests_overlay_key_test_shown",
       "weight": 1.0
     },
@@ -219004,7 +219577,18 @@
       "relation": "contains",
       "source": "tests_overlay_key_test",
       "source_file": "tests/overlay-key.test.ts",
-      "source_location": "L35",
+      "source_location": "L33",
+      "target": "tests_overlay_key_test_call",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_overlay_key_test",
+      "source_file": "tests/overlay-key.test.ts",
+      "source_location": "L36",
       "target": "tests_overlay_key_test_regenerate",
       "weight": 1.0
     },
@@ -219015,7 +219599,7 @@
       "relation": "contains",
       "source": "tests_overlay_key_test",
       "source_file": "tests/overlay-key.test.ts",
-      "source_location": "L39",
+      "source_location": "L40",
       "target": "tests_overlay_key_test_newurl",
       "weight": 1.0
     },
@@ -219026,8 +219610,19 @@
       "relation": "contains",
       "source": "tests_overlay_key_test",
       "source_file": "tests/overlay-key.test.ts",
-      "source_location": "L46",
+      "source_location": "L47",
       "target": "tests_overlay_key_test_seed",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_overlay_key_test",
+      "source_file": "tests/overlay-key.test.ts",
+      "source_location": "L508",
+      "target": "tests_overlay_key_test_dockurl",
       "weight": 1.0
     },
     {
@@ -227276,8 +227871,20 @@
       "relation": "indirect_call",
       "source": "tests_overlay_key_test",
       "source_file": "tests/overlay-key.test.ts",
-      "source_location": "L484",
+      "source_location": "L485",
       "target": "app_lib_chat_feed_active",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
+      "source": "tests_overlay_key_test",
+      "source_file": "tests/overlay-key.test.ts",
+      "source_location": "L526",
+      "target": "tests_tools_live_ui_test_topic",
       "weight": 1.0
     },
     {
@@ -237785,7 +238392,7 @@
       "label": "KeyColumns",
       "norm_label": "keycolumns",
       "source_file": "tests/overlay-key.test.ts",
-      "source_location": "L305"
+      "source_location": "L306"
     },
     {
       "_callable": true,
@@ -256151,6 +256758,28 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_server_api_dock_dockaction",
+      "label": "dockAction()",
+      "norm_label": "dockaction()",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L42"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_api_dock_dockpage",
+      "label": "dockPage()",
+      "norm_label": "dockpage()",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L23"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_server_api_router_anchored",
       "label": "anchored()",
       "norm_label": "anchored()",
@@ -268378,14 +269007,14 @@
             "callee": "set",
             "file": "tests/helpers/api.ts",
             "lang": "typescript",
-            "line": "L26",
+            "line": "L28",
             "receiver_type": "RouterContextProvider"
           }
         ]
       },
       "norm_label": "apicaller()",
       "source_file": "tests/helpers/api.ts",
-      "source_location": "L15"
+      "source_location": "L17"
     },
     {
       "_callable": true,
@@ -270223,7 +270852,18 @@
       "label": "columns()",
       "norm_label": "columns()",
       "source_file": "tests/overlay-key.test.ts",
-      "source_location": "L315"
+      "source_location": "L316"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_overlay_key_test_dockurl",
+      "label": "dockUrl()",
+      "norm_label": "dockurl()",
+      "source_file": "tests/overlay-key.test.ts",
+      "source_location": "L508"
     },
     {
       "_callable": true,
@@ -270234,7 +270874,7 @@
       "label": "newUrl()",
       "norm_label": "newurl()",
       "source_file": "tests/overlay-key.test.ts",
-      "source_location": "L39"
+      "source_location": "L40"
     },
     {
       "_callable": true,
@@ -270245,7 +270885,7 @@
       "label": "regenerate()",
       "norm_label": "regenerate()",
       "source_file": "tests/overlay-key.test.ts",
-      "source_location": "L35"
+      "source_location": "L36"
     },
     {
       "_callable": true,
@@ -270256,7 +270896,7 @@
       "label": "seed()",
       "norm_label": "seed()",
       "source_file": "tests/overlay-key.test.ts",
-      "source_location": "L46"
+      "source_location": "L47"
     },
     {
       "_callable": true,
@@ -270267,7 +270907,7 @@
       "label": "shown()",
       "norm_label": "shown()",
       "source_file": "tests/overlay-key.test.ts",
-      "source_location": "L324"
+      "source_location": "L325"
     },
     {
       "_callable": true,
@@ -279720,6 +280360,56 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_server_api_dock",
+      "label": "dock.ts",
+      "norm_label": "dock.ts",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_api_dock_dock_fields",
+      "label": "DOCK_FIELDS",
+      "norm_label": "dock_fields",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L35"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_api_dock_dock_key_header",
+      "label": "DOCK_KEY_HEADER",
+      "norm_label": "dock_key_header",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L17"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_api_dock_dock_layers",
+      "label": "DOCK_LAYERS",
+      "norm_label": "dock_layers",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L34"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_api_dock_dockroutes",
+      "label": "dockRoutes",
+      "norm_label": "dockroutes",
+      "source_file": "app/server/api/dock.ts",
+      "source_location": "L55"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_server_api_entries",
       "label": "entries.ts",
       "norm_label": "entries.ts",
@@ -279774,7 +280464,7 @@
       "label": "apiRoutes",
       "norm_label": "apiroutes",
       "source_file": "app/server/api/index.ts",
-      "source_location": "L20"
+      "source_location": "L21"
     },
     {
       "_origin": "ast",
@@ -287629,7 +288319,7 @@
       "label": "{ call }",
       "norm_label": "{ call }",
       "source_file": "tests/overlay-key.test.ts",
-      "source_location": "L32"
+      "source_location": "L33"
     },
     {
       "_origin": "ast",
