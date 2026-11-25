@@ -82,6 +82,7 @@ const ALL_CHIPS: readonly string[] = [
   "+ Message banner",
   "+ Community card",
   "+ Support banner",
+  "+ Camera frame",
 ];
 
 test("the owner resizes a placed layer by its handles and by the keyboard", async ({ browser }) => {

@@ -94,24 +94,29 @@ describe("grid and defaults", (): void => {
       message: least,
       card: least,
       support: least,
+      camera: { w: 6, h: 4 },
     });
   });
 
-  it("has one grid layer for each content source, after the chat and the characters", (): void => {
+  it("has one grid layer for each content source, after the chat and the characters, and the camera frame last", (): void => {
     expect(CONTENT_LAYERS).toEqual(["poll", "topic", "next", "message", "card", "support"]);
-    expect(GRID_LAYERS).toEqual(["chat", "characters", ...CONTENT_LAYERS]);
+    expect(GRID_LAYERS).toEqual(["chat", "characters", ...CONTENT_LAYERS, "camera"]);
     expect(LAYER_BACKGROUND).toEqual({ min: 0, max: 100, step: 5, default: 100 });
     expect(CHAT_BACKGROUND).toBe(LAYER_BACKGROUND);
   });
 
-  it("keeps chat and characters off and every layer off the grid by default", (): void => {
+  it("keeps the chat, the characters and the camera frame off and every layer off the grid by default", (): void => {
     const none = { chat: null, characters: null, poll: null, topic: null, next: null, message: null, card: null };
     expect(DEFAULT_LAYERS).toEqual({
       orientation: "horizontal",
       chat: { enabled: false, hideCommands: true, backgroundOpacity: 100 },
       characters: { enabled: false, timeout: 60, max: 40 },
+      camera: { enabled: false },
       items: defaultItems,
-      cells: { horizontal: { ...none, support: null }, vertical: { ...none, support: null } },
+      cells: {
+        horizontal: { ...none, support: null, camera: null },
+        vertical: { ...none, support: null, camera: null },
+      },
     });
     expect(emptyCells()).toEqual(DEFAULT_LAYERS.cells.horizontal);
     expect(emptyCells()).not.toBe(emptyCells());
@@ -257,6 +262,7 @@ describe("stored layers", (): void => {
       orientation: "vertical",
       chat: { enabled: true, hideCommands: false, backgroundOpacity: 35 },
       characters: { enabled: true, timeout: 60, max: 40 },
+      camera: { enabled: true },
       items: {
         ...defaultItems,
         poll: { enabled: false, ref: "p1", backgroundOpacity: 0, qr: false },
@@ -269,6 +275,7 @@ describe("stored layers", (): void => {
           characters: { c: 0, r: 14, w: 32, h: 4 },
           poll: { c: 12, r: 0, w: 8, h: 6 },
           support: { c: 0, r: 8, w: 20, h: 6 },
+          camera: { c: 1, r: 1, w: 11, h: 7 },
         },
         vertical: { ...emptyCells(), characters: { c: 0, r: 28, w: 18, h: 4 }, message: { c: 0, r: 8, w: 18, h: 4 } },
       },
@@ -414,12 +421,14 @@ describe("stored layers", (): void => {
       message: cell,
       card: cell,
       support: cell,
+      camera: cell,
     };
     const changed: ContentItem = { enabled: false, ref: null, backgroundOpacity: 55, qr: true };
     const full: OverlayLayers = {
       orientation: "horizontal",
       chat: { enabled: false, hideCommands: false, backgroundOpacity: 100 },
       characters: { enabled: false, timeout: 600, max: 5 },
+      camera: { enabled: true },
       items: {
         poll: { ...changed, ref, qr: false },
         topic: { ...changed, ref },
@@ -469,6 +478,83 @@ describe("stored layers", (): void => {
     expect(storedLayersSchema.parse(stored(layers))).toEqual(layers);
     expect(storedLayersSchema.parse(stored(DEFAULT_LAYERS))).toEqual(DEFAULT_LAYERS);
     expect(storedLayersSchema.parse(stored(LAID))).toEqual(LAID);
+  });
+});
+
+describe("camera frame", (): void => {
+  // Free cells of LAID: right of the chat, above the characters.
+  const frame: CellRect = { c: 20, r: 6, w: 12, h: 6 };
+
+  it("is a grid layer with its own switch, off until the owner puts it on the grid", (): void => {
+    expect(DEFAULT_LAYERS.camera).toEqual({ enabled: false });
+    expect(layerEnabled(DEFAULT_LAYERS, "camera")).toBe(false);
+    const placed: OverlayLayers = withCells({ camera: frame });
+    expect(onStream(placed, "camera")).toBe(false);
+    const on: OverlayLayers = { ...placed, camera: { enabled: true } };
+    expect(onStream(on, "camera")).toBe(true);
+    expect(layerPixels(on, "camera")).toEqual({ x: 1200, y: 360, w: 720, h: 360 });
+    // The vertical orientation has no camera frame.
+    expect(onStream({ ...on, orientation: "vertical" }, "camera")).toBe(false);
+    // The frame is not a content layer: it has no source.
+    expect(contentSources(on)).toEqual([]);
+  });
+
+  it("has a smallest size of 6 x 4 cells and keeps other layers out of its cells", (): void => {
+    expect(cellFits("horizontal", "camera", { c: 26, r: 14, w: 6, h: 4 })).toBe(true);
+    expect(cellFits("horizontal", "camera", { c: 0, r: 0, w: 5, h: 4 })).toBe(false);
+    expect(cellFits("horizontal", "camera", { c: 0, r: 0, w: 6, h: 3 })).toBe(false);
+    expect(cellFits("vertical", "camera", { c: 13, r: 0, w: 6, h: 4 })).toBe(false);
+    expect(overlappingPair({ ...emptyCells(), poll: pollCell, camera: { c: 14, r: 2, w: 6, h: 4 } })).toEqual([
+      "poll",
+      "camera",
+    ]);
+    expect(overlappingPair({ ...emptyCells(), poll: pollCell, camera: frame })).toBeNull();
+  });
+
+  it("stores the frame only while it is on, and reads a value without it as off", (): void => {
+    const off: OverlayLayers = withCells({ camera: frame });
+    expect(stored(off)).not.toHaveProperty("camera");
+    expect(stored(off)).toMatchObject({ cells: { horizontal: { camera: frame } } });
+    const on: OverlayLayers = { ...off, camera: { enabled: true } };
+    expect(stored(on)).toMatchObject({ camera: { enabled: true } });
+    expect(storedLayersSchema.parse(stored(on))).toEqual(on);
+    expect(storedLayersSchema.parse(stored(off))).toEqual(off);
+    // A value from before the camera frame, and a value with an incorrect setting.
+    expect(storedLayersSchema.parse({}).camera).toEqual({ enabled: false });
+    expect(storedLayersSchema.parse({ camera: "on" }).camera).toEqual({ enabled: false });
+    expect(storedLayersSchema.parse({ camera: { enabled: "yes", size: 3 } }).camera).toEqual({ enabled: false });
+  });
+
+  it("reads a frame cell that is invalid, or over an earlier layer, as no cell", (): void => {
+    const read = (camera: unknown): CellRect | null =>
+      storedLayersSchema.parse({ cells: { horizontal: { chat: chatCell, camera } } }).cells.horizontal.camera;
+    expect(read({ c: 0, r: 0, w: 12, h: 6 })).toEqual({ c: 0, r: 0, w: 12, h: 6 });
+    expect(read({ c: 0, r: 0, w: 5, h: 4 })).toBeNull();
+    expect(read({ c: 30, r: 0, w: 6, h: 4 })).toBeNull();
+    // The chat is earlier in the order of the layers, so it keeps its cell.
+    expect(read({ c: 18, r: 2, w: 6, h: 4 })).toBeNull();
+    expect(read("frame")).toBeNull();
+  });
+
+  it("takes the switch and the cell in a patch, and refuses other fields and invalid cells", (): void => {
+    const ok = (patch: unknown): boolean => layersPatchSchema.safeParse(patch).success;
+    expect(
+      ok({ camera: { enabled: true }, cells: { horizontal: { camera: frame }, vertical: { camera: null } } }),
+    ).toBe(true);
+    expect(ok({ camera: {} })).toBe(true);
+    expect(ok({ camera: { enabled: "yes" } })).toBe(false);
+    expect(ok({ camera: { enabled: true, style: "gold" } })).toBe(false);
+    expect(ok({ cells: { horizontal: { camera: { c: 0, r: 0, w: 5, h: 4 } } } })).toBe(false);
+    expect(ok({ cells: { horizontal: { poll: pollCell, camera: { c: 14, r: 2, w: 6, h: 4 } } } })).toBe(false);
+    const next: OverlayLayers = mergeLayers(LAID, {
+      camera: { enabled: true },
+      cells: { horizontal: { camera: frame } },
+    });
+    expect(next.camera).toEqual({ enabled: true });
+    expect(next.cells.horizontal.camera).toEqual(frame);
+    expect(next.cells.horizontal.camera).not.toBe(frame);
+    expect(mergeLayers(next, {}).camera).toEqual({ enabled: true });
+    expect(mergeLayers(next, { cells: { horizontal: { camera: null } } }).cells.horizontal.camera).toBeNull();
   });
 });
 

@@ -344,6 +344,7 @@ test("Streamer tools has the Overlay section with two numbered steps and the Cha
       "+ Message banner",
       "+ Community card",
       "+ Support banner",
+      "+ Camera frame",
     ]);
     await expect(build.getByRole("region", { name: "Composition preview" })).toBeVisible();
     await expect(build.getByRole("region", { name: "No layer selected" })).toBeVisible();
