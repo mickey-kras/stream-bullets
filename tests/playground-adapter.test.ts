@@ -29,9 +29,9 @@ function chat(user: number, text: string): ActivityChat {
   };
 }
 
-/** A running 16 x 2 playground with three admitted characters. */
+/** A running 32 x 4 playground with three admitted characters. */
 function playground(): PlaygroundSim {
-  const sim = new PlaygroundSim({ cellsW: 16, cellsH: 2, rng: mulberry32(7) });
+  const sim = new PlaygroundSim({ cellsW: 32, cellsH: 4, rng: mulberry32(7) });
   sim.resumeAfter(0);
   for (let user = 1; user <= 3; user += 1) sim.receive(chat(user, "hello"));
   for (let i = 0; i < 60; i += 1) sim.tick();

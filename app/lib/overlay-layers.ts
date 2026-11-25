@@ -1,15 +1,15 @@
 import { catch as fallback, z } from "zod";
 
 // Overlay layers sit on a grid of square cells. The streamer picks the orientation of the frame: horizontal is
-// 1920x1080 (16 x 9 cells), vertical is 1080x1920 (9 x 16 cells). Each orientation keeps its own layout.
-export const CELL_PX = 120;
+// 1920x1080 (32 x 18 cells), vertical is 1080x1920 (18 x 32 cells). Each orientation keeps its own layout.
+export const CELL_PX = 60;
 
 export const ORIENTATIONS = ["horizontal", "vertical"] as const;
 export type Orientation = (typeof ORIENTATIONS)[number];
 
 export const GRID: Readonly<Record<Orientation, Readonly<{ cols: number; rows: number }>>> = {
-  horizontal: { cols: 16, rows: 9 },
-  vertical: { cols: 9, rows: 16 },
+  horizontal: { cols: 32, rows: 18 },
+  vertical: { cols: 18, rows: 32 },
 };
 
 /** The values of `?layer=` on the OBS URL. `content` is all the content layers together. */
@@ -21,7 +21,7 @@ export const CONTENT_LAYERS = ["poll", "topic", "next", "message", "card", "supp
 export type ContentLayer = (typeof CONTENT_LAYERS)[number];
 
 /** The layers on the grid, in the order the lenient read resolves them. */
-export const GRID_LAYERS = ["chat", "characters", ...CONTENT_LAYERS] as const;
+export const GRID_LAYERS = ["chat", "characters", ...CONTENT_LAYERS, "camera"] as const;
 export type GridLayer = (typeof GRID_LAYERS)[number];
 
 /** A place in whole cells: column, row, width and height. `c + w <= cols` and `r + h <= rows`. */
@@ -71,6 +71,14 @@ export const CHARACTERS_TIMEOUT = { min: 10, max: 600, default: 60 } as const;
  */
 export const CHARACTERS_MAX = { min: 5, max: 40, default: 40 } as const;
 
+/**
+ * The camera frame: a frame with a clear window. The camera is a source of its own in OBS, under the overlay source
+ * and as large as the window. The overlay never reads the camera.
+ */
+export interface CameraLayer {
+  enabled: boolean;
+}
+
 /** The settings of one content layer. */
 export interface ContentItem {
   enabled: boolean;
@@ -89,6 +97,7 @@ export interface OverlayLayers {
   orientation: Orientation;
   chat: ChatLayer;
   characters: CharactersLayer;
+  camera: CameraLayer;
   items: Record<ContentLayer, ContentItem>;
   cells: Record<Orientation, LayerCells>;
 }
@@ -99,21 +108,24 @@ export interface LayersPatch {
   orientation?: Orientation;
   chat?: Partial<ChatLayer>;
   characters?: Partial<CharactersLayer>;
+  camera?: Partial<CameraLayer>;
   items?: Partial<Record<ContentLayer, Partial<ContentItem>>>;
   cells?: Partial<Record<Orientation, CellsPatch>>;
 }
 
-const CONTENT_MIN = { w: 4, h: 2 } as const;
+const CONTENT_MIN = { w: 8, h: 4 } as const;
 
 export const MIN_CELLS: Readonly<Record<GridLayer, Readonly<{ w: number; h: number }>>> = {
-  chat: { w: 3, h: 2 },
-  characters: { w: 6, h: 2 },
+  chat: { w: 6, h: 4 },
+  characters: { w: 12, h: 4 },
   poll: CONTENT_MIN,
   topic: CONTENT_MIN,
   next: CONTENT_MIN,
   message: CONTENT_MIN,
   card: CONTENT_MIN,
   support: CONTENT_MIN,
+  // The window of the smallest frame still holds a face: 360 x 240 design pixels with the frame around it.
+  camera: { w: 6, h: 4 },
 };
 
 /** One value for each content layer. */
@@ -130,7 +142,7 @@ function contentRecord<T>(value: (layer: ContentLayer) => T): Record<ContentLaye
 
 /** The cells of an orientation with no layer on the grid. */
 export function emptyCells(): LayerCells {
-  return { chat: null, characters: null, ...contentRecord((): null => null) };
+  return { chat: null, characters: null, ...contentRecord((): null => null), camera: null };
 }
 
 function defaultItem(layer: ContentLayer): ContentItem {
@@ -138,11 +150,12 @@ function defaultItem(layer: ContentLayer): ContentItem {
 }
 
 // No layer has a cell by default. A layer shows on stream when it is enabled and has a cell in the selected
-// orientation. Chat and characters are off until the streamer puts them on the grid.
+// orientation. The chat, the characters and the camera frame are off until the streamer puts them on the grid.
 export const DEFAULT_LAYERS: OverlayLayers = {
   orientation: "horizontal",
   chat: { enabled: false, hideCommands: true, backgroundOpacity: CHAT_BACKGROUND.default },
   characters: { enabled: false, timeout: CHARACTERS_TIMEOUT.default, max: CHARACTERS_MAX.default },
+  camera: { enabled: false },
   items: contentRecord(defaultItem),
   cells: {
     horizontal: emptyCells(),
@@ -208,7 +221,9 @@ export interface PlacedContent {
 
 /** The "Show on stream" setting of a layer. */
 export function layerEnabled(layers: OverlayLayers, layer: GridLayer): boolean {
-  return layer === "chat" || layer === "characters" ? layers[layer].enabled : layers.items[layer].enabled;
+  return layer === "chat" || layer === "characters" || layer === "camera"
+    ? layers[layer].enabled
+    : layers.items[layer].enabled;
 }
 
 /** True when `layer` shows on stream: it is enabled and has a cell in the selected orientation. */
@@ -256,6 +271,7 @@ function cellsPatchSchema(orientation: Orientation): z.ZodType<CellsPatch> {
       chat: cellSchema(orientation, "chat").nullable().optional(),
       characters: cellSchema(orientation, "characters").nullable().optional(),
       ...contentRecord((layer: ContentLayer) => cellSchema(orientation, layer).nullable().optional()),
+      camera: cellSchema(orientation, "camera").nullable().optional(),
     })
     .strict()
     .refine((cells: CellsPatch): boolean => overlappingPair(cells) === null, { message: "Layers must not overlap." });
@@ -309,6 +325,7 @@ export const layersPatchSchema = z
       })
       .strict()
       .optional(),
+    camera: z.object({ enabled: z.boolean().optional() }).strict().optional(),
     items: z.object(contentRecord(itemPatchSchema)).strict().optional(),
     cells: z
       .object({
@@ -344,7 +361,8 @@ function readCells(orientation: Orientation, value: unknown): LayerCells {
   // In the order of GRID_LAYERS.
   const chat: CellRect | null = free("chat");
   const characters: CellRect | null = free("characters");
-  return { chat, characters, ...contentRecord(free) };
+  const content: Record<ContentLayer, CellRect | null> = contentRecord(free);
+  return { chat, characters, ...content, camera: free("camera") };
 }
 
 function defaultItems(): Record<ContentLayer, ContentItem> {
@@ -388,6 +406,10 @@ export const storedLayersSchema: z.ZodType<OverlayLayers, unknown> = fallback(
       }),
       (): CharactersLayer => ({ ...DEFAULT_LAYERS.characters }),
     ),
+    camera: fallback(
+      z.object({ enabled: fallback(z.boolean(), DEFAULT_LAYERS.camera.enabled) }),
+      (): CameraLayer => ({ ...DEFAULT_LAYERS.camera }),
+    ),
     items: fallback(z.object(contentRecord(storedItemSchema)), defaultItems),
     cells: fallback(z.object({ horizontal: z.unknown().optional(), vertical: z.unknown().optional() }), {
       horizontal: undefined,
@@ -403,16 +425,17 @@ export const storedLayersSchema: z.ZodType<OverlayLayers, unknown> = fallback(
     orientation: DEFAULT_LAYERS.orientation,
     chat: { ...DEFAULT_LAYERS.chat },
     characters: { ...DEFAULT_LAYERS.characters },
+    camera: { ...DEFAULT_LAYERS.camera },
     items: defaultItems(),
     cells: { horizontal: emptyCells(), vertical: emptyCells() },
   }),
 );
 
 /**
- * The version of the stored `layers` JSON text that storedLayersText writes (`v`). A text without this version is
- * from before the overlay studio: see app/lib/overlay-legacy.ts.
+ * The version of the stored `layers` JSON text that storedLayersText writes (`v`). Version 3 has cells of 60 px.
+ * A text without this version is older: app/lib/overlay-legacy.ts converts it.
  */
-export const LAYERS_VERSION = 2;
+export const LAYERS_VERSION = 3;
 
 // Match `overlay_state_layers_check`.
 export const STORED_LAYERS_LENGTH = 4000;
@@ -437,8 +460,8 @@ function storedItem(layer: ContentLayer, item: ContentItem): Partial<ContentItem
 }
 
 /**
- * The `layers` JSON text to store. It leaves out what the lenient read fills in: a layer without a cell and each
- * content layer setting at its default. Thus the text stays short. The caller checks it against
+ * The `layers` JSON text to store. It leaves out what the lenient read fills in: a layer without a cell, each
+ * content layer setting at its default, and a camera frame that is off. Thus the text stays short. The caller checks it against
  * STORED_LAYERS_LENGTH.
  */
 export function storedLayersText(layers: OverlayLayers): string {
@@ -452,6 +475,7 @@ export function storedLayersText(layers: OverlayLayers): string {
     orientation: layers.orientation,
     chat: layers.chat,
     characters: layers.characters,
+    camera: layers.camera.enabled === DEFAULT_LAYERS.camera.enabled ? undefined : layers.camera,
     items: Object.keys(items).length > 0 ? items : undefined,
     cells: { horizontal: storedCells(layers.cells.horizontal), vertical: storedCells(layers.cells.vertical) },
   });
@@ -463,7 +487,7 @@ function mergeCells(current: LayerCells, patch: CellsPatch | undefined): LayerCe
     const rect: CellRect | null = next === undefined ? current[layer] : next;
     return rect ? copyCell(rect) : null;
   };
-  return { chat: merged("chat"), characters: merged("characters"), ...contentRecord(merged) };
+  return { chat: merged("chat"), characters: merged("characters"), ...contentRecord(merged), camera: merged("camera") };
 }
 
 function mergeItem(current: ContentItem, patch: Partial<ContentItem> | undefined): ContentItem {
@@ -488,6 +512,7 @@ export function mergeLayers(current: OverlayLayers, patch: LayersPatch): Overlay
       timeout: patch.characters?.timeout ?? current.characters.timeout,
       max: patch.characters?.max ?? current.characters.max,
     },
+    camera: { enabled: patch.camera?.enabled ?? current.camera.enabled },
     items: contentRecord((layer: ContentLayer): ContentItem => mergeItem(current.items[layer], patch.items?.[layer])),
     cells: {
       horizontal: mergeCells(current.cells.horizontal, patch.cells?.horizontal),

@@ -1,4 +1,4 @@
-<!-- @dsCard group="Overlay" height=1010 subtitle="On-air content layers: poll, Mash Battle, topic, up next, message, community, support" -->
+<!-- @dsCard group="Overlay" height=1060 subtitle="On-air content layers: poll, Mash Battle, topic, up next, message, community, support, camera frame" -->
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
@@ -11,13 +11,13 @@ body{margin:0;padding:20px;background:repeating-conic-gradient(var(--mock-check-
 </head><body>
 <div id="root"></div>
 <script type="text/babel">
-const { OverlayComposition, OverlayLayer, OverlayCard, OverlayPoll, OverlayMash } = window.StreamBulletsDesignSystem_e1d9fa;
+const { OverlayComposition, OverlayLayer, OverlayCard, OverlayPoll, OverlayMash, OverlayCamera } = window.StreamBulletsDesignSystem_e1d9fa;
 const SCALE = 0.5;
 const QR = "https://streambullets.com/@sunny?view=polls&entry=demo";
 
-// One layer in its grid cell, at half size. A cell is 120 × 120 design pixels.
+// One layer in its grid cell, at half size. A cell is 60 × 60 design pixels.
 function Cell({ name, layer, cols, rows, children }) {
-  const rect = { x: 0, y: 0, w: cols * 120, h: rows * 120 };
+  const rect = { x: 0, y: 0, w: cols * 60, h: rows * 60 };
   return (
     <div>
       <p className="cell-name">{name} · {cols} × {rows} cells</p>
@@ -32,26 +32,29 @@ function Cell({ name, layer, cols, rows, children }) {
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <div className="cells">
-    <Cell name="Poll" layer="poll" cols={8} rows={4}>
+    <Cell name="Poll" layer="poll" cols={16} rows={8}>
       <OverlayPoll title="Should we explore more local AI on stream?" options={["Yes, more local AI", "A mix of both", "Stick to cloud tools"]} counts={[48, 31, 9]} secondsLeft={3720} qr={QR} />
     </Cell>
-    <Cell name="Poll, Mash Battle" layer="poll" cols={8} rows={5}>
+    <Cell name="Poll, Mash Battle" layer="poll" cols={16} rows={10}>
       <OverlayMash title="Which boss first?" sides={["Malenia", "Radahn", "Fire Giant"]} totals={[12, 25, 4]} left={18} duration={30} qr={QR} />
     </Cell>
-    <Cell name="Topic" layer="topic" cols={8} rows={3}>
+    <Cell name="Topic" layer="topic" cols={16} rows={6}>
       <OverlayCard kind="topic" title="Can AI run my homelab?" author="TechNomad" authorPreset={0} likes={142} />
     </Cell>
-    <Cell name="Up next" layer="next" cols={8} rows={3}>
+    <Cell name="Up next" layer="next" cols={16} rows={6}>
       <OverlayCard kind="next" title="Building a quiet streaming PC" when="Fri 8:00 PM" startsIn="in 45 min" qr="https://streambullets.com/@sunny?view=schedule" />
     </Cell>
-    <Cell name="Message banner" layer="message" cols={8} rows={3}>
+    <Cell name="Message banner" layer="message" cols={16} rows={6}>
       <OverlayCard kind="message" messageStyle="hype" title="Raid incoming. Say hi!" />
     </Cell>
-    <Cell name="Support banner" layer="support" cols={8} rows={3}>
+    <Cell name="Support banner" layer="support" cols={16} rows={6}>
       <OverlayCard kind="support" link="https://ko-fi.com/sunny" />
     </Cell>
-    <Cell name="Community card" layer="card" cols={8} rows={3}>
+    <Cell name="Community card" layer="card" cols={16} rows={6}>
       <OverlayCard kind="card" streamer="Sunny" title="Join the Discord" body="Clips, schedule changes and the homelab build log." cta="Join us" ctaTarget="https://discord.gg/sunny" />
+    </Cell>
+    <Cell name="Camera frame" layer="camera" cols={10} rows={7}>
+      <OverlayCamera hint="Your OBS camera shows here" />
     </Cell>
   </div>
 );

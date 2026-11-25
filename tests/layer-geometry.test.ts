@@ -38,14 +38,14 @@ import {
 } from "../app/lib/overlay-layers";
 
 const write = { writer: "editor-1234", seq: 1 };
-const cell: CellRect = { c: 10, r: 0, w: 6, h: 4 };
+const cell: CellRect = { c: 20, r: 0, w: 12, h: 8 };
 
 /** The chat and the characters on the grid of both orientations, both off. No content layer has a cell. */
 const LAID: OverlayLayers = {
   ...DEFAULT_LAYERS,
   cells: {
-    horizontal: { ...emptyCells(), chat: { c: 0, r: 0, w: 5, h: 7 }, characters: { c: 0, r: 7, w: 16, h: 2 } },
-    vertical: { ...emptyCells(), chat: { c: 0, r: 8, w: 9, h: 5 }, characters: { c: 0, r: 13, w: 9, h: 3 } },
+    horizontal: { ...emptyCells(), chat: { c: 0, r: 0, w: 10, h: 14 }, characters: { c: 0, r: 14, w: 32, h: 4 } },
+    vertical: { ...emptyCells(), chat: { c: 0, r: 16, w: 18, h: 10 }, characters: { c: 0, r: 26, w: 18, h: 6 } },
   },
 };
 
@@ -61,52 +61,52 @@ describe("grid edits", () => {
   });
 
   it("moves a cell by the grabbed cell and keeps it inside the grid", () => {
-    expect(moveCell("horizontal", cell, { c: 1, r: 1 }, { c: 4, r: 3 })).toEqual({ c: 3, r: 2, w: 6, h: 4 });
-    expect(moveCell("horizontal", cell, { c: 0, r: 0 }, { c: 15, r: 8 })).toEqual({ c: 10, r: 5, w: 6, h: 4 });
-    expect(moveCell("vertical", cell, { c: 0, r: 0 }, { c: 8, r: 15 })).toEqual({ c: 3, r: 12, w: 6, h: 4 });
-    expect(moveCell("horizontal", cell, { c: 2, r: 2 }, { c: 0, r: 0 })).toEqual({ c: 0, r: 0, w: 6, h: 4 });
+    expect(moveCell("horizontal", cell, { c: 2, r: 2 }, { c: 8, r: 6 })).toEqual({ c: 6, r: 4, w: 12, h: 8 });
+    expect(moveCell("horizontal", cell, { c: 0, r: 0 }, { c: 30, r: 16 })).toEqual({ c: 20, r: 10, w: 12, h: 8 });
+    expect(moveCell("vertical", cell, { c: 0, r: 0 }, { c: 16, r: 30 })).toEqual({ c: 6, r: 24, w: 12, h: 8 });
+    expect(moveCell("horizontal", cell, { c: 4, r: 4 }, { c: 0, r: 0 })).toEqual({ c: 0, r: 0, w: 12, h: 8 });
   });
 
   it("finds the layer at a cell", () => {
     const cells = { ...LAID.cells.horizontal, poll: cell };
     expect(layerAt(cells, { c: 0, r: 0 })).toBe("chat");
-    expect(layerAt(cells, { c: 4, r: 6 })).toBe("chat");
-    expect(layerAt(cells, { c: 5, r: 6 })).toBeNull();
-    expect(layerAt(cells, { c: 15, r: 8 })).toBe("characters");
-    expect(layerAt(cells, { c: 12, r: 2 })).toBe("poll");
-    expect(layerAt(LAID.cells.horizontal, { c: 12, r: 2 })).toBeNull();
+    expect(layerAt(cells, { c: 8, r: 12 })).toBe("chat");
+    expect(layerAt(cells, { c: 10, r: 12 })).toBeNull();
+    expect(layerAt(cells, { c: 30, r: 16 })).toBe("characters");
+    expect(layerAt(cells, { c: 24, r: 4 })).toBe("poll");
+    expect(layerAt(LAID.cells.horizontal, { c: 24, r: 4 })).toBeNull();
   });
 
   it("refuses a cell over another layer or below the minimum size, and allows the layer's own place", () => {
     const cells = LAID.cells.horizontal;
     expect(placeProblem("horizontal", cells, "poll", cell)).toBeNull();
-    expect(placeProblem("horizontal", cells, "poll", { c: 4, r: 0, w: 4, h: 2 })).toEqual({
+    expect(placeProblem("horizontal", cells, "poll", { c: 8, r: 0, w: 8, h: 4 })).toEqual({
       kind: "overlap",
       other: "chat",
     });
-    expect(placeProblem("horizontal", cells, "chat", { c: 0, r: 5, w: 5, h: 3 })).toEqual({
+    expect(placeProblem("horizontal", cells, "chat", { c: 0, r: 10, w: 10, h: 6 })).toEqual({
       kind: "overlap",
       other: "characters",
     });
-    expect(placeProblem("horizontal", cells, "chat", { c: 1, r: 1, w: 5, h: 5 })).toBeNull();
-    expect(placeProblem("horizontal", cells, "poll", { c: 10, r: 0, w: 3, h: 2 })).toEqual({ kind: "small" });
-    expect(placeProblem("horizontal", cells, "characters", { c: 6, r: 0, w: 5, h: 2 })).toEqual({ kind: "small" });
+    expect(placeProblem("horizontal", cells, "chat", { c: 2, r: 2, w: 10, h: 10 })).toBeNull();
+    expect(placeProblem("horizontal", cells, "poll", { c: 20, r: 0, w: 6, h: 4 })).toEqual({ kind: "small" });
+    expect(placeProblem("horizontal", cells, "characters", { c: 12, r: 0, w: 10, h: 4 })).toEqual({ kind: "small" });
   });
 
   it("refuses a cell outside the grid of the orientation", () => {
     const cells = LAID.cells.horizontal;
     // A horizontal cell at column 10 does not fit the 9 columns of the vertical grid.
     expect(placeProblem("vertical", LAID.cells.vertical, "poll", cell)).toEqual({ kind: "outside" });
-    expect(placeProblem("horizontal", cells, "poll", { c: 12, r: 0, w: 5, h: 2 })).toEqual({ kind: "outside" });
-    expect(placeProblem("horizontal", cells, "poll", { c: 10, r: 5, w: 4, h: 5 })).toEqual({ kind: "outside" });
-    expect(placeProblem("horizontal", cells, "poll", { c: -1, r: 0, w: 4, h: 2 })).toEqual({ kind: "outside" });
-    expect(placeProblem("horizontal", cells, "poll", { c: 6, r: -1, w: 4, h: 2 })).toEqual({ kind: "outside" });
-    expect(placeProblem("horizontal", cells, "poll", { c: 12, r: 0, w: 4, h: 2 })).toBeNull();
+    expect(placeProblem("horizontal", cells, "poll", { c: 24, r: 0, w: 10, h: 4 })).toEqual({ kind: "outside" });
+    expect(placeProblem("horizontal", cells, "poll", { c: 20, r: 10, w: 8, h: 10 })).toEqual({ kind: "outside" });
+    expect(placeProblem("horizontal", cells, "poll", { c: -2, r: 0, w: 8, h: 4 })).toEqual({ kind: "outside" });
+    expect(placeProblem("horizontal", cells, "poll", { c: 12, r: -2, w: 8, h: 4 })).toEqual({ kind: "outside" });
+    expect(placeProblem("horizontal", cells, "poll", { c: 24, r: 0, w: 8, h: 4 })).toBeNull();
   });
 
   it("replaces one layer's cell in one orientation and removes a cell", () => {
-    const placed: OverlayLayers = withCell(layers(), "vertical", "poll", { c: 0, r: 0, w: 9, h: 4 });
-    expect(placed.cells.vertical.poll).toEqual({ c: 0, r: 0, w: 9, h: 4 });
+    const placed: OverlayLayers = withCell(layers(), "vertical", "poll", { c: 0, r: 0, w: 18, h: 8 });
+    expect(placed.cells.vertical.poll).toEqual({ c: 0, r: 0, w: 18, h: 8 });
     expect(placed.cells.horizontal).toEqual(LAID.cells.horizontal);
     expect(withCell(placed, "vertical", "poll", null).cells.vertical.poll).toBeNull();
     expect(withCell(placed, "horizontal", "chat", cell).cells.horizontal.chat).toEqual(cell);
@@ -124,9 +124,10 @@ describe("field-level patches", () => {
       orientation: "vertical",
       chat: { enabled: false, hideCommands: false, backgroundOpacity: 40 },
       characters: { enabled: true, timeout: 90, max: 12 },
+      camera: { enabled: true },
       items: before.items,
       cells: {
-        horizontal: { ...before.cells.horizontal, chat: cell, poll: { c: 5, r: 0, w: 4, h: 2 } },
+        horizontal: { ...before.cells.horizontal, chat: cell, poll: { c: 10, r: 0, w: 8, h: 4 } },
         vertical: before.cells.vertical,
       },
     };
@@ -134,7 +135,8 @@ describe("field-level patches", () => {
       orientation: "vertical",
       chat: { enabled: false, hideCommands: false, backgroundOpacity: 40 },
       characters: { enabled: true, timeout: 90, max: 12 },
-      cells: { horizontal: { chat: cell, poll: { c: 5, r: 0, w: 4, h: 2 } } },
+      camera: { enabled: true },
+      cells: { horizontal: { chat: cell, poll: { c: 10, r: 0, w: 8, h: 4 } } },
     });
     expect(
       diffLayers(after, {
@@ -239,24 +241,24 @@ describe("field-level patches", () => {
 });
 
 describe("resize by a handle", () => {
-  // A content cell in the middle of the horizontal grid: columns 5 to 10, rows 2 to 5.
-  const box: CellRect = { c: 5, r: 2, w: 6, h: 4 };
+  // A content cell in the middle of the horizontal grid: columns 10 to 21, rows 4 to 11.
+  const box: CellRect = { c: 10, r: 4, w: 12, h: 8 };
 
   it("moves only the edges of each handle to the grid lines of the pointer", () => {
-    // One column in from the left and the right, one row in from the top and the bottom.
+    // Two columns in from the left and the right, two rows in from the top and the bottom.
     const to: Readonly<Record<"x" | "y", Readonly<Record<-1 | 1, number>>>> = {
-      x: { [-1]: 6, 1: 10 },
-      y: { [-1]: 3, 1: 5 },
+      x: { [-1]: 12, 1: 20 },
+      y: { [-1]: 6, 1: 10 },
     };
     const expected: Readonly<Record<ResizeHandle, CellRect>> = {
-      nw: { c: 6, r: 3, w: 5, h: 3 },
-      n: { c: 5, r: 3, w: 6, h: 3 },
-      ne: { c: 5, r: 3, w: 5, h: 3 },
-      e: { c: 5, r: 2, w: 5, h: 4 },
-      se: { c: 5, r: 2, w: 5, h: 3 },
-      s: { c: 5, r: 2, w: 6, h: 3 },
-      sw: { c: 6, r: 2, w: 5, h: 3 },
-      w: { c: 6, r: 2, w: 5, h: 4 },
+      nw: { c: 12, r: 6, w: 10, h: 6 },
+      n: { c: 10, r: 6, w: 12, h: 6 },
+      ne: { c: 10, r: 6, w: 10, h: 6 },
+      e: { c: 10, r: 4, w: 10, h: 8 },
+      se: { c: 10, r: 4, w: 10, h: 6 },
+      s: { c: 10, r: 4, w: 12, h: 6 },
+      sw: { c: 12, r: 4, w: 10, h: 6 },
+      w: { c: 12, r: 4, w: 10, h: 8 },
     };
     for (const handle of RESIZE_HANDLES) {
       const line: Cell = { c: to.x[handle.includes("w") ? -1 : 1], r: to.y[handle.includes("n") ? -1 : 1] };
@@ -268,9 +270,9 @@ describe("resize by a handle", () => {
   });
 
   it("starts each handle on its own grid lines, so a press without a move changes nothing", () => {
-    expect(handleLines(box, "nw")).toEqual({ c: 5, r: 2 });
-    expect(handleLines(box, "se")).toEqual({ c: 11, r: 6 });
-    expect(handleLines(box, "ne")).toEqual({ c: 11, r: 2 });
+    expect(handleLines(box, "nw")).toEqual({ c: 10, r: 4 });
+    expect(handleLines(box, "se")).toEqual({ c: 22, r: 12 });
+    expect(handleLines(box, "ne")).toEqual({ c: 22, r: 4 });
     for (const handle of RESIZE_HANDLES)
       expect(resizeCell("horizontal", "poll", box, handle, handleLines(box, handle)), handle).toEqual({
         rect: box,
@@ -279,52 +281,52 @@ describe("resize by a handle", () => {
   });
 
   it("grows a layer in each direction", () => {
-    expect(resizeCell("horizontal", "poll", box, "se", { c: 14, r: 8 }).rect).toEqual({ c: 5, r: 2, w: 9, h: 6 });
-    expect(resizeCell("horizontal", "poll", box, "nw", { c: 2, r: 1 }).rect).toEqual({ c: 2, r: 1, w: 9, h: 5 });
-    expect(resizeCell("horizontal", "poll", box, "n", { c: 0, r: 0 }).rect).toEqual({ c: 5, r: 0, w: 6, h: 6 });
-    expect(resizeCell("horizontal", "poll", box, "w", { c: 0, r: 0 }).rect).toEqual({ c: 0, r: 2, w: 11, h: 4 });
+    expect(resizeCell("horizontal", "poll", box, "se", { c: 28, r: 16 }).rect).toEqual({ c: 10, r: 4, w: 18, h: 12 });
+    expect(resizeCell("horizontal", "poll", box, "nw", { c: 4, r: 2 }).rect).toEqual({ c: 4, r: 2, w: 18, h: 10 });
+    expect(resizeCell("horizontal", "poll", box, "n", { c: 0, r: 0 }).rect).toEqual({ c: 10, r: 0, w: 12, h: 12 });
+    expect(resizeCell("horizontal", "poll", box, "w", { c: 0, r: 0 }).rect).toEqual({ c: 0, r: 4, w: 22, h: 8 });
   });
 
   it("stops at the minimum size of the layer and says so", () => {
     for (const layer of GRID_LAYERS) {
       const least = MIN_CELLS[layer];
-      const wide: CellRect = { c: 2, r: 2, w: 8, h: 5 };
+      const wide: CellRect = { c: 4, r: 4, w: 16, h: 10 };
       // The bottom-right corner goes past the top-left corner: the top-left corner stays.
       expect(resizeCell("horizontal", layer, wide, "se", { c: 0, r: 0 }), layer).toEqual({
-        rect: { c: 2, r: 2, w: least.w, h: least.h },
+        rect: { c: 4, r: 4, w: least.w, h: least.h },
         min: true,
       });
       // The top-left corner goes past the bottom-right corner: the bottom-right corner stays.
-      expect(resizeCell("horizontal", layer, wide, "nw", { c: 16, r: 9 }), layer).toEqual({
-        rect: { c: 10 - least.w, r: 7 - least.h, w: least.w, h: least.h },
+      expect(resizeCell("horizontal", layer, wide, "nw", { c: 32, r: 18 }), layer).toEqual({
+        rect: { c: 20 - least.w, r: 14 - least.h, w: least.w, h: least.h },
         min: true,
       });
     }
     // Exactly the minimum is not below it.
-    expect(resizeCell("horizontal", "poll", box, "e", { c: 9, r: 0 })).toEqual({
-      rect: { c: 5, r: 2, w: 4, h: 4 },
+    expect(resizeCell("horizontal", "poll", box, "e", { c: 18, r: 0 })).toEqual({
+      rect: { c: 10, r: 4, w: 8, h: 8 },
       min: false,
     });
-    expect(resizeCell("horizontal", "poll", box, "e", { c: 8, r: 0 }).min).toBe(true);
-    expect(resizeCell("horizontal", "poll", box, "s", { c: 0, r: 3 }).min).toBe(true);
+    expect(resizeCell("horizontal", "poll", box, "e", { c: 17, r: 0 }).min).toBe(true);
+    expect(resizeCell("horizontal", "poll", box, "s", { c: 0, r: 7 }).min).toBe(true);
   });
 
   it("stops at the edges of the grid in both orientations", () => {
-    expect(resizeCell("horizontal", "poll", box, "se", { c: 40, r: 40 })).toEqual({
-      rect: { c: 5, r: 2, w: 11, h: 7 },
+    expect(resizeCell("horizontal", "poll", box, "se", { c: 80, r: 80 })).toEqual({
+      rect: { c: 10, r: 4, w: 22, h: 14 },
       min: false,
     });
-    expect(resizeCell("horizontal", "poll", box, "nw", { c: -3, r: -3 })).toEqual({
-      rect: { c: 0, r: 0, w: 11, h: 6 },
+    expect(resizeCell("horizontal", "poll", box, "nw", { c: -6, r: -6 })).toEqual({
+      rect: { c: 0, r: 0, w: 22, h: 12 },
       min: false,
     });
-    const tall: CellRect = { c: 2, r: 4, w: 4, h: 3 };
-    expect(resizeCell("vertical", "poll", tall, "se", { c: 40, r: 40 }).rect).toEqual({ c: 2, r: 4, w: 7, h: 12 });
+    const tall: CellRect = { c: 4, r: 8, w: 8, h: 6 };
+    expect(resizeCell("vertical", "poll", tall, "se", { c: 80, r: 80 }).rect).toEqual({ c: 4, r: 8, w: 14, h: 24 });
     for (const handle of RESIZE_HANDLES)
       for (const to of [
-        { c: -9, r: -9 },
-        { c: 99, r: 99 },
-        { c: 99, r: -9 },
+        { c: -18, r: -18 },
+        { c: 198, r: 198 },
+        { c: 198, r: -18 },
       ])
         expect(
           placeProblem(
@@ -339,19 +341,19 @@ describe("resize by a handle", () => {
 
   it("leaves the overlap rule to placeProblem, which refuses a resize onto another layer as it refuses a move", () => {
     const cells: LayerCells = LAID.cells.horizontal;
-    const chat: CellRect = { c: 0, r: 0, w: 5, h: 7 };
+    const chat: CellRect = { c: 0, r: 0, w: 10, h: 14 };
     expect(cells.chat).toEqual(chat);
-    // The chat (5 x 7 at the top-left) grows one row down, onto the characters slot.
-    const down: CellRect = resizeCell("horizontal", "chat", chat, "s", { c: 0, r: 8 }).rect;
-    expect(down).toEqual({ c: 0, r: 0, w: 5, h: 8 });
+    // The chat (10 x 14 at the top-left) grows two rows down, onto the characters slot.
+    const down: CellRect = resizeCell("horizontal", "chat", chat, "s", { c: 0, r: 16 }).rect;
+    expect(down).toEqual({ c: 0, r: 0, w: 10, h: 16 });
     expect(placeProblem("horizontal", cells, "chat", down)).toEqual({ kind: "overlap", other: "characters" });
     // To the right the cells are free.
-    const right: CellRect = resizeCell("horizontal", "chat", chat, "e", { c: 9, r: 0 }).rect;
+    const right: CellRect = resizeCell("horizontal", "chat", chat, "e", { c: 18, r: 0 }).rect;
     expect(placeProblem("horizontal", cells, "chat", right)).toBeNull();
     // A shared edge is not an overlap.
-    const poll: CellRect = { c: 9, r: 0, w: 4, h: 2 };
+    const poll: CellRect = { c: 18, r: 0, w: 8, h: 4 };
     expect(placeProblem("horizontal", { ...cells, poll }, "chat", right)).toBeNull();
-    const over: CellRect = resizeCell("horizontal", "chat", chat, "e", { c: 10, r: 0 }).rect;
+    const over: CellRect = resizeCell("horizontal", "chat", chat, "e", { c: 20, r: 0 }).rect;
     expect(placeProblem("horizontal", { ...cells, poll }, "chat", over)).toEqual({
       kind: "overlap",
       other: "poll",
@@ -359,16 +361,16 @@ describe("resize by a handle", () => {
   });
 
   it("resizes by one cell from the bottom-right corner for the keyboard", () => {
-    expect(growCell("horizontal", "poll", box, { c: 1, r: 0 })).toEqual({ rect: { ...box, w: 7 }, min: false });
-    expect(growCell("horizontal", "poll", box, { c: -1, r: 0 })).toEqual({ rect: { ...box, w: 5 }, min: false });
-    expect(growCell("horizontal", "poll", box, { c: 0, r: 1 })).toEqual({ rect: { ...box, h: 5 }, min: false });
-    expect(growCell("horizontal", "poll", box, { c: 0, r: -1 })).toEqual({ rect: { ...box, h: 3 }, min: false });
+    expect(growCell("horizontal", "poll", box, { c: 1, r: 0 })).toEqual({ rect: { ...box, w: 13 }, min: false });
+    expect(growCell("horizontal", "poll", box, { c: -1, r: 0 })).toEqual({ rect: { ...box, w: 11 }, min: false });
+    expect(growCell("horizontal", "poll", box, { c: 0, r: 1 })).toEqual({ rect: { ...box, h: 9 }, min: false });
+    expect(growCell("horizontal", "poll", box, { c: 0, r: -1 })).toEqual({ rect: { ...box, h: 7 }, min: false });
     // At the minimum size a smaller step changes nothing and reports the minimum.
-    const least: CellRect = { c: 5, r: 2, w: 4, h: 2 };
+    const least: CellRect = { c: 10, r: 4, w: 8, h: 4 };
     expect(growCell("horizontal", "poll", least, { c: -1, r: 0 })).toEqual({ rect: least, min: true });
     expect(growCell("horizontal", "poll", least, { c: 0, r: -1 })).toEqual({ rect: least, min: true });
     // At the edge of the grid a larger step changes nothing and does not report the minimum.
-    const edge: CellRect = { c: 10, r: 5, w: 6, h: 4 };
+    const edge: CellRect = { c: 20, r: 10, w: 12, h: 8 };
     expect(growCell("horizontal", "poll", edge, { c: 1, r: 0 })).toEqual({ rect: edge, min: false });
     expect(growCell("horizontal", "poll", edge, { c: 0, r: 1 })).toEqual({ rect: edge, min: false });
   });
@@ -376,55 +378,55 @@ describe("resize by a handle", () => {
   it("finds the handle under a pointer: a band along each edge, a corner where two bands meet", () => {
     const reach = { x: 0.25, y: 0.25 };
     const at = (x: number, y: number): ResizeHandle | null => handleAt(box, { x, y }, reach);
-    expect(at(5, 2)).toBe("nw");
-    expect(at(8, 2)).toBe("n");
-    expect(at(11, 2)).toBe("ne");
-    expect(at(11, 4)).toBe("e");
-    expect(at(11, 6)).toBe("se");
-    expect(at(8, 6)).toBe("s");
-    expect(at(5, 6)).toBe("sw");
-    expect(at(5, 4)).toBe("w");
+    expect(at(10, 4)).toBe("nw");
+    expect(at(16, 4)).toBe("n");
+    expect(at(22, 4)).toBe("ne");
+    expect(at(22, 8)).toBe("e");
+    expect(at(22, 12)).toBe("se");
+    expect(at(16, 12)).toBe("s");
+    expect(at(10, 12)).toBe("sw");
+    expect(at(10, 8)).toBe("w");
     // The band reaches to both sides of the edge.
-    expect(at(4.8, 4)).toBe("w");
-    expect(at(5.2, 4)).toBe("w");
-    expect(at(11.2, 6.2)).toBe("se");
+    expect(at(9.8, 8)).toBe("w");
+    expect(at(10.2, 8)).toBe("w");
+    expect(at(22.2, 12.2)).toBe("se");
     // The middle moves the layer, and a point away from the layer is not a handle.
-    expect(at(8, 4)).toBeNull();
-    expect(at(5.3, 4)).toBeNull();
-    expect(at(4.7, 4)).toBeNull();
-    expect(at(8, 6.3)).toBeNull();
-    expect(at(11.3, 1)).toBeNull();
+    expect(at(16, 8)).toBeNull();
+    expect(at(10.3, 8)).toBeNull();
+    expect(at(9.7, 8)).toBeNull();
+    expect(at(16, 12.3)).toBeNull();
+    expect(at(22.3, 2)).toBeNull();
   });
 
   it("keeps the middle of a small layer free of handles when the bands are wide", () => {
-    // On a phone a band can be wider than half a cell. Inside the layer it takes at most a quarter of the side.
-    const small: CellRect = { c: 0, r: 0, w: 3, h: 2 };
-    const reach = { x: 0.7, y: 0.7 };
-    expect(handleAt(small, { x: 1.5, y: 1 }, reach)).toBeNull();
-    expect(handleAt(small, { x: 1.5, y: 0.4 }, reach)).toBe("n");
-    expect(handleAt(small, { x: 1.5, y: 0.6 }, reach)).toBeNull();
-    expect(handleAt(small, { x: 3.6, y: 2.6 }, reach)).toBe("se");
-    expect(handleAt(small, { x: 2.3, y: 1 }, reach)).toBe("e");
+    // On a phone a band can be wider than a cell. Inside the layer it takes at most a quarter of the side.
+    const small: CellRect = { c: 0, r: 0, w: 6, h: 4 };
+    const reach = { x: 1.4, y: 1.4 };
+    expect(handleAt(small, { x: 3, y: 2 }, reach)).toBeNull();
+    expect(handleAt(small, { x: 3, y: 0.8 }, reach)).toBe("n");
+    expect(handleAt(small, { x: 3, y: 1.2 }, reach)).toBeNull();
+    expect(handleAt(small, { x: 7.2, y: 5.2 }, reach)).toBe("se");
+    expect(handleAt(small, { x: 4.6, y: 2 }, reach)).toBe("e");
   });
 });
 
 describe("layer palette", () => {
   it("adds a layer at the first free place that fits its minimum size, row by row", () => {
-    // The default layout: chat 5 x 7 at the top-left, characters along the bottom.
+    // The default layout: chat 10 x 14 at the top-left, characters along the bottom.
     const cells: LayerCells = LAID.cells.horizontal;
-    expect(firstFreeCell("horizontal", cells, "poll")).toEqual({ c: 5, r: 0, w: 4, h: 2 });
+    expect(firstFreeCell("horizontal", cells, "poll")).toEqual({ c: 10, r: 0, w: 8, h: 4 });
     // A chat across the top rows moves the first place below it.
-    const top: LayerCells = { ...cells, chat: { c: 0, r: 0, w: 14, h: 3 } };
-    expect(firstFreeCell("horizontal", top, "poll")).toEqual({ c: 0, r: 3, w: 4, h: 2 });
+    const top: LayerCells = { ...cells, chat: { c: 0, r: 0, w: 28, h: 6 } };
+    expect(firstFreeCell("horizontal", top, "poll")).toEqual({ c: 0, r: 6, w: 8, h: 4 });
     // Three free columns at the right are too narrow: the place is in the first row that has four.
-    const narrow: LayerCells = { ...cells, chat: { c: 0, r: 0, w: 13, h: 2 } };
-    expect(firstFreeCell("horizontal", narrow, "poll")).toEqual({ c: 0, r: 2, w: 4, h: 2 });
-    expect(firstFreeCell("vertical", LAID.cells.vertical, "poll")).toEqual({ c: 0, r: 0, w: 4, h: 2 });
+    const narrow: LayerCells = { ...cells, chat: { c: 0, r: 0, w: 26, h: 4 } };
+    expect(firstFreeCell("horizontal", narrow, "poll")).toEqual({ c: 0, r: 4, w: 8, h: 4 });
+    expect(firstFreeCell("vertical", LAID.cells.vertical, "poll")).toEqual({ c: 0, r: 0, w: 8, h: 4 });
   });
 
   it("finds a place that passes the placement rules for each layer", () => {
     for (const layer of GRID_LAYERS) {
-      const cells: LayerCells = { ...LAID.cells.horizontal, [layer]: null, topic: { c: 5, r: 0, w: 4, h: 2 } };
+      const cells: LayerCells = { ...LAID.cells.horizontal, [layer]: null, topic: { c: 10, r: 0, w: 8, h: 4 } };
       const rect: CellRect | null = firstFreeCell("horizontal", cells, layer);
       expect(rect && placeProblem("horizontal", cells, layer, rect), layer).toBeNull();
     }
@@ -433,31 +435,31 @@ describe("layer palette", () => {
   it("gives no place when the grid is full", () => {
     const full: LayerCells = {
       ...LAID.cells.horizontal,
-      chat: { c: 0, r: 0, w: 16, h: 7 },
-      characters: { c: 0, r: 7, w: 16, h: 2 },
+      chat: { c: 0, r: 0, w: 32, h: 14 },
+      characters: { c: 0, r: 14, w: 32, h: 4 },
     };
     expect(firstFreeCell("horizontal", full, "poll")).toBeNull();
     // One free row is not enough for two rows.
-    const row: LayerCells = { ...full, chat: { c: 0, r: 0, w: 16, h: 6 } };
+    const row: LayerCells = { ...full, chat: { c: 0, r: 0, w: 32, h: 12 } };
     expect(firstFreeCell("horizontal", row, "poll")).toBeNull();
   });
 
   it("drops a layer at its minimum size around the pointed cell, inside the grid", () => {
     const drops: readonly (readonly [GridLayer, Cell, CellRect])[] = [
-      ["poll", { c: 8, r: 4 }, { c: 6, r: 3, w: 4, h: 2 }],
-      ["poll", { c: 0, r: 0 }, { c: 0, r: 0, w: 4, h: 2 }],
-      ["poll", { c: 15, r: 8 }, { c: 12, r: 7, w: 4, h: 2 }],
-      ["characters", { c: 15, r: 0 }, { c: 10, r: 0, w: 6, h: 2 }],
-      ["chat", { c: 1, r: 8 }, { c: 0, r: 7, w: 3, h: 2 }],
+      ["poll", { c: 16, r: 8 }, { c: 12, r: 6, w: 8, h: 4 }],
+      ["poll", { c: 0, r: 0 }, { c: 0, r: 0, w: 8, h: 4 }],
+      ["poll", { c: 30, r: 16 }, { c: 24, r: 14, w: 8, h: 4 }],
+      ["characters", { c: 30, r: 0 }, { c: 20, r: 0, w: 12, h: 4 }],
+      ["chat", { c: 2, r: 16 }, { c: 0, r: 14, w: 6, h: 4 }],
     ];
     for (const [layer, at, rect] of drops) expect(dropCell("horizontal", layer, at), layer).toEqual(rect);
-    expect(dropCell("vertical", "poll", { c: 8, r: 15 })).toEqual({ c: 5, r: 14, w: 4, h: 2 });
+    expect(dropCell("vertical", "poll", { c: 16, r: 30 })).toEqual({ c: 10, r: 28, w: 8, h: 4 });
   });
 
   it("finds a free place of a given size", () => {
     const cells: LayerCells = LAID.cells.horizontal;
-    expect(firstFreeCell("horizontal", cells, "poll", { w: 11, h: 7 })).toEqual({ c: 5, r: 0, w: 11, h: 7 });
-    expect(firstFreeCell("horizontal", cells, "poll", { w: 12, h: 7 })).toBeNull();
+    expect(firstFreeCell("horizontal", cells, "poll", { w: 22, h: 14 })).toEqual({ c: 10, r: 0, w: 22, h: 14 });
+    expect(firstFreeCell("horizontal", cells, "poll", { w: 24, h: 14 })).toBeNull();
   });
 });
 
@@ -484,7 +486,7 @@ describe("layers on and off the grid", () => {
   });
 
   it("puts a layer on the grid at a cell and turns it on", () => {
-    const rect: CellRect = { c: 8, r: 0, w: 3, h: 2 };
+    const rect: CellRect = { c: 16, r: 0, w: 6, h: 4 };
     const placed: OverlayLayers | null = withPlaced(DEFAULT_LAYERS, "horizontal", "chat", rect);
     expect(placed?.chat.enabled).toBe(true);
     expect(placed?.characters.enabled).toBe(false);
@@ -496,30 +498,30 @@ describe("layers on and off the grid", () => {
     });
     // A content layer that was hidden and off the grid shows again.
     const hidden: OverlayLayers = withEnabled(DEFAULT_LAYERS, "card", false);
-    const card: OverlayLayers | null = withPlaced(hidden, "vertical", "card", { c: 0, r: 0, w: 4, h: 2 });
+    const card: OverlayLayers | null = withPlaced(hidden, "vertical", "card", { c: 0, r: 0, w: 8, h: 4 });
     expect(card?.items.card.enabled).toBe(true);
-    expect(card?.cells.vertical.card).toEqual({ c: 0, r: 0, w: 4, h: 2 });
+    expect(card?.cells.vertical.card).toEqual({ c: 0, r: 0, w: 8, h: 4 });
     expect(card?.chat.enabled).toBe(false);
   });
 
   it("moves a placed layer and keeps its Show on stream setting", () => {
     // The chat of LAID has a cell and is off.
-    const moved: OverlayLayers | null = withPlaced(LAID, "horizontal", "chat", { c: 6, r: 0, w: 5, h: 7 });
+    const moved: OverlayLayers | null = withPlaced(LAID, "horizontal", "chat", { c: 12, r: 0, w: 10, h: 14 });
     expect(moved?.chat.enabled).toBe(false);
-    expect(diffLayers(LAID, moved ?? LAID)).toEqual({ cells: { horizontal: { chat: { c: 6, r: 0, w: 5, h: 7 } } } });
+    expect(diffLayers(LAID, moved ?? LAID)).toEqual({ cells: { horizontal: { chat: { c: 12, r: 0, w: 10, h: 14 } } } });
     const hidden: OverlayLayers = withEnabled(withCell(LAID, "horizontal", "poll", cell), "poll", false);
     expect(withPlaced(hidden, "horizontal", "poll", { ...cell, r: 1 })?.items.poll.enabled).toBe(false);
   });
 
   it("refuses a cell over a placed layer, also over one that is off stream, and a cell outside the grid", () => {
     // The characters of LAID are off stream, and their cell still takes its place.
-    const rect: CellRect = { c: 0, r: 7, w: 4, h: 2 };
+    const rect: CellRect = { c: 0, r: 14, w: 8, h: 4 };
     expect(placeProblem("horizontal", LAID.cells.horizontal, "poll", rect)).toEqual({
       kind: "overlap",
       other: "characters",
     });
     expect(withPlaced(LAID, "horizontal", "poll", rect)).toBeNull();
-    expect(withPlaced(LAID, "horizontal", "poll", { c: 14, r: 0, w: 4, h: 2 })).toBeNull();
+    expect(withPlaced(LAID, "horizontal", "poll", { c: 28, r: 0, w: 8, h: 4 })).toBeNull();
     // Off the grid, the characters leave the place free.
     const free: OverlayLayers = withRemoved(LAID, "horizontal", "characters");
     expect(withPlaced(free, "horizontal", "poll", rect)?.cells.horizontal.poll).toEqual(rect);

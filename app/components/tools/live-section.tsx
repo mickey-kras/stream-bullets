@@ -108,6 +108,7 @@ function LivePreview({
             feed={feed}
             testUntil={testUntil}
             serverOffset={serverOffset}
+            cameraHint
           />
         </div>
       </section>

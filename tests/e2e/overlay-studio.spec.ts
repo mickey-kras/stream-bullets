@@ -1,3 +1,4 @@
+import { inflateSync } from "node:zlib";
 import type { Locator, Route, WebSocketRoute } from "@playwright/test";
 import { close, expect, newPage, test, type Browser, type Page } from "./coverage";
 import { clientIp } from "./client-ips";
@@ -30,6 +31,7 @@ const PHONE_IP = clientIp("overlay-studio", 32);
 const KEYS_IP = clientIp("overlay-studio", 33);
 const OBS_IP = clientIp("overlay-studio", 34);
 const QR_IP = clientIp("overlay-studio", 35);
+const CAMERA_IP = clientIp("overlay-studio", 36);
 
 test.beforeEach(async () => {
   await runSql("overlay-studio-reset", [
@@ -80,11 +82,11 @@ test("each content layer goes on the grid one time with its real content, and OB
   // Each chip puts its layer at the first free place: four in the first two rows, then the next two rows.
   const places: Record<ContentLayer, string> = {
     poll: "column 1, row 1",
-    topic: "column 5, row 1",
-    next: "column 9, row 1",
-    message: "column 13, row 1",
-    card: "column 1, row 3",
-    support: "column 5, row 3",
+    topic: "column 9, row 1",
+    next: "column 17, row 1",
+    message: "column 25, row 1",
+    card: "column 1, row 5",
+    support: "column 9, row 5",
   };
   const names: Record<ContentLayer, string> = {
     poll: "Poll",
@@ -96,7 +98,7 @@ test("each content layer goes on the grid one time with its real content, and OB
   };
   for (const layer of CONTENT_LAYERS) {
     await placeLayer(page, editor, layer);
-    await expect(status).toHaveText(`${names[layer]} placed at ${places[layer]}, 4 × 2 cells.`);
+    await expect(status).toHaveText(`${names[layer]} placed at ${places[layer]}, 8 × 4 cells.`);
     await expect(chip(editor, layer)).toHaveText(`${names[layer]}Placed`);
     await expect(settings(editor)).toHaveAttribute("data-comp-props", layer);
     await expect(settings(editor).getByRole("checkbox", { name: "Show on stream" })).toBeChecked();
@@ -133,12 +135,12 @@ test("each content layer goes on the grid one time with its real content, and OB
   const stored: OverlayLayers = await storedLayers(page);
   expect(stored.cells.horizontal).toEqual({
     ...emptyCells(),
-    poll: { c: 0, r: 0, w: 4, h: 2 },
-    topic: { c: 4, r: 0, w: 4, h: 2 },
-    next: { c: 8, r: 0, w: 4, h: 2 },
-    message: { c: 12, r: 0, w: 4, h: 2 },
-    card: { c: 0, r: 2, w: 4, h: 2 },
-    support: { c: 4, r: 2, w: 4, h: 2 },
+    poll: { c: 0, r: 0, w: 8, h: 4 },
+    topic: { c: 8, r: 0, w: 8, h: 4 },
+    next: { c: 16, r: 0, w: 8, h: 4 },
+    message: { c: 24, r: 0, w: 8, h: 4 },
+    card: { c: 0, r: 4, w: 8, h: 4 },
+    support: { c: 8, r: 4, w: 8, h: 4 },
   });
   expect(stored.cells.vertical).toEqual(emptyCells());
 
@@ -426,8 +428,8 @@ test("state from before the studio shows as layers: the source that was on air, 
     expect(converted.chat.enabled).toBe(true);
     expect(converted.items.message.enabled).toBe(true);
     expect(converted.cells).toEqual({
-      horizontal: { ...emptyCells(), chat: CHAT_CELL, message: { c: 5, r: 0, w: 11, h: 3 } },
-      vertical: { ...emptyCells(), chat: { c: 0, r: 8, w: 9, h: 5 }, message: { c: 0, r: 0, w: 9, h: 3 } },
+      horizontal: { ...emptyCells(), chat: CHAT_CELL, message: { c: 10, r: 0, w: 22, h: 6 } },
+      vertical: { ...emptyCells(), chat: { c: 0, r: 16, w: 18, h: 10 }, message: { c: 0, r: 0, w: 18, h: 6 } },
     });
     await chip(editor, "message").click();
     await expect(page.locator("[data-ov-message]")).toHaveValue("Back soon");
@@ -455,7 +457,7 @@ test("state from before the studio shows as layers: the source that was on air, 
     await page.reload();
     await expect(chip(editor, "poll")).toHaveText("PollPlaced");
     await expect(editor.locator('.ov-layer[data-layer="poll"] [data-overlay-mash]')).toBeVisible();
-    expect((await storedLayers(page)).cells.horizontal.poll).toEqual({ c: 0, r: 0, w: 16, h: 9 });
+    expect((await storedLayers(page)).cells.horizontal.poll).toEqual({ c: 0, r: 0, w: 32, h: 18 });
   } finally {
     await runSql("overlay-studio-legacy-restore", [
       `UPDATE overlay_state SET air='{"type":"auto","ref":null}', preview='{"type":"auto","ref":null}', position='lower', size='m', instant=0, message='' WHERE streamer_id=${FEATURE_HOST};`,
@@ -507,7 +509,7 @@ test("at 390 px the studio stacks the palette, the grid and the settings, and th
   }
   // The same holds with the vertical frame and with the settings of the characters, the longest panel.
   let save = saved(page);
-  await editor.getByRole("button", { name: "Vertical 9 × 16" }).click();
+  await editor.getByRole("button", { name: "Vertical 18 × 32" }).click();
   await save;
   await expect(frame).toHaveAttribute("data-orientation", "vertical");
   await page.route("**/api/overlay/characters", (route: Route) =>
@@ -524,7 +526,7 @@ test("at 390 px the studio stacks the palette, the grid and the settings, and th
   // On a wide screen the three parts are side by side.
   await page.setViewportSize({ width: 1440, height: 1000 });
   save = saved(page);
-  await editor.getByRole("button", { name: "Horizontal 16 × 9" }).click();
+  await editor.getByRole("button", { name: "Horizontal 32 × 18" }).click();
   await save;
   await expect(frame).toHaveAttribute("data-scaled", "true");
   const wide = {
@@ -545,18 +547,18 @@ test("the keyboard alone places, selects, changes and removes a layer", async ({
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/tools?view=overlay");
   const editor = page.locator("[data-composition-editor]");
-  const grid = gridButton(editor, "Layout grid, 16 columns by 9 rows");
+  const grid = gridButton(editor, "Layout grid, 32 columns by 18 rows");
   const status = editor.locator("[data-grid-status]");
   const panel = settings(editor);
   // Tab goes through the toolbar, then the chips in their order, then the grid.
-  await editor.getByRole("button", { name: "Horizontal 16 × 9" }).focus();
+  await editor.getByRole("button", { name: "Horizontal 32 × 18" }).focus();
   const order: string[] = [];
-  for (let step = 0; step < 12; step += 1) {
+  for (let step = 0; step < 13; step += 1) {
     await page.keyboard.press("Tab");
     order.push(await page.evaluate(() => (document.activeElement?.textContent ?? "").trim()));
   }
   expect(order).toEqual([
-    "Vertical 9 × 16",
+    "Vertical 18 × 32",
     "Transparent",
     "Sample game",
     "Start test",
@@ -568,6 +570,7 @@ test("the keyboard alone places, selects, changes and removes a layer", async ({
     "+ Message banner",
     "+ Community card",
     "+ Support banner",
+    "+ Camera frame",
   ]);
   await page.keyboard.press("Tab");
   await expect(grid).toBeFocused();
@@ -577,7 +580,7 @@ test("the keyboard alone places, selects, changes and removes a layer", async ({
   let save = saved(page);
   await page.keyboard.press("Enter");
   await save;
-  await expect(status).toHaveText("Topic placed at column 1, row 1, 4 × 2 cells.");
+  await expect(status).toHaveText("Topic placed at column 1, row 1, 8 × 4 cells.");
   await expect(grid).toBeFocused();
   await expect(panel).toHaveAttribute("data-comp-props", "topic");
   // The settings are a named region after the grid. Tab goes to its first control.
@@ -629,11 +632,11 @@ test("the keyboard alone places, selects, changes and removes a layer", async ({
   await grid.focus();
   save = saved(page);
   await page.keyboard.press("Shift+ArrowDown");
-  await expect(status).toHaveText("Topic moved to column 1, row 2, 4 × 2 cells.");
+  await expect(status).toHaveText("Topic moved to column 1, row 2, 8 × 4 cells.");
   await page.keyboard.press("Alt+ArrowRight");
-  await expect(status).toHaveText("Topic resized to 5 × 2 cells at column 1, row 2.");
+  await expect(status).toHaveText("Topic resized to 9 × 4 cells at column 1, row 2.");
   await save;
-  await expect.poll(async () => (await storedLayers(page)).cells.horizontal.topic).toEqual({ c: 0, r: 1, w: 5, h: 2 });
+  await expect.poll(async () => (await storedLayers(page)).cells.horizontal.topic).toEqual({ c: 0, r: 1, w: 9, h: 4 });
 
   // A second layer: the cursor selects it. Space picks up the layer at the cursor, and Escape puts it back.
   await chip(editor, "support").focus();
@@ -642,9 +645,9 @@ test("the keyboard alone places, selects, changes and removes a layer", async ({
   await save;
   await expect(panel).toHaveAttribute("data-comp-props", "support");
   await expect(grid).toBeFocused();
-  // The support banner is at the first free place: column 1, row 1 is free above the topic.
-  await expect(grid).toHaveAccessibleName("Column 6, row 1: Support banner.");
-  for (let step = 0; step < 5; step += 1) await page.keyboard.press("ArrowLeft");
+  // The support banner is at the first free place: beside the topic, which has columns 1 to 9.
+  await expect(grid).toHaveAccessibleName("Column 10, row 1: Support banner.");
+  for (let step = 0; step < 9; step += 1) await page.keyboard.press("ArrowLeft");
   await page.keyboard.press("ArrowDown");
   await expect(status).toHaveText("Column 1, row 2: Topic.");
   await page.keyboard.press("Space");
@@ -675,5 +678,112 @@ test("the keyboard alone places, selects, changes and removes a layer", async ({
   await save;
   await expect(status).toHaveText("Topic removed from the grid.");
   expect((await storedLayers(page)).cells.horizontal).toEqual(emptyCells());
+  await close(owner);
+});
+
+/**
+ * The opacity of the page at one point, from 0 (clear) to 255: the alpha of a screenshot of that one pixel without
+ * the default white background of the browser. This is what OBS gets from a browser source.
+ */
+async function alphaAt(page: Page, x: number, y: number): Promise<number> {
+  const png: Uint8Array = await page.screenshot({ omitBackground: true, clip: { x, y, width: 1, height: 1 } });
+  const view = new DataView(png.buffer, png.byteOffset, png.byteLength);
+  // One PNG chunk: length, type, data, checksum. The data chunks together are one RGBA pixel after its filter byte.
+  let offset = 8;
+  const parts: Uint8Array[] = [];
+  while (offset < png.length) {
+    const length: number = view.getUint32(offset);
+    const type: string = String.fromCodePoint(...png.subarray(offset + 4, offset + 8));
+    if (type === "IDAT") parts.push(png.subarray(offset + 8, offset + 8 + length));
+    offset += 12 + length;
+  }
+  const data = new Uint8Array(parts.reduce((sum: number, part: Uint8Array): number => sum + part.length, 0));
+  let at = 0;
+  for (const part of parts) {
+    data.set(part, at);
+    at += part.length;
+  }
+  const pixel: Uint8Array = inflateSync(data);
+  // The browser writes a pixel without alpha as RGB or grey. Byte 25 of the file is the colour type.
+  const colourType: number = png[25];
+  if (colourType === 6) return pixel[4];
+  if (colourType === 4) return pixel[2];
+  if (colourType === 2 || colourType === 0) return 255;
+  throw new Error(`The screenshot has colour type ${colourType}.`);
+}
+
+test("the camera frame has a clear window on stream at each size, and the editor tells where the camera goes", async ({
+  browser,
+}) => {
+  const owner = await signedIn(browser, "featureowner", CAMERA_IP);
+  const page = await newPage(owner);
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/overlay-control");
+  const editor = page.locator("[data-composition-editor]");
+  const frame = editor.getByRole("region", { name: "Composition preview" });
+  await expect(frame).toHaveAttribute("data-scaled", "true");
+  // The frame goes on the grid like each other layer, at its smallest size, and is on stream at once.
+  await expect(chip(editor, "camera")).toHaveText("+ Camera frame");
+  await placeLayer(page, editor, "camera");
+  await expect(editor.locator("[data-grid-status]")).toHaveText("Camera frame placed at column 1, row 1, 6 × 4 cells.");
+  await expect(frame.locator('[data-grid-box="camera"]')).toContainText("Camera frame · 360 × 240");
+  const panel = settings(editor);
+  await expect(panel).toHaveAttribute("data-comp-props", "camera");
+  await expect(panel.getByRole("checkbox", { name: "Show on stream" })).toBeChecked();
+  await expect(panel).toContainText(
+    "In OBS, put your camera under the overlay source and make it as large as the window.",
+  );
+  await expect(panel.locator("[data-props-background], [data-props-qr]")).toHaveCount(0);
+  expect(await storedLayers(page)).toMatchObject({
+    camera: { enabled: true },
+    cells: { horizontal: { camera: { c: 0, r: 0, w: 6, h: 4 } } },
+  });
+  // The preview marks the window for the owner.
+  await expect(frame.locator('.ov-layer[data-layer="camera"] [data-camera-hint]')).toHaveText(
+    "Your OBS camera shows here",
+  );
+
+  // OBS gets the frame without the text. The window is clear, and the band of the frame is not.
+  const obs = await obsPage(browser, "/@feature_host/overlay");
+  const layer = obs.locator('.ov-layer[data-layer="camera"]');
+  await expect(layer.locator("[data-overlay-camera]")).toBeVisible();
+  await expect(layer.locator("[data-camera-hint]")).toHaveCount(0);
+  await expect(obs.getByText("Your OBS camera shows here")).toHaveCount(0);
+  const clear = async (): Promise<{ window: number[]; band: number }> => {
+    const box = await layer.boundingBox();
+    if (!box) throw new Error("No camera frame.");
+    const inside = (fx: number, fy: number): Promise<number> =>
+      alphaAt(obs, Math.round(box.x + box.width * fx), Math.round(box.y + box.height * fy));
+    return {
+      // The middle of the window, and a point near each side of it.
+      window: await Promise.all([
+        inside(0.5, 0.5),
+        inside(0.2, 0.5),
+        inside(0.8, 0.5),
+        inside(0.5, 0.25),
+        inside(0.5, 0.75),
+      ]),
+      band: await alphaAt(obs, Math.round(box.x + box.width / 2), Math.round(box.y + 8)),
+    };
+  };
+  expect(await layer.boundingBox()).toEqual({ x: 0, y: 0, width: 360, height: 240 });
+  expect(await clear()).toEqual({ window: [0, 0, 0, 0, 0], band: 255 });
+
+  // A larger frame, at odd cells: the window is clear again. OBS gets the change without a load.
+  const moved = await owner.request.post("/api/overlay", {
+    data: { action: "layers", cells: { horizontal: { camera: { c: 17, r: 5, w: 15, h: 9 } } } },
+  });
+  expect(moved.ok()).toBe(true);
+  await expect.poll(async () => (await layer.boundingBox())?.width).toBe(900);
+  expect(await layer.boundingBox()).toEqual({ x: 1020, y: 300, width: 900, height: 540 });
+  expect(await clear()).toEqual({ window: [0, 0, 0, 0, 0], band: 255 });
+
+  // "Show on stream" off takes the frame off the stream and keeps its place on the grid.
+  const done = saved(page);
+  await panel.getByRole("checkbox", { name: "Show on stream" }).uncheck();
+  await done;
+  await expect(layer).toHaveCount(0);
+  await expect(frame.locator('[data-grid-box="camera"]')).toHaveAttribute("data-off", "true");
+  await close(obs);
   await close(owner);
 });

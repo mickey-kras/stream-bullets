@@ -28,7 +28,7 @@ The code is in these files:
 
 ## Layers
 
-The composition has eight layers. Each layer can be on the grid one time.
+The composition has nine layers. Each layer can be on the grid one time.
 
 | Layer | Name in the editor | What it shows |
 | --- | --- | --- |
@@ -40,12 +40,13 @@ The composition has eight layers. Each layer can be on the grid one time.
 | `message` | Message banner | A short text of the owner, in the info style or the hype style |
 | `card` | Community card | The first Community card, or a card that the owner picks |
 | `support` | Support banner | The first support link |
+| `camera` | Camera frame | A frame with a clear window for the camera source in OBS. See [Camera frame](#camera-frame). |
 
 `poll`, `topic`, `next`, `message`, `card`, and `support` are the content layers.
 
 A layer is on stream when it has a cell in the selected orientation and its `enabled` setting is on.
 In the editor, the `enabled` setting is **Show on stream**.
-The characters are at the bottom, then the content layers, and the chat is on top.
+The characters are at the bottom, then the content layers and the camera frame, and the chat is on top.
 Layers cannot overlap, so this sequence shows only at shared edges.
 
 No layer is on the grid by default. The chat layer and the characters layer are off by default.
@@ -56,12 +57,12 @@ The theme is separate from the layout and the behavior. The overlay has one them
 
 ## Grid and orientation
 
-The streamer selects the orientation of the frame. Each orientation has a grid of square cells of 120 pixels:
+The streamer selects the orientation of the frame. Each orientation has a grid of square cells of 60 pixels:
 
 | Orientation | Frame | Grid |
 | --- | --- | --- |
-| `horizontal` (default) | 1920 × 1080 | 16 columns × 9 rows |
-| `vertical` | 1080 × 1920 | 9 columns × 16 rows |
+| `horizontal` (default) | 1920 × 1080 | 32 columns × 18 rows |
+| `vertical` | 1080 × 1920 | 18 columns × 32 rows |
 
 A layer on the grid has one cell rectangle in that orientation.
 A rectangle has four integers: column `c`, row `r`, width `w`, and height `h`, all in cells.
@@ -73,15 +74,16 @@ Each orientation keeps its own layout. When you change the orientation, the layo
 The overlay shows only the selected orientation.
 A layer can be on the grid of one orientation and off the grid of the other.
 
-| Layer | Minimum size |
-| --- | --- |
-| `chat` | 3 × 2 |
-| `characters` | 6 × 2 |
-| Each content layer | 4 × 2 |
+| Layer | Minimum size in cells | Minimum size in pixels |
+| --- | --- | --- |
+| `chat` | 6 × 4 | 360 × 240 |
+| `characters` | 12 × 4 | 720 × 240 |
+| Each content layer | 8 × 4 | 480 × 240 |
+| `camera` | 6 × 4 | 360 × 240 |
 
-The characters cell sets the size of the playground world: each cell is 40 × 40 world pixels.
+The characters cell sets the size of the playground world: each cell is 20 × 20 world pixels.
 A wide cell gives a long ground. A tall cell gives more sky above the ground.
-In a small cell, such as the minimum of 6 × 2 cells, up to 40 characters stand close together on a short ground.
+In a small cell, such as the minimum of 12 × 4 cells, up to 40 characters stand close together on a short ground.
 Give the characters a wide cell when your chat is busy.
 
 A content layer shows its content in the middle of its cell, at the full width of the cell.
@@ -96,6 +98,7 @@ Each layer has the `enabled` setting. The other settings are these:
 | `chat` | `hideCommands` and `backgroundOpacity`. See [Commands](#commands) and [Message background](#message-background). |
 | `characters` | `timeout` and `max`. See [Interactive characters](characters.md). |
 | Each content layer | `ref`, `backgroundOpacity`, and `qr` |
+| `camera` | No other setting. See [Camera frame](#camera-frame). |
 
 The settings of a content layer are these:
 
@@ -143,9 +146,33 @@ A viewer scans the QR code with a phone. The phone then opens the public page of
 - The API accepts `qr` for the `message` layer, but that layer never shows a code.
 
 The stored layers have a limit of 4000 characters. The server stores only what is not a default.
-All eight layers on the grid of the two orientations, with each setting changed, need less than half of the limit.
+All nine layers on the grid of the two orientations, with each setting changed, need less than half of the limit.
 Migration `0032` raised the limit from 1000 characters. It builds the `overlay_state` table again and keeps all rows.
 An older Worker can use the new table.
+
+### Camera frame
+
+The camera frame is a frame around a clear window. The overlay does not show a camera picture.
+StreamBullets does not use the camera of the streamer, and it does not ask for the camera permission.
+The camera is a source of the streamer in OBS.
+
+To show the camera in the frame, do these steps:
+
+1. In the editor, add the camera frame to the grid. Give it the place and the size of the camera picture.
+2. In OBS, move the camera source below the overlay source in the list of sources.
+3. In OBS, give the camera source the place and the size of the window of the frame.
+
+The frame covers 19 design pixels at each edge of its cell. The remaining area of the cell is the window.
+Thus the window starts 19 design pixels from the left edge and the top edge of the cell.
+Its width and its height are 38 design pixels less than those of the cell.
+
+The window has round corners. Thus the frame hides the corners of the camera picture.
+The outer corners of the frame are also round. A camera picture as large as the cell shows outside them.
+The label of the layer on the grid gives the size of the cell in design pixels.
+
+In the editor, the window shows the text **Your OBS camera shows here**. The overlay page never shows this text.
+The camera frame has no `ref`, no background setting, and no QR code.
+The frame is a part of the content source (`layer=content`).
 
 ### Canvas
 
@@ -165,7 +192,7 @@ The overlay reads stored and broadcast layers leniently. Thus a value from an ol
 - A field with an incorrect value takes its default value.
 - A cell outside the grid or below the minimum size reads as no cell.
 - A cell that overlaps an earlier layer reads as no cell.
-  The sequence is `chat`, `characters`, `poll`, `topic`, `next`, `message`, `card`, `support`.
+  The sequence is `chat`, `characters`, `poll`, `topic`, `next`, `message`, `card`, `support`, `camera`.
 - A layer with an incorrect value takes the defaults of that layer.
 
 The API is strict for changes. See [Overlay layers](api.md#overlay-layers).
@@ -177,8 +204,11 @@ The owner changed the source with **Preview** and **Take**.
 The chat layer and the characters layer always had a cell, and an optional `content` layer gave the source a cell.
 Now the overlay shows only layers on the grid.
 
-The stored layers have a version (`v`). The current version is 2. Stored layers without this version are old.
+The stored layers have a version (`v`). The current version is 3. Stored layers without this version are old.
 The server converts old layers each time it reads them. The result is always the same.
+
+Stored layers without a version are from before the overlay studio.
+For version 2, see [Cells of 120 pixels](#cells-of-120-pixels).
 
 The first time the overlay page or **Streamer tools** reads the state, the server stores the result.
 Each save also stores the current version. Thus the conversion happens one time.
@@ -208,7 +238,8 @@ The conversion has these rules:
 
 The layer goes to the old `content` cell of an orientation, if that orientation had one.
 If not, the old position and size give the cell. A poll filled the frame and did not use the position.
-Each cell in this table is `c`, `r`, `w` × `h`:
+Each cell in this table is `c`, `r`, `w` × `h`, in cells of 120 pixels.
+The layer gets the same place in cells of 60 pixels: see [Cells of 120 pixels](#cells-of-120-pixels).
 
 | Old position | Horizontal S | Horizontal M | Horizontal L | Vertical S | Vertical M | Vertical L |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -230,6 +261,27 @@ A scene with a source on air shows the same source, in its cell and not in the f
 An OBS source that was open during the deploy loads the new page by itself after some failed updates.
 Refresh an open OBS source one time after the deploy to get the new page at once.
 
+## Cells of 120 pixels
+
+Until version 2, a cell was 120 pixels: 16 columns × 9 rows in the horizontal orientation.
+Version 3 has cells of 60 pixels. The frame did not change.
+
+The server converts each old cell rectangle: `c`, `r`, `w`, and `h` become two times larger.
+Thus each old cell is 2 × 2 cells, and each layer keeps its place and its size in pixels.
+The minimum sizes are two times larger in cells and the same in pixels.
+A cell that the old grid did not keep also reads as no cell after the conversion.
+
+The conversion uses the version, as the conversion of the state from before the overlay studio does.
+For stored layers without a version, the server converts the cells first. Then the rules above apply.
+The first read stores the result at version 3. The revision of the overlay does not change.
+
+The characters world keeps its size: a cell of the playground is 20 × 20 world pixels, and each old cell was 40 × 40.
+The playground also reads a checkpoint with the old cells as the same world.
+
+An overlay page or a **Streamer tools** page that was open during the deploy has the old grid.
+It shows the layers at incorrect places until you load it again.
+Refresh each open OBS source one time after the deploy.
+
 ## URLs
 
 The overlay page has one URL for the composition:
@@ -250,8 +302,8 @@ A chat source or a characters source keeps the aspect ratio of its cell and uses
 It aligns the layer with the bottom-right corner of the viewport. Thus the newest chat rows are always visible.
 The free space stays transparent, at the left or at the top.
 
-A content source (`layer=content`) shows all the content layers on stream, without the chat and the characters.
-Each content layer stays at its cell in the canvas of the selected orientation, as in the composition.
+A content source (`layer=content`) shows all the content layers and the camera frame on stream, without the chat and the characters.
+Each of these layers stays at its cell in the canvas of the selected orientation, as in the composition.
 Thus a content source has the frame size, not the size of one layer.
 
 An unknown `layer` value shows an empty transparent page. It never shows an error.
@@ -338,7 +390,7 @@ In the toolbar, select **Transparent** or **Sample game** for the preview backgr
 
 To change the layout, do these steps:
 
-1. In the toolbar, select **Horizontal 16 × 9** or **Vertical 9 × 16**.
+1. In the toolbar, select **Horizontal 32 × 18** or **Vertical 18 × 32**.
    OBS changes to the new orientation at once. Each orientation keeps its own layout.
 2. To select a layer, press it on the grid, or select its chip in the palette.
    The selected layer shows eight handles: four on its corners and four on its edges.
@@ -360,7 +412,7 @@ Then the editor does not keep the change. A message under the grid gives the rea
 
 ### Add and remove a layer
 
-The palette shows one chip for each of the eight layers.
+The palette shows one chip for each of the nine layers.
 The chip of a layer on the grid of the selected orientation shows **Placed**.
 Each layer can be on the grid one time.
 
@@ -407,6 +459,7 @@ The settings show the name of the selected layer and these controls:
 | **Remove from grid** | All | Takes the layer off the grid. |
 
 Up next and the support banner have no picker. The characters layer has no background.
+The camera frame shows only a note about the camera source in OBS. See [Camera frame](#camera-frame).
 Without a selected layer, the settings show a hint.
 
 The chat settings show a warning when the chat layer is on stream and no connected platform is healthy.

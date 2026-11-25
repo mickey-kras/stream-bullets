@@ -59,6 +59,7 @@ export const LAYER_NAMES: Readonly<Record<GridLayer, MessageId>> = {
   message: "overlay.name.message",
   card: "overlay.name.card",
   support: "overlay.name.support",
+  camera: "overlay.name.camera",
 };
 
 /**
@@ -543,6 +544,7 @@ export function LayoutGrid({
             feed={null}
             charactersFeed={charactersFeed}
             samples={SAMPLE_CHAT}
+            cameraHint
           />
           <div className="ov-grid-lines" aria-hidden="true" />
           {GRID_LAYERS.map((layer: GridLayer) => {
@@ -608,7 +610,7 @@ export function LayoutGrid({
         </div>
       </section>
       <p className="muted ov-comp-help" id={helpId}>
-        {t("overlay.grid.help")}
+        {t("overlay.grid.help", { px: CELL_PX })}
       </p>
       <p className="ov-grid-status" data-grid-status data-bad={status.bad || undefined} aria-live="polite">
         {status.text}

@@ -113,9 +113,9 @@ The rotation order does not change with new messages. Thus a viewer cannot jump 
 
 ## Terrain
 
-The world size comes from the characters cell. A cell is 40 × 40 world pixels, and a world pixel is 3 pixels of the design.
-The default cell of 16 × 2 cells gives a world of 640 × 80 world pixels.
-The vertical default of 9 × 3 cells gives 360 × 120. The minimum cell of 6 × 2 cells gives 240 × 80.
+The world size comes from the characters cell. A cell is 20 × 20 world pixels, and a world pixel is 3 pixels of the design.
+A cell of 32 × 4 cells across the horizontal frame gives a world of 640 × 80 world pixels.
+A cell of 18 × 6 cells across the vertical frame gives 360 × 120. The minimum cell of 12 × 4 cells gives 240 × 80.
 
 - The ground is 18 world pixels above the bottom of the world. More height gives more sky.
 - The ground has tiles of 16 world pixels.
