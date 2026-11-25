@@ -516,9 +516,9 @@ describe("Worker live connections", (): void => {
   });
 
   it("marks only a socket with the page's current overlay key as the owner's OBS source", async (): Promise<void> => {
-    const key = await regenerateOverlayKey(env, "owner", { id: pageId, status: "active" });
+    const key = await regenerateOverlayKey(env, "owner", { id: pageId, status: "active" }, "horizontal");
     await live("zed_page", {}, `?key=${key}`);
-    expect(lastForwarded()).toMatchObject({ user: null, owner: null, overlay: "1" });
+    expect(lastForwarded()).toMatchObject({ user: null, owner: null, overlay: "horizontal" });
     // Invalid keys receive signed-out seats.
     for (const query of [`?key=${"A".repeat(43)}`, `?key=${key}x`, "?key=", ""]) {
       await live("zed_page", {}, query);
@@ -527,12 +527,35 @@ describe("Worker live connections", (): void => {
     // Owner sessions need no overlay key.
     await live("zed_page", { Cookie: await cookie("owner") }, `?key=${key}`);
     expect(lastForwarded()).toMatchObject({ user: "owner", owner: "1", overlay: null });
-    const next = await regenerateOverlayKey(env, "owner", { id: pageId, status: "active" });
+    const next = await regenerateOverlayKey(env, "owner", { id: pageId, status: "active" }, "horizontal");
     await live("zed_page", {}, `?key=${key}`);
     expect(lastForwarded().overlay).toBeNull();
     await env.DB.prepare("UPDATE streamers SET status='frozen' WHERE id=?").bind(pageId).run();
     await live("zed_page", {}, `?key=${next}`);
-    expect(lastForwarded().overlay).toBe("1");
+    expect(lastForwarded().overlay).toBe("horizontal");
+  });
+
+  it("names the output of the key: each output has its own key, and a new key for one keeps the other", async (): Promise<void> => {
+    const active = { id: pageId, status: "active" } as const;
+    const horizontal = await regenerateOverlayKey(env, "owner", active, "horizontal");
+    const vertical = await regenerateOverlayKey(env, "owner", active, "vertical");
+    await live("zed_page", {}, `?key=${vertical}`);
+    expect(lastForwarded()).toMatchObject({ user: null, owner: null, overlay: "vertical" });
+    await live("zed_page", {}, `?key=${horizontal}`);
+    expect(lastForwarded().overlay).toBe("horizontal");
+    // A client cannot name an output itself.
+    await live("zed_page", { "X-SB-Overlay": "vertical" });
+    expect(lastForwarded().overlay).toBeNull();
+    await live("zed_page", { "X-SB-Overlay": "vertical" }, `?key=${horizontal}`);
+    expect(lastForwarded().overlay).toBe("horizontal");
+    // A new vertical key revokes the old vertical key only.
+    const next = await regenerateOverlayKey(env, "owner", active, "vertical");
+    await live("zed_page", {}, `?key=${vertical}`);
+    expect(lastForwarded().overlay).toBeNull();
+    await live("zed_page", {}, `?key=${next}`);
+    expect(lastForwarded().overlay).toBe("vertical");
+    await live("zed_page", {}, `?key=${horizontal}`);
+    expect(lastForwarded().overlay).toBe("horizontal");
   });
 
   it("refuses the overlay of a suspended page, even with its key", async (): Promise<void> => {
@@ -612,10 +635,10 @@ describe("Worker live connections into the room", (): void => {
   });
 
   it("admits the OBS overlay with its key past the client cap, and not with a revoked key", async (): Promise<void> => {
-    const key = await regenerateOverlayKey(env, "owner", { id: pageId, status: "active" });
+    const key = await regenerateOverlayKey(env, "owner", { id: pageId, status: "active" }, "horizontal");
     for (let index = 0; index < 10; index += 1) await live("zed_page", { "CF-Connecting-IP": "192.0.2.1" });
     expect((await live("zed_page", { "CF-Connecting-IP": "192.0.2.1" }, `?key=${key}`)).status).toBe(101);
-    await regenerateOverlayKey(env, "owner", { id: pageId, status: "active" });
+    await regenerateOverlayKey(env, "owner", { id: pageId, status: "active" }, "horizontal");
     expect((await live("zed_page", { "CF-Connecting-IP": "192.0.2.1" }, `?key=${key}`)).status).toBe(429);
   });
 });
@@ -635,9 +658,9 @@ describe("Worker activity feed and provider webhooks", (): void => {
 
   it("forwards the feed only with the current overlay key or the owner's session", async (): Promise<void> => {
     env.CHANNEL_INGEST = capturingRooms() as unknown as DurableObjectNamespace;
-    const key = await regenerateOverlayKey(env, "owner", { id: pageId, status: "active" });
+    const key = await regenerateOverlayKey(env, "owner", { id: pageId, status: "active" }, "horizontal");
     expect((await activity("zed_page", {}, `?key=${key}`)).status).toBe(101);
-    expect(lastForwarded()).toMatchObject({ overlay: "1", owner: null });
+    expect(lastForwarded()).toMatchObject({ overlay: "horizontal", owner: null });
     expect(lastForwarded().url).toBe(`https://channel-ingest.internal/subscribe?streamerId=${pageId}`);
     expect((await activity("zed_page", { Cookie: await cookie("owner") })).status).toBe(101);
     expect(lastForwarded()).toMatchObject({ overlay: null, owner: "1" });
@@ -651,13 +674,32 @@ describe("Worker activity feed and provider webhooks", (): void => {
     // A wrong or revoked key gets a socket that is closed with the refusal code, so the overlay stops its retries.
     expect(await refusedKey(activity("zed_page", {}, `?key=${"A".repeat(43)}`))).toBe(true);
     expect(await refusedKey(activity("zed_page", { Cookie: await cookie("viewer") }, "?key=short"))).toBe(true);
-    await regenerateOverlayKey(env, "owner", { id: pageId, status: "active" });
+    await regenerateOverlayKey(env, "owner", { id: pageId, status: "active" }, "horizontal");
     expect(await refusedKey(activity("zed_page", {}, `?key=${key}`))).toBe(true);
     expect((await activity("hidden_page", { Cookie: await cookie("hidden") })).status).toBe(404);
     expect((await activity("zed_page", { Origin: "https://evil.example" }, `?key=${key}`)).status).toBe(403);
     expect((await activity("zed_page", {}, "?other=1")).status).toBe(400);
     expect((await fetchPath("/api/activity/zed_page", { headers: { Origin: origin } })).status).toBe(426);
     expect(forwarded).toHaveLength(0);
+  });
+
+  it("forwards the feed with the output of the key, and refuses the old key of an output alone", async (): Promise<void> => {
+    env.CHANNEL_INGEST = capturingRooms() as unknown as DurableObjectNamespace;
+    const active = { id: pageId, status: "active" } as const;
+    const horizontal = await regenerateOverlayKey(env, "owner", active, "horizontal");
+    const vertical = await regenerateOverlayKey(env, "owner", active, "vertical");
+    expect((await activity("zed_page", {}, `?key=${vertical}`)).status).toBe(101);
+    expect(lastForwarded()).toMatchObject({ overlay: "vertical", owner: null });
+    expect((await activity("zed_page", {}, `?key=${horizontal}&characters=1`)).status).toBe(101);
+    expect(lastForwarded()).toMatchObject({ overlay: "horizontal", owner: null });
+    // A header of the client names no output.
+    expect((await activity("zed_page", { "X-SB-Overlay": "horizontal" })).status).toBe(403);
+    forwarded = [];
+    await regenerateOverlayKey(env, "owner", active, "horizontal");
+    expect(await refusedKey(activity("zed_page", {}, `?key=${horizontal}`))).toBe(true);
+    expect(forwarded).toHaveLength(0);
+    expect((await activity("zed_page", {}, `?key=${vertical}`)).status).toBe(101);
+    expect(lastForwarded().overlay).toBe("vertical");
   });
 
   it("refuses one page's overlay key on another page's feed", async (): Promise<void> => {
@@ -668,8 +710,8 @@ describe("Worker activity feed and provider webhooks", (): void => {
     )
       .bind(otherId)
       .run();
-    const keyA = await regenerateOverlayKey(env, "owner", { id: pageId, status: "active" });
-    const keyB = await regenerateOverlayKey(env, "viewer", { id: otherId, status: "active" });
+    const keyA = await regenerateOverlayKey(env, "owner", { id: pageId, status: "active" }, "horizontal");
+    const keyB = await regenerateOverlayKey(env, "viewer", { id: otherId, status: "active" }, "horizontal");
     expect(await refusedKey(activity("b_page", {}, `?key=${keyA}`))).toBe(true);
     expect(await refusedKey(activity("zed_page", {}, `?key=${keyB}`))).toBe(true);
     expect((await activity("b_page", { Cookie: await cookie("owner") })).status).toBe(403);

@@ -105,8 +105,7 @@ export class OverlaySources {
     const seen: SeenTimes = await this.times();
     const outputs: Record<Orientation, number | null> = { ...seen.outputs, [output]: now };
     this.seen = { all: now, outputs };
-    // Store each known time. Thus a horizontal time from before the two outputs stays with its output when a
-    // vertical source replaces the time of the page.
+    // Each known time is stored, so a time from before the two outputs stays the time of the horizontal output.
     const stored: Record<string, number> = { [SEEN_KEY]: now };
     for (const name of ORIENTATIONS) {
       const at: number | null = outputs[name];

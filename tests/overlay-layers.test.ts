@@ -15,20 +15,24 @@ import {
   ORIENTATIONS,
   OVERLAY_LAYERS,
   STORED_LAYERS_LENGTH,
+  allContentSources,
   cellFits,
   cellPixels,
   contentSources,
   emptyCells,
+  forOutput,
   frameSize,
   layerEnabled,
   layerPixels,
   layerUrl,
   layersPatchSchema,
   mergeLayers,
+  onAnyOutput,
   onStream,
   overlappingPair,
   parseLayerParam,
   placedContent,
+  playgroundCell,
   storedLayersSchema,
   storedLayersText,
   type CellRect,
@@ -555,6 +559,112 @@ describe("camera frame", (): void => {
     expect(next.cells.horizontal.camera).not.toBe(frame);
     expect(mergeLayers(next, {}).camera).toEqual({ enabled: true });
     expect(mergeLayers(next, { cells: { horizontal: { camera: null } } }).cells.horizontal.camera).toBeNull();
+  });
+});
+
+describe("two outputs on stream at the same time", (): void => {
+  const pollCell: CellRect = { c: 0, r: 0, w: 8, h: 4 };
+  const topicCell: CellRect = { c: 0, r: 4, w: 8, h: 4 };
+  const cardCell: CellRect = { c: 0, r: 8, w: 8, h: 4 };
+  /** The poll on the two grids, the topic on the horizontal grid only, the card on the vertical grid only. */
+  const layers: OverlayLayers = {
+    ...DEFAULT_LAYERS,
+    items: {
+      ...DEFAULT_LAYERS.items,
+      poll: { ...DEFAULT_LAYERS.items.poll, ref: "p1" },
+      topic: { ...DEFAULT_LAYERS.items.topic, ref: "t1" },
+      card: { ...DEFAULT_LAYERS.items.card, ref: "c1" },
+    },
+    cells: {
+      horizontal: { ...emptyCells(), poll: pollCell, topic: topicCell },
+      vertical: { ...emptyCells(), poll: pollCell, card: cardCell },
+    },
+  };
+
+  it("shows the layers as one output has them, and changes nothing else", (): void => {
+    expect(layers.orientation).toBe("horizontal");
+    const vertical: OverlayLayers = forOutput(layers, "vertical");
+    expect(vertical).toEqual({ ...layers, orientation: "vertical" });
+    expect(layers.orientation).toBe("horizontal");
+    // The same output gives the same object: a page does not render again for it.
+    expect(forOutput(layers, "horizontal")).toBe(layers);
+    expect(forOutput(vertical, "vertical")).toBe(vertical);
+    expect(onStream(vertical, "card")).toBe(true);
+    expect(onStream(vertical, "topic")).toBe(false);
+    expect(placedContent(vertical).map((placed) => placed.layer)).toEqual(["poll", "card"]);
+    expect(placedContent(forOutput(vertical, "horizontal")).map((placed) => placed.layer)).toEqual(["poll", "topic"]);
+  });
+
+  it("counts a layer as on stream when one output shows it, whatever output the editor shows", (): void => {
+    for (const orientation of ORIENTATIONS) {
+      const edited: OverlayLayers = { ...layers, orientation };
+      for (const layer of ["poll", "topic", "card"] as const) expect(onAnyOutput(edited, layer), layer).toBe(true);
+      // No cell in an output, and a cell with the layer off.
+      for (const layer of ["chat", "characters", "next", "message", "support", "camera"] as const)
+        expect(onAnyOutput(edited, layer), layer).toBe(false);
+      const off: OverlayLayers = {
+        ...edited,
+        items: { ...edited.items, card: { ...edited.items.card, enabled: false } },
+      };
+      expect(onAnyOutput(off, "card")).toBe(false);
+    }
+    // The chat and the camera frame have their switch outside `items`.
+    const chat: OverlayLayers = {
+      ...DEFAULT_LAYERS,
+      chat: { ...DEFAULT_LAYERS.chat, enabled: true },
+      camera: { enabled: true },
+      cells: { horizontal: emptyCells(), vertical: { ...emptyCells(), chat: { c: 0, r: 0, w: 6, h: 4 } } },
+    };
+    expect(onStream(chat, "chat")).toBe(false);
+    expect(onAnyOutput(chat, "chat")).toBe(true);
+    expect(onAnyOutput(chat, "camera")).toBe(false);
+  });
+
+  it("gives the content sources of the two outputs, each layer one time", (): void => {
+    expect(contentSources(layers)).toEqual([
+      { type: "poll", ref: "p1" },
+      { type: "topic", ref: "t1" },
+    ]);
+    const all = allContentSources(layers);
+    expect(all).toHaveLength(3);
+    expect(all).toEqual(
+      expect.arrayContaining([
+        { type: "poll", ref: "p1" },
+        { type: "topic", ref: "t1" },
+        { type: "card", ref: "c1" },
+      ]),
+    );
+    // The same sources for each output that the editor shows.
+    expect(allContentSources({ ...layers, orientation: "vertical" })).toEqual(all);
+    // A layer that is off, and a page with no layer on a grid.
+    const off: OverlayLayers = {
+      ...layers,
+      items: { ...layers.items, card: { ...layers.items.card, enabled: false } },
+    };
+    expect(allContentSources(off)).toEqual(contentSources(off));
+    expect(allContentSources(DEFAULT_LAYERS)).toEqual([]);
+    // The automatic poll of a poll layer without a ref.
+    const auto: OverlayLayers = {
+      ...DEFAULT_LAYERS,
+      cells: { horizontal: emptyCells(), vertical: { ...emptyCells(), poll: pollCell } },
+    };
+    expect(allContentSources(auto)).toEqual([{ type: "auto", ref: null }]);
+  });
+
+  it("sizes the character playground from the horizontal cell, else from the vertical cell", (): void => {
+    const wide: CellRect = { c: 0, r: 14, w: 32, h: 4 };
+    const tall: CellRect = { c: 0, r: 26, w: 18, h: 6 };
+    const cells = (horizontal: CellRect | null, vertical: CellRect | null): OverlayLayers["cells"] => ({
+      horizontal: { ...emptyCells(), characters: horizontal },
+      vertical: { ...emptyCells(), characters: vertical },
+    });
+    expect(playgroundCell(DEFAULT_LAYERS)).toBeNull();
+    for (const orientation of ORIENTATIONS) {
+      expect(playgroundCell({ ...DEFAULT_LAYERS, orientation, cells: cells(wide, tall) })).toEqual(wide);
+      expect(playgroundCell({ ...DEFAULT_LAYERS, orientation, cells: cells(wide, null) })).toEqual(wide);
+      expect(playgroundCell({ ...DEFAULT_LAYERS, orientation, cells: cells(null, tall) })).toEqual(tall);
+      expect(playgroundCell({ ...DEFAULT_LAYERS, orientation, cells: cells(null, null) })).toBeNull();
+    }
   });
 });
 

@@ -143,7 +143,8 @@ export async function nextOverlayState(
   if (!onAnyOutput(next.layers, "chat")) next.chatTestUntil = 0;
   if (action.action === "chatTest") {
     // The test cannot start while the chat layer is off stream. Stop always works.
-    if (action.on && !onAnyOutput(current.layers, "chat")) throw new HttpError(400, "Put the chat layer on stream first.");
+    if (action.on && !onAnyOutput(current.layers, "chat"))
+      throw new HttpError(400, "Put the chat layer on stream first.");
     next.chatTestUntil = action.on ? now + CHAT_TEST_MS : 0;
   }
   return next;

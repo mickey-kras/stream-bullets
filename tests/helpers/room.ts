@@ -129,17 +129,31 @@ class RoomStorage {
   readonly sql = new RoomSql();
   alarm: number | null = null;
 
-  get<T>(key: string): Promise<T | undefined> {
-    return Promise.resolve(this.values.get(key) as T | undefined);
+  // As in the runtime: one key gives its value, and a list of keys gives a map of the keys that have a value.
+  get<T>(key: string): Promise<T | undefined>;
+  get<T>(keys: string[]): Promise<Map<string, T>>;
+  get<T>(key: string | string[]): Promise<T | undefined | Map<string, T>> {
+    if (typeof key === "string") return Promise.resolve(this.values.get(key) as T | undefined);
+    const found = new Map<string, T>();
+    for (const name of key) if (this.values.has(name)) found.set(name, this.values.get(name) as T);
+    return Promise.resolve(found);
   }
 
-  put(key: string, value: unknown): Promise<void> {
-    this.values.set(key, value);
+  // One key and its value, or an object of keys and values.
+  put(key: string, value: unknown): Promise<void>;
+  put(entries: Record<string, unknown>): Promise<void>;
+  put(key: string | Record<string, unknown>, value?: unknown): Promise<void> {
+    if (typeof key === "string") this.values.set(key, value);
+    else for (const [name, item] of Object.entries(key)) this.values.set(name, item);
     return Promise.resolve();
   }
 
-  delete(key: string): Promise<boolean> {
-    return Promise.resolve(this.values.delete(key));
+  // One key gives whether it had a value. A list of keys gives how many had one.
+  delete(key: string): Promise<boolean>;
+  delete(keys: string[]): Promise<number>;
+  delete(key: string | string[]): Promise<boolean | number> {
+    if (typeof key === "string") return Promise.resolve(this.values.delete(key));
+    return Promise.resolve(key.filter((name: string): boolean => this.values.delete(name)).length);
   }
 
   /** Deletes every key and every SQL table, as the runtime's deleteAll does. Like the runtime, it keeps the alarm. */

@@ -208,8 +208,7 @@ function OutputLink({
           {LAYER_LINKS.map(([layer, label]) => {
             if (layer === "characters" && !CHARACTERS_READY) return null;
             // The size in this output: the frame for the content layers, else the cell of the layer.
-            const layerSize: { w: number; h: number } | null =
-              layer === "content" ? size : layerPixels(layers, layer);
+            const layerSize: { w: number; h: number } | null = layer === "content" ? size : layerPixels(layers, layer);
             const sizeLine: string | undefined = layerSize ? `${sizeId}-${layer}` : undefined;
             return (
               <div key={layer} className="ov-url-layer" data-ov-layer-row={layer}>

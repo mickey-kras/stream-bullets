@@ -78,17 +78,41 @@ describe("live notification failure recovery", () => {
 });
 
 describe("overlay key revocation notices", () => {
-  function envWith(ingestFetch: () => Promise<Response>): AppEnv {
-    const namespace = { idFromName: (name: string) => name, get: () => ({ fetch: ingestFetch }) };
+  type Fetch = (url: string, init?: RequestInit) => Promise<Response>;
+  const done: Fetch = (): Promise<Response> => Promise.resolve(new Response(null, { status: 204 }));
+
+  function envWith(ingestFetch: Fetch, roomFetch: Fetch = done): AppEnv {
     return {
-      POLL_ROOMS: { idFromName: (name: string) => name, get: () => ({ fetch: () => Promise.resolve(new Response(null, { status: 204 })) }) },
-      CHANNEL_INGEST: namespace,
+      POLL_ROOMS: { idFromName: (name: string) => name, get: () => ({ fetch: roomFetch }) },
+      CHANNEL_INGEST: { idFromName: (name: string) => name, get: () => ({ fetch: ingestFetch }) },
     } as unknown as AppEnv;
   }
 
   async function settle(): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 0));
   }
+
+  it("tells the live room and the activity feed which output lost its key", async () => {
+    const calls: { target: string; path: string; method: string | undefined; body: unknown }[] = [];
+    const record =
+      (target: string): Fetch =>
+      (url: string, init?: RequestInit): Promise<Response> => {
+        const body: unknown = typeof init?.body === "string" ? JSON.parse(init.body) : null;
+        calls.push({ target, path: new URL(url).pathname, method: init?.method, body });
+        return Promise.resolve(new Response(null, { status: 204 }));
+      };
+    notifyOverlayKey(envWith(record("ingest"), record("room")), "streamer", "vertical");
+    notifyOverlayKey(envWith(record("ingest"), record("room")), "streamer", "horizontal");
+    await settle();
+    type Call = (typeof calls)[number];
+    const sorted: Call[] = [...calls].sort((a: Call, b: Call): number => a.target.localeCompare(b.target));
+    expect(sorted).toEqual([
+      { target: "ingest", path: "/overlay-key", method: "POST", body: { output: "vertical" } },
+      { target: "ingest", path: "/overlay-key", method: "POST", body: { output: "horizontal" } },
+      { target: "room", path: "/overlay-key", method: "POST", body: { output: "vertical" } },
+      { target: "room", path: "/overlay-key", method: "POST", body: { output: "horizontal" } },
+    ]);
+  });
 
   it("asks the activity feed to close the old key's sockets, and logs failures without details", async () => {
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
@@ -99,12 +123,24 @@ describe("overlay key revocation notices", () => {
         return Promise.resolve(new Response(null, { status: 204 }));
       }),
       "streamer",
+      "horizontal",
     );
     await settle();
     expect(calls).toEqual(["ingest"]);
-    notifyOverlayKey(envWith(() => Promise.resolve(new Response(null, { status: 500 }))), "streamer");
-    notifyOverlayKey(envWith(() => Promise.reject(new TypeError("secret"))), "streamer");
-    notifyActivityPage(envWith(() => Promise.reject(new Error("secret"))), "streamer");
+    notifyOverlayKey(
+      envWith(() => Promise.resolve(new Response(null, { status: 500 }))),
+      "streamer",
+      "horizontal",
+    );
+    notifyOverlayKey(
+      envWith(() => Promise.reject(new TypeError("secret"))),
+      "streamer",
+      "vertical",
+    );
+    notifyActivityPage(
+      envWith(() => Promise.reject(new Error("secret"))),
+      "streamer",
+    );
     await settle();
     expect(log.mock.calls).toEqual([
       ["activity_notify_failed", { path: "overlay-key", status: 500 }],

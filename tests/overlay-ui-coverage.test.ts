@@ -6,12 +6,13 @@ import { ChannelPanel, type ChannelView } from "../app/components/channels/chann
 import { ChatDeliveryContext } from "../app/components/channels/use-live-channels";
 import type { CharactersControl } from "../app/components/overlay/characters-controls";
 import { ChatLayer, chatStyle, shortName } from "../app/components/overlay/chat-layer";
+import { outputSources, type OverlaySources } from "../app/components/live";
 import { LayerPalette } from "../app/components/overlay/layer-palette";
 import { LayerProperties, OVERLAY_MESSAGE_MAX } from "../app/components/overlay/layer-properties";
 import { LAYER_NAMES, LayoutGrid, type LayoutGridHandle } from "../app/components/overlay/layout-grid";
 import { CharactersSlot, OverlayComposition, usesDesignCanvas } from "../app/components/overlay/overlay-composition";
 import { controlState, OverlayControl } from "../app/components/overlay/overlay-control";
-import { sourcesText } from "../app/components/overlay/overlay-link";
+import { OverlayLink, sourcesText } from "../app/components/overlay/overlay-link";
 import {
   OverlayStage,
   optionColumns,
@@ -30,6 +31,7 @@ import {
   emptyCells,
   type ContentSource,
   type GridLayer,
+  type Orientation,
   type OverlayLayer,
   type OverlayLayers,
 } from "../app/lib/overlay-layers";
@@ -119,9 +121,11 @@ function playground(override: Partial<CharactersControl> = {}): CharactersContro
   };
 }
 
+const NO_LINKS: Readonly<Record<Orientation, boolean>> = { horizontal: false, vertical: false };
+
 describe("overlay control page", () => {
   function control(initial: OverlayState = state, connected: boolean = true): string {
-    return renderToStaticMarkup(createElement(OverlayControl, { initial, scene, hasOverlayKey: false, connected }));
+    return renderToStaticMarkup(createElement(OverlayControl, { initial, scene, hasOverlayKey: NO_LINKS, connected }));
   }
 
   it("has the studio as step 1 and the OBS link as step 2, without the page head and the old live control", () => {
@@ -139,10 +143,16 @@ describe("overlay control page", () => {
   });
 
   it("shows the OBS connection of a page that has an overlay link", () => {
-    const html = (hasOverlayKey: boolean, count: number): string =>
+    const html = (hasKey: boolean, count: number): string =>
       renderToStaticMarkup(
-        createElement(OverlayControl, { initial: state, scene, hasOverlayKey, sources: { count, seenAt: null } }),
+        createElement(OverlayControl, {
+          initial: state,
+          scene,
+          hasOverlayKey: { horizontal: hasKey, vertical: false },
+          sources: { count, seenAt: null },
+        }),
       );
+    // A room from before the two outputs sends no number for each output: its sources are horizontal.
     expect(html(true, 2)).toContain('data-ov-sources="2"');
     expect(html(true, 2)).toContain("OBS is connected: 2 sources.");
     expect(html(true, 0)).toContain("OBS did not connect yet.");
@@ -150,6 +160,84 @@ describe("overlay control page", () => {
     expect(sourcesText({ count: 1, seenAt: 0 }, 0)).toBe("OBS is connected: 1 source.");
     expect(sourcesText({ count: 0, seenAt: 1000 }, 181_000)).toBe("OBS is not connected. Last seen 3 minutes ago.");
     expect(sourcesText({ count: 0, seenAt: 1000 }, 1000)).toBe("OBS is not connected. Last seen just now.");
+  });
+
+  it("has one link section for each output, with its name, its source size and its own buttons", () => {
+    const html = (hasKey: Readonly<Record<Orientation, boolean>>): string =>
+      renderToStaticMarkup(createElement(OverlayLink, { hasKey, layers: placed, sources: null, now: 1000 }));
+    const sections = (markup: string): string[] => markup.split('<section class="ov-url-output"').slice(1);
+    const none: string = html(NO_LINKS);
+    // One sentence for the two links, before them.
+    expect(none.match(/Each output has its own private link for OBS\. Use one link or both\./g)).toHaveLength(1);
+    expect(none.indexOf("Each output has its own private link")).toBeLessThan(none.indexOf("<section"));
+    const [horizontal, vertical] = sections(none);
+    expect(sections(none)).toHaveLength(2);
+    expect(horizontal).toContain('data-ov-output="horizontal"');
+    expect(vertical).toContain('data-ov-output="vertical"');
+    // Each section is a region with the name of its output.
+    for (const [section, name] of [
+      [horizontal, "Horizontal output"],
+      [vertical, "Vertical output"],
+    ]) {
+      const id: string | undefined = /aria-labelledby="([^"]+)"/.exec(section)?.[1];
+      expect(id).toBeDefined();
+      expect(section).toContain(`<p id="${id}"><strong>${name}</strong></p>`);
+      expect(section.match(/<button/g)).toHaveLength(1);
+      expect(section).toContain(">Create overlay link</button>");
+      expect(section).not.toContain("data-ov-sources");
+    }
+    expect(horizontal).toContain("Add a Browser source in OBS: width 1920, height 1080.");
+    expect(vertical).toContain("Add a Browser source in OBS: width 1080, height 1920.");
+    // A link of one output: that section offers to show it and to replace it. The other section does not change.
+    const [made, other] = sections(html({ horizontal: false, vertical: true })).reverse();
+    expect(made).toContain('data-ov-output="vertical"');
+    expect(made).toContain(">Show link</button>");
+    expect(made).toContain(">Regenerate link</button>");
+    expect(made).toContain("Your private overlay link is hidden.");
+    expect(other).toContain(">Create overlay link</button>");
+    expect(other).not.toContain("Show link");
+    expect(other).not.toContain("Your private overlay link is hidden.");
+  });
+
+  it("shows the OBS connection of each output beside the link of that output", () => {
+    const sources: OverlaySources = {
+      count: 2,
+      seenAt: 900,
+      outputs: { horizontal: { count: 2, seenAt: 900 }, vertical: { count: 0, seenAt: 1000 - 180_000 } },
+    };
+    const html = (hasKey: Readonly<Record<Orientation, boolean>>, given: OverlaySources | null = sources): string =>
+      renderToStaticMarkup(createElement(OverlayLink, { hasKey, layers: placed, sources: given, now: 1000 }));
+    const [horizontal, vertical] = html({ horizontal: true, vertical: true }).split("<section").slice(1);
+    expect(horizontal).toContain('data-ov-sources="2"');
+    expect(horizontal).toContain("OBS is connected: 2 sources.");
+    expect(vertical).toContain('data-ov-sources="0"');
+    expect(vertical).toContain("OBS is not connected. Last seen 3 minutes ago.");
+    // An output without a link shows no connection, and nothing shows before the live room tells.
+    const [, noLink] = html({ horizontal: true, vertical: false }).split("<section").slice(1);
+    expect(noLink).not.toContain("data-ov-sources");
+    expect(html({ horizontal: true, vertical: true }, null)).not.toContain("data-ov-sources");
+    // A vertical output that OBS never opened.
+    const never: OverlaySources = {
+      ...sources,
+      outputs: { horizontal: { count: 2, seenAt: 900 }, vertical: { count: 0, seenAt: null } },
+    };
+    expect(html({ horizontal: true, vertical: true }, never).split("<section")[2]).toContain(
+      "OBS did not connect yet.",
+    );
+  });
+
+  it("reads the sources of each output, and all sources as horizontal from a room without them", () => {
+    const each: OverlaySources = {
+      count: 3,
+      seenAt: 9,
+      outputs: { horizontal: { count: 1, seenAt: 4 }, vertical: { count: 2, seenAt: 9 } },
+    };
+    expect(outputSources(each, "horizontal")).toEqual({ count: 1, seenAt: 4 });
+    expect(outputSources(each, "vertical")).toEqual({ count: 2, seenAt: 9 });
+    // A live room from before the two outputs sends only the numbers of the page.
+    const old: OverlaySources = { count: 3, seenAt: 9 };
+    expect(outputSources(old, "horizontal")).toEqual({ count: 3, seenAt: 9 });
+    expect(outputSources(old, "vertical")).toEqual({ count: 0, seenAt: null });
   });
 
   it("offers each layer one time in the palette and marks the layers on the grid", () => {
@@ -762,6 +850,8 @@ describe("overlay source fallbacks", () => {
       }),
     );
     expect(html).toMatch(/^<div aria-hidden="true"[^>]*><canvas class="characters-layer" width="720" height="240"/);
+    // A playground of a different size than the cell stays whole, at the bottom of the cell: the other output.
+    expect(html).toContain("object-fit:contain;object-position:50% 100%");
     expect(html).not.toContain("<img");
     expect(html).not.toContain("<button");
   });
