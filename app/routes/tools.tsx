@@ -10,7 +10,7 @@ import { signInProvider } from "../server/api/account";
 import { configuredProviders } from "../server/auth.server";
 import { listConnections } from "../server/channels.server";
 import { getOverlaySnapshot, getOwnStreamer } from "../server/data.server";
-import { hasOverlayKey } from "../server/overlay-key.server";
+import { overlayKeyOutputs } from "../server/overlay-key.server";
 import { getOverlayData, getOverlayState } from "../server/overlay.server";
 import { useLivePolls, useLiveRevalidation, useServerTime } from "../components/live";
 import { resultMessage } from "../components/channels/channel-panel";
@@ -70,7 +70,7 @@ export const loader = withRouteErrors(async ({ request, context }: LoaderFunctio
     },
     host: new URL(origin).host,
     origin: new URL(origin).origin,
-    hasOverlayKey: await hasOverlayKey(app.env, streamer.id),
+    hasOverlayKey: await overlayKeyOutputs(app.env, streamer.id),
     channels: await listConnections(app.env, streamer.id),
     providers: configuredProviders(app.env),
     signInProvider: await signInProvider(app.env, viewer.id),

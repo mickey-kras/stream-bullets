@@ -3,11 +3,14 @@ import { t, type MessageId } from "../../i18n";
 import { channelHealth, deliversChat, type ChannelHealth, type ChannelView } from "../../lib/channel-health";
 import {
   CELL_PX,
+  forOutput,
   GRID,
   GRID_LAYERS,
   onStream,
+  ORIENTATIONS,
   placedContent,
   type GridLayer,
+  type Orientation,
   type OverlayLayers,
   type PlacedContent,
 } from "../../lib/overlay-layers";
@@ -133,7 +136,10 @@ function LivePreview({
  * when none of them shows.
  */
 export function onAirTitle(scene: OverlayScene, layers: OverlayLayers): string | null {
-  const shown: PlacedContent[] = placedContent(layers);
+  // The content of the two outputs: each one is on stream.
+  const shown: PlacedContent[] = ORIENTATIONS.flatMap((output: Orientation): PlacedContent[] =>
+    placedContent(forOutput(layers, output)),
+  );
   const poll: PlacedContent | undefined = shown.find((item: PlacedContent): boolean => item.layer === "poll");
   const pollTitle: string | undefined = poll && overlayPoll(poll.source, scene.polls, scene.now)?.title;
   if (pollTitle) return pollTitle;

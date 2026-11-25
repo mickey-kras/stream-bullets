@@ -17,11 +17,17 @@ import type { OverlayData, OverlayState } from "../app/types";
 
 // The Live section of Streamer tools, as the server renders it for each on-air state.
 
-const cell = (c: number): CellRect => ({ c, r: 0, w: 4, h: 2 });
+const cell = (c: number): CellRect => ({ c, r: 0, w: 8, h: 4 });
 /** The poll, the topic and the message banner on the grid of the horizontal orientation. */
 const onGrid: OverlayLayers = {
   ...DEFAULT_LAYERS,
-  cells: { horizontal: { ...emptyCells(), poll: cell(0), topic: cell(4), message: cell(8) }, vertical: emptyCells() },
+  cells: { horizontal: { ...emptyCells(), poll: cell(0), topic: cell(8), message: cell(16) }, vertical: emptyCells() },
+};
+
+/** The same layers on the grid of the vertical output only. The editor shows the horizontal output. */
+const otherOutput: OverlayLayers = {
+  ...onGrid,
+  cells: { horizontal: emptyCells(), vertical: onGrid.cells.horizontal },
 };
 
 function layersWith(items: Partial<OverlayLayers["items"]>, layers: OverlayLayers = onGrid): OverlayLayers {
@@ -142,6 +148,16 @@ describe("poll on stream", (): void => {
     expect(none).not.toContain("Take off air");
   });
 
+  it("counts a poll on the grid of the output that the editor does not show as on stream", (): void => {
+    const html: string = pollPart(stateOf(otherOutput));
+    expect(html).toContain("On air");
+    expect(html).toContain("Take off air");
+    expect(html).not.toContain("data-live-not-on-grid");
+    const off: string = pollPart(stateOf(layersWith({ poll: { ...onGrid.items.poll, enabled: false } }, otherOutput)));
+    expect(off).toContain("Off air");
+    expect(off).toContain("Put on air");
+  });
+
   it("sends the owner to the Overlay section when the poll layer is not on the grid", (): void => {
     const html: string = pollPart(stateOf(DEFAULT_LAYERS));
     expect(html).toContain("The Poll layer is not on the grid, so it cannot show on stream.");
@@ -149,8 +165,12 @@ describe("poll on stream", (): void => {
     expect(html).not.toContain("Put on air");
     expect(placed(DEFAULT_LAYERS, "poll")).toBe(false);
     expect(placed(onGrid, "poll")).toBe(true);
-    // The cell of the other orientation does not count.
-    expect(placed({ ...onGrid, orientation: "vertical" }, "poll")).toBe(false);
+    // The two outputs are on stream at the same time: a cell in one of them counts, whatever the editor shows.
+    expect(placed({ ...onGrid, orientation: "vertical" }, "poll")).toBe(true);
+    for (const orientation of ["horizontal", "vertical"] as const)
+      for (const layer of ["poll", "topic", "message"] as const)
+        expect(placed({ ...otherOutput, orientation }, layer), `${layer} ${orientation}`).toBe(true);
+    expect(placed(otherOutput, "chat")).toBe(false);
     for (const layer of ["poll", "topic", "message"] as const)
       expect(renderToStaticMarkup(createElement(NotOnGrid, { layer }))).toContain(`data-live-not-on-grid="${layer}"`);
   });
@@ -183,6 +203,14 @@ describe("viewer topics", (): void => {
     // A topic layer that is off shows no topic, so no topic is on air.
     const off: OverlayLayers = layersWith({ topic: { ...onGrid.items.topic, ref: "t2", enabled: false } });
     expect(part(stateOf(off))).not.toContain("Take off air");
+  });
+
+  it("marks the topic on air in the output that the editor does not show", (): void => {
+    const layers: OverlayLayers = layersWith({ topic: { ...onGrid.items.topic, ref: "t2" } }, otherOutput);
+    const html: string = part(stateOf(layers));
+    expect(html).toContain('aria-label="Take off air: Topic 2"');
+    expect(html).toContain('aria-label="Feature on stream: Topic 1"');
+    expect(html).not.toContain("data-live-not-on-grid");
   });
 
   it("has no buttons without a place for the topic layer, and says when no topic exists", (): void => {
@@ -229,6 +257,13 @@ describe("message banner", (): void => {
     // Nothing changed yet, so there is nothing to update.
     expect(html).toMatch(/<button type="submit"[^>]*disabled=""/);
     expect(html).toMatch(/aria-pressed="true"[^>]*>Hype/);
+  });
+
+  it("counts a banner on the grid of the output that the editor does not show as on stream", (): void => {
+    const html: string = part(stateOf(otherOutput, { message: "BRB" }));
+    expect(html).toContain("On air");
+    expect(html).toContain("Take off air");
+    expect(html).not.toContain("is not on the grid");
   });
 
   it("sends the owner to the Overlay section when the banner is not on the grid", (): void => {
@@ -358,6 +393,14 @@ describe("full-screen chat", (): void => {
     expect(onAirTitle(scene, noTopic)).toBe("BRB");
     expect(onAirTitle(sceneOf(stateOf(noTopic)), noTopic)).toBeNull();
     expect(onAirTitle(scene, DEFAULT_LAYERS)).toBeNull();
+    // The content of each output is on stream, also of the output that the editor does not show.
+    const vertical: OverlayLayers = {
+      ...state.layers,
+      cells: { horizontal: emptyCells(), vertical: state.layers.cells.horizontal },
+    };
+    expect(vertical.orientation).toBe("horizontal");
+    expect(onAirTitle(scene, vertical)).toBe("Poll p1");
+    expect(onAirTitle(scene, layersWith({ poll: { ...onGrid.items.poll, enabled: false } }, vertical))).toBe("Topic 1");
   });
 
   it("offers the full-screen view from the chat part when the page can open it", (): void => {

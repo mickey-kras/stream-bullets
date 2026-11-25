@@ -9,7 +9,7 @@ The two images are screenshots of the Overlay section of the real app with test 
 
 - **Overlay**: the streamer builds the OBS overlay in two steps.
   1. **Build your overlay**: the studio.
-  2. **Add to OBS**: the private overlay link.
+  2. **Add to OBS**: one private link for the horizontal output and one for the vertical output. Each link shows its state in OBS.
 - **Channels**: the Twitch, YouTube, and Kick cards. Each card shows the platform icon and the state of the connection.
 
 ## Studio

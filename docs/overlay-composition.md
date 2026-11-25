@@ -44,7 +44,8 @@ The composition has nine layers. Each layer can be on the grid one time.
 
 `poll`, `topic`, `next`, `message`, `card`, and `support` are the content layers.
 
-A layer is on stream when it has a cell in the selected orientation and its `enabled` setting is on.
+A layer is on stream in an output when it has a cell in the orientation of that output and its `enabled` setting is on.
+See [Outputs](#outputs).
 In the editor, the `enabled` setting is **Show on stream**.
 The characters are at the bottom, then the content layers and the camera frame, and the chat is on top.
 Layers cannot overlap, so this sequence shows only at shared edges.
@@ -57,7 +58,7 @@ The theme is separate from the layout and the behavior. The overlay has one them
 
 ## Grid and orientation
 
-The streamer selects the orientation of the frame. Each orientation has a grid of square cells of 60 pixels:
+The overlay has two orientations. Each orientation has a grid of square cells of 60 pixels:
 
 | Orientation | Frame | Grid |
 | --- | --- | --- |
@@ -70,9 +71,32 @@ The rectangle must stay in the grid: `c + w` is at most the number of columns, a
 Two layers must not overlap. A shared edge is not an overlap.
 A layer that is on the grid and off stream also keeps its cells free of the other layers.
 
-Each orientation keeps its own layout. When you change the orientation, the layout of the other orientation stays.
-The overlay shows only the selected orientation.
+Each orientation keeps its own layout. When you change the orientation in the editor, the layout of the other orientation stays.
 A layer can be on the grid of one orientation and off the grid of the other.
+
+### Outputs
+
+Each orientation is one output of the overlay: the horizontal output and the vertical output.
+The two outputs are on stream at the same time. A streamer can use one output or the two.
+
+- Each output has its own private link with its own key. The key of a link gives the output that the page shows.
+- A link without a valid key shows the horizontal output.
+- The `orientation` value of the layers is the output that the editor shows. It does not change the picture in OBS.
+- The settings of a layer, such as `enabled` and `ref`, are the same in the two outputs. Only the cells are different.
+- The two outputs use the same live room, the same activity feed, and the same chat. A second output adds no call to Twitch, YouTube, or Kick.
+
+A server check that needs a layer on stream accepts the layer in one of the two outputs.
+Examples are the chat test, the characters test, and the public text of the message banner.
+
+The character playground is one world for the two outputs. Its size comes from the horizontal cell of the characters layer.
+If the layer is not on the horizontal grid, the size comes from the vertical cell.
+The other output shows the same world at the bottom of its cell. If the world does not fit in that cell, the output shows it smaller.
+See [Interactive characters](characters.md).
+
+Before the two outputs, a page had one link, and the editor selected the orientation that OBS showed.
+Migration `0046` keeps that picture. The link of a page that showed the vertical orientation is now the link of the vertical output.
+Each other link is the link of the horizontal output.
+An OBS source that connected before the two outputs connects again one time when a link of the page changes.
 
 | Layer | Minimum size in cells | Minimum size in pixels |
 | --- | --- | --- |
@@ -177,7 +201,7 @@ The frame is a part of the content source (`layer=content`).
 ### Canvas
 
 The page scales the design pixels to the size of the browser source.
-The composition puts all of its layers in one canvas. The canvas has the frame size of the selected orientation.
+The composition puts all of its layers in one canvas. The canvas has the frame size of the output.
 It is the same as the canvas of the editor preview.
 
 Thus the layout is the same at all source sizes with the same aspect ratio, and the same as in the preview.
@@ -284,13 +308,14 @@ Refresh each open OBS source one time after the deploy.
 
 ## URLs
 
-The overlay page has one URL for the composition:
+Each output has one URL for the composition. The two URLs have different keys:
 
 ```text
-https://<origin>/@<handle>/overlay?key=<key>
+https://<origin>/@<handle>/overlay?key=<key of the horizontal output>
+https://<origin>/@<handle>/overlay?key=<key of the vertical output>
 ```
 
-Add the `layer` parameter to show one part alone. Use one browser source for each part:
+Add the `layer` parameter to the URL of an output to show one part of that output alone. Use one browser source for each part:
 
 ```text
 https://<origin>/@<handle>/overlay?key=<key>&layer=chat
@@ -303,7 +328,7 @@ It aligns the layer with the bottom-right corner of the viewport. Thus the newes
 The free space stays transparent, at the left or at the top.
 
 A content source (`layer=content`) shows all the content layers and the camera frame on stream, without the chat and the characters.
-Each of these layers stays at its cell in the canvas of the selected orientation, as in the composition.
+Each of these layers stays at its cell in the canvas of the output, as in the composition.
 Thus a content source has the frame size, not the size of one layer.
 
 An unknown `layer` value shows an empty transparent page. It never shows an error.
@@ -313,17 +338,21 @@ The `poll` parameter shows one poll in place of the content layers:
 The poll layer then shows that poll, and no other content layer shows.
 The poll layer keeps its cell. If it is off the grid, it takes the cell of a poll at size M, or free space near it.
 
-The **Overlay** section shows the full URL and the layer URLs once, when you make a new key.
-The server keeps only the SHA-256 hash of the key. Thus it cannot show the URL again.
+The step **Add to OBS** has one part for each output. Each part shows the state of its link in OBS:
+the number of connected sources, or the time when the last source went away.
+A part shows the full URL and the layer URLs when you make a new key, and when you select **Show link**.
+The server keeps the SHA-256 hash of each key for the check, and the encrypted key for **Show link**.
 If you have the composition URL, add `&layer=chat` to its end for a chat source.
-If you lost the URL, select **Regenerate link**. Then update all OBS sources.
+
+**Regenerate link** makes a new key for one output. The old key of that output stops at once, and its sockets close.
+The link of the other output continues to work. After a new key, update the OBS sources of that output.
 
 ## OBS browser source
 
-Set the size of the browser source for the composition to the frame size of the selected orientation:
+Set the size of the browser source for the composition to the frame size of its output:
 
-- For the horizontal orientation, use 1920 × 1080. A different 16:9 size, such as 1280 × 720, also works.
-- For the vertical orientation, use 1080 × 1920. A different 9:16 size, such as 720 × 1280, also works.
+- For the horizontal output, use 1920 × 1080. A different 16:9 size, such as 1280 × 720, also works.
+- For the vertical output, use 1080 × 1920. A different 9:16 size, such as 720 × 1280, also works.
 
 All sizes with the correct aspect ratio show the same layout as the preview.
 The editor shows the correct size under the grid.
@@ -338,9 +367,12 @@ The overlay background is transparent, so you do not need custom CSS.
 Upgrade note: after you deploy the release that added the chat layer, refresh each open OBS source one time.
 An OBS source that opened before this release does not show the chat.
 
+Upgrade note for the two outputs: apply migration `0046` before the deploy, and refresh each open OBS source one time after it.
+An overlay page from before this release shows the orientation that the editor shows.
+
 ### Live-room seats
 
-Each OBS source with the overlay key uses one of the 10 owner seats of the live room.
+Each OBS source with an overlay key uses one of the 10 owner seats of the live room. The two outputs use the same seats.
 The signed-in tabs of the streamer use the same seats.
 When all 10 seats are full, a new connection replaces the oldest owner connection.
 Thus, where possible, use one composition source for each scene, not one source for each layer.
@@ -390,8 +422,8 @@ In the toolbar, select **Transparent** or **Sample game** for the preview backgr
 
 To change the layout, do these steps:
 
-1. In the toolbar, select **Horizontal 32 × 18** or **Vertical 18 × 32**.
-   OBS changes to the new orientation at once. Each orientation keeps its own layout.
+1. In the toolbar, select **Horizontal 32 × 18** or **Vertical 18 × 32**. This is the output that you edit.
+   The selection does not change the picture in OBS. Each output keeps its own layout.
 2. To select a layer, press it on the grid, or select its chip in the palette.
    The selected layer shows eight handles: four on its corners and four on its edges.
 3. To move a layer, drag it.
@@ -714,7 +746,8 @@ Thus close the overlay sources that you do not use.
 - The overlay page sends no `Referer`. Thus an emote image does not get the key.
 - The overlay key gives access to the activity feed. Without a key or an owner session, the socket gets `403`.
   With a wrong or revoked key, the server closes the socket with the code `4403`, and the page does not try again.
-- **Regenerate link** makes a new key. The old key stops at once, and its open sockets close.
+- **Regenerate link** makes a new key for one output. The old key of that output stops at once, and its open sockets close.
+- The key of one output gives no control of the other output. A key never gives a control action.
 - The chat ignores `user.color`. It uses the theme colors only.
 
 ## Limits and known gaps

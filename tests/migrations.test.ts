@@ -266,7 +266,7 @@ beforeAll(async (): Promise<void> => {
 afterAll(async (): Promise<void> => database.dispose());
 
 describe("migrations 0006 onwards", (): void => {
-  it("covers 0006 to 0045", (): void => {
+  it("covers 0006 to 0046", (): void => {
     expect(applied.map((file: string): string => file.slice(0, 4))).toEqual([
       "0006",
       "0007",
@@ -308,8 +308,94 @@ describe("migrations 0006 onwards", (): void => {
       "0043",
       "0044",
       "0045",
+      "0046",
     ]);
   });
+
+  it("adds a key for each output (0046): an old key is horizontal, or vertical for a page that shows vertical", async (): Promise<void> => {
+    // A database of its own: the layers of the pages decide the result, and the other tests read those rows.
+    const own: TestDatabase = await createTestDatabase({ migrate: false });
+    try {
+      const files: string[] = await migrationFiles();
+      await applyMigrations(
+        own.db,
+        files.filter((file: string): boolean => file < "0046"),
+      );
+      const hash = (letter: string): string => letter.repeat(64);
+      const pages: [id: string, layers: string | null][] = [
+        ["wide", "{}"],
+        ["set-wide", '{"v":3,"orientation":"horizontal"}'],
+        ["tall", '{"v":3,"orientation":"vertical","cells":{"vertical":{"chat":{"c":0,"r":0,"w":6,"h":4}}}}'],
+        // A page that made a link and never saved the overlay has no state row.
+        ["no-state", null],
+        // A page that shows the vertical orientation and has no link gets no row.
+        ["tall-no-key", '{"orientation":"vertical"}'],
+      ];
+      await own.db.batch([
+        // One owner for each page.
+        ...pages.flatMap(([id, layers]: [string, string | null], index: number): D1PreparedStatement[] => [
+          own.db
+            .prepare("INSERT INTO user (id,name,email,email_verified,created_at,updated_at) VALUES (?,?,?,1,1,1)")
+            .bind(`host-${index}`, `Host ${index}`, `host${index}@example.test`),
+          own.db
+            .prepare("INSERT INTO streamers (id,owner_id,handle,name) VALUES (?,?,?,?)")
+            .bind(id, `host-${index}`, `page_${index}`, id),
+          ...(layers === null
+            ? []
+            : [own.db.prepare("INSERT INTO overlay_state (streamer_id,updated_at,layers) VALUES (?,1,?)").bind(id, layers)]),
+          ...(id === "tall-no-key"
+            ? []
+            : [
+                own.db
+                  .prepare("INSERT INTO overlay_keys (streamer_id,key_hash,key_sealed,key_id,created_at) VALUES (?,?,?,?,?)")
+                  .bind(id, hash(String(index)), `sealed-${id}`, "a", 100 + index),
+              ]),
+        ]),
+      ]);
+      await applyMigrations(
+        own.db,
+        files.filter((file: string): boolean => file >= "0046"),
+      );
+      const { results } = await own.db.prepare("SELECT * FROM overlay_keys ORDER BY created_at").all();
+      const row = (id: string, index: number, output: string): Record<string, unknown> => ({
+        streamer_id: id,
+        key_hash: hash(String(index)),
+        key_sealed: `sealed-${id}`,
+        key_id: "a",
+        created_at: 100 + index,
+        output,
+        other_key_hash: null,
+        other_key_sealed: null,
+        other_key_id: null,
+        other_created_at: null,
+      });
+      expect(results).toEqual([
+        row("wide", 0, "horizontal"),
+        row("set-wide", 1, "horizontal"),
+        row("tall", 2, "vertical"),
+        row("no-state", 3, "horizontal"),
+      ]);
+      // A new row takes the horizontal output without a value, as a Worker from before the migration writes it.
+      await own.db
+        .prepare("INSERT INTO overlay_keys (streamer_id,key_hash,created_at) VALUES ('tall-no-key',?,1)")
+        .bind(hash("f"))
+        .run();
+      expect(await own.db.prepare("SELECT output FROM overlay_keys WHERE streamer_id='tall-no-key'").first()).toEqual({
+        output: "horizontal",
+      });
+      // The layers of the pages did not change.
+      expect(
+        (await own.db.prepare("SELECT streamer_id, layers FROM overlay_state ORDER BY streamer_id").all()).results,
+      ).toEqual(
+        pages
+          .filter(([, layers]: [string, string | null]): boolean => layers !== null)
+          .map(([id, layers]: [string, string | null]) => ({ streamer_id: id, layers }))
+          .sort((a, b) => a.streamer_id.localeCompare(b.streamer_id)),
+      );
+    } finally {
+      await own.dispose();
+    }
+  }, 60_000);
 
   it("joins a stream that each platform holds with a different title into the older entry (0044)", async (): Promise<void> => {
     const rows = async (sql: string): Promise<unknown[]> => (await db.prepare(sql).all()).results;

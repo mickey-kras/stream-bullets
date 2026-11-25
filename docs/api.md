@@ -122,15 +122,17 @@ English also shows `error` for `step_up_required` and `other_key_required`.
 | `POST /api/overlay` | `{action: "showResults", on: boolean}` | `{overlay}`. The whole new `OverlayState`, with `showResults` |
 | `POST /api/overlay` | `{action: "message", text, style: "info" \| "hype"}` | `{overlay}`. The whole new `OverlayState`, with `message` and `messageStyle` |
 | `POST /api/overlay` | `{action: "chatTest", on: boolean}` | `{overlay}`. The whole new `OverlayState`, with `chatTestUntil` |
-| `POST /api/overlay/key` | `{}` | `{url}`. A new private overlay link for the page of the signed-in owner. The old link stops immediately. |
-| `POST /api/overlay/key/show` | `{}` | `{url}`. The current private overlay link, or `null` when the server kept no key. Only the owner can read it. |
+| `POST /api/overlay/key` | `{output?: "horizontal" \| "vertical"}` | `{url}`. A new private link for one output of the page of the signed-in owner. The old link of that output stops immediately. The link of the other output stays. Without `output`, the output is `horizontal`. |
+| `POST /api/overlay/key/show` | `{output?: "horizontal" \| "vertical"}` | `{url}`. The current private link of one output, or `null` when the server kept no key for it. Only the owner can read it. |
 | `POST /api/overlay/characters` | `{op: "status" \| "test" \| "stopTest" \| "pause" \| "resume" \| "reset"}` or `{op: "remove", id}` | `{paused, testEndsAt}`. The state of the character playground |
-| `GET /@handle/overlay?key&layer&poll` | Optional `layer`: `content`, `chat`, or `characters`. Optional `poll`: a poll ID | The overlay page. Without `layer`, it shows the composition. With `layer`, it shows that part alone. An unknown value shows an empty page. |
+| `GET /@handle/overlay?key&layer&poll` | Optional `layer`: `content`, `chat`, or `characters`. Optional `poll`: a poll ID | The overlay page of one output. The key gives the output: horizontal or vertical. Without a valid key, the page shows the horizontal output. Without `layer`, it shows the composition. With `layer`, it shows that part alone. An unknown value shows an empty page. |
 
 - The overlay shows only the layers on the grid: `chat`, `characters`, the content layers, and `camera`.
   The content layers are `poll`, `topic`, `next`, `message`, `card`, and `support`. Each content layer shows one content source.
-  A layer is on stream when it has a cell in the selected orientation and its `enabled` value is `true`.
+  A layer is on stream in an output when it has a cell in the orientation of that output and its `enabled` value is `true`.
 - `orientation` is `horizontal` (a grid of 32 × 18 cells) or `vertical` (18 × 32 cells). A cell is 60 pixels.
+  It is the output that the editor shows. Each output has its own link, and OBS can show the two outputs together.
+  See [Outputs](overlay-composition.md#outputs).
 - Each orientation in `cells` holds `{chat?, characters?, poll?, topic?, next?, message?, card?, support?, camera?}`.
   Each value is a cell rectangle `{c, r, w, h}` of whole cells, or `null`. With `null`, the layer is not on the grid.
   `c + w` is at most the number of columns, and `r + h` is at most the number of rows.

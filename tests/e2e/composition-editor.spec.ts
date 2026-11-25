@@ -13,6 +13,7 @@ import {
   gridButton,
   gridCells,
   layersSql,
+  noKeysSql,
   placeLayer,
   resetLayers,
   saved,
@@ -292,10 +293,10 @@ test("a new orientation ends a drag and keeps the keyboard cursor inside its gri
   const frame = editor.getByRole("region", { name: "Composition preview" });
   const status = editor.locator("[data-grid-status]");
   await expect(editor.locator("[data-comp-orientation-note]")).toHaveText(
-    "OBS switches to this orientation at once. Each orientation keeps its own layout.",
+    "Choose the output to edit. Each output has its own layout and its own OBS link. Both outputs are on stream at the same time.",
   );
   await expect(editor.getByRole("button", { name: "Vertical 18 × 32" })).toHaveAccessibleDescription(
-    "OBS switches to this orientation at once. Each orientation keeps its own layout.",
+    "Choose the output to edit. Each output has its own layout and its own OBS link. Both outputs are on stream at the same time.",
   );
   const bodies: unknown[] = [];
   page.on("request", (request) => {
@@ -646,13 +647,19 @@ test("a new overlay link lists one URL per layer", async ({ browser }) => {
   const page = await newPage(owner);
   await page.goto("/tools?view=overlay");
   await expect(page.locator("[data-ov-layer-urls]")).toHaveCount(0);
-  await page.getByRole("button", { name: /^(Create overlay link|Regenerate link)$/ }).click();
+  // Each output has its own link. This spec uses the horizontal one.
+  const link = page.getByRole("region", { name: "Horizontal output" });
+  await link.getByRole("button", { name: /^(Create overlay link|Regenerate link)$/ }).click();
   // An existing link asks for confirmation first.
   const confirm = page.getByRole("dialog", { name: "Regenerate the overlay link?" });
-  await expect(confirm.or(page.locator("[data-ov-url]"))).toBeVisible();
+  await expect(confirm.or(link.locator("[data-ov-url]"))).toBeVisible();
   if (await confirm.isVisible()) await confirm.getByRole("button", { name: "Regenerate link" }).click();
-  const url: string = await page.locator("[data-ov-url]").inputValue();
+  const url: string = await link.locator("[data-ov-url]").inputValue();
   expect(url).toMatch(/\/@feature_host\/overlay\?key=/);
+  await expect(link).toContainText("Add a Browser source in OBS: width 1920, height 1080.");
+  await expect(page.getByRole("region", { name: "Vertical output" })).toContainText(
+    "Add a Browser source in OBS: width 1080, height 1920.",
+  );
   for (const layer of ["chat", "characters", "content"])
     await expect(page.locator(`[data-ov-layer-url="${layer}"]`)).toHaveValue(`${url}&layer=${layer}`);
   // Each layer URL names the source size: the cell of the layer, and the whole frame for the content layers.
@@ -676,9 +683,7 @@ test("a new overlay link lists one URL per layer", async ({ browser }) => {
   await expect(page.locator("[data-ov-layer-url]")).toHaveCount(0);
   await close(owner);
   // Other specs start without an overlay key.
-  await runSql("composition-editor-key", [
-    `DELETE FROM overlay_keys WHERE streamer_id=(SELECT id FROM streamers WHERE handle='feature_host');`,
-  ]);
+  await runSql("composition-editor-key", [noKeysSql]);
 });
 
 /** Lets the page run one real task: a MessageChannel message is not a timer, so the fake clock does not hold it. */

@@ -929,7 +929,7 @@
   "overlay.grid.notResized": "Größe nicht geändert.",
   "overlay.grid.obsSize": "Stelle die OBS-Browserquelle für diese Ausrichtung auf {w} × {h}.",
   "overlay.grid.orientation": "Bildschirmausrichtung",
-  "overlay.grid.orientationNote": "OBS wechselt sofort zu dieser Ausrichtung. Jede Ausrichtung behält ihr eigenes Layout.",
+  "overlay.grid.orientationNote": "Wähle die Ausgabe, die du bearbeitest. Jede Ausgabe hat ihr eigenes Layout und ihren eigenen OBS-Link. Beide Ausgaben sind gleichzeitig im Stream.",
   "overlay.grid.outside": "Die Ebene ragt über das Raster hinaus.",
   "overlay.grid.palette": "Ebenen · je eine",
   "overlay.grid.paletteHint": "Wähle eine Ebene, um sie am ersten freien Platz hinzuzufügen. Oder ziehe sie auf das Raster. Um eine Ebene zu entfernen, ziehe sie aus dem Raster hierher zurück. Wähle eine platzierte Ebene, um sie zu ändern.",
@@ -950,7 +950,7 @@
   "overlay.keyNotKept": "Dieser Link kann nicht erneut angezeigt werden. Erzeuge ihn neu, um einen Link zu erhalten, den du später wieder ansehen kannst.",
   "overlay.keyShow": "Link anzeigen",
   "overlay.keyMade": "Neuer Overlay-Link bereit. Kopiere ihn in OBS.",
-  "overlay.keyNone": "Erstelle einen privaten Overlay-Link für OBS. Damit kommt das Overlay immer in den Live-Raum, auch wenn er voll ist.",
+  "overlay.keyNone": "Jede Ausgabe hat ihren eigenen privaten Link für OBS. Nutze einen Link oder beide. Mit einem Link kommt das Overlay immer in den Live-Raum, auch wenn er voll ist.",
   "overlay.keyOnce": "Kopiere diesen Link in OBS. Halte ihn privat: Wer ihn hat, nimmt den Platz deines Overlays ein.",
   "overlay.keyRegenerate": "Link neu erstellen",
   "overlay.label": "Overlay von {name}",
@@ -975,7 +975,7 @@
   "overlay.noPolls": "Erstelle zuerst eine Umfrage oder Mash Battle auf deiner Seite.",
   "overlay.noTopics": "Noch keine Themen.",
   "overlay.notRevealed": "Ergebnisse noch nicht aufgedeckt",
-  "overlay.obsHelp": "Füge in OBS eine Browserquelle hinzu: Breite 1920, Höhe 1080. Du musst sie nie ändern. Was sie zeigt, stellst du hier um.",
+  "overlay.obsHelp": "Füge in OBS eine Browserquelle hinzu: Breite {w}, Höhe {h}. Du musst sie nie ändern. Was sie zeigt, stellst du hier um.",
   "overlay.offline": "Live-Updates offline.",
   "overlay.pickCard": "Community-Karte",
   "overlay.pickPoll": "Umfrage",
@@ -1440,5 +1440,8 @@
   "tools.live.chat.larger": "Größerer Text",
   "tools.live.chat.smaller": "Kleinerer Text",
   "tools.live.chat.onAir": "Auf Sendung: {title}",
-  "tools.live.chat.screenOff": "Dieser Browser kann den Bildschirm nicht eingeschaltet lassen. Schalte die Bildschirmsperre deines Geräts aus, solange du streamst."
+  "tools.live.chat.screenOff": "Dieser Browser kann den Bildschirm nicht eingeschaltet lassen. Schalte die Bildschirmsperre deines Geräts aus, solange du streamst.",
+  "overlay.output.horizontal": "Horizontale Ausgabe",
+  "overlay.output.vertical": "Vertikale Ausgabe",
+  "overlay.keyConfirmOther": "Der Link der anderen Ausgabe funktioniert weiter."
 }

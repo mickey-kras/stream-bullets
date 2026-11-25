@@ -34,7 +34,7 @@ Each control saves with `POST /api/overlay`, or with the API of the poll for **C
 The live room sends each change to OBS and to the other tabs of the owner at once. OBS does not load the page again.
 After a reconnect, the section shows the state of the server.
 
-A control changes a layer that has a place on the grid of the selected orientation.
+A control changes a layer that has a place on the grid of an output.
 **Live** does not put a layer on the grid: the owner selects the place in the **Overlay** section.
 For a layer without a place, the part shows a note and a link to the **Overlay** section.
 
@@ -46,7 +46,7 @@ One line gives the number of OBS sources that use the overlay link, or the time 
 
 ### What OBS shows
 
-The preview shows the composition of the selected orientation with the real content and the real chat.
+The preview shows the composition of the output that the editor shows, with the real content and the real chat.
 It uses the activity feed of the owner, without an overlay key.
 
 ### Poll

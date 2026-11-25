@@ -226,7 +226,10 @@ export function layerEnabled(layers: OverlayLayers, layer: GridLayer): boolean {
     : layers.items[layer].enabled;
 }
 
-/** True when `layer` shows on stream: it is enabled and has a cell in the selected orientation. */
+/**
+ * True when `layer` shows in the output `layers.orientation`: it is enabled and has a cell there. The two outputs,
+ * horizontal and vertical, are on stream at the same time: see `forOutput` and `onAnyOutput`.
+ */
 export function onStream(layers: OverlayLayers, layer: GridLayer): boolean {
   return layerEnabled(layers, layer) && layers.cells[layers.orientation][layer] !== null;
 }
@@ -246,6 +249,36 @@ export function placedContent(layers: OverlayLayers): PlacedContent[] {
 /** The sources of the content layers on stream. */
 export function contentSources(layers: OverlayLayers): ContentSource[] {
   return placedContent(layers).map((placed: PlacedContent): ContentSource => placed.source);
+}
+
+/**
+ * `layers` as one output shows them. Each output has its own OBS link, and the two are on stream at the same time.
+ * `orientation` is only the output that the editor shows, so an overlay page replaces it with its own output.
+ */
+export function forOutput(layers: OverlayLayers, output: Orientation): OverlayLayers {
+  return layers.orientation === output ? layers : { ...layers, orientation: output };
+}
+
+/** True when `layer` shows in one output or in the two: it is enabled and has a cell in an orientation. */
+export function onAnyOutput(layers: OverlayLayers, layer: GridLayer): boolean {
+  return ORIENTATIONS.some((output: Orientation): boolean => onStream(forOutput(layers, output), layer));
+}
+
+/** The sources of the content layers on stream in the two outputs. A layer has the same source in each output. */
+export function allContentSources(layers: OverlayLayers): ContentSource[] {
+  const sources = new Map<ContentLayer, ContentSource>();
+  for (const output of ORIENTATIONS)
+    for (const placed of placedContent(forOutput(layers, output))) sources.set(placed.layer, placed.source);
+  return [...sources.values()];
+}
+
+/**
+ * The cell that gives the character playground its size. One playground serves the two outputs: it takes the
+ * horizontal cell, or the vertical cell when the layer is not on the horizontal grid. The other output shows the
+ * same playground, made smaller to fit its cell.
+ */
+export function playgroundCell(layers: OverlayLayers): CellRect | null {
+  return layers.cells.horizontal.characters ?? layers.cells.vertical.characters;
 }
 
 const cellShape = {

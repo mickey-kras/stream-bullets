@@ -265,8 +265,15 @@ describe("stored overlay and battle values", (): void => {
   it("shows the message while the message layer is on stream", (): void => {
     const state: OverlayState = overlayValue(row);
     expect(overlayPublic({ ...state, layers: withMessage }).message).toBe("Back soon");
-    // Not in the other orientation, and not while the layer is off.
-    expect(overlayPublic({ ...state, layers: { ...withMessage, orientation: "vertical" } }).message).toBe("");
+    // The two outputs are on stream at the same time. The output that the editor shows does not matter.
+    expect(overlayPublic({ ...state, layers: { ...withMessage, orientation: "vertical" } }).message).toBe("Back soon");
+    const verticalOnly: OverlayLayers = {
+      ...layers,
+      cells: { ...layers.cells, vertical: { ...emptyCells(), message: messageCell } },
+    };
+    expect(overlayPublic({ ...state, layers: verticalOnly }).message).toBe("Back soon");
+    // Not on the grid of an output, and not while the layer is off.
+    expect(overlayPublic({ ...state, layers }).message).toBe("");
     const off: OverlayLayers = {
       ...withMessage,
       items: { ...withMessage.items, message: { ...withMessage.items.message, enabled: false } },
@@ -1446,8 +1453,10 @@ describe("overlay control", (): void => {
       const cells = { horizontal: { characters: charactersCell } };
       await send({ action: "layers", characters: { enabled: false }, cells });
       expect((await characters({ op: "test" })).status).toBe(400);
+      // On stream in the horizontal output: the test starts, also while the editor shows the vertical output.
       await send({ action: "layers", characters: { enabled: true }, orientation: "vertical" });
-      expect((await characters({ op: "test" })).status).toBe(400);
+      expect((await characters({ op: "test" })).status).toBe(200);
+      await send({ action: "layers", characters: { enabled: false } });
       ingestCalls = [];
       // The other controls work with the layer off.
       expect((await characters({ op: "pause" })).status).toBe(200);
@@ -1563,9 +1572,29 @@ describe("overlay control", (): void => {
       const off = await nextOverlayState(env, page, running, { action: "layers", chat: { enabled: false } });
       expect(off).toMatchObject({ chatTestUntil: 0, revision: 4 });
       expect(off.layers.chat.enabled).toBe(false);
-      // Off the grid, and in an orientation where the chat has no cell.
-      for (const patch of [{ cells: { horizontal: { chat: null } } }, { orientation: "vertical" as const }])
-        expect((await nextOverlayState(env, page, running, { action: "layers", ...patch })).chatTestUntil).toBe(0);
+      // Off the grid of the two outputs.
+      const gone = await nextOverlayState(env, page, running, {
+        action: "layers",
+        cells: { horizontal: { chat: null } },
+      });
+      expect(gone.chatTestUntil).toBe(0);
+      // The chat stays on stream in the horizontal output when the editor shows the vertical output.
+      const other = await nextOverlayState(env, page, running, { action: "layers", orientation: "vertical" });
+      expect(other.chatTestUntil).toBe(9_000);
+      // With a cell in each output, the test runs until the chat leaves the two grids.
+      const both: OverlayState = {
+        ...running,
+        layers: {
+          ...layers,
+          cells: { ...layers.cells, vertical: { ...emptyCells(), chat: { c: 0, r: 0, w: 10, h: 14 } } },
+        },
+      };
+      const one = await nextOverlayState(env, page, both, { action: "layers", cells: { horizontal: { chat: null } } });
+      expect(one.chatTestUntil).toBe(9_000);
+      expect(
+        (await nextOverlayState(env, page, one, { action: "layers", cells: { vertical: { chat: null } } }))
+          .chatTestUntil,
+      ).toBe(0);
       // Other layer edits keep the test running.
       const moved = await nextOverlayState(env, page, running, { action: "layers", chat: { hideCommands: false } });
       expect(moved.chatTestUntil).toBe(9_000);
@@ -1583,6 +1612,16 @@ describe("overlay control", (): void => {
       expect((await getOverlayState(env, page)).chatTestUntil).toBe(0);
       expect((await overlay(await send({ action: "chatTest", on: false }))).chatTestUntil).toBe(0);
       expect(roomCalls).toHaveLength(1);
+    });
+
+    it("starts while the chat layer is on stream only in the output that the editor does not show", async (): Promise<void> => {
+      const verticalOnly: OverlayState = {
+        ...DEFAULT_OVERLAY,
+        layers: { ...layers, cells: { horizontal: emptyCells(), vertical: { ...emptyCells(), chat: chatCell } } },
+      };
+      expect(verticalOnly.layers.orientation).toBe("horizontal");
+      const started = await nextOverlayState(env, page, verticalOnly, { action: "chatTest", on: true }, 5_000);
+      expect(started.chatTestUntil).toBe(5_000 + CHAT_TEST_MS);
     });
 
     it("refuses a bad body and a viewer", async (): Promise<void> => {
@@ -1720,26 +1759,38 @@ describe("schedule and Community routes", (): void => {
     expect(roomCalls).toEqual([{ path: `/overlay?streamerId=${page}`, body: "" }]);
   });
 
-  it("reloads an overlay with the Support layer in the selected orientation after the links are saved", async (): Promise<void> => {
+  it("reloads an overlay with the Support layer on the grid of an output after the links are saved", async (): Promise<void> => {
     const revision = async (): Promise<number> => (await getOverlayState(env, page)).revision;
     const save = async (url: string): Promise<void> => {
       const support = { links: [{ kind: "kofi", label: null, url }], visible: true, card: true };
       expect((await call("PUT", "support-links", { user: "owner", body: support })).status).toBe(200);
     };
     const cell: CellRect = { c: 0, r: 0, w: 8, h: 4 };
-    await updateOverlay(env, "owner", page, { action: "layers", cells: { vertical: { support: cell, next: null } } });
     let before = await revision();
-    await save("https://ko-fi.com/first");
+    await save("https://ko-fi.com/none");
     expect(await revision()).toBe(before);
+    // The layer is on the grid of the vertical output. The editor shows the horizontal output, and the two outputs
+    // are on stream at the same time.
+    await updateOverlay(env, "owner", page, { action: "layers", cells: { vertical: { support: cell, next: null } } });
+    before = await revision();
+    await save("https://ko-fi.com/first");
+    expect(await revision()).toBe(before + 1);
     await updateOverlay(env, "owner", page, { action: "layers", orientation: "vertical" });
     before = await revision();
     await save("https://ko-fi.com/second");
+    expect(await revision()).toBe(before + 1);
+    await updateOverlay(env, "owner", page, {
+      action: "layers",
+      cells: { vertical: { support: null }, horizontal: { support: cell } },
+    });
+    before = await revision();
+    await save("https://ko-fi.com/horizontal");
     expect(await revision()).toBe(before + 1);
     // Another content layer on the grid does not reload for the links.
     await updateOverlay(env, "owner", page, {
       action: "layers",
       orientation: "horizontal",
-      cells: { horizontal: { next: { c: 12, r: 0, w: 8, h: 4 } } },
+      cells: { horizontal: { support: null, next: { c: 12, r: 0, w: 8, h: 4 } } },
     });
     before = await revision();
     await save("https://ko-fi.com/third");
@@ -1770,6 +1821,18 @@ describe("schedule and Community routes", (): void => {
     before = await revision();
     await save();
     expect(await revision()).toBe(before + 1);
+    // The card layer on the grid of the vertical output only, while the editor shows the horizontal output.
+    await updateOverlay(env, "owner", page, {
+      action: "layers",
+      cells: { horizontal: { card: null }, vertical: { card: { c: 0, r: 0, w: 8, h: 4 } } },
+    });
+    before = await revision();
+    await save();
+    expect(await revision()).toBe(before + 1);
+    await updateOverlay(env, "owner", page, { action: "layers", cells: { vertical: { card: null } } });
+    before = await revision();
+    await save();
+    expect(await revision()).toBe(before);
   });
 
   it("reloads an overlay showing Up next after each schedule change, and only then", async (): Promise<void> => {

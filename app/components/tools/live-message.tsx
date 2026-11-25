@@ -1,6 +1,6 @@
 import { useId, useState, type FormEvent, type ReactNode } from "react";
 import { t } from "../../i18n";
-import { onStream, type OverlayLayers } from "../../lib/overlay-layers";
+import { onAnyOutput, type OverlayLayers } from "../../lib/overlay-layers";
 import type { OverlayMessageStyle, OverlayState } from "../../types";
 import { MESSAGE_STYLES, OVERLAY_MESSAGE_MAX } from "../overlay/layer-properties";
 import type { ControlAction } from "../overlay/use-overlay-state";
@@ -20,7 +20,7 @@ export function LiveMessage({
   const [style, setStyle] = useState<OverlayMessageStyle>(state.messageStyle);
   const inputId: string = useId();
   const layers: OverlayLayers = state.layers;
-  const onAir: boolean = onStream(layers, "message");
+  const onAir: boolean = onAnyOutput(layers, "message");
   const changed: boolean = text !== state.message || style !== state.messageStyle;
 
   async function show(): Promise<void> {

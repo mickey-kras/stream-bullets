@@ -5,6 +5,7 @@ import { appContext } from "../env";
 import { t } from "../i18n";
 import { getOverlaySnapshot, getStreamer } from "../server/data.server";
 import { getOverlayData, getOverlayState, sourceTopics } from "../server/overlay.server";
+import { overlayKeyOutput } from "../server/overlay-key.server";
 import { overlayPublic } from "../server/overlay-state";
 import { useLivePolls, useLiveRevalidation, useServerTime } from "../components/live";
 import { useActivityFeed } from "../components/overlay/activity-feed";
@@ -22,9 +23,11 @@ import { ServerOffset } from "../lib/clock";
 import { withPollOverride } from "../lib/overlay-legacy";
 import {
   contentSources,
+  forOutput,
   onStream,
   parseLayerParam,
   type ContentSource,
+  type Orientation,
   type OverlayLayer,
   type OverlayLayers,
 } from "../lib/overlay-layers";
@@ -38,11 +41,14 @@ export const loader = withRouteErrors(async ({ request, context, params }: Loade
   // Suspended pages have no overlay.
   if (!streamer || streamer.status === "suspended") throw new Response("Streamer not found.", { status: 404 });
   // `?poll=` shows that poll in place of the content layers (shownLayers).
-  const override: string | null = new URL(request.url).searchParams.get("poll") || null;
+  const search: URLSearchParams = new URL(request.url).searchParams;
+  const override: string | null = search.get("poll") || null;
+  // The key of the link gives the output. A page without a valid key shows the horizontal output.
+  const output: Orientation = (await overlayKeyOutput(app.env, streamer.id, search.get("key"))) ?? "horizontal";
   const overlay: OverlayPublic = overlayPublic(await getOverlayState(app.env, streamer.id));
   // The content layers on stream load their polls and topics. A null ref is the automatic poll. The first snapshot
   // is the poll of `?poll=`, or the automatic poll.
-  const placed: ContentSource[] = contentSources(shownLayers(overlay.layers, override));
+  const placed: ContentSource[] = contentSources(shownLayers(overlay.layers, override, output));
   const refs = new Set<string | null>([override]);
   for (const source of placed) if (source.type === "poll" || source.type === "auto") refs.add(source.ref);
   const [data, initial, ...more] = await Promise.all([
@@ -60,15 +66,20 @@ export const loader = withRouteErrors(async ({ request, context, params }: Loade
     host: new URL(app.env.APP_ORIGIN).host,
     origin: new URL(app.env.APP_ORIGIN).origin,
     override,
+    output,
     overlay,
     initial: { ...initial, polls } satisfies LiveSnapshot,
     data,
   };
 });
 
-/** The layers that the page shows: with `?poll=` the poll layer shows that poll and no other content layer shows. */
-function shownLayers(layers: OverlayLayers, override: string | null): OverlayLayers {
-  return override === null ? layers : withPollOverride(layers, override);
+/**
+ * The layers that the page shows: the layers of its output. With `?poll=` the poll layer shows that poll and no other
+ * content layer shows.
+ */
+function shownLayers(layers: OverlayLayers, override: string | null, output: Orientation): OverlayLayers {
+  const mine: OverlayLayers = forOutput(layers, output);
+  return override === null ? mine : withPollOverride(mine, override);
 }
 
 function mergeOverlayPolls(current: readonly OverlayPoll[], initial: readonly OverlayPoll[]): OverlayPoll[] {
@@ -100,7 +111,7 @@ export default function Overlay(): ReactNode {
   useLiveRevalidation(status, overlay.revision, revalidator.revalidate, content);
   // The activity socket is open only while a rendered layer needs it, so hiding the chat closes it. One socket carries
   // chat and, while the characters layer shows, the playground frames: the playground runs only while one listens.
-  const layers: OverlayLayers = shownLayers(overlay.layers, loaded.override);
+  const layers: OverlayLayers = shownLayers(overlay.layers, loaded.override, loaded.output);
   const feedOn: boolean = known && usesActivityFeed(layers, only);
   const feed = useActivityFeed(loaded.handle, key, feedOn, { characters: usesCharacters(layers, only) });
   // Server time minus local time, measured once per loader response: chat lifetimes use server receive times.

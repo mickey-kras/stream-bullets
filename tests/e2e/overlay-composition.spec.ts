@@ -1,7 +1,16 @@
 import type { Locator, WebSocketRoute } from "@playwright/test";
 import { newPage, close, test, expect, type Browser, type Page } from "./coverage";
 import { runSql } from "./fixtures";
-import { CHAT_CELL as DEFAULT_CHAT_CELL, FEATURE_HOST, POLL_CELL, defaultLayers, layersSql } from "./grid-helpers";
+import {
+  CHAT_CELL as DEFAULT_CHAT_CELL,
+  FEATURE_HOST,
+  POLL_CELL,
+  VERTICAL_KEY,
+  defaultLayers,
+  layersSql,
+  noKeysSql,
+  verticalKeySql,
+} from "./grid-helpers";
 import { signedIn } from "./live-helpers";
 import { clientIp } from "./client-ips";
 import type { ActivityChat, ActivityEvent, ActivityPlatform } from "../../app/lib/activity";
@@ -853,18 +862,21 @@ test("turning the chat on live keeps the content layers in place, without a remo
 });
 
 test("a vertical layout fills a 1080x1920 source and shows each layer inside its cell", async ({ browser }) => {
-  // The poll layer shows the latest active poll: the seeded battle.
-  await setLayers("overlay-vertical", {
-    orientation: "vertical",
-    chat: { enabled: true },
-    cells: { vertical: { chat: { c: 0, r: 16, w: 18, h: 10 }, poll: { c: 2, r: 2, w: 14, h: 8 } } },
-  });
+  // The poll layer shows the latest active poll: the seeded battle. The editor shows the horizontal output: the link
+  // of the vertical output shows the vertical layout all the same.
+  await runSql("overlay-vertical", [
+    layersSql({
+      chat: { enabled: true },
+      cells: { vertical: { chat: { c: 0, r: 16, w: 18, h: 10 }, poll: { c: 2, r: 2, w: 14, h: 8 } } },
+    }),
+    verticalKeySql(),
+  ]);
   try {
     // Half of 1080x1920: every design pixel is half a screen pixel.
     const source = await chatSource(
       browser,
       () => snapshot([message({ platform: "youtube", id: "v1", user: "Tall", text: "vertical chat" })]),
-      "/@feature_host/overlay?key=e2e-key",
+      `/@feature_host/overlay?key=${VERTICAL_KEY}`,
       { width: 540, height: 960 },
     );
     const page: Page = source.page;
@@ -904,7 +916,7 @@ test("a vertical layout fills a 1080x1920 source and shows each layer inside its
       viewport: { width: 540, height: 960 },
       extraHTTPHeaders: { "CF-Connecting-IP": `192.0.2.${DESIGN_IP}` },
     });
-    await alone.goto("/@feature_host/overlay?key=e2e-key&layer=content");
+    await alone.goto(`/@feature_host/overlay?key=${VERTICAL_KEY}&layer=content`);
     await expect(alone.locator(".ov-design")).toHaveAttribute("data-scaled", "true");
     await expect(alone.locator('.ov-layer[data-layer="poll"] .ov-stage > *').first()).toBeVisible();
     const aloneBox = await alone.locator('.ov-layer[data-layer="poll"]').boundingBox();
@@ -916,7 +928,7 @@ test("a vertical layout fills a 1080x1920 source and shows each layer inside its
     await expect(alone.locator('.ov-layer[data-layer="chat"]')).toHaveCount(0);
     await close(alone);
   } finally {
-    await setLayers("overlay-vertical-restore", {});
+    await runSql("overlay-vertical-restore", [layersSql({}), noKeysSql]);
   }
 });
 

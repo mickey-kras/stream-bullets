@@ -14,7 +14,10 @@ const ranges = {
   "discussion-history": [[75, 78]],
   // Reserved for callers without clientIp.
   mash: [[80, 82]],
-  "overlay-control": [[90, 94]],
+  "overlay-control": [
+    [90, 94],
+    [97, 98],
+  ],
   community: [[95, 96]],
   threads: [[100, 100]],
   "comment-translation": [[101, 102]],

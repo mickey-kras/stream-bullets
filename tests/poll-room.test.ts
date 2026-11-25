@@ -1,13 +1,13 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AppEnv } from "../app/env";
 import { MASH_FLUSH_MS, MASH_TICK_MS } from "../app/lib/mash";
-import { DEFAULT_LAYERS, emptyCells } from "../app/lib/overlay-layers";
+import { DEFAULT_LAYERS, emptyCells, type Orientation } from "../app/lib/overlay-layers";
 import { PollRoom } from "../app/server/poll-room";
 import type { LiveSnapshot } from "../app/types";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
 import {
   faultyDatabase,
-  type FakeSocket,
+  FakeSocket,
   installWorkersRuntime,
   LIVE_SCHEMA,
   liveRows,
@@ -69,14 +69,15 @@ interface Visitor {
   key?: string;
   user?: string;
   owner?: boolean;
-  overlay?: boolean;
+  /** An OBS source with the key of an output. `true` is the horizontal output. */
+  overlay?: boolean | Orientation;
 }
 
 function subscribe(visitor: Visitor = {}): Promise<Response> {
   const headers: Record<string, string> = { Upgrade: "websocket", "X-Stream-Bullets-Client": visitor.key ?? KEY };
   if (visitor.user) headers["X-SB-User"] = visitor.user;
   if (visitor.owner) headers["X-SB-Owner"] = "1";
-  if (visitor.overlay) headers["X-SB-Overlay"] = "1";
+  if (visitor.overlay) headers["X-SB-Overlay"] = visitor.overlay === true ? "horizontal" : visitor.overlay;
   return call("subscribe", { headers });
 }
 
@@ -403,7 +404,9 @@ describe("live room admission", (): void => {
     expect((await subscribe({ key: KEY })).status).toBe(429);
     expect((await subscribe({ key: seat(500) })).status).toBe(503);
     const overlay = await join({ key: KEY, overlay: true });
-    expect(state().tagsOf(overlay)).toEqual(["role:owner", "overlay-key"]);
+    expect(state().tagsOf(overlay)).toEqual(["role:owner", "overlay-key", "output:horizontal"]);
+    const vertical = await join({ key: KEY, overlay: "vertical" });
+    expect(state().tagsOf(vertical)).toEqual(["role:owner", "overlay-key", "output:vertical"]);
     expect(anonymous[0].closeCode).toBe(1013);
     expect(
       state()
@@ -412,22 +415,126 @@ describe("live room admission", (): void => {
     ).toHaveLength(200);
   });
 
+  it("gives no owner seat for an overlay header that names no output", async (): Promise<void> => {
+    for (const value of ["1", "diagonal", ""]) {
+      const response = await call("subscribe", {
+        headers: { Upgrade: "websocket", "X-Stream-Bullets-Client": KEY, "X-SB-Overlay": value },
+      });
+      const socket = serverSocketOf((response as Response & { webSocket: unknown }).webSocket);
+      expect(state().tagsOf(socket), value).toEqual([`client:${KEY}`, "role:anonymous"]);
+    }
+  });
+
   it("drops only the sockets that came in with a revoked overlay key", async (): Promise<void> => {
     const [overlay, broken] = await joinAll(2, () => ({ key: KEY, overlay: true }));
     const owner = await join({ key: KEY, user: "owner-1", owner: true });
     const viewer = await join({ key: seat(1) });
+    const vertical = await join({ key: KEY, overlay: "vertical" });
     broken.failSends = true;
-    expect((await post("overlay-key")).status).toBe(204);
+    expect((await post("overlay-key", { output: "horizontal" })).status).toBe(204);
     expect(overlay.ofType("unavailable")).toHaveLength(1);
     expect([overlay.closeCode, overlay.closeReason]).toEqual([1001, "Overlay key revoked"]);
     expect(broken.closeCode).toBe(1011);
+    // The key of the vertical output did not change: its source stays.
+    expect([owner.open, viewer.open, vertical.open]).toEqual([true, true, true]);
+    expect(vertical.ofType("unavailable")).toHaveLength(0);
+    expect((await post("overlay-key", { output: "vertical" })).status).toBe(204);
+    expect([vertical.closeCode, vertical.closeReason]).toEqual([1001, "Overlay key revoked"]);
     expect([owner.open, viewer.open]).toEqual([true, true]);
+  });
+
+  it("refuses a key notice that names no output, and closes no socket", async (): Promise<void> => {
+    const sources = await joinAll(2, (index) => ({ key: KEY, overlay: index === 0 ? "horizontal" : "vertical" }));
+    for (const body of [undefined, {}, { output: "diagonal" }, { output: 1 }, "vertical", null])
+      expect((await post("overlay-key", body)).status, JSON.stringify(body)).toBe(400);
+    expect((await call("overlay-key", { method: "POST", body: "{" })).status).toBe(400);
+    expect(sources.map((socket) => socket.open)).toEqual([true, true]);
+  });
+
+  it("counts the OBS sources of each output, and keeps a time for each", async (): Promise<void> => {
+    type Sources = {
+      count: number;
+      seenAt: number | null;
+      outputs: Record<Orientation, { count: number; seenAt: number | null }>;
+    };
+    const owner = await join({ key: KEY, user: "owner-1", owner: true });
+    const last = (): Sources | undefined => lastOf<{ sources: Sources }>(owner, "overlay")?.sources;
+    const none = { count: 0, seenAt: null };
+    expect(last()).toEqual({ ...none, outputs: { horizontal: none, vertical: none } });
+    const verticalAt = Date.now();
+    const vertical = await join({ key: KEY, overlay: "vertical" });
+    expect(last()).toEqual({
+      count: 1,
+      seenAt: verticalAt,
+      outputs: { horizontal: none, vertical: { count: 1, seenAt: verticalAt } },
+    });
+    vi.setSystemTime(Date.now() + 10_000);
+    const horizontalAt = Date.now();
+    const [first, second] = await joinAll(2, () => ({ key: KEY, overlay: "horizontal" }));
+    expect(last()).toEqual({
+      count: 3,
+      seenAt: horizontalAt + 1,
+      outputs: { horizontal: { count: 2, seenAt: horizontalAt + 1 }, vertical: { count: 1, seenAt: verticalAt } },
+    });
+    // A source of one output goes away: only the time of that output changes.
+    vi.setSystemTime(Date.now() + 10_000);
+    const goneAt = Date.now();
+    vertical.readyState = 3;
+    await room().webSocketClose(vertical as unknown as WebSocket, 1001, "", true);
+    expect(last()).toEqual({
+      count: 2,
+      seenAt: goneAt,
+      outputs: { horizontal: { count: 2, seenAt: horizontalAt + 1 }, vertical: { count: 0, seenAt: goneAt } },
+    });
+    await room().webSocketError(first as unknown as WebSocket, new Error("lost"));
+    expect(second.open).toBe(true);
+    expect(last()?.outputs).toEqual({
+      horizontal: { count: 1, seenAt: goneAt },
+      vertical: { count: 0, seenAt: goneAt },
+    });
+    // The times stay after a restart of the room.
+    vi.setSystemTime(Date.now() + 10_000);
+    rooms.restart(streamerId);
+    const again = await join({ key: KEY, user: "owner-1", owner: true });
+    expect(lastOf<{ sources: Sources }>(again, "overlay")?.sources).toEqual({
+      count: 0,
+      seenAt: goneAt,
+      outputs: { horizontal: { count: 0, seenAt: goneAt }, vertical: { count: 0, seenAt: goneAt } },
+    });
+  });
+
+  it("reads a time and a socket from before the two outputs as horizontal", async (): Promise<void> => {
+    type Sources = {
+      count: number;
+      seenAt: number | null;
+      outputs: Record<Orientation, { count: number; seenAt: number | null }>;
+    };
+    // The room first runs, so it knows its page. Then it starts again with the stored time of an older room.
+    (await join({ key: KEY, user: "owner-1", owner: true })).close();
+    rooms.restart(streamerId);
+    await state().storage.put("overlaySeenAt", 1234);
+    // An OBS socket that the older room accepted has no tag for its output.
+    const old = new FakeSocket();
+    old.serializeAttachment({ expiresAt: Date.now() + 60 * MINUTE, userId: null, openedAt: Date.now() });
+    state().acceptWebSocket(old, ["role:owner", "overlay-key"]);
+    const owner = await join({ key: KEY, user: "owner-1", owner: true });
+    expect(lastOf<{ sources: Sources }>(owner, "overlay")?.sources).toEqual({
+      count: 1,
+      seenAt: 1234,
+      outputs: { horizontal: { count: 1, seenAt: 1234 }, vertical: { count: 0, seenAt: null } },
+    });
+    // The key of the old socket can be the key of each output: a new key for one output closes it.
+    await post("overlay-key", { output: "vertical" });
+    expect([old.closeCode, old.closeReason]).toEqual([1001, "Overlay key revoked"]);
   });
 
   it("tells the owner how many OBS sources are connected and when one was last seen", async (): Promise<void> => {
     type Sources = { count: number; seenAt: number | null };
+    // The numbers of the page. The numbers of each output have their own test.
     const sources = (socket: FakeSocket): Sources[] =>
-      socket.ofType<{ sources?: Sources }>("overlay").flatMap(({ sources }) => (sources ? [sources] : []));
+      socket
+        .ofType<{ sources?: Sources }>("overlay")
+        .flatMap(({ sources }) => (sources ? [{ count: sources.count, seenAt: sources.seenAt }] : []));
     const owner = await join({ key: KEY, user: "owner-1", owner: true });
     const viewer = await join({ key: seat(1) });
     expect(sources(owner)).toEqual([{ count: 0, seenAt: null }]);
@@ -459,10 +566,10 @@ describe("live room admission", (): void => {
     const owner = await join({ key: KEY, user: "owner-1", owner: true });
     const counts = (): number[] =>
       owner.ofType<{ sources: { count: number } }>("overlay").map(({ sources }) => sources.count);
-    expect((await post("overlay-key")).status).toBe(204);
+    expect((await post("overlay-key", { output: "horizontal" })).status).toBe(204);
     expect(counts()).toEqual([0]);
     await join({ key: KEY, overlay: true });
-    expect((await post("overlay-key")).status).toBe(204);
+    expect((await post("overlay-key", { output: "horizontal" })).status).toBe(204);
     expect(counts()).toEqual([0, 1, 0]);
     // The source stops its pings: the room closes it at the next check and tells the owner.
     await join({ key: KEY, overlay: true });

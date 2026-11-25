@@ -15,8 +15,9 @@ import {
 } from "../app/server/http.server";
 import { serveImage } from "../app/server/images.server";
 import { serveStreamImage } from "../app/server/stream-images.server";
-import { overlayKeyMatches } from "../app/server/overlay-key.server";
+import { overlayKeyOutput } from "../app/server/overlay-key.server";
 import { KEY_REFUSED_CLOSE } from "../app/lib/activity-socket";
+import type { Orientation } from "../app/lib/overlay-layers";
 import { visitorPrefix } from "../app/server/ip-prefix";
 import { cleanExpiredData } from "../app/server/cleanup.server";
 import { TRANSLATION_CRON, translatePending } from "../app/server/translation-jobs.server";
@@ -130,8 +131,11 @@ async function liveResponse(
   });
   if (viewer) headers.set("X-SB-User", viewer.id);
   if (viewer?.id === streamer.ownerId) headers.set("X-SB-Owner", "1");
-  // Invalid/revoked keys join as signed-out viewers.
-  else if (await overlayKeyMatches(env, streamer.id, overlayKey)) headers.set("X-SB-Overlay", "1");
+  // Invalid/revoked keys join as signed-out viewers. The header names the output of the key.
+  else {
+    const output: Orientation | null = await overlayKeyOutput(env, streamer.id, overlayKey);
+    if (output) headers.set("X-SB-Overlay", output);
+  }
   const room = env.POLL_ROOMS.get(env.POLL_ROOMS.idFromName(streamer.id));
   return room.fetch(`https://poll-room.internal/subscribe?streamerId=${encodeURIComponent(streamer.id)}`, { headers });
 }
@@ -158,7 +162,8 @@ async function activityResponse(
   const streamer = await getStreamer(env, handle);
   if (!streamer || !isStreamerListed(streamer.status)) throw new HttpError(404, "Streamer not found.");
   const headers = new Headers({ Upgrade: "websocket" });
-  if (await overlayKeyMatches(env, streamer.id, overlayKey)) headers.set("X-SB-Overlay", "1");
+  const output: Orientation | null = await overlayKeyOutput(env, streamer.id, overlayKey);
+  if (output) headers.set("X-SB-Overlay", output);
   else if ((await getViewer(request, { env, nonce, responseHeaders }))?.id === streamer.ownerId)
     headers.set("X-SB-Owner", "1");
   else if (overlayKey === null) throw new HttpError(403, "Use the overlay URL with its key.");

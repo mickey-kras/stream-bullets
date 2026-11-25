@@ -915,7 +915,7 @@
   "overlay.grid.notResized": "未调整大小。",
   "overlay.grid.obsSize": "此方向下，请将 OBS 浏览器来源设为 {w} × {h}。",
   "overlay.grid.orientation": "屏幕方向",
-  "overlay.grid.orientationNote": "OBS 会立即切换到此方向。每个方向保留各自的布局。",
+  "overlay.grid.orientationNote": "选择要编辑的输出。每个输出都有各自的布局和 OBS 链接。两个输出会同时直播。",
   "overlay.grid.outside": "超出了网格。",
   "overlay.grid.palette": "图层 · 每种一个",
   "overlay.grid.paletteHint": "选择一个图层，可将它添加到第一个空位。也可以把它拖到网格上。要移除图层，请把它从网格拖回这里。选择已放置的图层即可更改它。",
@@ -936,7 +936,7 @@
   "overlay.keyNotKept": "此链接无法再次显示。请重新生成，以获得之后可以再次查看的链接。",
   "overlay.keyShow": "显示链接",
   "overlay.keyMade": "新的叠加层链接已就绪，请复制到 OBS。",
-  "overlay.keyNone": "为 OBS 创建私密叠加层链接。有了它，即使直播间已满，叠加层也总能连接。",
+  "overlay.keyNone": "每个输出都有各自的 OBS 私密链接。可以只用一个，也可以两个都用。有了链接，即使直播间已满，叠加层也总能连接。",
   "overlay.keyOnce": "将此链接复制到 OBS。请保密：任何拥有它的人都会占用你叠加层的位置。",
   "overlay.keyRegenerate": "重新生成链接",
   "overlay.label": "{name} 的叠加层",
@@ -961,7 +961,7 @@
   "overlay.noPolls": "请先在你的页面上创建投票或 Mash Battle。",
   "overlay.noTopics": "还没有话题。",
   "overlay.notRevealed": "结果尚未公布",
-  "overlay.obsHelp": "在 OBS 中添加浏览器源：宽 1920，高 1080。无需再修改，显示内容在这里切换。",
+  "overlay.obsHelp": "在 OBS 中添加浏览器源：宽 {w}，高 {h}。无需再修改，显示内容在这里切换。",
   "overlay.offline": "实时更新已离线。",
   "overlay.pickCard": "社区卡片",
   "overlay.pickPoll": "投票",
@@ -1420,5 +1420,8 @@
   "tools.live.chat.larger": "放大文字",
   "tools.live.chat.smaller": "缩小文字",
   "tools.live.chat.onAir": "直播中显示：{title}",
-  "tools.live.chat.screenOff": "此浏览器无法保持屏幕常亮。直播期间请关闭设备的屏幕锁定。"
+  "tools.live.chat.screenOff": "此浏览器无法保持屏幕常亮。直播期间请关闭设备的屏幕锁定。",
+  "overlay.output.horizontal": "横向输出",
+  "overlay.output.vertical": "纵向输出",
+  "overlay.keyConfirmOther": "另一个输出的链接仍然有效。"
 }

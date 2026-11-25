@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { t, tn } from "../../i18n";
 import { copyText } from "../../lib/clipboard";
-import { onStream, type ContentSource, type OverlayLayers } from "../../lib/overlay-layers";
+import { onAnyOutput, type ContentSource, type OverlayLayers } from "../../lib/overlay-layers";
 import { paths } from "../../lib/shell";
 import type { OverlayState } from "../../types";
 import { errorMessage, postJson } from "../api";
@@ -35,7 +35,7 @@ function PollActions({ scene, state, busy, run, poll }: Readonly<PollProps & { p
   const toast = useToast();
   const [closing, setClosing] = useState<boolean>(false);
   const layers: OverlayLayers = state.layers;
-  const onAir: boolean = onStream(layers, "poll");
+  const onAir: boolean = onAnyOutput(layers, "poll");
   const link: string | null = qrTarget(scene, pollSource(layers));
 
   async function copy(url: string): Promise<void> {
@@ -113,7 +113,7 @@ export function LivePoll(props: Readonly<PollProps>): ReactNode {
   const { scene, state } = props;
   const layers: OverlayLayers = state.layers;
   const poll: OverlayPoll | undefined = overlayPoll(pollSource(layers), scene.polls, scene.now);
-  const onAir: boolean = onStream(layers, "poll");
+  const onAir: boolean = onAnyOutput(layers, "poll");
   if (!poll)
     return (
       <LivePart name="poll" title={t("tools.live.poll")}>

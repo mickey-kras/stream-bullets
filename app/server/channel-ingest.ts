@@ -37,6 +37,8 @@ import { validateTestEnvironment } from "./test-environment-config";
 import { EVENTS, ID_SQL, type IdTable } from "./channel-ingest-sql";
 import { type PlaygroundHost, playgroundOf } from "./playground-host";
 import { detached } from "../lib/detached";
+import type { Orientation } from "../lib/overlay-layers";
+import { keyRevokes, outputInBody, outputTag, overlayOutput } from "./room-connections";
 import { NEW_YOUTUBE_STATE, type Connection, type YoutubeState } from "./channel-ingest-state";
 import {
   SNAPSHOT_SIZE,
@@ -186,7 +188,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (channelsOff(this.env)) this.closeSockets("Channels off");
     if (url.pathname === "/subscribe") return this.subscribe(request);
     if (url.pathname === "/test-chat") return this.testChat();
-    if (url.pathname === "/overlay-key") return this.overlayKeyRevoked();
+    if (url.pathname === "/overlay-key") return await this.overlayKeyRevoked(request);
     if (url.pathname === "/page-status") return this.pageStatusChanged();
     if (url.pathname === "/close") return this.closeAll();
     if (url.pathname === "/refresh") return Response.json(await this.refreshRequested());
@@ -217,21 +219,21 @@ export class ChannelIngest extends DurableObject<AppEnv> {
 
   private async subscribe(request: Request): Promise<Response> {
     if (request.headers.get("Upgrade")?.toLowerCase() !== "websocket") return reply("WebSocket required", 426);
-    const overlay = request.headers.get("X-SB-Overlay") === "1";
-    // The Worker sets these only for a valid overlay key or the signed-in owner.
-    if (!overlay && request.headers.get("X-SB-Owner") !== "1") return reply("Forbidden", 403);
+    const output: Orientation | null = overlayOutput(request.headers.get("X-SB-Overlay"));
+    // The Worker sets these only for a valid overlay key (with its output) or the signed-in owner.
+    if (!output && request.headers.get("X-SB-Owner") !== "1") return reply("Forbidden", 403);
     const before = this.suspensions;
     const keysBefore = this.overlayKeys;
     const suspended = await this.pageSuspended();
     // A suspension that arrived while this check waited wins over the read. No await from here to the accept.
     if (suspended || this.suspensions !== before) return reply("Stream not found", 404);
     // A key change that arrived while this check waited revoked the key this request carries.
-    if (overlay && this.overlayKeys !== keysBefore) return reply("Forbidden", 403);
+    if (output && this.overlayKeys !== keysBefore) return reply("Forbidden", 403);
     if (this.ctx.getWebSockets("activity").length >= MAX_SOCKETS) return reply("Too many connections", 429);
     const first = this.ctx.getWebSockets("activity").length === 0;
     const pair = new WebSocketPair();
     const [client, server] = Object.values(pair);
-    const tags = overlay ? ["activity", "overlay-key"] : ["activity", "owner"];
+    const tags = output ? ["activity", "overlay-key", outputTag(output)] : ["activity", "owner"];
     const characters = new URL(request.url).searchParams.get("characters") === "1";
     this.ctx.acceptWebSocket(server, characters ? [...tags, "characters"] : tags);
     this.send(server, this.snapshot(Date.now()));
@@ -301,20 +303,20 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     this.generations.set(platform, (this.generations.get(platform) ?? 0) + 1);
   }
 
-  private closeSockets(reason: string): void {
-    for (const socket of this.ctx.getWebSockets("activity")) {
+  private closeSockets(reason: string, sockets: WebSocket[] = this.ctx.getWebSockets("activity")): void {
+    for (const socket of sockets) {
       this.send(socket, JSON.stringify({ type: "unavailable" }));
       socket.close(1001, reason);
     }
   }
 
-  /** A new overlay key revokes the old one: its sockets close at once. */
-  private overlayKeyRevoked(): Response {
+  /** A new overlay key of one output revokes the old one: its sockets close at once. The other output stays. */
+  private async overlayKeyRevoked(request: Request): Promise<Response> {
+    const output: Orientation | null = await outputInBody(request);
+    if (!output) return reply("Invalid output", 400);
     this.overlayKeys += 1;
-    for (const socket of this.ctx.getWebSockets("overlay-key")) {
-      this.send(socket, JSON.stringify({ type: "unavailable" }));
-      socket.close(1001, "Overlay key revoked");
-    }
+    const mine = (socket: WebSocket): boolean => keyRevokes(this.ctx.getTags(socket), output);
+    this.closeSockets("Overlay key revoked", this.ctx.getWebSockets("overlay-key").filter(mine));
     return new Response(null, { status: 204 });
   }
 

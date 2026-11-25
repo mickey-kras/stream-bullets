@@ -718,7 +718,7 @@ test("the camera frame has a clear window on stream at each size, and the editor
   const owner = await signedIn(browser, "featureowner", CAMERA_IP);
   const page = await newPage(owner);
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   const editor = page.locator("[data-composition-editor]");
   const frame = editor.getByRole("region", { name: "Composition preview" });
   await expect(frame).toHaveAttribute("data-scaled", "true");
