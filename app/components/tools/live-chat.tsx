@@ -105,19 +105,12 @@ export interface ChatModel {
  * The merged chat of the connected platforms, for the owner. New messages keep the newest in view. A scroll up, or
  * the pause button, pauses the list: it then keeps its place and counts the new messages. "Jump to latest" resumes
  * it. The pause and the platform filters are local to this browser. A moderated message keeps its row and loses
- * its text, also while the list is paused. `now` is server time.
+ * its text, also while the list is paused.
  */
-export function useChatModel(feed: ActivityFeed, now: number): ChatModel {
+export function useChatModel(feed: ActivityFeed): ChatModel {
   const [state, dispatch] = useReducer(liveChatReducer, undefined, initialLiveChat);
   const { subscribe } = feed;
-  const clock = useRef<number>(now);
-  useEffect(() => {
-    clock.current = now;
-  }, [now]);
-  useEffect(
-    () => subscribe((message: ActivityMessage): void => dispatch({ type: "message", message, now: clock.current })),
-    [subscribe],
-  );
+  useEffect(() => subscribe((message: ActivityMessage): void => dispatch({ type: "message", message })), [subscribe]);
   const [hidden, setHidden] = useState<ReadonlySet<ActivityPlatform>>(new Set<ActivityPlatform>());
   const { pausedAt } = state;
   const element = useRef<HTMLDivElement | null>(null);
@@ -474,22 +467,19 @@ function FullChat({
 export function LiveChat({
   feed,
   delivers,
-  now,
   full = false,
   onFull,
   onAir = null,
 }: Readonly<{
   feed: ActivityFeed;
   delivers: boolean;
-  /** Server time. */
-  now: number;
   /** True while the full-screen view is open. The page keeps this in its address. */
   full?: boolean;
   /** Opens or exits the full-screen view. Without it the part has no button for the view. */
   onFull?: (open: boolean) => void;
   onAir?: string | null;
 }>): ReactNode {
-  const chat: ChatModel = useChatModel(feed, now);
+  const chat: ChatModel = useChatModel(feed);
   return (
     <LivePart name="chat" title={t("tools.live.chat")}>
       <ChatFilters chat={chat} />
