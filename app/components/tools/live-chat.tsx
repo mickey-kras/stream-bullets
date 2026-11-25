@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useReducer, useRef, useState, type ReactNode, type UIEvent } from "react";
+import { ScrollArea } from "radix-ui";
 import { t, type MessageId } from "../../i18n";
 import type { ActivityFragment, ActivityPlatform } from "../../lib/activity";
 import {
@@ -76,20 +77,20 @@ export function LiveChat({ feed, delivers }: Readonly<{ feed: ActivityFeed; deli
   const [hidden, setHidden] = useState<ReadonlySet<ActivityPlatform>>(new Set<ActivityPlatform>());
   // The newest row at the time of the pause: later rows wait. Null while the chat follows the newest message.
   const [pausedAt, setPausedAt] = useState<number | null>(null);
-  const list = useRef<HTMLOListElement | null>(null);
+  const list = useRef<HTMLDivElement | null>(null);
   const rows: LiveChatRow[] = shownRows(state.rows, hidden).filter(
     (row: LiveChatRow): boolean => pausedAt === null || row.seq <= pausedAt,
   );
   const waiting: number = pausedAt === null ? 0 : newSince(state.rows, pausedAt, hidden);
   const last: number = rows.at(-1)?.seq ?? 0;
   useLayoutEffect(() => {
-    const element: HTMLOListElement | null = list.current;
+    const element: HTMLDivElement | null = list.current;
     if (element && pausedAt === null) element.scrollTop = element.scrollHeight;
   }, [last, pausedAt]);
 
   const pause = (current: LiveChatState): void => setPausedAt(current.seq);
-  const scrolled = (event: UIEvent<HTMLOListElement>): void => {
-    const element: HTMLOListElement = event.currentTarget;
+  const scrolled = (event: UIEvent<HTMLDivElement>): void => {
+    const element: HTMLDivElement = event.currentTarget;
     const below: number = element.scrollHeight - element.scrollTop - element.clientHeight;
     if (pausedAt === null && below > PAUSE_DISTANCE) pause(state);
   };
@@ -102,19 +103,22 @@ export function LiveChat({ feed, delivers }: Readonly<{ feed: ActivityFeed; deli
   const feedText: MessageId | null = FEED_TEXT[feed.status];
   return (
     <LivePart name="chat" title={t("tools.live.chat")}>
-      <div className="seg tl-chat-filters" role="group" aria-label={t("tools.live.chat.filters")}>
-        {PLATFORMS.map((platform: ActivityPlatform) => (
-          <button
-            key={platform}
-            type="button"
-            aria-pressed={!hidden.has(platform)}
-            data-chat-filter={platform}
-            onClick={() => toggle(platform)}
-          >
-            {PLATFORM_NAMES[platform]}
-          </button>
-        ))}
-      </div>
+      <fieldset className="tl-chat-filters">
+        <legend className="sr-only">{t("tools.live.chat.filters")}</legend>
+        <div className="seg">
+          {PLATFORMS.map((platform: ActivityPlatform) => (
+            <button
+              key={platform}
+              type="button"
+              aria-pressed={!hidden.has(platform)}
+              data-chat-filter={platform}
+              onClick={() => toggle(platform)}
+            >
+              {PLATFORM_NAMES[platform]}
+            </button>
+          ))}
+        </div>
+      </fieldset>
       {!delivers && (
         <p className="muted tl-note" data-chat-no-channel>
           {t("tools.live.chat.noChannel")}{" "}
@@ -128,20 +132,26 @@ export function LiveChat({ feed, delivers }: Readonly<{ feed: ActivityFeed; deli
           {t(feedText)}
         </p>
       )}
-      <ol
-        className="tl-chat"
-        ref={list}
-        role="log"
-        aria-label={t("tools.live.chat")}
-        tabIndex={0}
-        onScroll={scrolled}
-        data-live-chat
-        data-paused={pausedAt !== null || undefined}
-      >
-        {rows.map((row: LiveChatRow) => (
-          <ChatRow key={row.id} row={row} />
-        ))}
-      </ol>
+      {/* The list scrolls, so the keyboard must reach it: the scroll area takes the focus, as the topic list does. */}
+      <ScrollArea.Root className="tl-chat-root">
+        <ScrollArea.Viewport asChild tabIndex={0} style={{ overflowY: "auto" }}>
+          <div
+            className="tl-chat"
+            ref={list}
+            role="log"
+            aria-label={t("tools.live.chat")}
+            onScroll={scrolled}
+            data-live-chat
+            data-paused={pausedAt !== null || undefined}
+          >
+            <ol className="tl-chat-list">
+              {rows.map((row: LiveChatRow) => (
+                <ChatRow key={row.id} row={row} />
+              ))}
+            </ol>
+          </div>
+        </ScrollArea.Viewport>
+      </ScrollArea.Root>
       {rows.length === 0 && (
         <p className="muted tl-note" data-chat-empty>
           {t("tools.live.chat.empty")}

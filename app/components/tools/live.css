@@ -72,7 +72,7 @@
 }
 .tl-status,
 .tl-list,
-.tl-chat {
+.tl-chat-list {
   list-style: none;
   margin-left: 0;
   margin-right: 0;
@@ -130,7 +130,25 @@
   max-width: 320px;
 }
 .tl-chat-filters {
-  display: flex;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+/* The scroll area hides the scroll bar and lays its content out as a table. The chat keeps both as in a plain list. */
+.tl-chat[data-radix-scroll-area-viewport] {
+  scrollbar-width: thin !important;
+}
+.tl-chat[data-radix-scroll-area-viewport]::-webkit-scrollbar {
+  display: initial !important;
+}
+.tl-chat[data-radix-scroll-area-viewport] > div {
+  display: block !important;
+  width: 100%;
+  min-width: 0 !important;
+}
+.tl-chat-list {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 .tl-chat {
   height: min(60vh, 560px);
