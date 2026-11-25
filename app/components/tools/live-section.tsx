@@ -71,7 +71,14 @@ function LivePreview({
   layers,
   feed,
   testUntil,
-}: Readonly<{ scene: OverlayScene; layers: OverlayLayers; feed: ActivityFeed; testUntil: number }>): ReactNode {
+  serverOffset,
+}: Readonly<{
+  scene: OverlayScene;
+  layers: OverlayLayers;
+  feed: ActivityFeed;
+  testUntil: number;
+  serverOffset: number;
+}>): ReactNode {
   const frame = useRef<HTMLElement | null>(null);
   useDesignScale(frame, GRID[layers.orientation].cols * CELL_PX);
   const empty: boolean = !GRID_LAYERS.some((layer: GridLayer): boolean => onStream(layers, layer));
@@ -85,7 +92,14 @@ function LivePreview({
         aria-label={t("overlay.comp.preview")}
       >
         <div className="ov-scaler" style={frameStyle(layers.orientation)}>
-          <OverlayComposition scene={scene} layers={layers} only={null} feed={feed} testUntil={testUntil} />
+          <OverlayComposition
+            scene={scene}
+            layers={layers}
+            only={null}
+            feed={feed}
+            testUntil={testUntil}
+            serverOffset={serverOffset}
+          />
         </div>
       </section>
       <p className="muted tl-note" data-live-preview-note>
@@ -117,12 +131,15 @@ export function LiveSection({
   sources = null,
   connected = true,
   reconnect,
+  serverOffset = 0,
 }: Readonly<{
   initial: OverlayState;
   // Latest live overlay state includes changes from other tabs.
   live?: OverlayPublic | null;
   scene: Omit<OverlayScene, "overlay">;
   channels: readonly ChannelView[];
+  // Server time minus the time of this device: the chat of the preview counts its times from server times.
+  serverOffset?: number;
   // The connected OBS sources, from the live room. Null while the room did not tell.
   sources?: OverlaySources | null;
   // Offline changes save but reach OBS after reconnect.
@@ -140,13 +157,19 @@ export function LiveSection({
       <div className="tl-live" data-live-section>
         <div className="tl-col">
           <LiveStatus channels={channels} sources={sources} now={scene.now} />
-          <LivePreview scene={view} layers={state.layers} feed={feed} testUntil={state.chatTestUntil} />
+          <LivePreview
+            scene={view}
+            layers={state.layers}
+            feed={feed}
+            testUntil={state.chatTestUntil}
+            serverOffset={serverOffset}
+          />
           <LivePoll scene={view} state={state} busy={busy} run={run} />
           <LiveTopics scene={view} state={state} busy={busy} run={run} />
           <LiveMessage key={`${state.message}:${state.messageStyle}`} state={state} busy={busy} send={send} />
         </div>
         <div className="tl-col tl-col-chat">
-          <LiveChat feed={feed} delivers={deliversChat(channels)} now={scene.now} />
+          <LiveChat feed={feed} delivers={deliversChat(channels)} />
         </div>
       </div>
     </>

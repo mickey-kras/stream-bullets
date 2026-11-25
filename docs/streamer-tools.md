@@ -98,7 +98,8 @@ The pause and the platform buttons apply to this browser only. They do not chang
 A message that a moderator deleted stays in its place without its text.
 The same applies to each message of a viewer who got a ban or a timeout.
 This also applies during a pause of the list.
-After a reconnect, it applies to each message of the last 9 minutes that the server no longer has.
+After a reconnect, the server tells from which time its chat history is complete.
+The part then shows each newer message that the server no longer has as removed.
 
 The chat uses the activity feed of the owner. See [channel connections](channel-connections.md).
 The owner can use the list with a keyboard: the list takes the focus, and the arrow keys scroll it.

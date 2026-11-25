@@ -1,6 +1,6 @@
 export { RouteErrorBoundary as ErrorBoundary } from "../components/route-error";
 import { withRouteErrors } from "../server/route-errors.server";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { redirect, useLoaderData, useRevalidator, useSearchParams, type LoaderFunctionArgs } from "react-router";
 import { appContext } from "../env";
 import { t } from "../i18n";
@@ -23,6 +23,7 @@ import { ToolsHead } from "../components/tools/tools-head";
 import type { OverlayPoll, OverlayScene } from "../components/overlay/overlay-stage";
 import { StreamerHeader, streamerHeaderAppearance, type StreamerView } from "../components/shell/streamer-header";
 import { useRevalidateAt } from "../components/use-clock";
+import { ServerOffset } from "../lib/clock";
 import type { LiveSnapshot } from "../types";
 import "../components/overlay/wasteland/wasteland.css";
 import "../components/overlay/composition.css";
@@ -94,6 +95,9 @@ export default function ToolsPage(): ReactNode {
   );
   const current: LiveSnapshot = snapshot && snapshot.revision >= loaded.initial.revision ? snapshot : loaded.initial;
   const now: number = useServerTime(current.serverNow);
+  // Server time minus local time, measured one time for each loader answer, as the overlay page does.
+  const [offsets] = useState<ServerOffset>(() => new ServerOffset());
+  const serverOffset: number = offsets.for(loaded.initial.serverNow);
   // Refresh Up next at the loaded stream's start, even when its layer is off the grid.
   useRevalidateAt(loaded.initial.serverNow, loaded.data.next?.startsAt ?? null, revalidator.revalidate);
   const polls: OverlayPoll[] = [...current.polls];
@@ -128,7 +132,7 @@ export default function ToolsPage(): ReactNode {
       <main className="page-panel ov-control" id="main-content">
         <ToolsHead view={view} />
         <ChatDeliveryContext.Provider value={deliversChat(channels)}>
-          {view === "live" && <LiveSection {...room} channels={channels} />}
+          {view === "live" && <LiveSection {...room} channels={channels} serverOffset={serverOffset} />}
           {view === "overlay" && <OverlayControl {...room} hasOverlayKey={loaded.hasOverlayKey} />}
           {view === "channels" && (
             <ChannelsStep

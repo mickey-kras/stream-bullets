@@ -231,7 +231,7 @@ describe("message banner", (): void => {
 
 describe("chat panel", (): void => {
   function part(status: ActivityFeed["status"], delivers: boolean): string {
-    return renderToStaticMarkup(createElement(LiveChat, { feed: { ...feed, status }, delivers, now: 0 }));
+    return renderToStaticMarkup(createElement(LiveChat, { feed: { ...feed, status }, delivers }));
   }
 
   it("starts empty and following, with each platform shown", (): void => {
