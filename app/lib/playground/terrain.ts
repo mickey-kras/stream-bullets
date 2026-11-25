@@ -145,7 +145,7 @@ export function createTerrain(world: World): Terrain {
   const kinds = tileKinds(world.cols, world.w);
   return {
     tiles: kinds.map((kind): Tile => ({ kind, stage: 0, repairAt: 0 })),
-    blocks: new Array<Block | null>(world.cols * world.rows).fill(null),
+    blocks: Array.from({ length: world.cols * world.rows }, (): Block | null => null),
     flags: [],
     count: 0,
     seq: 0,

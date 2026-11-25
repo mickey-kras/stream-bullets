@@ -10,7 +10,7 @@ Thus the editor preview, a composition source, and a characters source always sh
 
 | Part | Files |
 | --- | --- |
-| Rules and constants | `app/lib/playground/constants.ts`, `crowd.ts`, `sim.ts`, `terrain.ts` |
+| Rules and constants | `app/lib/playground/constants.ts`, `core.ts`, `crowd.ts`, `sim.ts`, `motion.ts`, `works.ts`, `terrain.ts`, `checkpoint.ts` |
 | Frame contract | `app/lib/playground/protocol.ts` |
 | Characters test | `app/lib/playground/test-crowd.ts` |
 | Server host | `app/server/playground-host.ts`, `app/server/channel-ingest.ts` |
