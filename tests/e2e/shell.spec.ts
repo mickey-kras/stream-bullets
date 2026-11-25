@@ -64,7 +64,7 @@ test("the account menu is a keyboard-operable disclosure of links", async ({ bro
   await expect(links.first()).toBeFocused();
   await expect(links).toHaveText([
     "Your page",
-    "Overlay control",
+    "Streamer tools",
     "Edit your page",
     "Your profile",
     "Your data",
@@ -148,7 +148,7 @@ test("logos go home, the streamer picture goes to its topics, and navigation mar
   await close(context);
 });
 
-test("the streamer header offers Overlay to the owner of the page only, and the site header has no Overlay entry", async ({
+test("the streamer header offers Tools to the owner of the page only, and the site header has no Tools entry", async ({
   browser,
 }) => {
   const owner = await signedIn(browser, "owner");
@@ -156,17 +156,17 @@ test("the streamer header offers Overlay to the owner of the page only, and the 
   await page.goto("/@test_host");
   const nav = page.getByRole("banner").getByRole("navigation", { name: "Main navigation" });
   // After the page views, with the icon and the label of the other tabs.
-  await expect(nav.getByRole("link")).toHaveText(["Topics", "Polls", "Schedule", "About", "Community", "Overlay"]);
-  const overlay = nav.getByRole("link", { name: "Overlay", exact: true });
-  await expect(overlay).toHaveAttribute("href", "/overlay-control");
+  await expect(nav.getByRole("link")).toHaveText(["Topics", "Polls", "Schedule", "About", "Community", "Tools"]);
+  const overlay = nav.getByRole("link", { name: "Tools", exact: true });
+  await expect(overlay).toHaveAttribute("href", "/tools");
   await expect(overlay).toHaveClass(/nav-tab/);
   await expect(overlay).not.toHaveAttribute("aria-current", "page");
   await expect(overlay.locator("svg")).toBeVisible();
   // The account menu keeps its entry.
   await page.getByRole("button", { name: /^Account menu/ }).click();
   await expect(
-    page.getByRole("navigation", { name: "Account" }).getByRole("link", { name: "Overlay control" }),
-  ).toHaveAttribute("href", "/overlay-control");
+    page.getByRole("navigation", { name: "Account" }).getByRole("link", { name: "Streamer tools" }),
+  ).toHaveAttribute("href", "/tools");
   await page.keyboard.press("Escape");
   // On a phone the six tabs are icons in one row. Each is a touch target, without sideways scroll.
   await page.setViewportSize({ width: 390, height: 844 });
@@ -188,25 +188,25 @@ test("the streamer header offers Overlay to the owner of the page only, and the 
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   await page.setViewportSize({ width: 1280, height: 720 });
   await overlay.click();
-  await expect(page.getByRole("heading", { level: 1, name: "Overlay control" })).toBeVisible();
-  // Overlay control keeps the streamer header: Overlay is the current tab and the other tabs lead to the page.
-  await expect(nav.getByRole("link")).toHaveText(["Topics", "Polls", "Schedule", "About", "Community", "Overlay"]);
+  await expect(page.getByRole("heading", { level: 1, name: "Streamer tools" })).toBeVisible();
+  // Streamer tools keeps the streamer header: Tools is the current tab and the other tabs lead to the page.
+  await expect(nav.getByRole("link")).toHaveText(["Topics", "Polls", "Schedule", "About", "Community", "Tools"]);
   await expect(overlay).toHaveAttribute("aria-current", "page");
   await expect(nav.getByRole("link", { name: "Polls", exact: true })).toHaveAttribute("href", "/@test_host?view=polls");
-  // The site header has no Overlay entry. "Your page" stays, also on a phone.
+  // The site header has no Tools entry. "Your page" stays, also on a phone.
   const site = page.getByRole("banner").getByRole("navigation", { name: "Main navigation" });
   await page.goto("/streamers");
   await expect(site.getByRole("link")).toHaveText(["Streamers", "Your page"]);
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(site.getByRole("link", { name: "Your page", exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
-  // The page of another streamer has no Overlay entry for this owner.
+  // The page of another streamer has no Tools entry for this owner.
   await page.goto("/@feature_host");
   await expect(nav.getByRole("link", { name: "Topics", exact: true })).toBeVisible();
-  await expect(nav.getByRole("link", { name: "Overlay", exact: true })).toHaveCount(0);
+  await expect(nav.getByRole("link", { name: "Tools", exact: true })).toHaveCount(0);
   await close(owner);
 
-  // A signed-in viewer without a page and a guest get no Overlay entry.
+  // A signed-in viewer without a page and a guest get no Tools entry.
   const viewer = await signedIn(browser, "viewer");
   const guest = await browser.newContext({ baseURL: origin });
   for (const context of [viewer, guest]) {
@@ -215,6 +215,45 @@ test("the streamer header offers Overlay to the owner of the page only, and the 
     const tabs = other.getByRole("banner").getByRole("navigation", { name: "Main navigation" });
     await expect(tabs.getByRole("link")).toHaveText(["Topics", "Polls", "Schedule", "About", "Community"]);
     await close(context);
+  }
+});
+
+test("the old Overlay control address opens Streamer tools", async ({ browser }) => {
+  const owner = await signedIn(browser, "owner");
+  const page = await newPage(owner);
+  await page.goto("/overlay-control");
+  await expect(page).toHaveURL(/\/tools\?view=overlay$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Streamer tools" })).toBeVisible();
+  // An old channel callback link opens the Channels section.
+  await page.goto("/overlay-control?channel=kick&result=denied");
+  await expect(page.getByRole("region", { name: "Connect channels" })).toBeVisible();
+  await expect(page).toHaveURL(/\/tools\?view=channels$/);
+  await close(owner);
+});
+
+test("the Streamers, language and notification controls of the header have equal visible gaps", async ({ browser }) => {
+  // The gap of the controls is 8px up to a width of 1800px, and 16px above it.
+  for (const width of [1440, 1920]) {
+    const owner = await signedIn(browser, "owner", { width });
+    const page = await newPage(owner);
+    await page.goto("/@test_host");
+    const end = page.getByRole("banner").locator(".header-end");
+    const edge = async (selector: string, side: "left" | "right"): Promise<number> => {
+      const box = (await end.locator(selector).boundingBox())!;
+      return side === "left" ? box.x : box.x + box.width;
+    };
+    // From visible edge to visible edge: the border of Streamers, the globe and the code of the language button,
+    // the notification icon, and the avatar.
+    const gaps: number[] = [
+      (await edge("button.header-language svg", "left")) - (await edge("a.header-streamers", "right")),
+      (await edge("button.notification-nav svg", "left")) - (await edge(".header-language-code", "right")),
+      (await edge(".account-menu-wrap > button .user-avatar", "left")) - (await edge("button.notification-nav svg", "right")),
+    ];
+    for (const gap of gaps) {
+      expect(gap, `${width}px: ${gaps.join(", ")}`).toBeGreaterThan(0);
+      expect(Math.abs(gap - gaps[0]), `${width}px: ${gaps.join(", ")}`).toBeLessThanOrEqual(2);
+    }
+    await close(owner);
   }
 });
 

@@ -30,8 +30,8 @@ test("the owner builds the overlay from layers and the one OBS URL follows at on
   // The poll layer shows the latest active poll: the seeded battle.
   await expect(obs.locator('.ov-layer[data-layer="poll"] [data-overlay-mash]')).toBeVisible();
 
-  await control.goto("/overlay-control");
-  await expect(control.getByRole("heading", { level: 1, name: "Overlay control" })).toBeVisible();
+  await control.goto("/tools?view=overlay");
+  await expect(control.getByRole("heading", { level: 1, name: "Streamer tools" })).toBeVisible();
   const editor = control.locator("[data-composition-editor]");
   await expect(editor.locator('.ov-layer[data-layer="poll"] [data-overlay-mash]')).toBeVisible();
   await expect(editor.locator("[data-comp-live-note]")).toHaveText("Changes go live right away");
@@ -39,7 +39,7 @@ test("the owner builds the overlay from layers and the one OBS URL follows at on
   await expect(control.locator("[data-ov-monitor]")).toHaveCount(0);
   await expect(control.getByRole("button", { name: /Take/ })).toHaveCount(0);
   await expect(control.locator("kbd")).toHaveCount(0);
-  if (shots) await control.screenshot({ path: `${shots}/overlay-control.png`, fullPage: true });
+  if (shots) await control.screenshot({ path: `${shots}/tools.png`, fullPage: true });
 
   // A topic layer comes on the grid with the newest topic, and OBS shows it at once.
   await placeLayer(control, editor, "topic");
@@ -118,9 +118,9 @@ test("the owner copies the private overlay link, and a new link revokes the old 
   const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 93));
   await owner.grantPermissions(["clipboard-read", "clipboard-write"], { origin });
   const control = await newPage(owner);
-  await control.goto("/overlay-control");
-  // Step 3 shows the link controls without a click.
-  await expect(control.getByRole("region", { name: "3 Add to OBS" })).toBeVisible();
+  await control.goto("/tools?view=overlay");
+  // Step 2 shows the link controls without a click.
+  await expect(control.getByRole("region", { name: "2 Add to OBS" })).toBeVisible();
   await control.getByRole("button", { name: "Create overlay link" }).click();
   const field = control.locator("[data-ov-url]");
   await expect(field).toHaveValue(/^http:\/\/localhost:5173\/@feature_host\/overlay\?key=[\w-]{43}$/);
@@ -190,11 +190,11 @@ test("an OBS source with a refused key stops its chat feed retries", async ({ br
 });
 
 test("overlay control is for the page owner only", async ({ browser, page }) => {
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   await expect(page).toHaveURL(/\/streamers$/);
   const viewer = await signedIn(browser, "viewer", clientIp("overlay-control", 91));
   const viewerPage = await newPage(viewer);
-  expect((await viewerPage.goto("/overlay-control"))?.status()).toBe(404);
+  expect((await viewerPage.goto("/tools?view=overlay"))?.status()).toBe(404);
   const hide = { action: "showResults", on: false };
   expect((await viewer.request.post("/api/overlay", { data: hide })).status()).toBe(404);
   const long = "x".repeat(121);
@@ -229,7 +229,7 @@ test("the pickers of a layer change what it shows, hide poll results and recover
   try {
     const control = await newPage(owner);
     await control.setViewportSize({ width: 1440, height: 1000 });
-    await control.goto("/overlay-control");
+    await control.goto("/tools?view=overlay");
     const editor = control.locator("[data-composition-editor]");
     const preview = editor.getByRole("region", { name: "Composition preview" });
     const panel = settings(editor);
@@ -309,7 +309,7 @@ test("the pickers of a layer change what it shows, hide poll results and recover
   }
 });
 
-test("the page is a flow of three numbered steps, with the channels first and collapsed when one is connected", async ({
+test("Streamer tools has the Overlay section with two numbered steps and the Channels section, collapsed when a channel is connected", async ({
   browser,
 }) => {
   const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 91));
@@ -317,19 +317,21 @@ test("the page is a flow of three numbered steps, with the channels first and co
   const now: number = Date.now();
   try {
     const control = await newPage(owner);
-    await control.goto("/overlay-control");
-    // The steps come in order, each a region named by its numbered level 2 heading.
-    await expect(control.locator("[data-step]")).toHaveCount(3);
-    expect(
-      await control.locator("[data-step]").evaluateAll((steps) => steps.map((step) => step.getAttribute("data-step"))),
-    ).toEqual(["channels", "build", "obs"]);
-    await expect(control.getByRole("heading", { level: 2 })).toHaveText([
-      "1 Connect channels",
-      "2 Build your overlay",
-      "3 Add to OBS",
-    ]);
-    // Step 2 is the studio: the toolbar, the layers, the grid and the settings of a layer. Step 3 has the link.
-    const build = control.getByRole("region", { name: "2 Build your overlay" });
+    await control.goto("/tools?view=overlay");
+    // The page has one title and the links to its sections. The address names the Overlay section.
+    await expect(control.getByRole("heading", { level: 1 })).toHaveText("Streamer tools");
+    const sections = control.getByRole("navigation", { name: "Streamer tools sections" });
+    await expect(sections.getByRole("link")).toHaveText(["Live", "Overlay", "Channels"]);
+    await expect(sections.getByRole("link", { name: "Overlay" })).toHaveAttribute("aria-current", "page");
+    await expect(sections.getByRole("link", { name: "Channels" })).not.toHaveAttribute("aria-current", "page");
+    // The steps of the section come in order, each a region named by its numbered level 2 heading.
+    const steps = (): Promise<(string | null)[]> =>
+      control.locator("[data-step]").evaluateAll((items) => items.map((item) => item.getAttribute("data-step")));
+    await expect(control.locator("[data-step]")).toHaveCount(2);
+    expect(await steps()).toEqual(["build", "obs"]);
+    await expect(control.getByRole("heading", { level: 2 })).toHaveText(["1 Build your overlay", "2 Add to OBS"]);
+    // Step 1 is the studio: the toolbar, the layers, the grid and the settings of a layer. Step 2 has the link.
+    const build = control.getByRole("region", { name: "1 Build your overlay" });
     await expect(build.getByRole("group", { name: "Screen orientation" })).toBeVisible();
     await expect(build.getByRole("group", { name: "Preview background" })).toBeVisible();
     await expect(build.getByRole("button", { name: "Start test" })).toBeVisible();
@@ -348,12 +350,24 @@ test("the page is a flow of three numbered steps, with the channels first and co
     await expect(build.getByRole("region", { name: "No layer selected" })).toBeVisible();
     await expect(
       control
-        .getByRole("region", { name: "3 Add to OBS" })
+        .getByRole("region", { name: "2 Add to OBS" })
         .getByRole("button", { name: /overlay link|Regenerate link/ }),
     ).toBeVisible();
 
-    // No channel is connected: the first step is open, with the full panel.
-    const channels = control.getByRole("region", { name: "1 Connect channels" });
+    // The Channels section has the channel cards alone, without a step number. No document loads for it.
+    let documents: number = 0;
+    control.on("request", (request) => {
+      if (request.isNavigationRequest()) documents += 1;
+    });
+    await sections.getByRole("link", { name: "Channels" }).click();
+    await expect(control).toHaveURL(/\/tools\?view=channels$/);
+    await expect(sections.getByRole("link", { name: "Channels" })).toHaveAttribute("aria-current", "page");
+    await expect(control.getByRole("heading", { level: 1 })).toHaveText("Streamer tools");
+    await expect(control.getByRole("heading", { level: 2 })).toHaveText(["Connect channels"]);
+    expect(await steps()).toEqual(["channels"]);
+    expect(documents).toBe(0);
+    // No channel is connected: the section is open, with the full panel.
+    const channels = control.getByRole("region", { name: "Connect channels" });
     const details = channels.locator("details.ch-details");
     const summary = channels.locator("[data-channels-summary]");
     const kick = channels.locator('[data-channel="kick"]');
@@ -391,7 +405,7 @@ test("the page is a flow of three numbered steps, with the channels first and co
     expect((await more.boundingBox())!.y).toBeGreaterThanOrEqual(button.y + button.height);
     await more.locator("summary").click();
 
-    // With a connected channel the step is one status line. It opens by keyboard and by pointer.
+    // With a connected channel the section is one status line. It opens by keyboard and by pointer.
     await runSql("channel-flow-seed", [
       `INSERT INTO channel_connections(id,streamer_id,platform,external_id,display_name,scopes,status,status_code,created_at,updated_at,last_event_at) VALUES ('${connectionId}',(SELECT id FROM streamers WHERE handle='feature_host'),'kick','flow-kick','Flow Kick','','active',NULL,${now},${now},NULL);`,
     ]);
@@ -406,17 +420,16 @@ test("the page is a flow of three numbered steps, with the channels first and co
     await expect(kick).toContainText("Connected as Flow Kick");
     await summary.click();
     await expect(kick).toBeHidden();
-    // The "Connect channels" link in the settings of the chat layer opens the panel again.
+    // The "Connect channels" link in the settings of the chat layer opens the Channels section with the panel open.
+    await sections.getByRole("link", { name: "Overlay" }).click();
     await placeLayer(control, build, "chat");
     const link = build.getByRole("region", { name: "Chat" }).getByRole("link", { name: "Connect channels" });
+    await expect(link).toHaveAttribute("href", "/tools?view=channels#channels-title");
     await link.click();
+    await expect(control).toHaveURL(/\/tools\?view=channels#channels-title$/);
     await expect(details).toHaveAttribute("open", "");
     await expect(kick).toBeVisible();
-    // The address has the fragment now. The same link opens a closed panel again, and so does a load.
-    await summary.click();
-    await expect(kick).toBeHidden();
-    await link.click();
-    await expect(details).toHaveAttribute("open", "");
+    // The address has the fragment now: a load opens a closed panel again.
     await summary.click();
     await expect(kick).toBeHidden();
     await control.reload();
@@ -447,8 +460,9 @@ test("the channel panel follows a platform that stops and works again while the 
     control.on("request", (request) => {
       if (request.isNavigationRequest()) documents += 1;
     });
-    await control.goto("/overlay-control");
-    const section = control.getByRole("region", { name: "1 Connect channels" });
+    await control.goto("/tools?view=channels");
+    const sections = control.getByRole("navigation", { name: "Streamer tools sections" });
+    const section = control.getByRole("region", { name: "Connect channels" });
     const details = section.locator("details.ch-details");
     const summary = section.locator("[data-channels-summary]");
     const kick = section.locator('[data-channel="kick"]');
@@ -457,37 +471,40 @@ test("the channel panel follows a platform that stops and works again while the 
     await expect(summary).toHaveText("Connected: Kick");
     await expect(details).not.toHaveAttribute("open");
     await expect(toast).toHaveCount(0);
+    await sections.getByRole("link", { name: "Overlay" }).click();
     const build = control.locator("[data-composition-editor]");
     await chip(build, "chat").click();
     const chat = settings(build);
     await expect(chat).toHaveAttribute("data-comp-props", "chat");
     await expect(chat.locator("[data-comp-chat-down]")).toHaveCount(0);
 
-    // Kick ends the access during the stream. The next read shows it: the panel opens and a toast names it.
+    // Kick ends the access during the stream. The next read shows it, also in the Overlay section: a toast names
+    // it, and the settings of the chat on stream say that no channel delivers chat, with a link to the cards.
     await runSql("channel-live-stop", [status("needs_reauth", "authorization_revoked")]);
     const stopped = control.waitForResponse((response) => new URL(response.url()).pathname === "/api/channels");
     await control.clock.runFor(20_001);
     expect((await stopped).status()).toBe(200);
+    await expect(toast).toHaveText("Kick: Access ended. Reconnect to keep receiving chat.");
+    await expect(control.locator("#sb-announce-assertive")).toHaveText(
+      "Kick: Access ended. Reconnect to keep receiving chat.",
+    );
+    await expect(chat.locator("[data-comp-chat-down]")).toHaveText("No channel delivers chat right now. See Channels.");
+    await expect(chat.locator("[data-comp-chat-down]").getByRole("link", { name: "Channels" })).toHaveAttribute(
+      "href",
+      "/tools?view=channels#channels-title",
+    );
+    // The Channels section opens with the panel open, because a connection needs the owner.
+    await sections.getByRole("link", { name: "Channels" }).click();
     await expect(summary).toHaveText("Needs attention: Kick");
     await expect(details).toHaveAttribute("open", "");
     await expect(kick.locator(".ch-mark")).toHaveText("Needs attention");
     await expect(kick.locator(".ch-mark")).toHaveAttribute("data-health", "attention");
     await expect(kick.getByRole("alert")).toHaveText("Access ended. Reconnect to keep receiving chat.");
-    await expect(toast).toHaveText("Kick: Access ended. Reconnect to keep receiving chat.");
-    await expect(control.locator("#sb-announce-assertive")).toHaveText(
-      "Kick: Access ended. Reconnect to keep receiving chat.",
-    );
     // The age of the last chat event is a time element with the absolute time as its title.
     const age = kick.locator("time");
     await expect(age).toHaveText("Last chat event 2 minutes ago");
     await expect(age).toHaveAttribute("datetime", new Date(now - 100_000).toISOString());
     await expect(age).toHaveAttribute("title", /\d/);
-    // The chat is on stream and no channel delivers chat: its settings say so, with a link to step 1.
-    await expect(chat.locator("[data-comp-chat-down]")).toHaveText("No channel delivers chat right now. See step 1.");
-    await expect(chat.locator("[data-comp-chat-down]").getByRole("link", { name: "step 1" })).toHaveAttribute(
-      "href",
-      "#channels-title",
-    );
     // The same state at the next read is no news: the toast goes away by itself and does not come back.
     const same = control.waitForResponse((response) => new URL(response.url()).pathname === "/api/channels");
     await control.clock.runFor(15_000);
@@ -508,7 +525,6 @@ test("the channel panel follows a platform that stops and works again while the 
     await expect(toast).toHaveText("Kick chat is back.");
     await expect(control.locator("#sb-announce-polite")).toHaveText("Kick chat is back.");
     await expect(details).toHaveAttribute("open", "");
-    await expect(chat.locator("[data-comp-chat-down]")).toHaveCount(0);
 
     // Reads that fail keep the last list. After the third failure in a row, the panel says so, until a read works.
     await control.route("**/api/channels", (route) => route.abort());
@@ -529,6 +545,10 @@ test("the channel panel follows a platform that stops and works again while the 
     await control.clock.runFor(20_001);
     await works;
     await expect(section.locator("[data-channels-stale]")).toHaveCount(0);
+    // Back in the Overlay section, the chat settings have no warning now.
+    await sections.getByRole("link", { name: "Overlay" }).click();
+    await chip(build, "chat").click();
+    await expect(settings(build).locator("[data-comp-chat-down]")).toHaveCount(0);
     // All of it without a reload of the page.
     expect(documents).toBe(1);
   } finally {
@@ -554,7 +574,7 @@ test("channel conflicts reload the list and expired authentication leaves a sign
     // The reloads of the page data that are in flight. The live connection starts one soon after the load.
     let reloads: number = 0;
     const held: Route[] = [];
-    const reload = (request: Request): boolean => new URL(request.url()).pathname === "/overlay-control.data";
+    const reload = (request: Request): boolean => new URL(request.url()).pathname === "/tools.data";
     control.on("request", (request) => {
       if (reload(request)) reloads += 1;
     });
@@ -563,7 +583,7 @@ test("channel conflicts reload the list and expired authentication leaves a sign
     };
     control.on("requestfinished", ended);
     control.on("requestfailed", ended);
-    await control.goto("/overlay-control");
+    await control.goto("/tools?view=channels");
     const kick = control.locator('[data-channel="kick"]');
     // A healthy connection: the section starts as one status line. Open it for the full panel.
     await control.getByText("Connected: Kick", { exact: true }).click();
@@ -585,7 +605,7 @@ test("channel conflicts reload the list and expired authentication leaves a sign
     await control.unroute("**/api/channels/kick");
     // Another tab removed it before this tab confirmed its old view. A reload of the page data must not show the
     // removal to this tab first: hold new reloads, and let the ones in flight end, before the removal.
-    await control.route("**/overlay-control.data*", (route) => {
+    await control.route("**/tools.data*", (route) => {
       reloads -= 1;
       held.push(route);
     });
@@ -599,7 +619,7 @@ test("channel conflicts reload the list and expired authentication leaves a sign
       .getByRole("dialog", { name: "Disconnect Kick?" })
       .getByRole("button", { name: "Disconnect Kick", exact: true })
       .click();
-    await control.unroute("**/overlay-control.data*");
+    await control.unroute("**/tools.data*");
     for (const route of held) await route.continue();
     await expect(kick.getByRole("button", { name: "Connect Kick", exact: true })).toBeFocused();
     await expect(kick).toContainText("Not connected");
@@ -633,8 +653,8 @@ test("channel conflicts reload the list and expired authentication leaves a sign
     await prompt.getByRole("button").click();
     expect((await signIn).postDataJSON()).toEqual({
       provider: "google",
-      callbackURL: "/overlay-control",
-      errorCallbackURL: "/sign-in?next=%2Foverlay-control",
+      callbackURL: "/tools?view=channels",
+      errorCallbackURL: "/sign-in?next=%2Ftools%3Fview%3Dchannels",
     });
     await expect(prompt).toContainText("Sign-in failed. Please try again.");
     const stored = JSON.parse((await control.evaluate(() => sessionStorage.getItem("sb-channel-intent"))) ?? "{}") as {
@@ -647,9 +667,9 @@ test("channel conflicts reload the list and expired authentication leaves a sign
     let connects: number = 0;
     await control.route("**/api/channels/kick/connect", async (route) => {
       connects += 1;
-      await route.fulfill({ json: { authorizeUrl: "/overlay-control?channel=kick&result=denied" } });
+      await route.fulfill({ json: { authorizeUrl: "/tools?view=channels&channel=kick&result=denied" } });
     });
-    await control.goto("/overlay-control");
+    await control.goto("/tools?view=channels");
     await expect(control.locator(".ch-result")).toHaveText("The Kick authorization was cancelled.");
     expect(connects).toBe(1);
     expect(await control.evaluate(() => sessionStorage.getItem("sb-channel-intent"))).toBeNull();
@@ -663,7 +683,7 @@ test("channel conflicts reload the list and expired authentication leaves a sign
         JSON.stringify({ platform: "kick", action: "connect", at: Date.now() - 11 * 60 * 1000 }),
       );
     });
-    await control.goto("/overlay-control?connect=kick");
+    await control.goto("/tools?view=channels&connect=kick");
     await expect(kick.getByRole("button", { name: "Connect Kick", exact: true })).toBeVisible();
     await expect(kick.getByRole("button", { name: "Connect Kick", exact: true })).toBeEnabled();
     expect(connects).toBe(1);
@@ -682,12 +702,12 @@ test("the grid preview shows its composition only once it is scaled to the frame
   // Without JavaScript, hide the unscaled composition to prevent overflow.
   const still = await fixtureSignedIn(browser, "featureowner", 92, { ...phone, javaScriptEnabled: false });
   const before = await newPage(still);
-  await before.goto("/overlay-control");
+  await before.goto("/tools?view=overlay");
   await expect(before.locator(".ov-comp-frame .ov-scaler")).toBeHidden();
   await close(still);
   const owner = await fixtureSignedIn(browser, "featureowner", 92, phone);
   const page = await newPage(owner);
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   await expect(page.locator(".ov-comp-frame .ov-scaler")).toBeVisible();
   await close(owner);
 });
@@ -753,7 +773,7 @@ test("the control page moves Up next on when the stream it shows starts", async 
   const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 94));
   try {
     const control = await newPage(owner);
-    await control.goto("/overlay-control");
+    await control.goto("/tools?view=overlay");
     const layer = control.locator(
       '[data-composition-editor] .ov-layer[data-layer="next"] [data-overlay-source="next"]',
     );
@@ -784,8 +804,8 @@ test("the owner sees each channel's connection health and the result of a connec
   const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 93));
   try {
     const control = await newPage(owner);
-    await control.goto("/overlay-control?channel=kick&result=channel_taken");
-    const section = control.getByRole("region", { name: "1 Connect channels" });
+    await control.goto("/tools?view=channels&channel=kick&result=channel_taken");
+    const section = control.getByRole("region", { name: "Connect channels" });
     // A callback result and a connection to repair open the section.
     await expect(section.locator("details.ch-details")).toHaveAttribute("open", "");
     await expect(section.locator("[data-channels-summary]")).toHaveText("Connected: YouTube · Needs attention: Kick");
@@ -797,7 +817,7 @@ test("the owner sees each channel's connection health and the result of a connec
     await expect(banner).toBeFocused();
     await expect(control.locator(".toast").filter({ hasText: "already connected" })).toHaveCount(0);
     // It leaves the address, so a reload does not show it again.
-    await expect(control).toHaveURL(/\/overlay-control$/);
+    await expect(control).toHaveURL(/\/tools\?view=channels$/);
     const youtube = section.locator('[data-channel="youtube"]');
     // YouTube is not set up here, so its notes about the YouTube limits stay hidden.
     await expect(youtube).not.toContainText("Chat starts when an overlay");

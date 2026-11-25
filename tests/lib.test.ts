@@ -14,7 +14,17 @@ import {
   withDefaults,
 } from "../app/lib/prefs";
 import { effectiveStatus, expandSeries, upcomingRows } from "../app/lib/schedule";
-import { localPath, paths, renamedPath, shellFromMatches, useShell, type ShellData } from "../app/lib/shell";
+import {
+  channelsSectionPath,
+  localPath,
+  paths,
+  renamedPath,
+  shellFromMatches,
+  toolsPath,
+  toolsView,
+  useShell,
+  type ShellData,
+} from "../app/lib/shell";
 import { eventsJsonLd, personJsonLd, postingJsonLd, siteJsonLd } from "../app/lib/structured-data";
 import { supportLabel } from "../app/lib/support";
 import { replyParent, visibleReplies } from "../app/lib/threads";
@@ -409,5 +419,23 @@ describe("renamedPath", () => {
     expect(renamedPath("/@abcd", "abc", "xyz")).toBeNull();
     expect(renamedPath("/@abcd/overlay", "abc", "xyz")).toBeNull();
     expect(renamedPath("/streamers", "abc", "xyz")).toBeNull();
+  });
+});
+
+describe("Streamer tools sections", () => {
+  it("opens the Live section for an absent or unknown view", (): void => {
+    expect(toolsView(null)).toBe("live");
+    expect(toolsView("")).toBe("live");
+    expect(toolsView("alerts")).toBe("live");
+    expect(toolsView("live")).toBe("live");
+    expect(toolsView("overlay")).toBe("overlay");
+    expect(toolsView("channels")).toBe("channels");
+  });
+
+  it("builds the address of a section and of the channel cards", (): void => {
+    expect(toolsPath("live")).toBe("/tools?view=live");
+    expect(toolsPath("overlay")).toBe("/tools?view=overlay");
+    expect(toolsPath("channels")).toBe("/tools?view=channels");
+    expect(channelsSectionPath).toBe("/tools?view=channels#channels-title");
   });
 });

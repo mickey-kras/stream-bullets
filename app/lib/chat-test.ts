@@ -2,7 +2,7 @@ import type { ActivityEvent } from "./activity";
 import { SAMPLE_CHAT } from "./chat-feed";
 
 /**
- * The chat test (issue #663): a dry run of the chat layer in OBS. The owner starts it in Overlay control. The server
+ * The chat test (issue #663): a dry run of the chat layer in OBS. The owner starts it in Streamer tools. The server
  * keeps only its end time; each overlay page makes the sample chat itself. Nothing goes to a provider.
  */
 

@@ -42,7 +42,7 @@ async function menuRows(page: Page): Promise<string[]> {
   return rows;
 }
 
-const OWNER_ROWS = ["Your page", "Overlay control", "Edit your page"];
+const OWNER_ROWS = ["Your page", "Streamer tools", "Edit your page"];
 
 const matrix: {
   role: Role;
@@ -96,11 +96,11 @@ for (const row of matrix) {
     expect(await adminApiStatuses(context.request)).toEqual(row.admin);
 
     // Overlay control: owners only; signed out redirects to /streamers; others get 404.
-    const overlay = await page.goto("/overlay-control");
+    const overlay = await page.goto("/tools?view=overlay");
     expect(overlay?.status()).toBe(row.overlayControl);
     if (row.role === "signed-out") await expect(page).toHaveURL(/\/streamers$/);
     if (row.role === "owner")
-      await expect(page.getByRole("heading", { level: 1, name: "Overlay control" })).toBeVisible();
+      await expect(page.getByRole("heading", { level: 1, name: "Streamer tools" })).toBeVisible();
 
     // Admin: sign-in when signed out; 404 for non-admins; tabs for admins.
     const admin = await page.goto("/admin");

@@ -287,7 +287,7 @@ test("the editor preview opens the owner's characters socket only while the char
   await page.route("**/api/overlay/characters", (route: Route) =>
     route.fulfill({ json: { paused: false, testEndsAt: null } }),
   );
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   const editor = page.locator("[data-composition-editor]");
   const frame = editor.getByRole("region", { name: "Composition preview" });
   await expect(frame).toHaveAttribute("data-scaled", "true");
@@ -353,7 +353,7 @@ test("the characters controls send their requests, keep focus and name every con
     if (body.op === "stopTest") reply = { ...reply, testEndsAt: null };
     await route.fulfill({ json: reply });
   });
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   const editor = page.locator("[data-composition-editor]");
   await expect.poll(() => sockets.length).toBe(1);
   // The page asks for the state once: pause and the test end are not in the layers.
@@ -473,7 +473,7 @@ test("the maximum characters field saves through the layers and stays after a re
   const owner = await signedIn(browser, "featureowner", CONTROLS_IP);
   const page = await newPage(owner);
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   const editor = page.locator("[data-composition-editor]");
   await chip(editor, "characters").click();
   const layer = settings(editor);
@@ -522,7 +522,7 @@ test("a test started in another tab shows here: frames with the test make the ed
     await held;
     await route.fulfill({ json: { paused: false, testEndsAt: Date.now() + 300_000 } });
   });
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   const editor = page.locator("[data-composition-editor]");
   const toggle = editor.locator("[data-test-toggle]");
   const status = editor.locator("[data-test-status]");
@@ -551,7 +551,7 @@ test("the test, pause and reset are unavailable while the saved characters layer
     bodies.push(route.request().postDataJSON());
     await route.fulfill({ json: { paused: false, testEndsAt: null } });
   });
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   const editor = page.locator("[data-composition-editor]");
   await chip(editor, "characters").click();
   const layer = settings(editor);
@@ -585,7 +585,7 @@ test("the controls show a calm note when the server has no playground", async ({
   await page.route("**/api/overlay/characters", (route: Route) =>
     route.fulfill({ status: 503, json: { error: "Characters are off on this server." } }),
   );
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   const editor = page.locator("[data-composition-editor]");
   await chip(editor, "characters").click();
   const layer = settings(editor);

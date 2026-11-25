@@ -27,7 +27,8 @@ import * as ai from "../app/server/ai.server";
 import * as adminRoute from "../app/routes/admin";
 import * as streamerRoute from "../app/routes/streamer";
 import * as overlayRoute from "../app/routes/overlay";
-import * as controlRoute from "../app/routes/overlay-control";
+import * as controlRoute from "../app/routes/tools";
+import * as legacyControlRoute from "../app/routes/overlay-control";
 import * as directoryRoute from "../app/routes/streamers";
 import * as signInRoute from "../app/routes/sign-in";
 import * as aiRoute from "../app/routes/ai";
@@ -615,15 +616,31 @@ describe("overlay loader contracts", (): void => {
     expect(overlay.getOverlayData).toHaveBeenLastCalledWith(expect.anything(), "page", []);
   });
 
+  it("sends the old Overlay control address to Streamer tools for good", (): void => {
+    const moved = (path: string): string | null => {
+      const response: Response = legacyControlRoute.loader(args(path));
+      expect(response.status).toBe(301);
+      return response.headers.get("Location");
+    };
+    expect(moved("/overlay-control")).toBe("/tools?view=overlay");
+    // An old channel callback link opens the Channels section and keeps its result.
+    expect(moved("/overlay-control?channel=twitch&result=connected")).toBe(
+      "/tools?channel=twitch&result=connected&view=channels",
+    );
+    expect(moved("/overlay-control?view=channels")).toBe("/tools?view=channels");
+    expect(moved("/overlay-control?view=unknown")).toBe("/tools?view=overlay");
+    expect(moved("/overlay-control?view=live")).toBe("/tools?view=live");
+  });
+
   it("redirects signed-out control users and returns 404 to users without a page", async (): Promise<void> => {
     const expectedHeaders: unknown = expect.any(Headers);
-    await expect(controlRoute.loader(args("/overlay-control"))).rejects.toMatchObject({
+    await expect(controlRoute.loader(args("/tools"))).rejects.toMatchObject({
       status: 302,
       headers: expectedHeaders,
     });
     expect(data.getOwnStreamer).not.toHaveBeenCalled();
     signedIn();
-    await expect(controlRoute.loader(args("/overlay-control"))).rejects.toMatchObject({ status: 404 });
+    await expect(controlRoute.loader(args("/tools"))).rejects.toMatchObject({ status: 404 });
   });
 
   it("loads the picked poll and topic for the control page, also while their layers are off stream", async (): Promise<void> => {
@@ -643,7 +660,7 @@ describe("overlay loader contracts", (): void => {
         ],
       }),
     );
-    const result = await controlRoute.loader(args("/overlay-control"));
+    const result = await controlRoute.loader(args("/tools"));
     expect(result.initial.polls.map((poll) => poll.id)).toEqual(["recent", "layer-poll"]);
     expect(refs()).toEqual([null, "layer-poll"]);
     expect(overlay.getOverlayData).toHaveBeenLastCalledWith(expect.anything(), "page", ["layer-topic"]);
@@ -660,7 +677,7 @@ describe("overlay loader contracts", (): void => {
   it("loads only the automatic poll and no topic for a control page without picked entries", async (): Promise<void> => {
     signedIn();
     vi.mocked(data.getOwnStreamer).mockResolvedValue(streamer);
-    await controlRoute.loader(args("/overlay-control"));
+    await controlRoute.loader(args("/tools"));
     expect(refs()).toEqual([null]);
     expect(overlay.getOverlayData).toHaveBeenLastCalledWith(expect.anything(), "page", []);
   });

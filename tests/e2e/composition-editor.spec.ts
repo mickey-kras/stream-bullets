@@ -59,7 +59,7 @@ test("the owner places layers on the grid by mouse and keyboard, and the layout 
   const owner = await signedIn(browser, "featureowner", OWNER_IP);
   const page = await newPage(owner);
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   const editor = page.locator("[data-composition-editor]");
   await expect(editor).toBeVisible();
   const frame = editor.getByRole("region", { name: "Composition preview" });
@@ -287,7 +287,7 @@ test("a new orientation ends a drag and keeps the keyboard cursor inside its gri
   const owner = await signedIn(browser, "featureowner", OWNER_IP);
   const page = await newPage(owner);
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   const editor = page.locator("[data-composition-editor]");
   const frame = editor.getByRole("region", { name: "Composition preview" });
   const status = editor.locator("[data-grid-status]");
@@ -371,7 +371,7 @@ test("on a 390 × 844 phone the whole vertical frame fits between the header and
   const owner = await signedIn(browser, "featureowner", OWNER_IP);
   const page = await newPage(owner);
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   const frame = page.locator(".ov-comp-frame");
   await expect(frame).toHaveAttribute("data-orientation", "vertical");
   // The phone has no dock over the page now: only the header and the footer bar take screen height.
@@ -391,7 +391,7 @@ test("on a 390 × 844 phone the whole vertical frame fits between the header and
 test("one test button starts and stops the test from the toolbar and shows the time left", async ({ browser }) => {
   const owner = await signedIn(browser, "featureowner", OWNER_IP);
   const page = await newPage(owner);
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   const editor = page.locator("[data-composition-editor]");
   const toggle = editor.locator("[data-test-toggle]");
   const status = editor.locator("[data-test-status]");
@@ -491,7 +491,7 @@ test("one test button starts and stops the test from the toolbar and shows the t
 test("a rejected layer save rolls back and shows an error", async ({ browser }) => {
   const owner = await signedIn(browser, "featureowner", OWNER_IP);
   const page = await newPage(owner);
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   const editor = page.locator("[data-composition-editor]");
   await expect(chip(editor, "chat")).toHaveText("+ Chat");
   await page.route("**/api/overlay", (route) =>
@@ -517,7 +517,7 @@ test("a save sends only the changed fields, and a failure rolls back only its ow
   await runSql("composition-editor-fields", [layersSql({ cells: { horizontal: { chat: CHAT_CELL } } })]);
   const owner = await signedIn(browser, "featureowner", OWNER_IP);
   const page = await newPage(owner);
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   const editor = page.locator("[data-composition-editor]");
   await expect(editor.locator('[data-grid-box="chat"]')).toHaveAttribute("data-off", "true");
   await chip(editor, "chat").click();
@@ -526,9 +526,9 @@ test("a save sends only the changed fields, and a failure rolls back only its ow
   const hide = panel.getByRole("checkbox", { name: "Hide chat commands (!jump)" });
   await expect(show).not.toBeChecked();
   await expect(hide).toBeChecked();
-  // The chat source note links to the channel connections on the same page.
+  // The chat source note links to the channel cards in the Channels section.
   const connect = panel.getByRole("link", { name: "Connect channels" });
-  await expect(connect).toHaveAttribute("href", "#channels-title");
+  await expect(connect).toHaveAttribute("href", "/tools?view=channels#channels-title");
   await expect(connect).toHaveClass("text-link");
   await expect(panel.locator("[data-comp-chat-source]")).toHaveText(
     "Chat shows messages from the channels you connect. Connect channels",
@@ -597,7 +597,7 @@ test("the message background slider changes the chat cards in the preview and th
   await runSql("composition-editor-background", [chatOn]);
   const owner = await signedIn(browser, "featureowner", OWNER_IP);
   const page = await newPage(owner);
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   const editor = page.locator("[data-composition-editor]");
   // The slider is in the settings of the chat layer.
   await chip(editor, "chat").click();
@@ -644,7 +644,7 @@ test("a new overlay link lists one URL per layer", async ({ browser }) => {
   ]);
   const owner = await signedIn(browser, "featureowner", OWNER_IP);
   const page = await newPage(owner);
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   await expect(page.locator("[data-ov-layer-urls]")).toHaveCount(0);
   await page.getByRole("button", { name: /^(Create overlay link|Regenerate link)$/ }).click();
   // An existing link asks for confirmation first.
@@ -710,7 +710,7 @@ for (const reduced of [true, false]) {
         body: '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>',
       }),
     );
-    await page.goto("/overlay-control");
+    await page.goto("/tools?view=overlay");
     const frame = page.getByRole("region", { name: "Composition preview" });
     const rows = frame.locator('.ov-layer[data-layer="chat"] li.wl-item');
     await expect(rows.first()).toBeVisible();
@@ -738,7 +738,7 @@ test("closing the editor sends an edit that waits for the idle save", async ({ b
   const owner = await signedIn(browser, "featureowner", LEAVE_IP);
   const page = await newPage(owner);
   await page.clock.install();
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   const editor = page.locator("[data-composition-editor]");
   await expect(editor.getByRole("region", { name: "Composition preview" })).toHaveAttribute("data-scaled", "true");
   // A key edit saves after a short idle time. Stop the clock, so only leaving the page can send it.
@@ -786,7 +786,7 @@ test("leaving the editor by an in-app link sends the edit that waits for the idl
   const owner = await signedIn(browser, "featureowner", NAV_IP);
   const page = await newPage(owner);
   await page.clock.install();
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   const editor = page.locator("[data-composition-editor]");
   await expect(editor.getByRole("region", { name: "Composition preview" })).toHaveAttribute("data-scaled", "true");
   // Stop the clock, so only closing the editor can send the key edit.
@@ -808,7 +808,7 @@ test("leaving the editor during a save sends the newer edit after it, so the new
   const owner = await signedIn(browser, "featureowner", NAV_IP);
   const page = await newPage(owner);
   await page.clock.install();
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   const editor = page.locator("[data-composition-editor]");
   await expect(editor.getByRole("region", { name: "Composition preview" })).toHaveAttribute("data-scaled", "true");
   await page.clock.pauseAt(Date.now() + 1000);
@@ -852,7 +852,7 @@ for (const stale of [false, true]) {
     const owner = await signedIn(browser, "featureowner", NAV_IP);
     const page = await newPage(owner);
     await page.clock.install();
-    await page.goto("/overlay-control");
+    await page.goto("/tools?view=overlay");
     const editor = page.locator("[data-composition-editor]");
     await expect(editor.getByRole("region", { name: "Composition preview" })).toHaveAttribute("data-scaled", "true");
     await page.clock.pauseAt(Date.now() + 1000);

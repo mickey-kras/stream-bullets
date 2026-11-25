@@ -64,7 +64,7 @@ async function openEditor(
   expect(placed.ok()).toBe(true);
   const page = await newPage(owner);
   await page.setViewportSize(viewport);
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   const editor = page.locator("[data-composition-editor]");
   const frame = editor.getByRole("region", { name: "Composition preview" });
   await expect(frame).toHaveAttribute("data-scaled", "true");
@@ -172,7 +172,7 @@ test("the owner resizes a placed layer by its handles and by the keyboard", asyn
   await expect(status).toHaveText("Not resized. Poll needs at least 8 × 4 cells.");
   await page.keyboard.press("Alt+ArrowUp");
   await expect(status).toHaveText("Not resized. Poll needs at least 8 × 4 cells.");
-  await expect(page).toHaveURL(/\/overlay-control$/);
+  await expect(page).toHaveURL(/\/tools\?view=overlay$/);
   save = saved(page);
   await page.keyboard.press("Alt+ArrowRight");
   await expect(status).toHaveText("Poll resized to 9 × 4 cells at column 1, row 1.");
@@ -381,7 +381,7 @@ test("the owner takes each layer off the grid by a drag to the palette or by a k
   await page.keyboard.press("Backspace");
   await expect(status).toHaveText("No layer is selected. Select a layer first.");
   await expect(status).toHaveAttribute("data-bad", "true");
-  await expect(page).toHaveURL(/\/overlay-control$/);
+  await expect(page).toHaveURL(/\/tools\?view=overlay$/);
   // Backspace during a keyboard move takes the carried layer off the grid.
   for (let step = 0; step < 12; step++) await page.keyboard.press("ArrowDown");
   for (let step = 0; step < 16; step++) await page.keyboard.press("ArrowRight");

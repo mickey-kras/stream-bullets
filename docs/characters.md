@@ -158,7 +158,7 @@ See the [capability matrix](channel-connections.md#capability-matrix).
 
 ## Controls
 
-The characters layer is one of the layers in step 2 (**Build your overlay**) on **Overlay control**.
+The characters layer is one of the layers in step 1 (**Build your overlay**) of the **Overlay** section of **Streamer tools**.
 To put it on the grid, select its chip in the palette. Its settings show when you select the layer:
 
 - **Show on stream** shows or hides the layer. The layer stays on the grid.
@@ -353,7 +353,7 @@ The art ships under the project license.
 
 ## OBS setup
 
-1. On **Overlay control**, select the **Characters** chip in the palette. The layer goes on the grid and on stream.
+1. In the **Overlay** section of **Streamer tools**, select the **Characters** chip in the palette. The layer goes on the grid and on stream.
    Drag the layer to its place and drag a handle to give it its size.
 2. Use the composition URL, or add a browser source with the characters layer URL:
 
@@ -361,7 +361,7 @@ The art ships under the project license.
    https://<origin>/@<handle>/overlay?key=<key>&layer=characters
    ```
 
-3. Give the source the size of the characters cell. **Overlay control** shows it under **Layer URLs**.
+3. Give the source the size of the characters cell. The **Overlay** section shows it under **Layer URLs**.
    A cell across the bottom of the horizontal frame is 1920 × 240.
 4. Keep the background of the source transparent.
 5. Select **Start test** to see the playground in OBS before you go live.

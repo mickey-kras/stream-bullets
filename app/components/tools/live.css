@@ -1,0 +1,305 @@
+/* The Live section of Streamer tools: the on-air controls in one column and the chat beside them. */
+.tl-live {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0 24px;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+.tl-col {
+  min-width: 0;
+}
+@media (min-width: 62em) {
+  .tl-live {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: start;
+  }
+  /* The chat stays in view while the owner scrolls the controls. */
+  .tl-col-chat {
+    position: sticky;
+    top: calc(var(--header-height, 72px) + 12px);
+  }
+}
+.tl-part > * + * {
+  margin-top: 12px;
+}
+.tl-title {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.tl-meta,
+.tl-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+.tl-meta {
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+/* The voting state and the time left of the poll card, here in one line with the other facts. */
+.tl-meta .poll-topline {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  margin: 0;
+}
+.tl-actions .small-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.tl-note {
+  margin-bottom: 0;
+  font-size: 0.875rem;
+}
+/* On air or off air, in words. The border, not only the color, tells the two apart. */
+.tl-state {
+  padding: 2px 8px;
+  border: 1px dashed var(--line);
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+.tl-state[data-on-air] {
+  border-style: solid;
+  border-color: var(--live);
+  color: var(--cream);
+}
+.tl-status,
+.tl-list,
+.tl-chat-list {
+  list-style: none;
+  margin-left: 0;
+  margin-right: 0;
+  padding: 0;
+}
+.tl-status {
+  display: grid;
+  gap: 8px;
+}
+.tl-status li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.tl-status .icon,
+.tl-chat-icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 3px;
+  fill: currentColor;
+}
+.tl-list {
+  display: grid;
+  gap: 8px;
+}
+.tl-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+}
+.tl-row[data-on-air] {
+  border-color: var(--live);
+}
+.tl-row-text {
+  display: grid;
+  gap: 2px;
+  flex: 1 1 14rem;
+  min-width: 0;
+  font-size: 0.875rem;
+}
+.tl-form {
+  display: grid;
+  gap: 12px;
+}
+.tl-form input {
+  width: 100%;
+}
+/* The preview is as wide as its column, at the aspect ratio of the frame. A vertical frame stays narrow. */
+.tl-preview[data-orientation="vertical"] {
+  max-width: 320px;
+}
+.tl-chat-filters {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+/* The scroll area hides the scroll bar and lays its content out as a table. The chat keeps both as in a plain list. */
+.tl-chat[data-radix-scroll-area-viewport] {
+  scrollbar-width: thin !important;
+}
+.tl-chat[data-radix-scroll-area-viewport]::-webkit-scrollbar {
+  display: initial !important;
+}
+.tl-chat[data-radix-scroll-area-viewport] > div {
+  display: block !important;
+  width: 100%;
+  min-width: 0 !important;
+}
+.tl-chat-list {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.tl-chat {
+  height: min(60vh, 560px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--modal);
+}
+.tl-chat-row {
+  padding: 4px 0;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.tl-chat-row .tl-chat-icon {
+  display: inline-block;
+  margin: 0 6px 0 0;
+  vertical-align: -2px;
+}
+.tl-chat-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+.tl-chat-row[data-removed] .tl-chat-text {
+  font-style: italic;
+  color: var(--muted);
+}
+.tl-chat-row .wl-emote {
+  height: 1.4em;
+  width: auto;
+  vertical-align: middle;
+}
+.tl-chat-bar {
+  justify-content: space-between;
+}
+
+/* The full-screen chat: a dialog over the whole page, for a phone that stands in front of the streamer. */
+.tl-full {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  box-sizing: border-box;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px)
+    env(safe-area-inset-left, 0px);
+  background: var(--bg);
+  color: var(--cream);
+}
+.tl-full-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+/* Portrait: the controls in rows at the top. */
+.tl-full-rail {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.tl-full-rail .small-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+}
+.tl-full-sizes,
+.tl-full-pause {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.tl-full-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+.tl-full-main > .tl-note {
+  margin: 0;
+  padding: 6px 12px;
+}
+.tl-full-air {
+  flex: none;
+  margin: 0;
+  padding: 6px 12px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--line);
+  font-weight: 600;
+  color: var(--gold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tl-full .tl-chat-root {
+  flex: 1;
+  min-height: 0;
+}
+.tl-full .tl-chat {
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+}
+/* Landscape on a phone: the controls in a rail at the side, and the chat at the full height. */
+@media (orientation: landscape) and (max-height: 34em) {
+  .tl-full-body {
+    flex-direction: row;
+  }
+  .tl-full-rail {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    width: 11rem;
+    overflow-y: auto;
+    border-right: 1px solid var(--line);
+    border-bottom: 0;
+  }
+  .tl-full-rail .seg {
+    flex-direction: column;
+  }
+  .tl-full-rail .seg button {
+    margin: -1px 0 0;
+    border-radius: 0;
+  }
+  .tl-full-pause {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+/* A new message fades in. The Motion setting of the site and of the system stop it (base.css). */
+@keyframes tl-chat-in {
+  from {
+    opacity: 0;
+  }
+}
+.tl-chat-row {
+  animation: tl-chat-in 0.2s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tl-chat-row {
+    animation: none;
+  }
+}
+html[data-reduced="true"] .tl-chat-row {
+  animation: none;
+}

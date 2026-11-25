@@ -1162,7 +1162,7 @@ export interface SiteHeaderProps {
 export function SiteHeader(props: SiteHeaderProps): JSX.Element;
 
 /** Tabs of a streamer page. */
-/** Path builder for a handle: "home", "streamers", "overlay", "page" or a view id -> URL. */
+/** Path builder for a handle: "home", "streamers", "tools", "page" or a view id -> URL. */
 export function streamerHref(handle: string): (id: string) => string;
 
 export interface HeaderSuggestButtonProps {
@@ -1187,8 +1187,8 @@ export interface StreamerHeaderProps {
   avatar?: string | null;
   /** Page logo URL. */
   logo?: string | null;
-  /** Current tab, or "overlay". Default "topics". */
-  current?: ("topics" | "polls" | "schedule" | "about" | "community") | "overlay";
+  /** Current tab, or "tools". Default "topics". */
+  current?: ("topics" | "polls" | "schedule" | "about" | "community") | "tools";
   /** Tabs. Default all five views. */
   views?: readonly ("topics" | "polls" | "schedule" | "about" | "community")[];
   /** Tab label overrides. Default {}. */
@@ -1207,7 +1207,7 @@ export interface StreamerHeaderProps {
   badge?: ReactNode;
   /** The on-air strip below the header. Text gets the default strip. */
   ticker?: ReactNode;
-  /** Own page: adds the Overlay tab and own account. Default false. */
+  /** Own page: adds the Tools tab and own account. Default false. */
   own?: boolean;
   /** Header action, e.g. HeaderSuggestButton. Default null. */
   action?: ReactNode;

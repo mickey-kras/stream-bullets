@@ -288,7 +288,7 @@ describe("the overlay page", (): void => {
   it("sends no Referer, so the key in its URL never leaves the page", (): void => {
     expect(headers("/@key_page/overlay?key=abc").get("Referrer-Policy")).toBe("no-referrer");
     expect(headers("/@key_page").get("Referrer-Policy")).toBe("strict-origin-when-cross-origin");
-    expect(headers("/overlay-control").get("Referrer-Policy")).toBe("strict-origin-when-cross-origin");
+    expect(headers("/tools").get("Referrer-Policy")).toBe("strict-origin-when-cross-origin");
   });
 
   it("keeps the layer in the query, so a layer URL also sends no Referer", (): void => {
@@ -311,7 +311,7 @@ describe("the overlay page", (): void => {
       "/@key_page",
       "/@key_page/overlay?key=abc&layer=chat",
       "/@key_page/overlay/chat",
-      "/overlay-control",
+      "/tools",
       "/settings",
     ]) {
       expect(imageSources(path)).toEqual(["img-src", "'self'", "blob:", "data:", ...emotes]);
