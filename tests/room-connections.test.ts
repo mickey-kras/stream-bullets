@@ -1,6 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_LAYERS } from "../app/lib/overlay-layers";
-import { outputInBody, outputOf, outputTag, overlayOutput, OverlaySources } from "../app/server/room-connections";
+import {
+  keyOf,
+  keyTags,
+  outputInBody,
+  outputOf,
+  outputTag,
+  overlayOutput,
+  OverlaySources,
+  socketKey,
+  sourceOutput,
+} from "../app/server/room-connections";
 import type { OverlayPublic } from "../app/types";
 
 // The outputs of the OBS sockets of a room, and the times that the room keeps for them.
@@ -185,5 +195,42 @@ describe("the OBS sources of a page", (): void => {
       seenAt: null,
       outputs: { horizontal: { seenAt: null }, vertical: { seenAt: null } },
     });
+  });
+});
+
+describe("the key of a socket", (): void => {
+  const headers = (values: Record<string, string>): Headers => new Headers(values);
+
+  it("reads the dock key and the overlay key of each output from the headers of the Worker", (): void => {
+    expect(socketKey(headers({}))).toBeNull();
+    expect(socketKey(headers({ "X-SB-Overlay": "vertical" }))).toBe("vertical");
+    expect(socketKey(headers({ "X-SB-Overlay": "horizontal" }))).toBe("horizontal");
+    expect(socketKey(headers({ "X-SB-Dock": "1" }))).toBe("dock");
+    // Only the value that the Worker sets counts.
+    expect(socketKey(headers({ "X-SB-Dock": "yes" }))).toBeNull();
+    expect(socketKey(headers({ "X-SB-Overlay": "dock" }))).toBeNull();
+  });
+
+  it("gives a dock socket its own tag: it is never an OBS source", (): void => {
+    expect(keyTags("dock")).toEqual(["dock-key"]);
+    expect(keyTags("vertical")).toEqual(["overlay-key", "output:vertical"]);
+    expect(keyOf(["role:owner", "dock-key"])).toBe("dock");
+    expect(keyOf(["role:owner", "overlay-key", "output:vertical"])).toBe("vertical");
+    // A socket from before the two outputs is a horizontal OBS source.
+    expect(keyOf(["role:owner", "overlay-key"])).toBe("horizontal");
+    // The signed-in owner has no key.
+    expect(keyOf(["role:owner"])).toBeNull();
+    expect(sourceOutput("dock")).toBeNull();
+    expect(sourceOutput("vertical")).toBe("vertical");
+    expect(sourceOutput(null)).toBeNull();
+  });
+
+  it("reads the key of a revocation from the body", async (): Promise<void> => {
+    const request = (body: unknown): Request =>
+      new Request("https://room.internal/overlay-key", { method: "POST", body: JSON.stringify(body) });
+    expect(await outputInBody(request({ output: "dock" }))).toBe("dock");
+    expect(await outputInBody(request({ output: "vertical" }))).toBe("vertical");
+    expect(await outputInBody(request({ output: "other" }))).toBeNull();
+    expect(await outputInBody(request({ output: 1 }))).toBeNull();
   });
 });

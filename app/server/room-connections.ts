@@ -42,10 +42,38 @@ export function overlayOutput(header: string | null): Orientation | null {
   return ORIENTATIONS.find((output: Orientation): boolean => output === header) ?? null;
 }
 
-/** The output in the JSON body `{output}` of a request between the Worker and an object. Null: none or invalid. */
-export async function outputInBody(request: Request): Promise<Orientation | null> {
+/**
+ * What the key of a socket is for: an output of the overlay (an OBS source), or the OBS dock. The dock key grants
+ * the live controls. It is not an OBS source: the room does not count it and sends it the snapshot of the owner.
+ */
+export type SocketKey = Orientation | "dock";
+
+/** The key that the Worker checked for this request, from its headers. Null: the request has no valid key. */
+export function socketKey(headers: Headers): SocketKey | null {
+  return headers.get("X-SB-Dock") === "1" ? "dock" : overlayOutput(headers.get("X-SB-Overlay"));
+}
+
+/** The tags of a socket that came in with a key. */
+export function keyTags(key: SocketKey): string[] {
+  return key === "dock" ? ["dock-key"] : ["overlay-key", outputTag(key)];
+}
+
+/** The key of a socket from its tags. Null: the socket came in without a key. */
+export function keyOf(tags: readonly string[]): SocketKey | null {
+  if (tags.includes("dock-key")) return "dock";
+  return tags.includes("overlay-key") ? outputOf(tags) : null;
+}
+
+/** The output of an OBS source key. The dock key is not an OBS source. */
+export function sourceOutput(key: SocketKey | null): Orientation | null {
+  return key === "dock" ? null : key;
+}
+
+/** The key in the JSON body `{output}` of a request between the Worker and an object. Null: none or invalid. */
+export async function outputInBody(request: Request): Promise<SocketKey | null> {
   const body: unknown = await request.json().catch((): null => null);
   const output: unknown = typeof body === "object" && body !== null && "output" in body ? body.output : null;
+  if (output === "dock") return "dock";
   return typeof output === "string" ? overlayOutput(output) : null;
 }
 

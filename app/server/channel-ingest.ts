@@ -38,8 +38,7 @@ import { validateTestEnvironment } from "./test-environment-config";
 import { ID_SQL, type IdTable } from "./channel-ingest-sql";
 import { type PlaygroundHost, playgroundOf } from "./playground-host";
 import { detached } from "../lib/detached";
-import type { Orientation } from "../lib/overlay-layers";
-import { outputInBody, outputOf, outputTag, overlayOutput } from "./room-connections";
+import { keyOf, keyTags, outputInBody, socketKey, type SocketKey } from "./room-connections";
 import { NEW_YOUTUBE_STATE, type Connection, type YoutubeState } from "./channel-ingest-state";
 import {
   SNAPSHOT_SIZE,
@@ -222,8 +221,8 @@ export class ChannelIngest extends DurableObject<AppEnv> {
 
   private async subscribe(request: Request): Promise<Response> {
     if (request.headers.get("Upgrade")?.toLowerCase() !== "websocket") return reply("WebSocket required", 426);
-    const output: Orientation | null = overlayOutput(request.headers.get("X-SB-Overlay"));
-    // The Worker sets these only for a valid overlay key (with its output) or the signed-in owner.
+    const output: SocketKey | null = socketKey(request.headers);
+    // The Worker sets these only for a valid overlay key, a valid dock key, or the signed-in owner.
     if (!output && request.headers.get("X-SB-Owner") !== "1") return reply("Forbidden", 403);
     const before = this.suspensions;
     const keysBefore = this.overlayKeys;
@@ -236,7 +235,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     const first = this.ctx.getWebSockets("activity").length === 0;
     const pair = new WebSocketPair();
     const [client, server] = Object.values(pair);
-    const tags = output ? ["activity", "overlay-key", outputTag(output)] : ["activity", "owner"];
+    const tags = output ? ["activity", ...keyTags(output)] : ["activity", "owner"];
     const characters = new URL(request.url).searchParams.get("characters") === "1";
     this.ctx.acceptWebSocket(server, characters ? [...tags, "characters"] : tags);
     this.send(server, snapshotMessage(this.snapshot(Date.now())));
@@ -313,13 +312,13 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     }
   }
 
-  /** A new overlay key of one output revokes the old one: its sockets close at once. The other output stays. */
+  /** A new key of one output or of the dock revokes the old one: its sockets close at once. The others stay. */
   private async overlayKeyRevoked(request: Request): Promise<Response> {
-    const output: Orientation | null = await outputInBody(request);
+    const output: SocketKey | null = await outputInBody(request);
     if (!output) return reply("Invalid output", 400);
     this.overlayKeys += 1;
-    const mine = (socket: WebSocket): boolean => outputOf(this.ctx.getTags(socket)) === output;
-    this.closeSockets("Overlay key revoked", this.ctx.getWebSockets("overlay-key").filter(mine));
+    const mine = (socket: WebSocket): boolean => keyOf(this.ctx.getTags(socket)) === output;
+    this.closeSockets("Overlay key revoked", this.ctx.getWebSockets("activity").filter(mine));
     return new Response(null, { status: 204 });
   }
 

@@ -15,6 +15,7 @@ import {
 } from "../app/server/http.server";
 import { serveImage } from "../app/server/images.server";
 import { serveStreamImage } from "../app/server/stream-images.server";
+import { dockKeyMatches } from "../app/server/dock-key.server";
 import { overlayKeyOutput } from "../app/server/overlay-key.server";
 import { KEY_REFUSED_CLOSE } from "../app/lib/activity-socket";
 import type { Orientation } from "../app/lib/overlay-layers";
@@ -135,6 +136,8 @@ async function liveResponse(
   else {
     const output: Orientation | null = await overlayKeyOutput(env, streamer.id, overlayKey);
     if (output) headers.set("X-SB-Overlay", output);
+    // The key of the OBS dock gets the seat and the snapshot of the owner.
+    else if (await dockKeyMatches(env, streamer.id, overlayKey)) headers.set("X-SB-Dock", "1");
   }
   const room = env.POLL_ROOMS.get(env.POLL_ROOMS.idFromName(streamer.id));
   return room.fetch(`https://poll-room.internal/subscribe?streamerId=${encodeURIComponent(streamer.id)}`, { headers });
@@ -164,6 +167,7 @@ async function activityResponse(
   const headers = new Headers({ Upgrade: "websocket" });
   const output: Orientation | null = await overlayKeyOutput(env, streamer.id, overlayKey);
   if (output) headers.set("X-SB-Overlay", output);
+  else if (await dockKeyMatches(env, streamer.id, overlayKey)) headers.set("X-SB-Dock", "1");
   else if ((await getViewer(request, { env, nonce, responseHeaders }))?.id === streamer.ownerId)
     headers.set("X-SB-Owner", "1");
   else if (overlayKey === null) throw new HttpError(403, "Use the overlay URL with its key.");
