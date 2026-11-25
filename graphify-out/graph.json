@@ -25990,18 +25990,6 @@
       "source": "app_components_streamer_entry_detail_entrydetail",
       "source_file": "app/components/streamer/entry-detail.tsx",
       "source_location": "L136",
-      "target": "app_components_streamer_vote_buttons_votebuttons",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_streamer_entry_detail_entrydetail",
-      "source_file": "app/components/streamer/entry-detail.tsx",
-      "source_location": "L145",
       "target": "app_components_streamer_entry_detail_entryactions",
       "weight": 1.0
     },
@@ -26013,7 +26001,19 @@
       "relation": "calls",
       "source": "app_components_streamer_entry_detail_entrydetail",
       "source_file": "app/components/streamer/entry-detail.tsx",
-      "source_location": "L155",
+      "source_location": "L147",
+      "target": "app_components_streamer_vote_buttons_votebuttons",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_streamer_entry_detail_entrydetail",
+      "source_file": "app/components/streamer/entry-detail.tsx",
+      "source_location": "L157",
       "target": "app_components_ideas_idea_status_control_ideastatuscontrol",
       "weight": 1.0
     },
@@ -26373,7 +26373,7 @@
       "relation": "calls",
       "source": "app_components_streamer_polls_view_pollsview",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L290",
+      "source_location": "L295",
       "target": "app_components_streamer_entry_detail_entryactions",
       "weight": 1.0
     },
@@ -26421,7 +26421,7 @@
       "relation": "calls",
       "source": "app_components_streamer_polls_view_usebattlephase",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L311",
+      "source_location": "L313",
       "target": "app_components_mash_use_mash_usemashview",
       "weight": 1.0
     },
@@ -26433,7 +26433,7 @@
       "relation": "calls",
       "source": "app_components_streamer_polls_view_usepollsmainclass",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L319",
+      "source_location": "L321",
       "target": "app_components_streamer_polls_view_usebattlephase",
       "weight": 1.0
     },
@@ -27417,7 +27417,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_message_livemessage",
       "source_file": "app/components/tools/live-message.tsx",
-      "source_location": "L57",
+      "source_location": "L65",
       "target": "app_components_tools_live_part_placed",
       "weight": 1.0
     },
@@ -27429,7 +27429,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_message_livemessage",
       "source_file": "app/components/tools/live-message.tsx",
-      "source_location": "L68",
+      "source_location": "L76",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -27441,7 +27441,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_message_livemessage",
       "source_file": "app/components/tools/live-message.tsx",
-      "source_location": "L85",
+      "source_location": "L93",
       "target": "app_components_tools_live_part_notongrid",
       "weight": 1.0
     },
@@ -59361,7 +59361,7 @@
       "relation": "calls",
       "source": "tests_e2e_mobile_discussion_spec",
       "source_file": "tests/e2e/mobile-discussion.spec.ts",
-      "source_location": "L134",
+      "source_location": "L148",
       "target": "tests_e2e_mobile_discussion_spec_touchscroll",
       "weight": 1.0
     },
@@ -64797,7 +64797,7 @@
       "relation": "calls",
       "source": "tests_tools_live_ui_test",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L342",
+      "source_location": "L350",
       "target": "tests_tools_live_ui_test_view",
       "weight": 1.0
     },
@@ -64809,7 +64809,7 @@
       "relation": "calls",
       "source": "tests_tools_live_ui_test",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L364",
+      "source_location": "L372",
       "target": "tests_tools_live_ui_test_model",
       "weight": 1.0
     },
@@ -64821,7 +64821,7 @@
       "relation": "calls",
       "source": "tests_tools_live_ui_test",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L380",
+      "source_location": "L388",
       "target": "tests_tools_live_ui_test_sceneof",
       "weight": 1.0
     },
@@ -64833,7 +64833,7 @@
       "relation": "calls",
       "source": "tests_tools_live_ui_test",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L425",
+      "source_location": "L433",
       "target": "tests_tools_live_ui_test_section",
       "weight": 1.0
     },
@@ -64881,7 +64881,7 @@
       "relation": "calls",
       "source": "tests_tools_live_ui_test_section",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L418",
+      "source_location": "L426",
       "target": "tests_tools_live_ui_test_stateof",
       "weight": 1.0
     },
@@ -64893,7 +64893,7 @@
       "relation": "calls",
       "source": "tests_tools_live_ui_test_section",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L420",
+      "source_location": "L428",
       "target": "tests_tools_live_ui_test_sceneof",
       "weight": 1.0
     },
@@ -64905,7 +64905,7 @@
       "relation": "calls",
       "source": "tests_tools_live_ui_test_view",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L329",
+      "source_location": "L337",
       "target": "tests_tools_live_ui_test_model",
       "weight": 1.0
     },
@@ -185323,7 +185323,7 @@
       "relation": "contains",
       "source": "app_components_streamer_polls_view",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L310",
+      "source_location": "L312",
       "target": "app_components_streamer_polls_view_usebattlephase",
       "weight": 1.0
     },
@@ -185334,7 +185334,7 @@
       "relation": "contains",
       "source": "app_components_streamer_polls_view",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L317",
+      "source_location": "L319",
       "target": "app_components_streamer_polls_view_usepollsmainclass",
       "weight": 1.0
     },
@@ -221073,19 +221073,8 @@
       "relation": "contains",
       "source": "tests_tools_live_ui_test",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L310",
+      "source_location": "L318",
       "target": "tests_tools_live_ui_test_model",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "tests_tools_live_ui_test",
-      "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L326",
-      "target": "tests_tools_live_ui_test_view",
       "weight": 1.0
     },
     {
@@ -221097,6 +221086,17 @@
       "source_file": "tests/tools-live-ui.test.ts",
       "source_location": "L33",
       "target": "tests_tools_live_ui_test_layerswith",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_tools_live_ui_test",
+      "source_file": "tests/tools-live-ui.test.ts",
+      "source_location": "L334",
+      "target": "tests_tools_live_ui_test_view",
       "weight": 1.0
     },
     {
@@ -221128,7 +221128,7 @@
       "relation": "contains",
       "source": "tests_tools_live_ui_test",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L417",
+      "source_location": "L425",
       "target": "tests_tools_live_ui_test_section",
       "weight": 1.0
     },
@@ -227214,7 +227214,19 @@
       "relation": "indirect_call",
       "source": "tests_tools_live_ui_test",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L400",
+      "source_location": "L246",
+      "target": "app_components_tools_live_message_livemessage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
+      "source": "tests_tools_live_ui_test",
+      "source_file": "tests/tools-live-ui.test.ts",
+      "source_location": "L408",
       "target": "app_components_tools_live_chat_livechat",
       "weight": 1.0
     },
@@ -227250,7 +227262,7 @@
       "relation": "indirect_call",
       "source": "tests_tools_live_ui_test_part",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L270",
+      "source_location": "L278",
       "target": "app_components_tools_live_chat_livechat",
       "weight": 1.0
     },
@@ -227274,7 +227286,7 @@
       "relation": "indirect_call",
       "source": "tests_tools_live_ui_test_section",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L420",
+      "source_location": "L428",
       "target": "app_components_tools_live_section_livesection",
       "weight": 1.0
     },
@@ -227286,7 +227298,7 @@
       "relation": "indirect_call",
       "source": "tests_tools_live_ui_test_view",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L328",
+      "source_location": "L336",
       "target": "app_components_tools_live_chat_fullchatview",
       "weight": 1.0
     },
@@ -229182,7 +229194,19 @@
       "relation": "indirect_call",
       "source": "tests_tools_live_ui_test",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L402",
+      "source_location": "L246",
+      "target": "tests_tools_live_ui_test_send",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "collection",
+      "relation": "indirect_call",
+      "source": "tests_tools_live_ui_test",
+      "source_file": "tests/tools-live-ui.test.ts",
+      "source_location": "L410",
       "target": "tests_overlay_ui_coverage_test_nothing",
       "weight": 1.0
     },
@@ -229194,7 +229218,7 @@
       "relation": "indirect_call",
       "source": "tests_tools_live_ui_test_model",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L312",
+      "source_location": "L320",
       "target": "tests_fading_rows_test_row",
       "weight": 1.0
     },
@@ -229206,7 +229230,7 @@
       "relation": "indirect_call",
       "source": "tests_tools_live_ui_test_model",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L315",
+      "source_location": "L323",
       "target": "tests_overlay_ui_coverage_test_nothing",
       "weight": 1.0
     },
@@ -229254,7 +229278,7 @@
       "relation": "indirect_call",
       "source": "tests_tools_live_ui_test_section",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L420",
+      "source_location": "L428",
       "target": "tests_channels_test_channels",
       "weight": 1.0
     },
@@ -229266,7 +229290,7 @@
       "relation": "indirect_call",
       "source": "tests_tools_live_ui_test_view",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L334",
+      "source_location": "L342",
       "target": "tests_overlay_ui_coverage_test_nothing",
       "weight": 1.0
     },
@@ -248309,7 +248333,7 @@
       "label": "useBattlePhase()",
       "norm_label": "usebattlephase()",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L310"
+      "source_location": "L312"
     },
     {
       "_callable": true,
@@ -248320,7 +248344,7 @@
       "label": "usePollsMainClass()",
       "norm_label": "usepollsmainclass()",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L317"
+      "source_location": "L319"
     },
     {
       "_callable": true,
@@ -271682,7 +271706,7 @@
       "label": "model()",
       "norm_label": "model()",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L310"
+      "source_location": "L318"
     },
     {
       "_callable": true,
@@ -271748,7 +271772,7 @@
       "label": "section()",
       "norm_label": "section()",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L417"
+      "source_location": "L425"
     },
     {
       "_callable": true,
@@ -271792,7 +271816,7 @@
       "label": "view()",
       "norm_label": "view()",
       "source_file": "tests/tools-live-ui.test.ts",
-      "source_location": "L326"
+      "source_location": "L334"
     },
     {
       "_callable": true,

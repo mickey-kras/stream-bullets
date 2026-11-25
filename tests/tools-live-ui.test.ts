@@ -241,6 +241,14 @@ describe("message banner", (): void => {
     expect(empty).toMatch(/<button type="submit"[^>]*disabled=""/);
   });
 
+  it("takes no edit while a save runs, so the form that the save puts here drops none", (): void => {
+    const state: OverlayState = stateOf(onGrid, { message: "BRB" });
+    const saving: string = renderToStaticMarkup(createElement(LiveMessage, { state, busy: true, send }));
+    expect(saving).toMatch(/<input[^>]*readOnly=""[^>]*data-live-message="true"/);
+    expect(saving.match(/<button type="button" aria-pressed="(?:true|false)" disabled=""/g)).toHaveLength(2);
+    expect(part(state)).not.toContain("readOnly");
+  });
+
   it("offers an update and the way off air for a banner on stream", (): void => {
     const html: string = part(stateOf(onGrid, { message: "BRB", messageStyle: "hype" }));
     expect(html).toContain("On air");
@@ -439,6 +447,15 @@ describe("Live section", (): void => {
     expect(html).not.toContain("ov-conn");
     const empty: string = section({ initial: stateOf(DEFAULT_LAYERS) });
     expect(empty).toContain("No layer is on stream.");
+  });
+
+  it("marks the window of the camera frame in the preview", (): void => {
+    const framed: OverlayLayers = {
+      ...onGrid,
+      camera: { enabled: true },
+      cells: { ...onGrid.cells, horizontal: { ...onGrid.cells.horizontal, camera: { c: 20, r: 12, w: 12, h: 6 } } },
+    };
+    expect(section({ initial: stateOf(framed) })).toContain("Your OBS camera shows here");
   });
 
   it("says that live updates are away, and offers a reconnect when the page stopped trying", (): void => {
