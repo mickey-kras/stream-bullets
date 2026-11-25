@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import type { ActivityChat, ActivityEvent, ActivityMessage } from "../../lib/activity";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import type { ActivityChat, ActivityEvent, ActivityMessage, ActivityPlatform } from "../../lib/activity";
 import {
   chatReducer,
   initialChatState,
@@ -8,7 +8,7 @@ import {
   type ChatOptions,
   type ChatState,
 } from "../../lib/chat-feed";
-import { CHAT_TEST_SCRIPT } from "../../lib/chat-test";
+import { chatTestScript } from "../../lib/chat-test";
 import type { ChatView } from "../../lib/fading-rows";
 import { motionReduced, watchMotion } from "../station/motion";
 import type { ActivityFeed } from "./activity-feed";
@@ -26,6 +26,8 @@ export interface UseChatOptions {
   serverOffset?: number;
   /** A chat test runs: show the test chat (CHAT_TEST_SCRIPT). The real chat keeps its state and shows again after. */
   test?: boolean;
+  /** The one platform that the output shows: the test chat has only its events. Null: each platform. */
+  platform?: ActivityPlatform | null;
 }
 
 const STILL_LIMITS: ChatOptions["limits"] = { lifetimeMs: Number.POSITIVE_INFINITY };
@@ -158,10 +160,18 @@ function useChatState(
  * samples. During a chat test it returns the test chat instead. The real chat keeps reading the feed underneath, so
  * it is current when the test ends.
  */
-export function useChat({ feed, samples, hideCommands, serverOffset, test = false }: UseChatOptions): ChatView {
+export function useChat({
+  feed,
+  samples,
+  hideCommands,
+  serverOffset,
+  test = false,
+  platform = null,
+}: UseChatOptions): ChatView {
   const chat: ChatState = useChatState({ feed, samples, prefill: true }, hideCommands, serverOffset);
+  const script: readonly ActivityEvent[] = useMemo(() => chatTestScript(platform), [platform]);
   const trial: ChatState = useChatState(
-    { feed: null, samples: test ? CHAT_TEST_SCRIPT : undefined, prefill: false },
+    { feed: null, samples: test ? script : undefined, prefill: false },
     hideCommands,
     serverOffset,
   );

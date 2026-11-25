@@ -1483,5 +1483,9 @@
   "tools.live.chat.screenOff": "Ta przeglądarka nie może utrzymać włączonego ekranu. Wyłącz blokadę ekranu urządzenia na czas streamu.",
   "overlay.output.horizontal": "Wyjście poziome",
   "overlay.output.vertical": "Wyjście pionowe",
-  "overlay.keyConfirmOther": "Link drugiego wyjścia działa dalej."
+  "overlay.keyConfirmOther": "Link drugiego wyjścia działa dalej.",
+  "overlay.twitch.title": "Streamujesz jednocześnie na Twitchu i na innych platformach?",
+  "overlay.twitch.body": "Zasady Twitcha dotyczące simulcastów nie pozwalają na czat z innych platform na streamie na Twitchu. Po włączeniu przełącznika to wyjście pokazuje tylko czat i postacie z Twitcha. Ankiety, tematy i baner wiadomości się nie zmieniają. Sekcja „Na żywo” zawsze pokazuje wszystkie platformy.",
+  "overlay.twitch.horizontal": "Pokazuj tylko czat Twitcha na wyjściu poziomym",
+  "overlay.twitch.vertical": "Pokazuj tylko czat Twitcha na wyjściu pionowym"
 }

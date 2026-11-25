@@ -932,6 +932,49 @@ test("a vertical layout fills a 1080x1920 source and shows each layer inside its
   }
 });
 
+test("an output with the Twitch switch on shows Twitch chat only, and the other output keeps the merged chat", async ({
+  browser,
+}) => {
+  const tall: CellRect = { c: 0, r: 16, w: 18, h: 10 };
+  await runSql("overlay-twitch-only", [
+    layersSql({
+      chat: { enabled: true },
+      cells: { horizontal: { chat: DEFAULT_CHAT_CELL }, vertical: { chat: tall } },
+      twitchOnly: { vertical: true },
+    }),
+    verticalKeySql(),
+  ]);
+  const rows = (): string =>
+    snapshot([
+      message({ platform: "youtube", id: "m1", user: "Yara", text: "from youtube" }),
+      message({ platform: "twitch", id: "m2", user: "Tess", text: "from twitch" }),
+      message({ platform: "kick", id: "m3", user: "Kai", text: "from kick" }),
+    ]);
+  try {
+    // The vertical output has the switch on: only the Twitch row of the snapshot shows.
+    const only = await chatSource(browser, rows, `/@feature_host/overlay?key=${VERTICAL_KEY}`, {
+      width: 540,
+      height: 960,
+    });
+    await expect(only.rows).toHaveCount(1);
+    await expect(only.rows).toContainText("from twitch");
+    await expect(only.page.locator(".ov-composition")).toHaveAttribute("data-overlay-platform", "twitch");
+    // A new message of another platform does not show. A new Twitch message shows.
+    only.send(event(message({ platform: "kick", id: "m4", user: "Kai", text: "kick again" })));
+    only.send(event(message({ platform: "twitch", id: "m5", user: "Tess", text: "twitch again" })));
+    await expect(only.rows).toHaveCount(2);
+    await expect(only.chat).not.toContainText("kick again");
+    await expect(only.chat).not.toContainText("from youtube");
+    // The horizontal output has the switch off: the same feed shows as the merged chat.
+    const merged = await chatSource(browser, rows, "/@feature_host/overlay?key=e2e-key", { width: 960, height: 540 });
+    await expect(merged.rows).toHaveCount(3);
+    await expect(merged.page.locator(".ov-composition")).not.toHaveAttribute("data-overlay-platform");
+    await Promise.all([close(only.page), close(merged.page)]);
+  } finally {
+    await runSql("overlay-twitch-only-restore", [layersSql({}), noKeysSql]);
+  }
+});
+
 const setTestEnd = (until: number): Promise<void> =>
   runSql("overlay-test-end", [
     `UPDATE overlay_state SET chat_test_until=${until}, revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`,

@@ -43,7 +43,14 @@ export function OverlayControl({
       <CompositionEditor scene={view} state={state} busy={busy} run={run} onSaved={keepNewest} />
       <section className="ov-step" aria-labelledby={obsId} data-step="obs">
         <StepHeading step={2} id={obsId} title={t("overlay.step.obs")} />
-        <OverlayLink hasKey={hasOverlayKey} layers={state.layers} sources={sources} now={scene.now} />
+        <OverlayLink
+          hasKey={hasOverlayKey}
+          layers={state.layers}
+          sources={sources}
+          now={scene.now}
+          busy={busy}
+          onTwitchOnly={(output: Orientation, on: boolean) => run({ action: "layers", twitchOnly: { [output]: on } })}
+        />
       </section>
     </>
   );

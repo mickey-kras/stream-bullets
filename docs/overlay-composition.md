@@ -93,6 +93,30 @@ If the layer is not on the horizontal grid, the size comes from the vertical cel
 The other output shows the same world at the bottom of its cell. If the world does not fit in that cell, the output shows it smaller.
 See [Interactive characters](characters.md).
 
+### Twitch chat only
+
+Each output shows the merged chat of all connected platforms by default.
+Each output has one switch, **Show Twitch chat only**. It is off by default.
+
+The Twitch rules for a simulcast do not allow chat from other platforms on the Twitch stream.
+A streamer who sends one output to Twitch can set the switch for that output.
+The switch of one output does not change the other output.
+
+With the switch on, the output shows only what comes from Twitch:
+
+- The chat layer shows Twitch messages. This includes the sample chat of a test.
+- The characters layer shows the characters of Twitch viewers. The playground on the server does not change.
+- Each other event of the activity feed that is not from Twitch does not show.
+
+Polls, topics, the message banner, and the other content layers do not change.
+The **Live** section and the full-screen chat always show each platform.
+A preview shows what its output shows, thus a preview of an output with the switch on shows Twitch only.
+
+The switches are in a closed section of the step **Add to OBS**: **Streaming to Twitch and other platforms at once?**
+The layers store them as `twitchOnly`, with one value for each output.
+The overlay page of the two outputs reads the same activity feed. The page of an output with the switch on drops the other events.
+Thus the switch adds no call to a platform.
+
 Before the two outputs, a page had one link, and the editor selected the orientation that OBS showed.
 Migration `0046` keeps that picture. The link of a page that showed the vertical orientation is now the link of the vertical output.
 Each other link is the link of the horizontal output.

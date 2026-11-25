@@ -193,6 +193,18 @@ export type ActivityMessage =
   | { type: "unavailable" }
   | PlaygroundFrame;
 
+/**
+ * `message` with the events of one platform only, or null when no part of it is left. Each event of the feed has a
+ * platform. A snapshot stays, with the events of the platform. A playground frame and `unavailable` are not events
+ * of a platform and stay: `viewForPlatform` selects the characters.
+ */
+export function messageForPlatform(message: ActivityMessage, platform: ActivityPlatform): ActivityMessage | null {
+  if (message.type === "event") return message.event.platform === platform ? message : null;
+  if (message.type !== "snapshot") return message;
+  const events: ActivityEvent[] = message.events.filter((event: ActivityEvent): boolean => event.platform === platform);
+  return events.length === message.events.length ? message : { ...message, events };
+}
+
 const messageSchema: z.ZodType<Exclude<ActivityMessage, PlaygroundFrame>> = z.union([
   z.object({
     type: z.literal("snapshot"),

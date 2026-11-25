@@ -122,6 +122,8 @@ function playground(override: Partial<CharactersControl> = {}): CharactersContro
 }
 
 const NO_LINKS: Readonly<Record<Orientation, boolean>> = { horizontal: false, vertical: false };
+/** The link panel saves nothing in a static render. */
+const LINK_SAVES = { busy: false, onTwitchOnly: (): void => undefined };
 
 describe("overlay control page", () => {
   function control(initial: OverlayState = state, connected: boolean = true): string {
@@ -164,7 +166,9 @@ describe("overlay control page", () => {
 
   it("has one link section for each output, with its name, its source size and its own buttons", () => {
     const html = (hasKey: Readonly<Record<Orientation, boolean>>): string =>
-      renderToStaticMarkup(createElement(OverlayLink, { hasKey, layers: placed, sources: null, now: 1000 }));
+      renderToStaticMarkup(
+        createElement(OverlayLink, { hasKey, layers: placed, sources: null, now: 1000, ...LINK_SAVES }),
+      );
     const sections = (markup: string): string[] => markup.split('<section class="ov-url-output"').slice(1);
     const none: string = html(NO_LINKS);
     // One sentence for the two links, before them.
@@ -199,6 +203,31 @@ describe("overlay control page", () => {
     expect(other).not.toContain("Your private overlay link is hidden.");
   });
 
+  it("has a closed section with one Twitch switch for each output, after the links", () => {
+    const html = (layers: OverlayLayers, busy: boolean = false): string =>
+      renderToStaticMarkup(
+        createElement(OverlayLink, { hasKey: NO_LINKS, layers, sources: null, now: 1000, ...LINK_SAVES, busy }),
+      );
+    const off: string = html(placed);
+    const section: string = off.slice(off.indexOf("<details"));
+    // The section is closed until the owner opens it, and comes after the two links.
+    expect(section).toMatch(/^<details class="[^"]*" data-ov-twitch="true">/);
+    expect(section).not.toMatch(/^<details[^>]* open/);
+    expect(off.indexOf("<details")).toBeGreaterThan(off.lastIndexOf('<section class="ov-url-output"'));
+    expect(section).toContain("<summary>Streaming to Twitch and other platforms at once?</summary>");
+    expect(section).toContain("The Twitch rules for simulcasts do not allow chat from other platforms");
+    expect(section).toContain("Show Twitch chat only on the horizontal output");
+    expect(section).toContain("Show Twitch chat only on the vertical output");
+    expect(section.match(/type="checkbox"/g)).toHaveLength(2);
+    expect(section).not.toContain("checked");
+    // Each switch shows the state of its own output.
+    const vertical: string = html({ ...placed, twitchOnly: { horizontal: false, vertical: true } });
+    expect(vertical).toMatch(/<input type="checkbox" data-ov-twitch-only="vertical" checked=""\/>/);
+    expect(vertical).toMatch(/<input type="checkbox" data-ov-twitch-only="horizontal"\/>/);
+    // No change during a save.
+    expect(html(placed, true).match(/type="checkbox" disabled=""/g)).toHaveLength(2);
+  });
+
   it("shows the OBS connection of each output beside the link of that output", () => {
     const sources: OverlaySources = {
       count: 2,
@@ -206,7 +235,9 @@ describe("overlay control page", () => {
       outputs: { horizontal: { count: 2, seenAt: 900 }, vertical: { count: 0, seenAt: 1000 - 180_000 } },
     };
     const html = (hasKey: Readonly<Record<Orientation, boolean>>, given: OverlaySources | null = sources): string =>
-      renderToStaticMarkup(createElement(OverlayLink, { hasKey, layers: placed, sources: given, now: 1000 }));
+      renderToStaticMarkup(
+        createElement(OverlayLink, { hasKey, layers: placed, sources: given, now: 1000, ...LINK_SAVES }),
+      );
     const [horizontal, vertical] = html({ horizontal: true, vertical: true }).split("<section").slice(1);
     expect(horizontal).toContain('data-ov-sources="2"');
     expect(horizontal).toContain("OBS is connected: 2 sources.");

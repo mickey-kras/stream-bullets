@@ -118,7 +118,7 @@ English also shows `error` for `step_up_required` and `other_key_required`.
 | Endpoint | Body | Response |
 | --- | --- | --- |
 | `GET /api/overlay` | - | `{overlay, data, handle}`. The `OverlayState` of the page of the signed-in owner, and the polls, topics, and cards for the pickers |
-| `POST /api/overlay` | `{action: "layers", write?, orientation?, chat?: {enabled?, hideCommands?, backgroundOpacity?}, characters?: {enabled?, timeout?, max?}, items?: {poll?, topic?, next?, message?, card?, support?}, camera?: {enabled?}, cells?: {horizontal?, vertical?}}` | `{overlay}`. The whole new `OverlayState`, with `layers` |
+| `POST /api/overlay` | `{action: "layers", write?, orientation?, chat?: {enabled?, hideCommands?, backgroundOpacity?}, characters?: {enabled?, timeout?, max?}, items?: {poll?, topic?, next?, message?, card?, support?}, camera?: {enabled?}, cells?: {horizontal?, vertical?}, twitchOnly?: {horizontal?, vertical?}}` | `{overlay}`. The whole new `OverlayState`, with `layers` |
 | `POST /api/overlay` | `{action: "showResults", on: boolean}` | `{overlay}`. The whole new `OverlayState`, with `showResults` |
 | `POST /api/overlay` | `{action: "message", text, style: "info" \| "hype"}` | `{overlay}`. The whole new `OverlayState`, with `message` and `messageStyle` |
 | `POST /api/overlay` | `{action: "chatTest", on: boolean}` | `{overlay}`. The whole new `OverlayState`, with `chatTestUntil` |
@@ -144,6 +144,8 @@ English also shows `error` for `step_up_required` and `other_key_required`.
   - `qr` shows a QR code in the card of the layer. A viewer scans it to open the public page of the item.
     The `message` layer accepts the value and never shows a code.
     See [QR code](overlay-composition.md#qr-code).
+- `twitchOnly` has one boolean for each output. With `true`, that output shows chat and characters from Twitch only.
+  The default is `false`: the merged chat. See [Twitch chat only](overlay-composition.md#twitch-chat-only).
 - `camera` is the camera frame: a frame with a clear window. It has only the `enabled` value.
   See [Camera frame](overlay-composition.md#camera-frame).
 - `chat.backgroundOpacity` is the opacity of the message cards in percent: an integer from 0 to 100 that is a multiple of 5.

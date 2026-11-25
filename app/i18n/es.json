@@ -1443,5 +1443,9 @@
   "tools.live.chat.screenOff": "Este navegador no puede mantener la pantalla encendida. Desactiva el bloqueo de pantalla de tu dispositivo mientras haces stream.",
   "overlay.output.horizontal": "Salida horizontal",
   "overlay.output.vertical": "Salida vertical",
-  "overlay.keyConfirmOther": "El enlace de la otra salida sigue funcionando."
+  "overlay.keyConfirmOther": "El enlace de la otra salida sigue funcionando.",
+  "overlay.twitch.title": "¿Emites en Twitch y en otras plataformas a la vez?",
+  "overlay.twitch.body": "Las reglas de Twitch para emisiones simultáneas no permiten el chat de otras plataformas en tu directo de Twitch. Con el interruptor activado, esa salida muestra solo el chat y los personajes de Twitch. Las encuestas, los temas y el banner de mensaje no cambian. La sección «En vivo» siempre muestra todas las plataformas.",
+  "overlay.twitch.horizontal": "Mostrar solo el chat de Twitch en la salida horizontal",
+  "overlay.twitch.vertical": "Mostrar solo el chat de Twitch en la salida vertical"
 }

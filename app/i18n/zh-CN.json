@@ -1423,5 +1423,9 @@
   "tools.live.chat.screenOff": "此浏览器无法保持屏幕常亮。直播期间请关闭设备的屏幕锁定。",
   "overlay.output.horizontal": "横向输出",
   "overlay.output.vertical": "纵向输出",
-  "overlay.keyConfirmOther": "另一个输出的链接仍然有效。"
+  "overlay.keyConfirmOther": "另一个输出的链接仍然有效。",
+  "overlay.twitch.title": "同时在 Twitch 和其他平台直播？",
+  "overlay.twitch.body": "Twitch 的同步直播规则不允许在 Twitch 直播中显示其他平台的聊天。开启开关后，该输出只显示 Twitch 的聊天和角色。投票、话题和消息横幅不变。“直播”部分始终显示所有平台。",
+  "overlay.twitch.horizontal": "横向输出只显示 Twitch 聊天",
+  "overlay.twitch.vertical": "纵向输出只显示 Twitch 聊天"
 }

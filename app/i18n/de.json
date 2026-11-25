@@ -1443,5 +1443,9 @@
   "tools.live.chat.screenOff": "Dieser Browser kann den Bildschirm nicht eingeschaltet lassen. Schalte die Bildschirmsperre deines Geräts aus, solange du streamst.",
   "overlay.output.horizontal": "Horizontale Ausgabe",
   "overlay.output.vertical": "Vertikale Ausgabe",
-  "overlay.keyConfirmOther": "Der Link der anderen Ausgabe funktioniert weiter."
+  "overlay.keyConfirmOther": "Der Link der anderen Ausgabe funktioniert weiter.",
+  "overlay.twitch.title": "Streamst du gleichzeitig auf Twitch und anderen Plattformen?",
+  "overlay.twitch.body": "Die Twitch-Regeln für Simulcasts erlauben keinen Chat anderer Plattformen in deinem Twitch-Stream. Mit eingeschaltetem Schalter zeigt diese Ausgabe nur Chat und Charaktere von Twitch. Umfragen, Themen und das Nachrichtenbanner bleiben gleich. Live zeigt immer alle Plattformen.",
+  "overlay.twitch.horizontal": "Auf der horizontalen Ausgabe nur Twitch-Chat zeigen",
+  "overlay.twitch.vertical": "Auf der vertikalen Ausgabe nur Twitch-Chat zeigen"
 }

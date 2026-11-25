@@ -625,8 +625,9 @@
 }
 
 /* ---------- Per-layer overlay URLs (overlay-link.tsx) ---------- */
-/* The link of one output. A line divides the two outputs. */
-.ov-url-output {
+/* The link of one output, and the Twitch switches after the links. A line divides the parts. */
+.ov-url-output,
+.ov-url-twitch {
   display: grid;
   gap: 10px;
   padding-top: 14px;

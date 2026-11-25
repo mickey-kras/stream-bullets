@@ -130,14 +130,27 @@ describe("field-level patches", () => {
         horizontal: { ...before.cells.horizontal, chat: cell, poll: { c: 10, r: 0, w: 8, h: 4 } },
         vertical: before.cells.vertical,
       },
+      twitchOnly: { horizontal: false, vertical: true },
     };
     expect(diffLayers(before, after)).toEqual({
       orientation: "vertical",
       chat: { enabled: false, hideCommands: false, backgroundOpacity: 40 },
       characters: { enabled: true, timeout: 90, max: 12 },
       camera: { enabled: true },
+      twitchOnly: { vertical: true },
       cells: { horizontal: { chat: cell, poll: { c: 10, r: 0, w: 8, h: 4 } } },
     });
+    // The Twitch switch of one output is one field: the other output is not in the patch.
+    expect(diffLayers(after, { ...after, twitchOnly: { horizontal: true, vertical: true } })).toEqual({
+      twitchOnly: { horizontal: true },
+    });
+    expect(
+      mergePatches({ twitchOnly: { horizontal: true } }, { twitchOnly: { vertical: true, horizontal: false } }),
+    ).toEqual({ twitchOnly: { horizontal: false, vertical: true } });
+    expect(
+      withoutSent({ twitchOnly: { horizontal: true, vertical: true } }, { twitchOnly: { vertical: true } }),
+    ).toEqual({ twitchOnly: { horizontal: true } });
+    expect(withoutSent({ twitchOnly: { vertical: true } }, { twitchOnly: { vertical: true } })).toEqual({});
     expect(
       diffLayers(after, {
         ...after,

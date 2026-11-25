@@ -44,6 +44,19 @@ export interface CharacterView {
   recent: boolean;
 }
 
+/**
+ * `view` with the characters of one platform only, for an output that shows one platform. The ground, the doors,
+ * and the mode stay. The playground on the server is the same for each output.
+ */
+export function viewForPlatform(view: PlaygroundView, platform: string): PlaygroundView {
+  const characters: CharacterView[] = view.characters.filter(
+    (character: CharacterView): boolean => character.platform === platform,
+  );
+  if (characters.length === view.characters.length) return view;
+  const ids = new Set<number>(characters.map((character: CharacterView): number => character.id));
+  return { ...view, characters, speakers: view.speakers.filter((id: number): boolean => ids.has(id)) };
+}
+
 type TileStage = 0 | 1 | 2 | 3;
 
 export interface TileView {
