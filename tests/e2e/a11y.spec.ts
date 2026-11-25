@@ -142,7 +142,7 @@ test("the overlay studio names every control and keeps 44 px touch targets on a 
   const owner = await signedIn(browser, "owner", clientIp("a11y", 179));
   const page = await newPage(owner);
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/tools");
+  await page.goto("/tools?view=overlay");
   await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
   const editor = page.locator("[data-composition-editor]");
   // A page that the owner did not change has the poll layer on the grid. Its chip selects it.

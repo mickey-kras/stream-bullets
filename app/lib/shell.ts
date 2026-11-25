@@ -65,11 +65,11 @@ export const paths = {
 } as const;
 
 /** The sections of Streamer tools. A section is listed when its work has shipped. */
-export const toolsViews = ["overlay", "channels"] as const;
+export const toolsViews = ["live", "overlay", "channels"] as const;
 export type ToolsView = (typeof toolsViews)[number];
 
 export function toolsView(value: string | null | undefined): ToolsView {
-  return toolsViews.find((view: ToolsView): boolean => view === value) ?? "overlay";
+  return toolsViews.find((view: ToolsView): boolean => view === value) ?? "live";
 }
 
 export function toolsPath(view: ToolsView): string {

@@ -423,14 +423,17 @@ describe("renamedPath", () => {
 });
 
 describe("Streamer tools sections", () => {
-  it("opens the Overlay section for an absent or unknown view", (): void => {
-    expect(toolsView(null)).toBe("overlay");
-    expect(toolsView("")).toBe("overlay");
-    expect(toolsView("live")).toBe("overlay");
+  it("opens the Live section for an absent or unknown view", (): void => {
+    expect(toolsView(null)).toBe("live");
+    expect(toolsView("")).toBe("live");
+    expect(toolsView("alerts")).toBe("live");
+    expect(toolsView("live")).toBe("live");
+    expect(toolsView("overlay")).toBe("overlay");
     expect(toolsView("channels")).toBe("channels");
   });
 
   it("builds the address of a section and of the channel cards", (): void => {
+    expect(toolsPath("live")).toBe("/tools?view=live");
     expect(toolsPath("overlay")).toBe("/tools?view=overlay");
     expect(toolsPath("channels")).toBe("/tools?view=channels");
     expect(channelsSectionPath).toBe("/tools?view=channels#channels-title");

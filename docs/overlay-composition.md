@@ -297,8 +297,9 @@ See [live capacity](live-room-capacity.md).
 ## Editor
 
 **Streamer tools** is the page of the owner at `/tools`. The header of a streamer page has its **Tools** tab.
-The old address `/overlay-control` redirects to it. The page has two sections:
+The old address `/overlay-control` redirects to it. The page has three sections:
 
+- **Live** (`/tools`) has the controls for a stream. See [Streamer tools](streamer-tools.md#live).
 - **Overlay** (`/tools?view=overlay`) has two numbered steps:
   1. **Build your overlay**: the overlay studio.
   2. **Add to OBS**: the overlay link.

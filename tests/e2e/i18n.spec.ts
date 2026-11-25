@@ -304,7 +304,8 @@ const phoneScreens: { role: string | null; ip: number; screens: PhoneScreen[] }[
     ip: clientIp("i18n", 234),
     screens: [
       { name: "edit-page", path: "/@feature_host?dialog=page" },
-      { name: "overlay-control", path: "/tools" },
+      { name: "tools-live", path: "/tools" },
+      { name: "overlay-control", path: "/tools?view=overlay" },
       { name: "create-poll", path: "/@feature_host?view=polls", open: headerAction },
       { name: "add-event", path: "/@feature_host?view=schedule", open: headerAction },
       { name: "add-card", path: "/@feature_host?view=community", open: headerAction },

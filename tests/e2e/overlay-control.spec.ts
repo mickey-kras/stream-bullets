@@ -30,7 +30,7 @@ test("the owner builds the overlay from layers and the one OBS URL follows at on
   // The poll layer shows the latest active poll: the seeded battle.
   await expect(obs.locator('.ov-layer[data-layer="poll"] [data-overlay-mash]')).toBeVisible();
 
-  await control.goto("/tools");
+  await control.goto("/tools?view=overlay");
   await expect(control.getByRole("heading", { level: 1, name: "Streamer tools" })).toBeVisible();
   const editor = control.locator("[data-composition-editor]");
   await expect(editor.locator('.ov-layer[data-layer="poll"] [data-overlay-mash]')).toBeVisible();
@@ -118,7 +118,7 @@ test("the owner copies the private overlay link, and a new link revokes the old 
   const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 93));
   await owner.grantPermissions(["clipboard-read", "clipboard-write"], { origin });
   const control = await newPage(owner);
-  await control.goto("/tools");
+  await control.goto("/tools?view=overlay");
   // Step 2 shows the link controls without a click.
   await expect(control.getByRole("region", { name: "2 Add to OBS" })).toBeVisible();
   await control.getByRole("button", { name: "Create overlay link" }).click();
@@ -190,11 +190,11 @@ test("an OBS source with a refused key stops its chat feed retries", async ({ br
 });
 
 test("overlay control is for the page owner only", async ({ browser, page }) => {
-  await page.goto("/tools");
+  await page.goto("/tools?view=overlay");
   await expect(page).toHaveURL(/\/streamers$/);
   const viewer = await signedIn(browser, "viewer", clientIp("overlay-control", 91));
   const viewerPage = await newPage(viewer);
-  expect((await viewerPage.goto("/tools"))?.status()).toBe(404);
+  expect((await viewerPage.goto("/tools?view=overlay"))?.status()).toBe(404);
   const hide = { action: "showResults", on: false };
   expect((await viewer.request.post("/api/overlay", { data: hide })).status()).toBe(404);
   const long = "x".repeat(121);
@@ -229,7 +229,7 @@ test("the pickers of a layer change what it shows, hide poll results and recover
   try {
     const control = await newPage(owner);
     await control.setViewportSize({ width: 1440, height: 1000 });
-    await control.goto("/tools");
+    await control.goto("/tools?view=overlay");
     const editor = control.locator("[data-composition-editor]");
     const preview = editor.getByRole("region", { name: "Composition preview" });
     const panel = settings(editor);
@@ -317,7 +317,7 @@ test("Streamer tools has the Overlay section with two numbered steps and the Cha
   const now: number = Date.now();
   try {
     const control = await newPage(owner);
-    await control.goto("/tools");
+    await control.goto("/tools?view=overlay");
     // The page has one title and the links to its sections. It opens the Overlay section.
     await expect(control.getByRole("heading", { level: 1 })).toHaveText("Streamer tools");
     const sections = control.getByRole("navigation", { name: "Streamer tools sections" });
@@ -701,12 +701,12 @@ test("the grid preview shows its composition only once it is scaled to the frame
   // Without JavaScript, hide the unscaled composition to prevent overflow.
   const still = await fixtureSignedIn(browser, "featureowner", 92, { ...phone, javaScriptEnabled: false });
   const before = await newPage(still);
-  await before.goto("/tools");
+  await before.goto("/tools?view=overlay");
   await expect(before.locator(".ov-comp-frame .ov-scaler")).toBeHidden();
   await close(still);
   const owner = await fixtureSignedIn(browser, "featureowner", 92, phone);
   const page = await newPage(owner);
-  await page.goto("/tools");
+  await page.goto("/tools?view=overlay");
   await expect(page.locator(".ov-comp-frame .ov-scaler")).toBeVisible();
   await close(owner);
 });
@@ -772,7 +772,7 @@ test("the control page moves Up next on when the stream it shows starts", async 
   const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 94));
   try {
     const control = await newPage(owner);
-    await control.goto("/tools");
+    await control.goto("/tools?view=overlay");
     const layer = control.locator(
       '[data-composition-editor] .ov-layer[data-layer="next"] [data-overlay-source="next"]',
     );

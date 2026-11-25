@@ -96,7 +96,7 @@ for (const row of matrix) {
     expect(await adminApiStatuses(context.request)).toEqual(row.admin);
 
     // Overlay control: owners only; signed out redirects to /streamers; others get 404.
-    const overlay = await page.goto("/tools");
+    const overlay = await page.goto("/tools?view=overlay");
     expect(overlay?.status()).toBe(row.overlayControl);
     if (row.role === "signed-out") await expect(page).toHaveURL(/\/streamers$/);
     if (row.role === "owner")
