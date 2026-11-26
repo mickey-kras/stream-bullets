@@ -2,7 +2,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import type { AppEnv } from "../app/env";
 import { MASH_FLUSH_MS, MASH_TICK_MS } from "../app/lib/mash";
 import { DEFAULT_LAYERS, emptyCells, type Orientation } from "../app/lib/overlay-layers";
-import { PollRoom } from "../app/server/poll-room";
+import { MAX_PENDING_MESSAGES, PollRoom } from "../app/server/poll-room";
 import type { LiveSnapshot } from "../app/types";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
 import {
@@ -1055,6 +1055,66 @@ describe("live room tap messages", (): void => {
     await database.db.prepare("UPDATE streamers SET status = 'frozen' WHERE id = ?").bind(streamerId).run();
     const live = await rows.addBattle({ "player-1": 0 });
     expect(await tap(socket, live, 1, 1)).toMatchObject({ reason: "closed" });
+  });
+
+  it("drops tap messages above the budget of an account before any D1 read", async (): Promise<void> => {
+    const reads = vi.spyOn(faults.db, "batch");
+    const lookups = (): number => reads.mock.calls.length;
+    // Two sockets of one account share the budget: ten messages in the first second, then ten each second.
+    const first = await join({ user: "flooder" });
+    const second = await join({ user: "flooder" });
+    const before = lookups();
+    const replies: (Reply | undefined)[] = [];
+    for (let index = 0; index < 40; index += 1)
+      replies.push(await tap(index % 2 ? second : first, crypto.randomUUID(), 1, index + 1));
+    // Each admitted message reads one unknown battle; a refused one reads nothing and gets no answer.
+    expect(lookups() - before).toBe(10);
+    expect(replies.filter((reply: Reply | undefined): boolean => reply?.type === "mash-denied")).toHaveLength(10);
+    expect(replies.slice(10)).toEqual(Array.from({ length: 30 }, (): undefined => undefined));
+    vi.setSystemTime(Date.now() + 100);
+    await tap(first, crypto.randomUUID(), 1, 100);
+    expect(lookups() - before).toBe(11);
+    // Another account has its own budget.
+    const other = await join({ user: "other" });
+    const joined = lookups();
+    await tap(other, crypto.randomUUID(), 1, 1);
+    expect(lookups() - joined).toBe(1);
+  });
+
+  it("drops tap messages while the room already waits on many, before any D1 read", async (): Promise<void> => {
+    const sockets: FakeSocket[] = [];
+    for (let index = 0; index < 20; index += 1)
+      sockets.push(await join({ user: `player-${index}`, key: String(index).padStart(64, "c") }));
+    // The battle reads wait until the test releases them.
+    let release: () => void = (): void => undefined;
+    faults.fail(
+      /FROM entry_mash m JOIN/,
+      new Promise<void>((resolve): void => {
+        release = resolve;
+      }),
+    );
+    // 100 messages within the budget of their accounts, each for a battle the room must read.
+    const handled = sockets.flatMap((socket: FakeSocket) =>
+      Array.from({ length: 5 }, (_: unknown, index: number) =>
+        room().webSocketMessage(
+          socket as unknown as WebSocket,
+          JSON.stringify({ t: "tap", id: crypto.randomUUID(), n: 1, assisted: false, seq: index + 1 }),
+        ),
+      ),
+    );
+    // The fake timers hold setInterval, so wait on real timeouts for the reads to start.
+    for (let wait = 0; wait < 100 && faults.held() < MAX_PENDING_MESSAGES; wait += 1)
+      await new Promise((resolve): void => {
+        setTimeout(resolve, 10);
+      });
+    await new Promise((resolve): void => {
+      setTimeout(resolve, 50);
+    });
+    expect(faults.held()).toBe(MAX_PENDING_MESSAGES);
+    release();
+    await Promise.allSettled(handled);
+    expect(faults.held()).toBe(0);
+    faults.heal();
   });
 
   it("remembers for two seconds that a battle is not live", async (): Promise<void> => {

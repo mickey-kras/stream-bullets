@@ -106,6 +106,11 @@ type JournalRow = { user_id: string; side: number; taps: number; assisted: numbe
 
 // Coalesce burst refreshes before reading D1.
 const REFRESH_COALESCE_MS = 250;
+// Tap messages one account may send each second over all its sockets, with a burst of one second. The client sends
+// one batch each 200 ms (MASH_BATCH_MS), so this is twice that. A message above it is dropped before any D1 read.
+const MESSAGE_RATE = 10;
+// Tap messages one room handles at a time. More are dropped before any D1 read, so a flood cannot queue D1 work.
+export const MAX_PENDING_MESSAGES = 64;
 
 function response(message: string, status: number): Response {
   return Response.json({ error: message }, { status, headers: { "Cache-Control": "no-store" } });
@@ -122,6 +127,9 @@ export class PollRoom extends DurableObject<AppEnv> {
   private readonly notLive = new Map<string, number>();
   // One bucket per account, shared by all of its sockets.
   private readonly buckets = new Map<string, TokenBucket>();
+  // The message budget of each account (`MESSAGE_RATE`), shared by all of its sockets.
+  private readonly messageBuckets = new Map<string, TokenBucket>();
+  private pendingMessages = 0;
   private ticker: ReturnType<typeof setInterval> | undefined;
   // Requests awaiting a refresh started after their arrival.
   private readonly refreshWaiters: { resolve: () => void; reject: (error: unknown) => void }[] = [];
@@ -397,13 +405,26 @@ export class PollRoom extends DurableObject<AppEnv> {
   }
 
   async webSocketMessage(socket: WebSocket, message: string | ArrayBuffer): Promise<void> {
+    if (this.pendingMessages >= MAX_PENDING_MESSAGES) return;
+    this.pendingMessages += 1;
     const pending: Promise<void> = this.handleWebSocketMessage(socket, message);
     this.pendingHandlers.add(pending);
     try {
       await pending;
     } finally {
+      this.pendingMessages -= 1;
       this.pendingHandlers.delete(pending);
     }
+  }
+
+  // Takes one message from the budget of `userId`. False when the account sent too many messages.
+  private admitMessage(userId: string, now: number): boolean {
+    const bucket: TokenBucket | undefined = this.messageBuckets.get(userId);
+    const elapsed: number = bucket ? Math.max(0, now - bucket.at) : Number.POSITIVE_INFINITY;
+    const tokens: number = Math.min(MESSAGE_RATE, (bucket?.tokens ?? MESSAGE_RATE) + (elapsed * MESSAGE_RATE) / 1_000);
+    const admitted: boolean = tokens >= 1;
+    this.messageBuckets.set(userId, { tokens: admitted ? tokens - 1 : tokens, at: now });
+    return admitted;
   }
 
   private async handleWebSocketMessage(socket: WebSocket, message: string | ArrayBuffer): Promise<void> {
@@ -464,6 +485,8 @@ export class PollRoom extends DurableObject<AppEnv> {
     const lease = leaseOf(socket);
     if (!lease.userId) return { type: "mash-denied", id: message.id, reason: "sign-in" };
     const userId = lease.userId;
+    // Before the battle and side lookups: a message over the budget costs no D1 read. It gets no answer.
+    if (!this.admitMessage(userId, Date.now())) return null;
     const battle = await this.battleFor(message.id);
     if (!battle || !battle.writable || battle.finishing || mashPhaseAt(battle, Date.now()) !== "live")
       return { type: "mash-denied", id: message.id, reason: "closed" };
