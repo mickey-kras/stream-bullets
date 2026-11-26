@@ -136,6 +136,9 @@ interface SimOptions {
   walkSpread?: number;
 }
 
+/** The side that a command names. Zero is no side. */
+type Side = 1 | -1 | 0;
+
 export class PlaygroundSim implements SimHost {
   world: World;
   terrain: Terrain;
@@ -581,7 +584,7 @@ export class PlaygroundSim implements SimHost {
   }
 
   /** Starts a command action. The caller makes sure the character is walking or standing inside the walking limits. */
-  perform(p: Participant, command: Command, key = "", n = 0, side: 1 | -1 | 0 = 0): void {
+  perform(p: Participant, command: Command, key = "", n = 0, side: Side = 0): void {
     const words: string[] = [`!${command}`];
     if (side !== 0) words.push(side < 0 ? "left" : "right");
     if (n > 0) words.push(String(n));
@@ -594,10 +597,10 @@ export class PlaygroundSim implements SimHost {
   }
 
   /** How each command starts. `n` is 0 without a number, and `side` is 0 without a side. */
-  private readonly starts: Record<Command, (p: Participant, n: number, side: 1 | -1 | 0) => void> = {
+  private readonly starts: Record<Command, (p: Participant, n: number, side: Side) => void> = {
     left: (p: Participant, n: number): void => this.motion.walkTo(p, -1, n),
     right: (p: Participant, n: number): void => this.motion.walkTo(p, 1, n),
-    look: (p: Participant, _n: number, side: 1 | -1 | 0): void => {
+    look: (p: Participant, _n: number, side: Side): void => {
       if (side === p.dir) this.rest(p);
       else setState(p, "turn");
     },
@@ -607,7 +610,7 @@ export class PlaygroundSim implements SimHost {
     up: (p: Participant): void => this.works.job(p, "up", 1, 0),
     stairs: (p: Participant, n: number): void => this.works.job(p, "stairs", n, 0),
     bridge: (p: Participant, n: number): void => this.works.job(p, "bridge", n, 0),
-    dig: (p: Participant, n: number, side: 1 | -1 | 0): void => this.works.job(p, "dig", n, side),
+    dig: (p: Participant, n: number, side: Side): void => this.works.job(p, "dig", n, side),
     flag: (p: Participant): void => this.works.job(p, "flag", 1, 0),
     grapple: (p: Participant): void => this.works.grapple(p),
     jetpack: (p: Participant, n: number): void => this.works.jetpack(p, n),
