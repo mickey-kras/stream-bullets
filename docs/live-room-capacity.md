@@ -90,7 +90,7 @@ That channel has a YouTube chat with 2 messages each second, a Twitch channel, a
 | Cost driver for one live channel-hour | Count | Depends on |
 | --- | ---: | --- |
 | Alarm runs of the ingest object | 360 | The YouTube poll interval |
-| Deliveries to the ingest object | 120 | The Twitch and Kick event rate, at most the admission rate |
+| Deliveries to the ingest object | 120 | The event rate that Twitch and Kick send |
 | D1 statements of the object and the Worker | 1,567 | The YouTube poll interval, the 30-second caches, and the 30-second health write |
 | WebSocket messages that the object sends | 29,280 | Admitted events × open activity sockets |
 | Provider calls | 373 | The YouTube poll interval and the subscription checks |
@@ -98,6 +98,10 @@ That channel has a YouTube chat with 2 messages each second, a Twitch channel, a
 
 The first hour has one more alarm run, 5 more D1 statements, 2 more provider calls, and 2 more quota units.
 The harness does not measure the duration that Cloudflare bills for an object, or the CPU time.
+
+The admission rate does not limit the deliveries. The Worker sends each signed delivery to the object, and the object admits the events after that.
+Thus a viral channel that gets 500 chat messages each second also causes 500 deliveries each second.
+The object then admits 50 of them each second and sends only those to the sockets.
 
 ## Proposed targets
 

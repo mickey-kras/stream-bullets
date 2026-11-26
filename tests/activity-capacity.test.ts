@@ -512,6 +512,10 @@ it("keeps storage and provider quota bounded over a stream of several hours", {
       bytes = now.object.databaseBytes;
       previous = now;
     }
+    // The load is fixed before the run: a stream that stops its polls reads fewer pages and fails here.
+    expect(sent.youtube).toBe(STREAM_HOURS * STEPS_PER_HOUR * YOUTUBE_MESSAGES_PER_POLL);
+    const youtubeStatus = await harness.connectionStatus(page, "youtube");
+    expect(youtubeStatus).toBe("active");
     const dropped = {
       chat: missing(clients, "chat", sent.youtube + sent.twitch),
       moderation: missing(clients, "moderation", sent.deletions),
@@ -523,7 +527,7 @@ it("keeps storage and provider quota bounded over a stream of several hours", {
       sent,
       chatPerSecond: Number(((sent.youtube + sent.twitch) / (STREAM_HOURS * 3600)).toFixed(2)),
       dropped,
-      youtubeStatus: await harness.connectionStatus(page, "youtube"),
+      youtubeStatus,
       perHour: hours,
     });
     expect(dropped.chat).toBeLessThanOrEqual(DROPPED_EVENTS_BELOW_ADMISSION.chat);
