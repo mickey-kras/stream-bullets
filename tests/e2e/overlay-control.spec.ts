@@ -459,8 +459,9 @@ test("the pickers of a layer change what it shows, hide poll results and recover
     await expect(control.locator(".sb-toast")).toHaveText("The request failed. Please try again.");
     await expect(results).toBeEnabled();
     await expect(results).not.toBeChecked();
-    // A failed save of a layer setting shows under the settings, and the setting goes back.
-    await panel.getByRole("checkbox", { name: "Show on stream" }).uncheck();
+    // A failed save of a layer setting shows under the settings, and the setting goes back. A click, not `uncheck`:
+    // the setting can go back before `uncheck` reads it, and `uncheck` then reports that the click changed nothing.
+    await panel.getByRole("checkbox", { name: "Show on stream" }).click();
     await expect(editor.locator("[data-comp-error]")).toContainText("Layout not saved");
     await expect(panel.getByRole("checkbox", { name: "Show on stream" })).toBeChecked();
     await control.unroute("**/api/overlay");

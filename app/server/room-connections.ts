@@ -42,10 +42,38 @@ export function overlayOutput(header: string | null): Orientation | null {
   return ORIENTATIONS.find((output: Orientation): boolean => output === header) ?? null;
 }
 
-/** The output in the JSON body `{output}` of a request between the Worker and an object. Null: none or invalid. */
-export async function outputInBody(request: Request): Promise<Orientation | null> {
+/**
+ * What the key of a socket is for: an output of the overlay (an OBS source), or the OBS dock. The dock key grants
+ * the live controls. It is not an OBS source: the room does not count it and sends it the snapshot of the owner.
+ */
+export type SocketKey = Orientation | "dock";
+
+/** The key that the Worker checked for this request, from its headers. Null: the request has no valid key. */
+export function socketKey(headers: Headers): SocketKey | null {
+  return headers.get("X-SB-Dock") === "1" ? "dock" : overlayOutput(headers.get("X-SB-Overlay"));
+}
+
+/** The tags of a socket that came in with a key. */
+export function keyTags(key: SocketKey): string[] {
+  return key === "dock" ? ["dock-key"] : ["overlay-key", outputTag(key)];
+}
+
+/** The key of a socket from its tags. Null: the socket came in without a key. */
+export function keyOf(tags: readonly string[]): SocketKey | null {
+  if (tags.includes("dock-key")) return "dock";
+  return tags.includes("overlay-key") ? outputOf(tags) : null;
+}
+
+/** The output of an OBS source key. The dock key is not an OBS source. */
+export function sourceOutput(key: SocketKey | null): Orientation | null {
+  return key === "dock" ? null : key;
+}
+
+/** The key in the JSON body `{output}` of a request between the Worker and an object. Null: none or invalid. */
+export async function outputInBody(request: Request): Promise<SocketKey | null> {
   const body: unknown = await request.json().catch((): null => null);
   const output: unknown = typeof body === "object" && body !== null && "output" in body ? body.output : null;
+  if (output === "dock") return "dock";
   return typeof output === "string" ? overlayOutput(output) : null;
 }
 
@@ -60,13 +88,14 @@ export function outputOf(tags: readonly string[]): Orientation {
 }
 
 /**
- * Whether a new key of `output` closes the OBS socket with these tags. A socket from before the two outputs has no
- * output tag, and its key can be the key of each output. Thus each new key closes it. It connects again with its
+ * Whether a new `key` closes the socket with these tags. An OBS socket from before the two outputs has no output
+ * tag, and its key can be the key of each output. Thus each new output key closes it. It connects again with its
  * key, and then it has the tag of its output.
  */
-export function keyRevokes(tags: readonly string[], output: Orientation): boolean {
+export function keyRevokes(tags: readonly string[], key: SocketKey): boolean {
+  if (key === "dock" || !tags.includes("overlay-key")) return keyOf(tags) === key;
   const tagged: boolean = ORIENTATIONS.some((name: Orientation): boolean => tags.includes(outputTag(name)));
-  return !tagged || outputOf(tags) === output;
+  return !tagged || outputOf(tags) === key;
 }
 
 interface SeenTimes {

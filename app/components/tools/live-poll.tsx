@@ -1,10 +1,11 @@
-import { useState, type ReactNode } from "react";
+import { useContext, useState, type ReactNode } from "react";
 import { t, tn } from "../../i18n";
 import { copyText } from "../../lib/clipboard";
 import { onAnyOutput, type ContentSource, type OverlayLayers } from "../../lib/overlay-layers";
 import { paths } from "../../lib/shell";
 import type { OverlayState } from "../../types";
-import { errorMessage, postJson } from "../api";
+import { errorMessage } from "../api";
+import { ControlApiContext, type ControlApi } from "../overlay/control-api";
 import { overlayPoll, qrTarget, type OverlayPoll, type OverlayScene } from "../overlay/overlay-stage";
 import type { ControlAction } from "../overlay/use-overlay-state";
 import { PollStatus } from "../poll";
@@ -42,10 +43,11 @@ function PollActions({ scene, state, busy, run, poll }: Readonly<PollProps & { p
     const copied: boolean = await copyText(url);
     toast(t(copied ? "tools.live.poll.copied" : "contact.copyFallback"), copied ? undefined : { tone: "error" });
   }
+  const api: ControlApi = useContext(ControlApiContext);
   async function close(): Promise<void> {
     setClosing(true);
     try {
-      await postJson<{ id: string }>(`/api/streamers/${scene.handle}`, { action: "reveal", id: poll.id });
+      await api.closePoll(scene.handle, poll.id);
     } catch (error: unknown) {
       toast(errorMessage(error), { tone: "error" });
     } finally {

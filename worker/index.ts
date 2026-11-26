@@ -15,6 +15,7 @@ import {
 } from "../app/server/http.server";
 import { serveImage } from "../app/server/images.server";
 import { serveStreamImage } from "../app/server/stream-images.server";
+import { dockKeyMatches } from "../app/server/dock-key.server";
 import { overlayKeyOutput } from "../app/server/overlay-key.server";
 import { KEY_REFUSED_CLOSE } from "../app/lib/activity-socket";
 import type { Orientation } from "../app/lib/overlay-layers";
@@ -130,12 +131,15 @@ async function liveResponse(
     "X-Stream-Bullets-Client": key,
   });
   if (viewer) headers.set("X-SB-User", viewer.id);
-  if (viewer?.id === streamer.ownerId) headers.set("X-SB-Owner", "1");
-  // Invalid/revoked keys join as signed-out viewers. The header names the output of the key.
-  else {
-    const output: Orientation | null = await overlayKeyOutput(env, streamer.id, overlayKey);
-    if (output) headers.set("X-SB-Overlay", output);
-  }
+  const owner: boolean = viewer?.id === streamer.ownerId;
+  if (owner) headers.set("X-SB-Owner", "1");
+  // Invalid/revoked keys join as signed-out viewers. The header names the output of the key. A session of the owner
+  // needs no overlay key.
+  const output: Orientation | null = owner ? null : await overlayKeyOutput(env, streamer.id, overlayKey);
+  if (output) headers.set("X-SB-Overlay", output);
+  // The key of the OBS dock gets the seat and the snapshot of the owner. A dock in a browser with the session of the
+  // owner gets the mark of its key too, so a new dock link also closes that dock.
+  else if (await dockKeyMatches(env, streamer.id, overlayKey)) headers.set("X-SB-Dock", "1");
   const room = env.POLL_ROOMS.get(env.POLL_ROOMS.idFromName(streamer.id));
   return room.fetch(`https://poll-room.internal/subscribe?streamerId=${encodeURIComponent(streamer.id)}`, { headers });
 }
@@ -164,6 +168,7 @@ async function activityResponse(
   const headers = new Headers({ Upgrade: "websocket" });
   const output: Orientation | null = await overlayKeyOutput(env, streamer.id, overlayKey);
   if (output) headers.set("X-SB-Overlay", output);
+  else if (await dockKeyMatches(env, streamer.id, overlayKey)) headers.set("X-SB-Dock", "1");
   else if ((await getViewer(request, { env, nonce, responseHeaders }))?.id === streamer.ownerId)
     headers.set("X-SB-Owner", "1");
   else if (overlayKey === null) throw new HttpError(403, "Use the overlay URL with its key.");

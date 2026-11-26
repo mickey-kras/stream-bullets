@@ -1528,5 +1528,21 @@
   "overlay.guide.platforms.1": "Twitch dostaje wyjście poziome. Aby wysyłać na Twitcha także wyjście pionowe, otwórz w OBS Settings, a potem Stream, włącz Enhanced Broadcasting i wybierz swoje pionowe płótno w Additional Canvas.",
   "overlay.guide.platforms.2": "Aby streamować jednocześnie na YouTube i Kick, zainstaluj wtyczkę, która dodaje kolejne wyjścia, na przykład Aitum Multistream. Dodaj jedno wyjście dla każdej platformy.",
   "overlay.guide.platforms.3": "Dla pionowego streamu na innej platformie dodaj w tej wtyczce jeszcze jedno wyjście i wybierz dla niego pionowe płótno.",
-  "overlay.guide.platforms.4": "W sekcji „{channels}” sprawdź, czy każdy kanał jest pokazany jako połączony."
+  "overlay.guide.platforms.4": "W sekcji „{channels}” sprawdź, czy każdy kanał jest pokazany jako połączony.",
+  "dock.title": "Dok OBS",
+  "dock.heading": "Sterowanie na żywo: {name}",
+  "overlay.dock.title": "Steruj streamem z poziomu OBS",
+  "overlay.dock.body": "Dok to mała strona ze sterowaniem na żywo: ankieta, tematy, baner wiadomości i czat. W OBS otwórz Docks, potem Custom Browser Docks i wklej link doku.",
+  "overlay.dock.private": "Link daje kontrolę nad Twoim streamem. Trzymaj dok poza ekranem: nie przechwytuj go w scenie i nie udostępniaj linku.",
+  "overlay.dock.create": "Utwórz link doku",
+  "overlay.dock.regenerate": "Wygeneruj link doku ponownie",
+  "overlay.dock.once": "Skopiuj ten link do OBS teraz. Pokazuje się tylko raz.",
+  "overlay.dock.made": "Link doku jest ukryty. Wygeneruj go ponownie, aby dostać nowy link. Stary link przestanie wtedy działać.",
+  "overlay.dock.url": "Link doku",
+  "overlay.dock.copy": "Kopiuj link doku",
+  "overlay.dock.confirmTitle": "Wygenerować link doku ponownie?",
+  "overlay.dock.confirmBody": "Stary link od razu przestaje działać, a każdy otwarty dok się zamyka. Wklej nowy link do OBS.",
+  "overlay.dock.ready": "Nowy link doku gotowy. Skopiuj go do OBS.",
+  "dock.closed.title": "Ten link doku nie działa",
+  "dock.closed.body": "Utwórz nowy link doku w narzędziach streamera, w sekcji Nakładka, i wklej go do OBS."
 }

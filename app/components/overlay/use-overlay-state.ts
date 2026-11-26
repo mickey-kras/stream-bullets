@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { onAnyOutput, type LayersPatch } from "../../lib/overlay-layers";
 import type { OverlayPublic, OverlayState } from "../../types";
-import { errorMessage, postJson } from "../api";
+import { errorMessage } from "../api";
 import { useToast } from "../ui/toast";
+import { ControlApiContext, type ControlApi } from "./control-api";
 import type { OverlayAction } from "./layer-properties";
 
 // Use the newest saved, loaded or live overlay state. A live message has the message only while the message layer
@@ -40,6 +41,7 @@ export interface OverlayControlState {
  */
 export function useOverlayState(initial: OverlayState, live: OverlayPublic | null | undefined): OverlayControlState {
   const toast = useToast();
+  const api: ControlApi = useContext(ControlApiContext);
   const [saved, setSaved] = useState<OverlayState>(initial);
   const [busy, setBusy] = useState<boolean>(false);
   // Save responses can arrive out of order; an older revision must not replace a newer one.
@@ -49,7 +51,7 @@ export function useOverlayState(initial: OverlayState, live: OverlayPublic | nul
   async function send(action: ControlAction): Promise<boolean> {
     setBusy(true);
     try {
-      const result = await postJson<{ overlay: OverlayState }>("/api/overlay", action);
+      const result = await api.overlay(action);
       keepNewest(result.overlay);
       return true;
     } catch (error: unknown) {

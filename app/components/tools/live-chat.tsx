@@ -1,5 +1,6 @@
 import {
   useCallback,
+  useContext,
   useEffect,
   useLayoutEffect,
   useReducer,
@@ -25,6 +26,7 @@ import {
 } from "../../lib/live-chat";
 import { toolsPath } from "../../lib/shell";
 import type { ActivityFeed, ActivityFeedStatus } from "../overlay/activity-feed";
+import { ControlApiContext } from "../overlay/control-api";
 import { ChatFragment } from "../overlay/chat-layer";
 import { PlatformIcon } from "../overlay/wasteland/glyphs";
 import { PLATFORM_NAMES } from "../overlay/wasteland/theme";
@@ -281,14 +283,18 @@ function ChatPause({ chat, hint }: Readonly<{ chat: ChatModel; hint: boolean }>)
 
 function ChatNotes({ chat, delivers }: Readonly<{ chat: ChatModel; delivers: boolean }>): ReactNode {
   const feedText: MessageId | null = FEED_TEXT[chat.status];
+  // The dock has no session, so a link to Streamer tools leads nowhere there.
+  const session: boolean = useContext(ControlApiContext).key === null;
   return (
     <>
       {!delivers && (
         <p className="muted tl-note" data-chat-no-channel>
           {t("tools.live.chat.noChannel")}{" "}
-          <a className="text-link" href={toolsPath("channels")}>
-            {t("tools.live.openChannels")}
-          </a>
+          {session && (
+            <a className="text-link" href={toolsPath("channels")}>
+              {t("tools.live.openChannels")}
+            </a>
+          )}
         </p>
       )}
       {feedText && (

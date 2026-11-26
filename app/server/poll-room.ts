@@ -23,11 +23,13 @@ import {
   oldest,
   outputInBody,
   keyRevokes,
+  keyTags,
   outputOf,
-  outputTag,
-  overlayOutput,
   OverlaySources,
+  socketKey,
+  sourceOutput,
   type ConnectionLease,
+  type SocketKey,
 } from "./room-connections";
 
 const MAX_CONNECTIONS = 200;
@@ -155,8 +157,8 @@ export class PollRoom extends DurableObject<AppEnv> {
     const userId = request.headers.get("X-SB-User");
     let role: SocketRole = userId === null ? "anonymous" : "member";
     if (userId !== null && request.headers.get("X-SB-Owner") === "1") role = "owner";
-    // Only valid overlay keys grant owner priority, even signed out. The header names the output of the key.
-    const overlayKey: Orientation | null = overlayOutput(request.headers.get("X-SB-Overlay"));
+    // Only a valid overlay key or dock key grants owner priority, even signed out. The Worker checked the key.
+    const overlayKey: SocketKey | null = socketKey(request.headers);
     if (overlayKey) role = "owner";
     if (url.pathname === "/subscribe") {
       const invalidSubscription = this.validateSubscription(request, clientKey, userId, role);
@@ -232,7 +234,7 @@ export class PollRoom extends DurableObject<AppEnv> {
     clientKey: string,
     userId: string | null,
     role: SocketRole,
-    overlayKey: Orientation | null,
+    overlayKey: SocketKey | null,
   ): Promise<Response> {
     if (this.streamerId === undefined) {
       this.streamerId = streamerId;
@@ -260,7 +262,7 @@ export class PollRoom extends DurableObject<AppEnv> {
     clientKey: string,
     userId: string | null,
     role: SocketRole,
-    overlayKey: Orientation | null,
+    overlayKey: SocketKey | null,
   ): Promise<Response> {
     const snapshot = await this.snapshot();
     this.expireConnections();
@@ -271,13 +273,14 @@ export class PollRoom extends DurableObject<AppEnv> {
     const pair = new WebSocketPair();
     const [client, server] = Object.values(pair);
     const tags = role === "owner" ? ["role:owner"] : [`client:${clientKey}`, `role:${role}`];
-    this.ctx.acceptWebSocket(server, overlayKey ? [...tags, "overlay-key", outputTag(overlayKey)] : tags);
+    this.ctx.acceptWebSocket(server, overlayKey ? [...tags, ...keyTags(overlayKey)] : tags);
     const now = Date.now();
     const lease: ConnectionLease = { expiresAt: now + CONNECTION_LEASE_MS, userId: userId ?? null, openedAt: now };
     server.serializeAttachment(lease);
     const first: LiveSnapshot = this.withBattles(snapshot);
-    this.send(server, JSON.stringify(overlayKey ? overlaySnapshot(first) : first));
-    if (overlayKey) await this.overlaySourcesChanged(overlayKey);
+    const source: Orientation | null = sourceOutput(overlayKey);
+    this.send(server, JSON.stringify(source ? overlaySnapshot(first) : first));
+    if (source) await this.overlaySourcesChanged(source);
     else if (role === "owner") this.send(server, await this.overlaySources());
     this.startTicker();
     await this.scheduleResync();
@@ -346,19 +349,18 @@ export class PollRoom extends DurableObject<AppEnv> {
     return this.refresh();
   }
 
-  // The key of one output changed: reconnect the sockets of that output without owner priority. The sockets of the
-  // other output stay.
+  // The key of one output or of the dock changed: reconnect its sockets without owner priority. The sockets of
+  // each other key stay.
   private async overlayKeyRevoked(request: Request): Promise<Response> {
-    const output: Orientation | null = await outputInBody(request);
+    const output: SocketKey | null = await outputInBody(request);
     if (!output) return response("Invalid output", 400);
-    const sources = this.activeSockets("overlay-key").filter((socket: WebSocket): boolean =>
-      keyRevokes(this.ctx.getTags(socket), output),
-    );
+    const mine = (socket: WebSocket): boolean => keyRevokes(this.ctx.getTags(socket), output);
+    const sources = this.activeSockets().filter(mine);
     for (const socket of sources) {
       this.send(socket, JSON.stringify({ type: "unavailable" }));
       if (socket.readyState === WebSocket.OPEN) socket.close(1001, "Overlay key revoked");
     }
-    if (sources.length > 0) await this.overlaySourcesChanged(output);
+    if (sources.length > 0 && output !== "dock") await this.overlaySourcesChanged(output);
     return new Response(null, { status: 204 });
   }
 

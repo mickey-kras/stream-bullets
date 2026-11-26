@@ -50,6 +50,17 @@ See [Outputs](overlay-composition.md#outputs) and [Layouts](overlay-composition.
 
 Twitch adds its own chat to its vertical view. Thus a chat layer in a vertical output for Twitch is not necessary.
 
+## Add the dock
+
+The dock is optional. It puts the live controls in a panel of OBS.
+
+1. In **Add to OBS**, open the section `Control your stream from inside OBS`. Make the dock link and copy it.
+2. In OBS, open `Docks`. Select `Custom Browser Docks`.
+3. Give the dock a name, and paste the link into `URL`.
+4. Keep the dock off screen: do not capture it in a scene.
+
+See [OBS dock](streamer-tools.md#obs-dock).
+
 ## Related sections
 
 - The rule of Twitch about chat from other platforms has its own closed section in **Add to OBS**.

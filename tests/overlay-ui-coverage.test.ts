@@ -12,6 +12,7 @@ import { LayerProperties, OVERLAY_MESSAGE_MAX } from "../app/components/overlay/
 import { LAYER_NAMES, LayoutGrid, type LayoutGridHandle } from "../app/components/overlay/layout-grid";
 import { CharactersSlot, OverlayComposition, usesDesignCanvas } from "../app/components/overlay/overlay-composition";
 import { controlState, OverlayControl } from "../app/components/overlay/overlay-control";
+import { DockLink } from "../app/components/overlay/dock-link";
 import { LayoutPicker, layoutOptions } from "../app/components/overlay/layout-picker";
 import { OverlayLink, sourcesText } from "../app/components/overlay/overlay-link";
 import {
@@ -131,7 +132,7 @@ function playground(override: Partial<CharactersControl> = {}): CharactersContro
 
 const NO_LINKS: Readonly<Record<Orientation, boolean>> = { horizontal: false, vertical: false };
 /** The link panel saves nothing in a static render. */
-const LINK_SAVES = { busy: false, onTwitchOnly: (): void => undefined };
+const LINK_SAVES = { busy: false, hasDock: false, onTwitchOnly: (): void => undefined };
 
 describe("layout list of the studio", () => {
   const act = (): Promise<boolean> => Promise.resolve(true);
@@ -142,7 +143,13 @@ describe("layout list of the studio", () => {
 
   it("is one row in step 1, between the output switch and the grid: no separate step to pick a layout", () => {
     const html: string = renderToStaticMarkup(
-      createElement(OverlayControl, { initial: state, scene, hasOverlayKey: NO_LINKS, layouts: EMPTY_LAYOUTS }),
+      createElement(OverlayControl, {
+        initial: state,
+        scene,
+        hasOverlayKey: NO_LINKS,
+        hasDockKey: false,
+        layouts: EMPTY_LAYOUTS,
+      }),
     );
     expect(html.match(/class="ov-step-num"/g)).toHaveLength(2);
     const row: number = html.indexOf('data-layout-picker="horizontal"');
@@ -197,7 +204,14 @@ describe("layout list of the studio", () => {
 describe("overlay control page", () => {
   function control(initial: OverlayState = state, connected: boolean = true): string {
     return renderToStaticMarkup(
-      createElement(OverlayControl, { initial, scene, hasOverlayKey: NO_LINKS, layouts: EMPTY_LAYOUTS, connected }),
+      createElement(OverlayControl, {
+        initial,
+        scene,
+        hasOverlayKey: NO_LINKS,
+        hasDockKey: false,
+        layouts: EMPTY_LAYOUTS,
+        connected,
+      }),
     );
   }
 
@@ -222,6 +236,7 @@ describe("overlay control page", () => {
           initial: state,
           scene,
           hasOverlayKey: { horizontal: hasKey, vertical: false },
+          hasDockKey: false,
           layouts: EMPTY_LAYOUTS,
           sources: { count, seenAt: null },
         }),
@@ -241,7 +256,9 @@ describe("overlay control page", () => {
       renderToStaticMarkup(
         createElement(OverlayLink, { hasKey, layers: placed, sources: null, now: 1000, ...LINK_SAVES }),
       );
-    const sections = (markup: string): string[] => markup.split('<section class="ov-url-output"').slice(1);
+    // The closed sections come after the two links: the guide, the dock, and the Twitch switches.
+    const sections = (markup: string): string[] =>
+      markup.slice(0, markup.indexOf("<details")).split('<section class="ov-url-output"').slice(1);
     const none: string = html(NO_LINKS);
     // One sentence for the two links, before them.
     expect(none.match(/Each output has its own private link for OBS\. Use one link or both\./g)).toHaveLength(1);
@@ -303,6 +320,28 @@ describe("overlay control page", () => {
     expect(guide).toContain("for example Aitum Multistream");
     expect(guide).not.toContain("Twitch chat only");
     expect(guide).not.toContain("{");
+  });
+
+  it("has a closed section for the OBS dock that tells the owner to keep the dock off screen", () => {
+    const html = (hasKey: boolean): string => renderToStaticMarkup(createElement(DockLink, { hasKey }));
+    const none: string = html(false);
+    expect(none).toMatch(/^<details class="[^"]*" data-ov-dock="true">/);
+    expect(none).not.toMatch(/^<details[^>]* open/);
+    expect(none).toContain("<summary>Control your stream from inside OBS</summary>");
+    expect(none).toContain("Keep the dock off screen: do not capture it in a scene, and do not share the link.");
+    expect(none).toContain(">Create dock link</button>");
+    // The link shows one time, when the owner makes it: a page with a link shows no link.
+    const made: string = html(true);
+    expect(made).toContain(">Regenerate dock link</button>");
+    expect(made).toContain("Your dock link is hidden.");
+    expect(made).not.toContain("data-ov-dock-url");
+    expect(made).not.toContain("dock?key=");
+    // The section is in the step with the links, before the Twitch switches.
+    const panel: string = renderToStaticMarkup(
+      createElement(OverlayLink, { hasKey: NO_LINKS, layers: placed, sources: null, now: 1000, ...LINK_SAVES }),
+    );
+    expect(panel.indexOf("data-ov-dock")).toBeGreaterThan(panel.indexOf("data-ov-guide"));
+    expect(panel.indexOf("data-ov-dock")).toBeLessThan(panel.indexOf("data-ov-twitch"));
   });
 
   it("has a closed section with one Twitch switch for each output, after the links", () => {

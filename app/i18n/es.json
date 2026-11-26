@@ -1488,5 +1488,21 @@
   "overlay.guide.platforms.1": "Twitch recibe la salida horizontal. Para enviar también la salida vertical a Twitch, abre Settings y luego Stream en OBS, activa Enhanced Broadcasting y elige tu lienzo vertical en Additional Canvas.",
   "overlay.guide.platforms.2": "Para emitir en YouTube y Kick a la vez, instala un plugin que añada más salidas, por ejemplo Aitum Multistream. Añade una salida por plataforma.",
   "overlay.guide.platforms.3": "Para un directo vertical en otra plataforma, añade una salida más en ese plugin y elige el lienzo vertical para ella.",
-  "overlay.guide.platforms.4": "En «{channels}», comprueba que cada canal aparece como conectado."
+  "overlay.guide.platforms.4": "En «{channels}», comprueba que cada canal aparece como conectado.",
+  "dock.title": "Panel de OBS",
+  "dock.heading": "Controles en vivo: {name}",
+  "overlay.dock.title": "Controla tu directo desde OBS",
+  "overlay.dock.body": "El panel es una página pequeña con los controles en vivo: la encuesta, los temas, el banner de mensaje y el chat. En OBS, abre Docks, luego Custom Browser Docks, y pega el enlace del panel.",
+  "overlay.dock.private": "El enlace da control sobre tu directo. Mantén el panel fuera de pantalla: no lo captures en una escena y no compartas el enlace.",
+  "overlay.dock.create": "Crear enlace del panel",
+  "overlay.dock.regenerate": "Regenerar enlace del panel",
+  "overlay.dock.once": "Copia este enlace en OBS ahora. Solo se muestra una vez.",
+  "overlay.dock.made": "El enlace de tu panel está oculto. Regenéralo para obtener uno nuevo. El enlace anterior dejará de funcionar.",
+  "overlay.dock.url": "Enlace del panel",
+  "overlay.dock.copy": "Copiar enlace del panel",
+  "overlay.dock.confirmTitle": "¿Regenerar el enlace del panel?",
+  "overlay.dock.confirmBody": "El enlace anterior deja de funcionar de inmediato y se cierra cada panel abierto. Pega el nuevo enlace en OBS.",
+  "overlay.dock.ready": "Nuevo enlace del panel listo. Cópialo en OBS.",
+  "dock.closed.title": "Este enlace del panel no funciona",
+  "dock.closed.body": "Crea un nuevo enlace del panel en las herramientas del streamer, en la sección Overlay, y pégalo en OBS."
 }

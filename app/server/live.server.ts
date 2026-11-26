@@ -66,6 +66,12 @@ export function notifyOverlayKey(env: AppEnv, streamerId: string, output: Orient
   waitUntil(callActivity(env, streamerId, "overlay-key", { output }));
 }
 
+// Asks the live room and the activity feed to drop the sockets that came in with the replaced key of the OBS dock.
+export function notifyDockKey(env: AppEnv, streamerId: string): void {
+  callRoom(env, streamerId, "overlay-key", { output: "dock" });
+  waitUntil(callActivity(env, streamerId, "overlay-key", { output: "dock" }));
+}
+
 /** Asks the activity feed to check the page's status: a suspended page closes every activity socket. */
 export function notifyActivityPage(env: AppEnv, streamerId: string): void {
   waitUntil(callActivity(env, streamerId, "page-status"));

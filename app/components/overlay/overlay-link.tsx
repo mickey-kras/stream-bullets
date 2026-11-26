@@ -1,7 +1,6 @@
 import { useId, useState, type ReactNode } from "react";
 import { intlLocale, t, tn, type MessageId } from "../../i18n";
 import { relativeAge } from "../../lib/channel-health";
-import { copyText } from "../../lib/clipboard";
 import {
   forOutput,
   frameSize,
@@ -16,8 +15,9 @@ import { errorMessage, postJson } from "../api";
 import { outputSources, type OverlaySources, type SourceState } from "../live";
 import { Dialog, DialogActions } from "../ui/dialog";
 import { Icon } from "../ui/icon";
-import { IconButton } from "../ui/icon-button";
 import { useToast } from "../ui/toast";
+import { CopyField } from "./copy-field";
+import { DockLink } from "./dock-link";
 import { CHARACTERS_READY } from "./overlay-composition";
 
 // Per-layer OBS sources. Characters arrive with the playground (#664): until then the row only says so.
@@ -26,43 +26,6 @@ const LAYER_LINKS: readonly (readonly [OverlayLayer, MessageId])[] = [
   ["content", "overlay.layer.content"],
   ["characters", "overlay.layer.characters"],
 ];
-
-function CopyField({
-  value,
-  label,
-  copyLabel,
-  layer,
-  describedBy,
-}: Readonly<{
-  value: string;
-  label: string;
-  copyLabel: string;
-  layer: OverlayLayer | null;
-  /** The id of a text that describes the field, like the source size of a layer URL. */
-  describedBy?: string;
-}>): ReactNode {
-  const toast = useToast();
-  async function copy(): Promise<void> {
-    toast((await copyText(value)) ? t("overlay.copied") : t("contact.copyFallback"));
-  }
-  return (
-    <div className="contact-address">
-      <input
-        className="contact-email ov-url-field"
-        type="text"
-        readOnly
-        value={value}
-        aria-label={label}
-        aria-describedby={describedBy}
-        spellCheck={false}
-        autoComplete="off"
-        data-ov-url={layer === null ? "" : undefined}
-        data-ov-layer-url={layer ?? undefined}
-      />
-      <IconButton label={copyLabel} icon="copy" iconSize={18} onClick={() => void copy()} />
-    </div>
-  );
-}
 
 const OUTPUT_NAMES: Readonly<Record<Orientation, MessageId>> = {
   horizontal: "overlay.output.horizontal",
@@ -88,9 +51,12 @@ export function OverlayLink({
   now,
   busy,
   onTwitchOnly,
+  hasDock,
 }: Readonly<{
   /** Which outputs have a link. */
   hasKey: Readonly<Record<Orientation, boolean>>;
+  /** True when the page has a link for the OBS dock. */
+  hasDock: boolean;
   /** The newest saved or live layers, for the source sizes and the Twitch switches. */
   layers: OverlayLayers;
   /** The connected OBS sources. Null while the live room did not tell. */
@@ -119,6 +85,7 @@ export function OverlayLink({
         />
       ))}
       <ObsGuide />
+      <DockLink hasKey={hasDock} />
       <TwitchOnly layers={layers} busy={busy} onChange={onTwitchOnly} />
     </div>
   );

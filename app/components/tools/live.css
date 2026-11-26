@@ -303,3 +303,35 @@
 html[data-reduced="true"] .tl-chat-row {
   animation: none;
 }
+
+/* ---------- The OBS dock (routes/dock.tsx): the live controls in one narrow column, from 300 px ---------- */
+.dock-page {
+  /* The site gives `main` three columns for a streamer page. The dock is one column. */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: 12px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 10px;
+  /* The page itself does not scroll (base.css): the dock scrolls inside its panel. */
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+/* A dock in OBS can be 300 px wide. The site has a minimum of 320 px. */
+html:has(.dock-page),
+body:has(.dock-page) {
+  min-width: 0;
+}
+.dock-title {
+  margin: 0;
+  font-size: 1.125rem;
+  overflow-wrap: anywhere;
+}
+.dock-page .tl-part {
+  min-width: 0;
+  margin: 0;
+}

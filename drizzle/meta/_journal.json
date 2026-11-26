@@ -337,6 +337,13 @@
       "when": 1795581763980,
       "tag": "0047_overlay_layouts",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "6",
+      "when": 1795584868377,
+      "tag": "0048_dock_keys",
+      "breakpoints": true
     }
   ]
 }

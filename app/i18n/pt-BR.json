@@ -1488,5 +1488,21 @@
   "overlay.guide.platforms.1": "A Twitch recebe a saída horizontal. Para enviar também a saída vertical para a Twitch, abra Settings e depois Stream no OBS, ative Enhanced Broadcasting e escolha sua tela vertical em Additional Canvas.",
   "overlay.guide.platforms.2": "Para transmitir no YouTube e no Kick ao mesmo tempo, instale um plugin que adicione mais saídas, por exemplo o Aitum Multistream. Adicione uma saída para cada plataforma.",
   "overlay.guide.platforms.3": "Para uma live vertical em outra plataforma, adicione mais uma saída nesse plugin e escolha a tela vertical para ela.",
-  "overlay.guide.platforms.4": "Em “{channels}”, confira se cada canal aparece como conectado."
+  "overlay.guide.platforms.4": "Em “{channels}”, confira se cada canal aparece como conectado.",
+  "dock.title": "Dock do OBS",
+  "dock.heading": "Controles ao vivo: {name}",
+  "overlay.dock.title": "Controle sua live de dentro do OBS",
+  "overlay.dock.body": "O dock é uma página pequena com os controles ao vivo: a enquete, os tópicos, o banner de mensagem e o chat. No OBS, abra Docks, depois Custom Browser Docks, e cole o link do dock.",
+  "overlay.dock.private": "O link dá controle sobre a sua live. Mantenha o dock fora da tela: não o capture em uma cena e não compartilhe o link.",
+  "overlay.dock.create": "Criar link do dock",
+  "overlay.dock.regenerate": "Gerar novo link do dock",
+  "overlay.dock.once": "Copie este link para o OBS agora. Ele aparece só uma vez.",
+  "overlay.dock.made": "O link do seu dock está oculto. Gere um novo para ver o link. O link antigo deixará de funcionar.",
+  "overlay.dock.url": "Link do dock",
+  "overlay.dock.copy": "Copiar link do dock",
+  "overlay.dock.confirmTitle": "Gerar um novo link do dock?",
+  "overlay.dock.confirmBody": "O link antigo para de funcionar na hora, e cada dock aberto é fechado. Cole o novo link no OBS.",
+  "overlay.dock.ready": "Novo link do dock pronto. Copie para o OBS.",
+  "dock.closed.title": "Este link do dock não funciona",
+  "dock.closed.body": "Crie um novo link do dock nas ferramentas do streamer, na seção Overlay, e cole no OBS."
 }

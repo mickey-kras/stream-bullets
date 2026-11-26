@@ -229,6 +229,26 @@ See [Layouts](overlay-composition.md#layouts).
 - Each action increases `overlay.revision`, and the live room sends the new revision. Another open tab of the owner then loads the layouts again.
 - Only the owner of the page can use these endpoints. Unknown fields return `400`.
 
+## OBS dock
+
+See [OBS dock](streamer-tools.md#obs-dock).
+
+| Endpoint | Body | Response |
+| --- | --- | --- |
+| `POST /api/dock/key` | `{}` | `{url}`. A new dock link for the page of the signed-in owner. The link shows one time. The old link stops immediately. |
+| `POST /api/dock/:handle/overlay` | `{action: "showResults" \| "message" \| "layers", ...}` | `{overlay}`. A live control from the dock |
+| `POST /api/dock/:handle/poll` | `{id}` | `{id}`. The poll takes no more votes |
+| `GET /@handle/dock?key` | - | The dock page. Without the current dock key, the answer is `404`. |
+
+- The two dock endpoints with `:handle` need no session. They need the dock key in the `X-SB-Dock-Key` header.
+  A call without the current dock key of that page returns `403` with the code `dock_key`.
+- `overlay` takes the same actions as `POST /api/overlay`, with these limits.
+  A `layers` action can have only `items`, only for `poll`, `topic`, and `message`, and only the fields `enabled`, `ref`, and `qr`.
+  `chatTest` and each other field return `403` with the code `dock_action`.
+- An overlay key is not a dock key. It returns `403`.
+- The live room (`/api/live/:handle`) and the activity feed (`/api/activity/:handle`) accept the dock key in `key`.
+  A dock then has the seat and the data of the owner.
+
 ## Later phases
 
 Overlay, Mash Battle, admin, step-up, and AI-interest handlers now exist in the registry.

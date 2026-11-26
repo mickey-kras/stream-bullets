@@ -14,6 +14,7 @@ import {
   regenerateOverlayKey,
   showOverlayKey,
 } from "../app/server/overlay-key.server";
+import { dockKeyMatches, hasDockKey } from "../app/server/dock-key.server";
 import { apiCaller } from "./helpers/api";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
 
@@ -497,6 +498,160 @@ describe("one key for each output", (): void => {
     ]);
     expect(await overlayKeyOutput(env, page, horizontal)).toBe("horizontal");
     expect(await overlayKeyOutput(env, page, vertical)).toBe("vertical");
+  });
+});
+
+describe("the key of the OBS dock", (): void => {
+  const poll = "30000000-0000-4000-8000-000000000011";
+  const topic = "30000000-0000-4000-8000-000000000012";
+
+  async function dockUrl(user: string = "owner"): Promise<{ url: string; key: string }> {
+    const response = await call("POST", "dock/key", { user, body: {} });
+    expect(response.status).toBe(200);
+    const { url } = await response.json<{ url: string }>();
+    return { url, key: new URL(url).searchParams.get("key") ?? "" };
+  }
+  /** A dock request: no session, and the key in the header. */
+  const dock = (path: string, body: unknown, key?: string, handle: string = "key_page"): Promise<Response> =>
+    call("POST", `dock/${handle}/${path}`, { body, headers: key === undefined ? {} : { "X-SB-Dock-Key": key } });
+  const code = async (response: Response): Promise<string | undefined> =>
+    (await response.json<{ code?: string }>()).code;
+  const hide = { action: "showResults", on: false };
+
+  beforeEach(async (): Promise<void> => {
+    await env.DB.prepare(
+      `INSERT INTO entries (id,streamer_id,author_id,kind,title,options,created_at) VALUES
+        (?1,?3,'owner','choice','Pick one','["A","B"]',2), (?2,?3,'viewer','topic','A topic','[]',1)`,
+    )
+      .bind(poll, topic, page)
+      .run();
+  });
+
+  it("gives the owner the dock link once, stores only its hash, and closes the old dock sockets", async (): Promise<void> => {
+    const { url, key } = await dockUrl();
+    expect(url).toBe(`${origin}/@key_page/dock?key=${key}`);
+    expect(key).toMatch(KEY);
+    const row = await env.DB.prepare("SELECT * FROM dock_keys WHERE streamer_id=?").bind(page).first();
+    expect(row).toMatchObject({ streamer_id: page, key_hash: await hashOverlayKey(key) });
+    expect(JSON.stringify(row)).not.toContain(key);
+    expect(await dockKeyMatches(env, page, key)).toBe(true);
+    expect(await hasDockKey(env, page)).toBe(true);
+    expect(await hasDockKey(env, frozenPage)).toBe(false);
+    // The live room and the activity feed drop the sockets of the dock, and no OBS source.
+    expect(roomCalls).toEqual([`/overlay-key?streamerId=${page} {"output":"dock"}`]);
+    // The audit names the actor, never the key or its hash.
+    const audits = await env.DB.prepare("SELECT * FROM moderation_actions WHERE action='dock_key_regenerated'").all();
+    expect(audits.results).toHaveLength(1);
+    expect(audits.results[0]).toMatchObject({ actor_id: "owner", streamer_id: page });
+    expect(JSON.stringify(audits.results)).not.toContain(key);
+    expect(JSON.stringify(audits.results)).not.toContain(await hashOverlayKey(key));
+    // A new link revokes the old one.
+    const next = await dockUrl();
+    expect(next.key).not.toBe(key);
+    expect(await dockKeyMatches(env, page, key)).toBe(false);
+    expect(await dockKeyMatches(env, page, next.key)).toBe(true);
+    expect((await dock("overlay", hide, key)).status).toBe(403);
+  });
+
+  it("lets only the page owner make the link, and not for a suspended page", async (): Promise<void> => {
+    expect((await call("POST", "dock/key", { user: "viewer", body: {} })).status).toBe(404);
+    expect((await call("POST", "dock/key", { body: {} })).status).toBe(401);
+    expect((await call("POST", "dock/key", { user: "owner", body: { output: "vertical" } })).status).toBe(400);
+    expect((await call("POST", "dock/key", { user: "suspended", body: {} })).status).toBe(423);
+    expect((await call("POST", "dock/key", { user: "frozen", body: {} })).status).toBe(200);
+  });
+
+  it("runs a live control with the dock key and no session, and tells OBS", async (): Promise<void> => {
+    const { key } = await dockUrl();
+    roomCalls = [];
+    const hidden = await dock("overlay", hide, key);
+    expect(hidden.status).toBe(200);
+    expect((await hidden.json<{ overlay: { showResults: boolean } }>()).overlay.showResults).toBe(false);
+    expect(roomCalls).toEqual([`/overlay?streamerId=${page} `]);
+    // The controls of the Live section: the message, and the poll, the topic, and the message banner on stream.
+    for (const action of [
+      { action: "message", text: "Back soon", style: "info" },
+      { action: "layers", items: { poll: { enabled: false } } },
+      { action: "layers", items: { poll: { qr: false, ref: poll } } },
+      { action: "layers", items: { topic: { ref: topic, enabled: true } } },
+      { action: "layers", items: { message: { enabled: true } } },
+    ])
+      expect((await dock("overlay", action, key)).status, JSON.stringify(action)).toBe(200);
+  });
+
+  it("refuses a request without the dock key, and never takes an overlay key for a control", async (): Promise<void> => {
+    const { key } = await dockUrl();
+    const wide = await newUrl("owner", "horizontal");
+    const tall = await newUrl("owner", "vertical");
+    const other = await dockUrl("frozen");
+    for (const wrong of [undefined, "", "short", "A".repeat(43), wide.key, tall.key, other.key]) {
+      const refused = await dock("overlay", hide, wrong);
+      expect(refused.status, String(wrong)).toBe(403);
+      expect(await code(refused)).toBe("dock_key");
+      expect((await dock("poll", { id: poll }, wrong)).status, String(wrong)).toBe(403);
+    }
+    // The same answer for a page that does not exist and for a suspended page.
+    expect((await dock("overlay", hide, key, "no_such_page")).status).toBe(403);
+    expect((await dock("overlay", hide, key, "gone_page")).status).toBe(403);
+    // The keys are for different things: the dock key is not an overlay key, and the reverse.
+    expect(await overlayKeyOutput(env, page, key)).toBeNull();
+    expect(await dockKeyMatches(env, page, wide.key)).toBe(false);
+    expect(await dockKeyMatches(env, page, tall.key)).toBe(false);
+    expect(await dockKeyMatches(env, page, null)).toBe(false);
+    // Nothing changed.
+    const row = await env.DB.prepare("SELECT show_results FROM overlay_state WHERE streamer_id=?").bind(page).first();
+    expect(row?.show_results ?? 1).toBe(1);
+  });
+
+  it("refuses each change that is not a live control, also with the dock key", async (): Promise<void> => {
+    const { key } = await dockUrl();
+    const cell = { c: 0, r: 0, w: 10, h: 6 };
+    for (const action of [
+      { action: "layers", cells: { horizontal: { chat: cell } } },
+      { action: "layers", orientation: "vertical" },
+      { action: "layers", chat: { enabled: true } },
+      { action: "layers", characters: { enabled: true } },
+      { action: "layers", camera: { enabled: true } },
+      { action: "layers", twitchOnly: { horizontal: true } },
+      { action: "layers", items: { card: { enabled: true } } },
+      { action: "layers", items: { poll: { backgroundOpacity: 50 } } },
+      { action: "layers", items: { poll: { enabled: true } }, cells: { horizontal: { poll: cell } } },
+      { action: "layers" },
+      { action: "chatTest", on: true },
+    ]) {
+      const refused = await dock("overlay", action, key);
+      expect(refused.status, JSON.stringify(action)).toBe(403);
+      expect(await code(refused)).toBe("dock_action");
+    }
+    expect((await dock("overlay", { action: "unknown" }, key)).status).toBe(400);
+    // The dock key is no session: the endpoints of the owner stay closed.
+    const headers = { "X-SB-Dock-Key": key };
+    expect((await call("POST", "overlay", { body: hide, headers })).status).toBe(401);
+    expect((await call("POST", "overlay/key", { body: {}, headers })).status).toBe(401);
+    expect((await call("POST", "dock/key", { body: {}, headers })).status).toBe(401);
+    expect(
+      (
+        await call("POST", "overlay/layouts", {
+          body: { action: "select", output: "horizontal", id: "preset:gameplay", keep: "My layout" },
+          headers,
+        })
+      ).status,
+    ).toBe(401);
+  });
+
+  it("closes the voting of a poll of the page, and of nothing else", async (): Promise<void> => {
+    const { key } = await dockUrl();
+    roomCalls = [];
+    const closed = await dock("poll", { id: poll }, key);
+    expect(closed.status).toBe(200);
+    expect(await env.DB.prepare("SELECT revealed FROM entries WHERE id=?").bind(poll).first()).toEqual({ revealed: 1 });
+    expect(roomCalls).toEqual([`/refresh?streamerId=${page} `]);
+    expect((await dock("poll", { id: topic }, key)).status).toBe(404);
+    expect((await dock("poll", { id: "not-an-id" }, key)).status).toBe(400);
+    expect((await dock("poll", { id: poll, extra: true }, key)).status).toBe(400);
+    // The key of this page is not a key of a different page.
+    await dockUrl("frozen");
+    expect((await dock("poll", { id: poll }, key, "frozen_page")).status).toBe(403);
   });
 });
 

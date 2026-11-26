@@ -802,6 +802,22 @@ export const overlayKeys = sqliteTable(
   ],
 );
 
+// The key of the private OBS dock of a page. It grants the live controls and nothing else, and it is separate from
+// the overlay keys. Store only its SHA-256 hash: the dock link shows one time.
+export const dockKeys = sqliteTable(
+  "dock_keys",
+  {
+    streamerId: text("streamer_id")
+      .primaryKey()
+      .references(() => streamers.id, { onDelete: "cascade" }),
+    keyHash: text("key_hash").notNull(),
+    createdAt: integer("created_at").notNull(),
+  },
+  (table) => [
+    check("dock_keys_hash_check", sql`length(${table.keyHash}) = 64 AND ${table.keyHash} NOT GLOB '*[^0-9a-f]*'`),
+  ],
+);
+
 // Mash Battles use `choice` entries with 2-4 options and expose API kind `mash`. `entry_votes` stores viewer
 // sides; `winner` is an index, -1 for draw, or null until finished.
 export const entryMash = sqliteTable(
