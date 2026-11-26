@@ -149,6 +149,7 @@ The dock has these parts of **Live**, in one column: the poll, the topics, the m
 It is usable from a width of 300 pixels. It scrolls in its panel.
 
 An action in the dock shows in **Live** at once, and an action in **Live** shows in the dock at once.
+When an action fails, the dock shows a message with the cause, as **Live** does.
 The dock does not show the preview, the channel health, and the layout. For those, use **Streamer tools** in a browser.
 
 ### Dock link

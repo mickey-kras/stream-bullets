@@ -609,6 +609,16 @@ test("the OBS dock runs the live controls with its own link in a narrow panel, a
   await liveResults.click();
   await expect(dockResults).toHaveText("Reveal results");
 
+  // A failed action in the dock tells the streamer why the change did not reach the stream.
+  await dock.route("**/api/dock/**", async (route) => {
+    if (route.request().method() !== "POST") return route.continue();
+    await route.fulfill({ status: 503, json: { error: "The request failed. Please try again." } });
+  });
+  await dockResults.click();
+  await expect(dock.locator(".sb-toast")).toHaveText("The request failed. Please try again.");
+  await expect(dockResults).toHaveText("Reveal results");
+  await dock.unroute("**/api/dock/**");
+
   // A key that is not the dock key opens nothing: a wrong key, and the key of an overlay link.
   expect((await dock.request.get(`/@feature_host/dock?key=${"A".repeat(43)}`)).status()).toBe(404);
   expect((await dock.request.get("/@feature_host/dock")).status()).toBe(404);
