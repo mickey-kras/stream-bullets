@@ -8,6 +8,8 @@ export interface CallOptions {
   body?: unknown;
   raw?: BodyInit;
   type?: string;
+  /** More request headers, for a request that carries a key in a header. */
+  headers?: Record<string, string>;
 }
 
 // Route GET/HEAD to the loader and other methods to the action.
@@ -32,7 +34,7 @@ export function apiCaller(
   };
   const call = async (method: string, path: string, options: CallOptions = {}): Promise<Response> => {
     const url = `${origin}/api/${path}`;
-    const headers: Record<string, string> = {};
+    const headers: Record<string, string> = { ...options.headers };
     if (options.user) headers.cookie = await cookie(options.user);
     if (method !== "GET" && method !== "HEAD") headers.Origin = origin;
     let body: BodyInit | undefined = options.raw;

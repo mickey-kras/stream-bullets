@@ -99,6 +99,8 @@ export type ChatAction =
   | { type: "message"; message: ActivityMessage; now: number; serverOffset?: number }
   | { type: "tick"; now: number }
   | { type: "filter"; hideCommands: boolean; now: number }
+  /** The output now shows `platform` only: the rows of the other platforms leave and do not come back. */
+  | { type: "platform"; platform: ActivityPlatform; now: number }
   | { type: "reset" };
 
 export function initialChatState(): ChatState {
@@ -211,18 +213,22 @@ function hidden(chat: ActivityChat, options: ChatOptions): boolean {
   return options.hideCommands && isChatCommand(chat.text);
 }
 
-/** Applies a turned-on hideCommands to shown and queued rows (see ChatAction `filter`). */
-function filterCommands(state: ChatState, hideCommands: boolean, now: number): ChatState {
-  if (!hideCommands) return state;
+/** The rows that `gone` matches leave the screen, and the waiting rows that it matches never enter. */
+function dismiss(state: ChatState, gone: (row: ChatRow) => boolean, now: number): ChatState {
   let changed = false;
   const rows: ChatRow[] = state.rows.map((row: ChatRow): ChatRow => {
-    if (!row.command || !active(row)) return row;
+    if (!gone(row) || !active(row)) return row;
     changed = true;
     return { ...row, phase: "leaving", phaseAt: now, animate: false };
   });
-  const pending: ChatRow[] = state.pending.filter((row: ChatRow): boolean => !row.command);
+  const pending: ChatRow[] = state.pending.filter((row: ChatRow): boolean => !gone(row));
   if (pending.length !== state.pending.length) changed = true;
   return changed ? { ...state, rows, pending } : state;
+}
+
+/** Removes the shown and queued command rows when hideCommands turns on (see ChatAction `filter`). */
+function dismissCommands(state: ChatState, now: number): ChatState {
+  return dismiss(state, (row: ChatRow): boolean => row.command, now);
 }
 
 function active(row: ChatRow): boolean {
@@ -395,15 +401,20 @@ function receiveSnapshot(
   now: number,
   serverOffset: number,
   options: ChatOptions,
+  since?: number,
 ): ChatState {
   const limits: ChatLimits = limitsOf(options);
   const chats: ActivityChat[] = events.filter((event: ActivityEvent): event is ActivityChat => event.kind === "chat");
   const ids = new Set<string>(chats.map((chat: ActivityChat): string => chat.id));
+  // The snapshot tells nothing about a row that is not newer than `since`. A producer from before `since` sends
+  // none: then a full snapshot has a window that starts at its oldest message.
   const windowStart: number =
     chats.length >= FULL_SNAPSHOT
       ? Math.min(...chats.map((chat: ActivityChat): number => chat.receivedAt))
       : Number.NEGATIVE_INFINITY;
-  const confirmed = (row: ChatRow): boolean => !active(row) || ids.has(row.id) || row.receivedAt < windowStart;
+  const outside = (row: ChatRow): boolean =>
+    since === undefined ? row.receivedAt < windowStart : row.receivedAt <= since;
+  const confirmed = (row: ChatRow): boolean => !active(row) || ids.has(row.id) || outside(row);
   // Queued messages enter at once: the snapshot already holds anything newer.
   const flushed: ChatRow[] = state.pending
     .filter(confirmed)
@@ -439,15 +450,21 @@ export function chatReducer(state: ChatState, action: ChatAction, options: ChatO
 function reduce(state: ChatState, action: Exclude<ChatAction, { type: "reset" }>, options: ChatOptions): ChatState {
   const limits: ChatLimits = limitsOf(options);
   if (action.type === "tick") return advance(state, action.now, limits);
-  if (action.type === "filter")
-    return advance(filterCommands(state, action.hideCommands, action.now), action.now, limits);
+  if (action.type === "filter") {
+    const filtered: ChatState = action.hideCommands ? dismissCommands(state, action.now) : state;
+    return advance(filtered, action.now, limits);
+  }
+  if (action.type === "platform") {
+    const other = (row: ChatRow): boolean => row.platform !== action.platform;
+    return advance(dismiss(state, other, action.now), action.now, limits);
+  }
   const { message, now } = action;
   if (message.type === "unavailable") return { ...initialChatState(), epoch: state.epoch + 1 };
   // Other message types (playground frames) are not chat.
   if (message.type !== "snapshot" && message.type !== "event") return state;
   const next: ChatState =
     message.type === "snapshot"
-      ? receiveSnapshot(state, message.events, now, action.serverOffset ?? 0, options)
+      ? receiveSnapshot(state, message.events, now, action.serverOffset ?? 0, options, message.since)
       : receiveEvent(state, message.event, now, options);
   return advance(next, now, limits);
 }

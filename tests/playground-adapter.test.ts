@@ -29,9 +29,9 @@ function chat(user: number, text: string): ActivityChat {
   };
 }
 
-/** A running 16 x 2 playground with three admitted characters. */
+/** A running 32 x 4 playground with three admitted characters. */
 function playground(): PlaygroundSim {
-  const sim = new PlaygroundSim({ cellsW: 16, cellsH: 2, rng: mulberry32(7) });
+  const sim = new PlaygroundSim({ cellsW: 32, cellsH: 4, rng: mulberry32(7) });
   sim.resumeAfter(0);
   for (let user = 1; user <= 3; user += 1) sim.receive(chat(user, "hello"));
   for (let i = 0; i < 60; i += 1) sim.tick();
@@ -39,7 +39,7 @@ function playground(): PlaygroundSim {
 }
 
 function tickFrame(chars: CharTuple[], over: Partial<PlaygroundTickFrame> = {}): PlaygroundTickFrame {
-  return { type: "playground", v: 1, full: false, tick: 99, chars, ...over };
+  return { type: "playground", v: 2, full: false, tick: 99, chars, ...over };
 }
 
 describe("playground frame adapter", () => {
@@ -72,12 +72,24 @@ describe("playground frame adapter", () => {
     expect(view.mode).toEqual({ test: false, paused: false });
   });
 
-  it("maps tiles, stairs, bubbles and flags", () => {
+  it("maps tiles, blocks, ropes, flags, the crown, bubbles and marks", () => {
     const frame: PlaygroundFullFrame = playground().fullFrame();
     const id: number = frame.roster[0].id;
     const state: FrameState | null = mergeFrame(null, {
       ...frame,
-      terrain: { ...frame.terrain, ground: "g0123", stairs: [[30, 50, -1]] },
+      // Five columns: a dirt block and a cracked plank in the first row, a stair to the left in the second.
+      terrain: { ...frame.terrain, ground: "g0123", blocks: "a.e..?..p.".replace("?", ".") },
+      extras: {
+        ropes: [
+          [id, 120, 30, 1],
+          [999, 1, 1, 0],
+        ],
+        flags: [
+          [id, 40, 62],
+          [999, 8, 62],
+        ],
+        crown: id,
+      },
       bubbles: [{ id, text: "hi" }],
       mode: { paused: true, test: true },
     });
@@ -90,12 +102,22 @@ describe("playground frame adapter", () => {
       { kind: "dirt", stage: 2 },
       { kind: "dirt", stage: 3 },
     ]);
-    expect(view.stairs).toEqual([{ x: 30, top: 50, dir: -1 }]);
+    expect(view.blocks).toEqual([
+      { c: 0, r: 0, kind: "dirt", dir: 1, stage: 0 },
+      { c: 2, r: 0, kind: "dirt", dir: -1, stage: 1 },
+      { c: 3, r: 1, kind: "stair", dir: -1, stage: 0 },
+    ]);
+    // A rope, a flag and a crown of a character that is not in the frame do not show.
+    expect(view.ropes).toEqual([{ id, x: 120, y: 30, hit: true }]);
+    expect(view.flags).toEqual([{ x: 40, y: 62, platform: frame.roster[0].platform }]);
+    expect(view.crown).toBe(id);
     expect(view.characters[0]).toMatchObject({ x: 100.5, y: 62, state: "walk", bubble: "hi", recent: true });
     expect(view.marks).toEqual([{ x: 100.5, y: 62 - MARK_LIFT }]);
     expect(view.mode).toEqual({ test: true, paused: true });
     // Without the flags: no mark, not recent, no bubble for another character.
     const plain: PlaygroundView = toView(state, [[frame.roster[1].id, 100, 620, 1, 0, 1, 0]]);
+    expect(plain.crown).toBeNull();
+    expect(plain.ropes).toEqual([]);
     expect(plain.marks).toEqual([]);
     expect(plain.characters[0]).toMatchObject({ recent: false, bubble: null });
   });

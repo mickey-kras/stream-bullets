@@ -1,4 +1,7 @@
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import {
+  createRoutesStub,
   RouterContextProvider,
   type LoaderFunctionArgs,
   type MetaArgs,
@@ -19,7 +22,10 @@ import * as schedule from "../app/server/schedule.server";
 import * as community from "../app/server/community.server";
 import * as support from "../app/server/support.server";
 import * as overlay from "../app/server/overlay.server";
+import { EMPTY_LAYOUTS } from "../app/lib/overlay-layouts";
+import * as dockKey from "../app/server/dock-key.server";
 import * as overlayKey from "../app/server/overlay-key.server";
+import * as overlayLayouts from "../app/server/overlay-layouts.server";
 import * as channels from "../app/server/channels.server";
 import * as account from "../app/server/api/account";
 import * as featured from "../app/server/featured-streamer.server";
@@ -27,7 +33,8 @@ import * as ai from "../app/server/ai.server";
 import * as adminRoute from "../app/routes/admin";
 import * as streamerRoute from "../app/routes/streamer";
 import * as overlayRoute from "../app/routes/overlay";
-import * as controlRoute from "../app/routes/overlay-control";
+import * as controlRoute from "../app/routes/tools";
+import * as legacyControlRoute from "../app/routes/overlay-control";
 import * as directoryRoute from "../app/routes/streamers";
 import * as signInRoute from "../app/routes/sign-in";
 import * as aiRoute from "../app/routes/ai";
@@ -91,9 +98,18 @@ vi.mock("../app/server/overlay.server", async (original) => ({
   getOverlayState: vi.fn(),
   getOverlayData: vi.fn(),
 }));
+vi.mock("../app/server/dock-key.server", async (original) => ({
+  ...(await original<typeof import("../app/server/dock-key.server")>()),
+  hasDockKey: vi.fn(),
+}));
+vi.mock("../app/server/overlay-layouts.server", async (original) => ({
+  ...(await original<typeof import("../app/server/overlay-layouts.server")>()),
+  getLayouts: vi.fn(),
+}));
 vi.mock("../app/server/overlay-key.server", async (original) => ({
   ...(await original<typeof import("../app/server/overlay-key.server")>()),
-  hasOverlayKey: vi.fn(),
+  overlayKeyOutputs: vi.fn(),
+  overlayKeyOutput: vi.fn(),
 }));
 vi.mock("../app/server/channels.server", async (original) => ({
   ...(await original<typeof import("../app/server/channels.server")>()),
@@ -265,7 +281,10 @@ beforeEach((): void => {
   vi.mocked(support.getSupport).mockResolvedValue({ links: [], visible: false, card: false });
   vi.mocked(overlay.getOverlayState).mockResolvedValue(DEFAULT_OVERLAY);
   vi.mocked(overlay.getOverlayData).mockResolvedValue({ polls: [], topics: [], cards: [], next: null, support: null });
-  vi.mocked(overlayKey.hasOverlayKey).mockResolvedValue(false);
+  vi.mocked(overlayKey.overlayKeyOutputs).mockResolvedValue({ horizontal: false, vertical: false });
+  vi.mocked(overlayLayouts.getLayouts).mockResolvedValue(EMPTY_LAYOUTS);
+  vi.mocked(dockKey.hasDockKey).mockResolvedValue(false);
+  vi.mocked(overlayKey.overlayKeyOutput).mockResolvedValue(null);
   vi.mocked(channels.listConnections).mockResolvedValue([]);
   vi.mocked(account.signInProvider).mockResolvedValue(null);
   vi.mocked(featured.getFeaturedStreamer).mockResolvedValue(null);
@@ -604,26 +623,119 @@ describe("overlay loader contracts", (): void => {
     result = await overlayRoute.loader(args("/@zed/overlay", { handle: "@zed" }));
     expect(refs()).toEqual([null, "layer-poll"]);
     expect(result.initial.polls.map((poll) => poll.id)).toEqual(["auto", "layer-poll"]);
-    // A content layer in the other orientation loads nothing.
+    // The output that the editor shows does not change the page: a link without a key shows the horizontal output.
     vi.mocked(data.getOverlaySnapshot).mockClear();
     vi.mocked(overlay.getOverlayState).mockResolvedValue({
       ...DEFAULT_OVERLAY,
       layers: { ...picked, orientation: "vertical" },
     });
-    await overlayRoute.loader(args("/@zed/overlay", { handle: "@zed" }));
+    result = await overlayRoute.loader(args("/@zed/overlay", { handle: "@zed" }));
+    expect(result.output).toBe("horizontal");
+    expect(refs()).toEqual([null, "layer-poll"]);
+    expect(overlay.getOverlayData).toHaveBeenLastCalledWith(expect.anything(), "page", ["layer-topic"]);
+  });
+
+  /** The layers of `picked`, and the card layer and the chat on the grid of the vertical output only. */
+  const twoOutputs: OverlayLayers = {
+    ...picked,
+    chat: { ...picked.chat, enabled: true },
+    cells: {
+      horizontal: { ...picked.cells.horizontal, card: null },
+      vertical: { ...DEFAULT_LAYERS.cells.vertical, card: cell(8), chat: { c: 0, r: 20, w: 18, h: 12 } },
+    },
+  };
+
+  it("takes the output of the page from the key of its link", async (): Promise<void> => {
+    vi.mocked(data.getOverlaySnapshot).mockImplementation((_env, _id, ref) =>
+      Promise.resolve({ ...initial, polls: [{ ...entry, id: ref ?? "auto", kind: "choice", byOwner: true }] }),
+    );
+    vi.mocked(overlay.getOverlayState).mockResolvedValue({ ...DEFAULT_OVERLAY, layers: twoOutputs });
+    // The key of the vertical output: only the layers on the vertical grid load their content.
+    vi.mocked(overlayKey.overlayKeyOutput).mockResolvedValue("vertical");
+    let result = await overlayRoute.loader(args("/@zed/overlay?key=vertical-key&layer=content", { handle: "@zed" }));
+    expect(overlayKey.overlayKeyOutput).toHaveBeenLastCalledWith(expect.anything(), "page", "vertical-key");
+    expect(result.output).toBe("vertical");
     expect(refs()).toEqual([null]);
     expect(overlay.getOverlayData).toHaveBeenLastCalledWith(expect.anything(), "page", []);
+    // The stored layers go to the page as they are: the page picks the cells of its output.
+    expect(result.overlay.layers).toEqual(twoOutputs);
+    // The key of the horizontal output.
+    vi.mocked(data.getOverlaySnapshot).mockClear();
+    vi.mocked(overlayKey.overlayKeyOutput).mockResolvedValue("horizontal");
+    result = await overlayRoute.loader(args("/@zed/overlay?key=horizontal-key", { handle: "@zed" }));
+    expect(result.output).toBe("horizontal");
+    expect(refs()).toEqual([null, "layer-poll"]);
+    expect(overlay.getOverlayData).toHaveBeenLastCalledWith(expect.anything(), "page", ["layer-topic"]);
+    // No key, and a key that is wrong or revoked: the horizontal output.
+    for (const path of ["/@zed/overlay", "/@zed/overlay?key=revoked"]) {
+      vi.mocked(overlayKey.overlayKeyOutput).mockResolvedValue(null);
+      result = await overlayRoute.loader(args(path, { handle: "@zed" }));
+      expect(result.output, path).toBe("horizontal");
+    }
+    expect(overlayKey.overlayKeyOutput).toHaveBeenCalledWith(expect.anything(), "page", null);
+    expect(overlayKey.overlayKeyOutput).toHaveBeenLastCalledWith(expect.anything(), "page", "revoked");
+    // A poll override shows in the poll layer of the output of the key.
+    vi.mocked(overlayKey.overlayKeyOutput).mockResolvedValue("vertical");
+    result = await overlayRoute.loader(args("/@zed/overlay?key=vertical-key&poll=override", { handle: "@zed" }));
+    expect(result).toMatchObject({ output: "vertical", override: "override" });
+  });
+
+  it("renders the cells of the output of the page, and not of the output that the editor shows", async (): Promise<void> => {
+    const page = async (
+      output: "horizontal" | "vertical" | null,
+      editor: "horizontal" | "vertical",
+    ): Promise<string> => {
+      vi.mocked(overlay.getOverlayState).mockResolvedValue({
+        ...DEFAULT_OVERLAY,
+        layers: { ...twoOutputs, orientation: editor },
+      });
+      vi.mocked(overlayKey.overlayKeyOutput).mockResolvedValue(output);
+      const path: string = output === null ? "/@zed/overlay" : "/@zed/overlay?key=its-key";
+      const loaded = await overlayRoute.loader(args(path, { handle: "@zed" }));
+      const Stub = createRoutesStub([{ id: "overlay", path: "/:handle/overlay", Component: overlayRoute.default }]);
+      return renderToStaticMarkup(
+        createElement(Stub, { initialEntries: [path], hydrationData: { loaderData: { overlay: loaded } } }),
+      );
+    };
+    const boxes = (html: string): string[] =>
+      [...html.matchAll(/class="ov-layer" data-layer="([a-z]+)"/g)].map((match: RegExpMatchArray): string => match[1]);
+    for (const editor of ["horizontal", "vertical"] as const) {
+      const vertical: string = await page("vertical", editor);
+      expect(boxes(vertical), editor).toEqual(["card", "chat"]);
+      // The frame of the vertical output is 1080 × 1920.
+      expect(vertical, editor).toContain("width:1080px;height:1920px");
+      for (const html of [await page("horizontal", editor), await page(null, editor)]) {
+        expect(boxes(html), editor).toEqual(["poll", "topic"]);
+        expect(html, editor).toContain("width:1920px;height:1080px");
+      }
+    }
+  });
+
+  it("sends the old Overlay control address to Streamer tools for good", (): void => {
+    const moved = (path: string): string | null => {
+      const response: Response = legacyControlRoute.loader(args(path));
+      expect(response.status).toBe(301);
+      return response.headers.get("Location");
+    };
+    expect(moved("/overlay-control")).toBe("/tools?view=overlay");
+    // An old channel callback link opens the Channels section and keeps its result.
+    expect(moved("/overlay-control?channel=twitch&result=connected")).toBe(
+      "/tools?channel=twitch&result=connected&view=channels",
+    );
+    expect(moved("/overlay-control?view=channels")).toBe("/tools?view=channels");
+    expect(moved("/overlay-control?view=unknown")).toBe("/tools?view=overlay");
+    expect(moved("/overlay-control?view=live")).toBe("/tools?view=live");
   });
 
   it("redirects signed-out control users and returns 404 to users without a page", async (): Promise<void> => {
     const expectedHeaders: unknown = expect.any(Headers);
-    await expect(controlRoute.loader(args("/overlay-control"))).rejects.toMatchObject({
+    await expect(controlRoute.loader(args("/tools"))).rejects.toMatchObject({
       status: 302,
       headers: expectedHeaders,
     });
     expect(data.getOwnStreamer).not.toHaveBeenCalled();
     signedIn();
-    await expect(controlRoute.loader(args("/overlay-control"))).rejects.toMatchObject({ status: 404 });
+    await expect(controlRoute.loader(args("/tools"))).rejects.toMatchObject({ status: 404 });
   });
 
   it("loads the picked poll and topic for the control page, also while their layers are off stream", async (): Promise<void> => {
@@ -643,7 +755,7 @@ describe("overlay loader contracts", (): void => {
         ],
       }),
     );
-    const result = await controlRoute.loader(args("/overlay-control"));
+    const result = await controlRoute.loader(args("/tools"));
     expect(result.initial.polls.map((poll) => poll.id)).toEqual(["recent", "layer-poll"]);
     expect(refs()).toEqual([null, "layer-poll"]);
     expect(overlay.getOverlayData).toHaveBeenLastCalledWith(expect.anything(), "page", ["layer-topic"]);
@@ -651,7 +763,9 @@ describe("overlay loader contracts", (): void => {
       handle: "zed",
       host: "stream.example.test",
       origin: "https://stream.example.test",
-      hasOverlayKey: false,
+      hasOverlayKey: { horizontal: false, vertical: false },
+      layouts: EMPTY_LAYOUTS,
+      hasDockKey: false,
       channels: [],
     });
     expect(result.state.layers).toEqual({ ...picked, orientation: "vertical" });
@@ -660,7 +774,7 @@ describe("overlay loader contracts", (): void => {
   it("loads only the automatic poll and no topic for a control page without picked entries", async (): Promise<void> => {
     signedIn();
     vi.mocked(data.getOwnStreamer).mockResolvedValue(streamer);
-    await controlRoute.loader(args("/overlay-control"));
+    await controlRoute.loader(args("/tools"));
     expect(refs()).toEqual([null]);
     expect(overlay.getOverlayData).toHaveBeenLastCalledWith(expect.anything(), "page", []);
   });

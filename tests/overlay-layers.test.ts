@@ -15,20 +15,25 @@ import {
   ORIENTATIONS,
   OVERLAY_LAYERS,
   STORED_LAYERS_LENGTH,
+  allContentSources,
   cellFits,
   cellPixels,
   contentSources,
   emptyCells,
+  forOutput,
   frameSize,
   layerEnabled,
   layerPixels,
   layerUrl,
   layersPatchSchema,
   mergeLayers,
+  onAnyOutput,
   onStream,
   overlappingPair,
   parseLayerParam,
   placedContent,
+  playgroundCell,
+  shownPlatform,
   storedLayersSchema,
   storedLayersText,
   type CellRect,
@@ -41,18 +46,18 @@ import { FRAME_CHARS_MAX } from "../app/lib/playground/protocol";
 
 // Pure rules for overlay layers: the grid, stored values, patches and layer URLs.
 
-const chatCell: CellRect = { c: 10, r: 0, w: 6, h: 5 };
+const chatCell: CellRect = { c: 20, r: 0, w: 12, h: 10 };
 /** Layers with the chat and the characters on the grid of both orientations, both off. */
 const LAID: OverlayLayers = {
   ...DEFAULT_LAYERS,
   cells: {
-    horizontal: { ...emptyCells(), chat: { c: 0, r: 0, w: 5, h: 7 }, characters: { c: 0, r: 7, w: 16, h: 2 } },
-    vertical: { ...emptyCells(), chat: { c: 0, r: 8, w: 9, h: 5 }, characters: { c: 0, r: 13, w: 9, h: 3 } },
+    horizontal: { ...emptyCells(), chat: { c: 0, r: 0, w: 10, h: 14 }, characters: { c: 0, r: 14, w: 32, h: 4 } },
+    vertical: { ...emptyCells(), chat: { c: 0, r: 16, w: 18, h: 10 }, characters: { c: 0, r: 26, w: 18, h: 6 } },
   },
 };
 // Free cells of the horizontal layout of LAID: the chat has columns 0 to 4, the characters have rows 7 and 8.
-const pollCell: CellRect = { c: 5, r: 0, w: 4, h: 2 };
-const topicCell: CellRect = { c: 9, r: 0, w: 4, h: 2 };
+const pollCell: CellRect = { c: 10, r: 0, w: 8, h: 4 };
+const topicCell: CellRect = { c: 18, r: 0, w: 8, h: 4 };
 const item: ContentItem = { enabled: true, ref: null, backgroundOpacity: 100, qr: false };
 const defaultItems: Record<ContentLayer, ContentItem> = {
   poll: { ...item, qr: true },
@@ -78,39 +83,46 @@ function stored(layers: OverlayLayers): unknown {
 }
 
 describe("grid and defaults", (): void => {
-  it("has a 16 x 9 horizontal and a 9 x 16 vertical grid of 120 px cells", (): void => {
+  it("has a 32 x 18 horizontal and an 18 x 32 vertical grid of 60 px cells", (): void => {
     expect(OVERLAY_LAYERS).toEqual(["content", "chat", "characters"]);
-    expect(CELL_PX).toBe(120);
+    expect(CELL_PX).toBe(60);
+    expect(GRID).toEqual({ horizontal: { cols: 32, rows: 18 }, vertical: { cols: 18, rows: 32 } });
     expect(frameSize("horizontal")).toEqual({ w: 1920, h: 1080 });
     expect(frameSize("vertical")).toEqual({ w: 1080, h: 1920 });
-    const least = { w: 4, h: 2 };
+    const least = { w: 8, h: 4 };
     expect(MIN_CELLS).toEqual({
-      chat: { w: 3, h: 2 },
-      characters: { w: 6, h: 2 },
+      chat: { w: 6, h: 4 },
+      characters: { w: 12, h: 4 },
       poll: least,
       topic: least,
       next: least,
       message: least,
       card: least,
       support: least,
+      camera: { w: 6, h: 4 },
     });
   });
 
-  it("has one grid layer for each content source, after the chat and the characters", (): void => {
+  it("has one grid layer for each content source, after the chat and the characters, and the camera frame last", (): void => {
     expect(CONTENT_LAYERS).toEqual(["poll", "topic", "next", "message", "card", "support"]);
-    expect(GRID_LAYERS).toEqual(["chat", "characters", ...CONTENT_LAYERS]);
+    expect(GRID_LAYERS).toEqual(["chat", "characters", ...CONTENT_LAYERS, "camera"]);
     expect(LAYER_BACKGROUND).toEqual({ min: 0, max: 100, step: 5, default: 100 });
     expect(CHAT_BACKGROUND).toBe(LAYER_BACKGROUND);
   });
 
-  it("keeps chat and characters off and every layer off the grid by default", (): void => {
+  it("keeps the chat, the characters and the camera frame off and every layer off the grid by default", (): void => {
     const none = { chat: null, characters: null, poll: null, topic: null, next: null, message: null, card: null };
     expect(DEFAULT_LAYERS).toEqual({
       orientation: "horizontal",
       chat: { enabled: false, hideCommands: true, backgroundOpacity: 100 },
       characters: { enabled: false, timeout: 60, max: 40 },
+      camera: { enabled: false },
       items: defaultItems,
-      cells: { horizontal: { ...none, support: null }, vertical: { ...none, support: null } },
+      cells: {
+        horizontal: { ...none, support: null, camera: null },
+        vertical: { ...none, support: null, camera: null },
+      },
+      twitchOnly: { horizontal: false, vertical: false },
     });
     expect(emptyCells()).toEqual(DEFAULT_LAYERS.cells.horizontal);
     expect(emptyCells()).not.toBe(emptyCells());
@@ -139,7 +151,7 @@ describe("grid and defaults", (): void => {
   });
 
   it("converts cells to design pixels and finds the place of a layer in the selected orientation", (): void => {
-    expect(cellPixels({ c: 1, r: 2, w: 3, h: 4 })).toEqual({ x: 120, y: 240, w: 360, h: 480 });
+    expect(cellPixels({ c: 2, r: 4, w: 6, h: 8 })).toEqual({ x: 120, y: 240, w: 360, h: 480 });
     expect(layerPixels(LAID, "chat")).toEqual({ x: 0, y: 0, w: 600, h: 840 });
     expect(layerPixels({ ...LAID, orientation: "vertical" }, "characters")).toEqual({
       x: 0,
@@ -153,16 +165,21 @@ describe("grid and defaults", (): void => {
   });
 
   it("checks the grid edges and minimum sizes per orientation", (): void => {
-    expect(cellFits("horizontal", "chat", { c: 13, r: 7, w: 3, h: 2 })).toBe(true);
-    expect(cellFits("horizontal", "chat", { c: 14, r: 7, w: 3, h: 2 })).toBe(false);
-    expect(cellFits("horizontal", "chat", { c: 0, r: 8, w: 3, h: 2 })).toBe(false);
-    expect(cellFits("vertical", "characters", { c: 0, r: 0, w: 9, h: 2 })).toBe(true);
-    expect(cellFits("vertical", "characters", { c: 0, r: 0, w: 10, h: 2 })).toBe(false);
-    expect(cellFits("horizontal", "characters", { c: 0, r: 0, w: 6, h: 1 })).toBe(false);
+    expect(cellFits("horizontal", "chat", { c: 26, r: 14, w: 6, h: 4 })).toBe(true);
+    expect(cellFits("horizontal", "chat", { c: 27, r: 14, w: 6, h: 4 })).toBe(false);
+    expect(cellFits("horizontal", "chat", { c: 0, r: 15, w: 6, h: 4 })).toBe(false);
+    expect(cellFits("horizontal", "chat", { c: 0, r: 0, w: 5, h: 4 })).toBe(false);
+    expect(cellFits("horizontal", "chat", { c: 0, r: 0, w: 6, h: 3 })).toBe(false);
+    expect(cellFits("vertical", "characters", { c: 0, r: 0, w: 18, h: 4 })).toBe(true);
+    expect(cellFits("vertical", "characters", { c: 0, r: 0, w: 19, h: 4 })).toBe(false);
+    expect(cellFits("horizontal", "characters", { c: 0, r: 0, w: 12, h: 3 })).toBe(false);
+    expect(cellFits("horizontal", "characters", { c: 0, r: 0, w: 11, h: 4 })).toBe(false);
     for (const layer of CONTENT_LAYERS) {
-      expect(cellFits("horizontal", layer, { c: 12, r: 7, w: 4, h: 2 }), layer).toBe(true);
-      expect(cellFits("horizontal", layer, { c: 0, r: 0, w: 3, h: 2 }), layer).toBe(false);
-      expect(cellFits("vertical", layer, { c: 6, r: 0, w: 4, h: 2 }), layer).toBe(false);
+      expect(cellFits("horizontal", layer, { c: 24, r: 14, w: 8, h: 4 }), layer).toBe(true);
+      expect(cellFits("horizontal", layer, { c: 0, r: 0, w: 7, h: 4 }), layer).toBe(false);
+      expect(cellFits("horizontal", layer, { c: 0, r: 0, w: 8, h: 3 }), layer).toBe(false);
+      expect(cellFits("vertical", layer, { c: 10, r: 0, w: 8, h: 4 }), layer).toBe(true);
+      expect(cellFits("vertical", layer, { c: 11, r: 0, w: 8, h: 4 }), layer).toBe(false);
     }
   });
 
@@ -170,8 +187,8 @@ describe("grid and defaults", (): void => {
     const cells = LAID.cells.horizontal;
     expect(overlappingPair(cells)).toBeNull();
     expect(overlappingPair(LAID.cells.vertical)).toBeNull();
-    expect(overlappingPair({ ...cells, characters: { c: 0, r: 6, w: 16, h: 2 } })).toEqual(["chat", "characters"]);
-    expect(overlappingPair({ ...cells, chat: null, poll: { c: 0, r: 0, w: 4, h: 2 } })).toBeNull();
+    expect(overlappingPair({ ...cells, characters: { c: 0, r: 12, w: 32, h: 4 } })).toEqual(["chat", "characters"]);
+    expect(overlappingPair({ ...cells, chat: null, poll: { c: 0, r: 0, w: 8, h: 4 } })).toBeNull();
     expect(overlappingPair({})).toBeNull();
     expect(overlappingPair(emptyCells())).toBeNull();
   });
@@ -179,9 +196,9 @@ describe("grid and defaults", (): void => {
   it("finds a content layer over another layer and over another content layer", (): void => {
     const cells = LAID.cells.horizontal;
     expect(overlappingPair({ ...cells, poll: pollCell, topic: topicCell })).toBeNull();
-    expect(overlappingPair({ ...cells, poll: { c: 4, r: 0, w: 4, h: 2 } })).toEqual(["chat", "poll"]);
+    expect(overlappingPair({ ...cells, poll: { c: 8, r: 0, w: 8, h: 4 } })).toEqual(["chat", "poll"]);
     expect(overlappingPair({ ...cells, topic: pollCell, card: pollCell })).toEqual(["topic", "card"]);
-    expect(overlappingPair({ ...cells, poll: pollCell, support: { c: 8, r: 1, w: 4, h: 2 } })).toEqual([
+    expect(overlappingPair({ ...cells, poll: pollCell, support: { c: 16, r: 2, w: 8, h: 4 } })).toEqual([
       "poll",
       "support",
     ]);
@@ -192,14 +209,14 @@ describe("grid and defaults", (): void => {
     expect(contentSources(LAID)).toEqual([]);
     const card: ContentItem = { ...item, ref: "c1", backgroundOpacity: 40 };
     const layers: OverlayLayers = withCells(
-      { card: topicCell, poll: pollCell, next: { c: 5, r: 2, w: 4, h: 2 }, topic: { c: 5, r: 4, w: 4, h: 2 } },
+      { card: topicCell, poll: pollCell, next: { c: 10, r: 4, w: 8, h: 4 }, topic: { c: 10, r: 8, w: 8, h: 4 } },
       { card, next: { ...item, enabled: false }, topic: { ...item, ref: "t1" } },
     );
     expect(placedContent(layers)).toEqual([
       { layer: "poll", rect: pollCell, item: defaultItems.poll, source: { type: "auto", ref: null } },
       {
         layer: "topic",
-        rect: { c: 5, r: 4, w: 4, h: 2 },
+        rect: { c: 10, r: 8, w: 8, h: 4 },
         item: { ...item, ref: "t1" },
         source: { type: "topic", ref: "t1" },
       },
@@ -231,7 +248,7 @@ describe("stored layers", (): void => {
 
   it("returns fresh defaults, so editing one result never changes another", (): void => {
     const first: OverlayLayers = storedLayersSchema.parse({});
-    first.cells.horizontal.chat = { c: 3, r: 0, w: 3, h: 2 };
+    first.cells.horizontal.chat = { c: 6, r: 0, w: 6, h: 4 };
     first.chat.enabled = true;
     expect(storedLayersSchema.parse({})).toEqual(DEFAULT_LAYERS);
     expect(DEFAULT_LAYERS.cells.horizontal.chat).toBeNull();
@@ -251,6 +268,7 @@ describe("stored layers", (): void => {
       orientation: "vertical",
       chat: { enabled: true, hideCommands: false, backgroundOpacity: 35 },
       characters: { enabled: true, timeout: 60, max: 40 },
+      camera: { enabled: true },
       items: {
         ...defaultItems,
         poll: { enabled: false, ref: "p1", backgroundOpacity: 0, qr: false },
@@ -260,12 +278,14 @@ describe("stored layers", (): void => {
         horizontal: {
           ...emptyCells(),
           chat: chatCell,
-          characters: { c: 0, r: 7, w: 16, h: 2 },
-          poll: { c: 6, r: 0, w: 4, h: 3 },
-          support: { c: 0, r: 4, w: 10, h: 3 },
+          characters: { c: 0, r: 14, w: 32, h: 4 },
+          poll: { c: 12, r: 0, w: 8, h: 6 },
+          support: { c: 0, r: 8, w: 20, h: 6 },
+          camera: { c: 1, r: 1, w: 11, h: 7 },
         },
-        vertical: { ...emptyCells(), characters: { c: 0, r: 14, w: 9, h: 2 }, message: { c: 0, r: 4, w: 9, h: 2 } },
+        vertical: { ...emptyCells(), characters: { c: 0, r: 28, w: 18, h: 4 }, message: { c: 0, r: 8, w: 18, h: 4 } },
       },
+      twitchOnly: { horizontal: true, vertical: false },
     };
     expect(storedLayersSchema.parse(layers)).toEqual(layers);
   });
@@ -299,24 +319,24 @@ describe("stored layers", (): void => {
       topic: topicCell,
     });
     // Outside the grid, below the minimum, not a cell, over the chat and over the characters.
-    for (const poll of [{ c: 13, r: 0, w: 4, h: 2 }, { c: 5, r: 0, w: 3, h: 2 }, "cell", 7])
+    for (const poll of [{ c: 26, r: 0, w: 8, h: 4 }, { c: 10, r: 0, w: 6, h: 4 }, "cell", 7])
       expect(read({ ...usual, poll })).toEqual(usual);
-    expect(read({ ...usual, poll: { c: 4, r: 0, w: 4, h: 2 } })).toEqual(usual);
-    expect(read({ ...usual, support: { c: 6, r: 6, w: 4, h: 2 } })).toEqual(usual);
+    expect(read({ ...usual, poll: { c: 8, r: 0, w: 8, h: 4 } })).toEqual(usual);
+    expect(read({ ...usual, support: { c: 12, r: 12, w: 8, h: 4 } })).toEqual(usual);
     // The earlier layer of GRID_LAYERS keeps its cell: chat, characters, poll, then the layers after it.
-    expect(read({ chat: usual.chat, characters: { c: 0, r: 6, w: 16, h: 2 } })).toEqual({
+    expect(read({ chat: usual.chat, characters: { c: 0, r: 12, w: 32, h: 4 } })).toEqual({
       ...emptyCells(),
       chat: usual.chat,
     });
-    expect(read({ poll: pollCell, topic: { c: 8, r: 1, w: 4, h: 2 }, card: topicCell })).toEqual({
+    expect(read({ poll: pollCell, topic: { c: 16, r: 2, w: 8, h: 4 }, card: topicCell })).toEqual({
       ...emptyCells(),
       poll: pollCell,
       card: topicCell,
     });
     // The vertical grid has its own cells.
     expect(
-      storedLayersSchema.parse({ cells: { vertical: { next: { c: 0, r: 0, w: 9, h: 2 } } } }).cells.vertical.next,
-    ).toEqual({ c: 0, r: 0, w: 9, h: 2 });
+      storedLayersSchema.parse({ cells: { vertical: { next: { c: 0, r: 0, w: 18, h: 4 } } } }).cells.vertical.next,
+    ).toEqual({ c: 0, r: 0, w: 18, h: 4 });
   });
 
   it("returns fresh content layer settings, so editing one result never changes the defaults", (): void => {
@@ -346,10 +366,10 @@ describe("stored layers", (): void => {
   });
 
   it.each([
-    ["past the right edge", { c: 14, r: 0, w: 3, h: 2 }],
-    ["past the bottom edge", { c: 0, r: 8, w: 3, h: 2 }],
-    ["negative", { c: -1, r: 0, w: 3, h: 2 }],
-    ["below the minimum", { c: 0, r: 0, w: 2, h: 2 }],
+    ["past the right edge", { c: 28, r: 0, w: 6, h: 4 }],
+    ["past the bottom edge", { c: 0, r: 16, w: 6, h: 4 }],
+    ["negative", { c: -2, r: 0, w: 6, h: 4 }],
+    ["below the minimum", { c: 0, r: 0, w: 4, h: 4 }],
     ["fractions", { c: 0.5, r: 0, w: 3, h: 2 }],
     ["text", { c: "0", r: 0, w: 3, h: 2 }],
     ["partial", { c: 0, r: 0, w: 3 }],
@@ -360,7 +380,7 @@ describe("stored layers", (): void => {
   });
 
   it("reads the cell of the old content layer as an unknown key", (): void => {
-    const cells = { horizontal: { content: { c: 6, r: 0, w: 4, h: 2 } } };
+    const cells = { horizontal: { content: { c: 12, r: 0, w: 8, h: 4 } } };
     expect(storedLayersSchema.parse({ cells })).toEqual(DEFAULT_LAYERS);
   });
 
@@ -398,7 +418,7 @@ describe("stored layers", (): void => {
     expect(STORED_LAYERS_LENGTH).toBe(4000);
     // Each layer on the grid of both orientations, with the longest ref and no setting at its default.
     const ref = "x".repeat(64);
-    const cell: CellRect = { c: 10, r: 10, w: 16, h: 16 };
+    const cell: CellRect = { c: 20, r: 20, w: 32, h: 32 };
     const cells: LayerCells = {
       chat: cell,
       characters: cell,
@@ -408,12 +428,14 @@ describe("stored layers", (): void => {
       message: cell,
       card: cell,
       support: cell,
+      camera: cell,
     };
     const changed: ContentItem = { enabled: false, ref: null, backgroundOpacity: 55, qr: true };
     const full: OverlayLayers = {
       orientation: "horizontal",
       chat: { enabled: false, hideCommands: false, backgroundOpacity: 100 },
       characters: { enabled: false, timeout: 600, max: 5 },
+      camera: { enabled: true },
       items: {
         poll: { ...changed, ref, qr: false },
         topic: { ...changed, ref },
@@ -423,6 +445,7 @@ describe("stored layers", (): void => {
         support: changed,
       },
       cells: { horizontal: cells, vertical: cells },
+      twitchOnly: { horizontal: true, vertical: true },
     };
     expect(storedLayersText(full).length).toBeGreaterThan(1000);
     expect(storedLayersText(full).length).toBeLessThan(STORED_LAYERS_LENGTH / 2);
@@ -431,7 +454,7 @@ describe("stored layers", (): void => {
   it("stores the version, and leaves out what the read fills in", (): void => {
     const { orientation, chat, characters } = DEFAULT_LAYERS;
     const before = { v: LAYERS_VERSION, orientation, chat, characters };
-    expect(LAYERS_VERSION).toBe(2);
+    expect(LAYERS_VERSION).toBe(3);
     expect(storedLayersText(DEFAULT_LAYERS)).toBe(
       JSON.stringify({ ...before, cells: { horizontal: {}, vertical: {} } }),
     );
@@ -466,6 +489,239 @@ describe("stored layers", (): void => {
   });
 });
 
+describe("Twitch chat only on an output", (): void => {
+  it("is off for the two outputs by default: each output shows the merged chat", (): void => {
+    expect(DEFAULT_LAYERS.twitchOnly).toEqual({ horizontal: false, vertical: false });
+    for (const output of ORIENTATIONS) expect(shownPlatform(forOutput(DEFAULT_LAYERS, output))).toBeNull();
+    expect(storedLayersSchema.parse({}).twitchOnly).toEqual({ horizontal: false, vertical: false });
+  });
+
+  it("changes one output and leaves the other output as it is", (): void => {
+    const vertical: OverlayLayers = mergeLayers(DEFAULT_LAYERS, { twitchOnly: { vertical: true } });
+    expect(vertical.twitchOnly).toEqual({ horizontal: false, vertical: true });
+    expect(shownPlatform(forOutput(vertical, "vertical"))).toBe("twitch");
+    expect(shownPlatform(forOutput(vertical, "horizontal"))).toBeNull();
+    const both: OverlayLayers = mergeLayers(vertical, { twitchOnly: { horizontal: true } });
+    expect(both.twitchOnly).toEqual({ horizontal: true, vertical: true });
+    expect(mergeLayers(both, { twitchOnly: { vertical: false } }).twitchOnly).toEqual({
+      horizontal: true,
+      vertical: false,
+    });
+    // A patch without the switches keeps them.
+    expect(mergeLayers(both, { chat: { enabled: true } }).twitchOnly).toEqual({ horizontal: true, vertical: true });
+  });
+
+  it("stores the switches only while one is on, and reads an invalid value as off", (): void => {
+    expect(storedLayersText(DEFAULT_LAYERS)).not.toContain("twitchOnly");
+    const on: OverlayLayers = mergeLayers(DEFAULT_LAYERS, { twitchOnly: { vertical: true } });
+    expect(stored(on)).toMatchObject({ twitchOnly: { horizontal: false, vertical: true } });
+    expect(storedLayersSchema.parse(JSON.parse(storedLayersText(on))).twitchOnly).toEqual({
+      horizontal: false,
+      vertical: true,
+    });
+    for (const value of ["yes", 1, null, [], { vertical: "yes" }, { horizontal: 1 }])
+      expect(storedLayersSchema.parse({ twitchOnly: value }).twitchOnly).toEqual({
+        horizontal: false,
+        vertical: false,
+      });
+    // One valid switch stays when the other one is invalid.
+    expect(storedLayersSchema.parse({ twitchOnly: { horizontal: true, vertical: "no" } }).twitchOnly).toEqual({
+      horizontal: true,
+      vertical: false,
+    });
+  });
+
+  it("takes only booleans for the two outputs in a patch", (): void => {
+    expect(layersPatchSchema.parse({ twitchOnly: { vertical: true } })).toEqual({ twitchOnly: { vertical: true } });
+    expect(layersPatchSchema.parse({ twitchOnly: {} })).toEqual({ twitchOnly: {} });
+    for (const twitchOnly of [true, { vertical: "yes" }, { vertical: 1 }, { square: true }, { vertical: null }])
+      expect(layersPatchSchema.safeParse({ twitchOnly }).success).toBe(false);
+  });
+});
+
+describe("camera frame", (): void => {
+  // Free cells of LAID: right of the chat, above the characters.
+  const frame: CellRect = { c: 20, r: 6, w: 12, h: 6 };
+
+  it("is a grid layer with its own switch, off until the owner puts it on the grid", (): void => {
+    expect(DEFAULT_LAYERS.camera).toEqual({ enabled: false });
+    expect(layerEnabled(DEFAULT_LAYERS, "camera")).toBe(false);
+    const placed: OverlayLayers = withCells({ camera: frame });
+    expect(onStream(placed, "camera")).toBe(false);
+    const on: OverlayLayers = { ...placed, camera: { enabled: true } };
+    expect(onStream(on, "camera")).toBe(true);
+    expect(layerPixels(on, "camera")).toEqual({ x: 1200, y: 360, w: 720, h: 360 });
+    // The vertical orientation has no camera frame.
+    expect(onStream({ ...on, orientation: "vertical" }, "camera")).toBe(false);
+    // The frame is not a content layer: it has no source.
+    expect(contentSources(on)).toEqual([]);
+  });
+
+  it("has a smallest size of 6 x 4 cells and keeps other layers out of its cells", (): void => {
+    expect(cellFits("horizontal", "camera", { c: 26, r: 14, w: 6, h: 4 })).toBe(true);
+    expect(cellFits("horizontal", "camera", { c: 0, r: 0, w: 5, h: 4 })).toBe(false);
+    expect(cellFits("horizontal", "camera", { c: 0, r: 0, w: 6, h: 3 })).toBe(false);
+    expect(cellFits("vertical", "camera", { c: 13, r: 0, w: 6, h: 4 })).toBe(false);
+    expect(overlappingPair({ ...emptyCells(), poll: pollCell, camera: { c: 14, r: 2, w: 6, h: 4 } })).toEqual([
+      "poll",
+      "camera",
+    ]);
+    expect(overlappingPair({ ...emptyCells(), poll: pollCell, camera: frame })).toBeNull();
+  });
+
+  it("stores the frame only while it is on, and reads a value without it as off", (): void => {
+    const off: OverlayLayers = withCells({ camera: frame });
+    expect(stored(off)).not.toHaveProperty("camera");
+    expect(stored(off)).toMatchObject({ cells: { horizontal: { camera: frame } } });
+    const on: OverlayLayers = { ...off, camera: { enabled: true } };
+    expect(stored(on)).toMatchObject({ camera: { enabled: true } });
+    expect(storedLayersSchema.parse(stored(on))).toEqual(on);
+    expect(storedLayersSchema.parse(stored(off))).toEqual(off);
+    // A value from before the camera frame, and a value with an incorrect setting.
+    expect(storedLayersSchema.parse({}).camera).toEqual({ enabled: false });
+    expect(storedLayersSchema.parse({ camera: "on" }).camera).toEqual({ enabled: false });
+    expect(storedLayersSchema.parse({ camera: { enabled: "yes", size: 3 } }).camera).toEqual({ enabled: false });
+  });
+
+  it("reads a frame cell that is invalid, or over an earlier layer, as no cell", (): void => {
+    const read = (camera: unknown): CellRect | null =>
+      storedLayersSchema.parse({ cells: { horizontal: { chat: chatCell, camera } } }).cells.horizontal.camera;
+    expect(read({ c: 0, r: 0, w: 12, h: 6 })).toEqual({ c: 0, r: 0, w: 12, h: 6 });
+    expect(read({ c: 0, r: 0, w: 5, h: 4 })).toBeNull();
+    expect(read({ c: 30, r: 0, w: 6, h: 4 })).toBeNull();
+    // The chat is earlier in the order of the layers, so it keeps its cell.
+    expect(read({ c: 18, r: 2, w: 6, h: 4 })).toBeNull();
+    expect(read("frame")).toBeNull();
+  });
+
+  it("takes the switch and the cell in a patch, and refuses other fields and invalid cells", (): void => {
+    const ok = (patch: unknown): boolean => layersPatchSchema.safeParse(patch).success;
+    expect(
+      ok({ camera: { enabled: true }, cells: { horizontal: { camera: frame }, vertical: { camera: null } } }),
+    ).toBe(true);
+    expect(ok({ camera: {} })).toBe(true);
+    expect(ok({ camera: { enabled: "yes" } })).toBe(false);
+    expect(ok({ camera: { enabled: true, style: "gold" } })).toBe(false);
+    expect(ok({ cells: { horizontal: { camera: { c: 0, r: 0, w: 5, h: 4 } } } })).toBe(false);
+    expect(ok({ cells: { horizontal: { poll: pollCell, camera: { c: 14, r: 2, w: 6, h: 4 } } } })).toBe(false);
+    const next: OverlayLayers = mergeLayers(LAID, {
+      camera: { enabled: true },
+      cells: { horizontal: { camera: frame } },
+    });
+    expect(next.camera).toEqual({ enabled: true });
+    expect(next.cells.horizontal.camera).toEqual(frame);
+    expect(next.cells.horizontal.camera).not.toBe(frame);
+    expect(mergeLayers(next, {}).camera).toEqual({ enabled: true });
+    expect(mergeLayers(next, { cells: { horizontal: { camera: null } } }).cells.horizontal.camera).toBeNull();
+  });
+});
+
+describe("two outputs on stream at the same time", (): void => {
+  const pollCell: CellRect = { c: 0, r: 0, w: 8, h: 4 };
+  const topicCell: CellRect = { c: 0, r: 4, w: 8, h: 4 };
+  const cardCell: CellRect = { c: 0, r: 8, w: 8, h: 4 };
+  /** The poll on the two grids, the topic on the horizontal grid only, the card on the vertical grid only. */
+  const layers: OverlayLayers = {
+    ...DEFAULT_LAYERS,
+    items: {
+      ...DEFAULT_LAYERS.items,
+      poll: { ...DEFAULT_LAYERS.items.poll, ref: "p1" },
+      topic: { ...DEFAULT_LAYERS.items.topic, ref: "t1" },
+      card: { ...DEFAULT_LAYERS.items.card, ref: "c1" },
+    },
+    cells: {
+      horizontal: { ...emptyCells(), poll: pollCell, topic: topicCell },
+      vertical: { ...emptyCells(), poll: pollCell, card: cardCell },
+    },
+  };
+
+  it("shows the layers as one output has them, and changes nothing else", (): void => {
+    expect(layers.orientation).toBe("horizontal");
+    const vertical: OverlayLayers = forOutput(layers, "vertical");
+    expect(vertical).toEqual({ ...layers, orientation: "vertical" });
+    expect(layers.orientation).toBe("horizontal");
+    // The same output gives the same object: a page does not render again for it.
+    expect(forOutput(layers, "horizontal")).toBe(layers);
+    expect(forOutput(vertical, "vertical")).toBe(vertical);
+    expect(onStream(vertical, "card")).toBe(true);
+    expect(onStream(vertical, "topic")).toBe(false);
+    expect(placedContent(vertical).map((placed) => placed.layer)).toEqual(["poll", "card"]);
+    expect(placedContent(forOutput(vertical, "horizontal")).map((placed) => placed.layer)).toEqual(["poll", "topic"]);
+  });
+
+  it("counts a layer as on stream when one output shows it, whatever output the editor shows", (): void => {
+    for (const orientation of ORIENTATIONS) {
+      const edited: OverlayLayers = { ...layers, orientation };
+      for (const layer of ["poll", "topic", "card"] as const) expect(onAnyOutput(edited, layer), layer).toBe(true);
+      // No cell in an output, and a cell with the layer off.
+      for (const layer of ["chat", "characters", "next", "message", "support", "camera"] as const)
+        expect(onAnyOutput(edited, layer), layer).toBe(false);
+      const off: OverlayLayers = {
+        ...edited,
+        items: { ...edited.items, card: { ...edited.items.card, enabled: false } },
+      };
+      expect(onAnyOutput(off, "card")).toBe(false);
+    }
+    // The chat and the camera frame have their switch outside `items`.
+    const chat: OverlayLayers = {
+      ...DEFAULT_LAYERS,
+      chat: { ...DEFAULT_LAYERS.chat, enabled: true },
+      camera: { enabled: true },
+      cells: { horizontal: emptyCells(), vertical: { ...emptyCells(), chat: { c: 0, r: 0, w: 6, h: 4 } } },
+    };
+    expect(onStream(chat, "chat")).toBe(false);
+    expect(onAnyOutput(chat, "chat")).toBe(true);
+    expect(onAnyOutput(chat, "camera")).toBe(false);
+  });
+
+  it("gives the content sources of the two outputs, each layer one time", (): void => {
+    expect(contentSources(layers)).toEqual([
+      { type: "poll", ref: "p1" },
+      { type: "topic", ref: "t1" },
+    ]);
+    const all = allContentSources(layers);
+    expect(all).toHaveLength(3);
+    expect(all).toEqual(
+      expect.arrayContaining([
+        { type: "poll", ref: "p1" },
+        { type: "topic", ref: "t1" },
+        { type: "card", ref: "c1" },
+      ]),
+    );
+    // The same sources for each output that the editor shows.
+    expect(allContentSources({ ...layers, orientation: "vertical" })).toEqual(all);
+    // A layer that is off, and a page with no layer on a grid.
+    const off: OverlayLayers = {
+      ...layers,
+      items: { ...layers.items, card: { ...layers.items.card, enabled: false } },
+    };
+    expect(allContentSources(off)).toEqual(contentSources(off));
+    expect(allContentSources(DEFAULT_LAYERS)).toEqual([]);
+    // The automatic poll of a poll layer without a ref.
+    const auto: OverlayLayers = {
+      ...DEFAULT_LAYERS,
+      cells: { horizontal: emptyCells(), vertical: { ...emptyCells(), poll: pollCell } },
+    };
+    expect(allContentSources(auto)).toEqual([{ type: "auto", ref: null }]);
+  });
+
+  it("sizes the character playground from the horizontal cell, else from the vertical cell", (): void => {
+    const wide: CellRect = { c: 0, r: 14, w: 32, h: 4 };
+    const tall: CellRect = { c: 0, r: 26, w: 18, h: 6 };
+    const cells = (horizontal: CellRect | null, vertical: CellRect | null): OverlayLayers["cells"] => ({
+      horizontal: { ...emptyCells(), characters: horizontal },
+      vertical: { ...emptyCells(), characters: vertical },
+    });
+    expect(playgroundCell(DEFAULT_LAYERS)).toBeNull();
+    for (const orientation of ORIENTATIONS) {
+      expect(playgroundCell({ ...DEFAULT_LAYERS, orientation, cells: cells(wide, tall) })).toEqual(wide);
+      expect(playgroundCell({ ...DEFAULT_LAYERS, orientation, cells: cells(wide, null) })).toEqual(wide);
+      expect(playgroundCell({ ...DEFAULT_LAYERS, orientation, cells: cells(null, tall) })).toEqual(tall);
+      expect(playgroundCell({ ...DEFAULT_LAYERS, orientation, cells: cells(null, null) })).toBeNull();
+    }
+  });
+});
+
 describe("layer patches", (): void => {
   it("accepts any subset of the known fields", (): void => {
     expect(layersPatchSchema.parse({})).toEqual({});
@@ -490,7 +746,7 @@ describe("layer patches", (): void => {
       },
       cells: {
         horizontal: { poll: pollCell, topic: topicCell, card: null },
-        vertical: { next: { c: 0, r: 0, w: 4, h: 2 }, message: { c: 5, r: 14, w: 4, h: 2 }, support: null },
+        vertical: { next: { c: 0, r: 0, w: 8, h: 4 }, message: { c: 10, r: 28, w: 8, h: 4 }, support: null },
       },
     };
     expect(layersPatchSchema.parse(patch)).toEqual(patch);
@@ -504,14 +760,14 @@ describe("layer patches", (): void => {
     ["an unknown orientation", { orientation: "square" }],
     ["an unknown grid", { cells: { square: {} } }],
     ["an unknown cell key", { cells: { horizontal: { chat: { ...chatCell, z: 1 } } } }],
-    ["a chat cell below the minimum", { cells: { horizontal: { chat: { c: 0, r: 0, w: 2, h: 2 } } } }],
-    ["a characters cell below the minimum", { cells: { vertical: { characters: { c: 0, r: 0, w: 5, h: 2 } } } }],
-    ["a cell outside the grid", { cells: { vertical: { chat: { c: 7, r: 0, w: 3, h: 2 } } } }],
+    ["a chat cell below the minimum", { cells: { horizontal: { chat: { c: 0, r: 0, w: 4, h: 4 } } } }],
+    ["a characters cell below the minimum", { cells: { vertical: { characters: { c: 0, r: 0, w: 10, h: 4 } } } }],
+    ["a cell outside the grid", { cells: { vertical: { chat: { c: 14, r: 0, w: 6, h: 4 } } } }],
     ["a cell of the old content layer", { cells: { horizontal: { content: null } } }],
     ["fractions", { cells: { horizontal: { poll: { c: 0.5, r: 0, w: 4, h: 2 } } } }],
     [
       "overlapping cells",
-      { cells: { horizontal: { chat: { c: 0, r: 0, w: 4, h: 4 }, characters: { c: 0, r: 3, w: 6, h: 2 } } } },
+      { cells: { horizontal: { chat: { c: 0, r: 0, w: 8, h: 8 }, characters: { c: 0, r: 6, w: 12, h: 4 } } } },
     ],
     ["a null value", { chat: { enabled: null } }],
     ["a message background that is not a step of 5", { chat: { backgroundOpacity: 3 } }],
@@ -532,8 +788,8 @@ describe("layer patches", (): void => {
     ["a content layer switch that is not a boolean", { items: { poll: { enabled: "yes" } } }],
     ["a QR switch that is not a boolean", { items: { poll: { qr: 1 } } }],
     ["a null content layer", { items: { poll: null } }],
-    ["a content layer cell below the minimum", { cells: { horizontal: { poll: { c: 5, r: 0, w: 3, h: 2 } } } }],
-    ["a content layer cell outside the grid", { cells: { vertical: { card: { c: 6, r: 0, w: 4, h: 2 } } } }],
+    ["a content layer cell below the minimum", { cells: { horizontal: { poll: { c: 10, r: 0, w: 6, h: 4 } } } }],
+    ["a content layer cell outside the grid", { cells: { vertical: { card: { c: 12, r: 0, w: 8, h: 4 } } } }],
     ["a content layer cell over the chat cell", { cells: { horizontal: { chat: chatCell, poll: chatCell } } }],
     ["two content layers in one cell", { cells: { horizontal: { poll: pollCell, support: pollCell } } }],
   ])("refuses %s", (_name: string, patch: Record<string, unknown>): void => {
@@ -579,13 +835,13 @@ describe("layer patches", (): void => {
     });
     expect(mergeLayers(next, {})).toEqual(next);
     expect(DEFAULT_LAYERS.chat.enabled).toBe(false);
-    for (const orientation of ORIENTATIONS) expect(GRID[orientation].cols * GRID[orientation].rows).toBe(144);
+    for (const orientation of ORIENTATIONS) expect(GRID[orientation].cols * GRID[orientation].rows).toBe(576);
   });
 
   it("merges content layer settings and cells, copies each cell and removes a cell with null", (): void => {
     const next: OverlayLayers = mergeLayers(DEFAULT_LAYERS, {
       items: { poll: { ref: "p1", qr: false }, card: { enabled: false, backgroundOpacity: 0 } },
-      cells: { horizontal: { poll: pollCell }, vertical: { card: { c: 0, r: 0, w: 4, h: 2 } } },
+      cells: { horizontal: { poll: pollCell }, vertical: { card: { c: 0, r: 0, w: 8, h: 4 } } },
     });
     expect(next).toEqual({
       ...DEFAULT_LAYERS,
@@ -596,7 +852,7 @@ describe("layer patches", (): void => {
       },
       cells: {
         horizontal: { ...DEFAULT_LAYERS.cells.horizontal, poll: pollCell },
-        vertical: { ...DEFAULT_LAYERS.cells.vertical, card: { c: 0, r: 0, w: 4, h: 2 } },
+        vertical: { ...DEFAULT_LAYERS.cells.vertical, card: { c: 0, r: 0, w: 8, h: 4 } },
       },
     });
     expect(next.cells.horizontal.poll).not.toBe(pollCell);
@@ -611,7 +867,7 @@ describe("layer patches", (): void => {
     });
     expect(cleared.items.poll.ref).toBeNull();
     expect(cleared.cells.horizontal.poll).toBeNull();
-    expect(cleared.cells.vertical.card).toEqual({ c: 0, r: 0, w: 4, h: 2 });
+    expect(cleared.cells.vertical.card).toEqual({ c: 0, r: 0, w: 8, h: 4 });
     expect(DEFAULT_LAYERS.items).toEqual(defaultItems);
   });
 });

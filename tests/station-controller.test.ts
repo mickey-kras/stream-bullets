@@ -1,7 +1,7 @@
 import { afterEach, expect, it, vi } from "vitest";
 import * as THREE from "three";
 import { installRecordingCanvas } from "./helpers/recording-canvas";
-import { createStation, type StationView } from "../app/components/station/scene.client";
+import { createStation, isSoftwareRenderer, type StationView } from "../app/components/station/scene.client";
 
 const gpu = vi.hoisted(() => ({
   render: vi.fn(),
@@ -10,6 +10,7 @@ const gpu = vi.hoisted(() => ({
   remove: vi.fn(),
   setSize: vi.fn(),
   canvas: new EventTarget(),
+  context: undefined as WebGLRenderingContext | undefined,
   controls: new EventTarget(),
 }));
 vi.mock("three", async (original) => {
@@ -18,7 +19,8 @@ vi.mock("three", async (original) => {
     ...actual,
     WebGLRenderer: class {
       domElement = Object.assign(gpu.canvas, { style: {}, setAttribute: vi.fn(), remove: gpu.remove });
-      shadowMap = {};
+      shadowMap = { enabled: false };
+      getContext = (): WebGLRenderingContext | undefined => gpu.context;
       setPixelRatio = vi.fn();
       setSize = gpu.setSize;
       dispose = gpu.dispose;
@@ -142,6 +144,13 @@ it.each([true, false])(
     });
     const fail = vi.fn();
     const onFrame = vi.fn();
+    gpu.context = reduced
+      ? ({
+          RENDERER: 0x1f01,
+          getExtension: () => ({ UNMASKED_RENDERER_WEBGL: 0x9246 }),
+          getParameter: () => "ANGLE (Google, SwiftShader)",
+        } as unknown as WebGLRenderingContext)
+      : undefined;
     const controller = await createStation(
       host as unknown as HTMLDivElement,
       fail,
@@ -180,6 +189,11 @@ it.each([true, false])(
     frame(160);
     expect(gpu.render).not.toHaveBeenCalled();
     controller.motion(true);
+    frame(180);
+    gpu.render.mockClear();
+    frame(190);
+    // Software WebGL stays paused even when motion is allowed.
+    expect(gpu.render).toHaveBeenCalledTimes(reduced ? 0 : 1);
     for (const view of [
       "entrance",
       "hero",
@@ -225,3 +239,21 @@ it.each([true, false])(
   },
   120_000,
 );
+
+it("detects software WebGL renderers and treats hardware or missing contexts as normal", (): void => {
+  const context = (rendererName: unknown, debugExtension: boolean) => ({
+    getContext: () =>
+      ({
+        RENDERER: 0x1f01,
+        getExtension: (name: string) =>
+          debugExtension && name === "WEBGL_debug_renderer_info" ? { UNMASKED_RENDERER_WEBGL: 0x9246 } : null,
+        getParameter: () => rendererName,
+      }) as unknown as WebGLRenderingContext,
+  });
+  expect(isSoftwareRenderer({ getContext: () => undefined as unknown as WebGLRenderingContext })).toBe(false);
+  expect(isSoftwareRenderer(context("ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device), SwiftShader)", true))).toBe(
+    true,
+  );
+  expect(isSoftwareRenderer(context("llvmpipe (LLVM 17.0.6, 256 bits)", false))).toBe(true);
+  expect(isSoftwareRenderer(context("ANGLE (NVIDIA, NVIDIA GeForce RTX 5090)", true))).toBe(false);
+});

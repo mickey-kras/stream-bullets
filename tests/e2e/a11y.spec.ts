@@ -142,7 +142,7 @@ test("the overlay studio names every control and keeps 44 px touch targets on a 
   const owner = await signedIn(browser, "owner", clientIp("a11y", 179));
   const page = await newPage(owner);
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
   const editor = page.locator("[data-composition-editor]");
   // A page that the owner did not change has the poll layer on the grid. Its chip selects it.
@@ -153,7 +153,7 @@ test("the overlay studio names every control and keeps 44 px touch targets on a 
   // The parts of the studio have names: the toolbar groups, the palette, the grid and the settings.
   for (const name of ["Screen orientation", "Preview background", "Layers · one of each"])
     await expect(editor.getByRole("group", { name })).toBeVisible();
-  await expect(editor.getByRole("application", { name: "Layout grid, 16 columns by 9 rows" })).toBeVisible();
+  await expect(editor.getByRole("application", { name: "Layout grid, 32 columns by 18 rows" })).toBeVisible();
   await expect(panel.getByRole("combobox", { name: "Poll" })).toBeVisible();
   await expect(panel.getByRole("slider", { name: "Background" })).toHaveAttribute("aria-valuetext", "100%");
   // Buttons and pickers are at least 44 px high for a finger. The toolbar controls have one height.

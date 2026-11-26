@@ -8,7 +8,7 @@ import {
   STORED_LAYERS_LENGTH,
   layersPatchSchema,
   mergeLayers,
-  onStream,
+  onAnyOutput,
   overlappingPair,
   storedLayersText,
   type ContentLayer,
@@ -140,10 +140,11 @@ export async function nextOverlayState(
   }
   if (action.action === "layers") next.layers = await mergedLayers(env, streamerId, current.layers, action);
   // The test plays in the chat layer, so taking the layer off stream also ends a running test.
-  if (!onStream(next.layers, "chat")) next.chatTestUntil = 0;
+  if (!onAnyOutput(next.layers, "chat")) next.chatTestUntil = 0;
   if (action.action === "chatTest") {
     // The test cannot start while the chat layer is off stream. Stop always works.
-    if (action.on && !onStream(current.layers, "chat")) throw new HttpError(400, "Put the chat layer on stream first.");
+    if (action.on && !onAnyOutput(current.layers, "chat"))
+      throw new HttpError(400, "Put the chat layer on stream first.");
     next.chatTestUntil = action.on ? now + CHAT_TEST_MS : 0;
   }
   return next;

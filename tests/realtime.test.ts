@@ -615,7 +615,8 @@ describe("Mash Battle taps", (): void => {
 
 describe("overlay updates", (): void => {
   it("tells the owner when an OBS source connects and when it closes", async (): Promise<void> => {
-    type Sources = { type: string; sources?: { count: number; seenAt: number | null } };
+    type Seen = { count: number; seenAt: number | null };
+    type Sources = { type: string; sources?: Seen & { outputs?: { horizontal: Seen; vertical: Seen } } };
     const subscribe = (extra: Record<string, string>): ReturnType<Miniflare["dispatchFetch"]> =>
       runtime.dispatchFetch(`${origin}/${streamerId}/subscribe?streamerId=${streamerId}`, {
         headers: { Upgrade: "websocket", Origin: origin, "X-Stream-Bullets-Client": clientKey, ...extra },
@@ -629,10 +630,27 @@ describe("overlay updates", (): void => {
     owner.accept();
     expect((await none).sources?.seenAt).toBeNull();
     const joined = sources(1);
-    const source = (await subscribe({ "X-SB-Overlay": "1" })).webSocket;
+    const source = (await subscribe({ "X-SB-Overlay": "horizontal" })).webSocket;
     if (!source) throw new Error("Missing WebSocket");
     source.accept();
-    expect((await joined).sources?.seenAt).toBeGreaterThan(0);
+    const first: Sources = await joined;
+    expect(first.sources?.seenAt).toBeGreaterThan(0);
+    expect(first.sources?.outputs).toEqual({
+      horizontal: { count: 1, seenAt: first.sources?.seenAt },
+      vertical: { count: 0, seenAt: null },
+    });
+    // A source with the key of the vertical output counts for that output.
+    const both = sources(2);
+    const vertical = (await subscribe({ "X-SB-Overlay": "vertical" })).webSocket;
+    if (!vertical) throw new Error("Missing WebSocket");
+    vertical.accept();
+    expect((await both).sources?.outputs).toMatchObject({ horizontal: { count: 1 }, vertical: { count: 1 } });
+    const one = sources(1);
+    vertical.close(1000, "done");
+    const afterVertical: Sources = await one;
+    expect(afterVertical.sources?.outputs?.horizontal).toEqual(first.sources?.outputs?.horizontal);
+    expect(afterVertical.sources?.outputs?.vertical.count).toBe(0);
+    expect(afterVertical.sources?.outputs?.vertical.seenAt).toBeGreaterThan(0);
     const gone = sources(0);
     source.close(1000, "done");
     expect((await gone).sources?.seenAt).toBeGreaterThan(0);
@@ -668,8 +686,8 @@ describe("overlay updates", (): void => {
       layers: {
         ...DEFAULT_LAYERS,
         cells: {
-          horizontal: { ...emptyCells(), message: { c: 0, r: 0, w: 16, h: 3 } },
-          vertical: { ...emptyCells(), message: { c: 0, r: 0, w: 9, h: 3 } },
+          horizontal: { ...emptyCells(), message: { c: 0, r: 0, w: 32, h: 6 } },
+          vertical: { ...emptyCells(), message: { c: 0, r: 0, w: 18, h: 6 } },
         },
       },
       chatTestUntil: 0,

@@ -11,13 +11,26 @@ import {
   type TapDelta,
   type TokenBucket,
 } from "../lib/mash";
+import type { Orientation } from "../lib/overlay-layers";
 import type { LiveSnapshot, MashPhase, MashTick, OverlayPublic } from "../types";
 import { LIVE_POLLS_SQL, livePolls, optionsFromJson, overlaySnapshot, type PollRow } from "./live-polls";
 import { OVERLAY_COLUMNS, overlayPublic, overlayValue, type OverlayRow } from "./overlay-state";
 import { validateTestEnvironment } from "./test-environment-config";
 import { detached } from "../lib/detached";
 import { ENTRY_ID, tapMessage, type TapMessage } from "./tap-message";
-import { leaseOf, oldest, OverlaySources, type ConnectionLease } from "./room-connections";
+import {
+  leaseOf,
+  oldest,
+  outputInBody,
+  keyRevokes,
+  keyTags,
+  outputOf,
+  OverlaySources,
+  socketKey,
+  sourceOutput,
+  type ConnectionLease,
+  type SocketKey,
+} from "./room-connections";
 
 const MAX_CONNECTIONS = 200;
 // Reserve half the room for signed-in viewers.
@@ -144,8 +157,8 @@ export class PollRoom extends DurableObject<AppEnv> {
     const userId = request.headers.get("X-SB-User");
     let role: SocketRole = userId === null ? "anonymous" : "member";
     if (userId !== null && request.headers.get("X-SB-Owner") === "1") role = "owner";
-    // Only valid overlay keys grant owner priority, even signed out.
-    const overlayKey = request.headers.get("X-SB-Overlay") === "1";
+    // Only a valid overlay key or dock key grants owner priority, even signed out. The Worker checked the key.
+    const overlayKey: SocketKey | null = socketKey(request.headers);
     if (overlayKey) role = "owner";
     if (url.pathname === "/subscribe") {
       const invalidSubscription = this.validateSubscription(request, clientKey, userId, role);
@@ -221,7 +234,7 @@ export class PollRoom extends DurableObject<AppEnv> {
     clientKey: string,
     userId: string | null,
     role: SocketRole,
-    overlayKey: boolean,
+    overlayKey: SocketKey | null,
   ): Promise<Response> {
     if (this.streamerId === undefined) {
       this.streamerId = streamerId;
@@ -230,7 +243,7 @@ export class PollRoom extends DurableObject<AppEnv> {
     if (path === "/refresh") return await this.refresh();
     if (path === "/mash") return await this.mashChanged(request);
     if (path === "/overlay") return await this.overlayChanged();
-    if (path === "/overlay-key") return this.overlayKeyRevoked();
+    if (path === "/overlay-key") return await this.overlayKeyRevoked(request);
 
     return await this.subscribe(clientKey, userId, role, overlayKey);
   }
@@ -249,7 +262,7 @@ export class PollRoom extends DurableObject<AppEnv> {
     clientKey: string,
     userId: string | null,
     role: SocketRole,
-    overlayKey: boolean,
+    overlayKey: SocketKey | null,
   ): Promise<Response> {
     const snapshot = await this.snapshot();
     this.expireConnections();
@@ -260,13 +273,14 @@ export class PollRoom extends DurableObject<AppEnv> {
     const pair = new WebSocketPair();
     const [client, server] = Object.values(pair);
     const tags = role === "owner" ? ["role:owner"] : [`client:${clientKey}`, `role:${role}`];
-    this.ctx.acceptWebSocket(server, overlayKey ? [...tags, "overlay-key"] : tags);
+    this.ctx.acceptWebSocket(server, overlayKey ? [...tags, ...keyTags(overlayKey)] : tags);
     const now = Date.now();
     const lease: ConnectionLease = { expiresAt: now + CONNECTION_LEASE_MS, userId: userId ?? null, openedAt: now };
     server.serializeAttachment(lease);
     const first: LiveSnapshot = this.withBattles(snapshot);
-    this.send(server, JSON.stringify(overlayKey ? overlaySnapshot(first) : first));
-    if (overlayKey) await this.overlaySourcesChanged();
+    const source: Orientation | null = sourceOutput(overlayKey);
+    this.send(server, JSON.stringify(source ? overlaySnapshot(first) : first));
+    if (source) await this.overlaySourcesChanged(source);
     else if (role === "owner") this.send(server, await this.overlaySources());
     this.startTicker();
     await this.scheduleResync();
@@ -335,26 +349,40 @@ export class PollRoom extends DurableObject<AppEnv> {
     return this.refresh();
   }
 
-  // Reconnect old-key sockets without owner priority.
-  private async overlayKeyRevoked(): Promise<Response> {
-    const sources = this.activeSockets("overlay-key");
+  // The key of one output or of the dock changed: reconnect its sockets without owner priority. The sockets of
+  // each other key stay.
+  private async overlayKeyRevoked(request: Request): Promise<Response> {
+    const output: SocketKey | null = await outputInBody(request);
+    if (!output) return response("Invalid output", 400);
+    const mine = (socket: WebSocket): boolean => keyRevokes(this.ctx.getTags(socket), output);
+    const sources = this.activeSockets().filter(mine);
     for (const socket of sources) {
       this.send(socket, JSON.stringify({ type: "unavailable" }));
       if (socket.readyState === WebSocket.OPEN) socket.close(1001, "Overlay key revoked");
     }
-    if (sources.length > 0) await this.overlaySourcesChanged();
+    if (sources.length > 0 && output !== "dock") await this.overlaySourcesChanged(output);
     return new Response(null, { status: 204 });
+  }
+
+  // The open OBS sockets of one output.
+  private sourceSockets(output: Orientation): WebSocket[] {
+    return this.activeSockets("overlay-key").filter(
+      (socket: WebSocket): boolean => outputOf(this.ctx.getTags(socket)) === output,
+    );
   }
 
   // The OBS sources in an `overlay` message, for the owner's sockets that are not OBS sources.
   private async overlaySources(): Promise<string> {
     this.overlay ??= await this.loadOverlay();
-    return this.sources.message(this.overlay, this.activeSockets("overlay-key").length);
+    return this.sources.message(this.overlay, {
+      horizontal: this.sourceSockets("horizontal").length,
+      vertical: this.sourceSockets("vertical").length,
+    });
   }
 
-  // An OBS source connected or went away: store the time and tell the overlay control.
-  private async overlaySourcesChanged(): Promise<void> {
-    await this.sources.touch(Date.now());
+  // An OBS source of one output connected or went away: store the time and tell the overlay control.
+  private async overlaySourcesChanged(output: Orientation): Promise<void> {
+    await this.sources.touch(output, Date.now());
     const message = await this.overlaySources();
     for (const socket of this.activeSockets("role:owner"))
       if (!this.ctx.getTags(socket).includes("overlay-key")) this.send(socket, message);
@@ -389,17 +417,17 @@ export class PollRoom extends DurableObject<AppEnv> {
   }
 
   async webSocketClose(socket: WebSocket, _code: number, _reason: string, _wasClean: boolean): Promise<void> {
-    const source = this.ctx.getTags(socket).includes("overlay-key");
+    const tags: string[] = this.ctx.getTags(socket);
     socket.close();
-    if (source) await this.overlaySourcesChanged();
+    if (tags.includes("overlay-key")) await this.overlaySourcesChanged(outputOf(tags));
     for (const battle of this.battles.values()) battle.seqs.delete(socket);
     if (this.activeSockets().length === 0 && this.battles.size === 0) await this.ctx.storage.deleteAlarm();
   }
 
   async webSocketError(socket: WebSocket, _error: unknown): Promise<void> {
-    const source = this.ctx.getTags(socket).includes("overlay-key");
+    const tags: string[] = this.ctx.getTags(socket);
     socket.close(1011, "Live connection failed");
-    if (source) await this.overlaySourcesChanged();
+    if (tags.includes("overlay-key")) await this.overlaySourcesChanged(outputOf(tags));
   }
 
   // Recover/end battles and broadcast a snapshot. Reschedule in `finally` so D1 failures cannot stop recovery.
@@ -933,7 +961,8 @@ export class PollRoom extends DurableObject<AppEnv> {
       if (socket.readyState !== WebSocket.OPEN) continue;
       socket.close(1001, idle ? "Live connection idle" : "Live connection lease expired");
       // An OBS source that went silent sends no close: tell the overlay control here.
-      if (this.ctx.getTags(socket).includes("overlay-key")) this.ctx.waitUntil(this.overlaySourcesChanged());
+      const tags: string[] = this.ctx.getTags(socket);
+      if (tags.includes("overlay-key")) this.ctx.waitUntil(this.overlaySourcesChanged(outputOf(tags)));
     }
   }
 

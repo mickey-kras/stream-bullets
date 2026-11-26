@@ -1,7 +1,9 @@
 import {
   type BubbleView,
+  blockOf,
   CHAR_STATES,
   type CharTuple,
+  type ExtrasView,
   FLAG_NEW,
   FLAG_UNAVAILABLE,
   type ModeView,
@@ -9,7 +11,7 @@ import {
   type RosterEntry,
   type TerrainView,
 } from "../../../lib/playground/protocol";
-import type { CharacterView, PlaygroundView, TileView } from "./view";
+import type { BlockView, CharacterView, FlagView, PlaygroundView, TileView } from "./view";
 
 /** The unavailable mark shows this far (world px) above the feet: over the head. */
 export const MARK_LIFT = 34;
@@ -19,6 +21,7 @@ export interface FrameState {
   roster: readonly RosterEntry[];
   bubbles: readonly BubbleView[];
   terrain: TerrainView;
+  extras: ExtrasView;
   mode: ModeView;
 }
 
@@ -33,14 +36,29 @@ function tile(code: string): TileView {
  * frame before the first full frame gives null: the playground is not known yet.
  */
 export function mergeFrame(state: FrameState | null, frame: PlaygroundFrame): FrameState | null {
-  if (frame.full) return { roster: frame.roster, bubbles: frame.bubbles, terrain: frame.terrain, mode: frame.mode };
+  if (frame.full) {
+    const { roster, bubbles, terrain, extras, mode } = frame;
+    return { roster, bubbles, terrain, extras, mode };
+  }
   if (!state) return null;
   return {
     roster: frame.roster ?? state.roster,
     bubbles: frame.bubbles ?? state.bubbles,
     terrain: frame.terrain ?? state.terrain,
+    extras: frame.extras ?? state.extras,
     mode: frame.mode ?? state.mode,
   };
+}
+
+/** The blocks of a terrain: `blocks` has one character per cell, in rows from the ground up. */
+function blocksOf(terrain: TerrainView): BlockView[] {
+  const cols: number = terrain.ground.length;
+  const found: BlockView[] = [];
+  for (const [i, code] of Array.from(terrain.blocks).entries()) {
+    const cell = blockOf(code);
+    if (cell && cols > 0) found.push({ ...cell, c: i % cols, r: Math.floor(i / cols) });
+  }
+  return found;
 }
 
 /** The renderer input for the characters of a frame. A character without a roster entry is not drawn. */
@@ -69,11 +87,18 @@ export function toView(state: FrameState, chars: readonly CharTuple[]): Playgrou
     });
     if ((flags & FLAG_UNAVAILABLE) !== 0) marks.push({ x, y: y - MARK_LIFT });
   }
-  const { terrain, mode } = state;
+  const { terrain, extras, mode } = state;
+  const shown = new Set<number>(characters.map((c: CharacterView): number => c.id));
   return {
     world: { width: terrain.w, height: terrain.h, ground: terrain.gy },
     tiles: Array.from(terrain.ground, tile),
-    stairs: terrain.stairs.map(([x, top, dir]) => ({ x, top, dir })),
+    blocks: blocksOf(terrain),
+    ropes: extras.ropes.flatMap(([id, x, y, hit]) => (shown.has(id) ? [{ id, x, y, hit: hit === 1 }] : [])),
+    flags: extras.flags.flatMap(([id, x, y]): FlagView[] => {
+      const owner: RosterEntry | undefined = roster.get(id);
+      return owner ? [{ x, y, platform: owner.platform }] : [];
+    }),
+    crown: extras.crown !== null && shown.has(extras.crown) ? extras.crown : null,
     marks,
     doors: { entrance: terrain.entryX, exit: terrain.exitX },
     pad: terrain.padX,

@@ -3,10 +3,11 @@ import { motionReduced, watchMotion } from "../../station/motion";
 import { WASTELAND_PLAYGROUND, type PlaygroundTheme } from "../wasteland/playground-theme";
 import { createMemory, draw, type DrawOptions, type RenderMemory } from "./renderer";
 import { loadAtlas, type Atlas } from "./sprites";
+import { PIXEL_SCALE } from "../../../lib/playground/constants";
 import type { PlaygroundView } from "./view";
 
 /** Design pixels per layout cell. */
-const CELL_DESIGN_PX = 120;
+const CELL_DESIGN_PX = 60;
 
 interface CharactersLayerProps {
   /** Layer size in layout cells. */
@@ -19,6 +20,18 @@ interface CharactersLayerProps {
   /** Called once if the pictures do not load or the canvas cannot draw; the layer then stays empty. */
   onError: (error: Error) => void;
   theme?: PlaygroundTheme;
+}
+
+/**
+ * Gives the canvas the size of the playground. One playground serves the horizontal and the vertical output, and its
+ * size comes from one cell. In the output whose cell has a different size, the picture becomes smaller to fit.
+ * Setting the size of a canvas clears it, so this runs only when the size changes.
+ */
+function fitCanvas(canvas: HTMLCanvasElement, view: PlaygroundView): void {
+  const width: number = Math.round(view.world.width * PIXEL_SCALE);
+  const height: number = Math.round(view.world.height * PIXEL_SCALE);
+  if (canvas.width !== width) canvas.width = width;
+  if (canvas.height !== height) canvas.height = height;
 }
 
 /** The character playground: one transparent canvas at design size, redrawn on every animation frame. */
@@ -62,6 +75,7 @@ export function CharactersLayer({
         if (stop.signal.aborted) return;
         try {
           const view: PlaygroundView | null = latest.current.source(now);
+          if (view) fitCanvas(canvas, view);
           if (view)
             draw(ctx, view, theme, atlas, now, memory, {
               reduced,
@@ -93,6 +107,9 @@ export function CharactersLayer({
           display: "block",
           width: "100%",
           height: "100%",
+          // A playground of a different size than the cell stays whole, on the ground of the cell (fitCanvas).
+          objectFit: "contain",
+          objectPosition: "50% 100%",
           imageRendering: "pixelated",
         }}
       />

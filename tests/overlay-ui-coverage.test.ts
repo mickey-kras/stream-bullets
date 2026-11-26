@@ -6,12 +6,15 @@ import { ChannelPanel, type ChannelView } from "../app/components/channels/chann
 import { ChatDeliveryContext } from "../app/components/channels/use-live-channels";
 import type { CharactersControl } from "../app/components/overlay/characters-controls";
 import { ChatLayer, chatStyle, shortName } from "../app/components/overlay/chat-layer";
+import { outputSources, type OverlaySources } from "../app/components/live";
 import { LayerPalette } from "../app/components/overlay/layer-palette";
 import { LayerProperties, OVERLAY_MESSAGE_MAX } from "../app/components/overlay/layer-properties";
 import { LAYER_NAMES, LayoutGrid, type LayoutGridHandle } from "../app/components/overlay/layout-grid";
 import { CharactersSlot, OverlayComposition, usesDesignCanvas } from "../app/components/overlay/overlay-composition";
 import { controlState, OverlayControl } from "../app/components/overlay/overlay-control";
-import { sourcesText } from "../app/components/overlay/overlay-link";
+import { DockLink } from "../app/components/overlay/dock-link";
+import { LayoutPicker, layoutOptions } from "../app/components/overlay/layout-picker";
+import { OverlayLink, sourcesText } from "../app/components/overlay/overlay-link";
 import {
   OverlayStage,
   optionColumns,
@@ -30,9 +33,17 @@ import {
   emptyCells,
   type ContentSource,
   type GridLayer,
+  type Orientation,
   type OverlayLayer,
   type OverlayLayers,
 } from "../app/lib/overlay-layers";
+import {
+  EMPTY_LAYOUTS,
+  layoutChoices,
+  presetCells,
+  selectLayout,
+  type OverlayLayouts,
+} from "../app/lib/overlay-layouts";
 import type { OverlayData, OverlayState } from "../app/types";
 
 const data: OverlayData = { polls: [], topics: [], cards: [], next: null, support: null };
@@ -40,7 +51,7 @@ const data: OverlayData = { polls: [], topics: [], cards: [], next: null, suppor
 const placed: OverlayLayers = {
   ...DEFAULT_LAYERS,
   cells: {
-    horizontal: { ...emptyCells(), chat: { c: 0, r: 0, w: 5, h: 7 }, poll: { c: 5, r: 0, w: 11, h: 7 } },
+    horizontal: { ...emptyCells(), chat: { c: 0, r: 0, w: 10, h: 14 }, poll: { c: 10, r: 0, w: 22, h: 14 } },
     vertical: emptyCells(),
   },
 };
@@ -119,15 +130,97 @@ function playground(override: Partial<CharactersControl> = {}): CharactersContro
   };
 }
 
+const NO_LINKS: Readonly<Record<Orientation, boolean>> = { horizontal: false, vertical: false };
+/** The link panel saves nothing in a static render. */
+const LINK_SAVES = { busy: false, hasDock: false, onTwitchOnly: (): void => undefined };
+
+describe("layout list of the studio", () => {
+  const act = (): Promise<boolean> => Promise.resolve(true);
+  const labels = (layouts: OverlayLayouts, layers: OverlayLayers): string[] =>
+    layoutOptions(layoutChoices(layouts, layers, "horizontal")).map((option): string => option.label);
+  const picker = (layouts: OverlayLayouts, layers: OverlayLayers, busy: boolean = false): string =>
+    renderToStaticMarkup(createElement(LayoutPicker, { output: "horizontal", layers, layouts, busy, act }));
+
+  it("is one row in step 1, between the output switch and the grid: no separate step to pick a layout", () => {
+    const html: string = renderToStaticMarkup(
+      createElement(OverlayControl, {
+        initial: state,
+        scene,
+        hasOverlayKey: NO_LINKS,
+        hasDockKey: false,
+        layouts: EMPTY_LAYOUTS,
+      }),
+    );
+    expect(html.match(/class="ov-step-num"/g)).toHaveLength(2);
+    const row: number = html.indexOf('data-layout-picker="horizontal"');
+    expect(row).toBeGreaterThan(html.indexOf("data-comp-orientation-note"));
+    expect(row).toBeLessThan(html.indexOf('class="ov-studio"'));
+  });
+
+  it("shows the layout on stream that is not saved yet, and offers a copy of it", () => {
+    const html: string = picker(EMPTY_LAYOUTS, placed);
+    expect(html).toContain(">Layout</span>");
+    expect(html).toContain("Save as a new layout");
+    // The list: the presets of the output, the layout on stream, and the entry for a new layout.
+    expect(labels(EMPTY_LAYOUTS, placed)).toEqual([
+      "Just chatting · preset",
+      "Gameplay · preset",
+      "Your layout · not saved yet",
+      "New layout…",
+    ]);
+    // No layout of the streamer yet, and no preset on stream.
+    expect(html).not.toContain("data-layout-manage");
+    expect(html).not.toContain("data-layout-reset");
+  });
+
+  it("names the preset on stream, and offers the reset only after a change", () => {
+    const picked = selectLayout({ layouts: EMPTY_LAYOUTS, layers: placed }, "horizontal", "preset:gameplay", {
+      id: "kept",
+      name: "My layout",
+    });
+    expect(picked.layers.cells.horizontal).toEqual(presetCells("gameplay"));
+    const same: string = picker(picked.layouts, picked.layers);
+    expect(labels(picked.layouts, picked.layers)).toEqual([
+      "Just chatting · preset",
+      "Gameplay · preset",
+      "My layout",
+      "New layout…",
+    ]);
+    expect(same).not.toContain("data-layout-reset");
+    // The layout that the page had is a layout of the streamer now: it can get a name or go.
+    expect(same).toContain("Rename or delete layouts");
+    const moved: OverlayLayers = {
+      ...picked.layers,
+      cells: { ...picked.layers.cells, horizontal: { ...picked.layers.cells.horizontal, poll: null } },
+    };
+    const changed: string = picker(picked.layouts, moved);
+    expect(labels(picked.layouts, moved)[1]).toBe("Gameplay · preset, changed by you");
+    expect(changed).toContain("Reset to the preset");
+    // No action during a save.
+    expect(picker(picked.layouts, moved, true).match(/<button[^>]* disabled=""/g)?.length).toBeGreaterThanOrEqual(3);
+  });
+});
+
 describe("overlay control page", () => {
   function control(initial: OverlayState = state, connected: boolean = true): string {
-    return renderToStaticMarkup(createElement(OverlayControl, { initial, scene, hasOverlayKey: false, connected }));
+    return renderToStaticMarkup(
+      createElement(OverlayControl, {
+        initial,
+        scene,
+        hasOverlayKey: NO_LINKS,
+        hasDockKey: false,
+        layouts: EMPTY_LAYOUTS,
+        connected,
+      }),
+    );
   }
 
-  it("has the studio as step 2 and the OBS link as step 3, without the old live control", () => {
+  it("has the studio as step 1 and the OBS link as step 2, without the page head and the old live control", () => {
     const html: string = control();
-    expect(html).toContain('<span class="ov-step-num">2</span> Build your overlay</h2>');
-    expect(html).toContain('<span class="ov-step-num">3</span> Add to OBS</h2>');
+    expect(html).toContain('<span class="ov-step-num">1</span> Build your overlay</h2>');
+    expect(html).toContain('<span class="ov-step-num">2</span> Add to OBS</h2>');
+    // The route gives the page its head and its section links.
+    expect(html).not.toContain("<h1");
     expect(html.match(/class="ov-step-num"/g)).toHaveLength(2);
     expect(html).toContain("Changes go live right away");
     for (const gone of ["data-ov-monitor", "data-ov-take", "ov-take-dock", "ov-sources", "<kbd", "Instant switch"])
@@ -137,10 +230,18 @@ describe("overlay control page", () => {
   });
 
   it("shows the OBS connection of a page that has an overlay link", () => {
-    const html = (hasOverlayKey: boolean, count: number): string =>
+    const html = (hasKey: boolean, count: number): string =>
       renderToStaticMarkup(
-        createElement(OverlayControl, { initial: state, scene, hasOverlayKey, sources: { count, seenAt: null } }),
+        createElement(OverlayControl, {
+          initial: state,
+          scene,
+          hasOverlayKey: { horizontal: hasKey, vertical: false },
+          hasDockKey: false,
+          layouts: EMPTY_LAYOUTS,
+          sources: { count, seenAt: null },
+        }),
       );
+    // A room from before the two outputs sends no number for each output: its sources are horizontal.
     expect(html(true, 2)).toContain('data-ov-sources="2"');
     expect(html(true, 2)).toContain("OBS is connected: 2 sources.");
     expect(html(true, 0)).toContain("OBS did not connect yet.");
@@ -148,6 +249,168 @@ describe("overlay control page", () => {
     expect(sourcesText({ count: 1, seenAt: 0 }, 0)).toBe("OBS is connected: 1 source.");
     expect(sourcesText({ count: 0, seenAt: 1000 }, 181_000)).toBe("OBS is not connected. Last seen 3 minutes ago.");
     expect(sourcesText({ count: 0, seenAt: 1000 }, 1000)).toBe("OBS is not connected. Last seen just now.");
+  });
+
+  it("has one link section for each output, with its name, its source size and its own buttons", () => {
+    const html = (hasKey: Readonly<Record<Orientation, boolean>>): string =>
+      renderToStaticMarkup(
+        createElement(OverlayLink, { hasKey, layers: placed, sources: null, now: 1000, ...LINK_SAVES }),
+      );
+    // The closed sections come after the two links: the guide, the dock, and the Twitch switches.
+    const sections = (markup: string): string[] =>
+      markup.slice(0, markup.indexOf("<details")).split('<section class="ov-url-output"').slice(1);
+    const none: string = html(NO_LINKS);
+    // One sentence for the two links, before them.
+    expect(none.match(/Each output has its own private link for OBS\. Use one link or both\./g)).toHaveLength(1);
+    expect(none.indexOf("Each output has its own private link")).toBeLessThan(none.indexOf("<section"));
+    const [horizontal, vertical] = sections(none);
+    expect(sections(none)).toHaveLength(2);
+    expect(horizontal).toContain('data-ov-output="horizontal"');
+    expect(vertical).toContain('data-ov-output="vertical"');
+    // Each section is a region with the name of its output.
+    for (const [section, name] of [
+      [horizontal, "Horizontal output"],
+      [vertical, "Vertical output"],
+    ]) {
+      const id: string | undefined = /aria-labelledby="([^"]+)"/.exec(section)?.[1];
+      expect(id).toBeDefined();
+      expect(section).toContain(`<p id="${id}"><strong>${name}</strong></p>`);
+      expect(section.match(/<button/g)).toHaveLength(1);
+      expect(section).toContain(">Create overlay link</button>");
+      expect(section).not.toContain("data-ov-sources");
+    }
+    expect(horizontal).toContain("Add a Browser source in OBS: width 1920, height 1080.");
+    expect(vertical).toContain("Add a Browser source in OBS: width 1080, height 1920.");
+    // A link of one output: that section offers to show it and to replace it. The other section does not change.
+    const [made, other] = sections(html({ horizontal: false, vertical: true })).reverse();
+    expect(made).toContain('data-ov-output="vertical"');
+    expect(made).toContain(">Show link</button>");
+    expect(made).toContain(">Regenerate link</button>");
+    expect(made).toContain("Your private overlay link is hidden.");
+    expect(other).toContain(">Create overlay link</button>");
+    expect(other).not.toContain("Show link");
+    expect(other).not.toContain("Your private overlay link is hidden.");
+  });
+
+  it("has a closed guide for a first use of OBS, in three groups of numbered steps", () => {
+    const html: string = renderToStaticMarkup(
+      createElement(OverlayLink, { hasKey: NO_LINKS, layers: placed, sources: null, now: 1000, ...LINK_SAVES }),
+    );
+    const guide: string = html.slice(html.indexOf("<details"), html.indexOf("</details>"));
+    expect(guide).toMatch(/^<details class="[^"]*" data-ov-guide="true">/);
+    expect(guide).not.toMatch(/^<details[^>]* open/);
+    expect(guide).toContain("<summary>First time in OBS? Set it up step by step</summary>");
+    // The guide is after the two links and before the Twitch section.
+    expect(html.indexOf("data-ov-guide")).toBeGreaterThan(html.lastIndexOf('<section class="ov-url-output"'));
+    expect(html.indexOf("data-ov-guide")).toBeLessThan(html.indexOf("data-ov-twitch"));
+    const groups: string[] = guide.split("<section").slice(1);
+    expect(groups.map((group: string): string => /<strong>([^<]+)<\/strong>/.exec(group)?.[1] ?? "")).toEqual([
+      "Add the overlay",
+      "Add the vertical output",
+      "Choose which platforms get each output",
+    ]);
+    expect(groups.map((group: string): number => group.match(/<li>/g)?.length ?? 0)).toEqual([6, 4, 4]);
+    // Each output has its own source size, and the steps name the controls of this page.
+    expect(groups[0]).toContain("Set Width to 1920 and Height to 1080.");
+    expect(groups[1]).toContain("Set Width to 1080 and Height to 1920.");
+    expect(groups[0]).toContain("select “Start test” in step 1");
+    expect(groups[2]).toContain("In “Channels”, check that each channel shows as connected.");
+    // The plugins are examples, and the Twitch rule and the dock are not in the guide.
+    expect(guide).toContain("for example Aitum Vertical");
+    expect(guide).toContain("for example Aitum Multistream");
+    expect(guide).not.toContain("Twitch chat only");
+    expect(guide).not.toContain("{");
+  });
+
+  it("has a closed section for the OBS dock that tells the owner to keep the dock off screen", () => {
+    const html = (hasKey: boolean): string => renderToStaticMarkup(createElement(DockLink, { hasKey }));
+    const none: string = html(false);
+    expect(none).toMatch(/^<details class="[^"]*" data-ov-dock="true">/);
+    expect(none).not.toMatch(/^<details[^>]* open/);
+    expect(none).toContain("<summary>Control your stream from inside OBS</summary>");
+    expect(none).toContain("Keep the dock off screen: do not capture it in a scene, and do not share the link.");
+    expect(none).toContain(">Create dock link</button>");
+    // The link shows one time, when the owner makes it: a page with a link shows no link.
+    const made: string = html(true);
+    expect(made).toContain(">Regenerate dock link</button>");
+    expect(made).toContain("Your dock link is hidden.");
+    expect(made).not.toContain("data-ov-dock-url");
+    expect(made).not.toContain("dock?key=");
+    // The section is in the step with the links, before the Twitch switches.
+    const panel: string = renderToStaticMarkup(
+      createElement(OverlayLink, { hasKey: NO_LINKS, layers: placed, sources: null, now: 1000, ...LINK_SAVES }),
+    );
+    expect(panel.indexOf("data-ov-dock")).toBeGreaterThan(panel.indexOf("data-ov-guide"));
+    expect(panel.indexOf("data-ov-dock")).toBeLessThan(panel.indexOf("data-ov-twitch"));
+  });
+
+  it("has a closed section with one Twitch switch for each output, after the links", () => {
+    // The Twitch section is the last closed section: the OBS guide is before it.
+    const html = (layers: OverlayLayers, busy: boolean = false): string =>
+      renderToStaticMarkup(
+        createElement(OverlayLink, { hasKey: NO_LINKS, layers, sources: null, now: 1000, ...LINK_SAVES, busy }),
+      );
+    const off: string = html(placed);
+    const section: string = off.slice(off.lastIndexOf("<details"));
+    // The section is closed until the owner opens it, and comes after the two links.
+    expect(section).toMatch(/^<details class="[^"]*" data-ov-twitch="true">/);
+    expect(section).not.toMatch(/^<details[^>]* open/);
+    expect(off.lastIndexOf("<details")).toBeGreaterThan(off.lastIndexOf('<section class="ov-url-output"'));
+    expect(section).toContain("<summary>Streaming to Twitch and other platforms at once?</summary>");
+    expect(section).toContain("The Twitch rules for simulcasts do not allow chat from other platforms");
+    expect(section).toContain("Show Twitch chat only on the horizontal output");
+    expect(section).toContain("Show Twitch chat only on the vertical output");
+    expect(section.match(/type="checkbox"/g)).toHaveLength(2);
+    expect(section).not.toContain("checked");
+    // Each switch shows the state of its own output.
+    const vertical: string = html({ ...placed, twitchOnly: { horizontal: false, vertical: true } });
+    expect(vertical).toMatch(/<input type="checkbox" data-ov-twitch-only="vertical" checked=""\/>/);
+    expect(vertical).toMatch(/<input type="checkbox" data-ov-twitch-only="horizontal"\/>/);
+    // No change during a save.
+    expect(html(placed, true).match(/type="checkbox" disabled=""/g)).toHaveLength(2);
+  });
+
+  it("shows the OBS connection of each output beside the link of that output", () => {
+    const sources: OverlaySources = {
+      count: 2,
+      seenAt: 900,
+      outputs: { horizontal: { count: 2, seenAt: 900 }, vertical: { count: 0, seenAt: 1000 - 180_000 } },
+    };
+    const html = (hasKey: Readonly<Record<Orientation, boolean>>, given: OverlaySources | null = sources): string =>
+      renderToStaticMarkup(
+        createElement(OverlayLink, { hasKey, layers: placed, sources: given, now: 1000, ...LINK_SAVES }),
+      );
+    const [horizontal, vertical] = html({ horizontal: true, vertical: true }).split("<section").slice(1);
+    expect(horizontal).toContain('data-ov-sources="2"');
+    expect(horizontal).toContain("OBS is connected: 2 sources.");
+    expect(vertical).toContain('data-ov-sources="0"');
+    expect(vertical).toContain("OBS is not connected. Last seen 3 minutes ago.");
+    // An output without a link shows no connection, and nothing shows before the live room tells.
+    const [, noLink] = html({ horizontal: true, vertical: false }).split("<section").slice(1);
+    expect(noLink).not.toContain("data-ov-sources");
+    expect(html({ horizontal: true, vertical: true }, null)).not.toContain("data-ov-sources");
+    // A vertical output that OBS never opened.
+    const never: OverlaySources = {
+      ...sources,
+      outputs: { horizontal: { count: 2, seenAt: 900 }, vertical: { count: 0, seenAt: null } },
+    };
+    expect(html({ horizontal: true, vertical: true }, never).split("<section")[2]).toContain(
+      "OBS did not connect yet.",
+    );
+  });
+
+  it("reads the sources of each output, and all sources as horizontal from a room without them", () => {
+    const each: OverlaySources = {
+      count: 3,
+      seenAt: 9,
+      outputs: { horizontal: { count: 1, seenAt: 4 }, vertical: { count: 2, seenAt: 9 } },
+    };
+    expect(outputSources(each, "horizontal")).toEqual({ count: 1, seenAt: 4 });
+    expect(outputSources(each, "vertical")).toEqual({ count: 2, seenAt: 9 });
+    // A live room from before the two outputs sends only the numbers of the page.
+    const old: OverlaySources = { count: 3, seenAt: 9 };
+    expect(outputSources(old, "horizontal")).toEqual({ count: 3, seenAt: 9 });
+    expect(outputSources(old, "vertical")).toEqual({ count: 0, seenAt: null });
   });
 
   it("offers each layer one time in the palette and marks the layers on the grid", () => {
@@ -159,10 +422,11 @@ describe("overlay control page", () => {
       ...GRID_LAYERS,
     ]);
     const marked: boolean[] = chips.map((chip: string): boolean => chip.includes('data-placed="true"'));
-    expect(marked).toEqual([true, false, true, false, false, false, false, false]);
+    expect(marked).toEqual([true, false, true, false, false, false, false, false, false]);
     for (const name of ["Chat", "Characters", "Poll", "Topic", "Up next", "Message banner", "Community card"])
       expect(html).toContain(`<span class="ov-palette-name">${name}</span>`);
     expect(html).toContain('<span class="ov-palette-name">Support banner</span>');
+    expect(html).toContain('<span class="ov-palette-name">Camera frame</span>');
     expect(html.match(/class="ov-palette-placed">Placed</g)).toHaveLength(2);
     // A placed chip is a toggle for the selection. A chip of a layer off the grid adds the layer.
     expect(chips[0]).toContain('aria-pressed="false"');
@@ -211,7 +475,7 @@ describe("overlay control page", () => {
     expect(controlState(state, loaded, live)).toEqual({ ...live, message: "Unsaved banner" });
     expect(controlState(loaded, state, state)).toBe(loaded);
     expect(controlState(state, loaded, null)).toBe(loaded);
-    const cells = { ...placed.cells, horizontal: { ...placed.cells.horizontal, message: { c: 0, r: 7, w: 4, h: 2 } } };
+    const cells = { ...placed.cells, horizontal: { ...placed.cells.horizontal, message: { c: 0, r: 14, w: 8, h: 4 } } };
     const onStream: OverlayState = { ...live, layers: { ...placed, cells }, message: "On stream" };
     expect(controlState(state, loaded, onStream).message).toBe("On stream");
   });
@@ -256,9 +520,12 @@ describe("settings of the selected layer", () => {
     expect(html).toMatch(new RegExp(`<h3 class="ov-props-name" id="[^"]+">${t(LAYER_NAMES[layer])}</h3>`));
     expect(html).toContain("Show on stream");
     expect(html).toMatch(/<button type="button" data-props-remove="true">Remove from grid<\/button>/);
-    // The characters have no background. The chat, the characters and the message banner have no QR code.
-    expect(html.includes("data-props-background")).toBe(layer !== "characters");
-    expect(html.includes("data-props-qr")).toBe(layer !== "chat" && layer !== "characters" && layer !== "message");
+    // The characters and the camera frame have no background. They, the chat and the message banner have no QR code.
+    const plain: boolean = layer === "characters" || layer === "camera";
+    expect(html.includes("data-props-background")).toBe(!plain);
+    expect(html.includes("data-props-qr")).toBe(!plain && layer !== "chat" && layer !== "message");
+    // The camera frame says where the camera goes.
+    expect(html.includes("put your camera under the overlay source")).toBe(layer === "camera");
   });
 
   it("warns in the chat settings when the chat is on stream and no channel delivers chat", () => {
@@ -282,7 +549,7 @@ describe("settings of the selected layer", () => {
       );
     const warning: string = chatSettings(true, false);
     expect(warning).toMatch(
-      /<p class="ch-problem ov-comp-note" data-comp-chat-down="true"><svg[^>]*icon-warning[^>]*>.*?<\/svg><span>No channel delivers chat right now\. See <a class="text-link" href="#channels-title">step 1<\/a>\.<\/span><\/p>/,
+      /<p class="ch-problem ov-comp-note" data-comp-chat-down="true"><svg[^>]*icon-warning[^>]*>.*?<\/svg><span>No channel delivers chat right now\. See <a class="text-link" href="\/tools\?view=channels#channels-title">Channels<\/a>\.<\/span><\/p>/,
     );
     // Off stream, with a healthy channel, or without live channel data, the line does not show.
     expect(chatSettings(false, false)).not.toContain("data-comp-chat-down");
@@ -398,7 +665,7 @@ describe("settings of the selected layer", () => {
     const html: string = settings("chat");
     expect(html).toContain("Hide chat commands (!jump)");
     expect(html).toContain('data-props-commands="true" checked=""');
-    expect(html).toContain('<a class="text-link" href="#channels-title">Connect channels</a>');
+    expect(html).toContain('<a class="text-link" href="/tools?view=channels#channels-title">Connect channels</a>');
     expect(settings("poll")).not.toContain("data-props-commands");
   });
 
@@ -756,6 +1023,8 @@ describe("overlay source fallbacks", () => {
       }),
     );
     expect(html).toMatch(/^<div aria-hidden="true"[^>]*><canvas class="characters-layer" width="720" height="240"/);
+    // A playground of a different size than the cell stays whole, at the bottom of the cell: the other output.
+    expect(html).toContain("object-fit:contain;object-position:50% 100%");
     expect(html).not.toContain("<img");
     expect(html).not.toContain("<button");
   });
@@ -822,12 +1091,12 @@ describe("layers in the composition", () => {
     cells: {
       horizontal: {
         ...emptyCells(),
-        chat: { c: 0, r: 0, w: 5, h: 7 },
-        characters: { c: 0, r: 7, w: 16, h: 2 },
-        poll: { c: 8, r: 0, w: 8, h: 3 },
-        topic: { c: 5, r: 0, w: 3, h: 3 },
-        message: { c: 5, r: 3, w: 4, h: 2 },
-        support: { c: 9, r: 3, w: 4, h: 2 },
+        chat: { c: 0, r: 0, w: 10, h: 14 },
+        characters: { c: 0, r: 14, w: 32, h: 4 },
+        poll: { c: 16, r: 0, w: 16, h: 6 },
+        topic: { c: 10, r: 0, w: 6, h: 6 },
+        message: { c: 10, r: 6, w: 8, h: 4 },
+        support: { c: 18, r: 6, w: 8, h: 4 },
       },
       vertical: emptyCells(),
     },
@@ -913,6 +1182,29 @@ describe("layers in the composition", () => {
     expect(boxes(composition(characters))[0]).toMatch(/^characters left:0%;top:77\./);
   });
 
+  it("shows the camera frame with a clear window, and the text of the window only in a preview", () => {
+    const framed: OverlayLayers = {
+      ...layers,
+      camera: { enabled: true },
+      cells: { ...layers.cells, horizontal: { ...layers.cells.horizontal, camera: { c: 20, r: 12, w: 12, h: 6 } } },
+    };
+    const html: string = composition(framed);
+    expect(boxes(html).at(-2)).toBe("camera left:62.5%;top:66.66666666666666%;width:37.5%;height:33.33333333333333%");
+    // The frame is an empty element: the window has no fill, no picture and no text on the overlay page.
+    expect(html).toContain('<div class="ov-camera" data-overlay-camera="true"></div>');
+    expect(html).not.toContain("Your OBS camera shows here");
+    const preview: string = renderToStaticMarkup(
+      createElement(OverlayComposition, { scene: shown, layers: framed, only: null, feed: null, cameraHint: true }),
+    );
+    expect(preview).toContain('<p class="ov-camera-hint" data-camera-hint="true">Your OBS camera shows here</p>');
+    // The frame goes with the content layers of a per-layer source, and not with the chat.
+    expect(boxes(composition(framed, "content")).map((box: string): string => box.split(" ")[0])).toContain("camera");
+    expect(composition(framed, "chat")).not.toContain("ov-camera");
+    // Off, or without a cell, the frame does not show.
+    expect(composition({ ...framed, camera: { enabled: false } })).not.toContain("ov-camera");
+    expect(composition({ ...layers, camera: { enabled: true } })).not.toContain("ov-camera");
+  });
+
   it("uses the design canvas for the composition and for the content layers alone", () => {
     expect(usesDesignCanvas(null)).toBe(true);
     expect(usesDesignCanvas("content")).toBe(true);
@@ -930,12 +1222,12 @@ describe("the channel cards", (): void => {
   function cards(channels: ChannelView[]): string[] {
     const Stub = createRoutesStub([
       {
-        path: "/overlay-control",
+        path: "/tools",
         Component: () =>
           createElement(ChannelPanel, { channels, providers: ["google"], signInProvider: "google", result: null }),
       },
     ]);
-    const markup: string = renderToStaticMarkup(createElement(Stub, { initialEntries: ["/overlay-control"] }));
+    const markup: string = renderToStaticMarkup(createElement(Stub, { initialEntries: ["/tools"] }));
     return markup.split('<li class="ch-item"').slice(1);
   }
 
@@ -1030,7 +1322,7 @@ describe("the channel cards", (): void => {
     const panel = (stale: boolean): string => {
       const Stub = createRoutesStub([
         {
-          path: "/overlay-control",
+          path: "/tools",
           Component: () =>
             createElement(ChannelPanel, {
               channels: offered,
@@ -1041,7 +1333,7 @@ describe("the channel cards", (): void => {
             }),
         },
       ]);
-      return renderToStaticMarkup(createElement(Stub, { initialEntries: ["/overlay-control"] }));
+      return renderToStaticMarkup(createElement(Stub, { initialEntries: ["/tools"] }));
     };
     expect(panel(true)).toContain(
       '<p class="muted" data-channels-stale="true">Status could not be refreshed. Next try in a moment.</p>',

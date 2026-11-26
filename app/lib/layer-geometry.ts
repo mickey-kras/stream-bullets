@@ -80,6 +80,8 @@ function compact(patch: LayersPatch): LayersPatch {
   if (patch.orientation !== undefined) result.orientation = patch.orientation;
   if (patch.chat && Object.keys(patch.chat).length > 0) result.chat = { ...patch.chat };
   if (patch.characters && Object.keys(patch.characters).length > 0) result.characters = { ...patch.characters };
+  if (patch.camera && Object.keys(patch.camera).length > 0) result.camera = { ...patch.camera };
+  if (patch.twitchOnly && Object.keys(patch.twitchOnly).length > 0) result.twitchOnly = { ...patch.twitchOnly };
   const items: ItemsPatch = compactItems(patch.items);
   if (Object.keys(items).length > 0) result.items = items;
   const cells: Partial<Record<Orientation, CellsPatch>> = {};
@@ -107,9 +109,23 @@ function diffItems(before: OverlayLayers, after: OverlayLayers): ItemsPatch {
   return items;
 }
 
+/** The Twitch switches that differ from `before` to `after`: one field for each output. */
+function diffTwitchOnly(before: OverlayLayers, after: OverlayLayers): Partial<Record<Orientation, boolean>> {
+  const changed: Partial<Record<Orientation, boolean>> = {};
+  for (const output of ORIENTATIONS)
+    if (before.twitchOnly[output] !== after.twitchOnly[output]) changed[output] = after.twitchOnly[output];
+  return changed;
+}
+
 /** The fields that differ from `before` to `after`, with their `after` values. */
 export function diffLayers(before: OverlayLayers, after: OverlayLayers): LayersPatch {
-  const patch: LayersPatch = { chat: {}, characters: {}, items: diffItems(before, after), cells: {} };
+  const patch: LayersPatch = {
+    chat: {},
+    characters: {},
+    items: diffItems(before, after),
+    cells: {},
+    twitchOnly: diffTwitchOnly(before, after),
+  };
   if (before.orientation !== after.orientation) patch.orientation = after.orientation;
   if (before.chat.enabled !== after.chat.enabled) patch.chat = { enabled: after.chat.enabled };
   if (before.chat.hideCommands !== after.chat.hideCommands)
@@ -121,6 +137,7 @@ export function diffLayers(before: OverlayLayers, after: OverlayLayers): LayersP
     patch.characters = { ...patch.characters, timeout: after.characters.timeout };
   if (before.characters.max !== after.characters.max)
     patch.characters = { ...patch.characters, max: after.characters.max };
+  if (before.camera.enabled !== after.camera.enabled) patch.camera = { enabled: after.camera.enabled };
   for (const orientation of ORIENTATIONS) {
     const layout: CellsPatch = {};
     for (const layer of GRID_LAYERS) {
@@ -144,6 +161,8 @@ export function mergePatches(base: LayersPatch, next: LayersPatch): LayersPatch 
     orientation: next.orientation ?? base.orientation,
     chat: { ...base.chat, ...next.chat },
     characters: { ...base.characters, ...next.characters },
+    camera: { ...base.camera, ...next.camera },
+    twitchOnly: { ...base.twitchOnly, ...next.twitchOnly },
     items: mergeItems(base.items, next.items),
     cells: {
       horizontal: { ...base.cells?.horizontal, ...next.cells?.horizontal },
@@ -176,6 +195,8 @@ export function withoutSent(draft: LayersPatch, sent: LayersPatch): LayersPatch 
   removeSentFields(result, sent, ["orientation"]);
   removeSentFields(result.chat, sent.chat, ["enabled", "hideCommands", "backgroundOpacity"]);
   removeSentFields(result.characters, sent.characters, ["enabled"]);
+  removeSentFields(result.camera, sent.camera, ["enabled"]);
+  removeSentFields(result.twitchOnly, sent.twitchOnly, ORIENTATIONS);
   for (const layer of CONTENT_LAYERS) removeSentFields(result.items?.[layer], sent.items?.[layer], ITEM_FIELDS);
   for (const orientation of ORIENTATIONS) {
     const layout: CellsPatch | undefined = result.cells?.[orientation];
@@ -230,6 +251,7 @@ export function moveCell(orientation: Orientation, rect: CellRect, grab: Cell, a
 export function withEnabled(layers: OverlayLayers, layer: GridLayer, enabled: boolean): OverlayLayers {
   if (layer === "chat") return { ...layers, chat: { ...layers.chat, enabled } };
   if (layer === "characters") return { ...layers, characters: { ...layers.characters, enabled } };
+  if (layer === "camera") return { ...layers, camera: { enabled } };
   return withItem(layers, layer, { enabled });
 }
 

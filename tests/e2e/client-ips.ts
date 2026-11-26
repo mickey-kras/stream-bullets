@@ -6,7 +6,7 @@ const ranges = {
   "viewer-polls": [[16, 19]],
   "comment-answer": [[20, 21]],
   mutations: [[25, 27]],
-  "overlay-studio": [[28, 35]],
+  "overlay-studio": [[28, 37]],
   account: [[40, 40]],
   pagination: [[50, 51]],
   moderation: [[60, 65]],
@@ -14,7 +14,10 @@ const ranges = {
   "discussion-history": [[75, 78]],
   // Reserved for callers without clientIp.
   mash: [[80, 82]],
-  "overlay-control": [[90, 94]],
+  "overlay-control": [
+    [90, 94],
+    [97, 98],
+  ],
   community: [[95, 96]],
   threads: [[100, 100]],
   "comment-translation": [[101, 102]],
@@ -45,6 +48,7 @@ const ranges = {
   ],
   "composition-editor": [[245, 249]],
   "layout-widgets": [[251, 254]],
+  "tools-live": [[41, 48]],
   characters: [[182, 189]],
   "compact-layout": [[220, 231]],
 } as const satisfies Record<string, readonly (readonly [number, number])[]>;

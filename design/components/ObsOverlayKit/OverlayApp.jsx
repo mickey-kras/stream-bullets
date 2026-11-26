@@ -4,7 +4,7 @@ import { Chat } from "./Chat.jsx";
 import { Content } from "./Content.jsx";
 import { Stage } from "./Stage.jsx";
 
-const CELL = 120;
+const CELL = 60;
 const FRAME = { w: 1920, h: 1080 };
 const SOURCES = [
   ["poll", "Poll"],
@@ -20,10 +20,10 @@ const BACKGROUNDS = [
   ["checker", "Transparent"],
   ["game", "Sample game"],
 ];
-// The cells of the layers, in columns and rows of the 16 × 9 grid.
-const CHAT_CELL = { c: 0, r: 2, w: 4, h: 7 };
-const POLL_CELL = { c: 5, r: 0, w: 11, h: 6 };
-const CARD_CELL = { c: 5, r: 6, w: 11, h: 3 };
+// The cells of the layers, in columns and rows of the 32 × 18 grid.
+const CHAT_CELL = { c: 0, r: 4, w: 8, h: 14 };
+const POLL_CELL = { c: 10, r: 0, w: 22, h: 12 };
+const CARD_CELL = { c: 10, r: 12, w: 22, h: 6 };
 
 const pixels = (cell) => ({ x: cell.c * CELL, y: cell.r * CELL, w: cell.w * CELL, h: cell.h * CELL });
 

@@ -29,7 +29,7 @@ const viewLabel: Record<StreamerView, MessageId> = {
   community: "streamer.nav.community",
 };
 
-// Narrow headers use icon tabs with accessible names. The owner of the page also gets the Overlay entry.
+// Narrow headers use icon tabs with accessible names. The owner of the page also gets the Tools entry.
 export function StreamerHeader({
   streamer,
   current,
@@ -41,7 +41,7 @@ export function StreamerHeader({
   brand,
   badge,
   ticker,
-  overlayCurrent = false,
+  toolsCurrent = false,
   className = "",
 }: Readonly<{
   streamer: {
@@ -61,8 +61,8 @@ export function StreamerHeader({
   badge?: ReactNode;
   // Full-width on-air strip rendered below the header bar while a stream is live.
   ticker?: ReactNode;
-  /** Overlay control is the current page: its tab is marked and the other tabs lead to the streamer page. */
-  overlayCurrent?: boolean;
+  /** Streamer tools is the current page: its tab is marked and the other tabs lead to the streamer page. */
+  toolsCurrent?: boolean;
   className?: string;
 }>): ReactNode {
   const header = useRef<HTMLElement | null>(null);
@@ -110,13 +110,13 @@ export function StreamerHeader({
         {ownPage && (
           <Link
             className="nav-tab"
-            to={paths.overlayControl}
-            aria-label={t("nav.overlay")}
-            title={t("nav.overlay")}
-            aria-current={overlayCurrent ? "page" : undefined}
+            to={paths.tools}
+            aria-label={t("nav.tools")}
+            title={t("nav.tools")}
+            aria-current={toolsCurrent ? "page" : undefined}
           >
-            <Icon name="overlay" size={20} />
-            <span className="nav-label">{t("nav.overlay")}</span>
+            <Icon name="mic" size={20} />
+            <span className="nav-label">{t("nav.tools")}</span>
           </Link>
         )}
       </nav>

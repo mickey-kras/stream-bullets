@@ -60,7 +60,7 @@ async function join(role: Role, previousUser?: string): Promise<{ status: number
   const headers: Record<string, string> = { Upgrade: "websocket", Origin: origin, "X-Stream-Bullets-Client": key };
   if (role === "member" || role === "owner") headers["X-SB-User"] = user;
   if (role === "owner") headers["X-SB-Owner"] = "1";
-  if (role === "overlay") headers["X-SB-Overlay"] = "1";
+  if (role === "overlay") headers["X-SB-Overlay"] = "horizontal";
   const start: number = performance.now();
   const result = await runtime.dispatchFetch(`${origin}/${room}/subscribe?streamerId=${room}`, { headers });
   if (!result.webSocket) return { status: result.status, ms: performance.now() - start };

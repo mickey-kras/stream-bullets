@@ -7,6 +7,7 @@ import { conversionRoutes } from "./conversions";
 import { cookieRoutes } from "./cookies";
 import { entryRoutes } from "./entries";
 import { imageRoutes } from "./images";
+import { dockRoutes } from "./dock";
 import { liveRoutes } from "./live";
 import { notificationRoutes } from "./notifications";
 import { moderationRoutes } from "./moderation";
@@ -27,6 +28,7 @@ export const apiRoutes: readonly ApiRoute[] = [
   ...scheduleRoutes,
   ...communityRoutes,
   ...liveRoutes,
+  ...dockRoutes,
   ...channelRoutes,
   ...adminRoutes,
   ...aiRoutes,

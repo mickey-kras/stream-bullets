@@ -699,10 +699,12 @@ describe("tables added by migrations 0006–0012", (): void => {
           ...DEFAULT_LAYERS,
           chat: { enabled: true, hideCommands: true },
           cells: {
-            horizontal: { ...DEFAULT_LAYERS.cells.horizontal, chat: { c: 10, r: 0, w: 3, h: 2 } },
-            vertical: { ...DEFAULT_LAYERS.cells.vertical, chat: { c: 0, r: 8, w: 9, h: 5 } },
+            horizontal: { ...DEFAULT_LAYERS.cells.horizontal, chat: { c: 20, r: 0, w: 6, h: 4 } },
+            vertical: { ...DEFAULT_LAYERS.cells.vertical, chat: { c: 0, r: 16, w: 18, h: 10 } },
           },
         },
+        // The page has no saved layout.
+        layouts: { horizontal: { active: null, saved: [] }, vertical: { active: null, saved: [] } },
         updatedAt: new Date(now).toISOString(),
       },
     });

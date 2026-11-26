@@ -751,6 +751,9 @@ export const overlayState = sqliteTable(
     // The last applied layer write of up to 8 editors: [random editor id, write number] pairs, the most recent
     // editor first (app/server/overlay.server.ts).
     layersWrites: text("layers_writes", { mode: "json" }).$type<[string, number][]>().notNull().default([]),
+    // The saved layouts of each output and the layout on stream. `{}` reads as no layouts
+    // (app/lib/overlay-layouts.ts validates the content).
+    layouts: text("layouts").notNull().default("{}"),
   },
   (table) => [
     check("overlay_state_air_check", overlaySourceCheck(table.air)),
@@ -786,9 +789,32 @@ export const overlayKeys = sqliteTable(
     // The id of the encryption key.
     keyId: text("key_id"),
     createdAt: integer("created_at").notNull(),
+    // The output of the key above: `horizontal` or `vertical` (app/server/overlay-key.server.ts validates it).
+    output: text("output").notNull().default("horizontal"),
+    // The key of the other output, with the same parts. Null: the other output has no key.
+    otherKeyHash: text("other_key_hash"),
+    otherKeySealed: text("other_key_sealed"),
+    otherKeyId: text("other_key_id"),
+    otherCreatedAt: integer("other_created_at"),
   },
   (table) => [
     check("overlay_keys_hash_check", sql`length(${table.keyHash}) = 64 AND ${table.keyHash} NOT GLOB '*[^0-9a-f]*'`),
+  ],
+);
+
+// The key of the private OBS dock of a page. It grants the live controls and nothing else, and it is separate from
+// the overlay keys. Store only its SHA-256 hash: the dock link shows one time.
+export const dockKeys = sqliteTable(
+  "dock_keys",
+  {
+    streamerId: text("streamer_id")
+      .primaryKey()
+      .references(() => streamers.id, { onDelete: "cascade" }),
+    keyHash: text("key_hash").notNull(),
+    createdAt: integer("created_at").notNull(),
+  },
+  (table) => [
+    check("dock_keys_hash_check", sql`length(${table.keyHash}) = 64 AND ${table.keyHash} NOT GLOB '*[^0-9a-f]*'`),
   ],
 );
 

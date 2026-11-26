@@ -1,0 +1,436 @@
+{
+  "texts": [
+    "{}",
+    "{\"chat\":{\"enabled\":true},\"characters\":{\"enabled\":true}}",
+    "{\"orientation\":\"vertical\",\"chat\":{\"enabled\":true,\"hideCommands\":false,\"backgroundOpacity\":40},\"characters\":{\"enabled\":true,\"timeout\":120,\"max\":12},\"cells\":{\"horizontal\":{\"chat\":{\"c\":11,\"r\":1,\"w\":5,\"h\":4},\"characters\":{\"c\":2,\"r\":6,\"w\":12,\"h\":3}},\"vertical\":{\"chat\":{\"c\":1,\"r\":1,\"w\":4,\"h\":6},\"characters\":{\"c\":0,\"r\":10,\"w\":9,\"h\":2}}}}",
+    "{\"chat\":{\"enabled\":true},\"characters\":{\"enabled\":true},\"cells\":{\"horizontal\":{\"chat\":{\"c\":0,\"r\":0,\"w\":16,\"h\":6},\"characters\":{\"c\":0,\"r\":7,\"w\":16,\"h\":2}},\"vertical\":{\"chat\":{\"c\":0,\"r\":0,\"w\":9,\"h\":12},\"characters\":{\"c\":0,\"r\":13,\"w\":9,\"h\":3}}}}",
+    "{\"chat\":{\"enabled\":true},\"characters\":{\"enabled\":true},\"cells\":{\"horizontal\":{\"chat\":{\"c\":0,\"r\":0,\"w\":16,\"h\":7},\"characters\":{\"c\":0,\"r\":7,\"w\":16,\"h\":2}},\"vertical\":{\"chat\":{\"c\":0,\"r\":0,\"w\":9,\"h\":13},\"characters\":{\"c\":0,\"r\":13,\"w\":9,\"h\":3}}}}",
+    "{\"chat\":{\"enabled\":true},\"characters\":{\"enabled\":true},\"cells\":{\"horizontal\":{\"chat\":{\"c\":0,\"r\":5,\"w\":5,\"h\":4},\"characters\":{\"c\":0,\"r\":7,\"w\":16,\"h\":2}},\"vertical\":{\"chat\":{\"c\":0,\"r\":0,\"w\":2,\"h\":2},\"characters\":{\"c\":4,\"r\":13,\"w\":9,\"h\":3}}}}",
+    "{\"chat\":{\"enabled\":true},\"characters\":{\"enabled\":true},\"cells\":{\"horizontal\":{\"chat\":{\"c\":0.5,\"r\":0,\"w\":5,\"h\":4},\"characters\":{\"c\":-1,\"r\":7,\"w\":16,\"h\":2}},\"vertical\":{\"chat\":\"none\",\"characters\":{\"c\":0,\"r\":13,\"w\":9}}}}",
+    "{\"chat\":{\"enabled\":true},\"cells\":{\"horizontal\":{\"content\":{\"c\":6,\"r\":2,\"w\":9,\"h\":4}},\"vertical\":{\"content\":{\"c\":0,\"r\":0,\"w\":3,\"h\":2}}}}",
+    "{\"chat\":{\"enabled\":true},\"characters\":{\"enabled\":true},\"cells\":{\"horizontal\":{\"content\":{\"c\":2,\"r\":2,\"w\":10,\"h\":5}},\"vertical\":{\"content\":{\"c\":0,\"r\":6,\"w\":9,\"h\":6}}}}",
+    "{\"v\":1,\"chat\":{\"enabled\":true},\"cells\":{\"horizontal\":{\"poll\":{\"c\":6,\"r\":0,\"w\":4,\"h\":2}}}}",
+    "{\"characters\":{\"enabled\":true},\"cells\":{\"horizontal\":{\"characters\":{\"c\":5,\"r\":3,\"w\":6,\"h\":2}}}}",
+    "not json",
+    "[]",
+    "{\"v\":2}",
+    "{\"v\":2,\"orientation\":\"vertical\",\"chat\":{\"enabled\":true,\"hideCommands\":false,\"backgroundOpacity\":55},\"characters\":{\"enabled\":true,\"timeout\":30,\"max\":8},\"items\":{\"poll\":{\"ref\":\"p1\",\"qr\":false},\"message\":{\"enabled\":false,\"backgroundOpacity\":0},\"card\":{\"ref\":\"c1\"}},\"cells\":{\"horizontal\":{\"chat\":{\"c\":0,\"r\":0,\"w\":3,\"h\":2},\"characters\":{\"c\":0,\"r\":7,\"w\":16,\"h\":2},\"poll\":{\"c\":3,\"r\":0,\"w\":4,\"h\":2},\"topic\":{\"c\":7,\"r\":0,\"w\":4,\"h\":2},\"next\":{\"c\":11,\"r\":0,\"w\":5,\"h\":3},\"message\":{\"c\":0,\"r\":2,\"w\":4,\"h\":5},\"card\":{\"c\":4,\"r\":2,\"w\":7,\"h\":5},\"support\":{\"c\":11,\"r\":3,\"w\":5,\"h\":4}},\"vertical\":{\"chat\":{\"c\":0,\"r\":0,\"w\":9,\"h\":2},\"characters\":{\"c\":0,\"r\":14,\"w\":9,\"h\":2},\"poll\":{\"c\":0,\"r\":2,\"w\":9,\"h\":2},\"topic\":{\"c\":0,\"r\":4,\"w\":4,\"h\":2},\"next\":{\"c\":4,\"r\":4,\"w\":5,\"h\":2},\"message\":{\"c\":0,\"r\":6,\"w\":9,\"h\":2},\"card\":{\"c\":0,\"r\":8,\"w\":9,\"h\":3},\"support\":{\"c\":0,\"r\":11,\"w\":9,\"h\":3}}}}",
+    "{\"v\":2,\"extra\":true,\"cells\":{\"horizontal\":{\"chat\":{\"c\":14,\"r\":0,\"w\":3,\"h\":2},\"characters\":{\"c\":0,\"r\":7,\"w\":5,\"h\":2},\"poll\":{\"c\":0,\"r\":0,\"w\":4,\"h\":1},\"topic\":{\"c\":4,\"r\":0,\"w\":4,\"h\":2},\"next\":{\"c\":6,\"r\":1,\"w\":4,\"h\":2},\"message\":{\"c\":0,\"r\":3,\"w\":4.5,\"h\":2},\"card\":{\"c\":-1,\"r\":5,\"w\":4,\"h\":2},\"support\":\"top\",\"content\":{\"c\":0,\"r\":0,\"w\":4,\"h\":2}},\"vertical\":{\"chat\":{\"c\":0,\"r\":15,\"w\":3,\"h\":2},\"poll\":{\"c\":5,\"r\":0,\"w\":4,\"h\":2,\"z\":1},\"topic\":null}}}",
+    "{\"v\":2,\"cells\":{\"horizontal\":{\"chat\":{\"c\":13,\"r\":7,\"w\":3,\"h\":2}},\"vertical\":{\"topic\":{\"c\":5,\"r\":14,\"w\":4,\"h\":2}}}}",
+    "{\"v\":2,\"cells\":\"none\"}"
+  ],
+  "cases": [
+    [0, "auto::lower:s", { "poll": [5, 0, 9, 5] }, { "poll": [0, 0, 7, 6] }],
+    [0, "auto::lower:m", { "poll": [5, 0, 11, 7] }, { "poll": [0, 0, 9, 8] }],
+    [0, "auto::lower:l", { "poll": [0, 0, 16, 9] }, { "poll": [0, 0, 9, 10] }],
+    [0, "poll::lower:s", {}, {}],
+    [0, "poll::lower:m", {}, {}],
+    [0, "poll::lower:l", {}, {}],
+    [0, "poll:p1:lower:s", { "poll": [5, 0, 9, 5] }, { "poll": [0, 0, 7, 6] }],
+    [0, "poll:p1:lower:m", { "poll": [5, 0, 11, 7] }, { "poll": [0, 0, 9, 8] }],
+    [0, "poll:p1:lower:l", { "poll": [0, 0, 16, 9] }, { "poll": [0, 0, 9, 10] }],
+    [0, "topic:t1:lower:s", { "topic": [0, 7, 8, 2] }, { "topic": [0, 14, 7, 2] }],
+    [0, "topic:t1:lower:m", { "topic": [0, 6, 10, 3] }, { "topic": [0, 13, 9, 3] }],
+    [0, "topic:t1:lower:l", { "topic": [0, 5, 12, 4] }, { "topic": [0, 12, 9, 4] }],
+    [0, "topic:t1:top:s", { "topic": [0, 0, 12, 2] }, { "topic": [0, 0, 7, 2] }],
+    [0, "topic:t1:top:m", { "topic": [0, 0, 16, 2] }, { "topic": [0, 0, 9, 2] }],
+    [0, "topic:t1:top:l", { "topic": [0, 0, 16, 3] }, { "topic": [0, 0, 9, 3] }],
+    [0, "topic:t1:corner:s", { "topic": [11, 7, 5, 2] }, { "topic": [5, 14, 4, 2] }],
+    [0, "topic:t1:corner:m", { "topic": [10, 6, 6, 3] }, { "topic": [4, 13, 5, 3] }],
+    [0, "topic:t1:corner:l", { "topic": [8, 5, 8, 4] }, { "topic": [3, 12, 6, 4] }],
+    [0, "topic:t1:center:s", { "topic": [5, 3, 6, 3] }, { "topic": [2, 7, 5, 2] }],
+    [0, "topic:t1:center:m", { "topic": [4, 3, 8, 3] }, { "topic": [1, 6, 7, 3] }],
+    [0, "topic:t1:center:l", { "topic": [3, 2, 10, 5] }, { "topic": [0, 6, 9, 4] }],
+    [0, "next::lower:s", { "next": [0, 7, 8, 2] }, { "next": [0, 14, 7, 2] }],
+    [0, "next::lower:m", { "next": [0, 6, 10, 3] }, { "next": [0, 13, 9, 3] }],
+    [0, "next::lower:l", { "next": [0, 5, 12, 4] }, { "next": [0, 12, 9, 4] }],
+    [0, "next::top:s", { "next": [0, 0, 12, 2] }, { "next": [0, 0, 7, 2] }],
+    [0, "next::top:m", { "next": [0, 0, 16, 2] }, { "next": [0, 0, 9, 2] }],
+    [0, "next::top:l", { "next": [0, 0, 16, 3] }, { "next": [0, 0, 9, 3] }],
+    [0, "next::corner:s", { "next": [11, 7, 5, 2] }, { "next": [5, 14, 4, 2] }],
+    [0, "next::corner:m", { "next": [10, 6, 6, 3] }, { "next": [4, 13, 5, 3] }],
+    [0, "next::corner:l", { "next": [8, 5, 8, 4] }, { "next": [3, 12, 6, 4] }],
+    [0, "next::center:s", { "next": [5, 3, 6, 3] }, { "next": [2, 7, 5, 2] }],
+    [0, "next::center:m", { "next": [4, 3, 8, 3] }, { "next": [1, 6, 7, 3] }],
+    [0, "next::center:l", { "next": [3, 2, 10, 5] }, { "next": [0, 6, 9, 4] }],
+    [0, "message::lower:s", { "message": [0, 7, 8, 2] }, { "message": [0, 14, 7, 2] }],
+    [0, "message::lower:m", { "message": [0, 6, 10, 3] }, { "message": [0, 13, 9, 3] }],
+    [0, "message::lower:l", { "message": [0, 5, 12, 4] }, { "message": [0, 12, 9, 4] }],
+    [0, "message::top:s", { "message": [0, 0, 12, 2] }, { "message": [0, 0, 7, 2] }],
+    [0, "message::top:m", { "message": [0, 0, 16, 2] }, { "message": [0, 0, 9, 2] }],
+    [0, "message::top:l", { "message": [0, 0, 16, 3] }, { "message": [0, 0, 9, 3] }],
+    [0, "message::corner:s", { "message": [11, 7, 5, 2] }, { "message": [5, 14, 4, 2] }],
+    [0, "message::corner:m", { "message": [10, 6, 6, 3] }, { "message": [4, 13, 5, 3] }],
+    [0, "message::corner:l", { "message": [8, 5, 8, 4] }, { "message": [3, 12, 6, 4] }],
+    [0, "message::center:s", { "message": [5, 3, 6, 3] }, { "message": [2, 7, 5, 2] }],
+    [0, "message::center:m", { "message": [4, 3, 8, 3] }, { "message": [1, 6, 7, 3] }],
+    [0, "message::center:l", { "message": [3, 2, 10, 5] }, { "message": [0, 6, 9, 4] }],
+    [0, "card:c1:lower:s", { "card": [0, 7, 8, 2] }, { "card": [0, 14, 7, 2] }],
+    [0, "card:c1:lower:m", { "card": [0, 6, 10, 3] }, { "card": [0, 13, 9, 3] }],
+    [0, "card:c1:lower:l", { "card": [0, 5, 12, 4] }, { "card": [0, 12, 9, 4] }],
+    [0, "card:c1:top:s", { "card": [0, 0, 12, 2] }, { "card": [0, 0, 7, 2] }],
+    [0, "card:c1:top:m", { "card": [0, 0, 16, 2] }, { "card": [0, 0, 9, 2] }],
+    [0, "card:c1:top:l", { "card": [0, 0, 16, 3] }, { "card": [0, 0, 9, 3] }],
+    [0, "card:c1:corner:s", { "card": [11, 7, 5, 2] }, { "card": [5, 14, 4, 2] }],
+    [0, "card:c1:corner:m", { "card": [10, 6, 6, 3] }, { "card": [4, 13, 5, 3] }],
+    [0, "card:c1:corner:l", { "card": [8, 5, 8, 4] }, { "card": [3, 12, 6, 4] }],
+    [0, "card:c1:center:s", { "card": [5, 3, 6, 3] }, { "card": [2, 7, 5, 2] }],
+    [0, "card:c1:center:m", { "card": [4, 3, 8, 3] }, { "card": [1, 6, 7, 3] }],
+    [0, "card:c1:center:l", { "card": [3, 2, 10, 5] }, { "card": [0, 6, 9, 4] }],
+    [0, "support::lower:s", { "support": [0, 7, 8, 2] }, { "support": [0, 14, 7, 2] }],
+    [0, "support::lower:m", { "support": [0, 6, 10, 3] }, { "support": [0, 13, 9, 3] }],
+    [0, "support::lower:l", { "support": [0, 5, 12, 4] }, { "support": [0, 12, 9, 4] }],
+    [0, "support::top:s", { "support": [0, 0, 12, 2] }, { "support": [0, 0, 7, 2] }],
+    [0, "support::top:m", { "support": [0, 0, 16, 2] }, { "support": [0, 0, 9, 2] }],
+    [0, "support::top:l", { "support": [0, 0, 16, 3] }, { "support": [0, 0, 9, 3] }],
+    [0, "support::corner:s", { "support": [11, 7, 5, 2] }, { "support": [5, 14, 4, 2] }],
+    [0, "support::corner:m", { "support": [10, 6, 6, 3] }, { "support": [4, 13, 5, 3] }],
+    [0, "support::corner:l", { "support": [8, 5, 8, 4] }, { "support": [3, 12, 6, 4] }],
+    [0, "support::center:s", { "support": [5, 3, 6, 3] }, { "support": [2, 7, 5, 2] }],
+    [0, "support::center:m", { "support": [4, 3, 8, 3] }, { "support": [1, 6, 7, 3] }],
+    [0, "support::center:l", { "support": [3, 2, 10, 5] }, { "support": [0, 6, 9, 4] }],
+    [0, "hidden::lower:m", {}, {}],
+    [0, null, {}, {}],
+    [
+      1,
+      "auto::lower:s",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "poll": [5, 0, 9, 5] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "poll": [0, 0, 7, 6] }
+    ],
+    [
+      1,
+      "auto::lower:m",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "poll": [5, 0, 11, 7] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "poll": [0, 0, 9, 8] }
+    ],
+    [
+      1,
+      "auto::lower:l",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "poll": [5, 0, 11, 7] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "poll": [0, 0, 9, 8] }
+    ],
+    [
+      1,
+      "topic:t1:lower:s",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "topic": [5, 0, 8, 2] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "topic": [0, 0, 7, 2] }
+    ],
+    [
+      1,
+      "topic:t1:lower:m",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "topic": [5, 0, 10, 3] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "topic": [0, 0, 9, 3] }
+    ],
+    [
+      1,
+      "topic:t1:lower:l",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "topic": [5, 0, 11, 4] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "topic": [0, 0, 9, 4] }
+    ],
+    [
+      1,
+      "topic:t1:top:s",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "topic": [5, 0, 11, 2] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "topic": [0, 0, 7, 2] }
+    ],
+    [
+      1,
+      "topic:t1:top:m",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "topic": [5, 0, 11, 2] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "topic": [0, 0, 9, 2] }
+    ],
+    [
+      1,
+      "topic:t1:top:l",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "topic": [5, 0, 11, 3] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "topic": [0, 0, 9, 3] }
+    ],
+    [
+      1,
+      "topic:t1:corner:s",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "topic": [5, 0, 5, 2] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "topic": [0, 0, 4, 2] }
+    ],
+    [
+      1,
+      "topic:t1:corner:m",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "topic": [5, 0, 6, 3] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "topic": [0, 0, 5, 3] }
+    ],
+    [
+      1,
+      "topic:t1:corner:l",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "topic": [5, 0, 8, 4] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "topic": [0, 0, 6, 4] }
+    ],
+    [
+      1,
+      "topic:t1:center:s",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "topic": [5, 3, 6, 3] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "topic": [0, 0, 5, 2] }
+    ],
+    [
+      1,
+      "topic:t1:center:m",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "topic": [5, 0, 8, 3] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "topic": [0, 0, 7, 3] }
+    ],
+    [
+      1,
+      "topic:t1:center:l",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "topic": [5, 0, 10, 5] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "topic": [0, 0, 9, 4] }
+    ],
+    [
+      1,
+      "message::lower:s",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "message": [5, 0, 8, 2] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "message": [0, 0, 7, 2] }
+    ],
+    [
+      1,
+      "message::lower:m",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "message": [5, 0, 10, 3] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "message": [0, 0, 9, 3] }
+    ],
+    [
+      1,
+      "message::lower:l",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "message": [5, 0, 11, 4] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "message": [0, 0, 9, 4] }
+    ],
+    [
+      1,
+      "message::top:s",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "message": [5, 0, 11, 2] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "message": [0, 0, 7, 2] }
+    ],
+    [
+      1,
+      "message::top:m",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "message": [5, 0, 11, 2] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "message": [0, 0, 9, 2] }
+    ],
+    [
+      1,
+      "message::top:l",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "message": [5, 0, 11, 3] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "message": [0, 0, 9, 3] }
+    ],
+    [
+      1,
+      "message::corner:s",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "message": [5, 0, 5, 2] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "message": [0, 0, 4, 2] }
+    ],
+    [
+      1,
+      "message::corner:m",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "message": [5, 0, 6, 3] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "message": [0, 0, 5, 3] }
+    ],
+    [
+      1,
+      "message::corner:l",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "message": [5, 0, 8, 4] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "message": [0, 0, 6, 4] }
+    ],
+    [
+      1,
+      "message::center:s",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "message": [5, 3, 6, 3] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "message": [0, 0, 5, 2] }
+    ],
+    [
+      1,
+      "message::center:m",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "message": [5, 0, 8, 3] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "message": [0, 0, 7, 3] }
+    ],
+    [
+      1,
+      "message::center:l",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "message": [5, 0, 10, 5] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "message": [0, 0, 9, 4] }
+    ],
+    [
+      1,
+      "hidden::lower:m",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3] }
+    ],
+    [
+      1,
+      null,
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3] }
+    ],
+    [
+      2,
+      "message::lower:l",
+      { "chat": [11, 1, 5, 4], "characters": [2, 6, 12, 3], "message": [0, 0, 11, 4] },
+      { "chat": [1, 1, 4, 6], "characters": [0, 10, 9, 2], "message": [0, 12, 9, 4] }
+    ],
+    [
+      2,
+      "auto::lower:m",
+      { "chat": [11, 1, 5, 4], "characters": [2, 6, 12, 3], "poll": [0, 0, 11, 6] },
+      { "chat": [1, 1, 4, 6], "characters": [0, 10, 9, 2], "poll": [0, 12, 9, 4] }
+    ],
+    [
+      2,
+      null,
+      { "chat": [11, 1, 5, 4], "characters": [2, 6, 12, 3] },
+      { "chat": [1, 1, 4, 6], "characters": [0, 10, 9, 2] }
+    ],
+    [
+      3,
+      "message::lower:l",
+      { "chat": [0, 0, 16, 6], "characters": [0, 7, 16, 2] },
+      { "chat": [0, 0, 9, 12], "characters": [0, 13, 9, 3] }
+    ],
+    [
+      3,
+      "auto::lower:m",
+      { "chat": [0, 0, 16, 6], "characters": [0, 7, 16, 2] },
+      { "chat": [0, 0, 9, 12], "characters": [0, 13, 9, 3] }
+    ],
+    [
+      3,
+      null,
+      { "chat": [0, 0, 16, 6], "characters": [0, 7, 16, 2] },
+      { "chat": [0, 0, 9, 12], "characters": [0, 13, 9, 3] }
+    ],
+    [
+      4,
+      "message::lower:l",
+      { "chat": [0, 0, 16, 7], "characters": [0, 7, 16, 2] },
+      { "chat": [0, 0, 9, 13], "characters": [0, 13, 9, 3] }
+    ],
+    [
+      4,
+      "auto::lower:m",
+      { "chat": [0, 0, 16, 7], "characters": [0, 7, 16, 2] },
+      { "chat": [0, 0, 9, 13], "characters": [0, 13, 9, 3] }
+    ],
+    [
+      4,
+      null,
+      { "chat": [0, 0, 16, 7], "characters": [0, 7, 16, 2] },
+      { "chat": [0, 0, 9, 13], "characters": [0, 13, 9, 3] }
+    ],
+    [
+      5,
+      "message::lower:l",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "message": [5, 0, 11, 4] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "message": [0, 0, 9, 4] }
+    ],
+    [
+      5,
+      "auto::lower:m",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "poll": [5, 0, 11, 7] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "poll": [0, 0, 9, 8] }
+    ],
+    [
+      5,
+      null,
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3] }
+    ],
+    [
+      6,
+      "message::lower:l",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "message": [5, 0, 11, 4] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "message": [0, 0, 9, 4] }
+    ],
+    [
+      6,
+      "auto::lower:m",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "poll": [5, 0, 11, 7] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "poll": [0, 0, 9, 8] }
+    ],
+    [
+      6,
+      null,
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3] }
+    ],
+    [
+      7,
+      "message::lower:l",
+      { "chat": [0, 0, 5, 7], "message": [6, 2, 9, 4] },
+      { "chat": [0, 8, 9, 5], "message": [0, 0, 9, 4] }
+    ],
+    [
+      7,
+      "auto::lower:m",
+      { "chat": [0, 0, 5, 7], "poll": [6, 2, 9, 4] },
+      { "chat": [0, 8, 9, 5], "poll": [0, 0, 9, 8] }
+    ],
+    [7, null, { "chat": [0, 0, 5, 7] }, { "chat": [0, 8, 9, 5] }],
+    [
+      8,
+      "message::lower:l",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "message": [5, 0, 10, 5] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "message": [0, 0, 9, 6] }
+    ],
+    [
+      8,
+      "auto::lower:m",
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2], "poll": [5, 0, 10, 5] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3], "poll": [0, 0, 9, 6] }
+    ],
+    [
+      8,
+      null,
+      { "chat": [0, 0, 5, 7], "characters": [0, 7, 16, 2] },
+      { "chat": [0, 8, 9, 5], "characters": [0, 13, 9, 3] }
+    ],
+    [9, "message::lower:l", { "chat": [0, 0, 5, 7], "poll": [6, 0, 4, 2] }, { "chat": [0, 8, 9, 5] }],
+    [9, "auto::lower:m", { "chat": [0, 0, 5, 7], "poll": [6, 0, 4, 2] }, { "chat": [0, 8, 9, 5] }],
+    [9, null, { "chat": [0, 0, 5, 7], "poll": [6, 0, 4, 2] }, { "chat": [0, 8, 9, 5] }],
+    [
+      10,
+      "message::lower:l",
+      { "characters": [5, 3, 6, 2], "message": [0, 5, 12, 4] },
+      { "characters": [0, 13, 9, 3], "message": [0, 0, 9, 4] }
+    ],
+    [
+      10,
+      "auto::lower:m",
+      { "characters": [5, 3, 6, 2], "poll": [0, 5, 11, 4] },
+      { "characters": [0, 13, 9, 3], "poll": [0, 0, 9, 8] }
+    ],
+    [10, null, { "characters": [5, 3, 6, 2] }, { "characters": [0, 13, 9, 3] }],
+    [11, "auto::lower:m", { "poll": [5, 0, 11, 7] }, { "poll": [0, 0, 9, 8] }],
+    [12, "message::lower:l", { "message": [0, 5, 12, 4] }, { "message": [0, 12, 9, 4] }],
+    [13, "auto::lower:m", {}, {}],
+    [
+      14,
+      "auto::lower:m",
+      {
+        "chat": [0, 0, 3, 2],
+        "characters": [0, 7, 16, 2],
+        "poll": [3, 0, 4, 2],
+        "topic": [7, 0, 4, 2],
+        "next": [11, 0, 5, 3],
+        "message": [0, 2, 4, 5],
+        "card": [4, 2, 7, 5],
+        "support": [11, 3, 5, 4]
+      },
+      {
+        "chat": [0, 0, 9, 2],
+        "characters": [0, 14, 9, 2],
+        "poll": [0, 2, 9, 2],
+        "topic": [0, 4, 4, 2],
+        "next": [4, 4, 5, 2],
+        "message": [0, 6, 9, 2],
+        "card": [0, 8, 9, 3],
+        "support": [0, 11, 9, 3]
+      }
+    ],
+    [15, "auto::lower:m", { "topic": [4, 0, 4, 2] }, { "poll": [5, 0, 4, 2] }],
+    [16, "auto::lower:m", { "chat": [13, 7, 3, 2] }, { "topic": [5, 14, 4, 2] }],
+    [17, "auto::lower:m", {}, {}]
+  ]
+}

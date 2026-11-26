@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ActivityEvent } from "../app/lib/activity";
-import { CHAT_TEST_MS, CHAT_TEST_SCRIPT, chatTestLeft } from "../app/lib/chat-test";
+import { CHAT_TEST_MS, CHAT_TEST_SCRIPT, chatTestLeft, chatTestScript } from "../app/lib/chat-test";
 
 describe("chat test", () => {
   it("runs one minute and reads a past or missing end time as off", () => {
@@ -30,5 +30,14 @@ describe("chat test", () => {
       CHAT_TEST_SCRIPT.findIndex((event) => event.kind === "chat" && event.messageId === removal.messageId),
     );
     expect(CHAT_TEST_SCRIPT.at(-1)).toBe(timeout);
+  });
+
+  it("plays only the events of the platform of an output that shows one platform", () => {
+    expect(chatTestScript(null)).toBe(CHAT_TEST_SCRIPT);
+    const twitch = chatTestScript("twitch");
+    expect(twitch.some((event: ActivityEvent) => event.kind === "chat")).toBe(true);
+    expect(new Set(twitch.map((event: ActivityEvent) => event.platform))).toEqual(new Set(["twitch"]));
+    // The events keep the order of the script.
+    expect(twitch).toEqual(CHAT_TEST_SCRIPT.filter((event: ActivityEvent) => event.platform === "twitch"));
   });
 });

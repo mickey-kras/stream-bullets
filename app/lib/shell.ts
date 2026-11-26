@@ -53,7 +53,7 @@ export const paths = {
   streamers: "/streamers",
   profile: "/streamers?dialog=profile",
   admin: "/admin",
-  overlayControl: "/overlay-control",
+  tools: "/tools",
   privacy: "/privacy",
   cookies: "/privacy#cookies",
   terms: "/terms",
@@ -63,6 +63,21 @@ export const paths = {
   ai: "/ai",
   streamer: (handle: string): string => `/@${handle}`,
 } as const;
+
+/** The sections of Streamer tools. A section is listed when its work has shipped. */
+export const toolsViews = ["live", "overlay", "channels"] as const;
+export type ToolsView = (typeof toolsViews)[number];
+
+export function toolsView(value: string | null | undefined): ToolsView {
+  return toolsViews.find((view: ToolsView): boolean => view === value) ?? "live";
+}
+
+export function toolsPath(view: ToolsView): string {
+  return `${paths.tools}?view=${view}`;
+}
+
+/** The channel cards of Streamer tools, for links from the overlay studio. */
+export const channelsSectionPath: string = `${toolsPath("channels")}#channels-title`;
 
 // Validate ?next= as a same-origin path. Reject external URLs, backslashes, control characters, and absent values.
 export function localPath(value: string | null | undefined): string | null {
