@@ -115,7 +115,8 @@ function receiveEvent(state: LiveChatState, event: ActivityEvent): LiveChatState
       );
     case "clear":
       return moderate(state, (row: LiveChatRow): boolean => row.platform === event.platform, null);
-    case "status":
+    default:
+      // A status and a support event are not rows of the chat.
       return state;
   }
 }

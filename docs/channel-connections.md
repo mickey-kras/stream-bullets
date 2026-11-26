@@ -61,6 +61,7 @@ It must ignore a message that the parser refuses.
 | `clear` | `platform`, `receivedAt` | A moderator cleared the chat |
 | `clear_user` | `platform`, `userId`, `receivedAt` | A moderator removed all messages of one user |
 | `status` | `platform`, `status`, `code` | The connection changed state |
+| A support kind | `id`, `platform`, `deliveryId`, `sender`, `anonymous`, `amount`, `currency`, optional `text`, `receivedAt`, `replay` | One support event. See [Support events](#support-events). |
 
 The `id` of a chat message is `platform:messageId`. It is unique across platforms.
 A participant is the pair of `platform` and `user.id`. A display name is not an identity.
@@ -93,6 +94,51 @@ A live chat message also has `live: false` when the platform sent it more than 3
 received it (`LIVE_WINDOW_MS`). Thus a late provider retry never runs an old command.
 A message without a source time is live. Twitch gives no source time in the chat event.
 Thus the feed uses the time of the webhook message. We did not check that a Twitch retry keeps this time.
+
+### Support events
+
+The feed has one format for support from each platform and for direct tips. These are the kinds:
+
+| Kind | Meaning | `amount` | `currency` |
+| --- | --- | --- | --- |
+| `follow` | A new follower | `null` | `null` |
+| `subscription` | A subscription | Months | `null` |
+| `membership` | A channel membership | Months | `null` |
+| `gift` | A gift bundle: one event for the bundle | Gifts in the bundle | `null` |
+| `raid` | A raid | Viewers | `null` |
+| `bits` | Bits | Bits | `null` |
+| `super_chat` | A Super Chat | Micros of the currency | The ISO 4217 code |
+| `super_sticker` | A Super Sticker | Micros of the currency | The ISO 4217 code |
+| `kicks` | KICKs | KICKs | `null` |
+| `tip` | A direct tip through StreamBullets | Micros of the currency | The ISO 4217 code |
+| `reactions` | A group of reactions: one event for the group | Reactions | `null` |
+
+Each support event has these fields:
+
+- `platform`: `twitch`, `youtube`, or `kick`. Only a `tip` has `direct`.
+- `deliveryId`: the ID that the provider gave the delivery. `id` is `platform:deliveryId`.
+- `sender`: `{id, displayName}` of the supporter on that platform, or `null`.
+- `anonymous`: `true` when the supporter asked for no name. An anonymous event always has `sender: null`.
+- `amount`: the amount in the native unit of the kind. Money is in micros: 1 000 000 is one unit of the currency.
+  The feed never converts an amount to a different unit or currency.
+- `text`: the text that the supporter sent, with at most 500 characters. Show it as text, never as HTML, as for chat text.
+- `replay`: `true` for an event that the server sends again: a replay of the owner, a test, or the snapshot of a reconnect.
+
+The parser refuses a support event that does not agree with its kind.
+Examples are a follow with an amount, money without a currency, and a tip that is not direct.
+
+A consumer ignores the kinds that it does not know.
+An `event` message of an unknown kind is not valid for the parser, and the consumer ignores it.
+A snapshot keeps its other events. Thus a newer server never empties the chat of an older page.
+
+These rules make each support event count one time:
+
+- A provider sends a delivery again after a timeout or an error. The second delivery has the same `deliveryId`.
+  `acceptDelivery` refuses it, so it makes no second event.
+- A consumer can show a replay. `supportTotals` never counts a replay, and it never counts the same `id` again.
+  Thus a replayed alert does not change a goal or a revenue record.
+
+This section is the format only. The feed does not send support events until the server reads them from the providers.
 
 ### Rules for consumers
 
