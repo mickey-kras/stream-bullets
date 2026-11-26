@@ -179,6 +179,18 @@
   font-style: italic;
   color: var(--muted);
 }
+/* A support event: a gold edge and a tint, and its line in bold. The words tell the kind, not the color alone. */
+.tl-support {
+  margin: 2px 0;
+  padding: 4px 8px;
+  border-left: 3px solid var(--gold);
+  border-radius: var(--radius-control);
+  background: var(--c-edbd5326);
+}
+.tl-support-line {
+  font-weight: 600;
+  color: var(--gold);
+}
 .tl-chat-row .wl-emote {
   height: 1.4em;
   width: auto;

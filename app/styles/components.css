@@ -1692,6 +1692,9 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 .ch-mark[data-health="attention"] .icon { color: var(--live); }
 .ch-problem { display: flex; align-items: flex-start; gap: 6px; }
 .ch-problem .icon { flex: none; margin-top: 2px; color: var(--live); }
+.ch-support .choice { display: flex; align-items: center; gap: 10px; margin: 0; font-weight: 600; cursor: pointer; }
+.ch-support .choice:has([aria-disabled="true"]) { color: var(--muted); cursor: default; }
+.ch-support [aria-disabled="true"] { opacity: .55; }
 .ch-actions { display: flex; flex-wrap: wrap; align-items: center; align-self: end; gap: 8px; }
 .ch-actions > button { flex: 1 1 12rem; }
 .ch-more > summary { width: fit-content; max-width: 100%; padding: 10px 0; cursor: pointer; color: var(--muted); font-weight: 600; }

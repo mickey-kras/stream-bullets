@@ -12,6 +12,7 @@ import { useToast } from "../ui/toast";
 import { paths, toolsPath, useShell } from "../../lib/shell";
 import { detached } from "../../lib/detached";
 import { PlatformIcon } from "../overlay/wasteland/glyphs";
+import { changeSupport, supportOutcome, SupportSwitch, type SupportOutcome } from "./support-switch";
 
 export type { ChannelView } from "../../lib/channel-health";
 
@@ -67,8 +68,21 @@ const NOTES: Readonly<Record<ActivityPlatform, readonly MessageId[]>> = {
 /** A change that needs a recent sign-in. The owner signs in again, then the page takes the change up again. */
 export interface ChannelIntent {
   platform: ActivityPlatform;
-  action: "connect" | "disconnect";
+  action: "connect" | "disconnect" | "support";
 }
+
+/** What the sign-in prompt of each change says. */
+const REAUTH_MESSAGES: Readonly<Record<ChannelIntent["action"], MessageId>> = {
+  connect: "channels.reauth.connect",
+  disconnect: "channels.reauth.disconnect",
+  support: "channels.reauth.support",
+};
+
+/** The control that gets focus after the sign-in, for a change that the page does not repeat by itself. */
+const INTENT_CONTROLS: Readonly<Record<Exclude<ChannelIntent["action"], "connect">, string>> = {
+  disconnect: "[data-disconnect]",
+  support: "[data-support-switch]",
+};
 
 const INTENT_KEY = "sb-channel-intent";
 /** As long as an authorization state lives: an older intent is not the owner's wish any more. */
@@ -91,7 +105,7 @@ export function parseIntent(raw: string | null, now: number, owner: string | nul
   // Another account can sign in during the prompt. Its page must not get the channel of the first owner.
   if (storedOwner !== owner) return null;
   if (typeof platform !== "string" || !isPlatform(platform)) return null;
-  if (action !== "connect" && action !== "disconnect") return null;
+  if (action !== "connect" && action !== "disconnect" && action !== "support") return null;
   if (typeof at !== "number" || at > now || now - at > INTENT_MS) return null;
   return { platform, action };
 }
@@ -236,8 +250,9 @@ function HealthMark({ health }: Readonly<{ health: ChannelHealth }>): ReactNode 
 
 /**
  * Streamer controls for the channel connections (docs/channel-connections.md): status, connect, reconnect and
- * disconnect for each platform. Connecting leaves for the provider and comes back with `?channel=&result=`. The
- * panel then shows and announces the result, and removes it from the address.
+ * disconnect for each platform, and the switch for the support events of a connected channel. Connecting leaves
+ * for the provider and comes back with `?channel=&result=`. The panel then shows and announces the result, and
+ * removes it from the address.
  */
 export function ChannelPanel({
   channels,
@@ -268,6 +283,10 @@ export function ChannelPanel({
   /** The change that the server refused because the sign-in is too old. Its card shows the sign-in prompt. */
   const [reauth, setReauth] = useState<ChannelIntent | null>(null);
   const resumed = useRef<boolean>(false);
+  /** The state of a switch from the answer to its change, until the reloaded list has it. */
+  const [support, setSupport] = useState<ReadonlyMap<ActivityPlatform, boolean>>(new Map());
+  /** The platform whose provider refused the support events at the last change of its switch. */
+  const [supportDenied, setSupportDenied] = useState<ActivityPlatform | null>(null);
   /** Platforms whose last disconnect the provider did not confirm: the owner should remove the app there. */
   const [unrevoked, setUnrevoked] = useState<ReadonlySet<ActivityPlatform>>(new Set());
   // The platform of the last disconnect. Until the next dialog opens, the closed dialog does not take focus back.
@@ -354,7 +373,8 @@ export function ChannelPanel({
   }
 
   // Back from the sign-in that a change needed: take the change up again. A connect goes on to the provider
-  // without a second click. A disconnect is not repeated by itself: its button gets focus.
+  // without a second click. A disconnect and a change of the support events are not repeated by themselves: the
+  // control gets focus.
   useEffect((): void => {
     if (resumed.current) return;
     resumed.current = true;
@@ -368,9 +388,42 @@ export function ChannelPanel({
       const reconnect: boolean = channel.connection !== null;
       queueMicrotask((): void => detached(connect(intent.platform, reconnect)));
     } else {
-      panel.current?.querySelector<HTMLElement>(`[data-channel="${intent.platform}"] [data-disconnect]`)?.focus();
+      const control: string = INTENT_CONTROLS[intent.action];
+      panel.current?.querySelector<HTMLElement>(`[data-channel="${intent.platform}"] ${control}`)?.focus();
     }
   });
+
+  function forgetSupport(platform: ActivityPlatform): void {
+    setSupport((current: ReadonlyMap<ActivityPlatform, boolean>): ReadonlyMap<ActivityPlatform, boolean> => {
+      const next = new Map<ActivityPlatform, boolean>(current);
+      next.delete(platform);
+      return next;
+    });
+  }
+
+  async function changeSupportEvents(platform: ActivityPlatform, on: boolean): Promise<void> {
+    setResult(null);
+    setReauth(null);
+    setSupportDenied(null);
+    setBusy(platform);
+    try {
+      const outcome: SupportOutcome = supportOutcome(await changeSupport(platform, on), on);
+      if (outcome.url !== null) {
+        globalThis.location.assign(outcome.url);
+        return;
+      }
+      setSupport((current) => new Map<ActivityPlatform, boolean>(current).set(platform, outcome.support));
+      if (outcome.denied) setSupportDenied(platform);
+      setBusy(null);
+      // The answer is newer than the list on screen. The list of the reload is newer than the answer.
+      detached(revalidator.revalidate().finally((): void => forgetSupport(platform)));
+    } catch (error: unknown) {
+      failed(error, { platform, action: "support" });
+      // Gone already (404): show the current list, which has no switch for this channel.
+      if (error instanceof ApiError && error.status === 404) detached(revalidator.revalidate());
+      setBusy(null);
+    }
+  }
 
   async function disconnect(platform: ActivityPlatform): Promise<void> {
     setResult(null);
@@ -453,6 +506,15 @@ export function ChannelPanel({
                     <span>{problem}</span>
                   </p>
                 )}
+                {connection && channel.available && (
+                  <SupportSwitch
+                    channel={channel}
+                    on={support.get(channel.platform) ?? channel.support}
+                    busy={busy !== null}
+                    denied={supportDenied === channel.platform}
+                    onChange={(on: boolean) => void changeSupportEvents(channel.platform, on)}
+                  />
+                )}
                 {!connection && unrevoked.has(channel.platform) && (
                   <p className="ch-problem">
                     <Icon name="warning" size={16} />
@@ -497,12 +559,7 @@ export function ChannelPanel({
                 {reauth?.platform === channel.platform && (
                   <div className="ch-reauth" role="alert">
                     {signInProviders.length > 0 && (
-                      <p>
-                        {t(reauth.action === "connect" ? "channels.reauth.connect" : "channels.reauth.disconnect", {
-                          platform: name,
-                          provider: signInNames,
-                        })}
-                      </p>
+                      <p>{t(REAUTH_MESSAGES[reauth.action], { platform: name, provider: signInNames })}</p>
                     )}
                     <Reauthenticate
                       providers={signInProviders}

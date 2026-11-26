@@ -7,7 +7,7 @@ Only the owner of the page can open it.
 | --- | --- | --- |
 | **Live** | `/tools` or `/tools?view=live` | Run the stream. |
 | **Overlay** | `/tools?view=overlay` | Build the overlay and add it to OBS. See [overlay composition](overlay-composition.md). |
-| **Channels** | `/tools?view=channels` | Connect the channels. See [channel connections](channel-connections.md). |
+| **Channels** | `/tools?view=channels` | Connect the channels, and turn their support events on or off. See [channel connections](channel-connections.md). |
 
 The page opens the **Live** section. The old address `/overlay-control` opens the **Overlay** section.
 
@@ -17,6 +17,7 @@ The page opens the **Live** section. The old address `/overlay-control` opens th
 | Sections and their addresses | `app/lib/shell.ts` (`toolsViews`, `toolsPath`) |
 | Live section | `app/components/tools/live-section.tsx` and the `live-*.tsx` files beside it |
 | Chat log | `app/lib/live-chat.ts` |
+| Support events in the chat log | `app/components/tools/live-support.tsx` |
 | Overlay state and saves | `app/components/overlay/use-overlay-state.ts` |
 
 ## Live
@@ -90,8 +91,11 @@ The text is a draft while the layer is off: viewers do not get it.
 
 ### Chat
 
-The part shows the merged chat of the connected channels. It keeps the newest 500 messages.
-The list follows the newest message.
+The part shows the merged chat of the connected channels. It keeps the newest 500 rows.
+The list follows the newest row.
+
+The list also shows the support events of each channel that has its switch on in **Channels**.
+See [Support events](#support-events).
 
 - A scroll up pauses the list. **Pause chat** also pauses it.
 - A paused list keeps its place and shows the number of new messages.
@@ -109,6 +113,29 @@ The part then shows each newer message that the server no longer has as removed.
 
 The chat uses the activity feed of the owner. See [channel connections](channel-connections.md).
 The owner can use the list with a keyboard: the list takes the focus, and the arrow keys scroll it.
+
+### Support events
+
+A support event is a row in the chat list, at the time of its arrival. The row has these parts:
+
+- The icon of the platform.
+- The name of the supporter, or "Anonymous" when the event names no supporter.
+- A line that tells the kind and the amount, for example "100 Bits" or "subscribed for 3 months".
+- The text of the supporter, if the event has one. The row shows it as text only.
+
+The line shows money in its currency and in the format of the language. The page converts no amount.
+A support row has a gold edge and a tint, so it does not look like a chat message.
+
+These rules apply to support rows:
+
+- The list has one row for each event. A replay and the copy in a reconnect snapshot add no second row.
+- No moderation event removes a support row.
+- The limit of 500 rows applies to chat and support rows together.
+- The platform buttons also show or hide the support rows of the platform.
+- A paused list counts new support rows with the new messages.
+
+The full-screen chat and the dock show the same rows.
+After a load of the page, the list has the support events that the server keeps: the newest 50, for 10 minutes.
 
 ### Full-screen chat
 
@@ -142,14 +169,15 @@ It then opens the full-screen chat without browser bars.
 
 A new message fades in. The Motion setting of the site and of the system stop this motion.
 
-Alerts and support events are not in this section yet.
-The full-screen chat has no highlight for them yet.
+The full-screen chat shows support events as the chat part does. See [Support events](#support-events).
+Alerts on stream are not in this section yet.
 
 ## OBS dock
 
 The OBS dock is a small page with the live controls, for a custom browser dock in OBS.
 The streamer changes the stream there and does not go to a browser.
 The dock has these parts of **Live**, in one column: the poll, the topics, the message banner, and the chat with its pause.
+The chat of the dock also shows the support events.
 It is usable from a width of 300 pixels. It scrolls in its panel.
 
 An action in the dock shows in **Live** at once, and an action in **Live** shows in the dock at once.

@@ -42,7 +42,7 @@ vi.mock("react", () => ({
 
 function channel(status: "active" | "error"): ChannelView {
   const connection = { displayName: "Host", status, code: null, connectedAt: 1, lastEventAt: null, updatedAt: 1 };
-  return { platform: "kick", available: true, connection };
+  return { platform: "kick", available: true, connection, support: false, supportScopes: [] };
 }
 
 const loaded: ChannelView[] = [channel("active")];

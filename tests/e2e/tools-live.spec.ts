@@ -25,6 +25,8 @@ const PHONE_IP = clientIp("tools-live", 46);
 const DOCK_OWNER_IP = clientIp("tools-live", 47);
 const DOCK_IP = clientIp("tools-live", 48);
 const REPLAY_IP = clientIp("tools-live", 49);
+const SUPPORT_IP = clientIp("tools-live", 52);
+const SUPPORT_DOCK_IP = clientIp("tools-live", 53);
 
 const now: number = Date.now();
 const entry = (id: string, kind: "choice" | "topic", title: string, age: number): string =>
@@ -702,4 +704,108 @@ test("the OBS dock runs the live controls with its own link in a narrow panel, a
   await expect(dock.locator("[data-live-poll-title]")).toHaveText("Tea or coffee");
   await Promise.all([close(owner), close(dock)]);
   await runSql("tools-live-dock-restore", [noDockKey, noKeysSql]);
+});
+
+/** A support event as the feed sends it. An anonymous event has no sender. */
+function support(
+  kind: "bits" | "follow",
+  deliveryId: string,
+  platform: "twitch" | "kick",
+  more: Record<string, unknown>,
+): Record<string, unknown> {
+  return {
+    kind,
+    id: `${platform}:${deliveryId}`,
+    platform,
+    deliveryId,
+    sender: null,
+    anonymous: false,
+    amount: null,
+    currency: null,
+    receivedAt: Date.now(),
+    replay: false,
+    ...more,
+  };
+}
+
+test("support events show in the Live chat and in the dock, and never in the overlay chat", async ({ browser }) => {
+  // The chat layer is on stream, so the preview of Live shows the overlay chat.
+  await runSql("tools-live-support", [
+    layersSql({ chat: { enabled: true }, cells: { horizontal: { chat: CHAT_CELL, poll: POLL_CELL } } }),
+    noDockKey,
+  ]);
+  const owner = await signedIn(browser, "featureowner", SUPPORT_IP);
+  const page = await newPage(owner);
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  const message: Record<string, unknown> = { ...chat(1, "twitch"), receivedAt: Date.now() };
+  const cheer = support("bits", "d1", "twitch", { anonymous: true, amount: 100, text: "great <b>stream</b>" });
+  const follow = support("follow", "d2", "kick", { sender: { id: "u9", displayName: "Viewer 9" } });
+  const sockets: WebSocketRoute[] = [];
+  // The snapshot of a reconnect has the support event as a replay. The follow comes as a live event.
+  await page.routeWebSocket("**/api/activity/**", (socket: WebSocketRoute) => {
+    sockets.push(socket);
+    socket.send(JSON.stringify({ type: "snapshot", events: [message, { ...cheer, replay: true }], replay: true }));
+  });
+  await page.goto("/tools?view=live");
+  const part = page.locator('[data-live-part="chat"]');
+  const log = part.getByRole("log", { name: "Chat" });
+  const rows = log.locator("[data-chat-row]");
+  await expect(rows).toHaveCount(2);
+  sockets[0].send(JSON.stringify({ type: "event", event: follow }));
+  await expect(rows).toHaveCount(3);
+  const bits = log.locator('[data-support="bits"]');
+  await expect(bits).toHaveText("Twitch Anonymous 100 Bits great <b>stream</b>");
+  await expect(bits.locator("b")).toHaveCount(0);
+  await expect(log.locator('[data-support="follow"]')).toHaveText("Kick Viewer 9 followed");
+  // A support row does not look like a chat row.
+  const edge = (row: Locator): Promise<string> =>
+    row.evaluate((element: Element): string => getComputedStyle(element).borderLeftWidth);
+  expect(await edge(bits)).toBe("3px");
+  expect(await edge(rows.first())).toBe("0px");
+  // The same event again adds no second row. A cleared chat removes the chat text only.
+  sockets[0].send(JSON.stringify({ type: "event", event: { ...cheer, replay: true } }));
+  sockets[0].send(JSON.stringify({ type: "event", event: { kind: "clear", platform: "twitch", receivedAt: 1 } }));
+  await expect(rows.first()).toContainText("message removed by a moderator");
+  await expect(rows).toHaveCount(3);
+  await expect(bits).toContainText("100 Bits");
+  // The platform filter hides the support events of its platform.
+  await part.getByRole("button", { name: "Kick" }).click();
+  await expect(log.locator('[data-support="follow"]')).toHaveCount(0);
+  await expect(rows).toHaveCount(2);
+  await part.getByRole("button", { name: "Kick" }).click();
+  await expect(rows).toHaveCount(3);
+
+  // The overlay chat of the preview got the same messages. It shows chat only.
+  const recent: Record<string, unknown> = { ...chat(2, "twitch"), receivedAt: Date.now() };
+  sockets[0].send(JSON.stringify({ type: "event", event: recent }));
+  const overlayChat = page.locator(".tl-preview [data-overlay-chat]");
+  await expect(overlayChat.locator("li.wl-item")).toHaveCount(1);
+  await expect(overlayChat).toContainText("chat message 2");
+  await expect(overlayChat).not.toContainText("100 Bits");
+  await expect(overlayChat).not.toContainText("Viewer 9");
+  await expect(rows).toHaveCount(4);
+
+  // The dock shows the same list with its own link.
+  const made = await owner.request.post("/api/dock/key", { data: {} });
+  expect(made.status()).toBe(200);
+  const dockUrl: string = ((await made.json()) as { url: string }).url;
+  const dock = await newPage(browser, {
+    viewport: { width: 300, height: 720 },
+    extraHTTPHeaders: { "CF-Connecting-IP": `192.0.2.${SUPPORT_DOCK_IP}` },
+  });
+  await dock.routeWebSocket("**/api/activity/**", (socket: WebSocketRoute) => {
+    socket.send(JSON.stringify({ type: "snapshot", events: [message, cheer, follow], replay: true }));
+  });
+  await dock.goto(dockUrl);
+  const dockLog = dock.locator('[data-live-part="chat"]').getByRole("log", { name: "Chat" });
+  await expect(dockLog.locator("[data-chat-row]")).toHaveCount(3);
+  await expect(dockLog.locator('[data-support="bits"]')).toContainText("Anonymous 100 Bits");
+  await expect(dockLog.locator('[data-support="follow"]')).toContainText("Viewer 9 followed");
+  // A support row is not wider than the narrow panel.
+  const right: number = await dockLog
+    .locator('[data-support="bits"]')
+    .evaluate((element: Element): number => element.getBoundingClientRect().right);
+  expect(right).toBeLessThanOrEqual(300);
+  await Promise.all([close(owner), close(dock)]);
+  await runSql("tools-live-support-restore", [noDockKey]);
 });
