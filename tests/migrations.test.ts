@@ -266,7 +266,7 @@ beforeAll(async (): Promise<void> => {
 afterAll(async (): Promise<void> => database.dispose());
 
 describe("migrations 0006 onwards", (): void => {
-  it("covers 0006 to 0046", (): void => {
+  it("covers 0006 to 0047", (): void => {
     expect(applied.map((file: string): string => file.slice(0, 4))).toEqual([
       "0006",
       "0007",
@@ -309,6 +309,7 @@ describe("migrations 0006 onwards", (): void => {
       "0044",
       "0045",
       "0046",
+      "0047",
     ]);
   });
 
@@ -430,6 +431,12 @@ describe("migrations 0006 onwards", (): void => {
     ]);
   });
 
+  it("adds the saved layouts of the overlay (0047), with no layout for old rows", async (): Promise<void> => {
+    const rows = await db.prepare("SELECT layouts FROM overlay_state").all<{ layouts: string }>();
+    expect(rows.results.length).toBeGreaterThan(0);
+    for (const row of rows.results) expect(row.layouts).toBe("{}");
+  });
+
   it("adds the category and the picture of a stream source (0045), empty for old rows", async (): Promise<void> => {
     expect(await db.prepare("SELECT category, image_url FROM stream_event_sources WHERE external_id='seg1'").first()).toEqual({
       category: null,
@@ -522,7 +529,14 @@ describe("migrations 0006 onwards", (): void => {
 
   it("rebuilds overlay_state (0032) with every row, column, default and foreign key", async (): Promise<void> => {
     expect(overlayBefore.rows).toHaveLength(2);
-    expect(await overlayTable()).toEqual(overlayBefore);
+    // After the rebuild, 0047 adds one column: the saved layouts.
+    const now: OverlayTable = await overlayTable();
+    const added = (column: Record<string, unknown>): boolean => column.name === "layouts";
+    expect(now.columns.filter(added)).toMatchObject([{ name: "layouts", notnull: 1, dflt_value: "'{}'", pk: 0 }]);
+    const rows: Record<string, unknown>[] = now.rows.map((row: Record<string, unknown>): Record<string, unknown> =>
+      Object.fromEntries(Object.entries(row).filter(([name]: [string, unknown]): boolean => name !== "layouts")),
+    );
+    expect({ ...now, rows, columns: now.columns.filter((column) => !added(column)) }).toEqual(overlayBefore);
     expect(await db.prepare("SELECT name FROM sqlite_master WHERE name='overlay_state_rows'").first()).toBeNull();
     expect(await db.prepare("SELECT * FROM pragma_foreign_key_check('overlay_state')").first()).toBeNull();
   });

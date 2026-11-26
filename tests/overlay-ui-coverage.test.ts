@@ -12,6 +12,7 @@ import { LayerProperties, OVERLAY_MESSAGE_MAX } from "../app/components/overlay/
 import { LAYER_NAMES, LayoutGrid, type LayoutGridHandle } from "../app/components/overlay/layout-grid";
 import { CharactersSlot, OverlayComposition, usesDesignCanvas } from "../app/components/overlay/overlay-composition";
 import { controlState, OverlayControl } from "../app/components/overlay/overlay-control";
+import { LayoutPicker, layoutOptions } from "../app/components/overlay/layout-picker";
 import { OverlayLink, sourcesText } from "../app/components/overlay/overlay-link";
 import {
   OverlayStage,
@@ -35,6 +36,13 @@ import {
   type OverlayLayer,
   type OverlayLayers,
 } from "../app/lib/overlay-layers";
+import {
+  EMPTY_LAYOUTS,
+  layoutChoices,
+  presetCells,
+  selectLayout,
+  type OverlayLayouts,
+} from "../app/lib/overlay-layouts";
 import type { OverlayData, OverlayState } from "../app/types";
 
 const data: OverlayData = { polls: [], topics: [], cards: [], next: null, support: null };
@@ -125,9 +133,72 @@ const NO_LINKS: Readonly<Record<Orientation, boolean>> = { horizontal: false, ve
 /** The link panel saves nothing in a static render. */
 const LINK_SAVES = { busy: false, onTwitchOnly: (): void => undefined };
 
+describe("layout list of the studio", () => {
+  const act = (): Promise<boolean> => Promise.resolve(true);
+  const labels = (layouts: OverlayLayouts, layers: OverlayLayers): string[] =>
+    layoutOptions(layoutChoices(layouts, layers, "horizontal")).map((option): string => option.label);
+  const picker = (layouts: OverlayLayouts, layers: OverlayLayers, busy: boolean = false): string =>
+    renderToStaticMarkup(createElement(LayoutPicker, { output: "horizontal", layers, layouts, busy, act }));
+
+  it("is one row in step 1, between the output switch and the grid: no separate step to pick a layout", () => {
+    const html: string = renderToStaticMarkup(
+      createElement(OverlayControl, { initial: state, scene, hasOverlayKey: NO_LINKS, layouts: EMPTY_LAYOUTS }),
+    );
+    expect(html.match(/class="ov-step-num"/g)).toHaveLength(2);
+    const row: number = html.indexOf('data-layout-picker="horizontal"');
+    expect(row).toBeGreaterThan(html.indexOf("data-comp-orientation-note"));
+    expect(row).toBeLessThan(html.indexOf('class="ov-studio"'));
+  });
+
+  it("shows the layout on stream that is not saved yet, and offers a copy of it", () => {
+    const html: string = picker(EMPTY_LAYOUTS, placed);
+    expect(html).toContain(">Layout</span>");
+    expect(html).toContain("Save as a new layout");
+    // The list: the presets of the output, the layout on stream, and the entry for a new layout.
+    expect(labels(EMPTY_LAYOUTS, placed)).toEqual([
+      "Just chatting · preset",
+      "Gameplay · preset",
+      "Your layout · not saved yet",
+      "New layout…",
+    ]);
+    // No layout of the streamer yet, and no preset on stream.
+    expect(html).not.toContain("data-layout-manage");
+    expect(html).not.toContain("data-layout-reset");
+  });
+
+  it("names the preset on stream, and offers the reset only after a change", () => {
+    const picked = selectLayout({ layouts: EMPTY_LAYOUTS, layers: placed }, "horizontal", "preset:gameplay", {
+      id: "kept",
+      name: "My layout",
+    });
+    expect(picked.layers.cells.horizontal).toEqual(presetCells("gameplay"));
+    const same: string = picker(picked.layouts, picked.layers);
+    expect(labels(picked.layouts, picked.layers)).toEqual([
+      "Just chatting · preset",
+      "Gameplay · preset",
+      "My layout",
+      "New layout…",
+    ]);
+    expect(same).not.toContain("data-layout-reset");
+    // The layout that the page had is a layout of the streamer now: it can get a name or go.
+    expect(same).toContain("Rename or delete layouts");
+    const moved: OverlayLayers = {
+      ...picked.layers,
+      cells: { ...picked.layers.cells, horizontal: { ...picked.layers.cells.horizontal, poll: null } },
+    };
+    const changed: string = picker(picked.layouts, moved);
+    expect(labels(picked.layouts, moved)[1]).toBe("Gameplay · preset, changed by you");
+    expect(changed).toContain("Reset to the preset");
+    // No action during a save.
+    expect(picker(picked.layouts, moved, true).match(/<button[^>]* disabled=""/g)?.length).toBeGreaterThanOrEqual(3);
+  });
+});
+
 describe("overlay control page", () => {
   function control(initial: OverlayState = state, connected: boolean = true): string {
-    return renderToStaticMarkup(createElement(OverlayControl, { initial, scene, hasOverlayKey: NO_LINKS, connected }));
+    return renderToStaticMarkup(
+      createElement(OverlayControl, { initial, scene, hasOverlayKey: NO_LINKS, layouts: EMPTY_LAYOUTS, connected }),
+    );
   }
 
   it("has the studio as step 1 and the OBS link as step 2, without the page head and the old live control", () => {
@@ -151,6 +222,7 @@ describe("overlay control page", () => {
           initial: state,
           scene,
           hasOverlayKey: { horizontal: hasKey, vertical: false },
+          layouts: EMPTY_LAYOUTS,
           sources: { count, seenAt: null },
         }),
       );

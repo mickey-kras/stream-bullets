@@ -85,6 +85,7 @@ const statusMessages: Readonly<Partial<Record<number, MessageId>>> = {
 
 const codeMessages: Readonly<Record<string, MessageId>> = {
   keys_required: "keys.setupIntro",
+  layout_limit: "overlay.layout.limit",
   step_up_required: "keys.confirmTitle",
   challenge_expired: "keys.cancelled",
   key_limit: "keys.limit",

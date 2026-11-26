@@ -141,6 +141,39 @@
   gap: 12px;
   margin-bottom: 8px;
 }
+/* The layouts of the output: the list and its buttons, in one row above the grid. */
+.ov-layout .field-label {
+  margin: 0;
+}
+.ov-layout .ov-layout-select {
+  flex: 1 1 14rem;
+  max-width: 24rem;
+}
+.ov-layout button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.ov-layout-form {
+  display: grid;
+  gap: 10px;
+}
+.ov-layout-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ov-layout-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ov-layout-row input {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
 .ov-comp-bar .ov-seg-field {
   margin: 0;
 }

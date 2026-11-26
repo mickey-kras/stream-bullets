@@ -751,6 +751,9 @@ export const overlayState = sqliteTable(
     // The last applied layer write of up to 8 editors: [random editor id, write number] pairs, the most recent
     // editor first (app/server/overlay.server.ts).
     layersWrites: text("layers_writes", { mode: "json" }).$type<[string, number][]>().notNull().default([]),
+    // The saved layouts of each output and the layout on stream. `{}` reads as no layouts
+    // (app/lib/overlay-layouts.ts validates the content).
+    layouts: text("layouts").notNull().default("{}"),
   },
   (table) => [
     check("overlay_state_air_check", overlaySourceCheck(table.air)),

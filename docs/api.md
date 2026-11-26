@@ -201,6 +201,34 @@ English also shows `error` for `step_up_required` and `other_key_required`.
   See [State from before the overlay studio](overlay-composition.md#state-from-before-the-overlay-studio).
 - See [Overlay composition and merged chat](overlay-composition.md) for the layers, the URLs, the test, and the chat limits.
 
+## Overlay layouts
+
+Each output of the overlay has its own layouts, and one of them is on stream.
+See [Layouts](overlay-composition.md#layouts).
+
+| Endpoint | Body | Response |
+| --- | --- | --- |
+| `GET /api/overlay` | - | The response also has `layouts`: `{horizontal, vertical}`, each with `active` and `saved` |
+| `POST /api/overlay/layouts` | `{action: "select", output, id, keep}` | `{overlay, layouts}`. The layout `id` is on stream |
+| `POST /api/overlay/layouts` | `{action: "create", output, name, from: "empty" \| "current", keep}` | `{overlay, layouts}`. A new layout of the streamer is on stream |
+| `POST /api/overlay/layouts` | `{action: "rename", output, id, name}` | `{overlay, layouts}` |
+| `POST /api/overlay/layouts` | `{action: "delete", output, id}` | `{overlay, layouts}` |
+| `POST /api/overlay/layouts` | `{action: "reset", output}` | `{overlay, layouts}`. The preset on stream has the cells that it comes with |
+
+- `output` is `horizontal` or `vertical`.
+- `id` is the ID of a layout of the streamer, or the ID of a preset: `preset:chatting`, `preset:gameplay`, or `preset:vertical`.
+  A preset of the other output returns `404`.
+- `active` is the ID of the layout on stream, or `null` when the layout on stream has no saved copy.
+- `saved` holds `{id, name, cells}` for each layout of the streamer, and for each preset that the streamer used.
+  The cells of the layout on stream are in `overlay.layers.cells`. Its `cells` in `saved` can be old.
+- `name` and `keep` are one line of 1 to 40 characters.
+  `keep` is the name for a layout on stream that has no saved copy: it then becomes a layout of the streamer.
+- Each output can have 8 layouts of the streamer. One more returns `400` with the code `layout_limit`.
+- The server refuses to delete the layout on stream (`400`), to rename a preset (`400`), and to reset when no preset is on stream (`400`).
+- `select`, `create`, and `reset` change the layers. Overlay pages get the new `layers` through the live room, without a reload.
+- Each action increases `overlay.revision`, and the live room sends the new revision. Another open tab of the owner then loads the layouts again.
+- Only the owner of the page can use these endpoints. Unknown fields return `400`.
+
 ## Later phases
 
 Overlay, Mash Battle, admin, step-up, and AI-interest handlers now exist in the registry.

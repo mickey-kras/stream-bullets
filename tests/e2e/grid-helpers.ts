@@ -9,11 +9,12 @@ export const FEATURE_HOST = "(SELECT id FROM streamers WHERE handle='feature_hos
 
 /**
  * SQL that saves layers for the feature host, as the current version stores them. Each layer that `layers` does not
- * name is off the grid and has its default settings. The new revision makes the live room read the row again.
+ * name is off the grid and has its default settings. The page then has no saved layout. The new revision makes the
+ * live room read the row again.
  */
 export function layersSql(layers: LayersPatch = {}): string {
   const text: string = JSON.stringify({ v: 3, ...layers }).replaceAll("'", "''");
-  return `UPDATE overlay_state SET layers='${text}', chat_test_until=0, revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`;
+  return `UPDATE overlay_state SET layers='${text}', layouts='{}', chat_test_until=0, revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`;
 }
 
 /** A key of the vertical output for a spec. It has the form of a real key: 43 characters. */

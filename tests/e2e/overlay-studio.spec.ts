@@ -32,6 +32,7 @@ const KEYS_IP = clientIp("overlay-studio", 33);
 const OBS_IP = clientIp("overlay-studio", 34);
 const QR_IP = clientIp("overlay-studio", 35);
 const CAMERA_IP = clientIp("overlay-studio", 36);
+const LAYOUT_IP = clientIp("overlay-studio", 37);
 
 test.beforeEach(async () => {
   await runSql("overlay-studio-reset", [
@@ -550,10 +551,10 @@ test("the keyboard alone places, selects, changes and removes a layer", async ({
   const grid = gridButton(editor, "Layout grid, 32 columns by 18 rows");
   const status = editor.locator("[data-grid-status]");
   const panel = settings(editor);
-  // Tab goes through the toolbar, then the chips in their order, then the grid.
+  // Tab goes through the toolbar, the layout list and its button, then the chips in their order, then the grid.
   await editor.getByRole("button", { name: "Horizontal 32 × 18" }).focus();
   const order: string[] = [];
-  for (let step = 0; step < 13; step += 1) {
+  for (let step = 0; step < 15; step += 1) {
     await page.keyboard.press("Tab");
     order.push(await page.evaluate(() => (document.activeElement?.textContent ?? "").trim()));
   }
@@ -562,6 +563,8 @@ test("the keyboard alone places, selects, changes and removes a layer", async ({
     "Transparent",
     "Sample game",
     "Start test",
+    "Your layout · not saved yet",
+    "Save as a new layout",
     "+ Chat",
     "+ Characters",
     "+ Poll",
@@ -786,4 +789,157 @@ test("the camera frame has a clear window on stream at each size, and the editor
   await expect(frame.locator('[data-grid-box="camera"]')).toHaveAttribute("data-off", "true");
   await close(obs);
   await close(owner);
+});
+
+/** The answer of a layout action. */
+function layoutSaved(page: Page): Promise<unknown> {
+  return page.waitForResponse(
+    (response) =>
+      response.request().method() === "POST" &&
+      new URL(response.url()).pathname === "/api/overlay/layouts" &&
+      response.ok(),
+  );
+}
+
+test("the owner picks a preset in the list, changes it, resets it, and keeps layouts of their own, and OBS follows", async ({
+  browser,
+}) => {
+  // The page has a layout from before the layouts: the chat on the horizontal grid.
+  await runSql("overlay-studio-layouts", [
+    layersSql({ chat: { enabled: true }, cells: { horizontal: { chat: CHAT_CELL } } }),
+  ]);
+  const owner = await signedIn(browser, "featureowner", LAYOUT_IP);
+  const page = await newPage(owner);
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/tools?view=overlay");
+  const editor = page.locator("[data-composition-editor]");
+  const frame = editor.getByRole("region", { name: "Composition preview" });
+  const picker = editor.locator('[data-layout-picker="horizontal"]');
+  const list = picker.getByRole("combobox", { name: "Layout" });
+  const obs = await obsPage(browser);
+  // The layout that the page has is on stream. It is not a saved layout yet.
+  await expect(list).toHaveText("Your layout · not saved yet");
+  await expect(obs.locator('.ov-layer[data-layer="chat"]')).toBeVisible();
+  await expect(obs.locator('.ov-layer[data-layer="camera"]')).toHaveCount(0);
+
+  // One step: the list is in the row above the grid. A preset opens in the grid and goes on stream at once.
+  await list.click();
+  await expect(page.getByRole("option")).toHaveText([
+    "Just chatting · preset",
+    "Gameplay · preset",
+    "Your layout · not saved yet",
+    "New layout…",
+  ]);
+  let done = layoutSaved(page);
+  await page.getByRole("option", { name: "Gameplay · preset" }).click();
+  await done;
+  await expect(list).toHaveText("Gameplay · preset");
+  for (const layer of ["camera", "chat", "poll", "characters"])
+    await expect(frame.locator(`[data-grid-box="${layer}"]`)).toHaveCount(1);
+  // OBS shows the layout without a reload.
+  await expect(obs.locator('.ov-layer[data-layer="camera"]')).toBeVisible();
+  const loads: string[] = [];
+  obs.on("framenavigated", (navigated) => loads.push(navigated.url()));
+
+  // An edit of the grid changes the preset: the list says so, and a button brings the preset back.
+  await expect(picker.locator("[data-layout-reset]")).toHaveCount(0);
+  const removed = saved(page);
+  await page.locator('[data-comp-layer="poll"]').click();
+  await page.getByRole("button", { name: "Remove from grid" }).click();
+  await removed;
+  await expect(list).toHaveText("Gameplay · preset, changed by you");
+  done = layoutSaved(page);
+  await picker.getByRole("button", { name: "Reset to the preset" }).click();
+  await done;
+  await expect(frame.locator('[data-grid-box="poll"]')).toHaveCount(1);
+  await expect(list).toHaveText("Gameplay · preset");
+  await expect(picker.locator("[data-layout-reset]")).toHaveCount(0);
+
+  // A copy with a name of the owner goes on stream.
+  await picker.getByRole("button", { name: "Save as a new layout" }).click();
+  const fresh = page.getByRole("dialog", { name: "New layout" });
+  const create = fresh.getByRole("button", { name: "Create and put on stream" });
+  await expect(create).toBeDisabled();
+  await fresh.getByLabel("Name").fill("Raid night");
+  await expect(fresh.getByRole("radio", { name: "Start from a copy of the layout on stream" })).toBeChecked();
+  done = layoutSaved(page);
+  await create.click();
+  await done;
+  await expect(fresh).toHaveCount(0);
+  await expect(list).toHaveText("Raid night");
+  await expect(frame.locator('[data-grid-box="camera"]')).toHaveCount(1);
+
+  // A second tab of the owner is open. It must get the new name and the deleted layout without a load.
+  const other = await newPage(owner);
+  await other.goto("/tools?view=overlay");
+  const otherList = other.locator('[data-layout-picker="horizontal"]').getByRole("combobox", { name: "Layout" });
+  await expect(otherList).toHaveText("Raid night");
+
+  // The layout that the page had first is a layout of the owner now. It gets a new name, and then it goes.
+  await picker.getByRole("button", { name: "Rename or delete layouts" }).click();
+  const mine = page.getByRole("dialog", { name: "Your layouts" });
+  await expect(mine.locator("[data-layout-row]")).toHaveCount(2);
+  const first = mine.locator("[data-layout-row]").filter({ has: page.getByLabel("Name of My layout") });
+  const onStream = mine.locator("[data-layout-row]").filter({ has: page.getByLabel("Name of Raid night") });
+  // The layout on stream cannot go.
+  await expect(onStream.getByRole("button", { name: "Delete" })).toBeDisabled();
+  await expect(onStream).toContainText("On stream. Select a different layout before you delete this one.");
+  await first.getByLabel("Name of My layout").fill("Cozy");
+  done = layoutSaved(page);
+  await first.getByRole("button", { name: "Save name" }).click();
+  await done;
+  await otherList.click();
+  await expect(other.getByRole("option", { name: "Cozy" })).toBeVisible();
+  await other.keyboard.press("Escape");
+  const cozy = mine.locator("[data-layout-row]").filter({ has: page.getByLabel("Name of Cozy") });
+  done = layoutSaved(page);
+  await cozy.getByRole("button", { name: "Delete" }).click();
+  await done;
+  await expect(mine.locator("[data-layout-row]")).toHaveCount(1);
+  await page.keyboard.press("Escape");
+  await otherList.click();
+  await expect(other.getByRole("option", { name: "Raid night" })).toBeVisible();
+  await expect(other.getByRole("option", { name: "Cozy" })).toHaveCount(0);
+  await other.keyboard.press("Escape");
+  await close(other);
+
+  // The layouts hold after a load, and the other output has its own list.
+  await page.reload();
+  await expect(list).toHaveText("Raid night");
+
+  // A layout action waits for a grid edit that still saves. Else the edit would change the layout that comes.
+  const order: string[] = [];
+  await page.route("**/api/overlay", async (route) => {
+    await new Promise<void>((resolve) => setTimeout(resolve, 700));
+    order.push("grid edit");
+    await route.continue();
+  });
+  page.on("request", (request) => {
+    if (new URL(request.url()).pathname === "/api/overlay/layouts") order.push("layout action");
+  });
+  await page.locator('[data-comp-layer="poll"]').click();
+  const slider = page.locator("[data-props-background]").getByRole("slider", { name: "Background" });
+  await slider.focus();
+  await page.keyboard.press("ArrowLeft");
+  await list.click();
+  done = layoutSaved(page);
+  await page.getByRole("option", { name: "Gameplay · preset" }).click();
+  await done;
+  expect(order).toEqual(["grid edit", "layout action"]);
+  await page.unroute("**/api/overlay");
+  await expect(list).toHaveText("Gameplay · preset");
+  const outputSaved = saved(page);
+  await editor.getByRole("button", { name: "Vertical 18 × 32" }).click();
+  await outputSaved;
+  const tall = editor.locator('[data-layout-picker="vertical"]').getByRole("combobox", { name: "Layout" });
+  await tall.click();
+  await expect(page.getByRole("option")).toHaveText([
+    "Vertical · preset",
+    "Your layout · not saved yet",
+    "New layout…",
+  ]);
+  await page.keyboard.press("Escape");
+  // OBS never loaded the page again.
+  expect(loads).toEqual([]);
+  await Promise.all([close(owner), close(obs)]);
 });

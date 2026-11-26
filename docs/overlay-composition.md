@@ -108,6 +108,10 @@ With the switch on, the output shows only what comes from Twitch:
 - The characters layer shows the characters of Twitch viewers. The playground on the server does not change.
 - Each other event of the activity feed that is not from Twitch does not show.
 
+A change of the switch during a stream applies at once.
+The Twitch messages on screen stay. The messages of the other platforms go, and they do not come back.
+When the switch goes off again, the other platforms show from their next message.
+
 Polls, topics, the message banner, and the other content layers do not change.
 The **Live** section and the full-screen chat always show each platform.
 A preview shows what its output shows, thus a preview of an output with the switch on shows Twitch only.
@@ -244,6 +248,58 @@ The overlay reads stored and broadcast layers leniently. Thus a value from an ol
 - A layer with an incorrect value takes the defaults of that layer.
 
 The API is strict for changes. See [Overlay layers](api.md#overlay-layers).
+
+## Layouts
+
+Each output has its own layouts, and one of them is on stream.
+A layout is the cells of the layers of one output. The settings of a layer are not a part of a layout.
+Thus a poll that the owner picked stays when the layout changes.
+
+The list **Layout** is in the row above the grid, in the step **Build your overlay**. It has these entries:
+
+- The presets of the output. The horizontal output has **Just chatting** and **Gameplay**. The vertical output has **Vertical**.
+- The layouts of the streamer.
+- **New layout…**
+
+When you select a layout, it opens in the grid and goes on stream at once. OBS does not load the page again.
+Each edit of the grid changes the layout on stream and saves at once, as before the layouts.
+A layer that a layout adds to the grid of the output also gets **Show on stream**.
+The switch of each other layer stays.
+
+| Preset | Output | Layers |
+| --- | --- | --- |
+| Just chatting | Horizontal | A large camera frame, the chat at its side, the poll and the message banner below |
+| Gameplay | Horizontal | A small camera frame, the chat, the poll, and the characters at the edges |
+| Vertical | Vertical | The camera frame at the top, then the poll, the chat, and the characters |
+
+A preset that you change keeps your version. The list then shows **preset, changed by you**.
+**Reset to the preset** brings back the cells that the preset comes with.
+
+**Save as a new layout** and **New layout…** make a layout with your name.
+It starts from a copy of the layout on stream or from an empty grid, and it goes on stream.
+
+A layout action first saves the edits of the grid. The grid takes no edit until the action ends.
+When a different tab changes the layouts, the list shows the new layouts without a load of the page.
+
+**Rename or delete layouts** opens the list of your layouts. Each layout can get a new name.
+You cannot delete the layout on stream. Select a different layout first.
+Each output can have 8 layouts of the streamer. The presets do not count.
+
+The layout that a page had before the layouts stays on stream. The list shows it as **Your layout · not saved yet**.
+When you select a different layout for the first time, it becomes a layout of the streamer with the name **My layout**.
+
+### How the server stores layouts
+
+The cells of the layout on stream are in the layers, as before. Thus the overlay page and the editor read them as before.
+The column `overlay_state.layouts` holds the other layouts and the ID of the layout on stream. Migration `0047` adds it.
+The stored cells of the layout on stream are old until a different layout goes on stream. Then they take the cells of the grid.
+
+A layout action changes the layers and the layouts in one write.
+The read of the stored layouts is lenient, as for the layers: a layout that is not valid is not in the list.
+A Worker from before the layouts ignores the column.
+The data export of **Your data** has the layouts. The row goes with the page when the owner deletes the account.
+
+See [Overlay layouts](api.md#overlay-layouts) for the API.
 
 ## State from before the overlay studio
 

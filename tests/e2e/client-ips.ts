@@ -6,7 +6,7 @@ const ranges = {
   "viewer-polls": [[16, 19]],
   "comment-answer": [[20, 21]],
   mutations: [[25, 27]],
-  "overlay-studio": [[28, 36]],
+  "overlay-studio": [[28, 37]],
   account: [[40, 40]],
   pagination: [[50, 51]],
   moderation: [[60, 65]],

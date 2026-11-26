@@ -399,7 +399,7 @@ export function readCell(orientation: Orientation, layer: GridLayer, value: unkn
  * A stored layout. A cell that is invalid reads as no cell. The same applies when it overlaps a layer earlier in
  * GRID_LAYERS.
  */
-function readCells(orientation: Orientation, value: unknown): LayerCells {
+export function readCells(orientation: Orientation, value: unknown): LayerCells {
   const raw: Record<string, unknown> = typeof value === "object" && value !== null ? { ...value } : {};
   const kept: CellRect[] = [];
   const free = (layer: GridLayer): CellRect | null => {
@@ -498,7 +498,8 @@ export const LAYERS_VERSION = 3;
 // Match `overlay_state_layers_check`.
 export const STORED_LAYERS_LENGTH = 4000;
 
-function storedCells(cells: LayerCells): CellsPatch {
+/** The cells to store: only the layers on the grid. */
+export function storedCells(cells: LayerCells): CellsPatch {
   const stored: CellsPatch = {};
   for (const layer of GRID_LAYERS) {
     const rect: CellRect | null = cells[layer];
