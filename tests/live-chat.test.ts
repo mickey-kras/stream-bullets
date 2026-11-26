@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import type { ActivityChat, ActivityEvent, ActivityMessage, ActivityPlatform } from "../app/lib/activity";
+import type {
+  ActivityChat,
+  ActivityEvent,
+  ActivityMessage,
+  ActivityPlatform,
+  ActivitySupport,
+  SupportKind,
+} from "../app/lib/activity";
 import { MAX_REMOVED_IDS } from "../app/lib/chat-feed";
 import {
   CHAT_TEXT_DEFAULT,
@@ -10,9 +17,11 @@ import {
   liveChatReducer,
   newSince,
   nextChatTextStep,
+  rowKey,
   shownRows,
   type LiveChatRow,
   type LiveChatState,
+  type LiveRow,
 } from "../app/lib/live-chat";
 
 // The chat log of the Live section of Streamer tools: a pure state machine over the activity feed.
@@ -58,10 +67,37 @@ function run(messages: ActivityMessage[], from: LiveChatState = initialLiveChat(
   return messages.reduce((state: LiveChatState, message: ActivityMessage) => receive(state, message), from);
 }
 
+/** A support event. Its ID is the platform and the delivery ID, as the feed makes it. */
+function support(kind: SupportKind, n: number, more: Partial<ActivitySupport> = {}): ActivitySupport {
+  const platform: ActivitySupport["platform"] = more.platform ?? "twitch";
+  const deliveryId: string = more.deliveryId ?? `d${n}`;
+  return {
+    kind,
+    id: `${platform}:${deliveryId}`,
+    platform,
+    deliveryId,
+    sender: { id: `u${n}`, displayName: `Viewer ${n}` },
+    anonymous: false,
+    amount: null,
+    currency: null,
+    receivedAt: T0 + n * 1000,
+    replay: false,
+    ...more,
+  };
+}
+
+/** The text of a chat row, "removed" for a moderated row, and the kind of a support row. */
 function texts(state: LiveChatState): string[] {
-  return state.rows.map((row: LiveChatRow): string =>
-    row.removed ? "removed" : row.fragments.map((part) => (part.type === "text" ? part.text : part.name)).join(""),
-  );
+  return state.rows.map((row: LiveRow): string => {
+    if (row.kind === "support") return row.event;
+    return row.removed
+      ? "removed"
+      : row.fragments.map((part) => (part.type === "text" ? part.text : part.name)).join("");
+  });
+}
+
+function chatRows(state: LiveChatState): LiveChatRow[] {
+  return state.rows.filter((row: LiveRow): row is LiveChatRow => row.kind === "chat");
 }
 
 describe("live chat log", (): void => {
@@ -87,7 +123,7 @@ describe("live chat log", (): void => {
       event(chat(2, { user: { id: "u2", displayName: "" } })),
     ]);
     expect(named.rows.map((row) => row.name)).toEqual(["login1", ""]);
-    expect(named.rows[0].badges).toEqual([
+    expect(chatRows(named)[0].badges).toEqual([
       { id: "mod", label: "MOD" },
       { id: "sub", label: "SUB" },
     ]);
@@ -96,7 +132,7 @@ describe("live chat log", (): void => {
   it("shows the whole text of a long message, up to the limit", (): void => {
     const long: string = "x".repeat(LIVE_CHAT_LIMITS.maxDisplayChars + 5);
     const state: LiveChatState = run([event(chat(1, { text: long, fragments: [{ type: "text", text: long }] }))]);
-    expect(state.rows[0].truncated).toBe(true);
+    expect(chatRows(state)[0].truncated).toBe(true);
     expect(texts(state)[0]).toHaveLength(LIVE_CHAT_LIMITS.maxDisplayChars);
   });
 
@@ -206,7 +242,11 @@ describe("live chat log", (): void => {
     const before: LiveChatState = run(Array.from({ length: 150 }, (_, n: number) => event(chat(n + 1))));
     const kept: ActivityChat[] = Array.from({ length: 99 }, (_, n: number) => chat(n + 51));
     const after: LiveChatState = receive(before, snapshot(kept, T0 + 50_000));
-    expect(after.rows.filter((row: LiveChatRow): boolean => row.removed).map((row) => row.id)).toEqual(["twitch:m150"]);
+    expect(
+      chatRows(after)
+        .filter((row: LiveChatRow): boolean => row.removed)
+        .map((row) => row.id),
+    ).toEqual(["twitch:m150"]);
   });
 
   it("reads a snapshot without a boundary from its oldest message, and an empty one not at all", (): void => {
@@ -222,6 +262,125 @@ describe("live chat log", (): void => {
 
   it("fills an empty log from the first snapshot", (): void => {
     expect(texts(run([snapshot([chat(1), chat(2)])]))).toEqual(["message 1", "message 2"]);
+  });
+});
+
+describe("support events in the live chat log", (): void => {
+  it("adds one row for each support event, in arrival order with the chat", (): void => {
+    const cheer: ActivitySupport = support("bits", 2, { sender: null, anonymous: true, amount: 100, text: "gg" });
+    const state: LiveChatState = run([event(chat(1)), event(cheer), event(support("follow", 3)), event(chat(4))]);
+    expect(texts(state)).toEqual(["message 1", "bits", "follow", "message 4"]);
+    expect(state.rows.map((row) => row.seq)).toEqual([1, 2, 3, 4]);
+    expect(state.rows[1]).toEqual({
+      kind: "support",
+      id: "twitch:d2",
+      seq: 2,
+      event: "bits",
+      platform: "twitch",
+      name: null,
+      amount: 100,
+      currency: null,
+      text: "gg",
+      receivedAt: T0 + 2000,
+    });
+    expect(state.rows[2]).toMatchObject({ event: "follow", name: "Viewer 3", amount: null, text: null });
+  });
+
+  it("has no name for a supporter that the platform does not name, and no text for an empty text", (): void => {
+    const unnamed: ActivitySupport = support("follow", 1, { sender: { id: "u1", displayName: "" }, text: "" });
+    expect(run([event(unnamed)]).rows[0]).toMatchObject({ name: null, text: null });
+  });
+
+  it("adds no second row for a replay, a provider retry or the copy of a snapshot", (): void => {
+    const gift: ActivitySupport = support("gift", 1, { amount: 5 });
+    const once: LiveChatState = run([event(gift)]);
+    expect(receive(once, event({ ...gift, replay: true }))).toBe(once);
+    expect(receive(once, event(gift))).toBe(once);
+    expect(receive(once, snapshot([{ ...gift, replay: true }], T0))).toBe(once);
+    // The same delivery ID on another platform is another event.
+    expect(texts(receive(once, event(support("gift", 1, { platform: "kick", amount: 5 }))))).toEqual(["gift", "gift"]);
+  });
+
+  it("adds no row for a snapshot copy of a support event whose row newer chat pushed out", (): void => {
+    const gift: ActivitySupport = support("gift", 1, { amount: 5 });
+    const chats: ActivityMessage[] = Array.from({ length: LIVE_CHAT_LIMITS.maxRows }, (_, n: number) =>
+      event(chat(n + 2)),
+    );
+    const busy: LiveChatState = run([event(gift), ...chats]);
+    expect(busy.rows.some((row) => row.kind === "support")).toBe(false);
+    // The server keeps the support event for the snapshot of a reconnect: it is not a new event.
+    const again: LiveChatState = receive(busy, snapshot([{ ...gift, replay: true }]));
+    expect(again.rows).toBe(busy.rows);
+    expect(again.seq).toBe(busy.seq);
+  });
+
+  it("keeps a chat message and a support event that have the same ID as two rows", (): void => {
+    const state: LiveChatState = run([
+      event(chat(1, { platform: "youtube", messageId: "x" })),
+      event(support("super_chat", 2, { platform: "youtube", deliveryId: "x", amount: 5_000_000, currency: "USD" })),
+    ]);
+    expect(state.rows.map((row) => row.id)).toEqual(["youtube:x", "youtube:x"]);
+    expect(state.rows.map(rowKey)).toEqual(["youtube:x", "support:youtube:x"]);
+    // The deletion of the message removes the chat row only.
+    const deleted: LiveChatState = receive(
+      state,
+      event({ kind: "delete", platform: "youtube", messageId: "x", receivedAt: T0 }),
+    );
+    expect(texts(deleted)).toEqual(["removed", "super_chat"]);
+  });
+
+  it("puts the support events of a snapshot between its chat in the order of their receive times", (): void => {
+    const first: LiveChatState = run([
+      snapshot([chat(1), chat(4), support("raid", 2, { amount: 40, replay: true }), support("follow", 5)], T0),
+    ]);
+    expect(texts(first)).toEqual(["message 1", "raid", "message 4", "follow"]);
+    // A snapshot with support events only adds them, and tells nothing about the chat without a boundary.
+    const more: LiveChatState = receive(first, snapshot([support("kicks", 6, { platform: "kick", amount: 10 })]));
+    expect(texts(more)).toEqual(["message 1", "raid", "message 4", "follow", "kicks"]);
+  });
+
+  it("never removes a support row: not for a deletion, a ban, a clear, or a snapshot without it", (): void => {
+    const start: LiveChatState = run([
+      event(chat(1)),
+      event(support("subscription", 1, { amount: 3 })),
+      event(support("follow", 2, { sender: { id: "u1", displayName: "Viewer 1" } })),
+    ]);
+    const moderated: LiveChatState = run(
+      [
+        event({ kind: "delete", platform: "twitch", messageId: "d1", receivedAt: T0 }),
+        event({ kind: "ban", platform: "twitch", userId: "u1", until: null, receivedAt: T0 }),
+        event({ kind: "clear_user", platform: "twitch", userId: "u1", receivedAt: T0 }),
+        event({ kind: "clear", platform: "twitch", receivedAt: T0 }),
+      ],
+      start,
+    );
+    expect(texts(moderated)).toEqual(["removed", "subscription", "follow"]);
+    // The feed keeps only chat for a late reader, so its snapshot has no support event.
+    expect(texts(receive(start, snapshot([], T0)))).toEqual(["removed", "subscription", "follow"]);
+    expect(texts(receive(start, snapshot([chat(1)], T0)))).toEqual(["message 1", "subscription", "follow"]);
+  });
+
+  it("applies the row limit to chat and support rows together", (): void => {
+    const many: ActivityMessage[] = Array.from({ length: LIVE_CHAT_LIMITS.maxRows + 2 }, (_, n: number) =>
+      event(n % 2 === 0 ? chat(n) : support("follow", n)),
+    );
+    const state: LiveChatState = run(many);
+    expect(state.rows).toHaveLength(LIVE_CHAT_LIMITS.maxRows);
+    expect(state.rows.slice(0, 2).map((row) => row.id)).toEqual(["twitch:m2", "twitch:d3"]);
+  });
+
+  it("filters support rows by platform, always shows a direct tip, and counts them for a paused chat", (): void => {
+    const state: LiveChatState = run([
+      event(chat(1)),
+      event(support("follow", 2, { platform: "kick" })),
+      event(support("tip", 3, { platform: "direct", amount: 2_000_000, currency: "EUR" })),
+      event(support("membership", 4, { platform: "youtube", amount: 1 })),
+    ]);
+    const all = new Set<ActivityPlatform>(["twitch", "youtube", "kick"]);
+    expect(shownRows(state.rows, new Set<ActivityPlatform>(["kick"])).map((row) => row.seq)).toEqual([1, 3, 4]);
+    expect(shownRows(state.rows, all).map((row) => row.seq)).toEqual([3]);
+    expect(newSince(state.rows, 1, new Set())).toBe(3);
+    expect(newSince(state.rows, 1, new Set<ActivityPlatform>(["youtube"]))).toBe(2);
   });
 });
 

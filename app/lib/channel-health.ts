@@ -14,10 +14,10 @@ export interface ChannelView {
     lastEventAt: number | null;
     updatedAt: number;
   } | null;
-  /** Whether the connection reads support events. Not there in the answer of a server from before them. */
-  support?: boolean;
+  /** Whether the connection reads support events. */
+  support: boolean;
   /** The permissions that the provider asks for when the streamer turns support events on. */
-  supportScopes?: string[];
+  supportScopes: string[];
 }
 
 /** The body of GET /api/channels. Fields that the panel does not read are dropped. */
@@ -36,10 +36,21 @@ export const channelsResponseSchema: z.ZodType<{ channels: ChannelView[] }> = z.
           updatedAt: z.number(),
         })
         .nullable(),
-      support: z.boolean().optional(),
-      supportScopes: z.array(z.string().max(200)).max(20).optional(),
+      support: z.boolean(),
+      supportScopes: z.array(z.string().max(200)).max(20),
     }),
   ),
+});
+
+/** The body of POST /api/channels/:platform/support. `url` is the provider page that gives the new permissions. */
+export interface SupportAnswer {
+  url: string | null;
+  support: boolean;
+}
+
+export const supportAnswerSchema: z.ZodType<SupportAnswer> = z.object({
+  url: z.string().min(1).max(2000).nullable(),
+  support: z.boolean(),
 });
 
 /**
