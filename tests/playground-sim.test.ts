@@ -10,14 +10,13 @@ import {
   REGISTRY_IDLE_TICKS,
   REGISTRY_MAX,
   RESTRICTED_MAX,
-  STAIRS_MAX,
   TEST_USER_PREFIX,
   VISIBLE_MAX,
 } from "../app/lib/playground/constants";
 import { COMMANDS, type Command, chooseCrowd, crowdSlots, type Participant } from "../app/lib/playground/crowd";
 import { BUBBLE_MAX_UNITS, CUT_MARK, encodeFrame, FLAG_NEW, FLAG_UNAVAILABLE } from "../app/lib/playground/protocol";
 import { mulberry32, PlaygroundSim, parseCommand, setState } from "../app/lib/playground/sim";
-import { createWorld, solidAt, tileAt } from "../app/lib/playground/terrain";
+import { blockAt, colOf, createWorld, placeBlock, rowOf, solidAt, tileAt } from "../app/lib/playground/terrain";
 import { TEST_CROWD_SIZE, type TestCrowdEvent, testCrowdScript } from "../app/lib/playground/test-crowd";
 
 const T0 = 1_800_000_000_000;
@@ -224,7 +223,7 @@ describe("prototype scenarios (640 x 120 world)", () => {
       setState(chars[0], "walk", { x: 240, y: sim.world.gy, dir: 1 });
       sim.perform(chars[0], command);
       let duration = 0;
-      while (duration < 600 && !["walk", "gone", "away"].includes(chars[0].state)) {
+      while (duration < 600 && !["walk", "hold", "gone", "away"].includes(chars[0].state)) {
         tick();
         duration += 1;
       }
@@ -288,10 +287,11 @@ describe("prototype scenarios (640 x 120 world)", () => {
     sim.clock = 1;
     message(chars[60], "!build");
     tick(32);
-    expect(chars[60].pending?.name).toBe("build");
-    expect(sim.terrain.stairs).toHaveLength(0);
-    for (let i = 0; i < 100 && sim.terrain.stairs.length === 0; i++) tick();
-    expect(sim.terrain.stairs).toHaveLength(1);
+    // `!build` is the name that `!stairs` had before.
+    expect(chars[60].pending?.name).toBe("stairs");
+    expect(sim.terrain.count).toBe(0);
+    for (let i = 0; i < 100 && sim.terrain.count === 0; i++) tick();
+    expect(sim.terrain.count).toBe(1);
     expect(chars[60].x).toBeGreaterThanOrEqual(88);
   });
 
@@ -304,18 +304,17 @@ describe("prototype scenarios (640 x 120 world)", () => {
     sim.rotation = 10;
     sim.select();
     setState(chars[30], "walk", { x: 240, y: sim.world.gy, dir: 1 });
-    sim.perform(chars[30], "build");
+    sim.perform(chars[30], "stairs", "", 3);
     expect(chars[30].eligible).toBe(false);
     let firstExit: number | null = null;
-    for (let i = 0; i < 200; i++) {
-      if (i % 90 === 0) message(chars[30], "!build");
+    for (let i = 0; i < 400 && firstExit === null; i++) {
+      if (i % 90 === 0) message(chars[30], "!stairs 3");
       tick();
-      if (chars[30].exitReason === "capacity") {
-        firstExit = i + 1;
-        break;
-      }
+      if (chars[30].exitReason === "capacity") firstExit = i + 1;
     }
-    expect(firstExit).toBe(173);
+    // The three stairs of the first command are there, and the repeated commands built no more.
+    expect(firstExit).not.toBeNull();
+    expect(sim.terrain.count).toBe(3);
   });
 
   it("clamps the timeout setting without removing the crowd", () => {
@@ -332,20 +331,6 @@ describe("prototype scenarios (640 x 120 world)", () => {
     sim.setTimeoutSeconds(9999);
     expect(sim.timeoutTicks).toBe(18_000);
     expect(() => sim.setTimeoutSeconds(Number.NaN)).toThrow(RangeError);
-  });
-
-  it("removes temporary stairs after 30 seconds", () => {
-    const { sim, chars, tick } = proto();
-    sim.select();
-    setState(chars[0], "walk", { x: 240, y: sim.world.gy, dir: 1 });
-    sim.perform(chars[0], "build");
-    tick(172);
-    expect(sim.terrain.stairs).toHaveLength(5);
-    const finalExpiry: number = Math.max(...sim.terrain.stairs.map((s) => s.until));
-    setState(chars[0], "walk");
-    sim.clock = finalExpiry;
-    tick();
-    expect(sim.terrain.stairs).toHaveLength(0);
   });
 
   it("restores fully broken dirt exactly 900 ticks after the final dig", () => {
@@ -418,10 +403,34 @@ function walking(sim: PlaygroundSim, p: Participant): void {
 }
 
 describe("commands and bubbles", () => {
-  it("parses only the five commands", () => {
-    expect(parseCommand("!JUMP")).toBe("jump");
-    expect(parseCommand("​！dig now")).toBe("dig");
+  it("parses the commands, their aliases, a number and a side", () => {
+    expect(parseCommand("!JUMP")).toEqual({ name: "jump", n: 0, side: 0 });
+    expect(parseCommand("​！dig now")).toEqual({ name: "dig", n: 0, side: 0 });
+    expect(parseCommand("!dig 5")).toEqual({ name: "dig", n: 5, side: 0 });
+    expect(parseCommand("!dig l")).toEqual({ name: "dig", n: 0, side: -1 });
+    expect(parseCommand("!dig RIGHT 3")).toEqual({ name: "dig", n: 3, side: 1 });
+    expect(parseCommand("!dig 3 r")).toEqual({ name: "dig", n: 3, side: 1 });
+    expect(parseCommand("!look left")).toEqual({ name: "look", n: 0, side: -1 });
+    expect(parseCommand("!r 2")).toEqual({ name: "right", n: 2, side: 0 });
+    for (const [alias, name] of [
+      ["l", "left"],
+      ["turn", "look"],
+      ["box", "block"],
+      ["crate", "block"],
+      ["pillar", "up"],
+      ["build", "stairs"],
+      ["hook", "grapple"],
+      ["jet", "jetpack"],
+      ["hi", "wave"],
+      ["shove", "push"],
+    ]) {
+      expect(parseCommand(`!${alias}`)?.name, alias).toBe(name);
+    }
+    // A number of three digits, a word after the second, and an unknown word are not arguments.
+    expect(parseCommand("!left 100")).toEqual({ name: "left", n: 0, side: 0 });
+    expect(parseCommand("!dig please now 3")).toEqual({ name: "dig", n: 0, side: 0 });
     expect(parseCommand("!discord")).toBeNull();
+    expect(parseCommand("!constructor")).toBeNull();
     expect(parseCommand("jump")).toBeNull();
   });
 
@@ -486,26 +495,14 @@ describe("commands and bubbles", () => {
     expect(p.pendingText).toBeNull();
   });
 
-  it("marks a build with no room as unavailable", () => {
+  it("marks a block in a door zone as unavailable", () => {
     const { sim, viewers } = crowd(1);
     const p = find(sim, viewers[0]) as Participant;
-    setState(p, "walk", { x: sim.world.xmin + 2, y: sim.world.gy, dir: 1 });
-    sim.perform(p, "build");
-    Object.assign(p, { dir: -1, bx: sim.world.xmin });
-    for (let i = 0; i < 7; i++) sim.tick();
-    expect(p.state).toBe("walk");
+    setState(p, "walk", { x: sim.world.xmin + 2, y: sim.world.gy, dir: -1 });
+    sim.perform(p, "block");
+    expect(p.state).toBe("hold");
     expect(p.mark).toBeGreaterThan(0);
-  });
-
-  it("bounds the stair steps, dropping the oldest", () => {
-    const { sim, viewers } = crowd(1);
-    for (let i = 0; i < STAIRS_MAX; i++) sim.terrain.stairs.push({ x: 300, top: 50, dir: 1, until: 1e9 + i });
-    const p = find(sim, viewers[0]) as Participant;
-    setState(p, "walk", { x: 300, y: sim.world.gy, dir: 1 });
-    sim.perform(p, "build");
-    for (let i = 0; i < 7; i++) sim.tick();
-    expect(sim.terrain.stairs).toHaveLength(STAIRS_MAX);
-    expect(sim.terrain.stairs[0].until).toBe(1e9 + 1);
+    expect(sim.terrain.count).toBe(0);
   });
 
   it("flags newly admitted characters for their label", () => {
@@ -606,12 +603,13 @@ describe("controls", () => {
   it("resets terrain and participants but keeps restrictions", () => {
     const { sim, viewers } = crowd(2);
     sim.terrain.tiles[8].stage = 3;
-    sim.terrain.stairs.push({ x: 300, top: 50, dir: 1, until: 1e9 });
+    placeBlock(sim.world, sim.terrain, 18, 0, "dirt", 1);
     sim.receive({ kind: "ban", platform: viewers[0].platform, userId: viewers[0].userId, until: null, receivedAt: T0 });
     sim.rotation = 30;
     sim.reset();
     expect(sim.terrain.tiles[8].stage).toBe(0);
-    expect(sim.terrain.stairs).toHaveLength(0);
+    expect(sim.terrain.count).toBe(0);
+    expect(blockAt(sim.world, sim.terrain, 18, 0)).toBeNull();
     expect(sim.rotation).toBe(0);
     expect(sim.restrictions.size).toBe(1);
   });
@@ -776,13 +774,17 @@ function fuzz(sim: PlaygroundSim, ticks: number, seed: number): void {
   const rng = mulberry32(seed);
   const viewers: Viewer[] = Array.from({ length: 120 }, (_, i: number) => viewer(i));
   const actionStart = new Map<Participant, number>();
-  const ACTIONS = new Set<string>(["jump", "dig", "build", "bwalk", "wave", "boom", "fall", "land", "flat", "respawn"]);
+  const RESTS = new Set<string>(["walk", "hold", "idle", "goto", "enter", "exit", "gone", "away"]);
+  const words = (command: Command): string => {
+    const side: string = ["", " left", " r"][Math.floor(rng() * 3)];
+    return `!${command}${side}${rng() < 0.4 ? ` ${1 + Math.floor(rng() * 6)}` : ""}`;
+  };
   for (let i = 0; i < ticks; i++) {
     if (rng() < 0.02) {
       for (let k = 0; k < 40 + Math.floor(rng() * 60); k++) {
         const v = viewers[Math.floor(rng() * viewers.length)];
         const command: Command = COMMANDS[Math.floor(rng() * COMMANDS.length)];
-        sim.receive(chat(v, rng() < 0.5 ? `!${command}` : "busy chat", rng() < 0.9));
+        sim.receive(chat(v, rng() < 0.5 ? words(command) : "busy chat", rng() < 0.9));
       }
     }
     if (rng() < 0.002) {
@@ -793,14 +795,26 @@ function fuzz(sim: PlaygroundSim, ticks: number, seed: number): void {
     sim.tick();
     const visible = admitted(sim);
     expect(visible.length).toBeLessThanOrEqual(VISIBLE_MAX);
+    expect(sim.terrain.count).toBeLessThanOrEqual(sim.world.cap);
+    expect(sim.terrain.blocks.filter(Boolean)).toHaveLength(sim.terrain.count);
     for (const p of sim.list()) {
-      if (!ACTIONS.has(p.state)) actionStart.delete(p);
+      // A character with work of more steps goes through `hold` between the steps: the work is one action.
+      if (RESTS.has(p.state) && !p.job) actionStart.delete(p);
       else if (!actionStart.has(p)) actionStart.set(p, sim.clock);
-      else expect(sim.clock - (actionStart.get(p) as number), p.state).toBeLessThan(600);
+      else expect(sim.clock - (actionStart.get(p) as number), p.state).toBeLessThan(900);
+      if (!p.admitted) continue;
+      expect(Number.isFinite(p.x) && Number.isFinite(p.y), p.state).toBe(true);
+      expect(p.x, p.state).toBeGreaterThanOrEqual(0);
+      expect(p.x, p.state).toBeLessThanOrEqual(sim.world.w);
+      // A character that stands still is never inside a dirt block or a plank. One that arrived in this tick comes
+      // out on top in the next one.
+      if (p.state === "hold" && p.t > 1) {
+        expect(blockAt(sim.world, sim.terrain, colOf(p.x), rowOf(sim.world, p.y))?.kind ?? "stair").toBe("stair");
+      }
     }
     if (i % 100 === 0) {
-      expect(encodeFrame(sim.tickFrame()).length).toBeLessThan(16_384);
-      expect(encodeFrame(sim.fullFrame()).length).toBeLessThan(16_384);
+      expect(encodeFrame(sim.tickFrame()).length).toBeLessThan(20_000);
+      expect(encodeFrame(sim.fullFrame()).length).toBeLessThan(20_000);
     }
   }
 }
@@ -810,6 +824,16 @@ describe("seeded fuzz", () => {
     const sim = new PlaygroundSim({ cellsW: 32, cellsH: 4, rng: mulberry32(42) });
     sim.resumeAfter(0);
     fuzz(sim, 10_000, 42);
+  });
+
+  it("builds, digs and booms in a full frame world over 10k ticks, and keeps its rules", () => {
+    const sim = new PlaygroundSim({ cellsW: 32, cellsH: 18, rng: mulberry32(9) });
+    sim.resumeAfter(0);
+    fuzz(sim, 10_000, 9);
+    // The crowd built: the exact number depends on the seed.
+    expect(sim.terrain.seq).toBeGreaterThan(5);
+    const restored = PlaygroundSim.restore(sim.checkpoint(), { rng: mulberry32(9) });
+    expect(restored.terrain.count).toBe(sim.terrain.count);
   });
 
   for (const [cellsW, cellsH] of [
@@ -899,7 +923,10 @@ describe("checkpoint", () => {
     setState(p, "dig", { x: 240, dir: 1 });
     for (let i = 0; i < 20; i++) sim.tick();
     setState(p, "wave");
-    sim.terrain.stairs.push({ x: 300, top: 40, dir: -1, until: 2000 });
+    placeBlock(sim.world, sim.terrain, 18, 0, "dirt", 1);
+    placeBlock(sim.world, sim.terrain, 19, 1, "stair", -1);
+    (blockAt(sim.world, sim.terrain, 18, 0) as { stage: number }).stage = 2;
+    sim.terrain.flags.push({ id: p.id, c: 18, r: 1 });
     sim.receive({ kind: "ban", platform: viewers[3].platform, userId: viewers[3].userId, until: null, receivedAt: T0 });
     sim.remove((find(sim, viewers[4]) as Participant).id);
     sim.startTest();
@@ -911,7 +938,11 @@ describe("checkpoint", () => {
     expect(back.terrain.tiles.map((t) => [t.stage, t.repairAt])).toEqual(
       sim.terrain.tiles.map((t) => [t.stage, t.repairAt]),
     );
-    expect(back.terrain.stairs).toEqual(sim.terrain.stairs);
+    expect(back.terrain.blocks.map((b) => b && [b.kind, b.dir, b.stage])).toEqual(
+      sim.terrain.blocks.map((b) => b && [b.kind, b.dir, b.stage]),
+    );
+    expect(back.terrain.count).toBe(2);
+    expect(back.terrain.flags).toEqual([{ id: p.id, c: 18, r: 1 }]);
     expect([...back.restrictions]).toEqual([...sim.restrictions]);
     expect(
       back
@@ -987,7 +1018,9 @@ describe("checkpoint", () => {
     const rng = { rng: () => 0.5 };
     const bad = (patch: Record<string, unknown>): string => JSON.stringify({ ...good, ...patch });
     expect(() => PlaygroundSim.restore("{", rng)).toThrow("not JSON");
-    expect(() => PlaygroundSim.restore(bad({ v: 2 }), rng)).toThrow("invalid");
+    expect(() => PlaygroundSim.restore(bad({ v: 1 }), rng)).toThrow("invalid");
+    expect(() => PlaygroundSim.restore(bad({ blocks: "a" }), rng)).toThrow("do not fit");
+    expect(() => PlaygroundSim.restore(bad({ blocks: "z".repeat(40) }), rng)).toThrow("invalid");
     expect(() => PlaygroundSim.restore(bad({ ground: "g" }), rng)).toThrow("does not match");
     expect(() => PlaygroundSim.restore(bad({ repairs: [[63, 5]] }), rng)).toThrow("outside the ground");
     const registry = good.registry as unknown[][];

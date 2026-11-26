@@ -1,13 +1,11 @@
-import { z } from "zod";
-import { CHANNEL_PLATFORMS } from "../../../db/enums";
 import type { ActivityChat, ActivityEvent, ActivityPlatform } from "../activity";
-import { isChatCommand } from "../chat-feed";
+
 import { CHARACTERS_MAX, CHARACTERS_TIMEOUT } from "../overlay-layers";
 import {
   BUBBLE_LENGTH,
   BUBBLE_MAX,
+  BLOCK_FALL_TICKS,
   BUBBLE_TICKS,
-  BUILD_STEPS,
   CELL_LOGICAL,
   CHARACTERS_TEST_TICKS,
   CHECKPOINT_MAX_LENGTH,
@@ -15,23 +13,19 @@ import {
   COMMAND_COOLDOWN_TICKS,
   COMMAND_EXPIRY_TICKS,
   DURATION,
-  FALL_VX,
-  FLAT_HEIGHT,
   GOTO_SPEED_MAX,
-  GRAVITY,
   IDLE_CHANCE,
   JUMP_VX,
   JUMP_VY,
   MARK_TICKS,
   MIN_STAY_TICKS,
   NEW_TICKS,
+  PUSH_VX,
+  PUSH_VY,
   REGISTRY_IDLE_TICKS,
   REGISTRY_MAX,
-  RESPAWN_TICKS,
   RESTRICTED_MAX,
   ROTATION_TICKS,
-  STAIR_SPEED,
-  STAIRS_MAX,
   STEP_UP,
   SWEEP_TICKS,
   TEST_USER_PREFIX,
@@ -41,7 +35,15 @@ import {
   WALK_SPEED,
   WALK_SPEED_SPREAD,
 } from "./constants";
-import { addScore, COMMANDS, type Command, chooseCrowd, crowdSlots, newParticipant, type Participant } from "./crowd";
+import {
+  addScore,
+  type Command,
+  type CommandCall,
+  chooseCrowd,
+  crowdSlots,
+  newParticipant,
+  type Participant,
+} from "./crowd";
 import {
   BUBBLE_MAX_UNITS,
   type BubbleView,
@@ -49,10 +51,11 @@ import {
   CHAR_STATES,
   type CharState,
   type CharTuple,
+  type ExtrasView,
+  type FlagTuple,
   FLAG_NEW,
   FLAG_UNAVAILABLE,
   FRAME_T_WRAP,
-  FRAME_TILES_MAX,
   type ModeView,
   CUT_MARK,
   NAME_GRAPHEMES,
@@ -60,26 +63,54 @@ import {
   PLAYGROUND_VERSION,
   type PlaygroundFullFrame,
   type PlaygroundTickFrame,
+  type RopeTuple,
   type RosterEntry,
   type TerrainView,
 } from "./protocol";
 import {
-  addStair,
-  buildDirection,
-  buildFits,
+  blockOrder,
+  blocksString,
+  cellX,
+  clearBuilds,
+  colOf,
   createTerrain,
   createWorld,
+  dropLoose,
   expire,
+  type Flag,
+  fits,
+  floorY,
   groundString,
-  hit,
   solidAt,
   surface,
   type Terrain,
   terrainView,
-  tileAt,
-  tops,
   type World,
 } from "./terrain";
+import {
+  checkpointSchema,
+  type Checkpoint,
+  fromRecord,
+  issueText,
+  type ParticipantRecord,
+  restoreTerrain,
+  toRecord,
+} from "./checkpoint";
+import {
+  clamp,
+  EMOTES,
+  FIXED_STATES,
+  HALTED_STATES,
+  mulberry32,
+  parseCommand,
+  setState,
+  type SimHost,
+  siteKey,
+} from "./core";
+import { Motion } from "./motion";
+import { Works } from "./works";
+
+export { mulberry32, parseCommand, setState } from "./core";
 
 /**
  * The character playground simulation (issue #664, docs/characters.md). It is pure: no clock, no DOM, no art. The
@@ -105,38 +136,7 @@ interface SimOptions {
   walkSpread?: number;
 }
 
-/** The mulberry32 generator: a small, seeded random source in [0, 1). */
-export function mulberry32(seed: number): () => number {
-  let state: number = seed >>> 0;
-  return (): number => {
-    state = (state + 0x6d2b79f5) >>> 0;
-    let value: number = state;
-    value = Math.imul(value ^ (value >>> 15), value | 1);
-    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
-    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-/** Sets the state and restarts its tick counter. */
-export function setState(participant: Participant, state: CharState | "away", extra: Partial<Participant> = {}): void {
-  Object.assign(participant, { state, t: 0 }, extra);
-}
-
-/** The command of a chat text (`!jump`, `！dig now`), or null. */
-export function parseCommand(text: string): Command | null {
-  if (!isChatCommand(text)) return null;
-  const word: string = text
-    .replace(/^[\s\p{Cf}]*[!！]/u, "")
-    .split(/\s/u)[0]
-    .toLowerCase();
-  return COMMANDS.find((command: Command): boolean => command === word) ?? null;
-}
-
-function siteKey(platform: ActivityPlatform, id: string): string {
-  return `${platform}:${id}`;
-}
-
-export class PlaygroundSim {
+export class PlaygroundSim implements SimHost {
   world: World;
   terrain: Terrain;
   /** Rules ticks since the playground started. */
@@ -146,6 +146,8 @@ export class PlaygroundSim {
   paused = false;
   /** The tick at which the characters test ends, or null. */
   testEndsAt: number | null = null;
+  /** The frame id of the character that wears the crown, or null. */
+  crown: number | null = null;
   /** Participants by `platform:userId`, in registration order. */
   readonly participants = new Map<string, Participant>();
   /** Restricted participants by `platform:userId`: the tick at which the restriction ends. */
@@ -156,7 +158,10 @@ export class PlaygroundSim {
   private maxVisible: number = CHARACTERS_MAX.default;
   private readonly rng: () => number;
   private readonly walkSpread: number;
-  private readonly sent = { roster: "", bubbles: "", terrain: "", mode: "" };
+  private readonly sent = { roster: "", bubbles: "", terrain: "", extras: "", mode: "" };
+  /** The moves of the characters, and the work on the builds. */
+  private readonly motion = new Motion(this);
+  private readonly works = new Works(this, this.motion);
 
   constructor(options: SimOptions) {
     this.world = createWorld(options.cellsW, options.cellsH);
@@ -245,11 +250,13 @@ export class PlaygroundSim {
   }
 
   private queue(p: Participant, event: ActivityChat): void {
-    const command: Command | null = parseCommand(event.text);
-    if (command) {
+    const call: CommandCall | null = parseCommand(event.text);
+    if (call) {
       if (this.clock - p.lastCommand < COMMAND_COOLDOWN_TICKS) return;
-      p.pending = { name: command, expires: this.clock + COMMAND_EXPIRY_TICKS, key: event.id };
       p.lastCommand = this.clock;
+      // A stop works at once, also in the middle of a walk or of work of more than one step.
+      if (call.name === "stop") this.halt(p);
+      else p.pending = { ...call, expires: this.clock + COMMAND_EXPIRY_TICKS, key: event.id };
       return;
     }
     const text: string = boundText(event.text, BUBBLE_LENGTH, BUBBLE_MAX_UNITS, CUT_MARK);
@@ -331,6 +338,18 @@ export class PlaygroundSim {
     this.participants.clear();
     this.terrain = createTerrain(this.world);
     this.rotation = 0;
+    this.crown = null;
+  }
+
+  /** Removes all builds (blocks, stairs, planks and flags). The characters stay and fall to the ground. */
+  clearBuilds(): void {
+    clearBuilds(this.terrain);
+    for (const p of this.participants.values()) {
+      const working: boolean = p.job !== null && (p.state === "dig" || p.state === "build");
+      p.job = null;
+      // A dig or a build without its work would hit the ground: the action ends with the work.
+      if (working) this.rest(p);
+    }
   }
 
   /**
@@ -405,7 +424,11 @@ export class PlaygroundSim {
     if (this.clock % SWEEP_TICKS === 0) this.sweep();
     this.select();
     expire(this.terrain, this.clock);
+    if (this.terrain.loose && this.clock % BLOCK_FALL_TICKS === 0) {
+      dropLoose(this.world, this.terrain, (c: number, r: number): boolean => this.works.crush(c, r));
+    }
     for (const p of this.participants.values()) this.step(p);
+    this.works.crownHolder();
   }
 
   /**
@@ -421,7 +444,7 @@ export class PlaygroundSim {
 
   /** Makes the next tick frame carry every section again, for example after a full frame or a restart. */
   resendSections(): void {
-    Object.assign(this.sent, { roster: "", bubbles: "", terrain: "", mode: "" });
+    Object.assign(this.sent, { roster: "", bubbles: "", terrain: "", extras: "", mode: "" });
   }
 
   /** Chooses the crowd and admits chosen participants while slots are free. */
@@ -466,27 +489,51 @@ export class PlaygroundSim {
         this.participants.delete(p.key);
     }
     if (this.testEndsAt !== null && this.clock >= this.testEndsAt) this.stopTest();
+    this.dropFlags();
+  }
+
+  /** A flag goes with its owner: a ban, a removal, the end of a test or an expiry leaves no flag behind. */
+  private dropFlags(): void {
+    const owners = new Set<number>(this.visible().map((p: Participant): number => p.id));
+    this.terrain.flags = this.terrain.flags.filter((flag: Flag): boolean => owners.has(flag.id));
   }
 
   /** Frees the slot at once. */
   private release(p: Participant): void {
-    setState(p, "away", { admitted: false, free: false, exitReason: null, mark: 0 });
+    setState(p, "away", { admitted: false, free: false, exitReason: null, mark: 0, piloted: false });
     this.clearQueue(p);
+    this.terrain.flags = this.terrain.flags.filter((flag: Flag): boolean => flag.id !== p.id);
   }
 
   private clearQueue(p: Participant): void {
     p.bubble = null;
     p.pending = null;
     p.pendingText = null;
+    p.job = null;
+    p.rope = null;
   }
 
-  /** After a gap or a change of world: a visible character stands walking on solid ground. */
+  /** After a gap or a change of world: a visible character stands walking on solid ground, or on the blocks there. */
   private settle(p: Participant): void {
     this.clearQueue(p);
     if (!p.admitted) return;
-    let x: number = Math.min(this.world.xmax, Math.max(this.world.xmin, p.x));
+    let x: number = clamp(p.x, this.world.xmin, this.world.xmax);
     if (!solidAt(this.terrain, x)) x = this.world.padX;
-    setState(p, "walk", { x, y: this.world.gy, vx: 0, vy: 0, free: false, exitReason: null, mark: 0 });
+    let r = 0;
+    while (!fits(this.world, this.terrain, colOf(x), r)) r += 1;
+    const y: number = floorY(this.world, r);
+    setState(p, "walk", {
+      x,
+      y,
+      vx: 0,
+      vy: 0,
+      free: false,
+      exitReason: null,
+      mark: 0,
+      piloted: false,
+      // A walk of some blocks that the gap ended does not go on after a later fall.
+      resume: false,
+    });
   }
 
   /** Shows a bubble. With BUBBLE_MAX bubbles already shown by others, the one closest to its end goes. */
@@ -498,52 +545,78 @@ export class PlaygroundSim {
     p.bubble = { text, ticks, key, at: this.clock };
   }
 
-  /** Starts a command action. The caller makes sure the character is walking inside the walking limits. */
-  perform(p: Participant, command: Command, key = ""): void {
-    if (command === "build") {
-      const x: number = Math.round(p.x);
-      setState(p, "build", { steps: 0, bx: x, by: p.y, x, dir: buildDirection(this.world, p.x, p.dir) });
-    } else {
-      setState(p, command);
-    }
-    this.say(p, `!${command}`, COMMAND_BUBBLE_TICKS, key);
+  /** After an action: a steered character stands still, and another character walks on. */
+  rest(p: Participant, extra: Partial<Participant> = {}): void {
+    setState(p, p.piloted ? "hold" : "walk", { vx: 0, vy: 0, resume: false, ...extra });
   }
 
-  private walkStep(p: Participant, speed: number): void {
-    const nx: number = p.x + p.dir * speed;
-    if (!p.free && ((nx < this.world.xmin && p.dir < 0) || (nx > this.world.xmax && p.dir > 0))) {
-      setState(p, "turn");
-      return;
-    }
-    const top: number = surface(this.world, this.terrain, nx, p.y, STEP_UP);
-    p.x = nx;
-    if (top === Infinity || top > p.y + 0.5) setState(p, "fall", { vy: 0, vx: p.dir * FALL_VX, fromY: p.y });
-    else p.y = top;
+  /** After a landing: a walk of some blocks that went off an edge goes on. */
+  private landed(p: Participant): void {
+    // A character that fell on its way out is not on that walk any more. If its time is still up, it leaves again
+    // from where it stands. If a new message came in the fall, it stays and takes commands.
+    if (p.exitReason !== null) Object.assign(p, { free: false, exitReason: null });
+    if (p.resume) setState(p, "step", { vx: 0, vy: 0, resume: false });
+    else this.rest(p);
   }
 
-  private physics(p: Participant): void {
-    p.vy += GRAVITY;
-    const ny: number = p.y + p.vy;
-    let nx: number = p.x + p.vx;
-    if (nx < this.world.bounceMin || nx > this.world.bounceMax) {
-      p.vx = 0;
-      nx = p.x;
-    }
-    const landings: number[] =
-      p.vy > 0
-        ? tops(this.world, this.terrain, nx).filter((top: number): boolean => p.y <= top + 0.01 && ny >= top)
-        : [];
-    p.x = nx;
-    if (landings.length > 0) {
-      const land: number = Math.min(...landings);
-      p.y = land;
-      p.vy = 0;
-      setState(p, land - p.fromY > FLAT_HEIGHT ? "flat" : "land");
-      return;
-    }
-    p.y = ny;
-    if (p.y > this.world.fallY) setState(p, "gone", { wait: RESPAWN_TICKS });
+  /** The command cannot run, or cannot go on: the work ends. A red cross shows unless a step was done. */
+  giveUp(p: Participant, quiet: boolean = false): void {
+    if (!quiet) p.mark = MARK_TICKS;
+    p.job = null;
+    p.rope = null;
+    this.rest(p);
   }
+
+  /**
+   * A stop: the queued command and the work go, and a walk, a dig or a build ends where the character is. A character
+   * that walks in or out keeps its walk: it stands still only inside the walking limits.
+   */
+  private halt(p: Participant): void {
+    Object.assign(p, { pending: null, job: null, resume: false });
+    if (!p.admitted || p.state === "away" || p.free) return;
+    p.piloted = true;
+    if (HALTED_STATES.has(p.state)) setState(p, "hold");
+    // A climb in the middle of a walk ends on top of its block. The walk does not go on.
+    else if (p.state === "climb") p.after = "hold";
+  }
+
+  /** Starts a command action. The caller makes sure the character is walking or standing inside the walking limits. */
+  perform(p: Participant, command: Command, key = "", n = 0, side: 1 | -1 | 0 = 0): void {
+    const words: string[] = [`!${command}`];
+    if (side !== 0) words.push(side < 0 ? "left" : "right");
+    if (n > 0) words.push(String(n));
+    this.say(p, words.join(" "), COMMAND_BUBBLE_TICKS, key);
+    Object.assign(p, { job: null, rope: null, resume: false });
+    if (!EMOTES.has(command)) p.piloted = true;
+    // A side turns the character first. `look` shows the turn, and a walk has its own side.
+    if (side !== 0 && command !== "look" && command !== "left" && command !== "right") p.dir = side;
+    this.starts[command](p, n, side);
+  }
+
+  /** How each command starts. `n` is 0 without a number, and `side` is 0 without a side. */
+  private readonly starts: Record<Command, (p: Participant, n: number, side: 1 | -1 | 0) => void> = {
+    left: (p: Participant, n: number): void => this.motion.walkTo(p, -1, n),
+    right: (p: Participant, n: number): void => this.motion.walkTo(p, 1, n),
+    look: (p: Participant, _n: number, side: 1 | -1 | 0): void => {
+      if (side === p.dir) this.rest(p);
+      else setState(p, "turn");
+    },
+    stop: (p: Participant): void => this.rest(p),
+    jump: (p: Participant): void => setState(p, "jump"),
+    block: (p: Participant): void => this.works.job(p, "block", 1, 0),
+    up: (p: Participant): void => this.works.job(p, "up", 1, 0),
+    stairs: (p: Participant, n: number): void => this.works.job(p, "stairs", n, 0),
+    bridge: (p: Participant, n: number): void => this.works.job(p, "bridge", n, 0),
+    dig: (p: Participant, n: number, side: 1 | -1 | 0): void => this.works.job(p, "dig", n, side),
+    flag: (p: Participant): void => this.works.job(p, "flag", 1, 0),
+    grapple: (p: Participant): void => this.works.grapple(p),
+    jetpack: (p: Participant, n: number): void => this.works.jetpack(p, n),
+    boom: (p: Participant): void => setState(p, "boom"),
+    dance: (p: Participant): void => setState(p, "dance"),
+    wave: (p: Participant): void => setState(p, "wave"),
+    cheer: (p: Participant): void => setState(p, "cheer"),
+    push: (p: Participant): void => this.works.push(p),
+  };
 
   private step(p: Participant): void {
     if (p.bubble && --p.bubble.ticks <= 0) p.bubble = null;
@@ -552,14 +625,19 @@ export class PlaygroundSim {
     if (p.pendingText && p.pendingText.expires < this.clock) p.pendingText = null;
     if (p.state === "away") return;
     p.t += 1;
-    if (p.state === "walk") this.walkTurn(p);
+    // Work of more than one step ends first: a queued command or an exit waits for it. A stop ends it at once.
+    if ((p.state === "walk" || p.state === "hold") && !p.job) this.walkTurn(p);
     this.actions[p.state](p);
   }
 
-  /** A walking character leaves when its time is up, or else shows its queued text and starts its queued command. */
+  /**
+   * A walking or standing character leaves when its time is up, or else shows its queued text and starts its queued
+   * command.
+   */
   private walkTurn(p: Participant): void {
     const timedOut: boolean = this.clock - p.lastChat >= this.timeoutTicks;
     if ((!p.eligible || timedOut) && this.clock - p.admittedAt >= MIN_STAY_TICKS) {
+      p.job = null;
       setState(p, "goto", {
         target: this.world.exitX,
         after: "exit",
@@ -576,8 +654,14 @@ export class PlaygroundSim {
     if (p.pending) {
       const pending = p.pending;
       p.pending = null;
-      this.perform(p, pending.name, pending.key);
+      this.perform(p, pending.name, pending.key, pending.n, pending.side);
     }
+  }
+
+  private timed(ticks: number): (p: Participant) => void {
+    return (p: Participant): void => {
+      if (p.t >= ticks) this.rest(p);
+    };
   }
 
   /** What a character in each state does in a tick. */
@@ -588,87 +672,89 @@ export class PlaygroundSim {
       else this.release(p);
     },
     enter: (p: Participant): void => {
-      if (p.t >= DURATION.enter) setState(p, "walk", { free: true });
+      if (p.t < DURATION.enter) return;
+      // A character with a queued command walks in and runs it at the walking limit. The others go to a free place.
+      if (p.pending) setState(p, "walk", { free: true });
+      else setState(p, "goto", { target: this.motion.spot(p), after: "walk", free: true });
     },
     respawn: (p: Participant): void => {
       if (p.t >= DURATION.respawn) setState(p, "walk", { y: this.world.gy });
     },
     walk: (p: Participant): void => {
-      this.walkStep(p, p.speed);
+      this.motion.unbury(p);
+      if (!p.free && this.motion.walled(p, p.x + p.dir * p.speed) !== null) {
+        setState(p, "turn");
+        return;
+      }
+      this.motion.walkStep(p, p.speed);
       if (p.free && p.x > this.world.xmin + 4) p.free = false;
       if (p.state !== "walk" || p.free) return;
       if (this.rng() < TURN_CHANCE) setState(p, "turn");
       else if (this.rng() < IDLE_CHANCE) setState(p, "idle");
     },
     idle: (p: Participant): void => {
+      this.motion.unbury(p);
       if (p.t >= DURATION.idle) setState(p, "walk");
     },
+    hold: (p: Participant): void => {
+      this.motion.unbury(p);
+      const top: number = surface(this.world, this.terrain, p.x, p.y, STEP_UP);
+      if (top === Infinity || top > p.y + 0.5) {
+        this.motion.drop(p, 0);
+        return;
+      }
+      p.y = top;
+      if (p.job) this.works.work(p);
+    },
+    step: (p: Participant): void => this.motion.stepWalk(p),
     turn: (p: Participant): void => {
-      if (p.t >= DURATION.turn) setState(p, "walk", { dir: p.dir === 1 ? -1 : 1 });
+      if (p.t >= DURATION.turn) this.rest(p, { dir: p.dir === 1 ? -1 : 1 });
     },
     goto: (p: Participant): void => {
       p.dir = p.target > p.x ? 1 : -1;
-      this.walkStep(p, Math.min(GOTO_SPEED_MAX, Math.abs(p.target - p.x)));
+      this.motion.walkStep(p, Math.min(GOTO_SPEED_MAX, Math.abs(p.target - p.x)));
       if (p.state === "goto" && Math.abs(p.x - p.target) < 0.7) setState(p, p.after, { x: p.target });
     },
     jump: (p: Participant): void => {
       if (p.t < DURATION.jumpCrouch) return;
       if (p.t === DURATION.jumpCrouch) Object.assign(p, { vy: JUMP_VY, vx: p.dir * JUMP_VX, fromY: p.y });
-      this.physics(p);
+      this.motion.physics(p);
     },
-    fall: (p: Participant): void => this.physics(p),
+    fall: (p: Participant): void => this.motion.physics(p),
     land: (p: Participant): void => {
-      if (p.t > DURATION.land) setState(p, "walk");
+      if (p.t > DURATION.land) this.landed(p);
     },
     flat: (p: Participant): void => {
-      if (p.t > DURATION.flat) setState(p, "walk");
+      if (p.t > DURATION.flat) this.landed(p);
     },
-    dig: (p: Participant): void => this.dig(p),
-    build: (p: Participant): void => this.build(p),
-    bwalk: (p: Participant): void => {
-      this.walkStep(p, STAIR_SPEED);
-      if (p.state === "bwalk" && Math.abs(p.x - p.target) < 0.5) setState(p, p.steps < BUILD_STEPS ? "build" : "walk");
+    dig: (p: Participant): void => this.works.dig(p),
+    build: (p: Participant): void => this.works.build(p),
+    climb: (p: Participant): void => this.motion.tweenStep(p),
+    zip: (p: Participant): void => this.motion.tweenStep(p),
+    jet: (p: Participant): void => this.motion.tweenStep(p),
+    shoot: (p: Participant): void => {
+      if (p.rope?.hit && p.t >= DURATION.shootHit) this.motion.tween(p, "zip", p.tx, p.ty, "hold");
+      else if (!p.rope?.hit && p.t >= DURATION.shootMiss) this.giveUp(p);
     },
-    wave: (p: Participant): void => {
-      if (p.t >= DURATION.wave) setState(p, "walk");
+    wave: this.timed(DURATION.wave),
+    dance: this.timed(DURATION.dance),
+    cheer: this.timed(DURATION.cheer),
+    push: (p: Participant): void => {
+      if (p.t < DURATION.push) return;
+      const victim: Participant | undefined = this.visible().find((o: Participant): boolean => o.id === p.victim);
+      if (victim && !FIXED_STATES.has(victim.state)) this.motion.fling(victim, p.dir, PUSH_VX, PUSH_VY);
+      this.rest(p);
     },
     boom: (p: Participant): void => {
-      if (p.t >= DURATION.boom) setState(p, "gone", { wait: RESPAWN_TICKS });
+      if (p.t === DURATION.boomAt) this.works.blast(p);
+      if (p.t >= DURATION.boom) this.motion.vanish(p);
     },
     exit: (p: Participant): void => {
       if (p.t >= DURATION.exit) this.release(p);
     },
   };
 
-  private dig(p: Participant): void {
-    if (p.t % DURATION.digEvery === DURATION.digAt) {
-      const tile = tileAt(this.terrain, p.x + p.dir * 4) ?? tileAt(this.terrain, p.x);
-      if (!tile || !hit(tile, this.clock)) {
-        p.mark = MARK_TICKS;
-        setState(p, "walk");
-        return;
-      }
-    }
-    if (p.t >= DURATION.dig) setState(p, "walk");
-  }
-
-  private build(p: Participant): void {
-    if (p.t === DURATION.buildAt) {
-      const i: number = p.steps;
-      const x: number = p.dir > 0 ? p.bx + 5 + 7 * i : p.bx - 12 - 7 * i;
-      if (!buildFits(this.world, x)) {
-        if (i === 0) p.mark = MARK_TICKS;
-        setState(p, "walk");
-        return;
-      }
-      addStair(this.terrain, x, p.by - 4 * (i + 1), p.dir, this.clock);
-      p.steps += 1;
-      p.target = x + 3;
-    }
-    if (p.t >= DURATION.buildEnd) setState(p, "bwalk");
-  }
-
-  private visible(): Participant[] {
+  visible(): Participant[] {
     return this.list().filter((p: Participant): boolean => p.admitted);
   }
 
@@ -688,7 +774,26 @@ export class PlaygroundSim {
     });
   }
 
-  private sections(): { roster: RosterEntry[]; bubbles: BubbleView[]; terrain: TerrainView; mode: ModeView } {
+  private extras(visible: Participant[]): ExtrasView {
+    const ids = new Set<number>(visible.map((p: Participant): number => p.id));
+    return {
+      ropes: visible.flatMap((p: Participant): RopeTuple[] =>
+        p.rope ? [[p.id, Math.round(p.rope.x), Math.round(p.rope.y), p.rope.hit ? 1 : 0]] : [],
+      ),
+      flags: this.terrain.flags
+        .filter((flag: Flag): boolean => ids.has(flag.id))
+        .map((flag: Flag): FlagTuple => [flag.id, cellX(flag.c), floorY(this.world, flag.r)]),
+      crown: this.crown !== null && ids.has(this.crown) ? this.crown : null,
+    };
+  }
+
+  private sections(): {
+    roster: RosterEntry[];
+    bubbles: BubbleView[];
+    terrain: TerrainView;
+    extras: ExtrasView;
+    mode: ModeView;
+  } {
     const visible: Participant[] = this.visible();
     return {
       roster: visible.map((p: Participant): RosterEntry => ({ id: p.id, platform: p.platform, name: p.name })),
@@ -700,6 +805,7 @@ export class PlaygroundSim {
         .sort((a: [number, BubbleView], b: [number, BubbleView]): number => a[0] - b[0])
         .map(([, bubble]: [number, BubbleView]): BubbleView => bubble),
       terrain: terrainView(this.world, this.terrain),
+      extras: this.extras(visible),
       mode: { paused: this.paused, test: this.testEndsAt !== null },
     };
   }
@@ -726,7 +832,7 @@ export class PlaygroundSim {
       chars: this.chars(this.visible()),
     };
     const sections = this.sections();
-    for (const name of ["roster", "bubbles", "terrain", "mode"] as const) {
+    for (const name of ["roster", "bubbles", "terrain", "extras", "mode"] as const) {
       const json: string = JSON.stringify(sections[name]);
       if (json === this.sent[name]) continue;
       this.sent[name] = json;
@@ -742,6 +848,7 @@ export class PlaygroundSim {
    * the crowd choice uses for ties and the rotation.
    */
   checkpoint(): string {
+    this.dropFlags();
     let kept: Participant[] = this.list();
     // The drop order: the participants without a slot, the most recent message first, so the end goes first.
     const droppable: Participant[] = kept
@@ -778,7 +885,9 @@ export class PlaygroundSim {
       cellsH: this.world.cellsH,
       ground: groundString(this.terrain),
       repairs,
-      stairs: this.terrain.stairs.map((s): [number, number, 1 | -1, number] => [s.x, s.top, s.dir, s.until]),
+      blocks: blocksString(this.world, this.terrain),
+      order: blockOrder(this.terrain),
+      flags: this.terrain.flags.map((flag: Flag): [number, number, number] => [flag.id, flag.c, flag.r]),
       registry,
       restrictions,
     };
@@ -810,7 +919,7 @@ export class PlaygroundSim {
       timeoutSeconds: data.timeoutSeconds,
       visibleMax: data.visibleMax,
     });
-    restoreTerrain(sim.terrain, data);
+    restoreTerrain(sim.world, sim.terrain, data);
     Object.assign(sim, {
       clock: data.clock,
       rotation: data.rotation,
@@ -830,161 +939,3 @@ export class PlaygroundSim {
     return sim;
   }
 }
-
-/** Puts the checkpoint's ground stages, repairs and stairs into a new terrain. Throws when they do not fit it. */
-function restoreTerrain(terrain: Terrain, data: Checkpoint): void {
-  const tiles = terrain.tiles;
-  const kinds: boolean =
-    data.ground.length === tiles.length &&
-    tiles.every((tile, i: number): boolean => (tile.kind === "g") === (data.ground[i] === "g"));
-  if (!kinds) throw new Error("playground checkpoint ground does not match its world");
-  for (const [i, tile] of tiles.entries()) if (tile.kind === "d") tile.stage = Number(data.ground[i]);
-  for (const [index, repairAt] of data.repairs) {
-    if (index >= tiles.length) throw new Error(`playground checkpoint repair outside the ground: ${index}`);
-    tiles[index].repairAt = repairAt;
-  }
-  terrain.stairs = data.stairs.map(([x, top, dir, until]) => ({ x, top, dir, until }));
-}
-
-/** id, platform, user id, name, score, scoreAt, lastScored, lastChat, lastCommand, admitted, admittedAt, x, removed. */
-type ParticipantRecord = [
-  number,
-  ActivityPlatform,
-  string,
-  string,
-  number,
-  number,
-  number,
-  number,
-  number,
-  0 | 1,
-  number,
-  number,
-  0 | 1,
-];
-
-interface Checkpoint {
-  v: typeof PLAYGROUND_VERSION;
-  clock: number;
-  nextId: number;
-  rotation: number;
-  paused: boolean;
-  testEndsAt: number | null;
-  timeoutSeconds: number;
-  visibleMax: number;
-  /** The logical px of one cell of `cellsW` and `cellsH`. */
-  cell: number;
-  cellsW: number;
-  cellsH: number;
-  ground: string;
-  repairs: [number, number][];
-  stairs: [number, number, 1 | -1, number][];
-  registry: ParticipantRecord[];
-  restrictions: [string, number][];
-}
-
-function issueText(error: z.ZodError): string {
-  const [first] = error.issues;
-  return `${first.path.join(".")}: ${first.message} (${error.issues.length} issues)`;
-}
-
-function toRecord(p: Participant): ParticipantRecord {
-  return [
-    p.id,
-    p.platform,
-    p.userId,
-    p.name,
-    p.score,
-    p.scoreAt,
-    p.lastScored,
-    p.lastChat,
-    p.lastCommand,
-    p.admitted ? 1 : 0,
-    p.admittedAt,
-    Math.round(p.x * 10) / 10,
-    p.removed ? 1 : 0,
-  ];
-}
-
-function fromRecord(record: ParticipantRecord, clock: number, walkSpread: number): Participant {
-  const [
-    id,
-    platform,
-    userId,
-    name,
-    score,
-    scoreAt,
-    lastScored,
-    lastChat,
-    lastCommand,
-    admitted,
-    admittedAt,
-    x,
-    removed,
-  ] = record;
-  const speed: number = WALK_SPEED + walkSpread * (mulberry32(id)() - 0.5);
-  const p: Participant = newParticipant(siteKey(platform, userId), id, platform, userId, name, clock, speed);
-  return Object.assign(p, {
-    score,
-    scoreAt,
-    lastScored,
-    lastChat,
-    lastCommand,
-    admitted: admitted === 1,
-    admittedAt,
-    x,
-    removed: removed === 1,
-    state: admitted === 1 ? "walk" : "away",
-  });
-}
-
-const tick = z.number().int().min(-1e12).max(1e12);
-/** The logical px of a cell of 120 design px: the cell of a checkpoint without `cell`. */
-const COARSE_CELL_LOGICAL = 40;
-const finite = z.number().finite();
-const userId = z.string().min(1).max(128);
-
-const checkpointSchema: z.ZodType<Checkpoint> = z
-  .object({
-    v: z.literal(PLAYGROUND_VERSION),
-    clock: tick.nonnegative(),
-    nextId: z
-      .number()
-      .int()
-      .min(1)
-      .max(2 ** 31 - 1),
-    rotation: z.number().int().nonnegative(),
-    paused: z.boolean(),
-    testEndsAt: tick.nullable(),
-    timeoutSeconds: z.number().int().min(CHARACTERS_TIMEOUT.min).max(CHARACTERS_TIMEOUT.max),
-    // A checkpoint from before this setting has no value: it takes the default.
-    visibleMax: z.number().int().min(CHARACTERS_MAX.min).max(CHARACTERS_MAX.max).default(CHARACTERS_MAX.default),
-    // A checkpoint from before the cells of 60 design px has no value: its cells are twice as large.
-    cell: z.union([z.literal(CELL_LOGICAL), z.literal(COARSE_CELL_LOGICAL)]).default(COARSE_CELL_LOGICAL),
-    cellsW: z.number().int(),
-    cellsH: z.number().int(),
-    ground: z.string().regex(/^[g0-3]*$/),
-    repairs: z.array(z.tuple([z.number().int().nonnegative(), tick])).max(FRAME_TILES_MAX),
-    stairs: z.array(z.tuple([finite, finite, z.union([z.literal(1), z.literal(-1)]), tick])).max(STAIRS_MAX),
-    registry: z
-      .array(
-        z.tuple([
-          z.number().int().min(1),
-          z.enum(CHANNEL_PLATFORMS),
-          userId,
-          z.string().max(NAME_MAX_UNITS),
-          finite.nonnegative(),
-          tick,
-          tick,
-          tick,
-          tick,
-          z.union([z.literal(0), z.literal(1)]),
-          tick,
-          finite,
-          z.union([z.literal(0), z.literal(1)]),
-        ]),
-      )
-      .max(REGISTRY_MAX),
-    restrictions: z.array(z.tuple([z.string().min(1).max(160), tick])).max(RESTRICTED_MAX),
-  })
-  .strict();

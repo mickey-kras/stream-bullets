@@ -117,11 +117,11 @@ function lastMode(socket: FakeSocket): { paused: boolean; test: boolean } | unde
   return mode;
 }
 
-/** The stairs the frames of a socket add up to. */
-function lastStairs(socket: FakeSocket): unknown[] | undefined {
-  let stairs: unknown[] | undefined;
-  for (const frame of frames(socket)) if (frame.terrain) stairs = frame.terrain.stairs;
-  return stairs;
+/** The terrain that the frames of a socket add up to. */
+function lastTerrain(socket: FakeSocket): { ground: string; blocks: string } | undefined {
+  let terrain: { ground: string; blocks: string } | undefined;
+  for (const frame of frames(socket)) if (frame.terrain) terrain = frame.terrain;
+  return terrain;
 }
 
 function state(streamerId: string = page): RoomState {
@@ -738,21 +738,36 @@ describe("controls", (): void => {
     expect(registry.map((record) => record[2])).toEqual(["u1"]);
   });
 
-  it("shows terrain that expires while paused: stairs built before the pause go at the alarm", async (): Promise<void> => {
+  it("shows terrain that expires while paused: a hole dug before the pause repairs at the alarm", async (): Promise<void> => {
     const socket = await listen();
-    await deliver([chat("m1", "u1", "hello")]);
+    const users: string[] = ["u1", "u2", "u3", "u4", "u5", "u6", "u7", "u8"];
+    await deliver(users.map((user: string, i: number) => chat(`m${i}`, user, "hello")));
     advance(10_000);
-    await deliver([chat("m2", "u1", "!build")]);
-    advance(15_000);
-    expect(lastStairs(socket)?.length).toBeGreaterThan(0);
+    await deliver(users.map((user: string, i: number) => chat(`d${i}`, user, "!dig")));
+    advance(5_000);
+    expect(lastTerrain(socket)?.ground).toMatch(/[123]/);
     await control({ op: "pause" });
     const sent: number = socket.sent.length;
     const ends: number = Date.now() + 31_000;
     for (let i = 0; i < 20 && Date.now() <= ends; i += 1) await fireAlarm();
     expect(Date.now()).toBeGreaterThan(ends);
     expect(socket.sent.length).toBeGreaterThan(sent);
-    expect(lastStairs(socket)).toEqual([]);
+    expect(lastTerrain(socket)?.ground).toMatch(/^[g0]+$/);
     expect(lastMode(socket)).toEqual({ paused: true, test: false });
+  });
+
+  it("clears the builds with one control and keeps the characters", async (): Promise<void> => {
+    const socket = await listen();
+    const users: string[] = ["u1", "u2", "u3", "u4", "u5", "u6", "u7", "u8"];
+    await deliver(users.map((user: string, i: number) => chat(`m${i}`, user, "hello")));
+    advance(10_000);
+    await deliver(users.map((user: string, i: number) => chat(`b${i}`, user, "!up")));
+    advance(5_000);
+    expect(lastTerrain(socket)?.blocks).toMatch(/a/);
+    expect((await control({ op: "clear" })).status).toBe(200);
+    advance(FRAME_MS);
+    expect(lastTerrain(socket)?.blocks).toBe("");
+    expect(roster(socket)).toHaveLength(users.length);
   });
 
   it("forgets a viewer 30 minutes after their last message while paused, and shows and saves it", async (): Promise<void> => {
@@ -935,7 +950,8 @@ describe("PlaygroundHost", (): void => {
     const playground = new PlaygroundHost({
       storage: {
         get: (key: string): Promise<unknown> => Promise.resolve(values.get(key)),
-        put: options.put ?? ((key: string, value: unknown): Promise<void> => Promise.resolve(void values.set(key, value))),
+        put:
+          options.put ?? ((key: string, value: unknown): Promise<void> => Promise.resolve(void values.set(key, value))),
         delete: options.remove ?? ((key: string): Promise<boolean> => Promise.resolve(values.delete(key))),
       } as unknown as DurableObjectStorage,
       sockets: (): WebSocket[] => sockets,

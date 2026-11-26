@@ -1,4 +1,4 @@
-import type { CharState } from "../../../lib/playground/protocol";
+import type { BlockCell, CharState } from "../../../lib/playground/protocol";
 
 /**
  * The input of the character renderer: one moment of the playground, in world pixels (1 world pixel = PIXEL_SCALE
@@ -45,8 +45,8 @@ export interface CharacterView {
 }
 
 /**
- * `view` with the characters of one platform only, for an output that shows one platform. The ground, the doors,
- * and the mode stay. The playground on the server is the same for each output.
+ * `view` with the characters of one platform only, for an output that shows one platform. Their ropes, their flags
+ * and the crown go with them. The ground, the builds, the doors, and the mode stay. The playground on the server is the same for each output.
  */
 export function viewForPlatform(view: PlaygroundView, platform: string): PlaygroundView {
   const characters: CharacterView[] = view.characters.filter(
@@ -54,7 +54,14 @@ export function viewForPlatform(view: PlaygroundView, platform: string): Playgro
   );
   if (characters.length === view.characters.length) return view;
   const ids = new Set<number>(characters.map((character: CharacterView): number => character.id));
-  return { ...view, characters, speakers: view.speakers.filter((id: number): boolean => ids.has(id)) };
+  return {
+    ...view,
+    characters,
+    speakers: view.speakers.filter((id: number): boolean => ids.has(id)),
+    ropes: view.ropes.filter((rope: RopeView): boolean => ids.has(rope.id)),
+    flags: view.flags.filter((flag: FlagView): boolean => flag.platform === platform),
+    crown: view.crown !== null && ids.has(view.crown) ? view.crown : null,
+  };
 }
 
 type TileStage = 0 | 1 | 2 | 3;
@@ -65,11 +72,25 @@ export interface TileView {
   stage: TileStage;
 }
 
-interface StairView {
-  /** Left edge and top of one 7 px step; the leg goes down to the ground. */
+/** A block that viewers built: its cell in the block grid (row 0 is on the ground) and what it is. */
+export interface BlockView extends BlockCell {
+  c: number;
+  r: number;
+}
+
+/** A grapple rope from the character `id` to the hook point. `hit` is false for a hook that caught nothing. */
+export interface RopeView {
+  id: number;
   x: number;
-  top: number;
-  dir: 1 | -1;
+  y: number;
+  hit: boolean;
+}
+
+/** A flag on the floor at (x, y), in the helmet colour of `platform`. */
+export interface FlagView {
+  x: number;
+  y: number;
+  platform: string;
 }
 
 export interface PlaygroundView {
@@ -77,7 +98,11 @@ export interface PlaygroundView {
   world: { width: number; height: number; ground: number };
   /** One tile per 16 world pixels, from x 0. */
   tiles: readonly TileView[];
-  stairs: readonly StairView[];
+  blocks: readonly BlockView[];
+  ropes: readonly RopeView[];
+  flags: readonly FlagView[];
+  /** The id of the character that wears the crown, or null. */
+  crown: number | null;
   /** Centres of the "unavailable" marks (a red cross). */
   marks: readonly { x: number; y: number }[];
   /** Centre x of each door and of the respawn pad. */
