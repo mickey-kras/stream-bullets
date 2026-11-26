@@ -430,8 +430,10 @@ export interface StreamEvent {
   // first). Null: none.
   category: { name: string; cover: string | null } | null;
   image: StreamImage | null;
-  // Last change; shared by download and feed DTSTAMP/SEQUENCE.
+  // Last change: the DTSTAMP of the download and the feed.
   updatedAt: number;
+  // iCalendar SEQUENCE: each update raises it by one.
+  sequence: number;
   // The text in the language of the reader. Null: no translation is necessary. Absent: not translated yet.
   translation?: { title: string; notes: string } | null;
 }

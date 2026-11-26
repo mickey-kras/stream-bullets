@@ -351,6 +351,13 @@
       "when": 1795680542278,
       "tag": "0049_channel_support_events",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "6",
+      "when": 1795732705863,
+      "tag": "0050_image_cleanup_event_sequence",
+      "breakpoints": true
     }
   ]
 }

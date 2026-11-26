@@ -6,6 +6,7 @@ import { DEFAULT_LAYERS } from "../app/lib/overlay-layers";
 import { action, loader } from "../app/routes/api";
 import { DELETED_AUTHOR_SNAPSHOT, deleteAccount, EXPORT_PAGE_SIZE, exportAccount } from "../app/server/account.server";
 import { mutateEntry } from "../app/server/data.server";
+import { retryImageCleanup } from "../app/server/images.server";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
 
 const origin = "https://stream.example.test";
@@ -384,6 +385,7 @@ beforeEach(async (): Promise<void> => {
   await env.DB.batch(
     [
       "DELETE FROM user",
+      "DELETE FROM image_cleanup",
       "DELETE FROM app_rate_limits",
       "DELETE FROM verification",
       "DELETE FROM rate_limit",
@@ -955,13 +957,35 @@ describe("account deletion", (): void => {
     await env.IMAGES.delete("avatar/other/unpublished");
   });
 
-  it("commits the deletion when image cleanup fails", async (): Promise<void> => {
+  it("commits the deletion when image cleanup fails, and the hourly retry removes the images", async (): Promise<void> => {
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    const keys = ["avatar/admin", "avatar/admin/v1", "background/admin/v2", "logo/admin"];
+    for (const key of keys) await env.IMAGES.put(key, new Uint8Array([1]));
     const failing = { delete: () => Promise.reject(new Error("bucket secret")) } as unknown as R2Bucket;
     await deleteAccount({ ...env, IMAGES: failing }, "admin");
     expect(await linkedRows("admin")).toEqual(zeroes());
-    expect(log.mock.calls).toEqual([["account_image_delete_failed", { cause: "Error" }]]);
+    // One failed kind does not skip the others, and the error text stays out of the log.
+    expect(log.mock.calls).toEqual(
+      ["avatar", "background", "logo"].map((kind: string) => ["account_image_delete_failed", { kind, cause: "Error" }]),
+    );
     expect(rooms).toEqual([]);
+    const pending = async (): Promise<unknown[]> =>
+      (await env.DB.prepare("SELECT kind FROM image_cleanup WHERE owner_id='admin' ORDER BY kind").all()).results;
+    expect(await pending()).toEqual([{ kind: "avatar" }, { kind: "background" }, { kind: "logo" }]);
+    // The outage goes on at the next run: the rows stay, and the run fails so the cron alert shows it.
+    await expect(retryImageCleanup({ ...env, IMAGES: failing })).rejects.toThrow("3 image prefixes");
+    expect(await pending()).toHaveLength(3);
+    // R2 is back: the retry removes every object and then the rows.
+    await retryImageCleanup(env);
+    for (const key of keys) expect(await env.IMAGES.head(key)).toBeNull();
+    expect(await pending()).toEqual([]);
+  });
+
+  it("leaves no cleanup row when the images go at once", async (): Promise<void> => {
+    await env.IMAGES.put("logo/leaver/v1", new Uint8Array([1]));
+    await deleteAccount(env, "leaver");
+    expect(await env.IMAGES.head("logo/leaver/v1")).toBeNull();
+    expect((await env.DB.prepare("SELECT count(*) AS n FROM image_cleanup").first<{ n: number }>())?.n).toBe(0);
   });
 
   it("rejects an account that does not exist", async (): Promise<void> => {

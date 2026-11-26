@@ -433,6 +433,7 @@ describe("ICS output", (): void => {
           url: "https://twitch.tv/nova",
           cancelled: true,
           updatedAt: Date.UTC(2026, 10, 1),
+          sequence: 3,
         },
       ],
       { now: Date.UTC(2026, 10, 2) },
@@ -945,6 +946,36 @@ describe("schedule storage", (): void => {
       }),
     ).rejects.toMatchObject({ status: 409, message: fullMessage });
     expect(await env.DB.prepare("SELECT count(*) AS n FROM stream_events WHERE id=?").bind(past).first("n")).toBe(1);
+    expect(await upcomingOf(streamerId, now)).toBe(MAX_UPCOMING_EVENTS);
+  });
+
+  it("refuses an edit of a future stream whose read went stale before its write", async (): Promise<void> => {
+    const now = Date.now();
+    await fillToCap(streamerId, now);
+    const target = (await env.DB.prepare("SELECT id FROM stream_events WHERE streamer_id=? ORDER BY starts_at LIMIT 1")
+      .bind(streamerId)
+      .first<{ id: string }>())!.id;
+    // After the edit read the future stream: a parallel edit moves it to the past and a create fills the free place.
+    let raced = false;
+    const db = new Proxy(env.DB, {
+      get(source: D1Database, key: string | symbol): unknown {
+        if (key === "batch")
+          return async (statements: D1PreparedStatement[]): Promise<D1Result[]> => {
+            if (!raced) {
+              raced = true;
+              await env.DB.prepare("UPDATE stream_events SET starts_at=? WHERE id=?").bind(now - 3 * day, target).run();
+              await fillToCap(streamerId, now);
+            }
+            return source.batch(statements);
+          };
+        const value: unknown = Reflect.get(source, key);
+        return typeof value === "function" ? (value as (...args: unknown[]) => unknown).bind(source) : value;
+      },
+    });
+    await expect(
+      patchEvent({ ...env, DB: db }, "owner", target, { action: "edit", scope: "one", ...input(new Date(now + 2 * day)) }),
+    ).rejects.toMatchObject({ status: 409, message: fullMessage });
+    expect(raced).toBe(true);
     expect(await upcomingOf(streamerId, now)).toBe(MAX_UPCOMING_EVENTS);
   });
 

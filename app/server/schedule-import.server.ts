@@ -169,8 +169,8 @@ function readAgain(sync: Sync, source: SourceRow, stream: ImportedStream): void 
   if (!takeRoom(sync, (source.starts_at ?? 0) < sync.now && stream.startsAt >= sync.now)) return;
   sync.changed = true;
   sync.statements.push(
-    env.DB.prepare(`UPDATE stream_events SET title=?, starts_at=?, duration_min=?, url=?, updated_at=?
-      WHERE id=? AND imported=1 AND platform=?`).bind(
+    env.DB.prepare(`UPDATE stream_events SET title=?, starts_at=?, duration_min=?, url=?, updated_at=?,
+      sequence=sequence+1 WHERE id=? AND imported=1 AND platform=?`).bind(
       stream.title,
       stream.startsAt,
       stream.durationMin,
@@ -301,7 +301,7 @@ function unlinked(env: AppEnv, eventId: string, platform: ImportPlatform): D1Pre
       AND NOT EXISTS(SELECT 1 FROM stream_event_sources WHERE event_id=?1)`).bind(eventId),
     env.DB.prepare(`UPDATE stream_events SET
         platform=(SELECT platform FROM stream_event_sources WHERE event_id=?1 ORDER BY platform LIMIT 1),
-        url=(SELECT url FROM stream_event_sources WHERE event_id=?1 ORDER BY platform LIMIT 1)
+        url=(SELECT url FROM stream_event_sources WHERE event_id=?1 ORDER BY platform LIMIT 1), sequence=sequence+1
       WHERE id=?1 AND imported=1 AND platform=?2`).bind(eventId, platform),
   ];
 }
@@ -375,7 +375,7 @@ export async function importSchedules(env: AppEnv, now: number): Promise<number>
         platform=(SELECT platform FROM stream_event_sources s WHERE s.event_id=stream_events.id AND s.platform <> 'youtube'
           ORDER BY s.platform LIMIT 1),
         url=(SELECT url FROM stream_event_sources s WHERE s.event_id=stream_events.id AND s.platform <> 'youtube'
-          ORDER BY s.platform LIMIT 1)
+          ORDER BY s.platform LIMIT 1), sequence=sequence+1
       WHERE imported=1 AND platform='youtube' AND id IN (SELECT event_id FROM stream_event_sources
           WHERE platform='youtube' AND read_at < ?1 AND event_id IS NOT NULL)
         AND EXISTS(SELECT 1 FROM stream_event_sources s WHERE s.event_id=stream_events.id AND s.platform <> 'youtube')`).bind(

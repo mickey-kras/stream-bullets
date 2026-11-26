@@ -34,6 +34,7 @@ interface EventRow {
   imported: number;
   created_at: number;
   updated_at: number;
+  sequence: number;
 }
 
 interface OwnedEventRow extends EventRow {
@@ -141,6 +142,7 @@ function eventValue(row: EventRow, topics: EventTopic[], sources: SourceInfo, no
     category: sources.category,
     image: sources.image,
     updatedAt: row.updated_at,
+    sequence: row.sequence,
   };
 }
 
@@ -475,13 +477,19 @@ export async function patchEvent(env: AppEnv, viewerId: string, id: string, valu
   const status = effectiveStatus(row.status, row.starts_at, row.duration_min, now);
   if (patch.action === "cancel") {
     if (status === "ended") throw new HttpError(409, "This stream has already ended.");
-    await env.DB.prepare("UPDATE stream_events SET status='cancelled', updated_at=? WHERE id=?").bind(now, id).run();
+    // A cancellation is owner content, like an edit: it takes the entry from the import, so the cleanup of a source
+    // that left cannot delete the stream and its `STATUS:CANCELLED` record.
+    await env.DB.prepare(
+      "UPDATE stream_events SET status='cancelled', imported=0, updated_at=?, sequence=sequence+1 WHERE id=?",
+    )
+      .bind(now, id)
+      .run();
     return (await getEvent(env, id, now))!;
   }
   if (patch.action === "replay") {
     if (status !== "ended") throw new HttpError(409, "Add a replay link after the stream ends.");
     // A replay link is owner content: like an edit, it takes the entry from the import, so it outlives its source.
-    await env.DB.prepare("UPDATE stream_events SET vod_url=?, imported=0, updated_at=? WHERE id=?")
+    await env.DB.prepare("UPDATE stream_events SET vod_url=?, imported=0, updated_at=?, sequence=sequence+1 WHERE id=?")
       .bind(patch.vodUrl, now, id)
       .run();
     return (await getEvent(env, id, now))!;
@@ -501,13 +509,15 @@ async function editOneEvent(
   const first = parseDate(patch.date)!;
   const [hour, minute] = patch.time.split(":").map(Number);
   const start = zonedTime(first, hour, minute, patch.tz);
-  // Only moving a past stream into the future increases upcoming count.
-  const adds = row.starts_at < now && start >= now;
-  if (adds) await assertRoom(env, row.streamer_id, 1, now);
+  // Only moving a past stream into the future increases upcoming count: the preflight uses the read above.
+  if (row.starts_at < now && start >= now) await assertRoom(env, row.streamer_id, 1, now);
+  // The read can be stale: a parallel edit can move this stream into the past and a create fill the free place. So a
+  // future target always ends with the guard, which counts in the batch.
+  const upcoming = start >= now;
   await guardedBatch(env, [
     env.DB.prepare(`UPDATE stream_events SET title=?, notes=?, starts_at=?, duration_min=?, platform=?, url=?, tz=?,
-      status=CASE WHEN status='cancelled' THEN 'cancelled' ELSE 'scheduled' END, is_exception=1, imported=0, updated_at=?
-      WHERE id=?`).bind(
+      status=CASE WHEN status='cancelled' THEN 'cancelled' ELSE 'scheduled' END, is_exception=1, imported=0, updated_at=?,
+      sequence=sequence+1 WHERE id=?`).bind(
       patch.title,
       patch.notes,
       start,
@@ -522,7 +532,7 @@ async function editOneEvent(
     env.DB.prepare(
       "INSERT OR IGNORE INTO stream_event_topics (event_id,entry_id) SELECT ?, value FROM json_each(?)",
     ).bind(id, JSON.stringify(topics)),
-    ...(adds ? [capacityGuard(env, row.streamer_id, now)] : []),
+    ...(upcoming ? [capacityGuard(env, row.streamer_id, now)] : []),
   ]);
   return (await getEvent(env, id, now))!;
 }
@@ -782,6 +792,7 @@ export async function scheduleCalendar(
       url: row.url,
       cancelled: row.status === "cancelled",
       updatedAt: row.updated_at,
+      sequence: row.sequence,
     }),
   );
   return buildCalendar(streamer.name, events, { pageUrl: `${origin}/@${streamer.handle}`, now });

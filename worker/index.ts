@@ -13,7 +13,7 @@ import {
   requireSameOrigin,
   securityHeaders,
 } from "../app/server/http.server";
-import { serveImage } from "../app/server/images.server";
+import { retryImageCleanup, serveImage } from "../app/server/images.server";
 import { serveStreamImage } from "../app/server/stream-images.server";
 import { dockKeyMatches } from "../app/server/dock-key.server";
 import { overlayKeyOutput } from "../app/server/overlay-key.server";
@@ -299,6 +299,8 @@ export default {
       channel_repair: repairChannelSubscriptions,
       // Scheduled streams of connected Twitch and YouTube channels.
       schedule_import: importSchedules,
+      // Images of deleted accounts that a failed R2 delete left.
+      image_cleanup: retryImageCleanup,
     };
     const names: string[] = Object.keys(jobs);
     const results = await Promise.allSettled(names.map((name: string) => jobs[name](env, controller.scheduledTime)));

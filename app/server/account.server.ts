@@ -5,7 +5,7 @@ import { parseStoredLayouts, type OverlayLayouts } from "../lib/overlay-layouts"
 import { SYSTEM_USER_ID } from "../lib/system";
 import type { AppEnv } from "../env";
 import { getOrigin, HttpError } from "./http.server";
-import { deleteImageObjects, imageStorageKey, IMAGE_KINDS, type ImageKind } from "./images.server";
+import { cleanUpImages, imageStorageKey, IMAGE_KINDS, type ImageKind } from "./images.server";
 import { notifyRoom } from "./live.server";
 
 // Bound export memory to one page per query.
@@ -949,15 +949,15 @@ export async function deleteAccount(env: AppEnv, userId: string): Promise<void> 
     statement("DELETE FROM poll_votes WHERE user_id=?1"),
     statement("DELETE FROM poll_reactions WHERE user_id=?1"),
     statement("DELETE FROM poll_comments WHERE user_id=?1"),
+    // The image prefixes go with the account: a failed R2 delete below stays recorded for the hourly retry.
+    env.DB.prepare(
+      "INSERT OR IGNORE INTO image_cleanup (owner_id,kind,created_at) SELECT ?1, value, ?2 FROM json_each(?3)",
+    ).bind(userId, Date.now(), JSON.stringify(IMAGE_KINDS)),
     statement("DELETE FROM user WHERE id=?1 RETURNING id"),
   ]);
   if (results.at(-1)?.results.length !== 1) throw new HttpError(404, "Account not found.");
-  try {
-    for (const kind of IMAGE_KINDS) await deleteImageObjects(env, userId, kind);
-  } catch (error_: unknown) {
-    // Deletion already committed: succeed and log only the error class for leftover-image cleanup.
-    console.error("account_image_delete_failed", { cause: error_ instanceof Error ? error_.name : "unknown" });
-  }
+  // Deletion already committed: a failed delete logs and leaves its row for `retryImageCleanup`.
+  await cleanUpImages(env, userId);
   const streamerIds = [...results[0].results, ...results[1].results].map(
     (row: unknown): string => (row as { id: string }).id,
   );

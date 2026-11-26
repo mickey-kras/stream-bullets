@@ -1,8 +1,8 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AppEnv } from "../app/env";
 import { isAllowedSupportLink } from "../app/lib/support";
 import { isPlainUrlText } from "../app/lib/url-text";
-import { buildCalendar, icsSequence, SEQUENCE_EPOCH, type IcsEvent } from "../app/server/ics";
+import { buildCalendar, type IcsEvent } from "../app/server/ics";
 import {
   createEvents,
   FEED_PAST_LIMIT,
@@ -29,6 +29,7 @@ function event(extra: Partial<IcsEvent> = {}): IcsEvent {
     url: "https://twitch.tv/nova",
     cancelled: false,
     updatedAt: Date.UTC(2026, 10, 1),
+    sequence: 7,
     ...extra,
   };
 }
@@ -98,20 +99,15 @@ describe("calendar content lines", (): void => {
     for (const line of text.split("\r\n")) expect(/[\r\n]/u.test(line)).toBe(false);
   });
 
-  it("writes DTSTAMP from the last change and a SEQUENCE that grows with each change", (): void => {
+  it("writes DTSTAMP from the last change and the stored SEQUENCE", (): void => {
     const now = Date.UTC(2026, 10, 2);
     const first = contentLines(buildCalendar("Nova", [event()], { now }));
     expect(first).toContain("DTSTAMP:20261101T000000Z");
-    const sequence = icsSequence(Date.UTC(2026, 10, 1));
-    expect(first).toContain(`SEQUENCE:${sequence}`);
-    const later = contentLines(buildCalendar("Nova", [event({ updatedAt: Date.UTC(2026, 10, 1, 0, 0, 5) })], { now }));
-    expect(later).toContain(`SEQUENCE:${sequence + 5}`);
+    expect(first).toContain("SEQUENCE:7");
     // Clamp future changes to now for DTSTAMP.
     expect(contentLines(buildCalendar("Nova", [event({ updatedAt: now + day })], { now }))).toContain(
       "DTSTAMP:20261102T000000Z",
     );
-    expect(icsSequence(SEQUENCE_EPOCH - 1000)).toBe(0);
-    expect(icsSequence(SEQUENCE_EPOCH + 1999)).toBe(1);
   });
 });
 
@@ -167,13 +163,41 @@ describe("the calendar feed", (): void => {
     expect(lines).toContain(`UID:${own.id}@streambullets.com`);
     expect(lines).not.toContain(`UID:${foreign.id}@streambullets.com`);
     expect(lines.some((line: string): boolean => line.includes("Other stream"))).toBe(false);
-    const before = Number(lines.find((line: string): boolean => line.startsWith("SEQUENCE:"))?.slice(9));
-    await env.DB.prepare("UPDATE stream_events SET updated_at=updated_at-5000 WHERE id=?").bind(own.id).run();
+    const sequence = (text: string[]): number =>
+      Number(text.find((line: string): boolean => line.startsWith("SEQUENCE:"))?.slice(9));
+    const before = sequence(lines);
     await patchEvent(env, "owner", own.id, { action: "cancel" });
     lines = await feed();
-    const after = Number(lines.find((line: string): boolean => line.startsWith("SEQUENCE:"))?.slice(9));
-    expect(after).toBeGreaterThanOrEqual(before);
+    expect(sequence(lines)).toBe(before + 1);
     expect(lines).toContain("STATUS:CANCELLED");
+  });
+
+  it("raises SEQUENCE for an edit and a cancellation in the same second", async (): Promise<void> => {
+    const now = Date.UTC(2026, 10, 7, 12, 0, 0, 100);
+    vi.useFakeTimers({ now, toFake: ["Date"] });
+    try {
+      const created = await createEvents(env, "owner", input(new Date(now + 2 * day), "Same second"));
+      const lines = async (): Promise<string[]> => {
+        const all = await feed(now);
+        const start = all.indexOf(`UID:${created.id}@streambullets.com`);
+        return all.slice(start, all.indexOf("END:VEVENT", start));
+      };
+      const confirmed = await lines();
+      expect(confirmed).toContain("SEQUENCE:0");
+      vi.setSystemTime(now + 400);
+      await patchEvent(env, "owner", created.id, { action: "edit", ...input(new Date(now + 2 * day), "Renamed") });
+      vi.setSystemTime(now + 800);
+      await patchEvent(env, "owner", created.id, { action: "cancel" });
+      const cancelled = await lines();
+      // The DTSTAMP is the same second; the SEQUENCE alone tells the newer state.
+      expect(cancelled.find((line: string): boolean => line.startsWith("DTSTAMP:"))).toBe(
+        confirmed.find((line: string): boolean => line.startsWith("DTSTAMP:")),
+      );
+      expect(cancelled).toContain("SEQUENCE:2");
+      expect(cancelled).toContain("STATUS:CANCELLED");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("keeps the furthest upcoming streams when the page has many past ones", async (): Promise<void> => {

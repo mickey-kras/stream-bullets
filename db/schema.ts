@@ -587,6 +587,8 @@ export const streamEvents = sqliteTable(
     imported: integer("imported", { mode: "boolean" }).notNull().default(false),
     createdAt: integer("created_at").notNull(),
     updatedAt: integer("updated_at").notNull(),
+    // The iCalendar SEQUENCE (RFC 5545 3.8.7.4): each update adds one, so two changes in one second still differ.
+    sequence: integer("sequence").notNull().default(0),
   },
   (table) => [
     index("stream_events_schedule_idx").on(table.streamerId, table.startsAt),
@@ -907,6 +909,22 @@ export const imageVersions = sqliteTable(
   (table) => [
     primaryKey({ columns: [table.ownerId, table.kind] }),
     check("image_versions_kind_check", sql`${table.kind} IN ('avatar', 'background', 'logo')`),
+  ],
+);
+
+// The image prefixes of a deleted account that R2 may still hold. Account deletion writes them in its batch; a row
+// goes when its objects are gone, so the hourly job retries a delete that failed. No foreign key: the user is gone.
+export const imageCleanup = sqliteTable(
+  "image_cleanup",
+  {
+    ownerId: text("owner_id").notNull(),
+    kind: text("kind").notNull(),
+    createdAt: integer("created_at").notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.ownerId, table.kind] }),
+    index("image_cleanup_created_idx").on(table.createdAt),
+    check("image_cleanup_kind_check", sql`${table.kind} IN ('avatar', 'background', 'logo')`),
   ],
 );
 
