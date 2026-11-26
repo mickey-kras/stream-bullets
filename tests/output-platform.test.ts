@@ -70,7 +70,16 @@ describe("the characters of one platform", (): void => {
   const view: PlaygroundView = {
     world: { width: 640, height: 80, ground: 60 },
     tiles: [],
-    stairs: [],
+    blocks: [{ c: 3, r: 0, kind: "dirt", dir: 1, stage: 0 }],
+    ropes: [
+      { id: 1, x: 40, y: 20, hit: true },
+      { id: 2, x: 50, y: 20, hit: false },
+    ],
+    flags: [
+      { x: 100, y: 60, platform: "twitch" },
+      { x: 200, y: 60, platform: "kick" },
+    ],
+    crown: 2,
     marks: [],
     doors: { entrance: 10, exit: 630 },
     pad: 320,
@@ -86,6 +95,15 @@ describe("the characters of one platform", (): void => {
     expect(shown.world).toBe(view.world);
     expect(shown.doors).toBe(view.doors);
     expect(shown.mode).toBe(view.mode);
+  });
+
+  it("keeps the builds, and only the ropes, the flags and the crown of the platform", (): void => {
+    const shown: PlaygroundView = viewForPlatform(view, "twitch");
+    expect(shown.blocks).toBe(view.blocks);
+    expect(shown.ropes).toEqual([{ id: 1, x: 40, y: 20, hit: true }]);
+    expect(shown.flags).toEqual([{ x: 100, y: 60, platform: "twitch" }]);
+    expect(shown.crown).toBeNull();
+    expect(viewForPlatform(view, "youtube").crown).toBe(2);
   });
 
   it("returns the same view when each character is of the platform", (): void => {

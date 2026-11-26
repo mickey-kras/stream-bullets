@@ -8,12 +8,12 @@ import { graphemes } from "../chat-feed";
  * and sends frames on the activity socket to the sockets that ask for characters. The overlay only draws them.
  *
  * - A full frame comes first on each socket. It has every section.
- * - A tick frame has the characters. It has roster, bubbles, terrain and mode only when they changed.
+ * - A tick frame has the characters. It has roster, bubbles, terrain, extras and mode only when they changed.
  * - Character ids are short numbers that the server gives. They are never platform user ids.
  * - Names and bubble text are untrusted chat text. They are bounded here; draw them as text (fillText), never HTML.
  */
 
-export const PLAYGROUND_VERSION = 1;
+export const PLAYGROUND_VERSION = 2;
 
 /** The longest frame that encodeFrame writes and parseFrame accepts, in UTF-16 code units. */
 export const MAX_FRAME_LENGTH = 32 * 1024;
@@ -31,8 +31,8 @@ export const BUBBLE_MAX_UNITS = 320;
 export const FRAME_CHARS_MAX = 40;
 /** Bubbles in a frame. Equal to BUBBLE_MAX in constants.ts. */
 export const FRAME_BUBBLES_MAX = 4;
-/** Temporary stair steps in a frame. Equal to STAIRS_MAX in constants.ts. */
-export const FRAME_STAIRS_MAX = 60;
+/** Block cells in a frame: the largest world (32 x 32 cells of 20 px) has 40 columns and 37 rows of 16 px. */
+export const FRAME_BLOCKS_MAX = 1600;
 /** Ground tiles in a frame: the widest world (32 cells of 20 px) has 40 tiles of 16 px. */
 export const FRAME_TILES_MAX = 64;
 
@@ -53,11 +53,19 @@ export const CHAR_STATES = [
   "flat",
   "dig",
   "build",
-  "bwalk",
   "wave",
   "boom",
   "gone",
   "respawn",
+  "hold",
+  "step",
+  "climb",
+  "shoot",
+  "zip",
+  "jet",
+  "dance",
+  "cheer",
+  "push",
 ] as const;
 export type CharState = (typeof CHAR_STATES)[number];
 
@@ -69,7 +77,7 @@ const FLAGS_ALL = FLAG_UNAVAILABLE | FLAG_NEW;
 
 /**
  * The tick counter `t` of a state wraps at this value in frames. Every animation period of the theme must divide it,
- * so a looping animation does not jump. Bounded states (all except walk, goto, bwalk) end long before it.
+ * so a looping animation does not jump. Bounded states (all except walk, goto, step and hold) end long before it.
  */
 export const FRAME_T_WRAP = 960;
 
@@ -92,12 +100,58 @@ export interface BubbleView {
   text: string;
 }
 
-/** One temporary stair step: left x, top y (logical px, rounded) and the build direction. Steps are 7 x 4 px. */
-export type StairTuple = [x: number, top: number, dir: 1 | -1];
+/** The kinds of block that viewers build, in code order. A stair rises in its direction. */
+export const BLOCK_KINDS = ["dirt", "plank", "stair"] as const;
+export type BlockKind = (typeof BLOCK_KINDS)[number];
+/** A block has this many damage stages before it breaks: intact, cracked, cracked more. */
+export const BLOCK_STAGES = 3;
+/** The character of an empty cell in `blocks`. */
+export const BLOCK_NONE = ".";
+const BLOCK_CODES = "abcdefghijklmnopqr";
+
+/** One cell of the block grid. */
+export interface BlockCell {
+  kind: BlockKind;
+  dir: 1 | -1;
+  /** Damage: 0 intact to BLOCK_STAGES - 1. */
+  stage: number;
+}
+
+/** The character of a block in `blocks`: one of 18 letters for the kind, the direction and the damage. */
+export function blockCode(block: BlockCell): string {
+  const index: number = BLOCK_KINDS.indexOf(block.kind) * 2 * BLOCK_STAGES + (block.dir < 0 ? BLOCK_STAGES : 0);
+  return BLOCK_CODES[index + Math.min(BLOCK_STAGES - 1, Math.max(0, block.stage))];
+}
+
+/** The block of a character of `blocks`, or null for an empty cell or an unknown character. */
+export function blockOf(code: string): BlockCell | null {
+  const index: number = BLOCK_CODES.indexOf(code);
+  if (index < 0 || code.length !== 1) return null;
+  return {
+    kind: BLOCK_KINDS[Math.floor(index / (2 * BLOCK_STAGES))],
+    dir: index % (2 * BLOCK_STAGES) < BLOCK_STAGES ? 1 : -1,
+    stage: index % BLOCK_STAGES,
+  };
+}
+
+/** A grapple rope: the character, the hook point (logical px, rounded), and 1 for a hit or 0 for a miss. */
+export type RopeTuple = [id: number, x: number, y: number, hit: 0 | 1];
+/** A flag: its owner and the point on the floor where it stands (logical px, rounded). */
+export type FlagTuple = [id: number, x: number, y: number];
+
+/** What the characters add to the world: ropes, flags, and the character that wears the crown. */
+export interface ExtrasView {
+  ropes: RopeTuple[];
+  flags: FlagTuple[];
+  /** The highest character on the builds, or null when nobody is two blocks up. */
+  crown: number | null;
+}
 
 /**
  * The world in logical px (one logical px is 3 design px). Tile i covers x from i * tile to (i + 1) * tile.
  * `ground` has one character per tile: "g" protected girder, "0" to "2" dirt with that much damage, "3" a hole.
+ * `blocks` is the block grid in rows from the ground up, one character per cell (blockCode), with as many columns
+ * as `ground` has tiles. It ends after the highest row that has a block. Row r is r * tile above the ground.
  */
 export interface TerrainView {
   w: number;
@@ -105,7 +159,9 @@ export interface TerrainView {
   gy: number;
   tile: number;
   ground: string;
-  stairs: StairTuple[];
+  /** The rows of the block grid. Characters build no higher. */
+  rows: number;
+  blocks: string;
   /** The x of the respawn pad, the entrance door and the exit door, and the walking limits. */
   padX: number;
   entryX: number;
@@ -128,6 +184,7 @@ export interface PlaygroundFullFrame {
   roster: RosterEntry[];
   bubbles: BubbleView[];
   terrain: TerrainView;
+  extras: ExtrasView;
   mode: ModeView;
 }
 
@@ -140,6 +197,7 @@ export interface PlaygroundTickFrame {
   roster?: RosterEntry[];
   bubbles?: BubbleView[];
   terrain?: TerrainView;
+  extras?: ExtrasView;
   mode?: ModeView;
 }
 
@@ -226,12 +284,24 @@ const terrainSchema = z
       .string()
       .max(FRAME_TILES_MAX)
       .regex(/^[g0-3]*$/),
-    stairs: z.array(z.tuple([coordinate, coordinate, dir])).max(FRAME_STAIRS_MAX),
+    rows: z.number().int().min(0).max(64),
+    blocks: z
+      .string()
+      .max(FRAME_BLOCKS_MAX)
+      .regex(/^[.a-r]*$/),
     padX: px,
     entryX: px,
     exitX: px,
     xmin: px,
     xmax: px,
+  })
+  .strict();
+
+const extrasSchema = z
+  .object({
+    ropes: z.array(z.tuple([id, coordinate, coordinate, z.union([z.literal(0), z.literal(1)])])).max(FRAME_CHARS_MAX),
+    flags: z.array(z.tuple([id, coordinate, coordinate])).max(FRAME_CHARS_MAX),
+    crown: id.nullable(),
   })
   .strict();
 
@@ -252,6 +322,7 @@ const frameSchema: z.ZodType<PlaygroundFrame> = z.union([
       roster: rosterSchema,
       bubbles: bubblesSchema,
       terrain: terrainSchema,
+      extras: extrasSchema,
       mode: modeSchema,
     })
     .strict(),
@@ -262,6 +333,7 @@ const frameSchema: z.ZodType<PlaygroundFrame> = z.union([
       roster: rosterSchema.optional(),
       bubbles: bubblesSchema.optional(),
       terrain: terrainSchema.optional(),
+      extras: extrasSchema.optional(),
       mode: modeSchema.optional(),
     })
     .strict(),
@@ -304,11 +376,12 @@ export function parseFrame(raw: unknown): PlaygroundFrame | null {
 
 /**
  * A control of the owner: `POST /api/overlay/characters` (docs/api.md), which the API passes to the page's
- * playground. `status` only reads the state. `remove` takes the character id of the frames.
+ * playground. `status` only reads the state. `remove` takes the character id of the frames. `clear` removes all
+ * builds and keeps the characters.
  */
 export const playgroundControlSchema = z.union([
   z.object({ op: z.literal("remove"), id }).strict(),
-  z.object({ op: z.enum(["status", "test", "stopTest", "pause", "resume", "reset"]) }).strict(),
+  z.object({ op: z.enum(["status", "test", "stopTest", "pause", "resume", "reset", "clear"]) }).strict(),
 ]);
 export type PlaygroundControl = z.infer<typeof playgroundControlSchema>;
 
