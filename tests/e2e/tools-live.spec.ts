@@ -24,6 +24,7 @@ const OBS_IP = clientIp("tools-live", 45);
 const PHONE_IP = clientIp("tools-live", 46);
 const DOCK_OWNER_IP = clientIp("tools-live", 47);
 const DOCK_IP = clientIp("tools-live", 48);
+const REPLAY_IP = clientIp("tools-live", 49);
 
 const now: number = Date.now();
 const entry = (id: string, kind: "choice" | "topic", title: string, age: number): string =>
@@ -279,6 +280,49 @@ test("the chat pauses on a scroll up, counts new messages, filters platforms and
   await expect(part.locator("[data-chat-paused]")).toHaveText("Chat paused. New messages: 0");
   await list.focus();
   await expect(list).toBeFocused();
+  await close(owner);
+});
+
+test("the preview shows the recent chat when the chat layer goes on stream from a different tab", async ({
+  browser,
+}) => {
+  // The chat layer has a place on the grid and is off stream. The characters are off the grid.
+  await runSql("tools-live-replay", [
+    layersSql({ chat: { enabled: false }, cells: { horizontal: { chat: CHAT_CELL, poll: POLL_CELL } } }),
+  ]);
+  const owner = await signedIn(browser, "featureowner", REPLAY_IP);
+  const page = await newPage(owner);
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  const sockets: WebSocketRoute[] = [];
+  // The overlay chat shows a message for two minutes, so the messages are from this moment.
+  const recent = (n: number): Record<string, unknown> => ({ ...chat(n, "twitch"), receivedAt: Date.now() });
+  await page.routeWebSocket("**/api/activity/**", (socket: WebSocketRoute) => {
+    sockets.push(socket);
+    socket.send(JSON.stringify({ type: "snapshot", events: [recent(1), recent(2)], replay: true }));
+  });
+  await page.goto("/tools?view=live");
+  const log = page.locator('[data-live-part="chat"]').getByRole("log", { name: "Chat" });
+  await expect(log.locator("[data-chat-row]")).toHaveCount(2);
+  // One more message comes, and a moderator removes the first message. The socket sends each of them one time.
+  sockets[0].send(JSON.stringify({ type: "event", event: recent(3) }));
+  sockets[0].send(
+    JSON.stringify({ type: "event", event: { kind: "delete", platform: "twitch", messageId: "m1", receivedAt: 1 } }),
+  );
+  await expect(log.locator("[data-chat-row]")).toHaveCount(3);
+  await expect(log).toContainText("message removed by a moderator");
+  const preview = page.locator(".tl-preview");
+  await expect(preview.locator("[data-overlay-chat]")).toHaveCount(0);
+
+  // A different tab of the owner puts the chat layer on stream. No new message comes.
+  const turned = await owner.request.post("/api/overlay", { data: { action: "layers", chat: { enabled: true } } });
+  expect(turned.status()).toBe(200);
+  const shown = preview.locator("[data-overlay-chat] li.wl-item");
+  await expect(shown).toHaveCount(2);
+  await expect(preview.locator("[data-overlay-chat]")).toContainText("chat message 2");
+  await expect(preview.locator("[data-overlay-chat]")).toContainText("chat message 3");
+  // The removed message does not show, and the page opened no second socket.
+  await expect(preview.locator("[data-overlay-chat]")).not.toContainText("chat message 1");
+  expect(sockets).toHaveLength(1);
   await close(owner);
 });
 
