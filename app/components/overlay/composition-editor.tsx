@@ -14,11 +14,13 @@ import {
   type Orientation,
 } from "../../lib/overlay-layers";
 import type { OverlayState } from "../../types";
+import type { LayoutAction, OverlayLayouts } from "../../lib/overlay-layouts";
 import { announce } from "../a11y/announcer";
 import { motionReduced } from "../station/motion";
 import { type ActivityFeed, useActivityFeed } from "./activity-feed";
 import { type CharactersControl, useCharactersControl } from "./characters-controls";
 import { LayerPalette } from "./layer-palette";
+import { LayoutPicker, type LayoutAct } from "./layout-picker";
 import { LayerProperties, type ChangeLayers, type OverlayAction } from "./layer-properties";
 import { LAYER_NAMES, LayoutGrid, type LayoutGridHandle, type PreviewBackground, type RemoveDrop } from "./layout-grid";
 import { CHARACTERS_READY } from "./overlay-composition";
@@ -72,7 +74,7 @@ function placedLayers(layers: OverlayLayers, layer: GridLayer, rect: CellRect, t
 }
 
 /**
- * Step 2 of Overlay control: the overlay studio. A toolbar sets the orientation and the preview background and
+ * Step 1 of the Overlay section of Streamer tools: the overlay studio. A toolbar sets the orientation and the preview background and
  * starts the test. Below it are the layer palette, the layout grid of the selected orientation over a preview of
  * what OBS shows, and the settings of the selected layer. The preview plays sample chat. While the characters layer
  * is on stream, it opens the owner's characters socket and shows the live playground. Layer edits go live at once.
@@ -83,6 +85,9 @@ export function CompositionEditor({
   busy,
   run,
   onSaved,
+  layouts,
+  layoutBusy,
+  layoutAct,
 }: Readonly<{
   scene: OverlayScene;
   /** The newest saved or live state, with the layers. */
@@ -92,6 +97,11 @@ export function CompositionEditor({
   /** Saves a setting that is not in the layers: the poll results switch or the message. */
   run: (action: OverlayAction) => void;
   onSaved: (overlay: OverlayState) => void;
+  /** The saved layouts of each output, and the layout on stream. */
+  layouts: OverlayLayouts;
+  /** True while a layout action saves. */
+  layoutBusy: boolean;
+  layoutAct: LayoutAct;
 }>): ReactNode {
   const { layers } = state;
   const buildId: string = useId();
@@ -103,7 +113,18 @@ export function CompositionEditor({
   // The palette takes a layer that a pointer drags off the grid: the grid reads its box and sets what it shows.
   const palette = useRef<HTMLFieldSetElement | null>(null);
   const [removeDrop, setRemoveDrop] = useState<RemoveDrop | null>(null);
-  const { shown, status, error, edit } = useLayerDraft(layers, onSaved);
+  const { shown, status, error, edit, flush } = useLayerDraft(layers, onSaved);
+  // True while a layout action runs: the grid edits save first, and the grid takes no edit.
+  const [switching, setSwitching] = useState<boolean>(false);
+  const actOnLayout: LayoutAct = async (action: LayoutAction): Promise<boolean> => {
+    setSwitching(true);
+    try {
+      await flush();
+      return await layoutAct(action);
+    } finally {
+      setSwitching(false);
+    }
+  };
   const orientation: Orientation = shown.orientation;
   const cells: LayerCells = shown.cells[orientation];
   // The preview shows the live playground while the characters layer is on stream: the owner's characters socket.
@@ -122,8 +143,9 @@ export function CompositionEditor({
   // The settings show for the selected layer while it is on the grid of this orientation.
   const active: GridLayer | null = selected && cells[selected] ? selected : null;
 
-  const change: ChangeLayers = (update: (current: OverlayLayers) => OverlayLayers, when: EditTiming = "now"): void =>
-    edit(update, when);
+  const change: ChangeLayers = (update: (current: OverlayLayers) => OverlayLayers, when: EditTiming = "now"): void => {
+    if (!switching) edit(update, when);
+  };
   const newestTopic: string | null = scene.data.topics[0]?.id ?? null;
   const place = (layer: GridLayer, rect: CellRect, when: EditTiming): void =>
     change((current: OverlayLayers) => placedLayers(current, layer, rect, newestTopic), when);
@@ -147,7 +169,7 @@ export function CompositionEditor({
 
   return (
     <section className="ov-step ov-comp" aria-labelledby={buildId} data-step="build" data-composition-editor>
-      <StepHeading step={2} id={buildId} title={t("overlay.step.build")} />
+      <StepHeading step={1} id={buildId} title={t("overlay.step.build")} />
       <div className="ov-comp-bar">
         <fieldset className="ov-seg-field">
           <legend className="sr-only">{t("overlay.grid.orientation")}</legend>
@@ -197,6 +219,13 @@ export function CompositionEditor({
       <p className="muted ov-comp-note" id={orientationNoteId} data-comp-orientation-note>
         {t("overlay.grid.orientationNote")}
       </p>
+      <LayoutPicker
+        output={orientation}
+        layers={shown}
+        layouts={layouts}
+        busy={layoutBusy || switching}
+        act={actOnLayout}
+      />
       <div className="ov-studio">
         <LayerPalette
           placed={placed}

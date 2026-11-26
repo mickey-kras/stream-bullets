@@ -14,7 +14,6 @@ import {
   type ChannelStatusCode,
 } from "../lib/activity";
 import { banKey, eventForBroadcast, snapshotMessage } from "./channel-ingest-events";
-export { snapshotMessage } from "./channel-ingest-events";
 import { youtubeEvents } from "./channel-normalize";
 import {
   channelIdentity,
@@ -35,9 +34,10 @@ import { channelsOff, loadTokens, replaceTokens, type StoredTokens } from "./cha
 import { HttpError } from "./http.server";
 import { sampleChatAt } from "../lib/chat-feed";
 import { validateTestEnvironment } from "./test-environment-config";
-import { ID_SQL, type IdTable } from "./channel-ingest-sql";
+import { EVENTS, ID_SQL, type IdTable } from "./channel-ingest-sql";
 import { type PlaygroundHost, playgroundOf } from "./playground-host";
 import { detached } from "../lib/detached";
+import { keyRevokes, keyTags, outputInBody, socketKey, type SocketKey } from "./room-connections";
 import { NEW_YOUTUBE_STATE, type Connection, type YoutubeState } from "./channel-ingest-state";
 import {
   SNAPSHOT_SIZE,
@@ -156,9 +156,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
 
   private createTables(): void {
     const sql = this.ctx.storage.sql;
-    sql.exec(`CREATE TABLE IF NOT EXISTS events (seq INTEGER PRIMARY KEY AUTOINCREMENT,
-      platform TEXT NOT NULL, message_id TEXT NOT NULL, user_id TEXT NOT NULL, received_at INTEGER NOT NULL,
-      body TEXT NOT NULL)`);
+    EVENTS.create(sql);
     // Delivery and chat message ids, for deduplication; and deleted message ids, kept apart so that a burst of
     // new ids can never push them out early.
     for (const table of ["seen", "deleted"] as const) {
@@ -189,7 +187,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (channelsOff(this.env)) this.closeSockets("Channels off");
     if (url.pathname === "/subscribe") return this.subscribe(request);
     if (url.pathname === "/test-chat") return this.testChat();
-    if (url.pathname === "/overlay-key") return this.overlayKeyRevoked();
+    if (url.pathname === "/overlay-key") return await this.overlayKeyRevoked(request);
     if (url.pathname === "/page-status") return this.pageStatusChanged();
     if (url.pathname === "/close") return this.closeAll();
     if (url.pathname === "/refresh") return Response.json(await this.refreshRequested());
@@ -220,24 +218,24 @@ export class ChannelIngest extends DurableObject<AppEnv> {
 
   private async subscribe(request: Request): Promise<Response> {
     if (request.headers.get("Upgrade")?.toLowerCase() !== "websocket") return reply("WebSocket required", 426);
-    const overlay = request.headers.get("X-SB-Overlay") === "1";
-    // The Worker sets these only for a valid overlay key or the signed-in owner.
-    if (!overlay && request.headers.get("X-SB-Owner") !== "1") return reply("Forbidden", 403);
+    const output: SocketKey | null = socketKey(request.headers);
+    // The Worker sets these only for a valid overlay key, a valid dock key, or the signed-in owner.
+    if (!output && request.headers.get("X-SB-Owner") !== "1") return reply("Forbidden", 403);
     const before = this.suspensions;
     const keysBefore = this.overlayKeys;
     const suspended = await this.pageSuspended();
     // A suspension that arrived while this check waited wins over the read. No await from here to the accept.
     if (suspended || this.suspensions !== before) return reply("Stream not found", 404);
     // A key change that arrived while this check waited revoked the key this request carries.
-    if (overlay && this.overlayKeys !== keysBefore) return reply("Forbidden", 403);
+    if (output && this.overlayKeys !== keysBefore) return reply("Forbidden", 403);
     if (this.ctx.getWebSockets("activity").length >= MAX_SOCKETS) return reply("Too many connections", 429);
     const first = this.ctx.getWebSockets("activity").length === 0;
     const pair = new WebSocketPair();
     const [client, server] = Object.values(pair);
-    const tags = overlay ? ["activity", "overlay-key"] : ["activity", "owner"];
+    const tags = output ? ["activity", ...keyTags(output)] : ["activity", "owner"];
     const characters = new URL(request.url).searchParams.get("characters") === "1";
     this.ctx.acceptWebSocket(server, characters ? [...tags, "characters"] : tags);
-    this.send(server, snapshotMessage(this.snapshot(Date.now())));
+    this.send(server, this.snapshot(Date.now()));
     if (characters) await this.playground.open(server);
     await this.listeningStarted(first, Date.now());
     return new Response(null, { status: 101, webSocket: client });
@@ -304,20 +302,20 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     this.generations.set(platform, (this.generations.get(platform) ?? 0) + 1);
   }
 
-  private closeSockets(reason: string): void {
-    for (const socket of this.ctx.getWebSockets("activity")) {
+  private closeSockets(reason: string, sockets: WebSocket[] = this.ctx.getWebSockets("activity")): void {
+    for (const socket of sockets) {
       this.send(socket, JSON.stringify({ type: "unavailable" }));
       socket.close(1001, reason);
     }
   }
 
-  /** A new overlay key revokes the old one: its sockets close at once. */
-  private overlayKeyRevoked(): Response {
+  /** A new key of one output or of the dock revokes the old one: its sockets close at once. The others stay. */
+  private async overlayKeyRevoked(request: Request): Promise<Response> {
+    const output: SocketKey | null = await outputInBody(request);
+    if (!output) return reply("Invalid output", 400);
     this.overlayKeys += 1;
-    for (const socket of this.ctx.getWebSockets("overlay-key")) {
-      this.send(socket, JSON.stringify({ type: "unavailable" }));
-      socket.close(1001, "Overlay key revoked");
-    }
+    const mine = (socket: WebSocket): boolean => keyRevokes(this.ctx.getTags(socket), output);
+    this.closeSockets("Overlay key revoked", this.ctx.getWebSockets("activity").filter(mine));
     return new Response(null, { status: 204 });
   }
 
@@ -350,19 +348,19 @@ export class ChannelIngest extends DurableObject<AppEnv> {
 
   // Ingestion -----------------------------------------------------------------------------------------------------
 
-  /** The chat messages a reconnecting consumer gets. They are marked not live: commands in them never run again. */
-  private snapshot(now: number): ActivityChat[] {
+  /** The snapshot a reconnecting consumer gets. Its messages are marked not live: commands in them never run again. */
+  private snapshot(now: number): string {
     this.prune(now);
-    return this.ctx.storage.sql
-      .exec<EventRow>("SELECT body FROM events ORDER BY seq")
-      .toArray()
-      .map((row: EventRow): ActivityChat => ({ ...(JSON.parse(row.body) as ActivityChat), live: false }));
+    const sql = this.ctx.storage.sql;
+    const rows: EventRow[] = sql.exec<EventRow>("SELECT body FROM events ORDER BY seq").toArray();
+    const events = rows.map((row): ActivityChat => ({ ...(JSON.parse(row.body) as ActivityChat), live: false }));
+    return snapshotMessage(events, Math.max(now - SNAPSHOT_MAX_AGE_MS, EVENTS.cut(sql)));
   }
 
   private prune(now: number): void {
     const sql = this.ctx.storage.sql;
     sql.exec("DELETE FROM events WHERE received_at < ?", now - SNAPSHOT_MAX_AGE_MS);
-    sql.exec("DELETE FROM events WHERE seq NOT IN (SELECT seq FROM events ORDER BY seq DESC LIMIT ?)", SNAPSHOT_SIZE);
+    EVENTS.trim(sql, SNAPSHOT_SIZE);
     for (const table of ["seen", "deleted"] as const) {
       let count = (this.counts.get(table) ?? 0) - this.deleteIds(ID_SQL[table].expire, now - SEEN_TTL_MS);
       if (count > SEEN_MAX) count -= this.deleteIds(ID_SQL[table].trim, count - SEEN_MAX);
@@ -731,7 +729,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     else await this.ctx.storage.delete(key);
     if (platform === "youtube") await this.ctx.storage.delete("youtube");
     await this.ctx.storage.delete(`repair:${platform}`);
-    this.ctx.storage.sql.exec("DELETE FROM events WHERE platform=?", platform);
+    EVENTS.dropPlatform(this.ctx.storage.sql, platform);
     this.broadcast({ kind: "status", platform, status: "disconnected" });
     return { revoked, unsubscribed };
   }

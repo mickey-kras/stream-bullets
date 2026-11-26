@@ -2,7 +2,7 @@ import { z } from "zod";
 import { CHANNEL_PLATFORMS, CHANNEL_STATUSES } from "../../db/enums";
 import type { ActivityPlatform, ChannelStatus } from "./activity";
 
-/** One platform as GET /api/channels and the overlay-control loader list it. */
+/** One platform as GET /api/channels and the Streamer tools loader list it. */
 export interface ChannelView {
   platform: ActivityPlatform;
   available: boolean;

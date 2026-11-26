@@ -62,7 +62,7 @@ async function listen(
   options: { characters?: boolean; overlay?: boolean; streamerId?: string } = {},
 ): Promise<FakeSocket> {
   const streamerId = options.streamerId ?? page;
-  const headers: Record<string, string> = options.overlay ? { "X-SB-Overlay": "1" } : { "X-SB-Owner": "1" };
+  const headers: Record<string, string> = options.overlay ? { "X-SB-Overlay": "horizontal" } : { "X-SB-Owner": "1" };
   const response = await ingest
     .get(ingest.idFromName(streamerId))
     .fetch(url("subscribe", streamerId, options.characters === false ? {} : { characters: "1" }), {
@@ -146,8 +146,8 @@ const ON: OverlayLayers = {
   ...DEFAULT_LAYERS,
   characters: { enabled: true, timeout: 60, max: 40 },
   cells: {
-    horizontal: { ...emptyCells(), characters: { c: 0, r: 7, w: 16, h: 2 } },
-    vertical: { ...emptyCells(), characters: { c: 0, r: 13, w: 9, h: 3 } },
+    horizontal: { ...emptyCells(), characters: { c: 0, r: 14, w: 32, h: 4 } },
+    vertical: { ...emptyCells(), characters: { c: 0, r: 26, w: 18, h: 6 } },
   },
 };
 
@@ -239,7 +239,7 @@ describe("characters sockets", (): void => {
     expect(socket.messages<{ type: string }>().map((message) => message.type)).toEqual(["snapshot", "playground"]);
     const [full] = frames(socket);
     expect(full).toMatchObject({ full: true, tick: 0, chars: [], roster: [], mode: { paused: false, test: false } });
-    // The default characters cell is 16 x 2: a world of 640 x 80 logical px.
+    // The characters cell is 32 x 4: a world of 640 x 80 logical px.
     expect(full.full && full.terrain).toMatchObject({ w: 640, h: 80 });
     expect(vi.getTimerCount()).toBe(1);
     expect(state().storage.alarm).toBe(T0 + WATCHDOG_MS);
@@ -521,12 +521,12 @@ describe("eviction", (): void => {
 describe("closing", (): void => {
   it("stops for a revoked overlay key and keeps the owner's socket running", async (): Promise<void> => {
     const overlay = await listen({ overlay: true });
-    expect((await post("overlay-key")).status).toBe(204);
+    expect((await post("overlay-key", { output: "horizontal" })).status).toBe(204);
     expect(overlay.closeCode).toBe(1001);
     advance(FRAME_MS);
     expect(vi.getTimerCount()).toBe(0);
     const owner = await listen();
-    await post("overlay-key");
+    await post("overlay-key", { output: "horizontal" });
     expect(owner.open).toBe(true);
     advance(FRAME_MS);
     expect(vi.getTimerCount()).toBe(1);
@@ -801,7 +801,7 @@ describe("configuration", (): void => {
     const narrow: OverlayLayers = {
       ...ON,
       characters: { enabled: true, timeout: 120, max: 40 },
-      cells: { ...ON.cells, horizontal: { ...ON.cells.horizontal, characters: { c: 0, r: 7, w: 8, h: 2 } } },
+      cells: { ...ON.cells, horizontal: { ...ON.cells.horizontal, characters: { c: 0, r: 14, w: 16, h: 4 } } },
     };
     await setLayers(narrow);
     queries.length = 0;
@@ -810,23 +810,41 @@ describe("configuration", (): void => {
     advance(FRAME_MS);
     const resized = frames(socket).at(-1);
     expect(resized?.terrain).toMatchObject({ w: 320, h: 80 });
+    // The terrain of the last frame that sent one: a frame without a change of the world sends none.
+    const lastTerrain = (): PlaygroundFrame["terrain"] =>
+      frames(socket)
+        .filter((frame: PlaygroundFrame): boolean => frame.terrain !== undefined)
+        .at(-1)?.terrain;
+    // One playground serves the two outputs. The output that the editor shows does not change its size.
     await setLayers({ ...narrow, orientation: "vertical" });
     await post("playground-config");
     advance(FRAME_MS);
-    expect(frames(socket).at(-1)?.terrain).toMatchObject({ w: 360, h: 120 });
+    expect(frames(socket).at(-1)?.terrain).toBeUndefined();
+    expect(lastTerrain()).toMatchObject({ w: 320, h: 80 });
+    // Without a horizontal cell, the vertical cell gives the size, with each selected output.
+    for (const orientation of ["horizontal", "vertical"] as const) {
+      await setLayers({ ...narrow, cells: { ...narrow.cells, horizontal: emptyCells() }, orientation });
+      await post("playground-config");
+      advance(FRAME_MS);
+      expect(lastTerrain()).toMatchObject({ w: 360, h: 120 });
+    }
     await setLayers(DEFAULT_LAYERS);
     await post("playground-config");
     expect(vi.getTimerCount()).toBe(0);
     await setLayers(ON);
     await post("playground-config");
     expect(vi.getTimerCount()).toBe(1);
-    // Off the grid of the selected orientation, the layer is off stream: the playground stops.
+    // On the grid of one output only, the layer is on stream there: the playground runs, with each selected output.
     await setLayers({ ...ON, cells: { ...ON.cells, horizontal: emptyCells() } });
     await post("playground-config");
-    expect(vi.getTimerCount()).toBe(0);
-    await setLayers({ ...ON, cells: { ...ON.cells, horizontal: emptyCells() }, orientation: "vertical" });
+    expect(vi.getTimerCount()).toBe(1);
+    await setLayers({ ...ON, cells: { ...ON.cells, vertical: emptyCells() }, orientation: "vertical" });
     await post("playground-config");
     expect(vi.getTimerCount()).toBe(1);
+    // Off the grid of the two outputs, the layer is off stream: the playground stops.
+    await setLayers({ ...ON, cells: { horizontal: emptyCells(), vertical: emptyCells() } });
+    await post("playground-config");
+    expect(vi.getTimerCount()).toBe(0);
   });
 
   it("does not read the layers while no characters socket listens", async (): Promise<void> => {
@@ -840,7 +858,7 @@ describe("configuration", (): void => {
     const queries = watchQueries();
     const narrow: OverlayLayers = {
       ...ON,
-      cells: { ...ON.cells, horizontal: { ...ON.cells.horizontal, characters: { c: 0, r: 7, w: 8, h: 2 } } },
+      cells: { ...ON.cells, horizontal: { ...ON.cells.horizontal, characters: { c: 0, r: 14, w: 16, h: 4 } } },
     };
     // The second change arrives while the first read runs; its read must see the newer layers.
     const first: Promise<Response> = post("playground-config");

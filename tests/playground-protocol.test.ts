@@ -177,7 +177,7 @@ describe("playground protocol", () => {
   });
 
   it("carries hostile chat as bounded, safe text and never the platform user id", () => {
-    const sim = new PlaygroundSim({ cellsW: 16, cellsH: 2, rng: () => 0.5 });
+    const sim = new PlaygroundSim({ cellsW: 32, cellsH: 4, rng: () => 0.5 });
     sim.resumeAfter(0);
     sim.receive(hostile(`${RLO}${"N".repeat(500)}\u0007`));
     const p = sim.list()[0];

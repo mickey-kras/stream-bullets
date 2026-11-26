@@ -56,9 +56,9 @@ interface Stage {
   put: (c: number, r: number, kind?: Block["kind"]) => void;
 }
 
-/** A full frame world (16 x 9 cells) with one steered character that stands on the ground in column START. */
+/** A full frame world (32 x 18 cells) with one steered character that stands on the ground in column START. */
 function stage(): Stage {
-  const sim = new PlaygroundSim({ cellsW: 16, cellsH: 9, rng: mulberry32(7), walkSpread: 0 });
+  const sim = new PlaygroundSim({ cellsW: 32, cellsH: 18, rng: mulberry32(7), walkSpread: 0 });
   sim.resumeAfter(0);
   sim.receive(chat("twitch", "builder", "hello"));
   const p = sim.list()[0];
@@ -199,7 +199,7 @@ describe("walking", () => {
   });
 
   it("does not stop a character on its way in: it takes commands after it comes in", () => {
-    const sim = new PlaygroundSim({ cellsW: 16, cellsH: 9, rng: mulberry32(2), walkSpread: 0 });
+    const sim = new PlaygroundSim({ cellsW: 32, cellsH: 18, rng: mulberry32(2), walkSpread: 0 });
     sim.resumeAfter(0);
     sim.tick();
     sim.receive(chat("kick", "entrant", "!right"));
@@ -661,7 +661,7 @@ describe("the crowd on the builds", () => {
   });
 
   it("gives each character that comes in its own place on the ground", () => {
-    const sim = new PlaygroundSim({ cellsW: 16, cellsH: 9, rng: mulberry32(3), walkSpread: 0 });
+    const sim = new PlaygroundSim({ cellsW: 32, cellsH: 18, rng: mulberry32(3), walkSpread: 0 });
     sim.resumeAfter(0);
     sim.tick();
     for (let i = 0; i < 8; i++) {
@@ -682,7 +682,7 @@ describe("the crowd on the builds", () => {
 
 describe("platform places", () => {
   function people(counts: Partial<Record<ActivityPlatform, number>>): Participant[] {
-    const sim = new PlaygroundSim({ cellsW: 16, cellsH: 2, rng: () => 0.5 });
+    const sim = new PlaygroundSim({ cellsW: 32, cellsH: 4, rng: () => 0.5 });
     for (const [platform, count] of Object.entries(counts) as [ActivityPlatform, number][]) {
       for (let i = 0; i < count; i++) sim.receive(chat(platform, `${platform}${i}`, "hello"));
     }

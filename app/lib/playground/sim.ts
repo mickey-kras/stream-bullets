@@ -6,6 +6,7 @@ import {
   BUBBLE_MAX,
   BLOCK_FALL_TICKS,
   BUBBLE_TICKS,
+  CELL_LOGICAL,
   CHARACTERS_TEST_TICKS,
   CHECKPOINT_MAX_LENGTH,
   COMMAND_BUBBLE_TICKS,
@@ -879,6 +880,7 @@ export class PlaygroundSim implements SimHost {
       testEndsAt: this.testEndsAt,
       timeoutSeconds: this.timeoutSeconds,
       visibleMax: this.maxVisible,
+      cell: CELL_LOGICAL,
       cellsW: this.world.cellsW,
       cellsH: this.world.cellsH,
       ground: groundString(this.terrain),
@@ -908,10 +910,12 @@ export class PlaygroundSim implements SimHost {
     const result = checkpointSchema.safeParse(value);
     if (!result.success) throw new Error(`playground checkpoint invalid: ${issueText(result.error)}`);
     const data: Checkpoint = result.data;
+    // A checkpoint with larger cells has the same world in more cells of today.
+    const scale: number = data.cell / CELL_LOGICAL;
     const sim = new PlaygroundSim({
       ...options,
-      cellsW: data.cellsW,
-      cellsH: data.cellsH,
+      cellsW: data.cellsW * scale,
+      cellsH: data.cellsH * scale,
       timeoutSeconds: data.timeoutSeconds,
       visibleMax: data.visibleMax,
     });

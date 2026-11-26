@@ -87,9 +87,10 @@ async function callback(platform: string, query: Record<string, string>, user: s
   });
   expect(response.status).toBe(302);
   const location = new URL(response.headers.get("Location") ?? "", origin);
-  expect(location.pathname).toBe("/overlay-control");
+  expect(location.pathname).toBe("/tools");
+  expect(location.searchParams.get("view")).toBe("channels");
   expect(location.searchParams.get("channel")).toBe(platform);
-  expect([...location.searchParams.keys()].sort()).toEqual(["channel", "result"]);
+  expect([...location.searchParams.keys()].sort()).toEqual(["channel", "result", "view"]);
   return location.searchParams.get("result");
 }
 

@@ -176,9 +176,9 @@ export function securityHeaders(
 ): Response {
   const headers = new Headers(response.headers);
   headers.set("X-Content-Type-Options", "nosniff");
-  // Overlay URLs carry secret keys; suppress Referer.
+  // Overlay and dock URLs carry secret keys; suppress Referer.
   const pathname: string = new URL(request.url).pathname;
-  const overlayPage: boolean = /^\/@[^/]+\/overlay$/.test(pathname);
+  const overlayPage: boolean = /^\/@[^/]+\/(overlay|dock)$/.test(pathname);
   // The CSP applies per document, and in-app navigation reaches the composition preview without a new document.
   const emoteHosts: string = EMOTE_HOSTS.map((host: string): string => ` https://${host}`).join("");
   headers.set("Referrer-Policy", overlayPage ? "no-referrer" : "strict-origin-when-cross-origin");

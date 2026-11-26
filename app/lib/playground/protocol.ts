@@ -31,9 +31,9 @@ export const BUBBLE_MAX_UNITS = 320;
 export const FRAME_CHARS_MAX = 40;
 /** Bubbles in a frame. Equal to BUBBLE_MAX in constants.ts. */
 export const FRAME_BUBBLES_MAX = 4;
-/** Block cells in a frame: the largest world (16 x 16 cells) has 40 columns and 37 rows of 16 px. */
+/** Block cells in a frame: the largest world (32 x 32 cells of 20 px) has 40 columns and 37 rows of 16 px. */
 export const FRAME_BLOCKS_MAX = 1600;
-/** Ground tiles in a frame: the widest world (16 cells of 40 px) has 40 tiles of 16 px. */
+/** Ground tiles in a frame: the widest world (32 cells of 20 px) has 40 tiles of 16 px. */
 export const FRAME_TILES_MAX = 64;
 
 /**

@@ -68,7 +68,11 @@ const deniedSchema = z.object({
   id: z.string().uuid(),
   reason: z.enum(["sign-in", "closed", "pick"]),
 });
-const overlaySourcesSchema = z.object({ count, seenAt: count.nullable() });
+const sourceStateSchema = z.object({ count, seenAt: count.nullable() });
+// The numbers for the page, and for each output. A room from before the two outputs sends no `outputs`.
+const overlaySourcesSchema = sourceStateSchema.extend({
+  outputs: z.object({ horizontal: sourceStateSchema, vertical: sourceStateSchema }).optional(),
+});
 // The owner's sockets also get `sources` in this message. An older script ignores the key.
 const overlayMessageSchema = z.object({
   type: z.literal("overlay"),
@@ -78,6 +82,14 @@ const overlayMessageSchema = z.object({
 
 /** The OBS sources of a page, for its owner: how many are connected, and when one last connected or went away. */
 export type OverlaySources = z.infer<typeof overlaySourcesSchema>;
+/** The OBS sources of one output, or of the page. */
+export type SourceState = z.infer<typeof sourceStateSchema>;
+
+/** The OBS sources of one output. Without the numbers of each output, all sources are horizontal. */
+export function outputSources(sources: OverlaySources, output: "horizontal" | "vertical"): SourceState {
+  if (sources.outputs) return sources.outputs[output];
+  return output === "horizontal" ? { count: sources.count, seenAt: sources.seenAt } : { count: 0, seenAt: null };
+}
 
 export type LiveStatus = "connecting" | "live" | "reconnecting" | "offline";
 export type MashDenial = z.infer<typeof deniedSchema>["reason"];

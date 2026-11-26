@@ -150,10 +150,10 @@ The sides are `left`, `right`, `l`, and `r`. Capital letters make no difference.
 
 ## Terrain
 
-The world size comes from the characters cell. A cell is 40 × 40 world pixels, and a world pixel is 3 pixels of the design.
-The default cell of 16 × 2 cells gives a world of 640 × 80 world pixels.
-The vertical default of 9 × 3 cells gives 360 × 120. The minimum cell of 6 × 2 cells gives 240 × 80.
-A full horizontal frame of 16 × 9 cells gives 640 × 360.
+The world size comes from the characters cell. A cell is 20 × 20 world pixels, and a world pixel is 3 pixels of the design.
+A cell of 32 × 4 cells across the horizontal frame gives a world of 640 × 80 world pixels.
+A cell of 18 × 6 cells across the vertical frame gives 360 × 120. The minimum cell of 12 × 4 cells gives 240 × 80.
+A full horizontal frame of 32 × 18 cells gives 640 × 360.
 
 - The ground is 18 world pixels above the bottom of the world. More height gives more room to build.
 - The ground has tiles of 16 world pixels.
@@ -219,7 +219,7 @@ See the [capability matrix](channel-connections.md#capability-matrix).
 
 ## Controls
 
-The characters layer is one of the layers in step 2 (**Build your overlay**) on **Overlay control**.
+The characters layer is one of the layers in step 1 (**Build your overlay**) of the **Overlay** section of **Streamer tools**.
 To put it on the grid, select its chip in the palette. Its settings show when you select the layer:
 
 - **Show on stream** shows or hides the layer. The layer stays on the grid.
@@ -245,7 +245,8 @@ The characters test needs the saved characters layer on stream.
 A start of the test also resumes a paused playground, so the test shows at once.
 During a pause, the text beside the button and the start message tell you this.
 
-The layer is on stream when it has a cell in the selected orientation and **Show on stream** is on.
+The layer is on stream when it has a cell in an output and **Show on stream** is on.
+One playground serves the two outputs. See [Outputs](overlay-composition.md#outputs).
 The preview opens the owner's own characters socket while the characters layer is on stream.
 The editor reads the pause and the test only while the saved characters layer is on stream.
 
@@ -422,7 +423,7 @@ The art ships under the project license.
 
 ## OBS setup
 
-1. On **Overlay control**, select the **Characters** chip in the palette. The layer goes on the grid and on stream.
+1. In the **Overlay** section of **Streamer tools**, select the **Characters** chip in the palette. The layer goes on the grid and on stream.
    Drag the layer to its place and drag a handle to give it its size.
 2. Use the composition URL, or add a browser source with the characters layer URL:
 
@@ -430,7 +431,7 @@ The art ships under the project license.
    https://<origin>/@<handle>/overlay?key=<key>&layer=characters
    ```
 
-3. Give the source the size of the characters cell. **Overlay control** shows it under **Layer URLs**.
+3. Give the source the size of the characters cell. The **Overlay** section shows it under **Layer URLs**.
    A cell across the bottom of the horizontal frame is 1920 × 240. A cell of the full frame is 1920 × 1080.
 4. Keep the background of the source transparent.
 5. Select **Start test** to see the playground in OBS before you go live.

@@ -4,12 +4,15 @@ import { runSql } from "./fixtures";
 import {
   CHARACTERS_CELL,
   CHAT_CELL,
+  VERTICAL_KEY,
   chip,
   defaultLayers,
   layersSql,
+  noKeysSql,
   saved,
   settings,
   storedLayers,
+  verticalKeySql,
 } from "./grid-helpers";
 import { signedIn } from "./live-helpers";
 import { clientIp } from "./client-ips";
@@ -74,9 +77,9 @@ interface Frames {
   without: (id: number) => string;
 }
 
-/** Frames of the real simulation: `viewers` chatters on a 16 x 2 playground, a few seconds after they spoke. */
+/** Frames of the real simulation: `viewers` chatters on a 32 x 4 playground, a few seconds after they spoke. */
 function playground(seed: number, viewers: number): Frames {
-  const sim = new PlaygroundSim({ cellsW: 16, cellsH: 2, rng: mulberry32(seed) });
+  const sim = new PlaygroundSim({ cellsW: 32, cellsH: 4, rng: mulberry32(seed) });
   sim.resumeAfter(0);
   for (let user = 1; user <= viewers; user += 1) sim.receive(chat(user));
   for (let i = 0; i < 120; i += 1) sim.tick();
@@ -99,7 +102,7 @@ function playground(seed: number, viewers: number): Frames {
 
 /** Viewers who only talk (no commands, so nobody jumps): 4 of them speak, one at length. */
 function talkers(cellsW: number): string {
-  const sim = new PlaygroundSim({ cellsW, cellsH: 2, rng: mulberry32(9) });
+  const sim = new PlaygroundSim({ cellsW, cellsH: 4, rng: mulberry32(9) });
   sim.resumeAfter(0);
   for (let user = 1; user <= 10; user += 1) sim.receive(chat(user, "hello wasteland"));
   for (let i = 0; i < 150; i += 1) sim.tick();
@@ -120,7 +123,7 @@ function talkers(cellsW: number): string {
 }
 
 /**
- * A full frame of 40 visible characters on a `cellsW` x 2 playground. The speakers say `lines` (each with its own
+ * A full frame of 40 visible characters on a `cellsW` x 4 playground. The speakers say `lines` (each with its own
  * name), and stand `spread` logical px apart from x = `at`, so their bubbles stand off their heads.
  */
 function crowd(
@@ -128,7 +131,7 @@ function crowd(
   lines: readonly { name: string; text: string }[],
   options: { at: number; spread: number; test?: boolean },
 ): string {
-  const sim = new PlaygroundSim({ cellsW, cellsH: 2, rng: mulberry32(4) });
+  const sim = new PlaygroundSim({ cellsW, cellsH: 4, rng: mulberry32(4) });
   sim.resumeAfter(0);
   const say = (index: number, text: string): void =>
     sim.receive({ ...chat(41 + index, text), user: { id: `speaker-${index}`, displayName: lines[index].name } });
@@ -252,10 +255,10 @@ test("a full frame characters layer draws the builds of the viewers: blocks, sta
 }) => {
   await setLayers("characters-builds", {
     characters: { enabled: true },
-    cells: { horizontal: { characters: { c: 0, r: 0, w: 16, h: 9 } } },
+    cells: { horizontal: { characters: { c: 0, r: 0, w: 32, h: 18 } } },
   });
   // The real simulation in a full frame world: five viewers stand apart, and each runs its own commands.
-  const sim = new PlaygroundSim({ cellsW: 16, cellsH: 9, rng: mulberry32(5) });
+  const sim = new PlaygroundSim({ cellsW: 32, cellsH: 18, rng: mulberry32(5) });
   sim.resumeAfter(0);
   const scripts: [number, string[]][] = [
     [8, ["up", "up", "up", "stairs 3", "flag"]],
@@ -313,6 +316,47 @@ test("a full frame characters layer draws the builds of the viewers: blocks, sta
   await close(page);
 });
 
+test("the vertical output shows the one playground whole inside its cell, at the bottom", async ({ browser }) => {
+  // The playground has the size of the horizontal cell, 32 x 4 cells. The vertical cell is 18 x 6 cells.
+  const tall = { c: 0, r: 26, w: 18, h: 6 };
+  await runSql("characters-vertical", [
+    layersSql({
+      characters: { enabled: true },
+      cells: { horizontal: { characters: CHARACTERS_CELL }, vertical: { characters: tall } },
+    }),
+    verticalKeySql(),
+  ]);
+  try {
+    const frames: Frames = playground(4, 12);
+    // Half of 1080 x 1920.
+    const page = await obsPage(browser, OBS_IP, { width: 540, height: 960 });
+    await mockFeed(page, () => [SNAPSHOT, frames.full, ...frames.ticks]);
+    await page.goto(`/@feature_host/overlay?key=${VERTICAL_KEY}`);
+    const layer = page.locator('.ov-layer[data-layer="characters"]');
+    const canvas = layer.locator("canvas.characters-layer");
+    await expect.poll(() => painted(canvas)).toBeGreaterThan(500);
+    // The canvas has the size of the playground, not of the cell.
+    await expect(canvas).toHaveAttribute("width", "1920");
+    await expect(canvas).toHaveAttribute("height", "240");
+    // The layer is at its vertical cell, and the picture fits inside it on the ground of the cell.
+    const box = await layer.boundingBox();
+    if (!box) throw new Error("The characters layer has no box.");
+    const near = (actual: number, expected: number): void => expect(Math.abs(actual - expected)).toBeLessThanOrEqual(2);
+    near(box.x, 0);
+    near(box.y, (tall.r * 60) / 2);
+    near(box.width, 540);
+    near(box.height, (tall.h * 60) / 2);
+    const fit: string[] = await canvas.evaluate((element: Element): string[] => {
+      const style: CSSStyleDeclaration = getComputedStyle(element);
+      return [style.objectFit, style.objectPosition];
+    });
+    expect(fit).toEqual(["contain", "50% 100%"]);
+    await close(page);
+  } finally {
+    await runSql("characters-vertical-restore", [noKeysSql]);
+  }
+});
+
 test("a refresh draws the playground again from the new socket's full frame, never from tick frames alone", async ({
   browser,
 }) => {
@@ -355,7 +399,7 @@ test("the editor preview opens the owner's characters socket only while the char
   await page.route("**/api/overlay/characters", (route: Route) =>
     route.fulfill({ json: { paused: false, testEndsAt: null } }),
   );
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   const editor = page.locator("[data-composition-editor]");
   const frame = editor.getByRole("region", { name: "Composition preview" });
   await expect(frame).toHaveAttribute("data-scaled", "true");
@@ -421,7 +465,7 @@ test("the characters controls send their requests, keep focus and name every con
     if (body.op === "stopTest") reply = { ...reply, testEndsAt: null };
     await route.fulfill({ json: reply });
   });
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   const editor = page.locator("[data-composition-editor]");
   await expect.poll(() => sockets.length).toBe(1);
   // The page asks for the state once: pause and the test end are not in the layers.
@@ -546,7 +590,7 @@ test("the maximum characters field saves through the layers and stays after a re
   const owner = await signedIn(browser, "featureowner", CONTROLS_IP);
   const page = await newPage(owner);
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   const editor = page.locator("[data-composition-editor]");
   await chip(editor, "characters").click();
   const layer = settings(editor);
@@ -577,7 +621,7 @@ test("a test started in another tab shows here: frames with the test make the ed
 }) => {
   await setLayers("characters-other-tab", CHARACTERS_ON);
   const frames: Frames = playground(6, 3);
-  const testing = new PlaygroundSim({ cellsW: 16, cellsH: 2, rng: mulberry32(6) });
+  const testing = new PlaygroundSim({ cellsW: 32, cellsH: 4, rng: mulberry32(6) });
   testing.resumeAfter(0);
   testing.startTest();
   const owner = await signedIn(browser, "featureowner", OTHER_TAB_IP);
@@ -595,7 +639,7 @@ test("a test started in another tab shows here: frames with the test make the ed
     await held;
     await route.fulfill({ json: { paused: false, testEndsAt: Date.now() + 300_000 } });
   });
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   const editor = page.locator("[data-composition-editor]");
   const toggle = editor.locator("[data-test-toggle]");
   const status = editor.locator("[data-test-status]");
@@ -624,7 +668,7 @@ test("the test, pause and reset are unavailable while the saved characters layer
     bodies.push(route.request().postDataJSON());
     await route.fulfill({ json: { paused: false, testEndsAt: null } });
   });
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   const editor = page.locator("[data-composition-editor]");
   await chip(editor, "characters").click();
   const layer = settings(editor);
@@ -658,7 +702,7 @@ test("the controls show a calm note when the server has no playground", async ({
   await page.route("**/api/overlay/characters", (route: Route) =>
     route.fulfill({ status: 503, json: { error: "Characters are off on this server." } }),
   );
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   const editor = page.locator("[data-composition-editor]");
   await chip(editor, "characters").click();
   const layer = settings(editor);
@@ -713,7 +757,7 @@ test("bubbles over a crowd: leader lines to clustered speakers, room for the tes
     {
       name: "leader-lines-1920",
       width: 1920,
-      cellsW: 16,
+      cellsW: 32,
       lines: [1, 2, 3, 4].map((n: number) => ({
         name: `Scav ${n}`,
         text: n === 2 ? long : `line ${n} from the crowd`,
@@ -725,7 +769,7 @@ test("bubbles over a crowd: leader lines to clustered speakers, room for the tes
     {
       name: "badge-band-720",
       width: 720,
-      cellsW: 6,
+      cellsW: 12,
       lines: [{ name: "Corner scav", text: long }],
       at: 228,
       spread: 0,
@@ -734,7 +778,7 @@ test("bubbles over a crowd: leader lines to clustered speakers, room for the tes
     {
       name: "rtl-1920",
       width: 1920,
-      cellsW: 16,
+      cellsW: 32,
       lines: [
         { name: "דנה!", text: "שלום לכולם, מה שלומכם היום?" },
         { name: "«سارة»", text: "مرحبا يا أصدقاء، كيف حالكم؟" },
@@ -748,7 +792,7 @@ test("bubbles over a crowd: leader lines to clustered speakers, room for the tes
   for (const scene of cases) {
     await setLayers(`characters-${scene.name}`, {
       characters: { enabled: true },
-      cells: { horizontal: { characters: { c: 0, r: 7, w: scene.cellsW, h: 2 } } },
+      cells: { horizontal: { characters: { c: 0, r: 14, w: scene.cellsW, h: 4 } } },
     });
     const page = await obsPage(browser, CROWD_IP, { width: scene.width, height: 240 });
     const errors: string[] = [];
@@ -779,13 +823,13 @@ test("bubbles over a crowd: leader lines to clustered speakers, room for the tes
 });
 
 for (const [width, cellsW] of [
-  [1920, 16],
-  [720, 6],
+  [1920, 32],
+  [720, 12],
 ] as const) {
   test(`bubbles carry the platform glyph and name of their speakers at ${width} x 240`, async ({ browser }) => {
     await setLayers(`characters-bubbles-${width}`, {
       characters: { enabled: true },
-      cells: { horizontal: { characters: { c: 0, r: 7, w: cellsW, h: 2 } } },
+      cells: { horizontal: { characters: { c: 0, r: 14, w: cellsW, h: 4 } } },
     });
     const page = await obsPage(browser, BUBBLE_IP, { width, height: 240 });
     const errors: string[] = [];

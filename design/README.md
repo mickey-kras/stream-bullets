@@ -52,7 +52,7 @@ Streamers show polls and their Twitch, YouTube, and Kick chat in an OBS overlay.
 
 The product has two surfaces:
 
-- The website. It works from a 320px phone to a desktop. It has the landing page, the streamer directory, the streamer page, the settings, and Overlay control. The streamer page has the tabs Topics, Polls, Schedule, About, and Community.
+- The website. It works from a 320px phone to a desktop. It has the landing page, the streamer directory, the streamer page, the settings, and Streamer tools. The streamer page has the tabs Topics, Polls, Schedule, About, and Community.
 - The OBS overlay. It is a transparent 1920×1080 or 1080×1920 browser source. It shows the content on air, the merged chat, and the interactive characters. The content on air is a poll, a topic spotlight, up next, a message, or a community card.
 
 The look is a dark broadcast station: deep teal, cream text, one gold accent, and sharp corners.

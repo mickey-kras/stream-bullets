@@ -1,7 +1,8 @@
 # Live room capacity
 
 Per streamer: 200 connections, including 100 anonymous connections.
-Each client address permits ten viewer connections. Owners and valid-key overlays share ten priority seats.
+Each client address permits ten viewer connections. Owners, valid-key overlays, and the OBS dock share ten priority seats.
+An open OBS dock uses one priority seat. See [OBS dock](streamer-tools.md#obs-dock).
 These are application limits, not measured Cloudflare limits.
 
 ## Reproduce locally

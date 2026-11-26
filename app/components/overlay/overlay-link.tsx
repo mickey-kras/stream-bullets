@@ -1,14 +1,23 @@
 import { useId, useState, type ReactNode } from "react";
 import { intlLocale, t, tn, type MessageId } from "../../i18n";
 import { relativeAge } from "../../lib/channel-health";
-import { copyText } from "../../lib/clipboard";
-import { frameSize, layerPixels, layerUrl, type OverlayLayer, type OverlayLayers } from "../../lib/overlay-layers";
+import {
+  forOutput,
+  frameSize,
+  layerPixels,
+  layerUrl,
+  ORIENTATIONS,
+  type Orientation,
+  type OverlayLayer,
+  type OverlayLayers,
+} from "../../lib/overlay-layers";
 import { errorMessage, postJson } from "../api";
-import type { OverlaySources } from "../live";
+import { outputSources, type OverlaySources, type SourceState } from "../live";
 import { Dialog, DialogActions } from "../ui/dialog";
 import { Icon } from "../ui/icon";
-import { IconButton } from "../ui/icon-button";
 import { useToast } from "../ui/toast";
+import { CopyField } from "./copy-field";
+import { DockLink } from "./dock-link";
 import { CHARACTERS_READY } from "./overlay-composition";
 
 // Per-layer OBS sources. Characters arrive with the playground (#664): until then the row only says so.
@@ -18,65 +27,193 @@ const LAYER_LINKS: readonly (readonly [OverlayLayer, MessageId])[] = [
   ["characters", "overlay.layer.characters"],
 ];
 
-function CopyField({
-  value,
-  label,
-  copyLabel,
-  layer,
-  describedBy,
-}: Readonly<{
-  value: string;
-  label: string;
-  copyLabel: string;
-  layer: OverlayLayer | null;
-  /** The id of a text that describes the field, like the source size of a layer URL. */
-  describedBy?: string;
-}>): ReactNode {
-  const toast = useToast();
-  async function copy(): Promise<void> {
-    toast((await copyText(value)) ? t("overlay.copied") : t("contact.copyFallback"));
-  }
-  return (
-    <div className="contact-address">
-      <input
-        className="contact-email ov-url-field"
-        type="text"
-        readOnly
-        value={value}
-        aria-label={label}
-        aria-describedby={describedBy}
-        spellCheck={false}
-        autoComplete="off"
-        data-ov-url={layer === null ? "" : undefined}
-        data-ov-layer-url={layer ?? undefined}
-      />
-      <IconButton label={copyLabel} icon="copy" iconSize={18} onClick={() => void copy()} />
-    </div>
-  );
-}
+const OUTPUT_NAMES: Readonly<Record<Orientation, MessageId>> = {
+  horizontal: "overlay.output.horizontal",
+  vertical: "overlay.output.vertical",
+};
 
-/** The sentence about the OBS sources of the page at the time `now`. */
-export function sourcesText(sources: OverlaySources, now: number): string {
+/** The sentence about the OBS sources of the page or of one output at the time `now`. */
+export function sourcesText(sources: SourceState, now: number): string {
   if (sources.count > 0) return tn("overlay.sources.connected", sources.count);
   if (sources.seenAt === null) return t("overlay.sources.never");
   const age: string | null = relativeAge(sources.seenAt, now, intlLocale());
   return age === null ? t("overlay.sources.goneNow") : t("overlay.sources.gone", { age });
 }
 
-// The private URL shows after its owner makes it or asks to see it again. Confirm regeneration because it
-// revokes the old link.
+/**
+ * The private links for OBS: one for the horizontal output and one for the vertical output. The two outputs are on
+ * stream at the same time, and a streamer can use one link or the two.
+ */
 export function OverlayLink({
   hasKey,
   layers,
   sources,
   now,
+  busy,
+  onTwitchOnly,
+  hasDock,
 }: Readonly<{
-  hasKey: boolean;
-  /** The newest saved or live layers, for the source sizes. */
+  /** Which outputs have a link. */
+  hasKey: Readonly<Record<Orientation, boolean>>;
+  /** True when the page has a link for the OBS dock. */
+  hasDock: boolean;
+  /** The newest saved or live layers, for the source sizes and the Twitch switches. */
   layers: OverlayLayers;
   /** The connected OBS sources. Null while the live room did not tell. */
   sources: OverlaySources | null;
   /** The server time, for the age of the last connection. */
+  now: number;
+  /** True while a change saves. */
+  busy: boolean;
+  /** Saves whether one output shows chat and characters from Twitch only. */
+  onTwitchOnly: (output: Orientation, on: boolean) => void;
+}>): ReactNode {
+  return (
+    <div className="ov-url">
+      <p>
+        <strong>{t("overlay.url")}</strong>
+      </p>
+      <p className="muted">{t("overlay.keyNone")}</p>
+      {ORIENTATIONS.map((output: Orientation) => (
+        <OutputLink
+          key={output}
+          output={output}
+          hasKey={hasKey[output]}
+          layers={forOutput(layers, output)}
+          sources={sources && outputSources(sources, output)}
+          now={now}
+        />
+      ))}
+      <ObsGuide />
+      <DockLink hasKey={hasDock} />
+      <TwitchOnly layers={layers} busy={busy} onChange={onTwitchOnly} />
+    </div>
+  );
+}
+
+/** One group of the OBS guide: its title and its steps in sequence. */
+interface GuideGroup {
+  name: "overlay" | "vertical" | "platforms";
+  title: MessageId;
+  steps: readonly string[];
+}
+
+/** The groups of the OBS guide with their texts. docs/obs-setup.md has the same steps. */
+function guideGroups(): GuideGroup[] {
+  const wide = frameSize("horizontal");
+  const tall = frameSize("vertical");
+  return [
+    {
+      name: "overlay",
+      title: "overlay.guide.overlay",
+      steps: [
+        t("overlay.guide.overlay.1"),
+        t("overlay.guide.overlay.2"),
+        t("overlay.guide.overlay.3", wide),
+        t("overlay.guide.overlay.4"),
+        t("overlay.guide.overlay.5"),
+        t("overlay.guide.overlay.6", { test: t("overlay.test.start") }),
+      ],
+    },
+    {
+      name: "vertical",
+      title: "overlay.guide.vertical",
+      steps: [
+        t("overlay.guide.vertical.1"),
+        t("overlay.guide.vertical.2"),
+        t("overlay.guide.vertical.3", tall),
+        t("overlay.guide.vertical.4"),
+      ],
+    },
+    {
+      name: "platforms",
+      title: "overlay.guide.platforms",
+      steps: [
+        t("overlay.guide.platforms.1"),
+        t("overlay.guide.platforms.2"),
+        t("overlay.guide.platforms.3"),
+        t("overlay.guide.platforms.4", { channels: t("tools.tab.channels") }),
+      ],
+    },
+  ];
+}
+
+/**
+ * The closed guide for a streamer who never used OBS: add the overlay, add the vertical output, and choose the
+ * platforms of each output. The plugin names are examples. A streamer who knows OBS does not open it.
+ */
+function ObsGuide(): ReactNode {
+  return (
+    <details className="ch-details ov-url-guide" data-ov-guide>
+      <summary>{t("overlay.guide.title")}</summary>
+      {guideGroups().map((group: GuideGroup) => (
+        <section key={group.name} data-ov-guide-group={group.name}>
+          <p>
+            <strong>{t(group.title)}</strong>
+          </p>
+          <ol>
+            {group.steps.map((step: string) => (
+              <li key={step}>{step}</li>
+            ))}
+          </ol>
+        </section>
+      ))}
+    </details>
+  );
+}
+
+const TWITCH_ONLY: Readonly<Record<Orientation, MessageId>> = {
+  horizontal: "overlay.twitch.horizontal",
+  vertical: "overlay.twitch.vertical",
+};
+
+/**
+ * The closed section for a streamer who sends the stream to Twitch and to other platforms: one switch for each
+ * output. With the switch on, the output shows chat and characters from Twitch only. The default is the merged chat.
+ */
+function TwitchOnly({
+  layers,
+  busy,
+  onChange,
+}: Readonly<{
+  layers: OverlayLayers;
+  busy: boolean;
+  onChange: (output: Orientation, on: boolean) => void;
+}>): ReactNode {
+  return (
+    <details className="ch-details ov-url-twitch" data-ov-twitch>
+      <summary>{t("overlay.twitch.title")}</summary>
+      <p className="muted">{t("overlay.twitch.body")}</p>
+      {ORIENTATIONS.map((output: Orientation) => (
+        <label className="choice" key={output}>
+          <input
+            type="checkbox"
+            checked={layers.twitchOnly[output]}
+            disabled={busy}
+            onChange={(event) => onChange(output, event.currentTarget.checked)}
+            data-ov-twitch-only={output}
+          />
+          <span>{t(TWITCH_ONLY[output])}</span>
+        </label>
+      ))}
+    </details>
+  );
+}
+
+// The private URL of one output shows after its owner makes it or asks to see it again. Confirm regeneration
+// because it revokes the old link of that output. The link of the other output stays.
+function OutputLink({
+  output,
+  hasKey,
+  layers,
+  sources,
+  now,
+}: Readonly<{
+  output: Orientation;
+  hasKey: boolean;
+  /** The layers as this output shows them. */
+  layers: OverlayLayers;
+  sources: SourceState | null;
   now: number;
 }>): ReactNode {
   const toast = useToast();
@@ -91,7 +228,7 @@ export function OverlayLink({
   async function regenerate(): Promise<void> {
     setBusy(true);
     try {
-      const result = await postJson<{ url: string }>("/api/overlay/key", {});
+      const result = await postJson<{ url: string }>("/api/overlay/key", { output });
       setUrl(result.url);
       setMade(true);
       setKept(true);
@@ -107,7 +244,7 @@ export function OverlayLink({
   async function show(): Promise<void> {
     setBusy(true);
     try {
-      const result = await postJson<{ url: string | null }>("/api/overlay/key/show", {});
+      const result = await postJson<{ url: string | null }>("/api/overlay/key/show", { output });
       if (result.url === null) setKept(false);
       else setUrl(result.url);
     } catch (error: unknown) {
@@ -117,18 +254,25 @@ export function OverlayLink({
     }
   }
 
-  let hint: string = t("overlay.keyNone");
+  let hint: string | null = null;
   if (url) hint = t("overlay.keyOnce");
   else if (made) hint = t(kept ? "overlay.keyHidden" : "overlay.keyNotKept");
+  const name: string = t(OUTPUT_NAMES[output]);
+  const size = frameSize(output);
   return (
-    <div className="ov-url">
-      <p>
-        <strong>{t("overlay.url")}</strong>
+    <section className="ov-url-output" aria-labelledby={`${sizeId}-name`} data-ov-output={output}>
+      <p id={`${sizeId}-name`}>
+        <strong>{name}</strong>
       </p>
       {url && (
         <>
           <p className="muted ov-url-caption">{t("overlay.layer.composition")}</p>
-          <CopyField value={url} label={t("overlay.url")} copyLabel={t("overlay.copyUrl")} layer={null} />
+          <CopyField
+            value={url}
+            label={`${t("overlay.url")}: ${name}`}
+            copyLabel={`${t("overlay.copyUrl")}: ${name}`}
+            layer={null}
+          />
         </>
       )}
       {made && sources && (
@@ -137,8 +281,8 @@ export function OverlayLink({
           <span>{sourcesText(sources, now)}</span>
         </p>
       )}
-      <p className="muted">{hint}</p>
-      <p className="muted">{t("overlay.obsHelp")}</p>
+      {hint && <p className="muted">{hint}</p>}
+      <p className="muted">{t("overlay.obsHelp", size)}</p>
       {url ? (
         <div className="ov-url-layers" data-ov-layer-urls>
           <p>
@@ -147,22 +291,21 @@ export function OverlayLink({
           <p className="muted">{t("overlay.layerUrlsHelp")}</p>
           {LAYER_LINKS.map(([layer, label]) => {
             if (layer === "characters" && !CHARACTERS_READY) return null;
-            // The size in the selected orientation: the frame for the content layers, else the cell of the layer.
-            const size: { w: number; h: number } | null =
-              layer === "content" ? frameSize(layers.orientation) : layerPixels(layers, layer);
-            const sizeLine: string | undefined = size ? `${sizeId}-${layer}` : undefined;
+            // The size in this output: the frame for the content layers, else the cell of the layer.
+            const layerSize: { w: number; h: number } | null = layer === "content" ? size : layerPixels(layers, layer);
+            const sizeLine: string | undefined = layerSize ? `${sizeId}-${layer}` : undefined;
             return (
               <div key={layer} className="ov-url-layer" data-ov-layer-row={layer}>
                 <p className="muted ov-url-caption">{t(label)}</p>
-                {size && (
+                {layerSize && (
                   <p className="muted ov-url-size" id={sizeLine} data-ov-layer-size={layer}>
-                    {t("overlay.layer.size", { w: size.w, h: size.h })}
+                    {t("overlay.layer.size", { w: layerSize.w, h: layerSize.h })}
                   </p>
                 )}
                 <CopyField
                   value={layerUrl(url, layer)}
-                  label={t(label)}
-                  copyLabel={t("overlay.copyLayerUrl", { layer: t(label) })}
+                  label={`${t(label)}: ${name}`}
+                  copyLabel={`${t("overlay.copyLayerUrl", { layer: t(label) })}: ${name}`}
                   layer={layer}
                   describedBy={sizeLine}
                 />
@@ -187,7 +330,7 @@ export function OverlayLink({
         open={confirming}
         onOpenChange={setConfirming}
         title={t("overlay.keyConfirmTitle")}
-        description={t("overlay.keyConfirmBody")}
+        description={`${t("overlay.keyConfirmBody")} ${t("overlay.keyConfirmOther")}`}
         actions={
           <DialogActions>
             <button type="button" className="danger" disabled={busy} onClick={() => void regenerate()}>
@@ -196,6 +339,6 @@ export function OverlayLink({
           </DialogActions>
         }
       />
-    </div>
+    </section>
   );
 }

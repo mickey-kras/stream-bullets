@@ -3,7 +3,7 @@ import { CHANNEL_PLATFORMS } from "../../../db/enums";
 import type { ActivityPlatform } from "../activity";
 
 import { CHARACTERS_MAX, CHARACTERS_TIMEOUT } from "../overlay-layers";
-import { REGISTRY_MAX, RESTRICTED_MAX, VISIBLE_MAX, WALK_SPEED } from "./constants";
+import { CELL_LOGICAL, REGISTRY_MAX, RESTRICTED_MAX, VISIBLE_MAX, WALK_SPEED } from "./constants";
 import { newParticipant, type Participant } from "./crowd";
 import { FRAME_BLOCKS_MAX, FRAME_TILES_MAX, NAME_MAX_UNITS, PLAYGROUND_VERSION } from "./protocol";
 import { type Flag, restoreBlocks, type Terrain, type World } from "./terrain";
@@ -55,6 +55,8 @@ export interface Checkpoint {
   testEndsAt: number | null;
   timeoutSeconds: number;
   visibleMax: number;
+  /** The logical px of one cell of `cellsW` and `cellsH`. */
+  cell: number;
   cellsW: number;
   cellsH: number;
   ground: string;
@@ -123,6 +125,8 @@ export function fromRecord(record: ParticipantRecord, clock: number, walkSpread:
 }
 
 const tick = z.number().int().min(-1e12).max(1e12);
+/** The logical px of a cell of 120 design px: the cell of a checkpoint without `cell`. */
+const COARSE_CELL_LOGICAL = 40;
 const finite = z.number().finite();
 const userId = z.string().min(1).max(128);
 const cell = z.number().int().min(0).max(64);
@@ -142,6 +146,8 @@ export const checkpointSchema: z.ZodType<Checkpoint> = z
     timeoutSeconds: z.number().int().min(CHARACTERS_TIMEOUT.min).max(CHARACTERS_TIMEOUT.max),
     // A checkpoint from before this setting has no value: it takes the default.
     visibleMax: z.number().int().min(CHARACTERS_MAX.min).max(CHARACTERS_MAX.max).default(CHARACTERS_MAX.default),
+    // A checkpoint from before the cells of 60 design px has no value: its cells are twice as large.
+    cell: z.union([z.literal(CELL_LOGICAL), z.literal(COARSE_CELL_LOGICAL)]).default(COARSE_CELL_LOGICAL),
     cellsW: z.number().int(),
     cellsH: z.number().int(),
     ground: z.string().regex(/^[g0-3]*$/),

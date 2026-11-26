@@ -2,6 +2,7 @@ import { useContext, useId, useState, type FormEvent, type ReactNode } from "rea
 import { t, tAround, type MessageId } from "../../i18n";
 import { withEnabled, withItem } from "../../lib/layer-geometry";
 import { MASH_NAME } from "../../lib/mash";
+import { channelsSectionPath } from "../../lib/shell";
 import {
   LAYER_BACKGROUND,
   layerEnabled,
@@ -21,7 +22,8 @@ import type { EditTiming } from "./use-layer-draft";
 // Must match overlay_state_message_check.
 export const OVERLAY_MESSAGE_MAX = 120;
 
-const STYLES: readonly [OverlayMessageStyle, MessageId][] = [
+/** The styles of the message banner and their names. */
+export const MESSAGE_STYLES: readonly [OverlayMessageStyle, MessageId][] = [
   ["info", "overlay.style.info"],
   ["hype", "overlay.style.hype"],
 ];
@@ -167,7 +169,7 @@ function MessageEditor({ state, busy, run }: Readonly<Pick<SettingsProps, "state
       <fieldset className="field ov-seg-field">
         <legend className="field-label">{t("overlay.messageStyle")}</legend>
         <div className="seg">
-          {STYLES.map(([style, id]) => (
+          {MESSAGE_STYLES.map(([style, id]) => (
             <button
               key={style}
               type="button"
@@ -201,7 +203,7 @@ function ChatSettings({ layers, change }: Readonly<Pick<SettingsProps, "layers" 
           <Icon name="warning" size={16} />
           <span>
             {downBefore}
-            <a className="text-link" href="#channels-title">
+            <a className="text-link" href={channelsSectionPath}>
               {t("overlay.comp.chatDownLink")}
             </a>
             {downAfter}
@@ -210,7 +212,7 @@ function ChatSettings({ layers, change }: Readonly<Pick<SettingsProps, "layers" 
       )}
       <p className="muted ov-comp-note" data-comp-chat-source>
         {sourceBefore}
-        <a className="text-link" href="#channels-title">
+        <a className="text-link" href={channelsSectionPath}>
           {t("overlay.comp.chatSourceLink")}
         </a>
         {sourceAfter}
@@ -270,13 +272,13 @@ function BackgroundRange({
   );
 }
 
-/** The background slider of a layer. The characters layer has none. */
+/** The background slider of a layer. The characters layer and the camera frame have none. */
 function LayerBackground({
   layer,
   layers,
   change,
 }: Readonly<{ layer: GridLayer; layers: OverlayLayers; change: ChangeLayers }>): ReactNode {
-  if (layer === "characters") return null;
+  if (layer === "characters" || layer === "camera") return null;
   if (layer === "chat")
     return (
       <BackgroundRange
@@ -307,7 +309,7 @@ function QrSetting({
   change,
 }: Readonly<{ layer: GridLayer; layers: OverlayLayers; change: ChangeLayers }>): ReactNode {
   const hintId: string = useId();
-  if (layer === "chat" || layer === "characters" || layer === "message") return null;
+  if (layer === "chat" || layer === "characters" || layer === "message" || layer === "camera") return null;
   return (
     <>
       <label className="choice">
@@ -403,7 +405,8 @@ export function LayerProperties({
           }
         />
       )}
-      {layer !== "chat" && layer !== "characters" && <ContentSettings layer={layer} {...props} />}
+      {layer === "camera" && <p className="muted ov-comp-note">{t("overlay.camera.note")}</p>}
+      {layer !== "chat" && layer !== "characters" && layer !== "camera" && <ContentSettings layer={layer} {...props} />}
       <QrSetting layer={layer} layers={layers} change={change} />
       <LayerBackground layer={layer} layers={layers} change={change} />
       <button type="button" onClick={() => onRemove(layer)} data-props-remove>
