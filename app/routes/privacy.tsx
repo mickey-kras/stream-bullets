@@ -145,8 +145,13 @@ const sections = (legal: ReturnType<typeof loader>): readonly LegalSection[] => 
         <p>
           The YouTube connection uses YouTube API Services. By connecting a YouTube channel, you agree to the{" "}
           <a href="https://www.youtube.com/t/terms">YouTube Terms of Service</a>. Google’s handling of your data follows
-          the <a href="https://policies.google.com/privacy">Google Privacy Policy</a>. You can disconnect the channel in
-          Streamer tools at any time. You can also remove StreamBullets’ access in your{" "}
+          the <a href="https://policies.google.com/privacy">Google Privacy Policy</a>. StreamBullets’ use and transfer
+          to any other app of information received from Google APIs will adhere to the{" "}
+          <a href="https://developers.google.com/terms/api-services-user-data-policy">
+            Google API Services User Data Policy
+          </a>
+          , including the Limited Use requirements. You can disconnect the channel in Streamer tools at any time. You
+          can also remove StreamBullets’ access in your{" "}
           <a href="https://security.google.com/settings/security/permissions">Google security settings</a>.
         </p>
         <p>

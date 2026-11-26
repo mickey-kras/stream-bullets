@@ -656,7 +656,7 @@
   "landing.getStarted": "はじめる",
   "landing.joinStreamer": "配信者として参加",
   "landing.station": "インタラクティブ放送局",
-  "landing.streamerBenefits": "視聴者から話題を集め、投票を実施できます。Google または Twitch でのログインにはプロフィールとメールアドレスを使用します。Twitch、YouTube、Kick を連携すると、OBS にライブチャットを表示できます。Twitch と YouTube の配信予定は自分のページにも表示できます。",
+  "landing.streamerBenefits": "StreamBullets で話題を集め、投票を実施できます。Google や Twitch でのログインにはプロフィールとメールアドレスを使用します。Twitch、YouTube、Kick を連携して OBS にチャットや配信予定を表示できます。",
   "landing.suggest": "トピックを提案",
   "landing.tagline": "トピックを提案。投票。配信をいっしょにつくろう。",
   "landing.title1": "あなたの声を、",

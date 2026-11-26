@@ -87,7 +87,16 @@ export default function Home(): ReactNode {
               <span className="title-line">{t("landing.title2")}</span>
             </h1>
             <p>{t("landing.tagline")}</p>
-            <p>{t("landing.streamerBenefits")}</p>
+            <p>
+              {t("landing.streamerBenefits")}{" "}
+              <Link className="text-link" to={paths.privacy}>
+                {t("legal.privacyPolicy")}
+              </Link>
+              {" · "}
+              <Link className="text-link" to={paths.terms}>
+                {t("legal.terms")}
+              </Link>
+            </p>
             <div className="landing-actions">
               {shell.ownStreamer ? (
                 <>
