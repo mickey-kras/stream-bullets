@@ -63009,7 +63009,19 @@
       "relation": "calls",
       "source": "tests_helpers_activity_harness_activityharness_addpage",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L198",
+      "source_location": "L192",
+      "target": "app_server_channel_providers_server_requiredsubscriptions",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_helpers_activity_harness_activityharness_addpage",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L210",
       "target": "app_server_channel_tokens_server_tokenstatement",
       "weight": 1.0
     },
@@ -63021,7 +63033,7 @@
       "relation": "calls",
       "source": "tests_helpers_activity_harness_activityharness_chat",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L283",
+      "source_location": "L295",
       "target": "tests_helpers_activity_harness_activityharness_notify",
       "weight": 1.0
     },
@@ -63033,7 +63045,7 @@
       "relation": "calls",
       "source": "tests_helpers_activity_harness_activityharness_dispose",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L143",
+      "source_location": "L144",
       "target": "tests_helpers_activity_harness_activityharness_closeclients",
       "weight": 1.0
     },
@@ -63045,7 +63057,7 @@
       "relation": "calls",
       "source": "tests_helpers_activity_harness_activityharness_listen",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L226",
+      "source_location": "L238",
       "target": "tests_helpers_activity_harness_activityharness_receive",
       "weight": 1.0
     },
@@ -63057,7 +63069,7 @@
       "relation": "calls",
       "source": "tests_helpers_activity_harness_activityharness_remove",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L302",
+      "source_location": "L314",
       "target": "tests_helpers_activity_harness_activityharness_notify",
       "weight": 1.0
     },
@@ -63069,7 +63081,7 @@
       "relation": "calls",
       "source": "tests_helpers_activity_harness_activityharness_report",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L312",
+      "source_location": "L324",
       "target": "tests_helpers_activity_harness_activityharness_json",
       "weight": 1.0
     },
@@ -63081,7 +63093,7 @@
       "relation": "calls",
       "source": "tests_helpers_activity_harness_activityharness_start",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L111",
+      "source_location": "L112",
       "target": "tests_helpers_channels_fakeproviders_655757955470",
       "weight": 1.0
     },
@@ -63093,7 +63105,7 @@
       "relation": "calls",
       "source": "tests_helpers_activity_harness_activityharness_start",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L129",
+      "source_location": "L130",
       "target": "tests_helpers_activity_harness_provideranswer",
       "weight": 1.0
     },
@@ -63105,7 +63117,7 @@
       "relation": "calls",
       "source": "tests_helpers_activity_harness_activityharness_start",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L133",
+      "source_location": "L134",
       "target": "tests_helpers_database_applymigrations",
       "weight": 1.0
     },
@@ -63117,7 +63129,7 @@
       "relation": "calls",
       "source": "tests_helpers_activity_harness_activityharness_start",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L133",
+      "source_location": "L134",
       "target": "tests_helpers_database_migrationfiles",
       "weight": 1.0
     },
@@ -63129,7 +63141,7 @@
       "relation": "calls",
       "source": "tests_helpers_activity_harness_activityharness_start",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L134",
+      "source_location": "L135",
       "target": "tests_helpers_activity_harness_activityharness",
       "weight": 1.0
     },
@@ -63141,7 +63153,7 @@
       "relation": "calls",
       "source": "tests_helpers_activity_harness_activityharness_step",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L321",
+      "source_location": "L333",
       "target": "tests_helpers_activity_harness_activityharness_json",
       "weight": 1.0
     },
@@ -63153,7 +63165,7 @@
       "relation": "calls",
       "source": "tests_helpers_activity_harness_activityharness_workerreport",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L316",
+      "source_location": "L328",
       "target": "tests_helpers_activity_harness_activityharness_json",
       "weight": 1.0
     },
@@ -71880,7 +71892,7 @@
       "relation": "references",
       "source": "tests_helpers_activity_harness_snapshot",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L49",
+      "source_location": "L50",
       "target": "app_lib_activity_activitychat",
       "weight": 1.0
     },
@@ -72504,7 +72516,7 @@
       "relation": "references",
       "source": "tests_helpers_activity_harness_activityharness_report",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L311",
+      "source_location": "L323",
       "target": "tests_helpers_activity_worker_ingestreport",
       "weight": 1.0
     },
@@ -72516,7 +72528,7 @@
       "relation": "references",
       "source": "tests_helpers_activity_harness_activityharness_step",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L320",
+      "source_location": "L332",
       "target": "tests_helpers_activity_worker_stepreport",
       "weight": 1.0
     },
@@ -72528,7 +72540,7 @@
       "relation": "references",
       "source": "tests_helpers_activity_harness_activityharness_workerreport",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L315",
+      "source_location": "L327",
       "target": "tests_helpers_activity_worker_workerreport",
       "weight": 1.0
     },
@@ -128682,7 +128694,7 @@
       "source": "tests_helpers_activity_harness",
       "source_file": "tests/helpers/activity-harness.ts",
       "source_location": "L10",
-      "target": "tests_helpers_database_applymigrations",
+      "target": "tests_helpers_channels_fakeproviders",
       "weight": 1.0
     },
     {
@@ -128694,6 +128706,42 @@
       "source": "tests_helpers_activity_harness",
       "source_file": "tests/helpers/activity-harness.ts",
       "source_location": "L10",
+      "target": "tests_helpers_channels_fakeproviders_655757955470",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L10",
+      "target": "tests_helpers_channels_providerfetch",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L11",
+      "target": "tests_helpers_database_applymigrations",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L11",
       "target": "tests_helpers_database_migrationfiles",
       "weight": 1.0
     },
@@ -128730,6 +128778,18 @@
       "source": "tests_helpers_activity_harness",
       "source_file": "tests/helpers/activity-harness.ts",
       "source_location": "L7",
+      "target": "app_server_channel_providers_server_requiredsubscriptions",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L8",
       "target": "app_server_channel_tokens_server_tokenstatement",
       "weight": 1.0
     },
@@ -128741,7 +128801,7 @@
       "relation": "imports",
       "source": "tests_helpers_activity_harness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L8",
+      "source_location": "L9",
       "target": "tests_helpers_activity_worker_ingestreport",
       "weight": 1.0
     },
@@ -128753,7 +128813,7 @@
       "relation": "imports",
       "source": "tests_helpers_activity_harness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L8",
+      "source_location": "L9",
       "target": "tests_helpers_activity_worker_stepreport",
       "weight": 1.0
     },
@@ -128765,44 +128825,8 @@
       "relation": "imports",
       "source": "tests_helpers_activity_harness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L8",
+      "source_location": "L9",
       "target": "tests_helpers_activity_worker_workerreport",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_helpers_activity_harness",
-      "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L9",
-      "target": "tests_helpers_channels_fakeproviders",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_helpers_activity_harness",
-      "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L9",
-      "target": "tests_helpers_channels_fakeproviders_655757955470",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_helpers_activity_harness",
-      "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L9",
-      "target": "tests_helpers_channels_providerfetch",
       "weight": 1.0
     },
     {
@@ -172449,6 +172473,18 @@
       "source": "tests_helpers_activity_harness",
       "source_file": "tests/helpers/activity-harness.ts",
       "source_location": "L10",
+      "target": "tests_helpers_channels",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L11",
       "target": "tests_helpers_database",
       "weight": 1.0
     },
@@ -172523,7 +172559,7 @@
       "source": "tests_helpers_activity_harness",
       "source_file": "tests/helpers/activity-harness.ts",
       "source_location": "L7",
-      "target": "app_server_channel_tokens_server",
+      "target": "app_server_channel_providers_server",
       "weight": 1.0
     },
     {
@@ -172535,8 +172571,7 @@
       "source": "tests_helpers_activity_harness",
       "source_file": "tests/helpers/activity-harness.ts",
       "source_location": "L8",
-      "target": "tests_helpers_activity_worker",
-      "type_only": true,
+      "target": "app_server_channel_tokens_server",
       "weight": 1.0
     },
     {
@@ -172548,7 +172583,8 @@
       "source": "tests_helpers_activity_harness",
       "source_file": "tests/helpers/activity-harness.ts",
       "source_location": "L9",
-      "target": "tests_helpers_channels",
+      "target": "tests_helpers_activity_worker",
+      "type_only": true,
       "weight": 1.0
     },
     {
@@ -180712,7 +180748,7 @@
       "relation": "references",
       "source": "tests_helpers_activity_harness_activityharness_constructor",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L93",
+      "source_location": "L94",
       "target": "tests_helpers_channels_fakeproviders",
       "weight": 1.0
     },
@@ -227741,7 +227777,7 @@
       "relation": "contains",
       "source": "tests_helpers_activity_harness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L18",
+      "source_location": "L19",
       "target": "tests_helpers_activity_harness_socket",
       "weight": 1.0
     },
@@ -227752,7 +227788,7 @@
       "relation": "contains",
       "source": "tests_helpers_activity_harness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L19",
+      "source_location": "L20",
       "target": "tests_helpers_activity_harness_database",
       "weight": 1.0
     },
@@ -227763,7 +227799,7 @@
       "relation": "contains",
       "source": "tests_helpers_activity_harness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L22",
+      "source_location": "L23",
       "target": "tests_helpers_activity_harness_consumer",
       "weight": 1.0
     },
@@ -227774,7 +227810,7 @@
       "relation": "contains",
       "source": "tests_helpers_activity_harness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L23",
+      "source_location": "L24",
       "target": "tests_helpers_activity_harness_consumers",
       "weight": 1.0
     },
@@ -227785,7 +227821,7 @@
       "relation": "contains",
       "source": "tests_helpers_activity_harness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L26",
+      "source_location": "L27",
       "target": "tests_helpers_activity_harness_identity",
       "weight": 1.0
     },
@@ -227796,7 +227832,7 @@
       "relation": "contains",
       "source": "tests_helpers_activity_harness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L345",
+      "source_location": "L357",
       "target": "tests_helpers_activity_harness_provideranswer",
       "weight": 1.0
     },
@@ -227807,7 +227843,7 @@
       "relation": "contains",
       "source": "tests_helpers_activity_harness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L39",
+      "source_location": "L40",
       "target": "tests_helpers_activity_harness_page",
       "weight": 1.0
     },
@@ -227818,7 +227854,7 @@
       "relation": "contains",
       "source": "tests_helpers_activity_harness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L47",
+      "source_location": "L48",
       "target": "tests_helpers_activity_harness_snapshot",
       "weight": 1.0
     },
@@ -227829,7 +227865,7 @@
       "relation": "contains",
       "source": "tests_helpers_activity_harness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L52",
+      "source_location": "L53",
       "target": "tests_helpers_activity_harness_incoming",
       "weight": 1.0
     },
@@ -227840,7 +227876,7 @@
       "relation": "contains",
       "source": "tests_helpers_activity_harness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L58",
+      "source_location": "L59",
       "target": "tests_helpers_activity_harness_activityclient",
       "weight": 1.0
     },
@@ -227851,7 +227887,7 @@
       "relation": "contains",
       "source": "tests_helpers_activity_harness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L72",
+      "source_location": "L73",
       "target": "tests_helpers_activity_harness_percentiles",
       "weight": 1.0
     },
@@ -227862,7 +227898,7 @@
       "relation": "contains",
       "source": "tests_helpers_activity_harness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L78",
+      "source_location": "L79",
       "target": "tests_helpers_activity_harness_percentiles_8796e1235fe6",
       "weight": 1.0
     },
@@ -227873,7 +227909,7 @@
       "relation": "contains",
       "source": "tests_helpers_activity_harness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L86",
+      "source_location": "L87",
       "target": "tests_helpers_activity_harness_activityharness",
       "weight": 1.0
     },
@@ -228370,6 +228406,116 @@
       "source_file": "tests/helpers/hostile-bidi.ts",
       "source_location": "L23",
       "target": "tests_helpers_hostile_bidi_rlm",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_load_targets",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L10",
+      "target": "tests_helpers_load_targets_event_latency_p95_ms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_load_targets",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L13",
+      "target": "tests_helpers_load_targets_moderation_latency_p95_ms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_load_targets",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L16",
+      "target": "tests_helpers_load_targets_dropped_events_below_admission",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_load_targets",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L22",
+      "target": "tests_helpers_load_targets_lost_admitted_events",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_load_targets",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L28",
+      "target": "tests_helpers_load_targets_storage_row_growth_per_live_hour",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_load_targets",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L31",
+      "target": "tests_helpers_load_targets_public_update_p95_ms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_load_targets",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L34",
+      "target": "tests_helpers_load_targets_reconnect_snapshot_p95_ms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_load_targets",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L37",
+      "target": "tests_helpers_load_targets_provider_requests_per_reconnect",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_load_targets",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L40",
+      "target": "tests_helpers_load_targets_youtube_units_per_live_hour",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_load_targets",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L46",
+      "target": "tests_helpers_load_targets_cost_drivers_per_live_hour",
       "weight": 1.0
     },
     {
@@ -236718,7 +236864,7 @@
       "relation": "method",
       "source": "tests_helpers_activity_harness_activityharness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L100",
+      "source_location": "L101",
       "target": "tests_helpers_activity_harness_activityharness_start",
       "weight": 1.0
     },
@@ -236729,7 +236875,7 @@
       "relation": "method",
       "source": "tests_helpers_activity_harness_activityharness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L141",
+      "source_location": "L142",
       "target": "tests_helpers_activity_harness_activityharness_dispose",
       "weight": 1.0
     },
@@ -236740,7 +236886,7 @@
       "relation": "method",
       "source": "tests_helpers_activity_harness_activityharness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L150",
+      "source_location": "L151",
       "target": "tests_helpers_activity_harness_activityharness_closeclients",
       "weight": 1.0
     },
@@ -236751,7 +236897,7 @@
       "relation": "method",
       "source": "tests_helpers_activity_harness_activityharness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L158",
+      "source_location": "L159",
       "target": "tests_helpers_activity_harness_activityharness_providercalls",
       "weight": 1.0
     },
@@ -236762,7 +236908,7 @@
       "relation": "method",
       "source": "tests_helpers_activity_harness_activityharness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L163",
+      "source_location": "L164",
       "target": "tests_helpers_activity_harness_activityharness_addpage",
       "weight": 1.0
     },
@@ -236773,7 +236919,7 @@
       "relation": "method",
       "source": "tests_helpers_activity_harness_activityharness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L206",
+      "source_location": "L218",
       "target": "tests_helpers_activity_harness_activityharness_listen",
       "weight": 1.0
     },
@@ -236784,7 +236930,7 @@
       "relation": "method",
       "source": "tests_helpers_activity_harness_activityharness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L238",
+      "source_location": "L250",
       "target": "tests_helpers_activity_harness_activityharness_receive",
       "weight": 1.0
     },
@@ -236795,7 +236941,7 @@
       "relation": "method",
       "source": "tests_helpers_activity_harness_activityharness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L254",
+      "source_location": "L266",
       "target": "tests_helpers_activity_harness_activityharness_notify",
       "weight": 1.0
     },
@@ -236806,7 +236952,7 @@
       "relation": "method",
       "source": "tests_helpers_activity_harness_activityharness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L281",
+      "source_location": "L293",
       "target": "tests_helpers_activity_harness_activityharness_chat",
       "weight": 1.0
     },
@@ -236817,7 +236963,7 @@
       "relation": "method",
       "source": "tests_helpers_activity_harness_activityharness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L300",
+      "source_location": "L312",
       "target": "tests_helpers_activity_harness_activityharness_remove",
       "weight": 1.0
     },
@@ -236828,7 +236974,7 @@
       "relation": "method",
       "source": "tests_helpers_activity_harness_activityharness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L305",
+      "source_location": "L317",
       "target": "tests_helpers_activity_harness_activityharness_json",
       "weight": 1.0
     },
@@ -236839,7 +236985,7 @@
       "relation": "method",
       "source": "tests_helpers_activity_harness_activityharness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L311",
+      "source_location": "L323",
       "target": "tests_helpers_activity_harness_activityharness_report",
       "weight": 1.0
     },
@@ -236850,7 +236996,7 @@
       "relation": "method",
       "source": "tests_helpers_activity_harness_activityharness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L315",
+      "source_location": "L327",
       "target": "tests_helpers_activity_harness_activityharness_workerreport",
       "weight": 1.0
     },
@@ -236861,7 +237007,7 @@
       "relation": "method",
       "source": "tests_helpers_activity_harness_activityharness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L320",
+      "source_location": "L332",
       "target": "tests_helpers_activity_harness_activityharness_step",
       "weight": 1.0
     },
@@ -236872,7 +237018,7 @@
       "relation": "method",
       "source": "tests_helpers_activity_harness_activityharness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L325",
+      "source_location": "L337",
       "target": "tests_helpers_activity_harness_activityharness_quotaunits",
       "weight": 1.0
     },
@@ -236883,7 +237029,7 @@
       "relation": "method",
       "source": "tests_helpers_activity_harness_activityharness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L334",
+      "source_location": "L346",
       "target": "tests_helpers_activity_harness_activityharness_connectionstatus",
       "weight": 1.0
     },
@@ -236894,7 +237040,7 @@
       "relation": "method",
       "source": "tests_helpers_activity_harness_activityharness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L93",
+      "source_location": "L94",
       "target": "tests_helpers_activity_harness_activityharness_constructor",
       "weight": 1.0
     },
@@ -242485,7 +242631,7 @@
       "label": "ActivityHarness",
       "norm_label": "activityharness",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L86"
+      "source_location": "L87"
     },
     {
       "_callable": true,
@@ -250067,7 +250213,7 @@
       "label": "ActivityClient",
       "norm_label": "activityclient",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L58"
+      "source_location": "L59"
     },
     {
       "_callable": true,
@@ -250079,7 +250225,7 @@
       "label": "Consumer",
       "norm_label": "consumer",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L22"
+      "source_location": "L23"
     },
     {
       "_callable": true,
@@ -250091,7 +250237,7 @@
       "label": "Database",
       "norm_label": "database",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L19"
+      "source_location": "L20"
     },
     {
       "_callable": true,
@@ -250103,7 +250249,7 @@
       "label": "Incoming",
       "norm_label": "incoming",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L52"
+      "source_location": "L53"
     },
     {
       "_callable": true,
@@ -250115,7 +250261,7 @@
       "label": "Page",
       "norm_label": "page",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L39"
+      "source_location": "L40"
     },
     {
       "_callable": true,
@@ -250127,7 +250273,7 @@
       "label": "Percentiles",
       "norm_label": "percentiles",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L72"
+      "source_location": "L73"
     },
     {
       "_callable": true,
@@ -250139,7 +250285,7 @@
       "label": "Snapshot",
       "norm_label": "snapshot",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L47"
+      "source_location": "L48"
     },
     {
       "_callable": true,
@@ -250151,7 +250297,7 @@
       "label": "Socket",
       "norm_label": "socket",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L18"
+      "source_location": "L19"
     },
     {
       "_callable": true,
@@ -282266,7 +282412,7 @@
       "label": ".addPage()",
       "norm_label": ".addpage()",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L163"
+      "source_location": "L164"
     },
     {
       "_callable": true,
@@ -282277,7 +282423,7 @@
       "label": ".chat()",
       "norm_label": ".chat()",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L281"
+      "source_location": "L293"
     },
     {
       "_callable": true,
@@ -282288,7 +282434,7 @@
       "label": ".closeClients()",
       "norm_label": ".closeclients()",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L150"
+      "source_location": "L151"
     },
     {
       "_callable": true,
@@ -282299,7 +282445,7 @@
       "label": ".connectionStatus()",
       "norm_label": ".connectionstatus()",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L334"
+      "source_location": "L346"
     },
     {
       "_callable": true,
@@ -282310,7 +282456,7 @@
       "label": ".constructor()",
       "norm_label": ".constructor()",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L93"
+      "source_location": "L94"
     },
     {
       "_callable": true,
@@ -282325,14 +282471,14 @@
             "callee": "dispose",
             "file": "tests/helpers/activity-harness.ts",
             "lang": "typescript",
-            "line": "L145",
+            "line": "L146",
             "receiver_type": "Miniflare"
           }
         ]
       },
       "norm_label": ".dispose()",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L141"
+      "source_location": "L142"
     },
     {
       "_callable": true,
@@ -282347,14 +282493,14 @@
             "callee": "dispatchFetch",
             "file": "tests/helpers/activity-harness.ts",
             "lang": "typescript",
-            "line": "L306",
+            "line": "L318",
             "receiver_type": "Miniflare"
           }
         ]
       },
       "norm_label": ".json()",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L305"
+      "source_location": "L317"
     },
     {
       "_callable": true,
@@ -282369,14 +282515,14 @@
             "callee": "dispatchFetch",
             "file": "tests/helpers/activity-harness.ts",
             "lang": "typescript",
-            "line": "L208",
+            "line": "L220",
             "receiver_type": "Miniflare"
           }
         ]
       },
       "norm_label": ".listen()",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L206"
+      "source_location": "L218"
     },
     {
       "_callable": true,
@@ -282391,14 +282537,14 @@
             "callee": "dispatchFetch",
             "file": "tests/helpers/activity-harness.ts",
             "lang": "typescript",
-            "line": "L265",
+            "line": "L277",
             "receiver_type": "Miniflare"
           }
         ]
       },
       "norm_label": ".notify()",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L254"
+      "source_location": "L266"
     },
     {
       "_callable": true,
@@ -282409,7 +282555,7 @@
       "label": ".providerCalls()",
       "norm_label": ".providercalls()",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L158"
+      "source_location": "L159"
     },
     {
       "_callable": true,
@@ -282420,7 +282566,7 @@
       "label": ".quotaUnits()",
       "norm_label": ".quotaunits()",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L325"
+      "source_location": "L337"
     },
     {
       "_callable": true,
@@ -282431,7 +282577,7 @@
       "label": ".receive()",
       "norm_label": ".receive()",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L238"
+      "source_location": "L250"
     },
     {
       "_callable": true,
@@ -282442,7 +282588,7 @@
       "label": ".remove()",
       "norm_label": ".remove()",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L300"
+      "source_location": "L312"
     },
     {
       "_callable": true,
@@ -282453,7 +282599,7 @@
       "label": ".report()",
       "norm_label": ".report()",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L311"
+      "source_location": "L323"
     },
     {
       "_callable": true,
@@ -282468,21 +282614,21 @@
             "callee": "getD1Database",
             "file": "tests/helpers/activity-harness.ts",
             "lang": "typescript",
-            "line": "L132",
+            "line": "L133",
             "receiver_type": "Miniflare"
           },
           {
             "callee": "dispose",
             "file": "tests/helpers/activity-harness.ts",
             "lang": "typescript",
-            "line": "L136",
+            "line": "L137",
             "receiver_type": "Miniflare"
           }
         ]
       },
       "norm_label": ".start()",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L100"
+      "source_location": "L101"
     },
     {
       "_callable": true,
@@ -282493,7 +282639,7 @@
       "label": ".step()",
       "norm_label": ".step()",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L320"
+      "source_location": "L332"
     },
     {
       "_callable": true,
@@ -282504,7 +282650,7 @@
       "label": ".workerReport()",
       "norm_label": ".workerreport()",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L315"
+      "source_location": "L327"
     },
     {
       "_callable": true,
@@ -282515,7 +282661,7 @@
       "label": "percentiles()",
       "norm_label": "percentiles()",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L78"
+      "source_location": "L79"
     },
     {
       "_callable": true,
@@ -282530,14 +282676,14 @@
             "callee": "text",
             "file": "tests/helpers/activity-harness.ts",
             "lang": "typescript",
-            "line": "L346",
+            "line": "L358",
             "receiver_type": "RuntimeRequest"
           }
         ]
       },
       "norm_label": "provideranswer()",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L345"
+      "source_location": "L357"
     },
     {
       "_callable": true,
@@ -301847,7 +301993,7 @@
       "label": "CONSUMERS",
       "norm_label": "consumers",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L23"
+      "source_location": "L24"
     },
     {
       "_origin": "ast",
@@ -301857,7 +302003,7 @@
       "label": "IDENTITY",
       "norm_label": "identity",
       "source_file": "tests/helpers/activity-harness.ts",
-      "source_location": "L26"
+      "source_location": "L27"
     },
     {
       "_origin": "ast",
@@ -302028,6 +302174,116 @@
       "norm_label": "rlo",
       "source_file": "tests/helpers/hostile-bidi.ts",
       "source_location": "L14"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_load_targets",
+      "label": "load-targets.ts",
+      "norm_label": "load-targets.ts",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_load_targets_cost_drivers_per_live_hour",
+      "label": "COST_DRIVERS_PER_LIVE_HOUR",
+      "norm_label": "cost_drivers_per_live_hour",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L46"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_load_targets_dropped_events_below_admission",
+      "label": "DROPPED_EVENTS_BELOW_ADMISSION",
+      "norm_label": "dropped_events_below_admission",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L16"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_load_targets_event_latency_p95_ms",
+      "label": "EVENT_LATENCY_P95_MS",
+      "norm_label": "event_latency_p95_ms",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L10"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_load_targets_lost_admitted_events",
+      "label": "LOST_ADMITTED_EVENTS",
+      "norm_label": "lost_admitted_events",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L22"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_load_targets_moderation_latency_p95_ms",
+      "label": "MODERATION_LATENCY_P95_MS",
+      "norm_label": "moderation_latency_p95_ms",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L13"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_load_targets_provider_requests_per_reconnect",
+      "label": "PROVIDER_REQUESTS_PER_RECONNECT",
+      "norm_label": "provider_requests_per_reconnect",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L37"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_load_targets_public_update_p95_ms",
+      "label": "PUBLIC_UPDATE_P95_MS",
+      "norm_label": "public_update_p95_ms",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L31"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_load_targets_reconnect_snapshot_p95_ms",
+      "label": "RECONNECT_SNAPSHOT_P95_MS",
+      "norm_label": "reconnect_snapshot_p95_ms",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L34"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_load_targets_storage_row_growth_per_live_hour",
+      "label": "STORAGE_ROW_GROWTH_PER_LIVE_HOUR",
+      "norm_label": "storage_row_growth_per_live_hour",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L28"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_load_targets_youtube_units_per_live_hour",
+      "label": "YOUTUBE_UNITS_PER_LIVE_HOUR",
+      "norm_label": "youtube_units_per_live_hour",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L40"
     },
     {
       "_origin": "ast",

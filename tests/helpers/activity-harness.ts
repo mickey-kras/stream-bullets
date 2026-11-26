@@ -4,6 +4,7 @@ import { build } from "esbuild";
 import { Miniflare, Response as RuntimeResponse, type Request as RuntimeRequest } from "miniflare";
 import type { AppEnv } from "../../app/env";
 import type { ActivityChat } from "../../app/lib/activity";
+import { requiredSubscriptions } from "../../app/server/channel-providers.server";
 import { tokenStatement } from "../../app/server/channel-tokens.server";
 import type { IngestReport, StepReport, WorkerReport } from "./activity-worker";
 import { fakeProviders, type FakeProviders, type ProviderFetch } from "./channels";
@@ -185,7 +186,18 @@ export class ActivityHarness {
         .prepare("INSERT INTO streamers (id,owner_id,handle,name) VALUES (?,?,?,'Host')")
         .bind(id, `owner-${index}`, `capacity_${index}`),
     ];
-    if (page.twitch) statements.push(connection("twitch", page.twitch));
+    if (page.twitch) {
+      statements.push(connection("twitch", page.twitch));
+      // A connect made the subscriptions of a connected channel. The fake holds them as Twitch does.
+      for (const type of requiredSubscriptions("twitch"))
+        this.providers.subscriptions.push({
+          platform: "twitch",
+          id: `capacity-sub-${index}-${type}`,
+          broadcaster: page.twitch,
+          callback: `${ORIGIN}/hooks/twitch`,
+          type,
+        });
+    }
     if (page.youtube) {
       const env = { DB: db, CHANNEL_TOKEN_KEYS: TOKEN_KEYS } as Partial<AppEnv> as AppEnv;
       const tokens = {
@@ -208,7 +220,7 @@ export class ActivityHarness {
     const response = await this.runtime.dispatchFetch(`${ORIGIN}/${page.id}/subscribe`, {
       headers: { Upgrade: "websocket", ...IDENTITY[consumer] },
     });
-    if (!response.webSocket) throw new Error(`Subscribe refused with status ${response.status} ${await response.text()}`);
+    if (!response.webSocket) throw new Error(`Subscribe refused with status ${response.status}`);
     const client: ActivityClient = {
       page,
       consumer,
