@@ -514,6 +514,9 @@ async function subscribeKick(
   return body.data.some((item) => !item.subscription_id) ? "partial" : "ok";
 }
 
+/** All types of chat, and no support events. */
+const CHAT_ONLY: SubscribeScope = { only: null, support: false };
+
 /**
  * Creates the provider subscriptions for a channel. Each id goes into `created` as soon as it exists, so a
  * failure part way through never loses one. `conflicts` names the Twitch types that already had a subscription:
@@ -530,7 +533,7 @@ export async function subscribe(
   accessToken: string | null,
   callbackOrigin: string,
   created: string[],
-  scope: SubscribeScope = { only: null, support: false },
+  scope: SubscribeScope = CHAT_ONLY,
 ): Promise<Subscribed> {
   if (platform === "youtube") return { conflicts: [], refused: false };
   if (platform === "twitch") return subscribeTwitch(env, externalId, callbackOrigin, created, scope);
