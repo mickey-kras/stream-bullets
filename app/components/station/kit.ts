@@ -7,8 +7,8 @@ export type Animator = (time: number, dt: number) => void;
 export type Draw = (ctx: CanvasRenderingContext2D, w: number, h: number) => void;
 
 // Per-station palette, animation/light registries and shared helpers.
-export function createKit(compact: boolean, family: string) {
-  const palette = createPalette(compact);
+export function createKit(compact: boolean, family: string, software = false) {
+  const palette = createPalette(compact, software);
   const { brass, gold, red, plantGreen, plantDark } = palette;
   const glowTexture = T.glow();
   const psiFace = T.dial(false);

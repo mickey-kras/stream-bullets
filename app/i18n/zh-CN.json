@@ -656,7 +656,7 @@
   "landing.getStarted": "开始",
   "landing.joinStreamer": "以主播身份加入",
   "landing.station": "互动广播站",
-  "landing.streamerBenefits": "收集话题并发起投票。通过 Google 或 Twitch 登录时，我们会使用你的个人资料和电子邮箱。关联 Twitch、YouTube 或 Kick 后，你可以在 OBS 中显示直播聊天。关联 Twitch 或 YouTube 后，还可以在个人页面列出即将开始的直播。",
+  "landing.streamerBenefits": "在 StreamBullets 收集话题并发起投票。通过 Google 或 Twitch 登录会使用你的个人资料和电子邮箱。关联 Twitch、YouTube 或 Kick 可在 OBS 显示直播聊天和即将开始的直播。",
   "landing.suggest": "提议话题",
   "landing.tagline": "提议话题。投票。共创直播。",
   "landing.title1": "你的声音，",

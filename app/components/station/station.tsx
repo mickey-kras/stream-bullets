@@ -1,3 +1,4 @@
+import { isbot } from "isbot";
 import { useEffect, useRef, useState, type ReactNode, type TransitionEvent } from "react";
 import { t } from "../../i18n";
 import { motionReduced, watchMotion } from "./motion";
@@ -7,6 +8,12 @@ import type { StationController } from "./scene.client";
 const DISPLAY_FONT = "Oswald, 'Arial Narrow', sans-serif";
 // Phone poster pixels: width, height.
 const PHONE_POSTER = [487, 557] as const;
+
+// Crawlers and link verifiers keep the static poster without booting WebGL or showing a fallback error.
+export function stationHost(element: HTMLDivElement | null): HTMLDivElement | null {
+  if (isbot(globalThis.navigator?.userAgent ?? "")) return null;
+  return element;
+}
 
 export function Station({ onSign }: Readonly<{ onSign?: (index: number) => void }> = {}): ReactNode {
   const host = useRef<HTMLDivElement>(null);
@@ -26,7 +33,7 @@ export function Station({ onSign }: Readonly<{ onSign?: (index: number) => void 
   useEffect(() => onFirstMotion((): void => setTiltDone(true)), []);
 
   useEffect(() => {
-    if (!host.current) return;
+    if (!stationHost(host.current)) return;
     const wide: MediaQueryList = globalThis.matchMedia("(min-width: 701px)");
     const lifecycle = new AbortController();
     let disposed: boolean = false;
