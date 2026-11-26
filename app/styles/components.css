@@ -1703,7 +1703,8 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 .ch-terms { flex-basis: 100%; font-size: 0.875rem; }
 
 .discussion-focus-bar { display: none; }
-.open-discussion { display: none; }
+/* A wide page shows the discussion below the topic, so only a narrow page has this button. */
+.detail-actions > button.open-discussion { display: none; }
 /* Open discussion is at the left. The delete and report controls are at the right of the same row. */
 .detail-actions { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px 10px; margin-top: 14px; }
 .detail-actions > .content-actions { margin-top: 0; margin-left: auto; }
@@ -1738,7 +1739,11 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 .ed-content .ed-strike { text-decoration: line-through; }
 .ed-content .ed-code { padding: 1px 5px; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--field); font: 0.875em/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; }
 .ed-content .mention { color: var(--gold); font-weight: 600; }
-.composer:has(.comment-input) > .gold { align-self: flex-end; }
+/* The Post button is below the field at each width. The avatar has its own column. */
+.composer:has(.comment-input) { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 0; }
+.composer:has(.comment-input) > .user-avatar { margin-right: 14px; }
+.composer:has(.comment-input) > :is(.comment-input, .gold) { grid-column: 2; }
+.composer:has(.comment-input) > .gold { justify-self: end; }
 .comment-editor .ed-content { min-height: 86px; }
 @media (max-width: 720px) { .inline-reply .composer .ed-content { min-height: 86px; } }
 .comment-editor { display: grid; gap: 8px; min-width: 0; }
@@ -1756,7 +1761,7 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 
 @media (max-width: 43.75em) {
   .detail-actions { margin-block: 8px; }
-  .detail-actions > .open-discussion { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 6px 12px; font-size: 1rem; }
+  .detail-actions > button.open-discussion { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 6px 12px; font-size: 1rem; }
   .detail-actions > .content-actions { flex-wrap: nowrap; gap: 8px; }
   /* The text stays as the accessible name. Only the icon shows. */
   .detail-actions > .content-actions > button { justify-content: center; width: 44px; min-height: 44px; padding: 0; font-size: 0; }
@@ -1767,9 +1772,6 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
   .replies { margin-left: 12px; }
   .thread.has-replies::before { left: 14px; }
   .replies > li > .comment::before { left: -7px; width: 5px; }
-  .discussion > .composer { gap: 8px; flex-wrap: wrap; }
-  .discussion > .composer > :is(textarea, .mention-input, .comment-input) { flex: 1 1 100%; }
-  .discussion > .composer > button { margin-left: auto; }
   .discussion > .composer .ed-content { min-height: 86px; }
   .discussion > .composer textarea { min-height: 88px; }
   .composer textarea { overflow-wrap: anywhere; touch-action: auto; overscroll-behavior-y: auto; max-height: min(150px, 30dvh); }
