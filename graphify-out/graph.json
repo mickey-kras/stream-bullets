@@ -44973,7 +44973,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_subscribe",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L536",
+      "source_location": "L539",
       "target": "app_server_channel_providers_server_subscribetwitch",
       "weight": 1.0
     },
@@ -44985,7 +44985,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_subscribe",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L537",
+      "source_location": "L540",
       "target": "app_server_channel_providers_server_reauthrequired",
       "weight": 1.0
     },
@@ -44997,7 +44997,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_subscribe",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L541",
+      "source_location": "L544",
       "target": "app_server_channel_providers_server_subscribekick",
       "weight": 1.0
     },
@@ -45009,7 +45009,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_subscribe",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L543",
+      "source_location": "L546",
       "target": "app_server_channel_providers_server_providererror",
       "weight": 1.0
     },
@@ -45165,7 +45165,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_twitchlivestream",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L966",
+      "source_location": "L969",
       "target": "app_server_channel_providers_server_twitchapptoken",
       "weight": 1.0
     },
@@ -45177,7 +45177,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_twitchlivestream",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L967",
+      "source_location": "L970",
       "target": "app_server_channel_providers_server_providerclient",
       "weight": 1.0
     },
@@ -45189,7 +45189,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_twitchlivestream",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L971",
+      "source_location": "L974",
       "target": "app_server_channel_providers_server_getjson",
       "weight": 1.0
     },
@@ -45201,7 +45201,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_twitchlivestream",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L981",
+      "source_location": "L984",
       "target": "app_server_channel_providers_server_streamtitle",
       "weight": 1.0
     },
@@ -45213,7 +45213,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_twitchschedule",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L826",
+      "source_location": "L829",
       "target": "app_server_channel_providers_server_twitchapptoken",
       "weight": 1.0
     },
@@ -45225,7 +45225,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_twitchschedule",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L827",
+      "source_location": "L830",
       "target": "app_server_channel_providers_server_providerclient",
       "weight": 1.0
     },
@@ -45237,20 +45237,8 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_twitchschedule",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L841",
+      "source_location": "L844",
       "target": "app_server_channel_providers_server_getjson",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_channel_providers_server_twitchschedule",
-      "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L843",
-      "target": "app_server_channel_providers_server_withcovers",
       "weight": 1.0
     },
     {
@@ -45262,6 +45250,18 @@
       "source": "app_server_channel_providers_server_twitchschedule",
       "source_file": "app/server/channel-providers.server.ts",
       "source_location": "L846",
+      "target": "app_server_channel_providers_server_withcovers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_channel_providers_server_twitchschedule",
+      "source_file": "app/server/channel-providers.server.ts",
+      "source_location": "L849",
       "target": "app_server_channel_providers_server_twitchstreams",
       "weight": 1.0
     },
@@ -45273,7 +45273,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_twitchstreams",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L764",
+      "source_location": "L767",
       "target": "app_server_channel_providers_server_streamtitle",
       "weight": 1.0
     },
@@ -45285,7 +45285,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_twitchstreams",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L766",
+      "source_location": "L769",
       "target": "app_server_channel_providers_server_streamlength",
       "weight": 1.0
     },
@@ -45309,7 +45309,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_unsubscribe",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L565",
+      "source_location": "L568",
       "target": "app_server_channel_providers_server_providerclient",
       "weight": 1.0
     },
@@ -45321,7 +45321,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_unsubscribe",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L565",
+      "source_location": "L568",
       "target": "app_server_channel_providers_server_twitchapptoken",
       "weight": 1.0
     },
@@ -45333,7 +45333,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_withcovers",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L797",
+      "source_location": "L800",
       "target": "app_server_channel_providers_server_getjson",
       "weight": 1.0
     },
@@ -45345,7 +45345,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_youtubechatpage",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L664",
+      "source_location": "L667",
       "target": "app_server_channel_providers_server_getjson",
       "weight": 1.0
     },
@@ -45357,7 +45357,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_youtubelivechat",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L589",
+      "source_location": "L592",
       "target": "app_server_channel_providers_server_getjson",
       "weight": 1.0
     },
@@ -45369,7 +45369,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_youtubestreams",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L888",
+      "source_location": "L891",
       "target": "app_server_channel_providers_server_streamtitle",
       "weight": 1.0
     },
@@ -45381,7 +45381,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_youtubestreams",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L890",
+      "source_location": "L893",
       "target": "app_server_channel_providers_server_streamlength",
       "weight": 1.0
     },
@@ -45393,7 +45393,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_youtubestreams",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L893",
+      "source_location": "L896",
       "target": "app_server_channel_providers_server_youtubethumbnail",
       "weight": 1.0
     },
@@ -45405,7 +45405,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_youtubeupcoming",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L926",
+      "source_location": "L929",
       "target": "app_server_channel_providers_server_getjson",
       "weight": 1.0
     },
@@ -45417,7 +45417,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_youtubeupcoming",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L927",
+      "source_location": "L930",
       "target": "app_server_channel_providers_server_youtubestreams",
       "weight": 1.0
     },
@@ -215041,7 +215041,18 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L526",
+      "source_location": "L518",
+      "target": "app_server_channel_providers_server_chat_only",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_channel_providers_server",
+      "source_file": "app/server/channel-providers.server.ts",
+      "source_location": "L529",
       "target": "app_server_channel_providers_server_subscribe",
       "weight": 1.0
     },
@@ -215052,7 +215063,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L552",
+      "source_location": "L555",
       "target": "app_server_channel_providers_server_unsubscribe",
       "weight": 1.0
     },
@@ -215063,7 +215074,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L585",
+      "source_location": "L588",
       "target": "app_server_channel_providers_server_youtubelivechat",
       "weight": 1.0
     },
@@ -215074,7 +215085,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L598",
+      "source_location": "L601",
       "target": "app_server_channel_providers_server_youtubemoney",
       "weight": 1.0
     },
@@ -215085,7 +215096,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L603",
+      "source_location": "L606",
       "target": "app_server_channel_providers_server_youtubedetail",
       "weight": 1.0
     },
@@ -215096,7 +215107,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L607",
+      "source_location": "L610",
       "target": "app_server_channel_providers_server_youtubemessageschema",
       "weight": 1.0
     },
@@ -215107,7 +215118,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L644",
+      "source_location": "L647",
       "target": "app_server_channel_providers_server_youtubemessage",
       "weight": 1.0
     },
@@ -215118,7 +215129,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L647",
+      "source_location": "L650",
       "target": "app_server_channel_providers_server_youtubechatpage",
       "weight": 1.0
     },
@@ -215129,7 +215140,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L682",
+      "source_location": "L685",
       "target": "app_server_channel_providers_server_stream_image_url",
       "weight": 1.0
     },
@@ -215140,7 +215151,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L686",
+      "source_location": "L689",
       "target": "app_server_channel_providers_server_importedstreamschema",
       "weight": 1.0
     },
@@ -215151,7 +215162,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L697",
+      "source_location": "L700",
       "target": "app_server_channel_providers_server_importedstream",
       "weight": 1.0
     },
@@ -215162,7 +215173,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L700",
+      "source_location": "L703",
       "target": "app_server_channel_providers_server_import_horizon_ms",
       "weight": 1.0
     },
@@ -215173,7 +215184,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L703",
+      "source_location": "L706",
       "target": "app_server_channel_providers_server_default_stream_min",
       "weight": 1.0
     },
@@ -215184,7 +215195,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L705",
+      "source_location": "L708",
       "target": "app_server_channel_providers_server_streamlength",
       "weight": 1.0
     },
@@ -215195,7 +215206,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L710",
+      "source_location": "L713",
       "target": "app_server_channel_providers_server_streamtitle",
       "weight": 1.0
     },
@@ -215206,7 +215217,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L715",
+      "source_location": "L718",
       "target": "app_server_channel_providers_server_twitchscheduleschema",
       "weight": 1.0
     },
@@ -215217,7 +215228,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L743",
+      "source_location": "L746",
       "target": "app_server_channel_providers_server_twitchstream",
       "weight": 1.0
     },
@@ -215228,7 +215239,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L749",
+      "source_location": "L752",
       "target": "app_server_channel_providers_server_twitchstreams",
       "weight": 1.0
     },
@@ -215239,7 +215250,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L777",
+      "source_location": "L780",
       "target": "app_server_channel_providers_server_twitchgamesschema",
       "weight": 1.0
     },
@@ -215250,19 +215261,8 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L788",
+      "source_location": "L791",
       "target": "app_server_channel_providers_server_withcovers",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_server_channel_providers_server",
-      "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L819",
-      "target": "app_server_channel_providers_server_twitchschedule",
       "weight": 1.0
     },
     {
@@ -215283,7 +215283,18 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L854",
+      "source_location": "L822",
+      "target": "app_server_channel_providers_server_twitchschedule",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_channel_providers_server",
+      "source_file": "app/server/channel-providers.server.ts",
+      "source_location": "L857",
       "target": "app_server_channel_providers_server_youtubeupcomingschema",
       "weight": 1.0
     },
@@ -215294,7 +215305,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L871",
+      "source_location": "L874",
       "target": "app_server_channel_providers_server_listed_privacy",
       "weight": 1.0
     },
@@ -215305,7 +215316,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L874",
+      "source_location": "L877",
       "target": "app_server_channel_providers_server_youtubethumbnail",
       "weight": 1.0
     },
@@ -215316,7 +215327,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L880",
+      "source_location": "L883",
       "target": "app_server_channel_providers_server_youtubestreams",
       "weight": 1.0
     },
@@ -215338,7 +215349,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L900",
+      "source_location": "L903",
       "target": "app_server_channel_providers_server_youtube_upcoming_pages",
       "weight": 1.0
     },
@@ -215349,7 +215360,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L909",
+      "source_location": "L912",
       "target": "app_server_channel_providers_server_youtubeupcoming",
       "weight": 1.0
     },
@@ -215360,7 +215371,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L935",
+      "source_location": "L938",
       "target": "app_server_channel_providers_server_livestream",
       "weight": 1.0
     },
@@ -215371,7 +215382,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L943",
+      "source_location": "L946",
       "target": "app_server_channel_providers_server_twitchstreamsschema",
       "weight": 1.0
     },
@@ -215382,7 +215393,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L955",
+      "source_location": "L958",
       "target": "app_server_channel_providers_server_twitchvideosschema",
       "weight": 1.0
     },
@@ -215393,7 +215404,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L964",
+      "source_location": "L967",
       "target": "app_server_channel_providers_server_twitchlivestream",
       "weight": 1.0
     },
@@ -254671,7 +254682,7 @@
       "label": "ImportedStream",
       "norm_label": "importedstream",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L697"
+      "source_location": "L700"
     },
     {
       "_callable": true,
@@ -254683,7 +254694,7 @@
       "label": "LiveStream",
       "norm_label": "livestream",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L935"
+      "source_location": "L938"
     },
     {
       "_callable": true,
@@ -254779,7 +254790,7 @@
       "label": "TwitchStream",
       "norm_label": "twitchstream",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L743"
+      "source_location": "L746"
     },
     {
       "_callable": true,
@@ -254791,7 +254802,7 @@
       "label": "YoutubeMessage",
       "norm_label": "youtubemessage",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L644"
+      "source_location": "L647"
     },
     {
       "_callable": true,
@@ -279355,7 +279366,7 @@
       "label": "streamLength()",
       "norm_label": "streamlength()",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L705"
+      "source_location": "L708"
     },
     {
       "_callable": true,
@@ -279366,7 +279377,7 @@
       "label": "streamTitle()",
       "norm_label": "streamtitle()",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L710"
+      "source_location": "L713"
     },
     {
       "_callable": true,
@@ -279377,7 +279388,7 @@
       "label": "subscribe()",
       "norm_label": "subscribe()",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L526"
+      "source_location": "L529"
     },
     {
       "_callable": true,
@@ -279443,7 +279454,7 @@
       "label": "twitchLiveStream()",
       "norm_label": "twitchlivestream()",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L964"
+      "source_location": "L967"
     },
     {
       "_callable": true,
@@ -279454,7 +279465,7 @@
       "label": "twitchSchedule()",
       "norm_label": "twitchschedule()",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L819"
+      "source_location": "L822"
     },
     {
       "_callable": true,
@@ -279465,7 +279476,7 @@
       "label": "twitchStreams()",
       "norm_label": "twitchstreams()",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L749"
+      "source_location": "L752"
     },
     {
       "_callable": true,
@@ -279487,7 +279498,7 @@
       "label": "unsubscribe()",
       "norm_label": "unsubscribe()",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L552"
+      "source_location": "L555"
     },
     {
       "_callable": true,
@@ -279498,7 +279509,7 @@
       "label": "withCovers()",
       "norm_label": "withcovers()",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L788"
+      "source_location": "L791"
     },
     {
       "_callable": true,
@@ -279509,7 +279520,7 @@
       "label": "youtubeChatPage()",
       "norm_label": "youtubechatpage()",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L647"
+      "source_location": "L650"
     },
     {
       "_callable": true,
@@ -279520,7 +279531,7 @@
       "label": "youtubeDetail()",
       "norm_label": "youtubedetail()",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L603"
+      "source_location": "L606"
     },
     {
       "_callable": true,
@@ -279531,7 +279542,7 @@
       "label": "youtubeLiveChat()",
       "norm_label": "youtubelivechat()",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L585"
+      "source_location": "L588"
     },
     {
       "_callable": true,
@@ -279553,7 +279564,7 @@
       "label": "youtubeStreams()",
       "norm_label": "youtubestreams()",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L880"
+      "source_location": "L883"
     },
     {
       "_callable": true,
@@ -279564,7 +279575,7 @@
       "label": "youtubeThumbnail()",
       "norm_label": "youtubethumbnail()",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L874"
+      "source_location": "L877"
     },
     {
       "_callable": true,
@@ -279575,7 +279586,7 @@
       "label": "youtubeUpcoming()",
       "norm_label": "youtubeupcoming()",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L909"
+      "source_location": "L912"
     },
     {
       "_callable": true,
@@ -304214,11 +304225,21 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_server_channel_providers_server_chat_only",
+      "label": "CHAT_ONLY",
+      "norm_label": "chat_only",
+      "source_file": "app/server/channel-providers.server.ts",
+      "source_location": "L518"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_server_channel_providers_server_default_stream_min",
       "label": "DEFAULT_STREAM_MIN",
       "norm_label": "default_stream_min",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L703"
+      "source_location": "L706"
     },
     {
       "_origin": "ast",
@@ -304238,7 +304259,7 @@
       "label": "IMPORT_HORIZON_MS",
       "norm_label": "import_horizon_ms",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L700"
+      "source_location": "L703"
     },
     {
       "_origin": "ast",
@@ -304248,7 +304269,7 @@
       "label": "importedStreamSchema",
       "norm_label": "importedstreamschema",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L686"
+      "source_location": "L689"
     },
     {
       "_origin": "ast",
@@ -304278,7 +304299,7 @@
       "label": "LISTED_PRIVACY",
       "norm_label": "listed_privacy",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L871"
+      "source_location": "L874"
     },
     {
       "_origin": "ast",
@@ -304308,7 +304329,7 @@
       "label": "STREAM_IMAGE_URL",
       "norm_label": "stream_image_url",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L682"
+      "source_location": "L685"
     },
     {
       "_origin": "ast",
@@ -304338,7 +304359,7 @@
       "label": "twitchGamesSchema",
       "norm_label": "twitchgamesschema",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L777"
+      "source_location": "L780"
     },
     {
       "_origin": "ast",
@@ -304358,7 +304379,7 @@
       "label": "twitchScheduleSchema",
       "norm_label": "twitchscheduleschema",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L715"
+      "source_location": "L718"
     },
     {
       "_origin": "ast",
@@ -304368,7 +304389,7 @@
       "label": "twitchStreamsSchema",
       "norm_label": "twitchstreamsschema",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L943"
+      "source_location": "L946"
     },
     {
       "_origin": "ast",
@@ -304378,7 +304399,7 @@
       "label": "twitchVideosSchema",
       "norm_label": "twitchvideosschema",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L955"
+      "source_location": "L958"
     },
     {
       "_origin": "ast",
@@ -304388,7 +304409,7 @@
       "label": "YOUTUBE_UPCOMING_PAGES",
       "norm_label": "youtube_upcoming_pages",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L900"
+      "source_location": "L903"
     },
     {
       "_origin": "ast",
@@ -304398,7 +304419,7 @@
       "label": "youtubeMessageSchema",
       "norm_label": "youtubemessageschema",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L607"
+      "source_location": "L610"
     },
     {
       "_origin": "ast",
@@ -304408,7 +304429,7 @@
       "label": "youtubeMoney",
       "norm_label": "youtubemoney",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L598"
+      "source_location": "L601"
     },
     {
       "_origin": "ast",
@@ -304418,7 +304439,7 @@
       "label": "youtubeUpcomingSchema",
       "norm_label": "youtubeupcomingschema",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L854"
+      "source_location": "L857"
     },
     {
       "_origin": "ast",
