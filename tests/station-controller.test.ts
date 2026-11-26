@@ -189,6 +189,11 @@ it.each([true, false])(
     frame(160);
     expect(gpu.render).not.toHaveBeenCalled();
     controller.motion(true);
+    frame(180);
+    gpu.render.mockClear();
+    frame(190);
+    // Software WebGL stays paused even when motion is allowed.
+    expect(gpu.render).toHaveBeenCalledTimes(reduced ? 0 : 1);
     for (const view of [
       "entrance",
       "hero",

@@ -617,7 +617,7 @@ export async function createStation(
       state.dirty = true;
     },
     motion: (enabled: boolean): void => {
-      state.playing = enabled;
+      state.playing = enabled && !software;
       state.dirty = true;
     },
     lights: (on: boolean): void => {
