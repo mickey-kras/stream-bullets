@@ -10005,7 +10005,7 @@
       "relation": "calls",
       "source": "app_components_overlay_activity_feed_useactivityfeed",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L134",
+      "source_location": "L112",
       "target": "app_lib_activity_socket_activityurl",
       "weight": 1.0
     },
@@ -10017,20 +10017,8 @@
       "relation": "calls",
       "source": "app_components_overlay_activity_feed_useactivityfeed",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L136",
+      "source_location": "L114",
       "target": "app_components_overlay_activity_feed_acquire",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_overlay_activity_feed_useplatformfeed",
-      "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L95",
-      "target": "app_lib_activity_messageforplatform",
       "weight": 1.0
     },
     {
@@ -13209,19 +13197,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_composition_overlaycomposition",
       "source_file": "app/components/overlay/overlay-composition.tsx",
-      "source_location": "L385",
-      "target": "app_components_overlay_activity_feed_useplatformfeed",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_overlay_overlay_composition_overlaycomposition",
-      "source_file": "app/components/overlay/overlay-composition.tsx",
-      "source_location": "L393",
+      "source_location": "L392",
       "target": "app_components_overlay_overlay_composition_layerbox",
       "weight": 1.0
     },
@@ -13233,7 +13209,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_composition_overlaycomposition",
       "source_file": "app/components/overlay/overlay-composition.tsx",
-      "source_location": "L394",
+      "source_location": "L393",
       "target": "app_components_overlay_overlay_composition_charactersslot",
       "weight": 1.0
     },
@@ -13245,7 +13221,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_composition_overlaycomposition",
       "source_file": "app/components/overlay/overlay-composition.tsx",
-      "source_location": "L397",
+      "source_location": "L396",
       "target": "app_components_overlay_overlay_composition_contentlayers",
       "weight": 1.0
     },
@@ -13257,7 +13233,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_composition_overlaycomposition",
       "source_file": "app/components/overlay/overlay-composition.tsx",
-      "source_location": "L400",
+      "source_location": "L399",
       "target": "app_components_overlay_overlay_composition_cameraframe",
       "weight": 1.0
     },
@@ -13269,7 +13245,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_composition_overlaycomposition",
       "source_file": "app/components/overlay/overlay-composition.tsx",
-      "source_location": "L405",
+      "source_location": "L404",
       "target": "app_components_overlay_overlay_composition_chatslot",
       "weight": 1.0
     },
@@ -14493,7 +14469,7 @@
       "relation": "calls",
       "source": "app_components_overlay_use_chat_subscribemotion",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L52",
+      "source_location": "L59",
       "target": "app_components_station_motion_watchmotion",
       "weight": 1.0
     },
@@ -14505,7 +14481,7 @@
       "relation": "calls",
       "source": "app_components_overlay_use_chat_usechat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L171",
+      "source_location": "L188",
       "target": "app_components_overlay_use_chat_usechatstate",
       "weight": 1.0
     },
@@ -14517,7 +14493,7 @@
       "relation": "calls",
       "source": "app_components_overlay_use_chat_usechat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L172",
+      "source_location": "L189",
       "target": "app_lib_chat_test_chattestscript",
       "weight": 1.0
     },
@@ -14529,7 +14505,19 @@
       "relation": "calls",
       "source": "app_components_overlay_use_chat_usechatstate",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L114",
+      "source_location": "L103",
+      "target": "app_lib_chat_feed_chatreducer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_overlay_use_chat_usechatstate",
+      "source_file": "app/components/overlay/use-chat.ts",
+      "source_location": "L129",
       "target": "app_components_overlay_use_chat_sampleevent",
       "weight": 1.0
     },
@@ -14541,7 +14529,19 @@
       "relation": "calls",
       "source": "app_components_overlay_use_chat_usechatstate",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L144",
+      "source_location": "L156",
+      "target": "app_lib_activity_messageforplatform",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_overlay_use_chat_usechatstate",
+      "source_file": "app/components/overlay/use-chat.ts",
+      "source_location": "L161",
       "target": "app_lib_chat_feed_nextwakeat",
       "weight": 1.0
     },
@@ -14553,20 +14553,8 @@
       "relation": "calls",
       "source": "app_components_overlay_use_chat_usechatstate",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L84",
+      "source_location": "L95",
       "target": "app_components_overlay_use_chat_usemotionreduced",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_overlay_use_chat_usechatstate",
-      "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L89",
-      "target": "app_lib_chat_feed_chatreducer",
       "weight": 1.0
     },
     {
@@ -59481,7 +59469,7 @@
       "relation": "calls",
       "source": "tests_e2e_overlay_composition_spec",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L1023",
+      "source_location": "L1045",
       "target": "tests_e2e_overlay_composition_spec_settestend",
       "weight": 1.0
     },
@@ -59697,7 +59685,7 @@
       "relation": "calls",
       "source": "tests_e2e_overlay_composition_spec_settestend",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L979",
+      "source_location": "L1001",
       "target": "tests_e2e_fixtures_runsql",
       "weight": 1.0
     },
@@ -67020,7 +67008,7 @@
       "relation": "references",
       "source": "app_components_overlay_use_chat_chatsource",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L66",
+      "source_location": "L76",
       "target": "app_components_overlay_activity_feed_activityfeed",
       "weight": 1.0
     },
@@ -67032,8 +67020,20 @@
       "relation": "references",
       "source": "app_components_overlay_use_chat_chatsource",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L67",
+      "source_location": "L77",
       "target": "app_lib_activity_activityevent",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "relation": "references",
+      "source": "app_components_overlay_use_chat_chatsource",
+      "source_file": "app/components/overlay/use-chat.ts",
+      "source_location": "L79",
+      "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
     {
@@ -67044,7 +67044,7 @@
       "relation": "references",
       "source": "app_components_overlay_use_chat_usechatoptions",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L21",
+      "source_location": "L28",
       "target": "app_components_overlay_activity_feed_activityfeed",
       "weight": 1.0
     },
@@ -67056,7 +67056,7 @@
       "relation": "references",
       "source": "app_components_overlay_use_chat_usechatoptions",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L23",
+      "source_location": "L30",
       "target": "app_lib_activity_activitychat",
       "weight": 1.0
     },
@@ -67068,7 +67068,7 @@
       "relation": "references",
       "source": "app_components_overlay_use_chat_usechatoptions",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L30",
+      "source_location": "L37",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -75941,30 +75941,6 @@
       "relation": "imports",
       "source": "app_components_overlay_activity_feed",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L2",
-      "target": "app_lib_activity_activityplatform",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_components_overlay_activity_feed",
-      "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L2",
-      "target": "app_lib_activity_messageforplatform",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_components_overlay_activity_feed",
-      "source_file": "app/components/overlay/activity-feed.tsx",
       "source_location": "L3",
       "target": "app_lib_activity_socket_activitysocket",
       "weight": 1.0
@@ -78953,18 +78929,6 @@
       "relation": "imports",
       "source": "app_components_overlay_overlay_composition",
       "source_file": "app/components/overlay/overlay-composition.tsx",
-      "source_location": "L32",
-      "target": "app_components_overlay_activity_feed_useplatformfeed",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_components_overlay_overlay_composition",
-      "source_file": "app/components/overlay/overlay-composition.tsx",
       "source_location": "L33",
       "target": "app_components_overlay_characters_characters_layer_characterslayer",
       "weight": 1.0
@@ -79973,7 +79937,7 @@
       "relation": "imports",
       "source": "app_components_overlay_use_chat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L11",
+      "source_location": "L18",
       "target": "app_lib_chat_test_chattestscript",
       "weight": 1.0
     },
@@ -79985,44 +79949,8 @@
       "relation": "imports",
       "source": "app_components_overlay_use_chat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L12",
+      "source_location": "L19",
       "target": "app_lib_fading_rows_chatview",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_components_overlay_use_chat",
-      "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L13",
-      "target": "app_components_station_motion_motionreduced",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_components_overlay_use_chat",
-      "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L13",
-      "target": "app_components_station_motion_watchmotion",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_components_overlay_use_chat",
-      "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L14",
-      "target": "app_components_overlay_activity_feed_activityfeed",
       "weight": 1.0
     },
     {
@@ -80081,7 +80009,55 @@
       "relation": "imports",
       "source": "app_components_overlay_use_chat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L3",
+      "source_location": "L2",
+      "target": "app_lib_activity_messageforplatform",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_overlay_use_chat",
+      "source_file": "app/components/overlay/use-chat.ts",
+      "source_location": "L20",
+      "target": "app_components_station_motion_motionreduced",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_overlay_use_chat",
+      "source_file": "app/components/overlay/use-chat.ts",
+      "source_location": "L20",
+      "target": "app_components_station_motion_watchmotion",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_overlay_use_chat",
+      "source_file": "app/components/overlay/use-chat.ts",
+      "source_location": "L21",
+      "target": "app_components_overlay_activity_feed_activityfeed",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_overlay_use_chat",
+      "source_file": "app/components/overlay/use-chat.ts",
+      "source_location": "L9",
       "target": "app_lib_chat_feed_chataction",
       "weight": 1.0
     },
@@ -80093,7 +80069,7 @@
       "relation": "imports",
       "source": "app_components_overlay_use_chat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L3",
+      "source_location": "L9",
       "target": "app_lib_chat_feed_chatoptions",
       "weight": 1.0
     },
@@ -80105,7 +80081,7 @@
       "relation": "imports",
       "source": "app_components_overlay_use_chat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L3",
+      "source_location": "L9",
       "target": "app_lib_chat_feed_chatreducer",
       "weight": 1.0
     },
@@ -80117,7 +80093,19 @@
       "relation": "imports",
       "source": "app_components_overlay_use_chat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L3",
+      "source_location": "L9",
+      "target": "app_lib_chat_feed_chatrow",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_overlay_use_chat",
+      "source_file": "app/components/overlay/use-chat.ts",
+      "source_location": "L9",
       "target": "app_lib_chat_feed_chatstate",
       "weight": 1.0
     },
@@ -80129,7 +80117,7 @@
       "relation": "imports",
       "source": "app_components_overlay_use_chat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L3",
+      "source_location": "L9",
       "target": "app_lib_chat_feed_initialchatstate",
       "weight": 1.0
     },
@@ -80141,7 +80129,7 @@
       "relation": "imports",
       "source": "app_components_overlay_use_chat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L3",
+      "source_location": "L9",
       "target": "app_lib_chat_feed_nextwakeat",
       "weight": 1.0
     },
@@ -138526,6 +138514,7 @@
       "source_file": "app/components/overlay/activity-feed.tsx",
       "source_location": "L2",
       "target": "app_lib_activity",
+      "type_only": true,
       "weight": 1.0
     },
     {
@@ -139916,6 +139905,7 @@
       "source_file": "app/components/overlay/overlay-composition.tsx",
       "source_location": "L32",
       "target": "app_components_overlay_activity_feed",
+      "type_only": true,
       "weight": 1.0
     },
     {
@@ -140658,7 +140648,7 @@
       "relation": "imports_from",
       "source": "app_components_overlay_use_chat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L11",
+      "source_location": "L18",
       "target": "app_lib_chat_test",
       "weight": 1.0
     },
@@ -140670,33 +140660,8 @@
       "relation": "imports_from",
       "source": "app_components_overlay_use_chat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L12",
+      "source_location": "L19",
       "target": "app_lib_fading_rows",
-      "type_only": true,
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports_from",
-      "source": "app_components_overlay_use_chat",
-      "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L13",
-      "target": "app_components_station_motion",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports_from",
-      "source": "app_components_overlay_use_chat",
-      "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L14",
-      "target": "app_components_overlay_activity_feed",
       "type_only": true,
       "weight": 1.0
     },
@@ -140710,6 +140675,30 @@
       "source_file": "app/components/overlay/use-chat.ts",
       "source_location": "L2",
       "target": "app_lib_activity",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_overlay_use_chat",
+      "source_file": "app/components/overlay/use-chat.ts",
+      "source_location": "L20",
+      "target": "app_components_station_motion",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_overlay_use_chat",
+      "source_file": "app/components/overlay/use-chat.ts",
+      "source_location": "L21",
+      "target": "app_components_overlay_activity_feed",
       "type_only": true,
       "weight": 1.0
     },
@@ -140721,7 +140710,7 @@
       "relation": "imports_from",
       "source": "app_components_overlay_use_chat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L3",
+      "source_location": "L9",
       "target": "app_lib_chat_feed",
       "weight": 1.0
     },
@@ -177139,28 +177128,6 @@
       "relation": "contains",
       "source": "app_components_overlay_activity_feed",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L106",
-      "target": "app_components_overlay_activity_feed_activityfeedoptions",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_overlay_activity_feed",
-      "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L116",
-      "target": "app_components_overlay_activity_feed_useactivityfeed",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_overlay_activity_feed",
-      "source_file": "app/components/overlay/activity-feed.tsx",
       "source_location": "L12",
       "target": "app_components_overlay_activity_feed_activityfeed",
       "weight": 1.0
@@ -177216,8 +177183,19 @@
       "relation": "contains",
       "source": "app_components_overlay_activity_feed",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L87",
-      "target": "app_components_overlay_activity_feed_useplatformfeed",
+      "source_location": "L84",
+      "target": "app_components_overlay_activity_feed_activityfeedoptions",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_overlay_activity_feed",
+      "source_file": "app/components/overlay/activity-feed.tsx",
+      "source_location": "L94",
+      "target": "app_components_overlay_activity_feed_useactivityfeed",
       "weight": 1.0
     },
     {
@@ -179834,7 +179812,7 @@
       "relation": "contains",
       "source": "app_components_overlay_use_chat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L163",
+      "source_location": "L180",
       "target": "app_components_overlay_use_chat_usechat",
       "weight": 1.0
     },
@@ -179845,7 +179823,7 @@
       "relation": "contains",
       "source": "app_components_overlay_use_chat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L17",
+      "source_location": "L24",
       "target": "app_components_overlay_use_chat_sample_interval_ms",
       "weight": 1.0
     },
@@ -179856,7 +179834,7 @@
       "relation": "contains",
       "source": "app_components_overlay_use_chat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L19",
+      "source_location": "L26",
       "target": "app_components_overlay_use_chat_usechatoptions",
       "weight": 1.0
     },
@@ -179867,7 +179845,7 @@
       "relation": "contains",
       "source": "app_components_overlay_use_chat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L33",
+      "source_location": "L40",
       "target": "app_components_overlay_use_chat_still_limits",
       "weight": 1.0
     },
@@ -179878,7 +179856,7 @@
       "relation": "contains",
       "source": "app_components_overlay_use_chat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L39",
+      "source_location": "L46",
       "target": "app_components_overlay_use_chat_sampleevent",
       "weight": 1.0
     },
@@ -179889,7 +179867,7 @@
       "relation": "contains",
       "source": "app_components_overlay_use_chat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L50",
+      "source_location": "L57",
       "target": "app_components_overlay_use_chat_subscribemotion",
       "weight": 1.0
     },
@@ -179900,7 +179878,7 @@
       "relation": "contains",
       "source": "app_components_overlay_use_chat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L60",
+      "source_location": "L67",
       "target": "app_components_overlay_use_chat_usemotionreduced",
       "weight": 1.0
     },
@@ -179911,7 +179889,7 @@
       "relation": "contains",
       "source": "app_components_overlay_use_chat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L65",
+      "source_location": "L75",
       "target": "app_components_overlay_use_chat_chatsource",
       "weight": 1.0
     },
@@ -179922,7 +179900,7 @@
       "relation": "contains",
       "source": "app_components_overlay_use_chat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L77",
+      "source_location": "L88",
       "target": "app_components_overlay_use_chat_usechatstate",
       "weight": 1.0
     },
@@ -210799,7 +210777,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_chat_behavior",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L712",
+      "source_location": "L716",
       "target": "docs_overlay_composition_chat_appearance",
       "weight": 1.0
     },
@@ -210810,7 +210788,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_chat_behavior",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L741",
+      "source_location": "L745",
       "target": "docs_overlay_composition_message_background",
       "weight": 1.0
     },
@@ -210821,7 +210799,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_chat_behavior",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L759",
+      "source_location": "L763",
       "target": "docs_overlay_composition_moderation",
       "weight": 1.0
     },
@@ -210832,7 +210810,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_chat_behavior",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L770",
+      "source_location": "L774",
       "target": "docs_overlay_composition_commands",
       "weight": 1.0
     },
@@ -210843,7 +210821,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_chat_behavior",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L779",
+      "source_location": "L783",
       "target": "docs_overlay_composition_reconnection",
       "weight": 1.0
     },
@@ -210854,7 +210832,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_editor",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L521",
+      "source_location": "L525",
       "target": "docs_overlay_composition_add_and_remove_a_layer",
       "weight": 1.0
     },
@@ -210865,7 +210843,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_editor",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L550",
+      "source_location": "L554",
       "target": "docs_overlay_composition_settings_of_the_selected_layer",
       "weight": 1.0
     },
@@ -210876,7 +210854,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_editor",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L581",
+      "source_location": "L585",
       "target": "docs_overlay_composition_keyboard",
       "weight": 1.0
     },
@@ -210887,7 +210865,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_editor",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L604",
+      "source_location": "L608",
       "target": "docs_overlay_composition_how_the_content_follows_the_size",
       "weight": 1.0
     },
@@ -210898,7 +210876,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_editor",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L625",
+      "source_location": "L629",
       "target": "docs_overlay_composition_saves",
       "weight": 1.0
     },
@@ -210909,7 +210887,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_grid_and_orientation",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L140",
+      "source_location": "L144",
       "target": "docs_overlay_composition_layer_settings",
       "weight": 1.0
     },
@@ -210920,7 +210898,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_grid_and_orientation",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L169",
+      "source_location": "L173",
       "target": "docs_overlay_composition_qr_code",
       "weight": 1.0
     },
@@ -210931,7 +210909,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_grid_and_orientation",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L201",
+      "source_location": "L205",
       "target": "docs_overlay_composition_camera_frame",
       "weight": 1.0
     },
@@ -210942,7 +210920,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_grid_and_orientation",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L225",
+      "source_location": "L229",
       "target": "docs_overlay_composition_canvas",
       "weight": 1.0
     },
@@ -210953,7 +210931,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_grid_and_orientation",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L235",
+      "source_location": "L239",
       "target": "docs_overlay_composition_stored_values",
       "weight": 1.0
     },
@@ -210986,7 +210964,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_layouts",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L287",
+      "source_location": "L291",
       "target": "docs_overlay_composition_how_the_server_stores_layouts",
       "weight": 1.0
     },
@@ -210997,7 +210975,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_obs_browser_source",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L449",
+      "source_location": "L453",
       "target": "docs_overlay_composition_live_room_seats",
       "weight": 1.0
     },
@@ -211008,7 +210986,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L248",
+      "source_location": "L252",
       "target": "docs_overlay_composition_layouts",
       "weight": 1.0
     },
@@ -211030,7 +211008,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L300",
+      "source_location": "L304",
       "target": "docs_overlay_composition_state_from_before_the_overlay_studio",
       "weight": 1.0
     },
@@ -211041,7 +211019,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L364",
+      "source_location": "L368",
       "target": "docs_overlay_composition_cells_of_120_pixels",
       "weight": 1.0
     },
@@ -211052,7 +211030,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L385",
+      "source_location": "L389",
       "target": "docs_overlay_composition_urls",
       "weight": 1.0
     },
@@ -211063,7 +211041,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L426",
+      "source_location": "L430",
       "target": "docs_overlay_composition_obs_browser_source",
       "weight": 1.0
     },
@@ -211074,7 +211052,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L457",
+      "source_location": "L461",
       "target": "docs_overlay_composition_editor",
       "weight": 1.0
     },
@@ -211096,7 +211074,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L648",
+      "source_location": "L652",
       "target": "docs_overlay_composition_test",
       "weight": 1.0
     },
@@ -211107,7 +211085,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L688",
+      "source_location": "L692",
       "target": "docs_overlay_composition_chat_behavior",
       "weight": 1.0
     },
@@ -211118,7 +211096,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L797",
+      "source_location": "L801",
       "target": "docs_overlay_composition_youtube_quota_and_sockets",
       "weight": 1.0
     },
@@ -211129,7 +211107,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L813",
+      "source_location": "L817",
       "target": "docs_overlay_composition_security",
       "weight": 1.0
     },
@@ -211140,7 +211118,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L829",
+      "source_location": "L833",
       "target": "docs_overlay_composition_limits_and_known_gaps",
       "weight": 1.0
     },
@@ -215320,6 +215298,17 @@
       "relation": "contains",
       "source": "tests_e2e_overlay_composition_spec",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L1000",
+      "target": "tests_e2e_overlay_composition_spec_settestend",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_overlay_composition_spec",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
       "source_location": "L101",
       "target": "tests_e2e_overlay_composition_spec_chatat",
       "weight": 1.0
@@ -215564,17 +215553,6 @@
       "source_file": "tests/e2e/overlay-composition.spec.ts",
       "source_location": "L762",
       "target": "tests_e2e_overlay_composition_spec_expectsamerects",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "tests_e2e_overlay_composition_spec",
-      "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L978",
-      "target": "tests_e2e_overlay_composition_spec_settestend",
       "weight": 1.0
     },
     {
@@ -225573,7 +225551,7 @@
       "relation": "references",
       "source": "docs_overlay_composition",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L246",
+      "source_location": "L250",
       "target": "docs_api",
       "weight": 1.0
     },
@@ -225595,7 +225573,7 @@
       "relation": "references",
       "source": "docs_overlay_composition",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L455",
+      "source_location": "L459",
       "target": "docs_live_room_capacity",
       "weight": 1.0
     },
@@ -225606,7 +225584,7 @@
       "relation": "references",
       "source": "docs_overlay_composition",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L462",
+      "source_location": "L466",
       "target": "docs_streamer_tools",
       "weight": 1.0
     },
@@ -225942,7 +225920,7 @@
       "relation": "indirect_call",
       "source": "app_components_overlay_use_chat_usechatstate",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L82",
+      "source_location": "L93",
       "target": "app_lib_chat_feed_initialchatstate",
       "weight": 1.0
     },
@@ -225954,7 +225932,7 @@
       "relation": "indirect_call",
       "source": "app_components_overlay_use_chat_usemotionreduced",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L61",
+      "source_location": "L68",
       "target": "app_components_overlay_use_chat_subscribemotion",
       "weight": 1.0
     },
@@ -225966,7 +225944,7 @@
       "relation": "indirect_call",
       "source": "app_components_overlay_use_chat_usemotionreduced",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L61",
+      "source_location": "L68",
       "target": "app_components_station_motion_motionreduced",
       "weight": 1.0
     },
@@ -230619,7 +230597,7 @@
       "label": "ActivityFeedOptions",
       "norm_label": "activityfeedoptions",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L106"
+      "source_location": "L84"
     },
     {
       "_callable": true,
@@ -231171,7 +231149,7 @@
       "label": "ChatSource",
       "norm_label": "chatsource",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L65"
+      "source_location": "L75"
     },
     {
       "_callable": true,
@@ -231183,7 +231161,7 @@
       "label": "UseChatOptions",
       "norm_label": "usechatoptions",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L19"
+      "source_location": "L26"
     },
     {
       "_callable": true,
@@ -241075,18 +241053,7 @@
       "label": "useActivityFeed()",
       "norm_label": "useactivityfeed()",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L116"
-    },
-    {
-      "_callable": true,
-      "_origin": "ast",
-      "community": null,
-      "file_type": "code",
-      "id": "app_components_overlay_activity_feed_useplatformfeed",
-      "label": "usePlatformFeed()",
-      "norm_label": "useplatformfeed()",
-      "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L87"
+      "source_location": "L94"
     },
     {
       "_callable": true,
@@ -243430,7 +243397,7 @@
       "label": "sampleEvent()",
       "norm_label": "sampleevent()",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L39"
+      "source_location": "L46"
     },
     {
       "_callable": true,
@@ -243441,7 +243408,7 @@
       "label": "subscribeMotion()",
       "norm_label": "subscribemotion()",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L50"
+      "source_location": "L57"
     },
     {
       "_callable": true,
@@ -243452,7 +243419,7 @@
       "label": "useChat()",
       "norm_label": "usechat()",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L163"
+      "source_location": "L180"
     },
     {
       "_callable": true,
@@ -243463,7 +243430,7 @@
       "label": "useChatState()",
       "norm_label": "usechatstate()",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L77"
+      "source_location": "L88"
     },
     {
       "_callable": true,
@@ -243474,7 +243441,7 @@
       "label": "useMotionReduced()",
       "norm_label": "usemotionreduced()",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L60"
+      "source_location": "L67"
     },
     {
       "_callable": true,
@@ -267361,7 +267328,7 @@
       "label": "setTestEnd()",
       "norm_label": "settestend()",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L978"
+      "source_location": "L1000"
     },
     {
       "_callable": true,
@@ -274137,7 +274104,7 @@
       "label": "SAMPLE_INTERVAL_MS",
       "norm_label": "sample_interval_ms",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L17"
+      "source_location": "L24"
     },
     {
       "_origin": "ast",
@@ -274147,7 +274114,7 @@
       "label": "STILL_LIMITS",
       "norm_label": "still_limits",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L33"
+      "source_location": "L40"
     },
     {
       "_origin": "ast",
@@ -289801,7 +289768,7 @@
       "node_kind": "heading",
       "norm_label": "add and remove a layer",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L521"
+      "source_location": "L525"
     },
     {
       "_origin": "ast",
@@ -289812,7 +289779,7 @@
       "node_kind": "heading",
       "norm_label": "camera frame",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L201"
+      "source_location": "L205"
     },
     {
       "_origin": "ast",
@@ -289823,7 +289790,7 @@
       "node_kind": "heading",
       "norm_label": "canvas",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L225"
+      "source_location": "L229"
     },
     {
       "_origin": "ast",
@@ -289834,7 +289801,7 @@
       "node_kind": "heading",
       "norm_label": "cells of 120 pixels",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L364"
+      "source_location": "L368"
     },
     {
       "_origin": "ast",
@@ -289845,7 +289812,7 @@
       "node_kind": "heading",
       "norm_label": "chat appearance",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L712"
+      "source_location": "L716"
     },
     {
       "_origin": "ast",
@@ -289856,7 +289823,7 @@
       "node_kind": "heading",
       "norm_label": "chat behavior",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L688"
+      "source_location": "L692"
     },
     {
       "_origin": "ast",
@@ -289867,7 +289834,7 @@
       "node_kind": "heading",
       "norm_label": "commands",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L770"
+      "source_location": "L774"
     },
     {
       "_origin": "ast",
@@ -289878,7 +289845,7 @@
       "node_kind": "heading",
       "norm_label": "editor",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L457"
+      "source_location": "L461"
     },
     {
       "_origin": "ast",
@@ -289900,7 +289867,7 @@
       "node_kind": "heading",
       "norm_label": "how the content follows the size",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L604"
+      "source_location": "L608"
     },
     {
       "_origin": "ast",
@@ -289911,7 +289878,7 @@
       "node_kind": "heading",
       "norm_label": "how the server stores layouts",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L287"
+      "source_location": "L291"
     },
     {
       "_origin": "ast",
@@ -289922,7 +289889,7 @@
       "node_kind": "heading",
       "norm_label": "keyboard",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L581"
+      "source_location": "L585"
     },
     {
       "_origin": "ast",
@@ -289933,7 +289900,7 @@
       "node_kind": "heading",
       "norm_label": "layer settings",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L140"
+      "source_location": "L144"
     },
     {
       "_origin": "ast",
@@ -289955,7 +289922,7 @@
       "node_kind": "heading",
       "norm_label": "layouts",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L248"
+      "source_location": "L252"
     },
     {
       "_origin": "ast",
@@ -289966,7 +289933,7 @@
       "node_kind": "heading",
       "norm_label": "limits and known gaps",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L829"
+      "source_location": "L833"
     },
     {
       "_origin": "ast",
@@ -289977,7 +289944,7 @@
       "node_kind": "heading",
       "norm_label": "live-room seats",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L449"
+      "source_location": "L453"
     },
     {
       "_origin": "ast",
@@ -289988,7 +289955,7 @@
       "node_kind": "heading",
       "norm_label": "message background",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L741"
+      "source_location": "L745"
     },
     {
       "_origin": "ast",
@@ -289999,7 +289966,7 @@
       "node_kind": "heading",
       "norm_label": "moderation",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L759"
+      "source_location": "L763"
     },
     {
       "_origin": "ast",
@@ -290010,7 +289977,7 @@
       "node_kind": "heading",
       "norm_label": "obs browser source",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L426"
+      "source_location": "L430"
     },
     {
       "_origin": "ast",
@@ -290043,7 +290010,7 @@
       "node_kind": "heading",
       "norm_label": "qr code",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L169"
+      "source_location": "L173"
     },
     {
       "_origin": "ast",
@@ -290054,7 +290021,7 @@
       "node_kind": "heading",
       "norm_label": "reconnection",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L779"
+      "source_location": "L783"
     },
     {
       "_origin": "ast",
@@ -290065,7 +290032,7 @@
       "node_kind": "heading",
       "norm_label": "saves",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L625"
+      "source_location": "L629"
     },
     {
       "_origin": "ast",
@@ -290076,7 +290043,7 @@
       "node_kind": "heading",
       "norm_label": "security",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L813"
+      "source_location": "L817"
     },
     {
       "_origin": "ast",
@@ -290087,7 +290054,7 @@
       "node_kind": "heading",
       "norm_label": "settings of the selected layer",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L550"
+      "source_location": "L554"
     },
     {
       "_origin": "ast",
@@ -290098,7 +290065,7 @@
       "node_kind": "heading",
       "norm_label": "state from before the overlay studio",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L300"
+      "source_location": "L304"
     },
     {
       "_origin": "ast",
@@ -290109,7 +290076,7 @@
       "node_kind": "heading",
       "norm_label": "stored values",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L235"
+      "source_location": "L239"
     },
     {
       "_origin": "ast",
@@ -290120,7 +290087,7 @@
       "node_kind": "heading",
       "norm_label": "test",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L648"
+      "source_location": "L652"
     },
     {
       "_origin": "ast",
@@ -290142,7 +290109,7 @@
       "node_kind": "heading",
       "norm_label": "urls",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L385"
+      "source_location": "L389"
     },
     {
       "_origin": "ast",
@@ -290153,7 +290120,7 @@
       "node_kind": "heading",
       "norm_label": "youtube quota and sockets",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L797"
+      "source_location": "L801"
     },
     {
       "_origin": "ast",

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { messageForPlatform, type ActivityMessage, type ActivityPlatform } from "../../lib/activity";
+import type { ActivityMessage } from "../../lib/activity";
 import {
   activityUrl,
   openActivitySocket,
@@ -78,28 +78,6 @@ function acquire(url: string, onMessage: Listener, onStatus: (status: ActivitySo
       current.release();
     }
   };
-}
-
-/**
- * `feed` with the events of one platform only. Null `platform` gives `feed` itself: all platforms. An output that
- * shows Twitch only reads the same socket as the other output, so the filter costs no provider call.
- */
-export function usePlatformFeed(feed: ActivityFeed | null, platform: ActivityPlatform | null): ActivityFeed | null {
-  const all = feed?.subscribe;
-  // The filter changes only with the socket or the platform. A new status of the feed must not make the readers
-  // subscribe again: they would lose the rows that they have.
-  const subscribe = useMemo(() => {
-    if (!all || platform === null) return null;
-    return (listener: Listener): (() => void) =>
-      all((message: ActivityMessage): void => {
-        const shown: ActivityMessage | null = messageForPlatform(message, platform);
-        if (shown) listener(shown);
-      });
-  }, [all, platform]);
-  return useMemo<ActivityFeed | null>(
-    () => (feed && subscribe ? { subscribe, status: feed.status } : feed),
-    [feed, subscribe],
-  );
 }
 
 /** `characters` adds the playground frames. `owner` connects without a key: the signed-in owner's editor. */

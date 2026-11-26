@@ -969,7 +969,29 @@ test("an output with the Twitch switch on shows Twitch chat only, and the other 
     const merged = await chatSource(browser, rows, "/@feature_host/overlay?key=e2e-key", { width: 960, height: 540 });
     await expect(merged.rows).toHaveCount(3);
     await expect(merged.page.locator(".ov-composition")).not.toHaveAttribute("data-overlay-platform");
-    await Promise.all([close(only.page), close(merged.page)]);
+    // The owner turns the switch on for the horizontal output during the stream. The Twitch row stays on screen and
+    // the rows of the other platforms go. The socket stays open, so it sends no second snapshot.
+    const owner = await signedIn(browser, "featureowner", OWNER_IP);
+    const turn = async (on: boolean): Promise<void> => {
+      const done = await owner.request.post("/api/overlay", {
+        data: { action: "layers", twitchOnly: { horizontal: on } },
+      });
+      expect(done.status()).toBe(200);
+    };
+    await turn(true);
+    await expect(merged.page.locator(".ov-composition")).toHaveAttribute("data-overlay-platform", "twitch");
+    await expect(merged.rows).toHaveCount(1);
+    await expect(merged.rows).toContainText("from twitch");
+    // Off again: the rows from before the switch show again, and a new message of another platform shows.
+    await turn(false);
+    await expect(merged.page.locator(".ov-composition")).not.toHaveAttribute("data-overlay-platform");
+    merged.send(event(message({ platform: "kick", id: "m6", user: "Kai", text: "kick is back" })));
+    await expect(merged.rows).toHaveCount(4);
+    await expect(merged.chat).toContainText("from twitch");
+    await expect(merged.chat).toContainText("from youtube");
+    await expect(merged.chat).toContainText("kick is back");
+    expect(merged.sockets).toHaveLength(1);
+    await Promise.all([close(only.page), close(merged.page), close(owner)]);
   } finally {
     await runSql("overlay-twitch-only-restore", [layersSql({}), noKeysSql]);
   }

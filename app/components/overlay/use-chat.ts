@@ -1,11 +1,18 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import type { ActivityChat, ActivityEvent, ActivityMessage, ActivityPlatform } from "../../lib/activity";
+import {
+  messageForPlatform,
+  type ActivityChat,
+  type ActivityEvent,
+  type ActivityMessage,
+  type ActivityPlatform,
+} from "../../lib/activity";
 import {
   chatReducer,
   initialChatState,
   nextWakeAt,
   type ChatAction,
   type ChatOptions,
+  type ChatRow,
   type ChatState,
 } from "../../lib/chat-feed";
 import { chatTestScript } from "../../lib/chat-test";
@@ -61,11 +68,15 @@ function useMotionReduced(): boolean {
   return useSyncExternalStore(subscribeMotion, motionReduced, (): boolean => false);
 }
 
-/** Where a chat state gets its events: the activity feed, or samples (shown at once if `prefill`, then on a loop). */
+/**
+ * Where a chat state gets its events: the activity feed, or samples (shown at once if `prefill`, then on a loop).
+ * `platform` drops the feed events of the other platforms. Null takes each platform.
+ */
 interface ChatSource {
   feed: ActivityFeed | null;
   samples?: readonly ActivityEvent[];
   prefill: boolean;
+  platform: ActivityPlatform | null;
 }
 
 /**
@@ -75,7 +86,7 @@ interface ChatSource {
  * Prefilled samples play on a loop, except with reduced motion: then they show once, as a still snapshot.
  */
 function useChatState(
-  { feed, samples, prefill }: ChatSource,
+  { feed, samples, prefill, platform }: ChatSource,
   hideCommands: boolean,
   serverOffset: number | undefined,
 ): ChatState {
@@ -85,6 +96,9 @@ function useChatState(
   const options: ChatOptions = still ? { hideCommands, limits: STILL_LIMITS } : { hideCommands };
   const optionsRef = useRef<ChatOptions>(options);
   const offsetRef = useRef<number | undefined>(serverOffset);
+  // The subscription reads the platform from here. A changed platform must not subscribe again: the socket sends its
+  // snapshot one time only, so the chat on stream would be empty until the next message comes.
+  const platformRef = useRef<ActivityPlatform | null>(platform);
   const dispatch = useCallback((action: ChatAction): void => {
     setState((current: ChatState): ChatState => chatReducer(current, action, optionsRef.current));
   }, []);
@@ -92,10 +106,11 @@ function useChatState(
   useEffect(() => {
     optionsRef.current = still ? { hideCommands, limits: STILL_LIMITS } : { hideCommands };
     offsetRef.current = serverOffset;
+    platformRef.current = platform;
     if (appliedHide.current === hideCommands) return;
     appliedHide.current = hideCommands;
     dispatch({ type: "filter", hideCommands, now: Date.now() });
-  }, [hideCommands, serverOffset, still, dispatch]);
+  }, [hideCommands, serverOffset, platform, still, dispatch]);
 
   const subscribe = feed?.subscribe ?? null;
   useEffect(() => {
@@ -137,7 +152,9 @@ function useChatState(
     }
     if (!subscribe) return;
     return subscribe((message: ActivityMessage): void => {
-      dispatch({ type: "message", message, now: Date.now(), serverOffset: offsetRef.current });
+      const only: ActivityPlatform | null = platformRef.current;
+      const shown: ActivityMessage | null = only === null ? message : messageForPlatform(message, only);
+      if (shown) dispatch({ type: "message", message: shown, now: Date.now(), serverOffset: offsetRef.current });
     });
   }, [subscribe, samples, prefill, dispatch, still]);
 
@@ -168,12 +185,22 @@ export function useChat({
   test = false,
   platform = null,
 }: UseChatOptions): ChatView {
-  const chat: ChatState = useChatState({ feed, samples, prefill: true }, hideCommands, serverOffset);
+  const chat: ChatState = useChatState({ feed, samples, prefill: true, platform }, hideCommands, serverOffset);
   const script: readonly ActivityEvent[] = useMemo(() => chatTestScript(platform), [platform]);
   const trial: ChatState = useChatState(
-    { feed: null, samples: test ? script : undefined, prefill: false },
+    { feed: null, samples: test ? script : undefined, prefill: false, platform: null },
     hideCommands,
     serverOffset,
   );
-  return test ? trial : chat;
+  const view: ChatState = test ? trial : chat;
+  // The state takes no event of the other platforms from the moment the output shows one platform. The rows from
+  // before that moment stay in the state, so the rows of the one platform do not leave the screen. The others do not
+  // show, and they show again when the output shows each platform again.
+  return useMemo<ChatView>(
+    () =>
+      platform === null
+        ? view
+        : { ...view, rows: view.rows.filter((row: ChatRow): boolean => row.platform === platform) },
+    [view, platform],
+  );
 }
