@@ -21801,7 +21801,7 @@
       "relation": "calls",
       "source": "app_components_station_palette_createpalette",
       "source_file": "app/components/station/palette.ts",
-      "source_location": "L231",
+      "source_location": "L234",
       "target": "app_components_station_palette_lamps",
       "weight": 1.0
     },
@@ -21813,7 +21813,7 @@
       "relation": "calls",
       "source": "app_components_station_palette_createpalette",
       "source_file": "app/components/station/palette.ts",
-      "source_location": "L239",
+      "source_location": "L242",
       "target": "app_components_station_palette_metals",
       "weight": 1.0
     },
@@ -21825,7 +21825,7 @@
       "relation": "calls",
       "source": "app_components_station_palette_createpalette",
       "source_file": "app/components/station/palette.ts",
-      "source_location": "L240",
+      "source_location": "L243",
       "target": "app_components_station_palette_paints",
       "weight": 1.0
     },
@@ -21837,7 +21837,7 @@
       "relation": "calls",
       "source": "app_components_station_palette_createpalette",
       "source_file": "app/components/station/palette.ts",
-      "source_location": "L242",
+      "source_location": "L245",
       "target": "app_components_station_palette_furnishings",
       "weight": 1.0
     },
@@ -65589,7 +65589,7 @@
       "relation": "calls",
       "source": "tests_playground_host_test",
       "source_file": "tests/playground-host.test.ts",
-      "source_location": "L800",
+      "source_location": "L809",
       "target": "tests_playground_host_test_watchqueries",
       "weight": 1.0
     },
@@ -65601,7 +65601,7 @@
       "relation": "calls",
       "source": "tests_playground_host_test",
       "source_file": "tests/playground-host.test.ts",
-      "source_location": "L982",
+      "source_location": "L991",
       "target": "tests_playground_host_test_host",
       "weight": 1.0
     },
@@ -65673,7 +65673,7 @@
       "relation": "calls",
       "source": "tests_playground_host_test_host",
       "source_file": "tests/playground-host.test.ts",
-      "source_location": "L950",
+      "source_location": "L959",
       "target": "app_server_playground_host_playgroundhost",
       "weight": 1.0
     },
@@ -229834,7 +229834,7 @@
       "relation": "contains",
       "source": "tests_playground_host_test",
       "source_file": "tests/playground-host.test.ts",
-      "source_location": "L931",
+      "source_location": "L940",
       "target": "tests_playground_host_test_host",
       "weight": 1.0
     },
@@ -283226,7 +283226,7 @@
       "label": "host()",
       "norm_label": "host()",
       "source_file": "tests/playground-host.test.ts",
-      "source_location": "L931"
+      "source_location": "L940"
     },
     {
       "_callable": true,

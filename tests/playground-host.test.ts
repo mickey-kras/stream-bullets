@@ -757,6 +757,15 @@ describe("controls", (): void => {
   });
 
   it("clears the builds with one control and keeps the characters", async (): Promise<void> => {
+    // A fixed seed: with some seeds no character builds a block in the 5 seconds.
+    const random = crypto.getRandomValues.bind(crypto);
+    vi.spyOn(crypto, "getRandomValues").mockImplementation(
+      <T extends ArrayBufferView<ArrayBuffer> | null>(array: T): T => {
+        if (array instanceof Uint32Array && array.length === 1) array[0] = 7;
+        else if (array) random(array);
+        return array;
+      },
+    );
     const socket = await listen();
     const users: string[] = ["u1", "u2", "u3", "u4", "u5", "u6", "u7", "u8"];
     await deliver(users.map((user: string, i: number) => chat(`m${i}`, user, "hello")));
