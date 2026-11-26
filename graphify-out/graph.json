@@ -59227,6 +59227,318 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L195",
+      "target": "app_lib_activity_platform",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L219",
+      "target": "tests_activity_capacity_test_openfleet",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L230",
+      "target": "tests_activity_capacity_test_sleep",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L233",
+      "target": "tests_activity_capacity_test_received",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L233",
+      "target": "tests_activity_capacity_test_settled",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L235",
+      "target": "tests_activity_capacity_test_missing",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L240",
+      "target": "tests_activity_capacity_test_pagereports",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L253",
+      "target": "tests_activity_capacity_test_total",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L272",
+      "target": "tests_activity_capacity_test_openclients",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L272",
+      "target": "tests_activity_capacity_test_viralconsumers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L391",
+      "target": "tests_activity_capacity_test_pooled",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L394",
+      "target": "tests_activity_capacity_test_reconnectburst",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L462",
+      "target": "tests_activity_capacity_test_chatpage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L468",
+      "target": "tests_activity_capacity_test_streamid",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L494",
+      "target": "tests_activity_capacity_test_runtimeresidentbytes",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_capacity_test_chatpage",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L414",
+      "target": "tests_activity_capacity_test_streamid",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_capacity_test_chatpage",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L414",
+      "target": "tests_helpers_channels_youtubetext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_capacity_test_openclients",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L139",
+      "target": "tests_activity_capacity_test_pooled",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_capacity_test_openfleet",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L152",
+      "target": "tests_activity_capacity_test_openclients",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_capacity_test_openfleet",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L154",
+      "target": "tests_activity_capacity_test_settled",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_capacity_test_pagereports",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L128",
+      "target": "tests_activity_capacity_test_pooled",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_capacity_test_reconnectburst",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L342",
+      "target": "tests_activity_capacity_test_pagereports",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_capacity_test_reconnectburst",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L348",
+      "target": "tests_activity_capacity_test_total",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_capacity_test_reconnectburst",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L350",
+      "target": "tests_activity_capacity_test_sleep",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_capacity_test_reconnectburst",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L361",
+      "target": "tests_helpers_activity_harness_percentiles_8796e1235fe6",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_capacity_test_settled",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L93",
+      "target": "tests_activity_capacity_test_sleep",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "tests_activity_history_test",
       "source_file": "tests/activity-history.test.ts",
       "source_location": "L49",
@@ -59975,6 +60287,186 @@
       "source_file": "tests/channel-health.test.ts",
       "source_location": "L42",
       "target": "tests_channel_health_test_channel",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L175",
+      "target": "tests_channel_ingest_sharing_test_addconnection",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L176",
+      "target": "tests_channel_ingest_sharing_test_listen",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L178",
+      "target": "tests_channel_ingest_sharing_test_live",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L181",
+      "target": "tests_channel_ingest_sharing_test_paths",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L189",
+      "target": "tests_channel_ingest_sharing_test_state",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L199",
+      "target": "tests_channel_ingest_sharing_test_chatids",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L203",
+      "target": "tests_channel_ingest_sharing_test_leave",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L213",
+      "target": "tests_channel_ingest_sharing_test_request",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_channel_ingest_sharing_test_addconnection",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L69",
+      "target": "app_server_channel_tokens_server_tokenstatement",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_channel_ingest_sharing_test_leave",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L56",
+      "target": "tests_channel_ingest_sharing_test_state",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_channel_ingest_sharing_test_listen",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L48",
+      "target": "tests_channel_ingest_sharing_test_request",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_channel_ingest_sharing_test_listen",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L50",
+      "target": "tests_helpers_room_serversocketof",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_channel_ingest_sharing_test_live",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L105",
+      "target": "tests_helpers_channels_youtubetext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_channel_ingest_sharing_test_live",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L96",
+      "target": "tests_channel_ingest_sharing_test_quotaunits",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_channel_ingest_sharing_test_live",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L99",
+      "target": "tests_channel_ingest_sharing_test_state",
       "weight": 1.0
     },
     {
@@ -64075,6 +64567,270 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "tests_helpers_activity_harness_activityharness_addpage",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L192",
+      "target": "app_server_channel_providers_server_requiredsubscriptions",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_helpers_activity_harness_activityharness_addpage",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L210",
+      "target": "app_server_channel_tokens_server_tokenstatement",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_helpers_activity_harness_activityharness_chat",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L295",
+      "target": "tests_helpers_activity_harness_activityharness_notify",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_helpers_activity_harness_activityharness_dispose",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L144",
+      "target": "tests_helpers_activity_harness_activityharness_closeclients",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_helpers_activity_harness_activityharness_listen",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L238",
+      "target": "tests_helpers_activity_harness_activityharness_receive",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_helpers_activity_harness_activityharness_remove",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L314",
+      "target": "tests_helpers_activity_harness_activityharness_notify",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_helpers_activity_harness_activityharness_report",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L324",
+      "target": "tests_helpers_activity_harness_activityharness_json",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_helpers_activity_harness_activityharness_start",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L112",
+      "target": "tests_helpers_channels_fakeproviders_655757955470",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_helpers_activity_harness_activityharness_start",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L130",
+      "target": "tests_helpers_activity_harness_provideranswer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_helpers_activity_harness_activityharness_start",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L134",
+      "target": "tests_helpers_database_applymigrations",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_helpers_activity_harness_activityharness_start",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L134",
+      "target": "tests_helpers_database_migrationfiles",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_helpers_activity_harness_activityharness_start",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L135",
+      "target": "tests_helpers_activity_harness_activityharness",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_helpers_activity_harness_activityharness_step",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L333",
+      "target": "tests_helpers_activity_harness_activityharness_json",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_helpers_activity_harness_activityharness_workerreport",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L328",
+      "target": "tests_helpers_activity_harness_activityharness_json",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_helpers_activity_worker_capacityingest_constructor",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L100",
+      "target": "tests_helpers_activity_worker_counteddatabase",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_helpers_activity_worker_capacityingest_fetch",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L106",
+      "target": "tests_helpers_activity_worker_capacityingest_report",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_helpers_activity_worker_capacityingest_fetch",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L107",
+      "target": "tests_helpers_activity_worker_capacityingest_step",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_helpers_activity_worker_capacityingest_report",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L125",
+      "target": "tests_helpers_activity_worker_capacityingest_count",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_helpers_activity_worker_capacityingest_step",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L143",
+      "target": "tests_helpers_activity_worker_capacityingest_alarm",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_helpers_activity_worker_fetch",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L163",
+      "target": "tests_helpers_activity_worker_webhook",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_helpers_activity_worker_webhook",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L153",
+      "target": "app_server_channel_webhooks_server_twitchwebhook",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_helpers_activity_worker_webhook",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L153",
+      "target": "tests_helpers_activity_worker_counteddatabase",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "tests_helpers_api_apicaller",
       "source_file": "tests/helpers/api.ts",
       "source_location": "L53",
@@ -64363,9 +65119,9 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
-      "source": "tests_helpers_channels_installfakeproviders",
+      "source": "tests_helpers_channels_fakeproviders_655757955470",
       "source_file": "tests/helpers/channels.ts",
-      "source_location": "L162",
+      "source_location": "L172",
       "target": "tests_helpers_channels_platformoftoken",
       "weight": 1.0
     },
@@ -64375,10 +65131,22 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
-      "source": "tests_helpers_channels_installfakeproviders",
+      "source": "tests_helpers_channels_fakeproviders_655757955470",
       "source_file": "tests/helpers/channels.ts",
-      "source_location": "L163",
+      "source_location": "L173",
       "target": "tests_helpers_channels_json",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_helpers_channels_fakeproviders_655757955470",
+      "source_file": "tests/helpers/channels.ts",
+      "source_location": "L232",
+      "target": "tests_helpers_channels_twitchcondition",
       "weight": 1.0
     },
     {
@@ -64389,8 +65157,8 @@
       "relation": "calls",
       "source": "tests_helpers_channels_installfakeproviders",
       "source_file": "tests/helpers/channels.ts",
-      "source_location": "L222",
-      "target": "tests_helpers_channels_twitchcondition",
+      "source_location": "L121",
+      "target": "tests_helpers_channels_fakeproviders_655757955470",
       "weight": 1.0
     },
     {
@@ -65013,7 +65781,7 @@
       "relation": "calls",
       "source": "tests_live_capacity_test",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L155",
+      "source_location": "L156",
       "target": "tests_live_capacity_test_closeclients",
       "weight": 1.0
     },
@@ -65025,7 +65793,7 @@
       "relation": "calls",
       "source": "tests_live_capacity_test",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L162",
+      "source_location": "L163",
       "target": "tests_live_capacity_test_freshroom",
       "weight": 1.0
     },
@@ -65037,7 +65805,7 @@
       "relation": "calls",
       "source": "tests_live_capacity_test",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L163",
+      "source_location": "L164",
       "target": "tests_live_capacity_test_burst",
       "weight": 1.0
     },
@@ -65049,7 +65817,7 @@
       "relation": "calls",
       "source": "tests_live_capacity_test",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L173",
+      "source_location": "L174",
       "target": "tests_live_capacity_test_metrics_966b9734015a",
       "weight": 1.0
     },
@@ -65061,7 +65829,7 @@
       "relation": "calls",
       "source": "tests_live_capacity_test",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L175",
+      "source_location": "L176",
       "target": "tests_live_capacity_test_request",
       "weight": 1.0
     },
@@ -65073,7 +65841,7 @@
       "relation": "calls",
       "source": "tests_live_capacity_test",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L204",
+      "source_location": "L205",
       "target": "tests_live_capacity_test_percentiles",
       "weight": 1.0
     },
@@ -65085,7 +65853,7 @@
       "relation": "calls",
       "source": "tests_live_capacity_test",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L218",
+      "source_location": "L221",
       "target": "tests_live_capacity_test_message_6f9b9af3cd6e",
       "weight": 1.0
     },
@@ -65097,7 +65865,7 @@
       "relation": "calls",
       "source": "tests_live_capacity_test",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L235",
+      "source_location": "L238",
       "target": "tests_live_capacity_test_join",
       "weight": 1.0
     },
@@ -65109,7 +65877,7 @@
       "relation": "calls",
       "source": "tests_live_capacity_test_burst",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L77",
+      "source_location": "L78",
       "target": "tests_live_capacity_test_join",
       "weight": 1.0
     },
@@ -65121,7 +65889,7 @@
       "relation": "calls",
       "source": "tests_live_capacity_test_burst",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L83",
+      "source_location": "L84",
       "target": "tests_live_capacity_test_percentiles",
       "weight": 1.0
     },
@@ -65133,7 +65901,7 @@
       "relation": "calls",
       "source": "tests_live_capacity_test_join",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L68",
+      "source_location": "L69",
       "target": "tests_live_capacity_test_message_6f9b9af3cd6e",
       "weight": 1.0
     },
@@ -65145,7 +65913,7 @@
       "relation": "calls",
       "source": "tests_live_capacity_test_metrics_966b9734015a",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L53",
+      "source_location": "L54",
       "target": "tests_live_capacity_test_request",
       "weight": 1.0
     },
@@ -72682,6 +73450,54 @@
       "confidence_score": 1.0,
       "context": "field",
       "relation": "references",
+      "source": "tests_activity_capacity_test_counters",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L423",
+      "target": "tests_helpers_activity_worker_ingestreport",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "relation": "references",
+      "source": "tests_activity_capacity_test_counters",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L424",
+      "target": "tests_helpers_activity_worker_workerreport",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "relation": "references",
+      "source": "tests_activity_capacity_test_fleet",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L68",
+      "target": "tests_helpers_activity_harness_page",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "relation": "references",
+      "source": "tests_activity_capacity_test_fleet",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L69",
+      "target": "tests_helpers_activity_harness_activityclient",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "relation": "references",
       "source": "tests_e2e_characters_spec_frames",
       "source_file": "tests/e2e/characters.spec.ts",
       "source_location": "L75",
@@ -72698,6 +73514,18 @@
       "source_file": "tests/e2e/overlay-composition.spec.ts",
       "source_location": "L109",
       "target": "app_lib_activity_activityplatform",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "relation": "references",
+      "source": "tests_helpers_activity_harness_snapshot",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L50",
+      "target": "app_lib_activity_activitychat",
       "weight": 1.0
     },
     {
@@ -73286,6 +74114,42 @@
       "source_file": "app/server/room-connections.ts",
       "source_location": "L103",
       "target": "app_lib_overlay_layers_orientation",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "generic_arg",
+      "relation": "references",
+      "source": "tests_helpers_activity_harness_activityharness_report",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L323",
+      "target": "tests_helpers_activity_worker_ingestreport",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "generic_arg",
+      "relation": "references",
+      "source": "tests_helpers_activity_harness_activityharness_step",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L332",
+      "target": "tests_helpers_activity_worker_stepreport",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "generic_arg",
+      "relation": "references",
+      "source": "tests_helpers_activity_harness_activityharness_workerreport",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L327",
+      "target": "tests_helpers_activity_worker_workerreport",
       "weight": 1.0
     },
     {
@@ -117975,6 +118839,366 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L14",
+      "target": "tests_helpers_activity_harness_activityclient",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L14",
+      "target": "tests_helpers_activity_harness_activityharness",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L14",
+      "target": "tests_helpers_activity_harness_consumer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L14",
+      "target": "tests_helpers_activity_harness_consumers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L14",
+      "target": "tests_helpers_activity_harness_page",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L14",
+      "target": "tests_helpers_activity_harness_percentiles",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L14",
+      "target": "tests_helpers_activity_harness_percentiles_8796e1235fe6",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L22",
+      "target": "tests_helpers_activity_worker_ingestreport",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L22",
+      "target": "tests_helpers_activity_worker_workerreport",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L23",
+      "target": "tests_helpers_channels_youtubetext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L24",
+      "target": "tests_helpers_load_targets_cost_drivers_per_live_hour",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L24",
+      "target": "tests_helpers_load_targets_dropped_events_below_admission",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L24",
+      "target": "tests_helpers_load_targets_event_latency_p95_ms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L24",
+      "target": "tests_helpers_load_targets_fleet_reconnect_snapshot_p95_ms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L24",
+      "target": "tests_helpers_load_targets_flood_event_latency_p95_ms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L24",
+      "target": "tests_helpers_load_targets_lost_admitted_events",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L24",
+      "target": "tests_helpers_load_targets_moderation_latency_p95_ms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L24",
+      "target": "tests_helpers_load_targets_provider_requests_per_reconnect",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L24",
+      "target": "tests_helpers_load_targets_reconnect_snapshot_p95_ms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L24",
+      "target": "tests_helpers_load_targets_storage_byte_growth_per_live_hour",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L24",
+      "target": "tests_helpers_load_targets_storage_row_growth_per_live_hour",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L24",
+      "target": "tests_helpers_load_targets_youtube_units_per_live_hour",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L4",
+      "target": "app_lib_activity_quotaday",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L5",
+      "target": "app_server_channel_ingest_limits_admission_burst",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L5",
+      "target": "app_server_channel_ingest_limits_admission_rate",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L5",
+      "target": "app_server_channel_ingest_limits_max_sockets",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L5",
+      "target": "app_server_channel_ingest_limits_moderation_burst",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L5",
+      "target": "app_server_channel_ingest_limits_seen_max",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L5",
+      "target": "app_server_channel_ingest_limits_snapshot_size",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L5",
+      "target": "app_server_channel_ingest_limits_youtube_min_poll_ms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
       "source": "tests_activity_history_test",
       "source_file": "tests/activity-history.test.ts",
       "source_location": "L2",
@@ -120271,6 +121495,222 @@
       "source_file": "tests/channel-health.test.ts",
       "source_location": "L9",
       "target": "app_lib_activity_activityplatform",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L10",
+      "target": "tests_helpers_room_fakesocket",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L10",
+      "target": "tests_helpers_room_installworkersruntime",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L10",
+      "target": "tests_helpers_room_roomnamespace",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L10",
+      "target": "tests_helpers_room_roomstate",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L10",
+      "target": "tests_helpers_room_serversocketof",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L2",
+      "target": "app_env_appenv",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L3",
+      "target": "app_lib_activity_activitychat",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L4",
+      "target": "app_server_channel_ingest_channelingest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L5",
+      "target": "app_server_channel_ingest_limits_reconcile_interval_ms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L5",
+      "target": "app_server_channel_ingest_limits_youtube_min_poll_ms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L6",
+      "target": "app_server_channel_providers_server_requiredsubscriptions",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L7",
+      "target": "app_server_channel_tokens_server_tokenstatement",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L8",
+      "target": "tests_helpers_channels_fakeproviders",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L8",
+      "target": "tests_helpers_channels_installfakeproviders",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L8",
+      "target": "tests_helpers_channels_providercall",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L8",
+      "target": "tests_helpers_channels_youtubetext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L9",
+      "target": "tests_helpers_database_createtestdatabase",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L9",
+      "target": "tests_helpers_database_testdatabase",
       "weight": 1.0
     },
     {
@@ -130263,6 +131703,198 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L10",
+      "target": "tests_helpers_channels_fakeproviders",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L10",
+      "target": "tests_helpers_channels_fakeproviders_655757955470",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L10",
+      "target": "tests_helpers_channels_providerfetch",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L11",
+      "target": "tests_helpers_database_applymigrations",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L11",
+      "target": "tests_helpers_database_migrationfiles",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L5",
+      "target": "app_env_appenv",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L6",
+      "target": "app_lib_activity_activitychat",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L7",
+      "target": "app_server_channel_providers_server_requiredsubscriptions",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L8",
+      "target": "app_server_channel_tokens_server_tokenstatement",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L9",
+      "target": "tests_helpers_activity_worker_ingestreport",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L9",
+      "target": "tests_helpers_activity_worker_stepreport",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L9",
+      "target": "tests_helpers_activity_worker_workerreport",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_helpers_activity_worker",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L1",
+      "target": "app_env_appenv",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_helpers_activity_worker",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L2",
+      "target": "app_server_channel_ingest_channelingest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_helpers_activity_worker",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L3",
+      "target": "app_server_channel_webhooks_server_twitchwebhook",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_helpers_activity_worker",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L4",
+      "target": "app_server_http_server_httperror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
       "source": "tests_helpers_api",
       "source_file": "tests/helpers/api.ts",
       "source_location": "L3",
@@ -131874,19 +133506,7 @@
       "source": "tests_live_capacity_test",
       "source_file": "tests/live-capacity.test.ts",
       "source_location": "L7",
-      "target": "tests_helpers_room_live_schema",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_live_capacity_test",
-      "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L7",
-      "target": "tests_helpers_room_liverows",
+      "target": "tests_helpers_load_targets_public_update_p95_ms",
       "weight": 1.0
     },
     {
@@ -131898,6 +133518,30 @@
       "source": "tests_live_capacity_test",
       "source_file": "tests/live-capacity.test.ts",
       "source_location": "L8",
+      "target": "tests_helpers_room_live_schema",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_live_capacity_test",
+      "source_file": "tests/live-capacity.test.ts",
+      "source_location": "L8",
+      "target": "tests_helpers_room_liverows",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_live_capacity_test",
+      "source_file": "tests/live-capacity.test.ts",
+      "source_location": "L9",
       "target": "app_types_livesnapshot",
       "weight": 1.0
     },
@@ -167933,6 +169577,115 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports_from",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L1",
+      "target": "ref_node_fs",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L14",
+      "target": "tests_helpers_activity_harness",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L2",
+      "target": "ref_node_os",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L22",
+      "target": "tests_helpers_activity_worker",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L23",
+      "target": "tests_helpers_channels",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L24",
+      "target": "tests_helpers_load_targets",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L3",
+      "target": "ref_vitest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L4",
+      "target": "app_lib_activity",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L5",
+      "target": "app_server_channel_ingest_limits",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
       "source": "tests_activity_history_test",
       "source_file": "tests/activity-history.test.ts",
       "source_location": "L1",
@@ -169056,6 +170809,128 @@
       "source_location": "L9",
       "target": "app_lib_activity",
       "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L1",
+      "target": "ref_vitest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L10",
+      "target": "tests_helpers_room",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L2",
+      "target": "app_env",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L3",
+      "target": "app_lib_activity",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L4",
+      "target": "app_server_channel_ingest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L5",
+      "target": "app_server_channel_ingest_limits",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L6",
+      "target": "app_server_channel_providers_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L7",
+      "target": "app_server_channel_tokens_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L8",
+      "target": "tests_helpers_channels",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L9",
+      "target": "tests_helpers_database",
       "weight": 1.0
     },
     {
@@ -174167,6 +176042,190 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports_from",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L1",
+      "target": "ref_node_crypto",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L10",
+      "target": "tests_helpers_channels",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L11",
+      "target": "tests_helpers_database",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L2",
+      "target": "ref_node_url",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L3",
+      "target": "ref_esbuild",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L4",
+      "target": "ref_miniflare",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L5",
+      "target": "app_env",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L6",
+      "target": "app_lib_activity",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L7",
+      "target": "app_server_channel_providers_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L8",
+      "target": "app_server_channel_tokens_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L9",
+      "target": "tests_helpers_activity_worker",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_helpers_activity_worker",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L1",
+      "target": "app_env",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_helpers_activity_worker",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L2",
+      "target": "app_server_channel_ingest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_helpers_activity_worker",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L3",
+      "target": "app_server_channel_webhooks_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_helpers_activity_worker",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L4",
+      "target": "app_server_http_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
       "source": "tests_helpers_api",
       "source_file": "tests/helpers/api.ts",
       "source_location": "L1",
@@ -175014,7 +177073,7 @@
       "source": "tests_live_capacity_test",
       "source_file": "tests/live-capacity.test.ts",
       "source_location": "L7",
-      "target": "tests_helpers_room",
+      "target": "tests_helpers_load_targets",
       "weight": 1.0
     },
     {
@@ -175026,6 +177085,18 @@
       "source": "tests_live_capacity_test",
       "source_file": "tests/live-capacity.test.ts",
       "source_location": "L8",
+      "target": "tests_helpers_room",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_live_capacity_test",
+      "source_file": "tests/live-capacity.test.ts",
+      "source_location": "L9",
       "target": "app_types",
       "type_only": true,
       "weight": 1.0
@@ -182293,6 +184364,30 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
+      "context": "parameter_type",
+      "relation": "references",
+      "source": "tests_helpers_activity_harness_activityharness_constructor",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L94",
+      "target": "tests_helpers_channels_fakeproviders",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "parameter_type",
+      "relation": "references",
+      "source": "tests_helpers_activity_worker_capacityingest_constructor",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L98",
+      "target": "app_env_appenv",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
       "context": "re-export",
       "relation": "imports_from",
       "source": "app_components_common",
@@ -183563,6 +185658,30 @@
       "source_file": "tests/entry-activity-counts.test.ts",
       "source_location": "L16",
       "target": "tests_entry_activity_counts_test_activity",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "type",
+      "relation": "inherits",
+      "source": "tests_helpers_activity_worker_capacityingest",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L95",
+      "target": "app_server_channel_ingest_channelingest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "type",
+      "relation": "inherits",
+      "source": "tests_helpers_activity_worker_ingestreport",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L23",
+      "target": "tests_helpers_activity_worker_ingestcounts",
       "weight": 1.0
     },
     {
@@ -222843,7 +224962,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1035",
+      "source_location": "L1036",
       "target": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
       "weight": 1.0
     },
@@ -222854,7 +224973,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1152",
+      "source_location": "L1153",
       "target": "docs_channel_connections_facts_not_checked",
       "weight": 1.0
     },
@@ -222942,7 +225061,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L583",
+      "source_location": "L584",
       "target": "docs_channel_connections_token_encryption_and_rotation",
       "weight": 1.0
     },
@@ -222953,7 +225072,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L637",
+      "source_location": "L638",
       "target": "docs_channel_connections_disconnect",
       "weight": 1.0
     },
@@ -222964,7 +225083,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L782",
+      "source_location": "L783",
       "target": "docs_channel_connections_logs_and_alerts",
       "weight": 1.0
     },
@@ -222975,7 +225094,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L814",
+      "source_location": "L815",
       "target": "docs_channel_connections_overlay_key",
       "weight": 1.0
     },
@@ -222986,7 +225105,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L829",
+      "source_location": "L830",
       "target": "docs_channel_connections_setup",
       "weight": 1.0
     },
@@ -222997,7 +225116,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L857",
+      "source_location": "L858",
       "target": "docs_channel_connections_runbook",
       "weight": 1.0
     },
@@ -223008,7 +225127,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L882",
+      "source_location": "L883",
       "target": "docs_channel_connections_turn_the_feature_off",
       "weight": 1.0
     },
@@ -223019,7 +225138,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L920",
+      "source_location": "L921",
       "target": "docs_channel_connections_rollback",
       "weight": 1.0
     },
@@ -223030,7 +225149,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L931",
+      "source_location": "L932",
       "target": "docs_channel_connections_threat_model",
       "weight": 1.0
     },
@@ -223041,7 +225160,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L996",
+      "source_location": "L997",
       "target": "docs_channel_connections_stored_youtube_data",
       "weight": 1.0
     },
@@ -223052,7 +225171,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L663",
+      "source_location": "L664",
       "target": "docs_channel_connections_provider_subscriptions",
       "weight": 1.0
     },
@@ -223063,7 +225182,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L681",
+      "source_location": "L682",
       "target": "docs_channel_connections_subscription_repair",
       "weight": 1.0
     },
@@ -223074,7 +225193,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L734",
+      "source_location": "L735",
       "target": "docs_channel_connections_refused_webhooks",
       "weight": 1.0
     },
@@ -223085,7 +225204,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L758",
+      "source_location": "L759",
       "target": "docs_channel_connections_account_deletion",
       "weight": 1.0
     },
@@ -223096,7 +225215,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L766",
+      "source_location": "L767",
       "target": "docs_channel_connections_callback_failures",
       "weight": 1.0
     },
@@ -223184,7 +225303,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1049",
+      "source_location": "L1050",
       "target": "docs_channel_connections_instagram",
       "weight": 1.0
     },
@@ -223195,7 +225314,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1087",
+      "source_location": "L1088",
       "target": "docs_channel_connections_facebook_live",
       "weight": 1.0
     },
@@ -223206,7 +225325,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1123",
+      "source_location": "L1124",
       "target": "docs_channel_connections_tiktok",
       "weight": 1.0
     },
@@ -223217,7 +225336,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1144",
+      "source_location": "L1145",
       "target": "docs_channel_connections_decisions_for_the_owner",
       "weight": 1.0
     },
@@ -223228,7 +225347,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L933",
+      "source_location": "L934",
       "target": "docs_channel_connections_assets",
       "weight": 1.0
     },
@@ -223239,7 +225358,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L941",
+      "source_location": "L942",
       "target": "docs_channel_connections_actors",
       "weight": 1.0
     },
@@ -223250,7 +225369,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L949",
+      "source_location": "L950",
       "target": "docs_channel_connections_threats_and_mitigations",
       "weight": 1.0
     },
@@ -223261,7 +225380,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L978",
+      "source_location": "L979",
       "target": "docs_channel_connections_residual_risks",
       "weight": 1.0
     },
@@ -223272,7 +225391,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_token_encryption_and_rotation",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L626",
+      "source_location": "L627",
       "target": "docs_channel_connections_refresh",
       "weight": 1.0
     },
@@ -223701,8 +225820,8 @@
       "relation": "contains",
       "source": "docs_live_room_capacity_live_room_capacity",
       "source_file": "docs/live-room-capacity.md",
-      "source_location": "L108",
-      "target": "docs_live_room_capacity_recovery_api",
+      "source_location": "L106",
+      "target": "docs_live_room_capacity_proposed_targets",
       "weight": 1.0
     },
     {
@@ -223712,29 +225831,7 @@
       "relation": "contains",
       "source": "docs_live_room_capacity_live_room_capacity",
       "source_file": "docs/live-room-capacity.md",
-      "source_location": "L28",
-      "target": "docs_live_room_capacity_workload",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "docs_live_room_capacity_live_room_capacity",
-      "source_file": "docs/live-room-capacity.md",
-      "source_location": "L46",
-      "target": "docs_live_room_capacity_results_and_limits",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "docs_live_room_capacity_live_room_capacity",
-      "source_file": "docs/live-room-capacity.md",
-      "source_location": "L8",
+      "source_location": "L139",
       "target": "docs_live_room_capacity_reproduce_locally",
       "weight": 1.0
     },
@@ -223745,7 +225842,51 @@
       "relation": "contains",
       "source": "docs_live_room_capacity_live_room_capacity",
       "source_file": "docs/live-room-capacity.md",
-      "source_location": "L85",
+      "source_location": "L159",
+      "target": "docs_live_room_capacity_workload",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_live_room_capacity_live_room_capacity",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L177",
+      "target": "docs_live_room_capacity_results_and_limits",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_live_room_capacity_live_room_capacity",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L216",
+      "target": "docs_live_room_capacity_activity_load_tests",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_live_room_capacity_live_room_capacity",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L253",
+      "target": "docs_live_room_capacity_activity_results_and_limits",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_live_room_capacity_live_room_capacity",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L307",
       "target": "docs_live_room_capacity_bounded_reliability_change",
       "weight": 1.0
     },
@@ -223756,8 +225897,41 @@
       "relation": "contains",
       "source": "docs_live_room_capacity_live_room_capacity",
       "source_file": "docs/live-room-capacity.md",
-      "source_location": "L96",
+      "source_location": "L318",
       "target": "docs_live_room_capacity_remaining_bottlenecks",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_live_room_capacity_live_room_capacity",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L330",
+      "target": "docs_live_room_capacity_recovery_api",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_live_room_capacity_live_room_capacity",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L8",
+      "target": "docs_live_room_capacity_load_model",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_live_room_capacity_load_model",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L83",
+      "target": "docs_live_room_capacity_cost_for_one_live_channel_hour",
       "weight": 1.0
     },
     {
@@ -225019,6 +227193,204 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "contains",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L102",
+      "target": "tests_activity_capacity_test_pooled",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L115",
+      "target": "tests_activity_capacity_test_received",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L123",
+      "target": "tests_activity_capacity_test_missing",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L127",
+      "target": "tests_activity_capacity_test_pagereports",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L131",
+      "target": "tests_activity_capacity_test_counter",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L133",
+      "target": "tests_activity_capacity_test_total",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L138",
+      "target": "tests_activity_capacity_test_openclients",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L146",
+      "target": "tests_activity_capacity_test_openfleet",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L160",
+      "target": "tests_activity_capacity_test_viralconsumers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L171",
+      "target": "tests_activity_capacity_test_runtimeresidentbytes",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L336",
+      "target": "tests_activity_capacity_test_reconnectburst",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L402",
+      "target": "tests_activity_capacity_test_streamid",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L407",
+      "target": "tests_activity_capacity_test_chatpage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L422",
+      "target": "tests_activity_capacity_test_counters",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L67",
+      "target": "tests_activity_capacity_test_fleet",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L78",
+      "target": "tests_activity_capacity_test_reports",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L80",
+      "target": "tests_activity_capacity_test_sleep",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L87",
+      "target": "tests_activity_capacity_test_settled",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
       "source": "tests_activity_history_test",
       "source_file": "tests/activity-history.test.ts",
       "source_location": "L13",
@@ -225771,6 +228143,116 @@
       "source_file": "tests/channel-health.test.ts",
       "source_location": "L23",
       "target": "tests_channel_health_test_channel",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L117",
+      "target": "tests_channel_ingest_sharing_test_paths",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L121",
+      "target": "tests_channel_ingest_sharing_test_chatids",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L24",
+      "target": "tests_channel_ingest_sharing_test_consumers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L38",
+      "target": "tests_channel_ingest_sharing_test_state",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L42",
+      "target": "tests_channel_ingest_sharing_test_request",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L47",
+      "target": "tests_channel_ingest_sharing_test_listen",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L54",
+      "target": "tests_channel_ingest_sharing_test_leave",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L59",
+      "target": "tests_channel_ingest_sharing_test_addconnection",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L80",
+      "target": "tests_channel_ingest_sharing_test_quotaunits",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_channel_ingest_sharing_test",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L93",
+      "target": "tests_channel_ingest_sharing_test_live",
       "weight": 1.0
     },
     {
@@ -230343,6 +232825,281 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "contains",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L19",
+      "target": "tests_helpers_activity_harness_socket",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L20",
+      "target": "tests_helpers_activity_harness_database",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L23",
+      "target": "tests_helpers_activity_harness_consumer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L24",
+      "target": "tests_helpers_activity_harness_consumers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L27",
+      "target": "tests_helpers_activity_harness_identity",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L357",
+      "target": "tests_helpers_activity_harness_provideranswer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L40",
+      "target": "tests_helpers_activity_harness_page",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L48",
+      "target": "tests_helpers_activity_harness_snapshot",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L53",
+      "target": "tests_helpers_activity_harness_incoming",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L59",
+      "target": "tests_helpers_activity_harness_activityclient",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L73",
+      "target": "tests_helpers_activity_harness_percentiles",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L79",
+      "target": "tests_helpers_activity_harness_percentiles_8796e1235fe6",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_activity_harness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L87",
+      "target": "tests_helpers_activity_harness_activityharness",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_activity_worker",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L13",
+      "target": "tests_helpers_activity_worker_ingestcounts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_activity_worker",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L150",
+      "target": "tests_helpers_activity_worker_webhook",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_activity_worker",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L161",
+      "target": "tests_helpers_activity_worker_fetch",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_activity_worker",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L23",
+      "target": "tests_helpers_activity_worker_ingestreport",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_activity_worker",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L41",
+      "target": "tests_helpers_activity_worker_workerreport",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_activity_worker",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L49",
+      "target": "tests_helpers_activity_worker_stepreport",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_activity_worker",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L55",
+      "target": "tests_helpers_activity_worker_realnow",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_activity_worker",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L60",
+      "target": "tests_helpers_activity_worker_executors",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_activity_worker",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L61",
+      "target": "tests_helpers_activity_worker_workercounts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_activity_worker",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L63",
+      "target": "tests_helpers_activity_worker_countedstatement",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_activity_worker",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L79",
+      "target": "tests_helpers_activity_worker_counteddatabase",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_activity_worker",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L95",
+      "target": "tests_helpers_activity_worker_capacityingest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
       "source": "tests_helpers_api",
       "source_file": "tests/helpers/api.ts",
       "source_location": "L17",
@@ -230555,7 +233312,29 @@
       "source": "tests_helpers_channels",
       "source_file": "tests/helpers/channels.ts",
       "source_location": "L117",
+      "target": "tests_helpers_channels_providerfetch",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_channels",
+      "source_file": "tests/helpers/channels.ts",
+      "source_location": "L120",
       "target": "tests_helpers_channels_installfakeproviders",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_channels",
+      "source_file": "tests/helpers/channels.ts",
+      "source_location": "L127",
+      "target": "tests_helpers_channels_fakeproviders_655757955470",
       "weight": 1.0
     },
     {
@@ -230576,7 +233355,7 @@
       "relation": "contains",
       "source": "tests_helpers_channels",
       "source_file": "tests/helpers/channels.ts",
-      "source_location": "L304",
+      "source_location": "L314",
       "target": "tests_helpers_channels_youtubetext",
       "weight": 1.0
     },
@@ -230710,6 +233489,149 @@
       "source_file": "tests/helpers/hostile-bidi.ts",
       "source_location": "L23",
       "target": "tests_helpers_hostile_bidi_rlm",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_load_targets",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L13",
+      "target": "tests_helpers_load_targets_event_latency_p95_ms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_load_targets",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L16",
+      "target": "tests_helpers_load_targets_flood_event_latency_p95_ms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_load_targets",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L19",
+      "target": "tests_helpers_load_targets_moderation_latency_p95_ms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_load_targets",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L22",
+      "target": "tests_helpers_load_targets_dropped_events_below_admission",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_load_targets",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L28",
+      "target": "tests_helpers_load_targets_lost_admitted_events",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_load_targets",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L34",
+      "target": "tests_helpers_load_targets_storage_row_growth_per_live_hour",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_load_targets",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L37",
+      "target": "tests_helpers_load_targets_storage_byte_growth_per_live_hour",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_load_targets",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L40",
+      "target": "tests_helpers_load_targets_public_update_p95_ms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_load_targets",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L43",
+      "target": "tests_helpers_load_targets_reconnect_snapshot_p95_ms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_load_targets",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L46",
+      "target": "tests_helpers_load_targets_fleet_reconnect_snapshot_p95_ms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_load_targets",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L49",
+      "target": "tests_helpers_load_targets_provider_requests_per_reconnect",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_load_targets",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L52",
+      "target": "tests_helpers_load_targets_youtube_units_per_live_hour",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_load_targets",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L58",
+      "target": "tests_helpers_load_targets_cost_drivers_per_live_hour",
       "weight": 1.0
     },
     {
@@ -231445,7 +234367,7 @@
       "relation": "contains",
       "source": "tests_live_capacity_test",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L10",
+      "source_location": "L11",
       "target": "tests_live_capacity_test_socket",
       "weight": 1.0
     },
@@ -231456,7 +234378,7 @@
       "relation": "contains",
       "source": "tests_live_capacity_test",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L11",
+      "source_location": "L12",
       "target": "tests_live_capacity_test_database",
       "weight": 1.0
     },
@@ -231467,7 +234389,7 @@
       "relation": "contains",
       "source": "tests_live_capacity_test",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L12",
+      "source_location": "L13",
       "target": "tests_live_capacity_test_role",
       "weight": 1.0
     },
@@ -231478,7 +234400,7 @@
       "relation": "contains",
       "source": "tests_live_capacity_test",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L13",
+      "source_location": "L14",
       "target": "tests_live_capacity_test_client",
       "weight": 1.0
     },
@@ -231489,7 +234411,7 @@
       "relation": "contains",
       "source": "tests_live_capacity_test",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L14",
+      "source_location": "L15",
       "target": "tests_live_capacity_test_metrics",
       "weight": 1.0
     },
@@ -231500,7 +234422,7 @@
       "relation": "contains",
       "source": "tests_live_capacity_test",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L15",
+      "source_location": "L16",
       "target": "tests_live_capacity_test_message",
       "weight": 1.0
     },
@@ -231511,7 +234433,7 @@
       "relation": "contains",
       "source": "tests_live_capacity_test",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L22",
+      "source_location": "L23",
       "target": "tests_live_capacity_test_clients",
       "weight": 1.0
     },
@@ -231522,7 +234444,7 @@
       "relation": "contains",
       "source": "tests_live_capacity_test",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L23",
+      "source_location": "L24",
       "target": "tests_live_capacity_test_reports",
       "weight": 1.0
     },
@@ -231533,7 +234455,7 @@
       "relation": "contains",
       "source": "tests_live_capacity_test",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L25",
+      "source_location": "L26",
       "target": "tests_live_capacity_test_percentiles",
       "weight": 1.0
     },
@@ -231544,7 +234466,7 @@
       "relation": "contains",
       "source": "tests_live_capacity_test",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L31",
+      "source_location": "L32",
       "target": "tests_live_capacity_test_message_6f9b9af3cd6e",
       "weight": 1.0
     },
@@ -231555,7 +234477,7 @@
       "relation": "contains",
       "source": "tests_live_capacity_test",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L48",
+      "source_location": "L49",
       "target": "tests_live_capacity_test_request",
       "weight": 1.0
     },
@@ -231566,7 +234488,7 @@
       "relation": "contains",
       "source": "tests_live_capacity_test",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L52",
+      "source_location": "L53",
       "target": "tests_live_capacity_test_metrics_966b9734015a",
       "weight": 1.0
     },
@@ -231577,7 +234499,7 @@
       "relation": "contains",
       "source": "tests_live_capacity_test",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L56",
+      "source_location": "L57",
       "target": "tests_live_capacity_test_join",
       "weight": 1.0
     },
@@ -231588,7 +234510,7 @@
       "relation": "contains",
       "source": "tests_live_capacity_test",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L76",
+      "source_location": "L77",
       "target": "tests_live_capacity_test_burst",
       "weight": 1.0
     },
@@ -231599,7 +234521,7 @@
       "relation": "contains",
       "source": "tests_live_capacity_test",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L86",
+      "source_location": "L87",
       "target": "tests_live_capacity_test_freshroom",
       "weight": 1.0
     },
@@ -231610,7 +234532,7 @@
       "relation": "contains",
       "source": "tests_live_capacity_test",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L91",
+      "source_location": "L92",
       "target": "tests_live_capacity_test_closeclients",
       "weight": 1.0
     },
@@ -239078,6 +242000,259 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "method",
+      "source": "tests_helpers_activity_harness_activityharness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L101",
+      "target": "tests_helpers_activity_harness_activityharness_start",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "tests_helpers_activity_harness_activityharness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L142",
+      "target": "tests_helpers_activity_harness_activityharness_dispose",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "tests_helpers_activity_harness_activityharness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L151",
+      "target": "tests_helpers_activity_harness_activityharness_closeclients",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "tests_helpers_activity_harness_activityharness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L159",
+      "target": "tests_helpers_activity_harness_activityharness_providercalls",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "tests_helpers_activity_harness_activityharness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L164",
+      "target": "tests_helpers_activity_harness_activityharness_addpage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "tests_helpers_activity_harness_activityharness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L218",
+      "target": "tests_helpers_activity_harness_activityharness_listen",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "tests_helpers_activity_harness_activityharness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L250",
+      "target": "tests_helpers_activity_harness_activityharness_receive",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "tests_helpers_activity_harness_activityharness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L266",
+      "target": "tests_helpers_activity_harness_activityharness_notify",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "tests_helpers_activity_harness_activityharness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L293",
+      "target": "tests_helpers_activity_harness_activityharness_chat",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "tests_helpers_activity_harness_activityharness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L312",
+      "target": "tests_helpers_activity_harness_activityharness_remove",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "tests_helpers_activity_harness_activityharness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L317",
+      "target": "tests_helpers_activity_harness_activityharness_json",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "tests_helpers_activity_harness_activityharness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L323",
+      "target": "tests_helpers_activity_harness_activityharness_report",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "tests_helpers_activity_harness_activityharness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L327",
+      "target": "tests_helpers_activity_harness_activityharness_workerreport",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "tests_helpers_activity_harness_activityharness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L332",
+      "target": "tests_helpers_activity_harness_activityharness_step",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "tests_helpers_activity_harness_activityharness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L337",
+      "target": "tests_helpers_activity_harness_activityharness_quotaunits",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "tests_helpers_activity_harness_activityharness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L346",
+      "target": "tests_helpers_activity_harness_activityharness_connectionstatus",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "tests_helpers_activity_harness_activityharness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L94",
+      "target": "tests_helpers_activity_harness_activityharness_constructor",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "tests_helpers_activity_worker_capacityingest",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L104",
+      "target": "tests_helpers_activity_worker_capacityingest_fetch",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "tests_helpers_activity_worker_capacityingest",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L112",
+      "target": "tests_helpers_activity_worker_capacityingest_alarm",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "tests_helpers_activity_worker_capacityingest",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L117",
+      "target": "tests_helpers_activity_worker_capacityingest_count",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "tests_helpers_activity_worker_capacityingest",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L121",
+      "target": "tests_helpers_activity_worker_capacityingest_report",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "tests_helpers_activity_worker_capacityingest",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L135",
+      "target": "tests_helpers_activity_worker_capacityingest_step",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "tests_helpers_activity_worker_capacityingest",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L98",
+      "target": "tests_helpers_activity_worker_capacityingest_constructor",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
       "source": "tests_helpers_authenticator_softkey",
       "source_file": "tests/helpers/authenticator.ts",
       "source_location": "L101",
@@ -239782,6 +242957,17 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "references",
+      "source": "docs_channel_connections",
+      "source_file": "docs/channel-connections.md",
+      "source_location": "L556",
+      "target": "docs_live_room_capacity",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "references",
       "source": "docs_characters",
       "source_file": "docs/characters.md",
       "source_location": "L140",
@@ -239819,6 +243005,17 @@
       "source_file": "docs/live-room-capacity.md",
       "source_location": "L5",
       "target": "docs_streamer_tools",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "references",
+      "source": "docs_live_room_capacity",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L77",
+      "target": "docs_channel_connections",
       "weight": 1.0
     },
     {
@@ -242938,6 +246135,30 @@
       "confidence_score": 0.85,
       "context": "call",
       "relation": "calls",
+      "source": "tests_channel_ingest_sharing_test_chatids",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L122",
+      "target": "tests_helpers_room_fakesocket_oftype",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_channel_ingest_sharing_test_leave",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L55",
+      "target": "tests_helpers_room_fakesocket_close",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "relation": "calls",
       "source": "tests_channel_ingest_test_run",
       "source_file": "tests/channel-ingest.test.ts",
       "source_location": "L2032",
@@ -244164,7 +247385,7 @@
       "relation": "references",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L642",
+      "source_location": "L643",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -244188,7 +247409,7 @@
       "relation": "references",
       "source": "docs_channel_connections_refresh",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L628",
+      "source_location": "L629",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -244200,7 +247421,7 @@
       "relation": "references",
       "source": "docs_channel_connections_rollback",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L922",
+      "source_location": "L923",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -244224,7 +247445,7 @@
       "relation": "references",
       "source": "docs_channel_connections_setup",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L848",
+      "source_location": "L849",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -244260,7 +247481,7 @@
       "relation": "references",
       "source": "docs_channel_connections_threats_and_mitigations",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L961",
+      "source_location": "L962",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -244273,6 +247494,18 @@
       "source": "docs_characters_server_host",
       "source_file": "docs/characters.md",
       "source_location": "L291",
+      "target": "app_server_channel_ingest_channelingest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "context": "ChannelIngest",
+      "relation": "references",
+      "source": "docs_live_room_capacity_activity_load_tests",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L226",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -244378,9 +247611,21 @@
       "confidence_score": 0.95,
       "context": "PollRoom",
       "relation": "references",
+      "source": "docs_live_room_capacity_load_model",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L79",
+      "target": "app_server_poll_room_pollroom",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "context": "PollRoom",
+      "relation": "references",
       "source": "docs_live_room_capacity_reproduce_locally",
       "source_file": "docs/live-room-capacity.md",
-      "source_location": "L17",
+      "source_location": "L148",
       "target": "app_server_poll_room_pollroom",
       "weight": 1.0
     },
@@ -244703,6 +247948,24 @@
       "_callable_class": true,
       "_origin": "ast",
       "_ts_fields": {
+        "database": "Database",
+        "providers": "FakeProviders",
+        "runtime": "Miniflare",
+        "sentAt": "Map"
+      },
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_harness_activityharness",
+      "label": "ActivityHarness",
+      "norm_label": "activityharness",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L87"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "_ts_fields": {
         "db": "DatabaseSync"
       },
       "community": null,
@@ -244727,6 +247990,21 @@
       "norm_label": "recordingcanvas",
       "source_file": "tests/helpers/recording-canvas.ts",
       "source_location": "L5"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "_ts_fields": {
+        "measured": "IngestCounts"
+      },
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_worker_capacityingest",
+      "label": "CapacityIngest",
+      "norm_label": "capacityingest",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L95"
     },
     {
       "_callable": true,
@@ -252127,6 +255405,42 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_activity_capacity_test_counter",
+      "label": "Counter",
+      "norm_label": "counter",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L131"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_activity_capacity_test_counters",
+      "label": "Counters",
+      "norm_label": "counters",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L422"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_activity_capacity_test_fleet",
+      "label": "Fleet",
+      "norm_label": "fleet",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L67"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_activity_socket_test_fakesocket",
       "label": "FakeSocket",
       "norm_label": "fakesocket",
@@ -252379,6 +255693,150 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_helpers_activity_harness_activityclient",
+      "label": "ActivityClient",
+      "norm_label": "activityclient",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L59"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_harness_consumer",
+      "label": "Consumer",
+      "norm_label": "consumer",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L23"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_harness_database",
+      "label": "Database",
+      "norm_label": "database",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L20"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_harness_incoming",
+      "label": "Incoming",
+      "norm_label": "incoming",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L53"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_harness_page",
+      "label": "Page",
+      "norm_label": "page",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L40"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_harness_percentiles",
+      "label": "Percentiles",
+      "norm_label": "percentiles",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L73"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_harness_snapshot",
+      "label": "Snapshot",
+      "norm_label": "snapshot",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L48"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_harness_socket",
+      "label": "Socket",
+      "norm_label": "socket",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L19"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_worker_ingestcounts",
+      "label": "IngestCounts",
+      "norm_label": "ingestcounts",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L13"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_worker_ingestreport",
+      "label": "IngestReport",
+      "norm_label": "ingestreport",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L23"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_worker_stepreport",
+      "label": "StepReport",
+      "norm_label": "stepreport",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L49"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_worker_workerreport",
+      "label": "WorkerReport",
+      "norm_label": "workerreport",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L41"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_helpers_api_calloptions",
       "label": "CallOptions",
       "norm_label": "calloptions",
@@ -252444,6 +255902,18 @@
       "norm_label": "providercall",
       "source_file": "tests/helpers/channels.ts",
       "source_location": "L8"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_channels_providerfetch",
+      "label": "ProviderFetch",
+      "norm_label": "providerfetch",
+      "source_file": "tests/helpers/channels.ts",
+      "source_location": "L117"
     },
     {
       "_callable": true,
@@ -252527,7 +255997,7 @@
       "label": "Client",
       "norm_label": "client",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L13"
+      "source_location": "L14"
     },
     {
       "_callable": true,
@@ -252539,7 +256009,7 @@
       "label": "Database",
       "norm_label": "database",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L11"
+      "source_location": "L12"
     },
     {
       "_callable": true,
@@ -252551,7 +256021,7 @@
       "label": "Message",
       "norm_label": "message",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L15"
+      "source_location": "L16"
     },
     {
       "_callable": true,
@@ -252563,7 +256033,7 @@
       "label": "Metrics",
       "norm_label": "metrics",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L14"
+      "source_location": "L15"
     },
     {
       "_callable": true,
@@ -252575,7 +256045,7 @@
       "label": "Role",
       "norm_label": "role",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L12"
+      "source_location": "L13"
     },
     {
       "_callable": true,
@@ -252587,7 +256057,7 @@
       "label": "Socket",
       "norm_label": "socket",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L10"
+      "source_location": "L11"
     },
     {
       "_callable": true,
@@ -281101,6 +284571,160 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_activity_capacity_test_chatpage",
+      "label": "chatPage()",
+      "norm_label": "chatpage()",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L407"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_activity_capacity_test_missing",
+      "label": "missing()",
+      "norm_label": "missing()",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L123"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_activity_capacity_test_openclients",
+      "label": "openClients()",
+      "norm_label": "openclients()",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L138"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_activity_capacity_test_openfleet",
+      "label": "openFleet()",
+      "norm_label": "openfleet()",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L146"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_activity_capacity_test_pagereports",
+      "label": "pageReports()",
+      "norm_label": "pagereports()",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L127"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_activity_capacity_test_pooled",
+      "label": "pooled()",
+      "norm_label": "pooled()",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L102"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_activity_capacity_test_received",
+      "label": "received()",
+      "norm_label": "received()",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L115"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_activity_capacity_test_reconnectburst",
+      "label": "reconnectBurst()",
+      "norm_label": "reconnectburst()",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L336"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_activity_capacity_test_runtimeresidentbytes",
+      "label": "runtimeResidentBytes()",
+      "norm_label": "runtimeresidentbytes()",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L171"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_activity_capacity_test_settled",
+      "label": "settled()",
+      "norm_label": "settled()",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L87"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_activity_capacity_test_sleep",
+      "label": "sleep()",
+      "norm_label": "sleep()",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L80"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_activity_capacity_test_streamid",
+      "label": "streamId()",
+      "norm_label": "streamid()",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L402"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_activity_capacity_test_total",
+      "label": "total()",
+      "norm_label": "total()",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L133"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_activity_capacity_test_viralconsumers",
+      "label": "viralConsumers()",
+      "norm_label": "viralconsumers()",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L160"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_activity_history_test_after",
       "label": "after()",
       "norm_label": "after()",
@@ -281700,6 +285324,105 @@
       "norm_label": "settle()",
       "source_file": "tests/channel-health.test.ts",
       "source_location": "L224"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_channel_ingest_sharing_test_addconnection",
+      "label": "addConnection()",
+      "norm_label": "addconnection()",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L59"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_channel_ingest_sharing_test_chatids",
+      "label": "chatIds()",
+      "norm_label": "chatids()",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L121"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_channel_ingest_sharing_test_leave",
+      "label": "leave()",
+      "norm_label": "leave()",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L54"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_channel_ingest_sharing_test_listen",
+      "label": "listen()",
+      "norm_label": "listen()",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L47"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_channel_ingest_sharing_test_live",
+      "label": "live()",
+      "norm_label": "live()",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L93"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_channel_ingest_sharing_test_paths",
+      "label": "paths()",
+      "norm_label": "paths()",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L117"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_channel_ingest_sharing_test_quotaunits",
+      "label": "quotaUnits()",
+      "norm_label": "quotaunits()",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L80"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_channel_ingest_sharing_test_request",
+      "label": "request()",
+      "norm_label": "request()",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L42"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_channel_ingest_sharing_test_state",
+      "label": "state()",
+      "norm_label": "state()",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L38"
     },
     {
       "_callable": true,
@@ -285038,6 +288761,398 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_helpers_activity_harness_activityharness_addpage",
+      "label": ".addPage()",
+      "norm_label": ".addpage()",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L164"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_harness_activityharness_chat",
+      "label": ".chat()",
+      "norm_label": ".chat()",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L293"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_harness_activityharness_closeclients",
+      "label": ".closeClients()",
+      "norm_label": ".closeclients()",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L151"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_harness_activityharness_connectionstatus",
+      "label": ".connectionStatus()",
+      "norm_label": ".connectionstatus()",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L346"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_harness_activityharness_constructor",
+      "label": ".constructor()",
+      "norm_label": ".constructor()",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L94"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_harness_activityharness_dispose",
+      "label": ".dispose()",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "dispose",
+            "file": "tests/helpers/activity-harness.ts",
+            "lang": "typescript",
+            "line": "L146",
+            "receiver_type": "Miniflare"
+          }
+        ]
+      },
+      "norm_label": ".dispose()",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L142"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_harness_activityharness_json",
+      "label": ".json()",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "dispatchFetch",
+            "file": "tests/helpers/activity-harness.ts",
+            "lang": "typescript",
+            "line": "L318",
+            "receiver_type": "Miniflare"
+          }
+        ]
+      },
+      "norm_label": ".json()",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L317"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_harness_activityharness_listen",
+      "label": ".listen()",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "dispatchFetch",
+            "file": "tests/helpers/activity-harness.ts",
+            "lang": "typescript",
+            "line": "L220",
+            "receiver_type": "Miniflare"
+          }
+        ]
+      },
+      "norm_label": ".listen()",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L218"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_harness_activityharness_notify",
+      "label": ".notify()",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "dispatchFetch",
+            "file": "tests/helpers/activity-harness.ts",
+            "lang": "typescript",
+            "line": "L277",
+            "receiver_type": "Miniflare"
+          }
+        ]
+      },
+      "norm_label": ".notify()",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L266"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_harness_activityharness_providercalls",
+      "label": ".providerCalls()",
+      "norm_label": ".providercalls()",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L159"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_harness_activityharness_quotaunits",
+      "label": ".quotaUnits()",
+      "norm_label": ".quotaunits()",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L337"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_harness_activityharness_receive",
+      "label": ".receive()",
+      "norm_label": ".receive()",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L250"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_harness_activityharness_remove",
+      "label": ".remove()",
+      "norm_label": ".remove()",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L312"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_harness_activityharness_report",
+      "label": ".report()",
+      "norm_label": ".report()",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L323"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_harness_activityharness_start",
+      "label": ".start()",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "getD1Database",
+            "file": "tests/helpers/activity-harness.ts",
+            "lang": "typescript",
+            "line": "L133",
+            "receiver_type": "Miniflare"
+          },
+          {
+            "callee": "dispose",
+            "file": "tests/helpers/activity-harness.ts",
+            "lang": "typescript",
+            "line": "L137",
+            "receiver_type": "Miniflare"
+          }
+        ]
+      },
+      "norm_label": ".start()",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L101"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_harness_activityharness_step",
+      "label": ".step()",
+      "norm_label": ".step()",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L332"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_harness_activityharness_workerreport",
+      "label": ".workerReport()",
+      "norm_label": ".workerreport()",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L327"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_harness_percentiles_8796e1235fe6",
+      "label": "percentiles()",
+      "norm_label": "percentiles()",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L79"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_harness_provideranswer",
+      "label": "providerAnswer()",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "text",
+            "file": "tests/helpers/activity-harness.ts",
+            "lang": "typescript",
+            "line": "L358",
+            "receiver_type": "RuntimeRequest"
+          }
+        ]
+      },
+      "norm_label": "provideranswer()",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L357"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_worker_capacityingest_alarm",
+      "label": ".alarm()",
+      "norm_label": ".alarm()",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L112"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_worker_capacityingest_constructor",
+      "label": ".constructor()",
+      "norm_label": ".constructor()",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L98"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_worker_capacityingest_count",
+      "label": ".count()",
+      "norm_label": ".count()",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L117"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_worker_capacityingest_fetch",
+      "label": ".fetch()",
+      "norm_label": ".fetch()",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L104"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_worker_capacityingest_report",
+      "label": ".report()",
+      "norm_label": ".report()",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L121"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_worker_capacityingest_step",
+      "label": ".step()",
+      "norm_label": ".step()",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L135"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_worker_counteddatabase",
+      "label": "countedDatabase()",
+      "norm_label": "counteddatabase()",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L79"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_worker_countedstatement",
+      "label": "countedStatement()",
+      "norm_label": "countedstatement()",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L63"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_worker_fetch",
+      "label": "fetch()",
+      "norm_label": "fetch()",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L161"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_worker_webhook",
+      "label": "webhook()",
+      "norm_label": "webhook()",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L150"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_helpers_api_apicaller",
       "label": "apiCaller()",
       "metadata": {
@@ -285269,11 +289384,22 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_helpers_channels_fakeproviders_655757955470",
+      "label": "fakeProviders()",
+      "norm_label": "fakeproviders()",
+      "source_file": "tests/helpers/channels.ts",
+      "source_location": "L127"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_helpers_channels_installfakeproviders",
       "label": "installFakeProviders()",
       "norm_label": "installfakeproviders()",
       "source_file": "tests/helpers/channels.ts",
-      "source_location": "L117"
+      "source_location": "L120"
     },
     {
       "_callable": true,
@@ -285317,7 +289443,7 @@
       "label": "youtubeText()",
       "norm_label": "youtubetext()",
       "source_file": "tests/helpers/channels.ts",
-      "source_location": "L304"
+      "source_location": "L314"
     },
     {
       "_callable": true,
@@ -286363,7 +290489,7 @@
       "label": "burst()",
       "norm_label": "burst()",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L76"
+      "source_location": "L77"
     },
     {
       "_callable": true,
@@ -286374,7 +290500,7 @@
       "label": "closeClients()",
       "norm_label": "closeclients()",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L91"
+      "source_location": "L92"
     },
     {
       "_callable": true,
@@ -286385,7 +290511,7 @@
       "label": "freshRoom()",
       "norm_label": "freshroom()",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L86"
+      "source_location": "L87"
     },
     {
       "_callable": true,
@@ -286396,7 +290522,7 @@
       "label": "join()",
       "norm_label": "join()",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L56"
+      "source_location": "L57"
     },
     {
       "_callable": true,
@@ -286407,7 +290533,7 @@
       "label": "message()",
       "norm_label": "message()",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L31"
+      "source_location": "L32"
     },
     {
       "_callable": true,
@@ -286418,7 +290544,7 @@
       "label": "metrics()",
       "norm_label": "metrics()",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L52"
+      "source_location": "L53"
     },
     {
       "_callable": true,
@@ -286429,7 +290555,7 @@
       "label": "percentiles()",
       "norm_label": "percentiles()",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L25"
+      "source_location": "L26"
     },
     {
       "_callable": true,
@@ -286440,7 +290566,7 @@
       "label": "request()",
       "norm_label": "request()",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L48"
+      "source_location": "L49"
     },
     {
       "_callable": true,
@@ -301464,6 +305590,26 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_activity_capacity_test",
+      "label": "activity-capacity.test.ts",
+      "norm_label": "activity-capacity.test.ts",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_activity_capacity_test_reports",
+      "label": "reports",
+      "norm_label": "reports",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L78"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_activity_history_test",
       "label": "activity-history.test.ts",
       "norm_label": "activity-history.test.ts",
@@ -301770,6 +305916,26 @@
       "norm_label": "channel-health.test.ts",
       "source_file": "tests/channel-health.test.ts",
       "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_channel_ingest_sharing_test",
+      "label": "channel-ingest-sharing.test.ts",
+      "norm_label": "channel-ingest-sharing.test.ts",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_channel_ingest_sharing_test_consumers",
+      "label": "CONSUMERS",
+      "norm_label": "consumers",
+      "source_file": "tests/channel-ingest-sharing.test.ts",
+      "source_location": "L24"
     },
     {
       "_origin": "ast",
@@ -304534,6 +308700,76 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_helpers_activity_harness",
+      "label": "activity-harness.ts",
+      "norm_label": "activity-harness.ts",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_harness_consumers",
+      "label": "CONSUMERS",
+      "norm_label": "consumers",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L24"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_harness_identity",
+      "label": "IDENTITY",
+      "norm_label": "identity",
+      "source_file": "tests/helpers/activity-harness.ts",
+      "source_location": "L27"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_worker",
+      "label": "activity-worker.ts",
+      "norm_label": "activity-worker.ts",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_worker_executors",
+      "label": "EXECUTORS",
+      "norm_label": "executors",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L60"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_worker_realnow",
+      "label": "realNow",
+      "norm_label": "realnow",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L55"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_activity_worker_workercounts",
+      "label": "workerCounts",
+      "norm_label": "workercounts",
+      "source_file": "tests/helpers/activity-worker.ts",
+      "source_location": "L61"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_helpers_api",
       "label": "helpers/api.ts",
       "norm_label": "helpers/api.ts",
@@ -304679,6 +308915,146 @@
       "norm_label": "rlo",
       "source_file": "tests/helpers/hostile-bidi.ts",
       "source_location": "L14"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_load_targets",
+      "label": "load-targets.ts",
+      "norm_label": "load-targets.ts",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_load_targets_cost_drivers_per_live_hour",
+      "label": "COST_DRIVERS_PER_LIVE_HOUR",
+      "norm_label": "cost_drivers_per_live_hour",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L58"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_load_targets_dropped_events_below_admission",
+      "label": "DROPPED_EVENTS_BELOW_ADMISSION",
+      "norm_label": "dropped_events_below_admission",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L22"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_load_targets_event_latency_p95_ms",
+      "label": "EVENT_LATENCY_P95_MS",
+      "norm_label": "event_latency_p95_ms",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L13"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_load_targets_fleet_reconnect_snapshot_p95_ms",
+      "label": "FLEET_RECONNECT_SNAPSHOT_P95_MS",
+      "norm_label": "fleet_reconnect_snapshot_p95_ms",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L46"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_load_targets_flood_event_latency_p95_ms",
+      "label": "FLOOD_EVENT_LATENCY_P95_MS",
+      "norm_label": "flood_event_latency_p95_ms",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L16"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_load_targets_lost_admitted_events",
+      "label": "LOST_ADMITTED_EVENTS",
+      "norm_label": "lost_admitted_events",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L28"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_load_targets_moderation_latency_p95_ms",
+      "label": "MODERATION_LATENCY_P95_MS",
+      "norm_label": "moderation_latency_p95_ms",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L19"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_load_targets_provider_requests_per_reconnect",
+      "label": "PROVIDER_REQUESTS_PER_RECONNECT",
+      "norm_label": "provider_requests_per_reconnect",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L49"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_load_targets_public_update_p95_ms",
+      "label": "PUBLIC_UPDATE_P95_MS",
+      "norm_label": "public_update_p95_ms",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L40"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_load_targets_reconnect_snapshot_p95_ms",
+      "label": "RECONNECT_SNAPSHOT_P95_MS",
+      "norm_label": "reconnect_snapshot_p95_ms",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L43"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_load_targets_storage_byte_growth_per_live_hour",
+      "label": "STORAGE_BYTE_GROWTH_PER_LIVE_HOUR",
+      "norm_label": "storage_byte_growth_per_live_hour",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L37"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_load_targets_storage_row_growth_per_live_hour",
+      "label": "STORAGE_ROW_GROWTH_PER_LIVE_HOUR",
+      "norm_label": "storage_row_growth_per_live_hour",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L34"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_load_targets_youtube_units_per_live_hour",
+      "label": "YOUTUBE_UNITS_PER_LIVE_HOUR",
+      "norm_label": "youtube_units_per_live_hour",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L52"
     },
     {
       "_origin": "ast",
@@ -304989,7 +309365,7 @@
       "label": "clients",
       "norm_label": "clients",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L22"
+      "source_location": "L23"
     },
     {
       "_origin": "ast",
@@ -304999,7 +309375,7 @@
       "label": "reports",
       "norm_label": "reports",
       "source_file": "tests/live-capacity.test.ts",
-      "source_location": "L23"
+      "source_location": "L24"
     },
     {
       "_origin": "ast",
@@ -306867,7 +311243,7 @@
       "node_kind": "heading",
       "norm_label": "account deletion",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L758"
+      "source_location": "L759"
     },
     {
       "_origin": "ast",
@@ -306878,7 +311254,7 @@
       "node_kind": "heading",
       "norm_label": "actors",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L941"
+      "source_location": "L942"
     },
     {
       "_origin": "ast",
@@ -306889,7 +311265,7 @@
       "node_kind": "heading",
       "norm_label": "assets",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L933"
+      "source_location": "L934"
     },
     {
       "_origin": "ast",
@@ -306900,7 +311276,7 @@
       "node_kind": "heading",
       "norm_label": "callback failures",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L766"
+      "source_location": "L767"
     },
     {
       "_origin": "ast",
@@ -306955,7 +311331,7 @@
       "node_kind": "heading",
       "norm_label": "decisions for the owner",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1144"
+      "source_location": "L1145"
     },
     {
       "_origin": "ast",
@@ -306966,7 +311342,7 @@
       "node_kind": "heading",
       "norm_label": "disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L637"
+      "source_location": "L638"
     },
     {
       "_origin": "ast",
@@ -306988,7 +311364,7 @@
       "node_kind": "heading",
       "norm_label": "facebook live",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1087"
+      "source_location": "L1088"
     },
     {
       "_origin": "ast",
@@ -306999,7 +311375,7 @@
       "node_kind": "heading",
       "norm_label": "facts not checked",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1152"
+      "source_location": "L1153"
     },
     {
       "_origin": "ast",
@@ -307010,7 +311386,7 @@
       "node_kind": "heading",
       "norm_label": "instagram",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1049"
+      "source_location": "L1050"
     },
     {
       "_origin": "ast",
@@ -307043,7 +311419,7 @@
       "node_kind": "heading",
       "norm_label": "logs and alerts",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L782"
+      "source_location": "L783"
     },
     {
       "_origin": "ast",
@@ -307076,7 +311452,7 @@
       "node_kind": "heading",
       "norm_label": "overlay key",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L814"
+      "source_location": "L815"
     },
     {
       "_origin": "ast",
@@ -307098,7 +311474,7 @@
       "node_kind": "heading",
       "norm_label": "provider subscriptions",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L663"
+      "source_location": "L664"
     },
     {
       "_origin": "ast",
@@ -307109,7 +311485,7 @@
       "node_kind": "heading",
       "norm_label": "refresh",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L626"
+      "source_location": "L627"
     },
     {
       "_origin": "ast",
@@ -307120,7 +311496,7 @@
       "node_kind": "heading",
       "norm_label": "refused webhooks",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L734"
+      "source_location": "L735"
     },
     {
       "_origin": "ast",
@@ -307131,7 +311507,7 @@
       "node_kind": "heading",
       "norm_label": "research for instagram, facebook live, and tiktok",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1035"
+      "source_location": "L1036"
     },
     {
       "_origin": "ast",
@@ -307142,7 +311518,7 @@
       "node_kind": "heading",
       "norm_label": "residual risks",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L978"
+      "source_location": "L979"
     },
     {
       "_origin": "ast",
@@ -307153,7 +311529,7 @@
       "node_kind": "heading",
       "norm_label": "rollback",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L920"
+      "source_location": "L921"
     },
     {
       "_origin": "ast",
@@ -307175,7 +311551,7 @@
       "node_kind": "heading",
       "norm_label": "runbook",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L857"
+      "source_location": "L858"
     },
     {
       "_origin": "ast",
@@ -307197,7 +311573,7 @@
       "node_kind": "heading",
       "norm_label": "setup",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L829"
+      "source_location": "L830"
     },
     {
       "_origin": "ast",
@@ -307208,7 +311584,7 @@
       "node_kind": "heading",
       "norm_label": "stored youtube data",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L996"
+      "source_location": "L997"
     },
     {
       "_origin": "ast",
@@ -307219,7 +311595,7 @@
       "node_kind": "heading",
       "norm_label": "subscription repair",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L681"
+      "source_location": "L682"
     },
     {
       "_origin": "ast",
@@ -307252,7 +311628,7 @@
       "node_kind": "heading",
       "norm_label": "threat model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L931"
+      "source_location": "L932"
     },
     {
       "_origin": "ast",
@@ -307263,7 +311639,7 @@
       "node_kind": "heading",
       "norm_label": "threats and mitigations",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L949"
+      "source_location": "L950"
     },
     {
       "_origin": "ast",
@@ -307274,7 +311650,7 @@
       "node_kind": "heading",
       "norm_label": "tiktok",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1123"
+      "source_location": "L1124"
     },
     {
       "_origin": "ast",
@@ -307285,7 +311661,7 @@
       "node_kind": "heading",
       "norm_label": "token encryption and rotation",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L583"
+      "source_location": "L584"
     },
     {
       "_origin": "ast",
@@ -307296,7 +311672,7 @@
       "node_kind": "heading",
       "norm_label": "turn the feature off",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L882"
+      "source_location": "L883"
     },
     {
       "_origin": "ast",
@@ -307775,12 +312151,45 @@
       "_origin": "ast",
       "community": null,
       "file_type": "document",
+      "id": "docs_live_room_capacity_activity_load_tests",
+      "label": "Activity load tests",
+      "node_kind": "heading",
+      "norm_label": "activity load tests",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L216"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_live_room_capacity_activity_results_and_limits",
+      "label": "Activity results and limits",
+      "node_kind": "heading",
+      "norm_label": "activity results and limits",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L253"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
       "id": "docs_live_room_capacity_bounded_reliability_change",
       "label": "Bounded reliability change",
       "node_kind": "heading",
       "norm_label": "bounded reliability change",
       "source_file": "docs/live-room-capacity.md",
-      "source_location": "L85"
+      "source_location": "L307"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_live_room_capacity_cost_for_one_live_channel_hour",
+      "label": "Cost for one live channel-hour",
+      "node_kind": "heading",
+      "norm_label": "cost for one live channel-hour",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L83"
     },
     {
       "_origin": "ast",
@@ -307797,12 +312206,34 @@
       "_origin": "ast",
       "community": null,
       "file_type": "document",
+      "id": "docs_live_room_capacity_load_model",
+      "label": "Load model",
+      "node_kind": "heading",
+      "norm_label": "load model",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L8"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_live_room_capacity_proposed_targets",
+      "label": "Proposed targets",
+      "node_kind": "heading",
+      "norm_label": "proposed targets",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L106"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
       "id": "docs_live_room_capacity_recovery_api",
       "label": "Recovery API",
       "node_kind": "heading",
       "norm_label": "recovery api",
       "source_file": "docs/live-room-capacity.md",
-      "source_location": "L108"
+      "source_location": "L330"
     },
     {
       "_origin": "ast",
@@ -307813,7 +312244,7 @@
       "node_kind": "heading",
       "norm_label": "remaining bottlenecks",
       "source_file": "docs/live-room-capacity.md",
-      "source_location": "L96"
+      "source_location": "L318"
     },
     {
       "_origin": "ast",
@@ -307824,7 +312255,7 @@
       "node_kind": "heading",
       "norm_label": "reproduce locally",
       "source_file": "docs/live-room-capacity.md",
-      "source_location": "L8"
+      "source_location": "L139"
     },
     {
       "_origin": "ast",
@@ -307835,7 +312266,7 @@
       "node_kind": "heading",
       "norm_label": "results and limits",
       "source_file": "docs/live-room-capacity.md",
-      "source_location": "L46"
+      "source_location": "L177"
     },
     {
       "_origin": "ast",
@@ -307846,7 +312277,7 @@
       "node_kind": "heading",
       "norm_label": "workload",
       "source_file": "docs/live-room-capacity.md",
-      "source_location": "L28"
+      "source_location": "L159"
     },
     {
       "_origin": "ast",
