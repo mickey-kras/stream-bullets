@@ -6,15 +6,16 @@ import { z } from "zod";
 import {
   activityEventSchema,
   CHANNEL_STATUS_CODES,
+  isSupport,
   quotaDay,
-  type ActivityChat,
   type ActivityEvent,
   type ActivityPlatform,
   type ChannelStatus,
   type ChannelStatusCode,
 } from "../lib/activity";
-import { banKey, eventForBroadcast, snapshotMessage } from "./channel-ingest-events";
+import { banKey, eventForBroadcast, snapshotEvents, snapshotMessage, withoutSupport } from "./channel-ingest-events";
 import { youtubeEvents } from "./channel-normalize";
+import { youtubeSupport } from "./channel-support";
 import {
   channelIdentity,
   IMPORT_HORIZON_MS,
@@ -34,7 +35,7 @@ import { channelsOff, loadTokens, replaceTokens, type StoredTokens } from "./cha
 import { HttpError } from "./http.server";
 import { sampleChatAt } from "../lib/chat-feed";
 import { validateTestEnvironment } from "./test-environment-config";
-import { EVENTS, ID_SQL, type IdTable } from "./channel-ingest-sql";
+import { EVENTS, ID_SQL, SUPPORT, nextExpiry, type IdTable } from "./channel-ingest-sql";
 import { type PlaygroundHost, playgroundOf } from "./playground-host";
 import { detached } from "../lib/detached";
 import { keyRevokes, keyTags, outputInBody, socketKey, type SocketKey } from "./room-connections";
@@ -42,6 +43,7 @@ import { NEW_YOUTUBE_STATE, type Connection, type YoutubeState } from "./channel
 import {
   SNAPSHOT_SIZE,
   SNAPSHOT_MAX_AGE_MS,
+  SUPPORT_SNAPSHOT_SIZE,
   SEEN_TTL_MS,
   SEEN_MAX,
   CONNECTION_READS,
@@ -62,10 +64,7 @@ import {
   YOUTUBE_STARTUP_POLL_MS,
   YOUTUBE_STARTUP_WINDOW_MS,
   REFRESH_MARGIN_MS,
-  type Admission,
-  type Bucket,
-  ADMISSIONS,
-  newBuckets,
+  Admissions,
   spendYoutubeQuota,
 } from "./channel-ingest-limits";
 
@@ -90,13 +89,12 @@ const ROUTES: Readonly<Record<string, "GET" | "POST">> = {
   "/close": "POST",
   "/refresh": "POST",
   "/reconcile": "POST",
+  "/support": "POST",
   "/playground": "POST",
   "/playground-config": "POST",
   "/test-chat": "POST",
   "/upcoming": "POST",
 };
-
-type EventRow = { body: string };
 
 /** A disconnect or close started while a poll waited: the poll stops and writes nothing. */
 class Superseded extends Error {}
@@ -107,9 +105,7 @@ function reply(message: string, status: number): Response {
 
 export class ChannelIngest extends DurableObject<AppEnv> {
   private streamerId: string | undefined;
-  private readonly buckets: Record<Admission, Bucket> = newBuckets();
-  private readonly dropped: Record<Admission, number> = { chat: 0, moderation: 0 };
-  private droppedLoggedAt = 0;
+  private readonly admissions = new Admissions();
   private readonly healthAt = new Map<ActivityPlatform, number>();
   /** The refresh in flight for each connection: a second caller waits for it instead of refreshing again. */
   private readonly refreshes = new Map<string, Promise<StoredTokens>>();
@@ -138,6 +134,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
       streamerId: () => this.streamerId,
       listening: () => ctx.getWebSockets("activity").length > 0,
       connection: this.connection.bind(this),
+      forget: this.forgetConnections.bind(this),
       setStatus: this.setStatus.bind(this),
       freshTokens: this.freshTokens.bind(this),
       generation: (platform: ActivityPlatform) => this.generations.get(platform),
@@ -157,6 +154,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
   private createTables(): void {
     const sql = this.ctx.storage.sql;
     EVENTS.create(sql);
+    SUPPORT.create(sql);
     // Delivery and chat message ids, for deduplication; and deleted message ids, kept apart so that a burst of
     // new ids can never push them out early.
     for (const table of ["seen", "deleted"] as const) {
@@ -179,9 +177,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
       await this.ctx.storage.put("streamerId", streamerId);
     }
     // These requests change a connection or the page: read them from D1 again afterwards.
-    if (
-      ["/connect", "/disconnect", "/status", "/page-status", "/close", "/refresh", "/reconcile"].includes(url.pathname)
-    )
+    if (/^\/(connect|disconnect|status|page-status|close|refresh|reconcile|support)$/.test(url.pathname))
       this.forgetConnections();
     // Ingestion is off: consumers get `unavailable` and reconnect once it is on again.
     if (channelsOff(this.env)) this.closeSockets("Channels off");
@@ -201,6 +197,8 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (pathname === "/connect") return Response.json(await this.connectChannel(platform));
     if (pathname === "/disconnect") return Response.json(await this.disconnectChannel(platform));
     if (pathname === "/reconcile") return Response.json(await this.subscriptions.requested(platform, Date.now()));
+    // The streamer changed the support events: their subscriptions come or go now, not at the next check.
+    if (pathname === "/support") return Response.json(await this.subscriptions.requested(platform, Date.now(), true));
     if (pathname === "/upcoming") return Response.json(await this.upcomingRequested(platform));
     return this.statusChanged(platform, request);
   }
@@ -293,7 +291,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     this.forgetConnections();
     this.refreshes.clear();
     this.healthAt.clear();
-    Object.assign(this.buckets, newBuckets());
+    this.admissions.reset();
     this.createTables();
     return new Response(null, { status: 204 });
   }
@@ -352,8 +350,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
   private snapshot(now: number): string {
     this.prune(now);
     const sql = this.ctx.storage.sql;
-    const rows: EventRow[] = sql.exec<EventRow>("SELECT body FROM events ORDER BY seq").toArray();
-    const events = rows.map((row): ActivityChat => ({ ...(JSON.parse(row.body) as ActivityChat), live: false }));
+    const events: ActivityEvent[] = snapshotEvents(EVENTS.snapshot(sql), SUPPORT.snapshot(sql));
     return snapshotMessage(events, Math.max(now - SNAPSHOT_MAX_AGE_MS, EVENTS.cut(sql)));
   }
 
@@ -361,6 +358,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     const sql = this.ctx.storage.sql;
     sql.exec("DELETE FROM events WHERE received_at < ?", now - SNAPSHOT_MAX_AGE_MS);
     EVENTS.trim(sql, SNAPSHOT_SIZE);
+    SUPPORT.prune(sql, now - SNAPSHOT_MAX_AGE_MS, SUPPORT_SNAPSHOT_SIZE);
     for (const table of ["seen", "deleted"] as const) {
       let count = (this.counts.get(table) ?? 0) - this.deleteIds(ID_SQL[table].expire, now - SEEN_TTL_MS);
       if (count > SEEN_MAX) count -= this.deleteIds(ID_SQL[table].trim, count - SEEN_MAX);
@@ -390,24 +388,6 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     return true;
   }
 
-  /** Takes up to `count` tokens from a bucket and returns how many it got. The rest is dropped and counted. */
-  private admit(kind: Admission, count: number, now: number): number {
-    if (count === 0) return 0;
-    const { rate, burst } = ADMISSIONS[kind];
-    const bucket = this.buckets[kind];
-    const tokens = Math.min(burst, bucket.tokens + (Math.max(0, now - bucket.at) / 1000) * rate);
-    const admitted = Math.min(count, Math.floor(tokens));
-    this.buckets[kind] = { tokens: tokens - admitted, at: now };
-    this.dropped[kind] += count - admitted;
-    if (admitted < count && now - this.droppedLoggedAt >= 60_000) {
-      console.warn("channel_ingest_dropped", { ...this.dropped });
-      this.dropped.chat = 0;
-      this.dropped.moderation = 0;
-      this.droppedLoggedAt = now;
-    }
-    return admitted;
-  }
-
   /** A verified delivery from the Worker: `{deliveryId, events}`. */
   private async receive(platform: ActivityPlatform, request: Request): Promise<Response> {
     const body: unknown = await request.json().catch((): null => null);
@@ -426,8 +406,8 @@ export class ChannelIngest extends DurableObject<AppEnv> {
       const result = activityEventSchema.safeParse(event);
       if (result.success && result.data.platform === platform) parsed.push(result.data);
     }
-    const admitted = this.admitEvents(parsed, now);
-    if (admitted.length === 0) return new Response(null, { status: 204 });
+    const all = this.admitEvents(parsed, now);
+    if (all.length === 0) return new Response(null, { status: 204 });
     const connection = await this.connection(platform);
     // A delivery for a channel that is gone, needs a new authorization, belongs to a suspended page, or comes from
     // another channel (a route cached before the page changed its channel) is dropped.
@@ -438,6 +418,9 @@ export class ChannelIngest extends DurableObject<AppEnv> {
       connection.externalId !== channelId
     )
       return new Response(null, { status: 204 });
+    // Support events count only while the streamer has them on. The chat of the same delivery goes on.
+    const admitted = connection.support ? all : withoutSupport(all);
+    if (admitted.length === 0) return new Response(null, { status: 204 });
     // A parallel copy of this delivery can finish while the connection is read.
     if (this.known("seen", `delivery:${platform}:${deliveryId}`)) return new Response(null, { status: 204 });
     // Every accepted delivery is remembered: a repeated clear or ban would otherwise remove newer chat again.
@@ -461,8 +444,9 @@ export class ChannelIngest extends DurableObject<AppEnv> {
 
   /**
    * The events to ingest, in their order: the newest new chat messages the chat bucket allows, and the moderation
-   * events the moderation bucket allows. The buckets are separate, so a chat flood cannot keep a deleted message on
-   * screen. Chat already seen or deleted costs no token. Status events come only from the object itself.
+   * and support events their buckets allow. The buckets are separate, so a flood of chat or of follows cannot keep
+   * a deleted message on screen. Chat already seen or deleted costs no token, and neither does a support event
+   * already seen. Status events come only from the object itself.
    */
   private admitEvents(events: readonly ActivityEvent[], now: number): ActivityEvent[] {
     const fresh = events.filter((event: ActivityEvent): boolean => {
@@ -471,41 +455,54 @@ export class ChannelIngest extends DurableObject<AppEnv> {
       // Kick copies of one ban can reach other apps and come back with new delivery ids: a ban is deduplicated by
       // its content.
       if (event.kind === "ban") return !this.known("seen", banKey(event));
-      return true;
+      // A provider retry and a YouTube page that comes again have the same event id.
+      return !isSupport(event) || !this.known("seen", `support:${event.id}`);
     });
     const chats = fresh.filter((event: ActivityEvent) => event.kind === "chat").length;
-    let skipChat = chats - this.admit("chat", chats, now);
-    let keepModeration = this.admit("moderation", fresh.length - chats, now);
-    return fresh.filter((event: ActivityEvent) => (event.kind === "chat" ? skipChat-- <= 0 : keepModeration-- > 0));
+    const support = fresh.filter(isSupport).length;
+    let skipChat = chats - this.admissions.admit("chat", chats, now);
+    let keepSupport = this.admissions.admit("support", support, now);
+    let keepModeration = this.admissions.admit("moderation", fresh.length - chats - support, now);
+    return fresh.filter((event: ActivityEvent): boolean => {
+      if (event.kind === "chat") return skipChat-- <= 0;
+      return isSupport(event) ? keepSupport-- > 0 : keepModeration-- > 0;
+    });
   }
 
   /** Stores and broadcasts events that already passed admission. */
   private ingest(events: readonly ActivityEvent[], now: number): void {
-    const sql = this.ctx.storage.sql;
-    for (const event of events) {
-      if (event.kind === "chat") {
-        // A message that was deleted (even before it arrived) or delivered before never enters again.
-        if (this.known("deleted", event.id) || !this.firstSight(`message:${event.id}`, now)) continue;
-        sql.exec(
-          "INSERT INTO events (platform, message_id, user_id, received_at, body) VALUES (?, ?, ?, ?, ?)",
-          event.platform,
-          event.messageId,
-          event.user.id,
-          event.receivedAt,
-          JSON.stringify(event),
-        );
-      } else if (event.kind === "delete") {
-        this.remember("deleted", `${event.platform}:${event.messageId}`, now);
-        sql.exec("DELETE FROM events WHERE platform=? AND message_id=?", event.platform, event.messageId);
-      } else if (event.kind === "ban" || event.kind === "clear_user") {
-        if (event.kind === "ban") this.remember("seen", banKey(event), now);
-        sql.exec("DELETE FROM events WHERE platform=? AND user_id=?", event.platform, event.userId);
-      } else if (event.kind === "clear") {
-        sql.exec("DELETE FROM events WHERE platform=?", event.platform);
-      }
-      this.broadcast(eventForBroadcast(event, now));
-    }
+    for (const event of events) if (this.store(event, now)) this.broadcast(eventForBroadcast(event, now));
     this.prune(now);
+  }
+
+  /** Stores what an event changes. False for an event that came before: it is neither stored nor sent. */
+  private store(event: ActivityEvent, now: number): boolean {
+    const sql = this.ctx.storage.sql;
+    if (event.kind === "chat") {
+      // A message that was deleted (even before it arrived) or delivered before never enters again.
+      if (this.known("deleted", event.id) || !this.firstSight(`message:${event.id}`, now)) return false;
+      sql.exec(
+        "INSERT INTO events (platform, message_id, user_id, received_at, body) VALUES (?, ?, ?, ?, ?)",
+        event.platform,
+        event.messageId,
+        event.user.id,
+        event.receivedAt,
+        JSON.stringify(event),
+      );
+    } else if (isSupport(event)) {
+      // Each support event counts one time: a second one with the same id never enters.
+      if (!this.firstSight(`support:${event.id}`, now)) return false;
+      SUPPORT.add(sql, event);
+    } else if (event.kind === "delete") {
+      this.remember("deleted", `${event.platform}:${event.messageId}`, now);
+      sql.exec("DELETE FROM events WHERE platform=? AND message_id=?", event.platform, event.messageId);
+    } else if (event.kind === "ban" || event.kind === "clear_user") {
+      if (event.kind === "ban") this.remember("seen", banKey(event), now);
+      sql.exec("DELETE FROM events WHERE platform=? AND user_id=?", event.platform, event.userId);
+    } else if (event.kind === "clear") {
+      sql.exec("DELETE FROM events WHERE platform=?", event.platform);
+    }
+    return true;
   }
 
   // Connections ---------------------------------------------------------------------------------------------------
@@ -536,7 +533,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
 
   private async readConnection(platform: ActivityPlatform): Promise<Connection | null> {
     const row = await this.env.DB.prepare(
-      `SELECT c.id, c.external_id, c.status, c.status_code, c.last_event_at, s.status AS page_status
+      `SELECT c.id, c.external_id, c.status, c.status_code, c.last_event_at, c.support_events, s.status AS page_status
         FROM channel_connections c JOIN streamers s ON s.id = c.streamer_id WHERE c.streamer_id=? AND c.platform=?`,
     )
       .bind(this.streamerId, platform)
@@ -546,6 +543,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
         status: ChannelStatus;
         status_code: string | null;
         last_event_at: number | null;
+        support_events: number;
         page_status: string;
       }>();
     if (!row) return null;
@@ -556,6 +554,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
       code: row.status_code,
       lastEventAt: row.last_event_at,
       suspended: row.page_status === "suspended",
+      support: row.support_events === 1,
     };
   }
 
@@ -730,6 +729,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (platform === "youtube") await this.ctx.storage.delete("youtube");
     await this.ctx.storage.delete(`repair:${platform}`);
     EVENTS.dropPlatform(this.ctx.storage.sql, platform);
+    SUPPORT.dropPlatform(this.ctx.storage.sql, platform);
     this.broadcast({ kind: "status", platform, status: "disconnected" });
     return { revoked, unsubscribed };
   }
@@ -765,7 +765,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     const now = Date.now();
     if (channelsOff(this.env)) this.closeSockets("Channels off");
     this.prune(now);
-    const expiry = this.nextExpiry();
+    const expiry = nextExpiry(this.ctx.storage.sql);
     const cleanup = expiry === null ? null : Math.max(expiry, now + CLEANUP_INTERVAL_MS);
     // The cleanup alarm is set before the poll, so a failed poll can never stop the retention cleanup.
     if (cleanup !== null) await this.ctx.storage.setAlarm(cleanup);
@@ -784,20 +784,6 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (wait !== null) await this.ctx.storage.setAlarm(cleanup === null ? now + wait : Math.min(cleanup, now + wait));
     // The playground restarts after an eviction and sets its watchdog, or saves a pending checkpoint.
     await this.playground.alarm();
-  }
-
-  /** When the oldest stored message or id expires, or null when nothing is stored. */
-  private nextExpiry(): number | null {
-    const row = this.ctx.storage.sql
-      .exec<{ events: number | null; seen: number | null; deleted: number | null }>(
-        `SELECT (SELECT min(received_at) FROM events) AS events, (SELECT min(at) FROM seen) AS seen,
-          (SELECT min(at) FROM deleted) AS deleted`,
-      )
-      .toArray()[0];
-    const times: number[] = [];
-    if (row.events !== null) times.push(row.events + SNAPSHOT_MAX_AGE_MS + 1);
-    for (const at of [row.seen, row.deleted]) if (at !== null) times.push(at + SEEN_TTL_MS + 1);
-    return times.length > 0 ? Math.min(...times) : null;
   }
 
   /** One YouTube poll, when one is due. Returns the wait before the next one, or null for none. */
@@ -924,9 +910,13 @@ export class ChannelIngest extends DurableObject<AppEnv> {
       return now - since < YOUTUBE_STARTUP_WINDOW_MS ? YOUTUBE_STARTUP_POLL_MS : YOUTUBE_IDLE_POLL_MS;
     }
     const page = await youtubeChatPage(tokens.accessToken, state.liveChatId, state.pageToken);
+    // The streamer can change the support events while the page comes: the choice of now decides, not the old one.
+    const wanted: boolean = (await this.connection("youtube"))?.support === true;
     current();
     // The first page is ingested too: messages sent before LIVE_WINDOW_MS are not live, so no old command runs.
-    this.ingest(this.admitEvents(youtubeEvents(page.items, connection.externalId, now), now), now);
+    // The support events come from the same page: they cost no further call and no quota.
+    const support = wanted ? youtubeSupport(page.items, now) : [];
+    this.ingest(this.admitEvents([...youtubeEvents(page.items, connection.externalId, now), ...support], now), now);
     state.pageToken = page.nextPageToken;
     if (page.items.length > 0) await this.touch("youtube", connection, now);
     if (page.offline) {

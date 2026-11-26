@@ -11,6 +11,8 @@ export interface Connection {
   lastEventAt: number | null;
   /** The page is suspended: nothing is received or polled until an admin lifts it. */
   suspended: boolean;
+  /** The streamer turned support events on (`support_events`). Without it, the object drops each support event. */
+  support: boolean;
 }
 
 /** The YouTube polling state that the ingest object keeps in its storage. */

@@ -266,7 +266,7 @@ beforeAll(async (): Promise<void> => {
 afterAll(async (): Promise<void> => database.dispose());
 
 describe("migrations 0006 onwards", (): void => {
-  it("covers 0006 to 0048", (): void => {
+  it("covers 0006 to 0049", (): void => {
     expect(applied.map((file: string): string => file.slice(0, 4))).toEqual([
       "0006",
       "0007",
@@ -311,8 +311,65 @@ describe("migrations 0006 onwards", (): void => {
       "0046",
       "0047",
       "0048",
+      "0049",
     ]);
   });
+
+  it("adds the support events switch (0049) in place: an old connection keeps its tokens and has the switch off", async (): Promise<void> => {
+    // A database of its own: the connection and its tokens must exist before the migration runs.
+    const own: TestDatabase = await createTestDatabase({ migrate: false });
+    try {
+      const files: string[] = await migrationFiles();
+      await applyMigrations(
+        own.db,
+        files.filter((file: string): boolean => file < "0049"),
+      );
+      const connection = (id: string, external: string, columns: string = "", values: string = ""): D1PreparedStatement =>
+        own.db
+          .prepare(
+            `INSERT INTO channel_connections (id,streamer_id,platform,external_id,display_name,scopes,created_at,updated_at${columns})
+              VALUES (?,'page',?,?,'Host','user:read:chat',1,1${values})`,
+          )
+          .bind(id, id, external);
+      await own.db.batch([
+        own.db.prepare("INSERT INTO user (id,name,email,email_verified,created_at,updated_at) VALUES ('host','Host','host@example.test',1,1,1)"),
+        own.db.prepare("INSERT INTO streamers (id,owner_id,handle,name) VALUES ('page','host','host_page','Host')"),
+        connection("twitch", "111"),
+        own.db.prepare("INSERT INTO channel_tokens (connection_id,key_id,access_token,updated_at) VALUES ('twitch','k1','sealed',1)"),
+      ]);
+      await applyMigrations(
+        own.db,
+        files.filter((file: string): boolean => file >= "0049"),
+      );
+      // No rebuild of the table: a rebuild deletes the token rows through their cascade.
+      expect(await own.db.prepare("SELECT id, scopes, support_events FROM channel_connections").all()).toMatchObject({
+        results: [{ id: "twitch", scopes: "user:read:chat", support_events: 0 }],
+      });
+      expect(await own.db.prepare("SELECT connection_id, access_token FROM channel_tokens").all()).toMatchObject({
+        results: [{ connection_id: "twitch", access_token: "sealed" }],
+      });
+      const column = await own.db
+        .prepare("SELECT name, \"notnull\", dflt_value FROM pragma_table_info('channel_connections') WHERE name='support_events'")
+        .all();
+      expect(column.results).toEqual([{ name: "support_events", notnull: 1, dflt_value: "false" }]);
+      // A row from a Worker from before the migration has no value: the switch is off.
+      await connection("youtube", "UC1").run();
+      await connection("kick", "333", ",support_events", ",1").run();
+      expect((await own.db.prepare("SELECT id, support_events FROM channel_connections ORDER BY id").all()).results).toEqual([
+        { id: "kick", support_events: 1 },
+        { id: "twitch", support_events: 0 },
+        { id: "youtube", support_events: 0 },
+      ]);
+      await expect(own.db.prepare("UPDATE channel_connections SET support_events=2 WHERE id='kick'").run()).rejects.toThrow(/CHECK/);
+      // The unique indexes of the table are still there.
+      const indexes = await own.db.prepare("SELECT name FROM pragma_index_list('channel_connections') WHERE \"unique\"=1 ORDER BY name").all();
+      expect(indexes.results.map((row) => row.name)).toEqual(
+        expect.arrayContaining(["channel_connections_platform_external_idx", "channel_connections_streamer_platform_idx"]),
+      );
+    } finally {
+      await own.dispose();
+    }
+  }, 60_000);
 
   it("adds a key for each output (0046): an old key is horizontal, or vertical for a page that shows vertical", async (): Promise<void> => {
     // A database of its own: the layers of the pages decide the result, and the other tests read those rows.

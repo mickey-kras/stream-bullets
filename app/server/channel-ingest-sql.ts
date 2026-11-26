@@ -1,3 +1,6 @@
+import type { ActivityChat, ActivitySupport } from "../lib/activity";
+import { SEEN_TTL_MS, SNAPSHOT_MAX_AGE_MS } from "./channel-ingest-limits";
+
 /** The id tables of the ingest object. */
 export type IdTable = "seen" | "deleted";
 
@@ -61,4 +64,58 @@ export const EVENTS = {
   cut(sql: SqlStorage): number {
     return sql.exec<{ at: number }>("SELECT at FROM cut").toArray()[0]?.at ?? 0;
   },
+  /** The kept messages, the oldest first. None is live: a command in a snapshot never runs again. */
+  snapshot(sql: SqlStorage): ActivityChat[] {
+    const rows: { body: string }[] = sql.exec<{ body: string }>("SELECT body FROM events ORDER BY seq").toArray();
+    return rows.map((row): ActivityChat => ({ ...(JSON.parse(row.body) as ActivityChat), live: false }));
+  },
 };
+
+/**
+ * The support events that the object keeps for a reconnect snapshot. The id is unique, so an event is stored one
+ * time. No moderation removes a support event, so this table needs no cut.
+ */
+export const SUPPORT = {
+  create(sql: SqlStorage): void {
+    sql.exec(`CREATE TABLE IF NOT EXISTS support (seq INTEGER PRIMARY KEY AUTOINCREMENT, id TEXT NOT NULL UNIQUE,
+      platform TEXT NOT NULL, received_at INTEGER NOT NULL, body TEXT NOT NULL)`);
+  },
+  add(sql: SqlStorage, event: ActivitySupport): void {
+    sql.exec(
+      "INSERT OR IGNORE INTO support (id, platform, received_at, body) VALUES (?, ?, ?, ?)",
+      event.id,
+      event.platform,
+      event.receivedAt,
+      JSON.stringify(event),
+    );
+  },
+  /** Removes the events received before `before`, and the oldest ones above `size`. */
+  prune(sql: SqlStorage, before: number, size: number): void {
+    sql.exec("DELETE FROM support WHERE received_at < ?", before);
+    sql.exec("DELETE FROM support WHERE seq NOT IN (SELECT seq FROM support ORDER BY seq DESC LIMIT ?)", size);
+  },
+  /** Removes the events of a platform that the owner disconnected. */
+  dropPlatform(sql: SqlStorage, platform: string): void {
+    sql.exec("DELETE FROM support WHERE platform=?", platform);
+  },
+  /** The kept events, the oldest first. Each one is a replay: a consumer shows it and never counts it again. */
+  snapshot(sql: SqlStorage): ActivitySupport[] {
+    const rows: { body: string }[] = sql.exec<{ body: string }>("SELECT body FROM support ORDER BY seq").toArray();
+    return rows.map((row): ActivitySupport => ({ ...(JSON.parse(row.body) as ActivitySupport), replay: true }));
+  },
+};
+
+const OLDEST = `SELECT (SELECT min(received_at) FROM events) AS events,
+  (SELECT min(received_at) FROM support) AS support, (SELECT min(at) FROM seen) AS seen,
+  (SELECT min(at) FROM deleted) AS deleted`;
+
+/** When the oldest stored message, support event or id expires, or null when nothing is stored. */
+export function nextExpiry(sql: SqlStorage): number | null {
+  const row = sql
+    .exec<{ events: number | null; support: number | null; seen: number | null; deleted: number | null }>(OLDEST)
+    .toArray()[0];
+  const times: number[] = [];
+  for (const at of [row.events, row.support]) if (at !== null) times.push(at + SNAPSHOT_MAX_AGE_MS + 1);
+  for (const at of [row.seen, row.deleted]) if (at !== null) times.push(at + SEEN_TTL_MS + 1);
+  return times.length > 0 ? Math.min(...times) : null;
+}

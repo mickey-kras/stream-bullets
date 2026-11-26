@@ -43,6 +43,9 @@ function support(
   };
 }
 
+/** What a reader gives for a payload. `contentId` is the ID of the event when the delivery ID is not: see Kick. */
+type SupportRead = Parameters<typeof support>[4] & { kind: SupportKind; contentId?: string };
+
 const twitchUser = z.object({ user_id: id, user_name: name });
 // An anonymous cheer and an anonymous gift have no user: Twitch sends null for each user field.
 const twitchMaybeUser = z.object({
@@ -55,7 +58,7 @@ function twitchSender(user: { user_id: string | null; user_name: string | null }
   return user.user_id === null ? null : { id: user.user_id, displayName: user.user_name ?? "" };
 }
 
-const TWITCH_SUPPORT: Record<string, (event: unknown) => Parameters<typeof support>[4] & { kind: SupportKind }> = {
+const TWITCH_SUPPORT: Record<string, (event: unknown) => SupportRead> = {
   "channel.follow": (event) => ({ kind: "follow", sender: twitchSender(twitchUser.parse(event)) }),
   // A gift bundle also sends `channel.subscribe` with `is_gift` for each person who got a gift. The bundle is one
   // event (`channel.subscription.gift`), so those give none.
@@ -104,6 +107,31 @@ const TWITCH_SUPPORT: Record<string, (event: unknown) => Parameters<typeof suppo
 /** The EventSub subscription types that give support events. */
 export const TWITCH_SUPPORT_TYPES: readonly string[] = Object.keys(TWITCH_SUPPORT);
 
+/** One EventSub subscription as Twitch takes it: the type, its version and its condition. */
+export interface TwitchSubscription {
+  type: string;
+  version: string;
+  condition: Record<string, string>;
+}
+
+/**
+ * The EventSub subscriptions of the support types for a channel. `channel.bits.use` is not one of them: a cheer
+ * would count two times.
+ */
+export function twitchSupportSubscriptions(broadcaster: string): TwitchSubscription[] {
+  const own = { broadcaster_user_id: broadcaster };
+  return [
+    // Version 2 needs a moderator: the broadcaster is the moderator of the own channel.
+    { type: "channel.follow", version: "2", condition: { ...own, moderator_user_id: broadcaster } },
+    { type: "channel.subscribe", version: "1", condition: own },
+    { type: "channel.subscription.gift", version: "1", condition: own },
+    { type: "channel.subscription.message", version: "1", condition: own },
+    { type: "channel.cheer", version: "1", condition: own },
+    // A raid names the channel that gets it.
+    { type: "channel.raid", version: "1", condition: { to_broadcaster_user_id: broadcaster } },
+  ];
+}
+
 /**
  * The support event of one Twitch EventSub notification. `deliveryId` is the `Twitch-Eventsub-Message-Id` header:
  * Twitch sends a notification again with the same ID.
@@ -125,45 +153,91 @@ function kickSender(user: { user_id: string; username: string }): Sender {
   return { id: user.user_id, displayName: user.username };
 }
 
-const kickSubscription = z.object({ subscriber: kickUser, duration: count });
+/** A time as Kick writes it, such as `2025-01-14T16:08:06Z`. */
+const kickTime = z.string().regex(/^[\dTZ:.+-]{10,40}$/);
+const kickSubscription = z.object({ subscriber: kickUser, duration: count, created_at: kickTime.optional() });
 
-const KICK_SUPPORT: Record<string, (body: unknown) => Parameters<typeof support>[4] & { kind: SupportKind }> = {
-  "channel.followed": (body) => ({
-    kind: "follow",
-    sender: kickSender(z.object({ follower: kickUser }).parse(body).follower),
-  }),
+/**
+ * The ID of a Kick support event from its content. Kick signs the webhooks of all apps with one key, and a copy
+ * that a different app got has a different message ID. The content is the same in each copy, so the copy makes the
+ * same event ID and counts one time. Without the time of the event, the ID is the message ID.
+ */
+function kickContentId(type: string, who: string, at: string | undefined, more: string = ""): string | undefined {
+  return at === undefined ? undefined : `${type}:${who}:${at}${more}`;
+}
+
+const KICK_SUPPORT: Record<string, (body: unknown) => SupportRead> = {
+  // A follow has no time. A person follows one time: a second follow of the same person is the same event.
+  "channel.followed": (body) => {
+    const { follower } = z.object({ follower: kickUser }).parse(body);
+    return { kind: "follow", sender: kickSender(follower), contentId: `channel.followed:${follower.user_id}` };
+  },
   "channel.subscription.new": (body) => {
     const value = kickSubscription.parse(body);
-    return { kind: "subscription", sender: kickSender(value.subscriber), amount: value.duration };
+    const contentId = kickContentId("channel.subscription.new", value.subscriber.user_id, value.created_at);
+    return { kind: "subscription", sender: kickSender(value.subscriber), amount: value.duration, contentId };
   },
   "channel.subscription.renewal": (body) => {
     const value = kickSubscription.parse(body);
-    return { kind: "subscription", sender: kickSender(value.subscriber), amount: value.duration };
+    const contentId = kickContentId("channel.subscription.renewal", value.subscriber.user_id, value.created_at);
+    return { kind: "subscription", sender: kickSender(value.subscriber), amount: value.duration, contentId };
   },
   // One delivery for the bundle: the amount is the number of people who got a gift.
   "channel.subscription.gifts": (body) => {
-    const value = z.object({ gifter: kickGifter, giftees: z.array(z.unknown()).min(1).max(1000) }).parse(body);
-    const { gifter } = value;
+    const value = z
+      .object({
+        gifter: kickGifter,
+        giftees: z
+          .array(z.object({ user_id: id.nullish() }))
+          .min(1)
+          .max(1000),
+        created_at: kickTime.optional(),
+      })
+      .parse(body);
+    const { gifter, giftees } = value;
     const anonymous: boolean = gifter.is_anonymous === true || gifter.user_id == null;
+    // An anonymous bundle has no gifter, so the first person who got a gift is part of the ID.
+    const bundle = `:${giftees.length}:${giftees[0].user_id ?? ""}`;
     return {
       kind: "gift",
       sender: anonymous || gifter.user_id == null ? null : { id: gifter.user_id, displayName: gifter.username ?? "" },
       anonymous,
-      amount: value.giftees.length,
+      amount: giftees.length,
+      contentId: kickContentId("channel.subscription.gifts", gifter.user_id ?? "anonymous", value.created_at, bundle),
     };
   },
   "kicks.gifted": (body) => {
-    const value = z.object({ sender: kickUser, gift: z.object({ amount: count, message: optionalText }) }).parse(body);
-    return { kind: "kicks", sender: kickSender(value.sender), amount: value.gift.amount, text: value.gift.message };
+    const value = z
+      .object({
+        sender: kickUser,
+        gift: z.object({ amount: count, message: optionalText }),
+        created_at: kickTime.optional(),
+      })
+      .parse(body);
+    return {
+      kind: "kicks",
+      sender: kickSender(value.sender),
+      amount: value.gift.amount,
+      text: value.gift.message,
+      contentId: kickContentId("kicks.gifted", value.sender.user_id, value.created_at, `:${value.gift.amount}`),
+    };
   },
 };
 
 /** The Kick webhook events that give support events. */
 export const KICK_SUPPORT_EVENTS: readonly string[] = Object.keys(KICK_SUPPORT);
 
+/** The subscription types that only support events need. YouTube has none: its support comes with the chat. */
+export const SUPPORT_SUBSCRIPTIONS: Readonly<Record<ActivityPlatform, readonly string[]>> = {
+  twitch: TWITCH_SUPPORT_TYPES,
+  youtube: [],
+  kick: KICK_SUPPORT_EVENTS,
+};
+
 /**
  * The support event of one Kick webhook delivery. `deliveryId` is the `Kick-Event-Message-Id` header: Kick sends a
- * delivery again with the same ID.
+ * delivery again with the same ID. The event ID is from the content of the event (`kickContentId`), so a copy of
+ * the delivery with a different message ID makes the same event.
  */
 export function kickSupport(
   eventType: string,
@@ -174,17 +248,23 @@ export function kickSupport(
   return read("kick", KICK_SUPPORT[eventType], body, deliveryId, receivedAt);
 }
 
+/**
+ * A delivery ID is opaque text of the provider. Twitch sends Base64 text with `+`, `/` and `=`, so any printable
+ * ASCII text without a space is an ID.
+ */
+const deliveryIdSchema = z.string().regex(/^[\x21-\x7e]{1,128}$/);
+
 function read(
   platform: ActivityPlatform,
-  reader: ((payload: unknown) => Parameters<typeof support>[4] & { kind: SupportKind }) | undefined,
+  reader: ((payload: unknown) => SupportRead) | undefined,
   payload: unknown,
   deliveryId: string,
   receivedAt: number,
 ): ActivitySupport[] {
-  if (!reader || !id.safeParse(deliveryId).success) return [];
+  if (!reader) return [];
   try {
-    const { kind, ...detail } = reader(payload);
-    return [support(platform, kind, deliveryId, receivedAt, detail)];
+    const { kind, contentId, ...detail } = reader(payload);
+    return [support(platform, kind, deliveryIdSchema.parse(contentId ?? deliveryId), receivedAt, detail)];
   } catch (error: unknown) {
     // A payload that is not as the provider documents it gives no event.
     if (error instanceof z.ZodError) return [];
@@ -194,7 +274,7 @@ function read(
 
 type YoutubeSnippet = YoutubeMessage["snippet"];
 
-function youtubeDetail(snippet: YoutubeSnippet): (Parameters<typeof support>[4] & { kind: SupportKind }) | null {
+function youtubeDetail(snippet: YoutubeSnippet): SupportRead | null {
   const base = { sender: null };
   if (snippet.type === "superChatEvent" && snippet.superChatDetails) {
     const { amountMicros, currency: code, userComment } = snippet.superChatDetails;

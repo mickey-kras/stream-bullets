@@ -484,8 +484,7 @@ export const streamerApplications = sqliteTable(
   ],
 );
 
-// Content reports (EU Digital Services Act, Article 16). Plain target/page IDs survive deletion; snapshots
-// retain reported text.
+// Content reports (EU DSA, Article 16). Plain target/page IDs survive deletion; snapshots retain reported text.
 export const contentReports = sqliteTable(
   "content_reports",
   {
@@ -621,8 +620,7 @@ export const scheduleImports = sqliteTable("schedule_imports", {
   readAt: integer("read_at").notNull(),
 });
 
-// Resume after this watermark, so deleted occurrences stay deleted. Legacy series start at their latest
-// occurrence.
+// Resume after this watermark, so deleted occurrences stay deleted. Legacy series start at their latest occurrence.
 export const streamSeries = sqliteTable("stream_series", {
   id: text("id").primaryKey(),
   streamerId: text("streamer_id")
@@ -962,6 +960,7 @@ export const channelConnections = sqliteTable(
     dataReadAt: integer("data_read_at").notNull().default(0),
     /** When the last event arrived, written at most each 30 seconds. */
     lastEventAt: integer("last_event_at"),
+    supportEvents: integer("support_events", { mode: "boolean" }).notNull().default(false),
   },
   (table) => [
     uniqueIndex("channel_connections_streamer_platform_idx").on(table.streamerId, table.platform),
@@ -971,6 +970,7 @@ export const channelConnections = sqliteTable(
     check("channel_connections_external_check", sql`length(${table.externalId}) BETWEEN 1 AND 64`),
     check("channel_connections_name_check", sql`length(${table.displayName}) BETWEEN 1 AND 100`),
     check("channel_connections_code_check", sql`${table.statusCode} IS NULL OR length(${table.statusCode}) <= 40`),
+    check("channel_connections_support_check", sql`${table.supportEvents} IN (0, 1)`),
   ],
 );
 

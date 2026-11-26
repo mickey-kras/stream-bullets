@@ -1506,5 +1506,6 @@
   "overlay.dock.confirmBody": "O link antigo para de funcionar na hora, e cada dock aberto é fechado. Cole o novo link no OBS.",
   "overlay.dock.ready": "Novo link do dock pronto. Copie para o OBS.",
   "dock.closed.title": "Este link do dock não funciona",
-  "dock.closed.body": "Crie um novo link do dock nas ferramentas do streamer, na seção Overlay, e cole no OBS."
+  "dock.closed.body": "Crie um novo link do dock nas ferramentas do streamer, na seção Overlay, e cole no OBS.",
+  "channels.result.supportDenied": "O canal está conectado. {platform} não deu as permissões para os eventos de apoio, então eles continuam desativados."
 }

@@ -1,5 +1,6 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AppEnv } from "../app/env";
+import { activityEventSchema } from "../app/lib/activity";
 import { ChannelIngest } from "../app/server/channel-ingest";
 import {
   MAX_WEBHOOK_AGE_MS,
@@ -18,6 +19,8 @@ import { HttpError } from "../app/server/http.server";
 import { installFakeProviders, type FakeProviders } from "./helpers/channels";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
 import { installWorkersRuntime, RoomNamespace, serverSocketOf, type FakeSocket, type RoomState } from "./helpers/room";
+import kickFixture from "./fixtures/providers/kick-support.json";
+import twitchFixture from "./fixtures/providers/twitch-support.json";
 
 vi.mock("cloudflare:workers", () => import("./helpers/room"));
 
@@ -501,6 +504,164 @@ describe("Kick webhook", (): void => {
     resetKickKey();
     fake.kickPublicKey = "-----BEGIN PUBLIC KEY-----\nnot a key\n-----END PUBLIC KEY-----";
     expect(await status(kickWebhook(await kickRequest(kickChat), env))).toBe(503);
+  });
+});
+
+describe("support events", (): void => {
+  type Sent = { event: Record<string, unknown> };
+  const twitchPayloads: Record<string, Record<string, unknown>> = twitchFixture.events;
+  const kickPayloads: Record<string, Record<string, unknown>> = kickFixture.events;
+
+  /** The streamer turned support events on for each channel of the page. */
+  async function supportOn(): Promise<void> {
+    await env.DB.prepare("UPDATE channel_connections SET support_events=1").run();
+  }
+
+  function sent(socket: FakeSocket): Record<string, unknown>[] {
+    return socket.ofType<Sent>("event").map((message) => message.event);
+  }
+
+  /** A Kick webhook of the fixtures for the connected channel. */
+  function kickBody(name: string): string {
+    const payload = kickPayloads[name];
+    return JSON.stringify({ ...payload, broadcaster: { ...(payload.broadcaster as object), user_id: 333 } });
+  }
+
+  function raidNotification(to: string): string {
+    return JSON.stringify({
+      subscription: { id: "s9", type: "channel.raid", version: "1", status: "enabled", condition: { from_broadcaster_user_id: "", to_broadcaster_user_id: to } },
+      event: twitchPayloads["channel.raid"],
+    });
+  }
+
+  it("sends a signed Twitch support notification as one event, also when Twitch sends it again", async (): Promise<void> => {
+    await supportOn();
+    const socket = await listen();
+    const body = twitchNotification("channel.cheer", twitchPayloads["channel.cheer"]);
+    // Twitch message ids are Base64 text.
+    const id = "hId+zZ0vqcCcCQXWcDDnmgk3Z0ZNOqDArx2X7ZvVdDg=";
+    const now = Date.now();
+    expect((await twitchWebhook(await twitchRequest(body, { id }), env, now)).status).toBe(204);
+    expect((await twitchWebhook(await twitchRequest(body, { id }), env, now + 1000)).status).toBe(204);
+    const events = sent(socket);
+    expect(events).toEqual([
+      {
+        kind: "bits",
+        id: `twitch:${id}`,
+        platform: "twitch",
+        deliveryId: id,
+        sender: { id: "1234", displayName: "Cool_User" },
+        anonymous: false,
+        amount: 1000,
+        currency: null,
+        text: "Cheer1000 pogchamp",
+        receivedAt: now,
+        replay: false,
+      },
+    ]);
+    expect(activityEventSchema.safeParse(events[0]).success).toBe(true);
+    // A gift bundle is one event: the notification of each person who got a gift makes none.
+    const gifted = twitchNotification("channel.subscribe", twitchPayloads["channel.subscribe (a gift of a bundle)"]);
+    expect((await twitchWebhook(await twitchRequest(gifted), env)).status).toBe(204);
+    const bundle = twitchNotification("channel.subscription.gift", twitchPayloads["channel.subscription.gift"]);
+    expect((await twitchWebhook(await twitchRequest(bundle), env)).status).toBe(204);
+    expect(sent(socket).map((event) => [event.kind, event.amount])).toEqual([
+      ["bits", 1000],
+      ["gift", 2],
+    ]);
+  });
+
+  it("routes a raid to the channel that gets it", async (): Promise<void> => {
+    await supportOn();
+    const socket = await listen();
+    expect((await twitchWebhook(await twitchRequest(raidNotification("111"), { id: "raid-1" }), env)).status).toBe(204);
+    expect(sent(socket)).toMatchObject([
+      { kind: "raid", id: "twitch:raid-1", sender: { id: "1234", displayName: "Cool_User" }, amount: 9001, replay: false },
+    ]);
+    // A raid of a channel that no page connected is an orphaned subscription: Twitch removes it after the 410.
+    vi.spyOn(console, "warn").mockImplementation((): void => undefined);
+    expect((await twitchWebhook(await twitchRequest(raidNotification("999")), env)).status).toBe(410);
+    // Twitch checks the callback of the raid subscription with the same condition.
+    const challenge = JSON.stringify({
+      challenge: "raid-challenge",
+      subscription: { type: "channel.raid", condition: { from_broadcaster_user_id: "", to_broadcaster_user_id: "111" } },
+    });
+    const confirmed = await twitchWebhook(await twitchRequest(challenge, { type: "webhook_callback_verification" }), env);
+    expect(await confirmed.text()).toBe("raid-challenge");
+    // A condition that names no channel is refused.
+    const none = JSON.stringify({ subscription: { type: "channel.raid", condition: { from_broadcaster_user_id: "111" } }, event: {} });
+    expect(await status(twitchWebhook(await twitchRequest(none), env))).toBe(400);
+    const empty = JSON.stringify({ subscription: { type: "channel.raid", condition: { to_broadcaster_user_id: "" } }, event: {} });
+    expect(await status(twitchWebhook(await twitchRequest(empty), env))).toBe(400);
+  });
+
+  it("makes no Twitch support event while the streamer has support events off, and chat still flows", async (): Promise<void> => {
+    const socket = await listen();
+    const cheer = twitchNotification("channel.cheer", twitchPayloads["channel.cheer"]);
+    expect((await twitchWebhook(await twitchRequest(cheer, { id: "cheer-1" }), env)).status).toBe(204);
+    expect((await twitchWebhook(await twitchRequest(raidNotification("111")), env)).status).toBe(204);
+    const chat = twitchNotification("channel.chat.message", twitchChat);
+    expect((await twitchWebhook(await twitchRequest(chat), env)).status).toBe(204);
+    expect(sent(socket).map((event) => event.kind)).toEqual(["chat"]);
+    // Nothing of the support event is kept: it does not come back when the streamer turns the switch on later.
+    const sql = ingest.entry(page).state.storage.sql;
+    expect(sql.exec("SELECT key FROM seen WHERE key LIKE 'support:%' OR key LIKE '%cheer-1'").toArray()).toEqual([]);
+    expect(sql.exec("SELECT id FROM support").toArray()).toEqual([]);
+  });
+
+  it("sends a signed Kick support event as one event, also when Kick sends it again", async (): Promise<void> => {
+    await supportOn();
+    const socket = await listen();
+    const body = kickBody("kicks.gifted");
+    const now = Date.now();
+    expect((await kickWebhook(await kickRequest(body, { id: "01JKICKS1", type: "kicks.gifted" }), env, now)).status).toBe(204);
+    expect((await kickWebhook(await kickRequest(body, { id: "01JKICKS1", type: "kicks.gifted" }), env, now)).status).toBe(204);
+    // Another Worker isolate does not know the id: the ingest object refuses the copy.
+    resetRoutes();
+    expect((await kickWebhook(await kickRequest(body, { id: "01JKICKS1", type: "kicks.gifted" }), env, now)).status).toBe(204);
+    // A different Kick app can send its copy of the event: a new message ID, the same content. It counts one time.
+    expect((await kickWebhook(await kickRequest(body, { id: "01JCOPYOFAPP2", type: "kicks.gifted" }), env, now)).status).toBe(204);
+    const events = sent(socket);
+    const contentId = "kicks.gifted:987654321:2025-10-20T04:00:08.634Z:500";
+    expect(events).toEqual([
+      {
+        kind: "kicks",
+        id: `kick:${contentId}`,
+        platform: "kick",
+        deliveryId: contentId,
+        sender: { id: "987654321", displayName: "gift_sender" },
+        anonymous: false,
+        amount: 500,
+        currency: null,
+        text: "w",
+        receivedAt: now,
+        replay: false,
+      },
+    ]);
+    expect(activityEventSchema.safeParse(events[0]).success).toBe(true);
+    const bundle = kickBody("channel.subscription.gifts (anonymous, a bundle of 3)");
+    expect((await kickWebhook(await kickRequest(bundle, { id: "01JGIFTS1", type: "channel.subscription.gifts" }), env)).status).toBe(204);
+    expect(sent(socket)[1]).toMatchObject({ kind: "gift", amount: 3, anonymous: true, sender: null });
+  });
+
+  it("makes no Kick support event while the streamer has support events off, and chat still flows", async (): Promise<void> => {
+    const socket = await listen();
+    const follow = kickBody("channel.followed");
+    expect((await kickWebhook(await kickRequest(follow, { id: "01JFOLLOW1", type: "channel.followed" }), env)).status).toBe(204);
+    expect((await kickWebhook(await kickRequest(kickChat), env)).status).toBe(204);
+    expect(sent(socket).map((event) => event.kind)).toEqual(["chat"]);
+    expect(ingest.entry(page).state.storage.sql.exec("SELECT id FROM support").toArray()).toEqual([]);
+  });
+
+  it("gives a reconnecting consumer the support event as a replay", async (): Promise<void> => {
+    await supportOn();
+    const cheer = twitchNotification("channel.cheer", twitchPayloads["channel.cheer (anonymous)"]);
+    expect((await twitchWebhook(await twitchRequest(cheer, { id: "cheer-2" }), env)).status).toBe(204);
+    const socket = await listen();
+    const [snapshot] = socket.ofType<{ events: Record<string, unknown>[]; replay: boolean }>("snapshot");
+    expect(snapshot.replay).toBe(true);
+    expect(snapshot.events).toMatchObject([{ kind: "bits", id: "twitch:cheer-2", anonymous: true, sender: null, replay: true }]);
+    expect(sent(socket)).toEqual([]);
   });
 });
 

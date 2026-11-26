@@ -120,6 +120,8 @@ export const CONNECT_RESULTS = [
   "channel_taken",
   "disconnect_first",
   "scope_missing",
+  // The channel is connected and reads chat, but the provider did not give the permissions for support events.
+  "support_denied",
   "failed",
 ] as const;
 export type ConnectResult = (typeof CONNECT_RESULTS)[number];

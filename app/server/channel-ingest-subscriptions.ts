@@ -34,6 +34,8 @@ export interface SubscriptionHost {
   /** Whether a consumer listens. */
   listening: () => boolean;
   connection: (platform: ActivityPlatform) => Promise<Connection | null>;
+  /** Forgets the connections that the object read: the next use reads them from D1 again. */
+  forget: () => void;
   setStatus: (
     platform: ActivityPlatform,
     connection: Connection,
@@ -103,6 +105,19 @@ export class ChannelSubscriptions {
     });
   }
 
+  /**
+   * The provider refused a subscription that only support events need: the support events of the connection go
+   * off. The subscriptions of chat and the status stay as they are, and the next check deletes what is left.
+   */
+  private async supportRefused(platform: ActivityPlatform, connection: Connection): Promise<void> {
+    await this.host.env.DB.prepare("UPDATE channel_connections SET support_events=0 WHERE id=?")
+      .bind(connection.id)
+      .run();
+    this.host.forget();
+    // Only the platform: never an id, a name or provider text.
+    console.warn("channel_support_refused", { platform });
+  }
+
   /** Undeleted and new ids stay stored for a later disconnect. A Twitch 409 adopts the listed ids of that type. */
   private async replace(
     platform: ActivityPlatform,
@@ -118,7 +133,17 @@ export class ChannelSubscriptions {
     if (overtaken()) return;
     const created: string[] = [];
     try {
-      const { conflicts } = await subscribe(env, platform, connection.externalId, accessToken, origin, created);
+      const scope = { only: null, support: connection.support };
+      const { conflicts, refused } = await subscribe(
+        env,
+        platform,
+        connection.externalId,
+        accessToken,
+        origin,
+        created,
+        scope,
+      );
+      if (refused && !overtaken()) await this.supportRefused(platform, connection);
       if (conflicts.length > 0) {
         const listed = await listSubscriptions(env, platform, connection.externalId, accessToken, origin);
         const adopted = (listed ?? []).filter((item) => conflicts.includes(item.type));
@@ -201,6 +226,7 @@ export class ChannelSubscriptions {
     // A connect, a disconnect or a close ran during the check: its outcome stands, so this one writes nothing.
     if (overtaken()) return "skipped";
     if (outcome.ids !== null) await this.host.storage.put(`subs:${platform}`, outcome.ids);
+    if (outcome.supportRefused) await this.supportRefused(platform, connection);
     // A revocation can arrive during the check: the status it set stands, so the stale one writes no status.
     const current = await this.host.connection(platform);
     if (!this.checkable(platform, current)) return "skipped";
@@ -218,9 +244,10 @@ export class ChannelSubscriptions {
     try {
       if (platform === "kick") accessToken = (await this.host.freshTokens(platform, connection)).accessToken;
     } catch (error: unknown) {
-      return { ids: null, changed: false, failure: error instanceof ReauthRequired ? "reauth" : "provider" };
+      const failure = error instanceof ReauthRequired ? "reauth" : "provider";
+      return { ids: null, changed: false, failure, supportRefused: false };
     }
-    return reconcileSubscriptions(this.host.env, platform, connection.externalId, accessToken);
+    return reconcileSubscriptions(this.host.env, platform, connection.externalId, accessToken, connection.support);
   }
 
   private async reconcileFailed(
@@ -327,11 +354,18 @@ export class ChannelSubscriptions {
     return soonest;
   }
 
-  /** The hourly job asks for a check. One that ran or is scheduled inside the interval stands: `recent`. */
-  async requested(platform: ActivityPlatform, now: number): Promise<{ result: ReconcileResult | "recent" }> {
+  /**
+   * The hourly job asks for a check. One that ran or is scheduled inside the interval stands: `recent`. With
+   * `force`, the check runs now: the streamer changed the support events, so their subscriptions must come or go.
+   */
+  async requested(
+    platform: ActivityPlatform,
+    now: number,
+    force: boolean = false,
+  ): Promise<{ result: ReconcileResult | "recent" }> {
     if (!REPAIRABLE.includes(platform) || channelsOff(this.host.env)) return { result: "skipped" };
     const state = await this.state(platform);
-    if (now < state.nextAt) return { result: "recent" };
+    if (!force && now < state.nextAt) return { result: "recent" };
     const connection = await this.host.connection(platform);
     if (!this.checkable(platform, connection)) return { result: "skipped" };
     const result = await this.reconcile(platform, connection);

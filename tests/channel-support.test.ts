@@ -136,9 +136,9 @@ describe("Kick support events", (): void => {
   it("reads each documented webhook example", (): void => {
     expect(one(kick("channel.followed"))).toEqual({
       kind: "follow",
-      id: "kick:01JKICKDELIVERY",
+      id: "kick:channel.followed:987654321",
       platform: "kick",
-      deliveryId: "01JKICKDELIVERY",
+      deliveryId: "channel.followed:987654321",
       sender: { id: "987654321", displayName: "follower_name" },
       anonymous: false,
       amount: null,
@@ -176,6 +176,35 @@ describe("Kick support events", (): void => {
   it("gives the same event ID for a delivery that Kick sends again", (): void => {
     const first = one(kick("kicks.gifted", "01JSAME"));
     expect(acceptDelivery(acceptDelivery([], first).seen, one(kick("kicks.gifted", "01JSAME"))).accepted).toBe(false);
+  });
+
+  it("gives the same event ID for a copy with a different message ID, so the copy counts one time", (): void => {
+    // Kick signs the webhooks of all apps with one key: a different app can send its copy of a real event.
+    for (const name of Object.keys(kickPayloads)) {
+      const first = one(kick(name, "01JFIRST"));
+      const copy = one(kick(name, "01JCOPY"));
+      expect(copy.id, name).toBe(first.id);
+      expect(first.id, name).not.toContain("01JFIRST");
+      expect(acceptDelivery(acceptDelivery([], first).seen, copy).accepted, name).toBe(false);
+    }
+    expect(one(kick("kicks.gifted")).id).toBe("kick:kicks.gifted:987654321:2025-10-20T04:00:08.634Z:500");
+    // A different time, a different person, or a different bundle is a different event.
+    const gifted = kickPayloads["kicks.gifted"] as Record<string, unknown>;
+    const later = one(kickSupport("kicks.gifted", { ...gifted, created_at: "2025-10-20T04:00:09.000Z" }, "d", now));
+    expect(later.id).not.toBe(one(kick("kicks.gifted")).id);
+    expect(one(kick("channel.subscription.gifts")).id).not.toBe(
+      one(kick("channel.subscription.gifts (anonymous, a bundle of 3)")).id,
+    );
+    expect(one(kick("channel.subscription.new")).id).not.toBe(one(kick("channel.subscription.renewal")).id);
+  });
+
+  it("uses the message ID for an event without its time", (): void => {
+    const gifted: Record<string, unknown> = Object.fromEntries(
+      Object.entries(kickPayloads["kicks.gifted"] as object).filter(([key]: [string, unknown]) => key !== "created_at"),
+    );
+    expect(one(kickSupport("kicks.gifted", gifted, "01JMESSAGE", now)).id).toBe("kick:01JMESSAGE");
+    expect(kickSupport("kicks.gifted", gifted, "not a valid id", now)).toEqual([]);
+    expect(kickSupport("kicks.gifted", { ...gifted, created_at: "not a time" }, "01JMESSAGE", now)).toEqual([]);
   });
 
   it("gives no event for a payload or an event that is not as the documentation says", (): void => {
