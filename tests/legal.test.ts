@@ -55,6 +55,7 @@ describe("legal links and consent", () => {
       expect(html).toContain(legal.operatorName);
       expect(html).toContain(legal.contactEmail);
     }
+    expect(render(Privacy)).toContain("https://developers.google.com/terms/api-services-user-data-policy");
   });
 });
 
