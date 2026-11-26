@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { catch as withFallback, z } from "zod";
 import type { AppEnv } from "../env";
 import type { ActivityPlatform } from "../lib/activity";
 import type { ChannelTokens } from "./channel-tokens.server";
@@ -544,6 +544,16 @@ export async function youtubeLiveChat(accessToken: string): Promise<string | nul
   return body.items.find((item) => item.snippet.liveChatId)?.snippet.liveChatId ?? null;
 }
 
+/** The amount of a Super Chat or a Super Sticker. The API sends the micros as a string of digits. */
+const youtubeMoney = {
+  amountMicros: z.union([z.string().regex(/^\d{1,16}$/), z.number().int().nonnegative()]).transform(Number),
+  currency: z.string().max(8),
+};
+
+function youtubeDetail<Shape extends z.ZodRawShape>(shape: Shape) {
+  return withFallback(z.object(shape).optional(), undefined);
+}
+
 export const youtubeMessageSchema = z.object({
   id: z.string().min(1).max(128),
   snippet: z.object({
@@ -559,6 +569,16 @@ export const youtubeMessageSchema = z.object({
         banDurationSeconds: z.coerce.number().nonnegative().optional(),
       })
       .optional(),
+    // The details of the support events. A detail that is not as the documentation says parses to `undefined`: it
+    // must not refuse the item, because the item is one of a page of chat.
+    superChatDetails: youtubeDetail({ ...youtubeMoney, userComment: z.string().max(2000).optional() }),
+    superStickerDetails: youtubeDetail(youtubeMoney),
+    newSponsorDetails: youtubeDetail({ isUpgrade: z.boolean().optional() }),
+    memberMilestoneChatDetails: youtubeDetail({
+      memberMonth: z.coerce.number().int().positive(),
+      userComment: z.string().max(2000).optional(),
+    }),
+    membershipGiftingDetails: youtubeDetail({ giftMembershipsCount: z.coerce.number().int().positive() }),
   }),
   authorDetails: z
     .object({
