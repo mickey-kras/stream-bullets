@@ -1506,5 +1506,6 @@
   "overlay.dock.confirmBody": "El enlace anterior deja de funcionar de inmediato y se cierra cada panel abierto. Pega el nuevo enlace en OBS.",
   "overlay.dock.ready": "Nuevo enlace del panel listo. Cópialo en OBS.",
   "dock.closed.title": "Este enlace del panel no funciona",
-  "dock.closed.body": "Crea un nuevo enlace del panel en las herramientas del streamer, en la sección Overlay, y pégalo en OBS."
+  "dock.closed.body": "Crea un nuevo enlace del panel en las herramientas del streamer, en la sección Overlay, y pégalo en OBS.",
+  "channels.result.supportDenied": "El canal está conectado. {platform} no dio los permisos para los eventos de apoyo, así que siguen desactivados."
 }

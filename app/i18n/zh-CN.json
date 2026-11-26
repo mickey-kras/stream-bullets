@@ -1486,5 +1486,6 @@
   "overlay.dock.confirmBody": "旧链接会立即失效，每个打开的停靠窗口都会关闭。请把新链接粘贴到 OBS。",
   "overlay.dock.ready": "新的停靠窗口链接已就绪。请复制到 OBS。",
   "dock.closed.title": "此停靠窗口链接无效",
-  "dock.closed.body": "请在主播工具的叠加层部分创建新的停靠窗口链接，并粘贴到 OBS。"
+  "dock.closed.body": "请在主播工具的叠加层部分创建新的停靠窗口链接，并粘贴到 OBS。",
+  "channels.result.supportDenied": "频道已连接。{platform} 未授予支持事件的权限，因此支持事件保持关闭。"
 }

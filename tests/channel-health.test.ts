@@ -63,6 +63,18 @@ describe("the response of GET /api/channels", (): void => {
     expect(channelsResponseSchema.parse(body)).toEqual({ channels: [kick, channel("twitch", null)] });
   });
 
+  it("keeps the support events of a platform: the switch and the permissions that it asks for", (): void => {
+    const twitch: ChannelView = { ...channel("twitch", "active"), support: true, supportScopes: ["bits:read"] };
+    const kick: ChannelView = { ...channel("kick", null), support: false, supportScopes: [] };
+    expect(channelsResponseSchema.parse({ channels: [twitch, kick] })).toEqual({ channels: [twitch, kick] });
+    // A server from before the support events sends neither field.
+    expect(channelsResponseSchema.parse({ channels: [channel("youtube", "active")] })).toEqual({
+      channels: [channel("youtube", "active")],
+    });
+    const wrong: unknown = { channels: [{ ...twitch, support: "yes" }] };
+    expect(channelsResponseSchema.safeParse(wrong).success).toBe(false);
+  });
+
   it("refuses another shape", (): void => {
     expect(
       channelsResponseSchema.safeParse({ channels: [{ platform: "tiktok", available: true, connection: null }] })

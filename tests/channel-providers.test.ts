@@ -1,8 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { AppEnv } from "../app/env";
 import {
+  PROVIDERS,
   ProviderError,
   ReauthRequired,
+  SUPPORT_SCOPES,
+  authorizationUrl,
   channelIdentity,
   configuredPlatform,
   exchangeCode,
@@ -98,6 +101,7 @@ describe("channel provider clients", (): void => {
         "channel.chat.clear_user_messages",
         "channel.moderate",
       ],
+      refused: false,
     });
     expect(none).toEqual([]);
     answers(
@@ -123,7 +127,132 @@ describe("channel provider clients", (): void => {
     await expect(subscribe(env, "kick", "333", "t", "https://app.test", [])).rejects.toBeInstanceOf(ReauthRequired);
     answers(() => new Response(null, { status: 500 }));
     await expect(subscribe(env, "kick", "333", "t", "https://app.test", [])).rejects.toBeInstanceOf(ProviderError);
-    expect(await subscribe(env, "youtube", "UC", "t", "https://app.test", [])).toEqual({ conflicts: [] });
+    expect(await subscribe(env, "youtube", "UC", "t", "https://app.test", [])).toEqual({ conflicts: [], refused: false });
+  });
+
+  it("asks for the support scopes only when support is wanted", (): void => {
+    const input = { state: "s", redirectUri: "https://app.test/cb", codeChallenge: "c" };
+    const scopes = (platform: "twitch" | "youtube" | "kick", support: boolean): string[] =>
+      new URL(authorizationUrl(env, platform, { ...input, support })).searchParams.get("scope")?.split(" ") ?? [];
+    expect(SUPPORT_SCOPES).toEqual({
+      twitch: ["moderator:read:followers", "channel:read:subscriptions", "bits:read"],
+      youtube: [],
+      kick: [],
+    });
+    for (const platform of ["twitch", "youtube", "kick"] as const) {
+      expect(scopes(platform, false)).toEqual(PROVIDERS[platform].scopes);
+      expect(scopes(platform, true)).toEqual([...PROVIDERS[platform].scopes, ...SUPPORT_SCOPES[platform]]);
+    }
+    // Only read scopes: support events never give a right to change the channel.
+    expect(scopes("twitch", true).join(" ")).not.toMatch(/manage|edit|write/);
+  });
+
+  it("makes the support subscriptions after the chat ones, each with its version and condition", async (): Promise<void> => {
+    let made = 0;
+    const requests = answers(
+      () => Response.json({ access_token: "app" }),
+      () => Response.json({ data: [{ id: `s${++made}` }] }, { status: 202 }),
+    );
+    const created: string[] = [];
+    expect(await subscribe(env, "twitch", "111", null, "https://app.test", created, { only: null, support: true })).toEqual({
+      conflicts: [],
+      refused: false,
+    });
+    const bodies = await Promise.all(requests.slice(1).map((request) => request.json<Record<string, unknown>>()));
+    expect(bodies.map((body) => [body.type, body.version, body.condition])).toEqual([
+      ["channel.chat.message", "1", { broadcaster_user_id: "111", user_id: "111" }],
+      ["channel.chat.message_delete", "1", { broadcaster_user_id: "111", user_id: "111" }],
+      ["channel.chat.clear", "1", { broadcaster_user_id: "111", user_id: "111" }],
+      ["channel.chat.clear_user_messages", "1", { broadcaster_user_id: "111", user_id: "111" }],
+      ["channel.moderate", "2", { broadcaster_user_id: "111", moderator_user_id: "111" }],
+      ["channel.follow", "2", { broadcaster_user_id: "111", moderator_user_id: "111" }],
+      ["channel.subscribe", "1", { broadcaster_user_id: "111" }],
+      ["channel.subscription.gift", "1", { broadcaster_user_id: "111" }],
+      ["channel.subscription.message", "1", { broadcaster_user_id: "111" }],
+      ["channel.cheer", "1", { broadcaster_user_id: "111" }],
+      ["channel.raid", "1", { to_broadcaster_user_id: "111" }],
+    ]);
+    // A cheer also sends `channel.bits.use`: the feed never subscribes to it, so Bits count one time.
+    expect(requiredSubscriptions("twitch", true)).not.toContain("channel.bits.use");
+    expect(created).toHaveLength(11);
+    expect(requiredSubscriptions("twitch", true)).toEqual(bodies.map((body) => body.type));
+    expect(requiredSubscriptions("kick", true)).toEqual([
+      "chat.message.sent",
+      "moderation.banned",
+      "channel.followed",
+      "channel.subscription.new",
+      "channel.subscription.renewal",
+      "channel.subscription.gifts",
+      "kicks.gifted",
+    ]);
+    expect(requiredSubscriptions("youtube", true)).toEqual([]);
+  });
+
+  it("keeps the chat subscriptions when Twitch refuses a support type, and asks for no further support type", async (): Promise<void> => {
+    let made = 0;
+    const requests = answers(
+      () => Response.json({ access_token: "app" }),
+      ...Array.from({ length: 6 }, () => (): Response => Response.json({ data: [{ id: `s${++made}` }] }, { status: 202 })),
+      () => new Response(null, { status: 403 }),
+    );
+    const created: string[] = [];
+    const result = await subscribe(env, "twitch", "111", null, "https://app.test", created, { only: null, support: true });
+    expect(result).toEqual({ conflicts: [], refused: true });
+    // The five chat types and the follow type exist; the refused type ended the support types.
+    expect(created).toEqual(["s1", "s2", "s3", "s4", "s5", "s6"]);
+    expect(requests).toHaveLength(8);
+    expect(await requests[7].json()).toMatchObject({ type: "channel.subscribe" });
+    // The same answer for a chat type still needs a new authorization.
+    answers(
+      () => Response.json({ access_token: "app" }),
+      () => new Response(null, { status: 403 }),
+    );
+    const scope = { only: null, support: true };
+    await expect(subscribe(env, "twitch", "111", null, "https://app.test", [], scope)).rejects.toBeInstanceOf(ReauthRequired);
+  });
+
+  it("asks Kick for the chat events first, and takes a refusal of the support events without an error", async (): Promise<void> => {
+    const scope = { only: null, support: true };
+    for (const refusal of [401, 403]) {
+      const requests = answers(
+        () => Response.json({ data: [{ subscription_id: "k1" }, { subscription_id: "k2" }] }),
+        () => new Response(null, { status: refusal }),
+      );
+      const created: string[] = [];
+      expect(await subscribe(env, "kick", "333", "t", "https://app.test", created, scope)).toEqual({ conflicts: [], refused: true });
+      expect(created).toEqual(["k1", "k2"]);
+      expect(await requests[0].json()).toMatchObject({ events: [{ name: "chat.message.sent" }, { name: "moderation.banned" }] });
+      expect((await requests[1].json<{ events: { name: string }[] }>()).events.map((event) => event.name)).toEqual([
+        "channel.followed",
+        "channel.subscription.new",
+        "channel.subscription.renewal",
+        "channel.subscription.gifts",
+        "kicks.gifted",
+      ]);
+    }
+    // An event without a subscription id is a refusal too; the ids that Kick made stay known.
+    answers(
+      () => Response.json({ data: [{ subscription_id: "k1" }, { subscription_id: "k2" }] }),
+      () => Response.json({ data: [{ subscription_id: "k3" }, { subscription_id: null, error: "not allowed" }] }),
+    );
+    const partial: string[] = [];
+    expect(await subscribe(env, "kick", "333", "t", "https://app.test", partial, scope)).toEqual({ conflicts: [], refused: true });
+    expect(partial).toEqual(["k1", "k2", "k3"]);
+    // An outage is no refusal: the repair tries again, and the support events stay on.
+    answers(
+      () => Response.json({ data: [{ subscription_id: "k1" }, { subscription_id: "k2" }] }),
+      () => new Response(null, { status: 500 }),
+    );
+    await expect(subscribe(env, "kick", "333", "t", "https://app.test", [], scope)).rejects.toBeInstanceOf(ProviderError);
+    // A refusal of the chat events still needs a new authorization, and no support event is asked for.
+    const refused = answers(() => new Response(null, { status: 403 }));
+    await expect(subscribe(env, "kick", "333", "t", "https://app.test", [], scope)).rejects.toBeInstanceOf(ReauthRequired);
+    expect(refused).toHaveLength(1);
+    // A repair that misses only support events asks for those alone.
+    const repair = answers(() => Response.json({ data: [{ subscription_id: "k9" }] }));
+    await subscribe(env, "kick", "333", "t", "https://app.test", [], { only: ["kicks.gifted"], support: true });
+    expect(repair).toHaveLength(1);
+    expect(await repair[0].json()).toMatchObject({ events: [{ name: "kicks.gifted", version: 1 }] });
   });
 
   it("returns the ids it could not delete", async (): Promise<void> => {
@@ -141,6 +270,30 @@ describe("channel provider clients", (): void => {
     vi.stubGlobal("fetch", () => Promise.reject(new TypeError("down")));
     expect(await unsubscribe(env, "kick", ["a"], "t")).toEqual(["a"]);
     expect(await unsubscribe(env, "twitch", ["a"], null)).toEqual(["a"]);
+  });
+
+  it("lists the raid subscription of the channel, which names it as the channel that gets the raid", async (): Promise<void> => {
+    const origin = "https://app.test";
+    const raid = (id: string, condition: Record<string, string>): unknown => ({
+      id,
+      type: "channel.raid",
+      status: "enabled",
+      condition,
+      transport: { method: "webhook", callback: `${origin}/hooks/twitch` },
+    });
+    answers(
+      () => Response.json({ access_token: "app" }),
+      () =>
+        Response.json({
+          data: [
+            raid("to-me", { from_broadcaster_user_id: "", to_broadcaster_user_id: "111" }),
+            raid("to-other", { from_broadcaster_user_id: "", to_broadcaster_user_id: "999" }),
+            raid("from-me", { from_broadcaster_user_id: "111", to_broadcaster_user_id: "" }),
+          ],
+          pagination: {},
+        }),
+    );
+    expect(await listSubscriptions(env, "twitch", "111", null, origin)).toEqual([{ id: "to-me", type: "channel.raid", health: "enabled" }]);
   });
 
   it("lists only this app's webhook subscriptions for the channel and callback", async (): Promise<void> => {
@@ -221,28 +374,28 @@ describe("channel provider clients", (): void => {
       // A list without the documented status proves no failure.
       ["no-status", "enabled"],
     ]);
-    expect(requiredSubscriptions("twitch")).toEqual([
+    expect(requiredSubscriptions("twitch", false)).toEqual([
       "channel.chat.message",
       "channel.chat.message_delete",
       "channel.chat.clear",
       "channel.chat.clear_user_messages",
       "channel.moderate",
     ]);
-    expect(requiredSubscriptions("kick")).toEqual(["chat.message.sent", "moderation.banned"]);
-    expect(requiredSubscriptions("youtube")).toEqual([]);
+    expect(requiredSubscriptions("kick", false)).toEqual(["chat.message.sent", "moderation.banned"]);
+    expect(requiredSubscriptions("youtube", false)).toEqual([]);
     let requests = answers(
       () => Response.json({ access_token: "app" }),
       () => Response.json({ data: [{ id: "made" }] }, { status: 202 }),
     );
     const created: string[] = [];
     // Twitch needs no user token: the app token creates the webhook subscription.
-    await subscribe(env, "twitch", "111", null, origin, created, ["channel.moderate"]);
+    await subscribe(env, "twitch", "111", null, origin, created, { only: ["channel.moderate"], support: false });
     expect(created).toEqual(["made"]);
     expect(requests).toHaveLength(2);
     expect(await requests[1].json()).toMatchObject({ type: "channel.moderate", version: "2" });
     expect(requests[1].headers.get("Authorization")).toBe("Bearer app");
     requests = answers(() => Response.json({ data: [{ subscription_id: "k2" }] }));
-    await subscribe(env, "kick", "333", "t", origin, [], ["moderation.banned"]);
+    await subscribe(env, "kick", "333", "t", origin, [], { only: ["moderation.banned"], support: false });
     expect(await requests[0].json()).toMatchObject({ events: [{ name: "moderation.banned", version: 1 }] });
     // Kick subscribes only with the broadcaster's token.
     await expect(subscribe(env, "kick", "333", null, origin, [])).rejects.toBeInstanceOf(ReauthRequired);

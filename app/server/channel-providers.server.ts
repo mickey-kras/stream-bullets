@@ -1,6 +1,12 @@
 import { catch as withFallback, z } from "zod";
 import type { AppEnv } from "../env";
 import type { ActivityPlatform } from "../lib/activity";
+import {
+  KICK_SUPPORT_EVENTS,
+  TWITCH_SUPPORT_TYPES,
+  twitchSupportSubscriptions,
+  type TwitchSubscription,
+} from "./channel-support";
 import type { ChannelTokens } from "./channel-tokens.server";
 import { HttpError } from "./http.server";
 
@@ -72,6 +78,13 @@ export const PROVIDERS: Readonly<Record<ActivityPlatform, Provider>> = {
   },
 };
 
+/** The scopes that only support events need. The server asks for them when the streamer turns support events on. */
+export const SUPPORT_SCOPES: Readonly<Record<ActivityPlatform, readonly string[]>> = {
+  twitch: ["moderator:read:followers", "channel:read:subscriptions", "bits:read"],
+  youtube: [],
+  kick: [],
+};
+
 /** The OAuth client of a platform. The YouTube connection uses the Google sign-in client with its own redirect. */
 export function providerClient(env: AppEnv, platform: ActivityPlatform): { id: string; secret: string } {
   const pairs: Record<ActivityPlatform, [string | undefined, string | undefined]> = {
@@ -98,15 +111,16 @@ export function configuredPlatform(env: AppEnv, platform: ActivityPlatform): boo
 export function authorizationUrl(
   env: AppEnv,
   platform: ActivityPlatform,
-  input: { state: string; redirectUri: string; codeChallenge: string },
+  input: { state: string; redirectUri: string; codeChallenge: string; support: boolean },
 ): string {
   const provider = PROVIDERS[platform];
+  const scopes: readonly string[] = input.support ? [...provider.scopes, ...SUPPORT_SCOPES[platform]] : provider.scopes;
   const url = new URL(provider.authorizeUrl);
   url.search = new URLSearchParams({
     client_id: providerClient(env, platform).id,
     redirect_uri: input.redirectUri,
     response_type: "code",
-    scope: provider.scopes.join(" "),
+    scope: scopes.join(" "),
     state: input.state,
     ...(provider.pkce ? { code_challenge: input.codeChallenge, code_challenge_method: "S256" } : {}),
     ...provider.extra,
@@ -278,30 +292,27 @@ async function twitchAppToken(env: AppEnv): Promise<string> {
   return z.object({ access_token: z.string().min(1) }).parse(await response.json()).access_token;
 }
 
-/** The Twitch EventSub types the feed uses, with their condition. */
-function twitchSubscriptions(
-  broadcaster: string,
-): { type: string; version: string; condition: Record<string, string> }[] {
+/** The Twitch EventSub types the feed uses, with their condition: chat first, then support when `support` is true. */
+function twitchSubscriptions(broadcaster: string, support: boolean): TwitchSubscription[] {
   const chat = { broadcaster_user_id: broadcaster, user_id: broadcaster };
+  const moderator = { broadcaster_user_id: broadcaster, moderator_user_id: broadcaster };
   return [
     { type: "channel.chat.message", version: "1", condition: chat },
     { type: "channel.chat.message_delete", version: "1", condition: chat },
     { type: "channel.chat.clear", version: "1", condition: chat },
     { type: "channel.chat.clear_user_messages", version: "1", condition: chat },
-    {
-      type: "channel.moderate",
-      version: "2",
-      condition: { broadcaster_user_id: broadcaster, moderator_user_id: broadcaster },
-    },
+    { type: "channel.moderate", version: "2", condition: moderator },
+    ...(support ? twitchSupportSubscriptions(broadcaster) : []),
   ];
 }
 
 export const KICK_EVENTS: readonly string[] = ["chat.message.sent", "moderation.banned"];
 
-/** The subscription types a healthy channel has at its provider. YouTube has none: its chat is polled. */
-export function requiredSubscriptions(platform: ActivityPlatform): readonly string[] {
+/** The types a healthy channel has at its provider. YouTube has none: its chat, with the support, is polled. */
+export function requiredSubscriptions(platform: ActivityPlatform, support: boolean): readonly string[] {
   if (platform === "youtube") return [];
-  return platform === "kick" ? KICK_EVENTS : twitchSubscriptions("").map((subscription) => subscription.type);
+  if (platform === "kick") return support ? [...KICK_EVENTS, ...KICK_SUPPORT_EVENTS] : KICK_EVENTS;
+  return twitchSubscriptions("", support).map((subscription: TwitchSubscription): string => subscription.type);
 }
 
 const TWITCH_SUBSCRIPTIONS_URL = "https://api.twitch.tv/helix/eventsub/subscriptions";
@@ -363,7 +374,7 @@ async function listTwitchSubscriptions(
   };
   const subscriptions: ProviderSubscription[] = [];
   let cursor: string | undefined;
-  // At most 10 pages of 100: far more than the five subscriptions of one channel.
+  // At most 10 pages of 100: far more than the eleven subscriptions of one channel.
   for (let page = 0; page < 10; page++) {
     const url = new URL(TWITCH_SUBSCRIPTIONS_URL);
     url.searchParams.set("user_id", externalId);
@@ -375,7 +386,8 @@ async function listTwitchSubscriptions(
       if (
         item.transport.method === "webhook" &&
         item.transport.callback === `${callbackOrigin}/hooks/twitch` &&
-        item.condition.broadcaster_user_id === externalId
+        // A raid subscription names the channel in `to_broadcaster_user_id`.
+        (item.condition.broadcaster_user_id === externalId || item.condition.to_broadcaster_user_id === externalId)
       )
         subscriptions.push({ id: item.id, type: item.type, health: twitchHealth(item.status) });
     cursor = body.pagination?.cursor;
@@ -415,18 +427,30 @@ export async function listSubscriptions(
   }
 }
 
+/** What a subscribe call did. `refused`: the provider refused a type that only support events need. */
+type Subscribed = { conflicts: string[]; refused: boolean };
+
+/** Which subscriptions a call makes: the types a repair names in `only` (null: all), with or without support. */
+type SubscribeScope = { only: readonly string[] | null; support: boolean };
+
 async function subscribeTwitch(
   env: AppEnv,
   externalId: string,
   callbackOrigin: string,
   created: string[],
-  only: readonly string[] | null,
-): Promise<{ conflicts: string[] }> {
+  scope: SubscribeScope,
+): Promise<Subscribed> {
   const token = await twitchAppToken(env);
   const conflicts: string[] = [];
+  let refused = false;
   // A repair names the missing types in `only`; a connect creates all of them.
-  const wanted = twitchSubscriptions(externalId).filter((item) => only?.includes(item.type) ?? true);
+  const wanted = twitchSubscriptions(externalId, scope.support).filter(
+    (item: TwitchSubscription): boolean => scope.only?.includes(item.type) ?? true,
+  );
   for (const subscription of wanted) {
+    const optional: boolean = TWITCH_SUPPORT_TYPES.includes(subscription.type);
+    // After one refusal the support events go off: no further type of them is asked for.
+    if (optional && refused) continue;
     const response = await fetch(TWITCH_SUBSCRIPTIONS_URL, {
       method: "POST",
       headers: {
@@ -448,6 +472,11 @@ async function subscribeTwitch(
       continue;
     }
     // 403: the broadcaster's authorization is missing. A 401 refuses the app token: no owner can repair that.
+    // The types of chat come first, so a 403 for a support type leaves chat as it is.
+    if (response.status === 403 && optional) {
+      refused = true;
+      continue;
+    }
     if (response.status === 403) throw new ReauthRequired();
     if (!response.ok) throw new ProviderError(response.status);
     const body = z
@@ -455,28 +484,16 @@ async function subscribeTwitch(
       .parse(await response.json());
     created.push(body.data[0].id);
   }
-  return { conflicts };
+  return { conflicts, refused };
 }
 
-/**
- * Creates the provider subscriptions for a channel. Each id goes into `created` as soon as it exists, so a
- * failure part way through never loses one. `conflicts` names the Twitch types that already had a subscription:
- * the caller then lists the existing ones to adopt them. Twitch webhooks need an app token; Kick takes the
- * broadcaster's own token. YouTube has no push API: the ingest object polls its live chat instead.
- */
-export async function subscribe(
-  env: AppEnv,
-  platform: ActivityPlatform,
+/** One Kick call for `events`. `refused`: a 401 or a 403. `partial`: an event got no subscription. */
+async function subscribeKick(
   externalId: string,
-  accessToken: string | null,
-  callbackOrigin: string,
+  accessToken: string,
+  events: readonly string[],
   created: string[],
-  only: readonly string[] | null = null,
-): Promise<{ conflicts: string[] }> {
-  if (platform === "youtube") return { conflicts: [] };
-  if (platform === "twitch") return subscribeTwitch(env, externalId, callbackOrigin, created, only);
-  if (!accessToken) throw new ReauthRequired();
-  const events = KICK_EVENTS.filter((name: string) => only?.includes(name) ?? true);
+): Promise<"ok" | "refused" | "partial"> {
   const response = await fetch(KICK_SUBSCRIPTIONS_URL, {
     method: "POST",
     headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
@@ -486,7 +503,7 @@ export async function subscribe(
       method: "webhook",
     }),
   });
-  if (response.status === 401 || response.status === 403) throw new ReauthRequired();
+  if (response.status === 401 || response.status === 403) return "refused";
   if (!response.ok) throw new ProviderError(response.status);
   const body = z
     .object({
@@ -494,8 +511,41 @@ export async function subscribe(
     })
     .parse(await response.json());
   for (const item of body.data) if (item.subscription_id) created.push(item.subscription_id);
-  if (body.data.some((item) => !item.subscription_id)) throw new ProviderError(502);
-  return { conflicts: [] };
+  return body.data.some((item) => !item.subscription_id) ? "partial" : "ok";
+}
+
+/**
+ * Creates the provider subscriptions for a channel. Each id goes into `created` as soon as it exists, so a
+ * failure part way through never loses one. `conflicts` names the Twitch types that already had a subscription:
+ * the caller then lists the existing ones to adopt them. Twitch webhooks need an app token; Kick takes the
+ * broadcaster's own token. YouTube has no push API: the ingest object polls its live chat instead.
+ *
+ * The types of chat are made first. A refusal of a type that only support events need throws nothing: the result
+ * has `refused`, and the caller turns the support events of the connection off.
+ */
+export async function subscribe(
+  env: AppEnv,
+  platform: ActivityPlatform,
+  externalId: string,
+  accessToken: string | null,
+  callbackOrigin: string,
+  created: string[],
+  scope: SubscribeScope = { only: null, support: false },
+): Promise<Subscribed> {
+  if (platform === "youtube") return { conflicts: [], refused: false };
+  if (platform === "twitch") return subscribeTwitch(env, externalId, callbackOrigin, created, scope);
+  if (!accessToken) throw new ReauthRequired();
+  const wanted = (name: string): boolean => scope.only?.includes(name) ?? true;
+  const chat: string[] = KICK_EVENTS.filter(wanted);
+  if (chat.length > 0) {
+    const result = await subscribeKick(externalId, accessToken, chat, created);
+    if (result === "refused") throw new ReauthRequired();
+    if (result === "partial") throw new ProviderError(502);
+  }
+  const support: string[] = scope.support ? KICK_SUPPORT_EVENTS.filter(wanted) : [];
+  if (support.length === 0) return { conflicts: [], refused: false };
+  // Kick names no scope for these events, so a refusal of this call alone is about them, not about the token.
+  return { conflicts: [], refused: (await subscribeKick(externalId, accessToken, support, created)) !== "ok" };
 }
 
 /** Deletes the provider subscriptions. Returns the ids it could not delete. Never throws. */

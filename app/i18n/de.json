@@ -1506,5 +1506,6 @@
   "overlay.dock.confirmBody": "Der alte Link funktioniert sofort nicht mehr, und jedes offene Dock schließt sich. Füge den neuen Link in OBS ein.",
   "overlay.dock.ready": "Neuer Dock-Link bereit. Kopiere ihn in OBS.",
   "dock.closed.title": "Dieser Dock-Link funktioniert nicht",
-  "dock.closed.body": "Erstelle in den Streamer-Tools im Bereich Overlay einen neuen Dock-Link und füge ihn in OBS ein."
+  "dock.closed.body": "Erstelle in den Streamer-Tools im Bereich Overlay einen neuen Dock-Link und füge ihn in OBS ein.",
+  "channels.result.supportDenied": "Der Kanal ist verbunden. {platform} hat die Berechtigungen für Unterstützer-Ereignisse nicht erteilt, deshalb bleiben sie aus."
 }
