@@ -702,7 +702,8 @@ export function Discussion({
               signal: controller.signal,
             });
             if (exact.entryId !== entryId) throw new Error(t("discussion.commentUnavailable"));
-            values = mergeThreads(values, [exact.thread], sort);
+            // A comment that the refreshed list already shows keeps its thread, with the replies loaded again.
+            if (!findComment(values, id)) values = mergeThreads(values, [exact.thread], sort);
           } catch (error_: unknown) {
             // The viewer's own reply can be gone by now: that is no error to show.
             if (id === postedReply.current) postedReply.current = null;

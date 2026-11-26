@@ -344,6 +344,16 @@ describe("comment threads", (): void => {
     expect(again).toMatchObject({ earlierReplies: 2, replyCount: 9 });
   });
 
+  it("keeps the reply count when an earlier page fills replies that were already counted", (): void => {
+    // A link to reply 90 of 100 loaded replies 80 to 100: 79 come before them.
+    const linked = Array.from({ length: 21 }, (_: unknown, index: number) => comment(`r${80 + index}`, { createdAt: 80 + index }));
+    const thread = { ...comment("t"), ...window(linked, 100, 79) };
+    const page = Array.from({ length: 50 }, (_: unknown, index: number) => comment(`r${30 + index}`, { createdAt: 30 + index }));
+    const earlier = withReplies(thread, page, true);
+    expect(earlier).toMatchObject({ earlierReplies: 29, replyCount: 100 });
+    expect(visibleReplies(earlier, true)).toMatchObject({ earlier: 29, later: 0, unloaded: 0 });
+  });
+
   it("finds the parent a reply answers, also when the parent is not loaded", (): void => {
     const reply = comment("r2", { parentId: "r1" });
     const thread = { ...comment("t"), ...window([comment("r1", { parentId: "t" }), reply]) };

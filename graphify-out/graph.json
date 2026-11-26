@@ -7317,7 +7317,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L705",
+      "source_location": "L706",
       "target": "app_components_discussion_mergethreads",
       "weight": 1.0
     },
@@ -7329,7 +7329,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L709",
+      "source_location": "L710",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -7341,7 +7341,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L779",
+      "source_location": "L780",
       "target": "app_components_api_needsstepup",
       "weight": 1.0
     },
@@ -7353,7 +7353,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L787",
+      "source_location": "L788",
       "target": "app_lib_threads_orderreplies",
       "weight": 1.0
     },
@@ -7365,20 +7365,8 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L794",
+      "source_location": "L795",
       "target": "app_lib_threads_withreplies",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_discussion_discussion",
-      "source_file": "app/components/discussion.tsx",
-      "source_location": "L827",
-      "target": "app_components_discussion_discussion_run",
       "weight": 1.0
     },
     {
@@ -7390,6 +7378,18 @@
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
       "source_location": "L828",
+      "target": "app_components_discussion_discussion_run",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_discussion_discussion",
+      "source_file": "app/components/discussion.tsx",
+      "source_location": "L829",
       "target": "app_components_api_postjson",
       "weight": 1.0
     },
@@ -7401,7 +7401,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L844",
+      "source_location": "L845",
       "target": "app_components_discussion_updatecomment",
       "weight": 1.0
     },
@@ -7413,7 +7413,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L874",
+      "source_location": "L875",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -7425,7 +7425,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L878",
+      "source_location": "L879",
       "target": "app_components_discussion_composer",
       "weight": 1.0
     },
@@ -7437,7 +7437,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L891",
+      "source_location": "L892",
       "target": "app_components_discussion_discussion_post",
       "weight": 1.0
     },
@@ -7449,7 +7449,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L901",
+      "source_location": "L902",
       "target": "app_components_ui_select_select",
       "weight": 1.0
     },
@@ -7461,7 +7461,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L914",
+      "source_location": "L915",
       "target": "app_components_ui_icon_button_iconbutton",
       "weight": 1.0
     },
@@ -7473,7 +7473,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L942",
+      "source_location": "L943",
       "target": "app_components_shell_sign_in_dialog_signindialog",
       "weight": 1.0
     },
@@ -7485,7 +7485,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L952",
+      "source_location": "L953",
       "target": "app_components_discussion_thread",
       "weight": 1.0
     },
@@ -7497,7 +7497,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion_loadreplies",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L787",
+      "source_location": "L788",
       "target": "app_lib_threads_orderreplies",
       "weight": 1.0
     },
@@ -7509,7 +7509,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion_loadreplies",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L790",
+      "source_location": "L791",
       "target": "app_components_discussion_fetchreplies",
       "weight": 1.0
     },
@@ -7521,7 +7521,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion_loadreplies",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L794",
+      "source_location": "L795",
       "target": "app_lib_threads_withreplies",
       "weight": 1.0
     },
@@ -7533,7 +7533,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion_loadreplies",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L800",
+      "source_location": "L801",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -7545,7 +7545,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion_post",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L805",
+      "source_location": "L806",
       "target": "app_components_discussion_discussion_run",
       "weight": 1.0
     },
@@ -7557,7 +7557,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion_run",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L779",
+      "source_location": "L780",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -7569,7 +7569,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion_run",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L779",
+      "source_location": "L780",
       "target": "app_components_api_needsstepup",
       "weight": 1.0
     },
@@ -35793,7 +35793,7 @@
       "relation": "calls",
       "source": "app_lib_threads_withreplies",
       "source_file": "app/lib/threads.ts",
-      "source_location": "L36",
+      "source_location": "L38",
       "target": "app_lib_threads_orderreplies",
       "weight": 1.0
     },
@@ -62241,7 +62241,7 @@
       "relation": "calls",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L138",
+      "source_location": "L139",
       "target": "tests_e2e_a11y_responsive_spec_expectcontained",
       "weight": 1.0
     },
@@ -62253,7 +62253,7 @@
       "relation": "calls",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L139",
+      "source_location": "L140",
       "target": "tests_e2e_a11y_responsive_spec_expectheaderfits",
       "weight": 1.0
     },
@@ -62265,7 +62265,7 @@
       "relation": "calls",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L153",
+      "source_location": "L154",
       "target": "tests_e2e_a11y_responsive_spec_expectlabelsfit",
       "weight": 1.0
     },
@@ -62277,7 +62277,7 @@
       "relation": "calls",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L161",
+      "source_location": "L162",
       "target": "tests_e2e_a11y_responsive_spec_opencontact",
       "weight": 1.0
     },
@@ -62289,7 +62289,7 @@
       "relation": "calls",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L163",
+      "source_location": "L164",
       "target": "tests_e2e_a11y_responsive_spec_expectreachable",
       "weight": 1.0
     },
@@ -62301,7 +62301,7 @@
       "relation": "calls",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L283",
+      "source_location": "L284",
       "target": "tests_e2e_a11y_responsive_spec_expectconsentaligned",
       "weight": 1.0
     },
@@ -63873,7 +63873,7 @@
       "relation": "calls",
       "source": "tests_e2e_threads_spec",
       "source_file": "tests/e2e/threads.spec.ts",
-      "source_location": "L27",
+      "source_location": "L31",
       "target": "tests_e2e_threads_spec_seedthreads",
       "weight": 1.0
     },
@@ -63885,8 +63885,8 @@
       "relation": "calls",
       "source": "tests_e2e_threads_spec_seedthreads",
       "source_file": "tests/e2e/threads.spec.ts",
-      "source_location": "L16",
-      "target": "tests_e2e_fixtures_runsql",
+      "source_location": "L12",
+      "target": "tests_e2e_fixtures_accounts",
       "weight": 1.0
     },
     {
@@ -63897,8 +63897,8 @@
       "relation": "calls",
       "source": "tests_e2e_threads_spec_seedthreads",
       "source_file": "tests/e2e/threads.spec.ts",
-      "source_location": "L9",
-      "target": "tests_e2e_fixtures_accounts",
+      "source_location": "L20",
+      "target": "tests_e2e_fixtures_runsql",
       "weight": 1.0
     },
     {
@@ -187572,7 +187572,7 @@
       "relation": "contains",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L770",
+      "source_location": "L771",
       "target": "app_components_discussion_discussion_run",
       "weight": 1.0
     },
@@ -187583,7 +187583,7 @@
       "relation": "contains",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L786",
+      "source_location": "L787",
       "target": "app_components_discussion_discussion_loadreplies",
       "weight": 1.0
     },
@@ -187594,7 +187594,7 @@
       "relation": "contains",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L804",
+      "source_location": "L805",
       "target": "app_components_discussion_discussion_post",
       "weight": 1.0
     },
@@ -207427,7 +207427,7 @@
       "relation": "contains",
       "source": "app_lib_threads",
       "source_file": "app/lib/threads.ts",
-      "source_location": "L43",
+      "source_location": "L45",
       "target": "app_lib_threads_replyparent",
       "weight": 1.0
     },
@@ -207438,7 +207438,7 @@
       "relation": "contains",
       "source": "app_lib_threads",
       "source_file": "app/lib/threads.ts",
-      "source_location": "L55",
+      "source_location": "L57",
       "target": "app_lib_threads_orderthreads",
       "weight": 1.0
     },
@@ -228250,7 +228250,7 @@
       "relation": "contains",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L62",
+      "source_location": "L63",
       "target": "tests_e2e_a11y_responsive_spec_expectconsentaligned",
       "weight": 1.0
     },
@@ -228261,7 +228261,7 @@
       "relation": "contains",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L85",
+      "source_location": "L86",
       "target": "tests_e2e_a11y_responsive_spec_expectreachable",
       "weight": 1.0
     },
@@ -228272,7 +228272,7 @@
       "relation": "contains",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L96",
+      "source_location": "L97",
       "target": "tests_e2e_a11y_responsive_spec_opencontact",
       "weight": 1.0
     },
@@ -230835,7 +230835,7 @@
       "relation": "contains",
       "source": "tests_e2e_threads_spec",
       "source_file": "tests/e2e/threads.spec.ts",
-      "source_location": "L8",
+      "source_location": "L11",
       "target": "tests_e2e_threads_spec_seedthreads",
       "weight": 1.0
     },
@@ -256223,7 +256223,7 @@
       "label": "loadReplies()",
       "norm_label": "loadreplies()",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L786"
+      "source_location": "L787"
     },
     {
       "_callable": true,
@@ -256234,7 +256234,7 @@
       "label": "post()",
       "norm_label": "post()",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L804"
+      "source_location": "L805"
     },
     {
       "_callable": true,
@@ -256245,7 +256245,7 @@
       "label": "run()",
       "norm_label": "run()",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L770"
+      "source_location": "L771"
     },
     {
       "_callable": true,
@@ -271427,7 +271427,7 @@
       "label": "orderThreads()",
       "norm_label": "orderthreads()",
       "source_file": "app/lib/threads.ts",
-      "source_location": "L55"
+      "source_location": "L57"
     },
     {
       "_callable": true,
@@ -271438,7 +271438,7 @@
       "label": "replyParent()",
       "norm_label": "replyparent()",
       "source_file": "app/lib/threads.ts",
-      "source_location": "L43"
+      "source_location": "L45"
     },
     {
       "_callable": true,
@@ -284212,21 +284212,21 @@
             "callee": "evaluate",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L63",
+            "line": "L64",
             "receiver_type": "Locator"
           },
           {
             "callee": "getBoundingClientRect",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L68",
+            "line": "L69",
             "receiver_type": "Element"
           }
         ]
       },
       "norm_label": "expectconsentaligned()",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L62"
+      "source_location": "L63"
     },
     {
       "_callable": true,
@@ -284342,35 +284342,35 @@
             "callee": "evaluate",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L86",
+            "line": "L87",
             "receiver_type": "Locator"
           },
           {
             "callee": "scrollIntoView",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L87",
+            "line": "L88",
             "receiver_type": "Element"
           },
           {
             "callee": "click",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L90",
+            "line": "L91",
             "receiver_type": "Locator"
           },
           {
             "callee": "boundingBox",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L91",
+            "line": "L92",
             "receiver_type": "Locator"
           }
         ]
       },
       "norm_label": "expectreachable()",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L85"
+      "source_location": "L86"
     },
     {
       "_callable": true,
@@ -284381,7 +284381,7 @@
       "label": "openContact()",
       "norm_label": "opencontact()",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L96"
+      "source_location": "L97"
     },
     {
       "_callable": true,
@@ -286015,7 +286015,7 @@
       "label": "seedThreads()",
       "norm_label": "seedthreads()",
       "source_file": "tests/e2e/threads.spec.ts",
-      "source_location": "L8"
+      "source_location": "L11"
     },
     {
       "_callable": true,
@@ -303512,28 +303512,28 @@
             "callee": "getBoundingClientRect",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L142",
+            "line": "L143",
             "receiver_type": "HTMLElement"
           },
           {
             "callee": "evaluate",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L320",
+            "line": "L321",
             "receiver_type": "Locator"
           },
           {
             "callee": "scrollIntoView",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L321",
+            "line": "L322",
             "receiver_type": "Element"
           },
           {
             "callee": "check",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L325",
+            "line": "L326",
             "receiver_type": "Locator"
           }
         ]
@@ -305566,7 +305566,7 @@
             "callee": "closest",
             "file": "tests/e2e/threads.spec.ts",
             "lang": "typescript",
-            "line": "L175",
+            "line": "L179",
             "receiver_type": "HTMLElement"
           }
         ]

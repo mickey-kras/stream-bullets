@@ -48,14 +48,15 @@ async function expectHeaderFits(page: Page): Promise<void> {
     "header nav > a, header nav > button, header .header-end > :not(.account-menu-wrap), header .profile, header .landing-brand",
   );
   await expectLabelsFit(page.locator("header nav > a, header nav > button, header .header-end > .gold"));
-  const overlaps: boolean = await controls.evaluateAll((elements: Element[]): boolean => {
+  const overlaps = (): Promise<boolean> => controls.evaluateAll((elements: Element[]): boolean => {
     const boxes: DOMRect[] = elements.map((element: Element): DOMRect => element.getBoundingClientRect())
       .filter((box: DOMRect): boolean => box.width > 0 && box.height > 0);
     return boxes.some((box: DOMRect, index: number): boolean => boxes.slice(index + 1).some((other: DOMRect): boolean =>
       box.left < other.right - 1 && box.right > other.left + 1 && box.top < other.bottom - 1 && box.bottom > other.top + 1,
     ));
   });
-  expect(overlaps).toBe(false);
+  // The header fits itself to its width after a style change; a collision that stays fails, one in passing does not.
+  await expect.poll(overlaps).toBe(false);
 }
 
 // The consent checkbox: a 24 px target, a gap before its text, centred on the first line. Wrapped lines stay under the text.

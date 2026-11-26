@@ -5,10 +5,14 @@ import { accounts, commentBox, expectCommentText, runSql, signedIn } from "./fix
 import { clientIp } from "./client-ips";
 import { z } from "zod";
 
+// The root comment of the seeded thread, for links to it.
+let seededRoot = "";
+
 async function seedThreads(): Promise<string> {
   const users = await accounts();
   const entryId = randomUUID();
   const root = randomUUID();
+  seededRoot = root;
   const removed = randomUUID();
   const now = Date.now() - 600_000;
   const comment = (id: string, author: string, text: string, at: number, parent: string | null, gone = false): string =>
@@ -373,6 +377,34 @@ test("the link field adds a link and does not post the comment", async ({ browse
       "href",
       "https://example.com/guide",
     );
+  } finally {
+    await close(context);
+  }
+});
+
+test("a link to a thread keeps its loaded replies when the discussion refreshes", async ({ browser }) => {
+  const entryId: string = await seedThreads();
+  const users = await accounts();
+  await runSql("threads-link-quota", [
+    `DELETE FROM app_rate_limits WHERE key IN ('content:${users.viewer.id}','write:${users.viewer.id}');`,
+  ]);
+  const context = await signedIn(browser, "viewer", clientIp("threads", 100));
+  try {
+    const page = await newPage(context);
+    await page.goto(`/@other_host?entry=${entryId}&comment=${seededRoot}`);
+    const thread = page.locator("li.thread").filter({ has: page.getByText("Root comment", { exact: true }) });
+    const replies = thread.locator(".replies > li > article.comment");
+    await expect(replies).toHaveCount(2);
+    await thread.getByRole("button", { name: "View 2 more replies" }).click();
+    await expect(replies).toHaveCount(4);
+    // A new comment refreshes the discussion; the linked thread keeps the four replies it loaded.
+    await commentBox(page, "Write a comment").fill("A comment that refreshes the list.");
+    await page.getByRole("button", { name: "Post", exact: true }).click();
+    await expect(page.getByText("A comment that refreshes the list.", { exact: true })).toBeVisible();
+    // A post refreshes the list more than once, and each refresh reads the linked comment again: wait for the last.
+    await page.waitForLoadState("networkidle");
+    await expect(replies).toHaveCount(4);
+    await expect(thread.getByRole("button", { name: "View 2 more replies" })).toHaveCount(0);
   } finally {
     await close(context);
   }

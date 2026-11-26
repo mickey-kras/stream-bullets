@@ -31,11 +31,13 @@ export function visibleReplies(
 export function withReplies(thread: CommentThread, page: readonly Comment[], before: boolean): CommentThread {
   const known = new Set<string>(thread.replies.map((reply: Comment): string => reply.id));
   const added: Comment[] = page.filter((reply: Comment): boolean => !known.has(reply.id));
+  // An earlier page holds replies that `earlierReplies` already counted, so the total stays the lower bound.
+  const earlierReplies: number = before ? Math.max(0, thread.earlierReplies - added.length) : thread.earlierReplies;
   return {
     ...thread,
     replies: orderReplies([...thread.replies, ...added]),
-    earlierReplies: before ? Math.max(0, thread.earlierReplies - added.length) : thread.earlierReplies,
-    replyCount: Math.max(thread.replyCount, thread.earlierReplies + thread.replies.length + added.length),
+    earlierReplies,
+    replyCount: Math.max(thread.replyCount, earlierReplies + thread.replies.length + added.length),
   };
 }
 
