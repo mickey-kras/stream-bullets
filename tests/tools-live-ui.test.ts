@@ -1,6 +1,6 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import type { ActivityFeed } from "../app/components/overlay/activity-feed";
 import type { OverlayPoll, OverlayScene } from "../app/components/overlay/overlay-stage";
 import type { ControlAction } from "../app/components/overlay/use-overlay-state";
@@ -9,9 +9,12 @@ import { LiveMessage } from "../app/components/tools/live-message";
 import { NotOnGrid, placed } from "../app/components/tools/live-part";
 import { LivePoll } from "../app/components/tools/live-poll";
 import { LiveSection, onAirTitle } from "../app/components/tools/live-section";
+import { supportLine } from "../app/components/tools/live-support";
 import { LIVE_TOPICS, LiveTopics, liveTopics } from "../app/components/tools/live-topics";
+import { DEFAULT_LOCALE, loadCatalog, setLocaleSource, type Locale } from "../app/i18n";
+import { SUPPORT_KINDS, type ActivityPlatform } from "../app/lib/activity";
 import type { ChannelView } from "../app/lib/channel-health";
-import type { LiveChatRow } from "../app/lib/live-chat";
+import type { LiveChatRow, LiveSupportRow } from "../app/lib/live-chat";
 import { DEFAULT_LAYERS, emptyCells, type CellRect, type OverlayLayers } from "../app/lib/overlay-layers";
 import type { OverlayData, OverlayState } from "../app/types";
 
@@ -302,6 +305,7 @@ describe("chat panel", (): void => {
 
 describe("full-screen chat", (): void => {
   const row: LiveChatRow = {
+    kind: "chat",
     id: "twitch:m1",
     seq: 1,
     platform: "twitch",
@@ -414,12 +418,135 @@ describe("full-screen chat", (): void => {
   });
 });
 
+describe("support events in the chat", (): void => {
+  function supportRow(event: LiveSupportRow["event"], more: Partial<LiveSupportRow> = {}): LiveSupportRow {
+    return {
+      kind: "support",
+      id: `twitch:${event}`,
+      seq: 1,
+      event,
+      platform: "twitch",
+      name: "Viewer 1",
+      amount: null,
+      currency: null,
+      text: null,
+      receivedAt: 1,
+      ...more,
+    };
+  }
+  const line = (event: LiveSupportRow["event"], more: Partial<LiveSupportRow> = {}): string =>
+    supportLine(supportRow(event, more));
+  const nothing = (): void => undefined;
+
+  afterEach((): void => {
+    setLocaleSource((): Locale => DEFAULT_LOCALE);
+  });
+
+  it("says what each kind is, with its amount", (): void => {
+    expect(line("follow")).toBe("followed");
+    expect(line("subscription", { amount: 1 })).toBe("subscribed");
+    expect(line("subscription", { amount: 14 })).toBe("subscribed for 14 months");
+    expect(line("membership", { amount: 1 })).toBe("became a member");
+    expect(line("membership", { amount: 2 })).toBe("member for 2 months");
+    expect(line("gift", { amount: 1 })).toBe("gave 1 subscription");
+    expect(line("gift", { amount: 5, platform: "kick" })).toBe("gave 5 subscriptions");
+    expect(line("gift", { amount: 5, platform: "youtube" })).toBe("gave 5 memberships");
+    expect(line("raid", { amount: 1200 })).toBe("raid with 1,200 viewers");
+    expect(line("bits", { amount: 100 })).toBe("100 Bits");
+    expect(line("bits", { amount: 1 })).toBe("1 Bit");
+    expect(line("kicks", { amount: 50 })).toBe("50 KICKs");
+    expect(line("reactions", { amount: 3 })).toBe("3 reactions");
+  });
+
+  it("shows money in its currency, from micros", (): void => {
+    expect(line("super_chat", { amount: 5_000_000, currency: "USD" })).toBe("Super Chat: $5.00");
+    expect(line("super_sticker", { amount: 1_990_000, currency: "EUR" })).toBe("Super Sticker: €1.99");
+    expect(line("tip", { amount: 500_000_000, currency: "JPY", platform: "direct" })).toBe("tip: ¥500");
+    // An event without a currency is not valid in the feed. Its amount still shows as a number.
+    expect(line("tip", { amount: 2_500_000 })).toBe("tip: 2.5");
+  });
+
+  it("has a line for each kind of support event", (): void => {
+    const lines: string[] = SUPPORT_KINDS.map((kind) => line(kind, { amount: 2_000_000, currency: "USD" }));
+    expect(new Set(lines).size).toBe(SUPPORT_KINDS.length);
+    for (const text of lines) expect(text).not.toBe("");
+  });
+
+  it("follows the plural rules and the money format of the language", async (): Promise<void> => {
+    await Promise.all([loadCatalog("ru"), loadCatalog("de")]);
+    setLocaleSource((): Locale => "ru");
+    expect(line("gift", { amount: 1 })).toBe("дарит 1 подписку");
+    expect(line("gift", { amount: 3 })).toBe("дарит 3 подписки");
+    expect(line("gift", { amount: 5 })).toBe("дарит 5 подписок");
+    setLocaleSource((): Locale => "de");
+    expect(line("super_chat", { amount: 5_000_000, currency: "EUR" })).toBe("Super Chat: 5,00\u00a0€");
+  });
+
+  it("shows a support row with the platform, the supporter, the line and the text as text", (): void => {
+    const rows: LiveSupportRow[] = [
+      supportRow("bits", { id: "twitch:d1", name: null, amount: 100, text: "<b>gg</b>" }),
+      supportRow("follow", { id: "kick:d2", seq: 2, platform: "kick" }),
+      supportRow("tip", { id: "direct:d3", seq: 3, platform: "direct", amount: 3_000_000, currency: "USD" }),
+    ];
+    const html: string = renderToStaticMarkup(
+      createElement(FullChatView, {
+        chat: {
+          rows,
+          paused: false,
+          waiting: 0,
+          pause: nothing,
+          jump: nothing,
+          hidden: new Set<ActivityPlatform>(),
+          toggle: nothing,
+          list: nothing,
+          scrolled: nothing,
+          status: "live",
+        },
+        delivers: true,
+        onAir: null,
+        wake: "on",
+        step: 2,
+        onStep: nothing,
+        onExit: nothing,
+      }),
+    );
+    const items: string[] = html.split("<li ").slice(1);
+    expect(items).toHaveLength(3);
+    expect(items[0]).toContain('class="tl-chat-row tl-support" data-chat-row="support:twitch:d1" data-support="bits"');
+    expect(items[0]).toContain('<span class="sr-only">Twitch </span>');
+    expect(items[0]).toContain("<bdi>Anonymous</bdi>");
+    expect(items[0]).toContain('<span class="tl-support-line">100 Bits</span>');
+    // The text of the supporter is untrusted: it is text, never markup.
+    expect(items[0]).toContain('<span class="tl-chat-text" dir="auto">&lt;b&gt;gg&lt;/b&gt;</span>');
+    expect(items[1]).toContain('data-platform="kick"');
+    expect(items[1]).toContain("<bdi>Viewer 1</bdi>");
+    expect(items[1]).toContain('<span class="tl-support-line">followed</span>');
+    expect(items[1]).not.toContain("tl-chat-text");
+    // A direct tip is from no platform: it has no platform icon.
+    expect(items[2]).toContain('data-platform="direct"');
+    expect(items[2]).not.toContain("sr-only");
+    expect(items[2]).toContain("icon-heart");
+  });
+});
+
 describe("Live section", (): void => {
   const connection = { displayName: "host", code: null, connectedAt: 1, lastEventAt: null, updatedAt: 1 };
   const channels: ChannelView[] = [
-    { platform: "twitch", available: true, connection: { ...connection, status: "active" } },
-    { platform: "youtube", available: true, connection: { ...connection, status: "error" } },
-    { platform: "kick", available: true, connection: null },
+    {
+      platform: "twitch",
+      available: true,
+      connection: { ...connection, status: "active" },
+      support: false,
+      supportScopes: [],
+    },
+    {
+      platform: "youtube",
+      available: true,
+      connection: { ...connection, status: "error" },
+      support: false,
+      supportScopes: [],
+    },
+    { platform: "kick", available: true, connection: null, support: false, supportScopes: [] },
   ];
 
   function section(more: Partial<Parameters<typeof LiveSection>[0]> = {}): string {
@@ -467,7 +594,13 @@ describe("Live section", (): void => {
 
   it("leaves out a platform that this site does not offer", (): void => {
     const off: ChannelView[] = [
-      { platform: "kick", available: false, connection: { ...connection, status: "active" } },
+      {
+        platform: "kick",
+        available: false,
+        connection: { ...connection, status: "active" },
+        support: false,
+        supportScopes: [],
+      },
     ];
     expect(section({ channels: off })).not.toContain("Kick:");
   });

@@ -1215,9 +1215,9 @@ describe("layers in the composition", () => {
 
 describe("the channel cards", (): void => {
   const offered: ChannelView[] = [
-    { platform: "twitch", available: true, connection: null },
-    { platform: "youtube", available: true, connection: null },
-    { platform: "kick", available: true, connection: null },
+    { platform: "twitch", available: true, connection: null, support: false, supportScopes: [] },
+    { platform: "youtube", available: true, connection: null, support: false, supportScopes: [] },
+    { platform: "kick", available: true, connection: null, support: false, supportScopes: [] },
   ];
   function cards(channels: ChannelView[]): string[] {
     const Stub = createRoutesStub([
@@ -1280,7 +1280,9 @@ describe("the channel cards", (): void => {
   });
 
   it("give a platform that the site does not offer no button and no notes", (): void => {
-    const [twitch] = cards([{ platform: "twitch", available: false, connection: null }]);
+    const [twitch] = cards([
+      { platform: "twitch", available: false, connection: null, support: false, supportScopes: [] },
+    ]);
     expect(twitch).toContain("This platform is not set up on this site yet.");
     expect(twitch).not.toContain("<button");
     expect(twitch).not.toContain("<details");
@@ -1289,9 +1291,21 @@ describe("the channel cards", (): void => {
   it("mark the health of each card with an icon and words", (): void => {
     const connection = { displayName: "Host", code: null, connectedAt: 1, lastEventAt: null, updatedAt: 1 };
     const [twitch, youtube, kick] = cards([
-      { platform: "twitch", available: true, connection: { ...connection, status: "active" } },
-      { platform: "youtube", available: true, connection: { ...connection, status: "needs_reauth" } },
-      { platform: "kick", available: true, connection: null },
+      {
+        platform: "twitch",
+        available: true,
+        connection: { ...connection, status: "active" },
+        support: false,
+        supportScopes: [],
+      },
+      {
+        platform: "youtube",
+        available: true,
+        connection: { ...connection, status: "needs_reauth" },
+        support: false,
+        supportScopes: [],
+      },
+      { platform: "kick", available: true, connection: null, support: false, supportScopes: [] },
     ]);
     const mark = (card: string): string | undefined =>
       /<span class="ch-mark" data-health="([a-z]+)"><svg[^>]*class="[^"]*(icon-[a-z-]+)"[^>]*>.*?<\/svg>([^<]+)<\/span>/
@@ -1310,12 +1324,51 @@ describe("the channel cards", (): void => {
     // A connection without a chat event says so on the server already. An age waits for the viewer's clock.
     expect(twitch).toContain('<p class="muted">No chat event yet</p>');
     const [aged] = cards([
-      { platform: "kick", available: true, connection: { ...connection, status: "active", lastEventAt: 5 } },
+      {
+        platform: "kick",
+        available: true,
+        connection: { ...connection, status: "active", lastEventAt: 5 },
+        support: false,
+        supportScopes: [],
+      },
     ]);
     expect(aged).not.toContain("Last chat event");
     // A platform that the site does not offer has no health mark.
-    const [gone] = cards([{ platform: "twitch", available: false, connection: { ...connection, status: "error" } }]);
+    const [gone] = cards([
+      {
+        platform: "twitch",
+        available: false,
+        connection: { ...connection, status: "error" },
+        support: false,
+        supportScopes: [],
+      },
+    ]);
     expect(gone).not.toContain("ch-mark");
+  });
+
+  it("have the switch for support events in the body of a connected card only", (): void => {
+    const connection = { displayName: "Host", code: null, connectedAt: 1, lastEventAt: null, updatedAt: 1 };
+    const active = { ...connection, status: "active" as const };
+    const scopes: string[] = ["moderator:read:followers", "channel:read:subscriptions", "bits:read"];
+    const [twitch, youtube, kick] = cards([
+      { platform: "twitch", available: true, connection: active, support: false, supportScopes: scopes },
+      { platform: "youtube", available: true, connection: active, support: true, supportScopes: [] },
+      { platform: "kick", available: true, connection: null, support: false, supportScopes: [] },
+    ]);
+    const [gone] = cards([
+      { platform: "twitch", available: false, connection: active, support: true, supportScopes: scopes },
+    ]);
+    expect(twitch).toMatch(/<input type="checkbox" aria-describedby="[^"]+" data-support-switch="true"\/>/);
+    expect(twitch).toContain("<span>Twitch support events</span>");
+    expect(twitch).toContain(
+      "Twitch asks for these permissions: read your followers, read your subscribers, and read Bits.",
+    );
+    expect(twitch.indexOf("data-support-switch")).toBeGreaterThan(twitch.indexOf('class="ch-body"'));
+    expect(twitch.indexOf("data-support-switch")).toBeLessThan(twitch.indexOf('class="ch-actions"'));
+    expect(youtube).toMatch(/<input type="checkbox"[^>]* checked=""\/>/);
+    expect(youtube).not.toContain("permissions");
+    // No connection, or a platform that the site does not offer: no switch.
+    for (const card of [kick, gone]) expect(card).not.toContain("data-support-switch");
   });
 
   it("say that the status is old only while the reads fail", (): void => {

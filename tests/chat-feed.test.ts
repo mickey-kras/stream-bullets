@@ -5,6 +5,7 @@ import {
   type ActivityEvent,
   type ActivityMessage,
   type ActivityPlatform,
+  type ActivitySupport,
 } from "../app/lib/activity";
 import {
   CHAT_LIMITS,
@@ -716,5 +717,39 @@ describe("SAMPLE_CHAT", () => {
     }
     const state = send(initialChatState(), snapshot([...SAMPLE_CHAT]), SAMPLE_CHAT.at(-1)?.receivedAt ?? 0);
     expect(state.rows).toHaveLength(SAMPLE_CHAT.length - 1);
+  });
+});
+
+describe("support events and the overlay chat", (): void => {
+  // Alerts on stream are another feature (issue #1043): the overlay chat shows chat only.
+  const cheer: ActivitySupport = {
+    kind: "bits",
+    id: "twitch:d1",
+    platform: "twitch",
+    deliveryId: "d1",
+    sender: null,
+    anonymous: true,
+    amount: 100,
+    currency: null,
+    text: "gg",
+    receivedAt: T0,
+    replay: false,
+  };
+  const follow: ActivitySupport = { ...cheer, kind: "follow", id: "kick:d2", platform: "kick", deliveryId: "d2", amount: null };
+
+  it("adds no row for a live support event", (): void => {
+    const first: ChatState = send(initialChatState(), event(chat()), T0);
+    expect(first.rows).toHaveLength(1);
+    const after: ChatState = send(send(first, event(cheer), T0 + 1), event(follow), T0 + 2);
+    expect(after.rows).toBe(first.rows);
+    expect(after.pending).toHaveLength(0);
+    expect(send(initialChatState(), event(cheer), T0).rows).toHaveLength(0);
+  });
+
+  it("adds no row for a support event of a snapshot, and keeps the chat of the snapshot", (): void => {
+    const message: ActivityChat = chat();
+    const state: ChatState = send(initialChatState(), snapshot([{ ...cheer, replay: true }, message, follow]), T0);
+    expect(state.rows.map((row: ChatRow): string => row.id)).toEqual([message.id]);
+    expect(send(initialChatState(), snapshot([{ ...cheer, replay: true }, follow]), T0).rows).toHaveLength(0);
   });
 });

@@ -120,12 +120,12 @@ describe("a consumer and the kinds that it does not know", (): void => {
     expect(parseActivityMessage(JSON.stringify(many))).toBeNull();
   });
 
-  it("leaves the chat of the overlay and of Live as it is for a support event", (): void => {
+  it("leaves the chat of the overlay as it is for a support event, and Live shows the event as a row", (): void => {
     const event: ActivityMessage = { type: "event", event: support("bits") };
     const overlay: ChatState = initialChatState();
     expect(chatReducer(overlay, { type: "message", message: event, now: 1000 }, { hideCommands: false })).toBe(overlay);
-    const live: LiveChatState = initialLiveChat();
-    expect(liveChatReducer(live, { type: "message", message: event })).toBe(live);
+    const live: LiveChatState = liveChatReducer(initialLiveChat(), { type: "message", message: event });
+    expect(live.rows).toMatchObject([{ kind: "support", event: "bits", seq: 1 }]);
   });
 
   it("does not show a direct tip or the support of a different platform in an output for Twitch only", (): void => {
