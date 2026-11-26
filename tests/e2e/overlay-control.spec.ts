@@ -308,6 +308,35 @@ test("the Twitch switch of one output saves that output only, in a section that 
   await runSql("overlay-control-twitch-restore", [defaultLayers]);
 });
 
+test("the guide for a first use of OBS is closed at first and shows its steps when the owner opens it", async ({
+  browser,
+}) => {
+  const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 97));
+  const control = await newPage(owner);
+  await control.goto("/tools?view=overlay");
+  const guide = control.locator("[data-ov-guide]");
+  const steps = guide.getByRole("listitem");
+  await expect(guide).not.toHaveAttribute("open");
+  await expect(steps.first()).toBeHidden();
+  await guide.getByText("First time in OBS? Set it up step by step").click();
+  await expect(steps).toHaveCount(14);
+  await expect(guide.locator('[data-ov-guide-group="overlay"]')).toContainText("Add the overlay");
+  await expect(guide.locator('[data-ov-guide-group="overlay"]').getByRole("listitem").nth(2)).toHaveText(
+    "Paste the link into URL. Set Width to 1920 and Height to 1080. Select OK.",
+  );
+  await expect(guide.locator('[data-ov-guide-group="vertical"]').getByRole("listitem")).toHaveCount(4);
+  await expect(guide.locator('[data-ov-guide-group="platforms"]').getByRole("listitem")).toHaveCount(4);
+  // The guide fits a phone: no step is wider than the screen.
+  await control.setViewportSize({ width: 390, height: 844 });
+  const overflow: number = await control.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  expect(overflow).toBeLessThanOrEqual(0);
+  // The keyboard closes and opens it: the summary is a control.
+  await guide.locator("summary").focus();
+  await control.keyboard.press("Enter");
+  await expect(guide).not.toHaveAttribute("open");
+  await close(owner);
+});
+
 test("an OBS source with a refused key stops its chat feed retries", async ({ browser }) => {
   await runSql("overlay-control-refused-key", [
     layersSql({ chat: { enabled: true }, cells: { horizontal: { chat: CHAT_CELL } } }),

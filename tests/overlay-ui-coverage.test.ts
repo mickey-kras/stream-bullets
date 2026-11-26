@@ -275,17 +275,48 @@ describe("overlay control page", () => {
     expect(other).not.toContain("Your private overlay link is hidden.");
   });
 
+  it("has a closed guide for a first use of OBS, in three groups of numbered steps", () => {
+    const html: string = renderToStaticMarkup(
+      createElement(OverlayLink, { hasKey: NO_LINKS, layers: placed, sources: null, now: 1000, ...LINK_SAVES }),
+    );
+    const guide: string = html.slice(html.indexOf("<details"), html.indexOf("</details>"));
+    expect(guide).toMatch(/^<details class="[^"]*" data-ov-guide="true">/);
+    expect(guide).not.toMatch(/^<details[^>]* open/);
+    expect(guide).toContain("<summary>First time in OBS? Set it up step by step</summary>");
+    // The guide is after the two links and before the Twitch section.
+    expect(html.indexOf("data-ov-guide")).toBeGreaterThan(html.lastIndexOf('<section class="ov-url-output"'));
+    expect(html.indexOf("data-ov-guide")).toBeLessThan(html.indexOf("data-ov-twitch"));
+    const groups: string[] = guide.split("<section").slice(1);
+    expect(groups.map((group: string): string => /<strong>([^<]+)<\/strong>/.exec(group)?.[1] ?? "")).toEqual([
+      "Add the overlay",
+      "Add the vertical output",
+      "Choose which platforms get each output",
+    ]);
+    expect(groups.map((group: string): number => group.match(/<li>/g)?.length ?? 0)).toEqual([6, 4, 4]);
+    // Each output has its own source size, and the steps name the controls of this page.
+    expect(groups[0]).toContain("Set Width to 1920 and Height to 1080.");
+    expect(groups[1]).toContain("Set Width to 1080 and Height to 1920.");
+    expect(groups[0]).toContain("select “Start test” in step 1");
+    expect(groups[2]).toContain("In “Channels”, check that each channel shows as connected.");
+    // The plugins are examples, and the Twitch rule and the dock are not in the guide.
+    expect(guide).toContain("for example Aitum Vertical");
+    expect(guide).toContain("for example Aitum Multistream");
+    expect(guide).not.toContain("Twitch chat only");
+    expect(guide).not.toContain("{");
+  });
+
   it("has a closed section with one Twitch switch for each output, after the links", () => {
+    // The Twitch section is the last closed section: the OBS guide is before it.
     const html = (layers: OverlayLayers, busy: boolean = false): string =>
       renderToStaticMarkup(
         createElement(OverlayLink, { hasKey: NO_LINKS, layers, sources: null, now: 1000, ...LINK_SAVES, busy }),
       );
     const off: string = html(placed);
-    const section: string = off.slice(off.indexOf("<details"));
+    const section: string = off.slice(off.lastIndexOf("<details"));
     // The section is closed until the owner opens it, and comes after the two links.
     expect(section).toMatch(/^<details class="[^"]*" data-ov-twitch="true">/);
     expect(section).not.toMatch(/^<details[^>]* open/);
-    expect(off.indexOf("<details")).toBeGreaterThan(off.lastIndexOf('<section class="ov-url-output"'));
+    expect(off.lastIndexOf("<details")).toBeGreaterThan(off.lastIndexOf('<section class="ov-url-output"'));
     expect(section).toContain("<summary>Streaming to Twitch and other platforms at once?</summary>");
     expect(section).toContain("The Twitch rules for simulcasts do not allow chat from other platforms");
     expect(section).toContain("Show Twitch chat only on the horizontal output");

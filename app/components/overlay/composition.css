@@ -658,13 +658,24 @@
 }
 
 /* ---------- Per-layer overlay URLs (overlay-link.tsx) ---------- */
-/* The link of one output, and the Twitch switches after the links. A line divides the parts. */
+/* The link of one output, then the OBS guide and the Twitch switches. A line divides the parts. */
 .ov-url-output,
+.ov-url-guide,
 .ov-url-twitch {
   display: grid;
   gap: 10px;
   padding-top: 14px;
   border-top: 1px solid var(--line);
+}
+.ov-url-guide ol {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 1.4em;
+}
+.ov-url-guide section {
+  display: grid;
+  gap: 8px;
 }
 .ov-url-layers {
   display: grid;

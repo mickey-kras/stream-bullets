@@ -118,8 +118,80 @@ export function OverlayLink({
           now={now}
         />
       ))}
+      <ObsGuide />
       <TwitchOnly layers={layers} busy={busy} onChange={onTwitchOnly} />
     </div>
+  );
+}
+
+/** One group of the OBS guide: its title and its steps in sequence. */
+interface GuideGroup {
+  name: "overlay" | "vertical" | "platforms";
+  title: MessageId;
+  steps: readonly string[];
+}
+
+/** The groups of the OBS guide with their texts. docs/obs-setup.md has the same steps. */
+function guideGroups(): GuideGroup[] {
+  const wide = frameSize("horizontal");
+  const tall = frameSize("vertical");
+  return [
+    {
+      name: "overlay",
+      title: "overlay.guide.overlay",
+      steps: [
+        t("overlay.guide.overlay.1"),
+        t("overlay.guide.overlay.2"),
+        t("overlay.guide.overlay.3", wide),
+        t("overlay.guide.overlay.4"),
+        t("overlay.guide.overlay.5"),
+        t("overlay.guide.overlay.6", { test: t("overlay.test.start") }),
+      ],
+    },
+    {
+      name: "vertical",
+      title: "overlay.guide.vertical",
+      steps: [
+        t("overlay.guide.vertical.1"),
+        t("overlay.guide.vertical.2"),
+        t("overlay.guide.vertical.3", tall),
+        t("overlay.guide.vertical.4"),
+      ],
+    },
+    {
+      name: "platforms",
+      title: "overlay.guide.platforms",
+      steps: [
+        t("overlay.guide.platforms.1"),
+        t("overlay.guide.platforms.2"),
+        t("overlay.guide.platforms.3"),
+        t("overlay.guide.platforms.4", { channels: t("tools.tab.channels") }),
+      ],
+    },
+  ];
+}
+
+/**
+ * The closed guide for a streamer who never used OBS: add the overlay, add the vertical output, and choose the
+ * platforms of each output. The plugin names are examples. A streamer who knows OBS does not open it.
+ */
+function ObsGuide(): ReactNode {
+  return (
+    <details className="ch-details ov-url-guide" data-ov-guide>
+      <summary>{t("overlay.guide.title")}</summary>
+      {guideGroups().map((group: GuideGroup) => (
+        <section key={group.name} data-ov-guide-group={group.name}>
+          <p>
+            <strong>{t(group.title)}</strong>
+          </p>
+          <ol>
+            {group.steps.map((step: string) => (
+              <li key={step}>{step}</li>
+            ))}
+          </ol>
+        </section>
+      ))}
+    </details>
   );
 }
 
