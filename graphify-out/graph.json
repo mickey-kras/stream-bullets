@@ -64113,7 +64113,7 @@
       "relation": "calls",
       "source": "tests_poll_room_test",
       "source_file": "tests/poll-room.test.ts",
-      "source_location": "L1230",
+      "source_location": "L1233",
       "target": "tests_poll_room_test_deferreddatabaseoperation",
       "weight": 1.0
     },
@@ -64209,7 +64209,7 @@
       "relation": "calls",
       "source": "tests_poll_room_test",
       "source_file": "tests/poll-room.test.ts",
-      "source_location": "L455",
+      "source_location": "L457",
       "target": "tests_poll_room_test_lastof",
       "weight": 1.0
     },
@@ -64221,7 +64221,7 @@
       "relation": "calls",
       "source": "tests_poll_room_test",
       "source_file": "tests/poll-room.test.ts",
-      "source_location": "L509",
+      "source_location": "L512",
       "target": "tests_poll_room_test_room",
       "weight": 1.0
     },
@@ -64233,7 +64233,7 @@
       "relation": "calls",
       "source": "tests_poll_room_test",
       "source_file": "tests/poll-room.test.ts",
-      "source_location": "L624",
+      "source_location": "L627",
       "target": "tests_poll_room_test_alarmafter",
       "weight": 1.0
     },
@@ -64245,7 +64245,7 @@
       "relation": "calls",
       "source": "tests_poll_room_test",
       "source_file": "tests/poll-room.test.ts",
-      "source_location": "L640",
+      "source_location": "L643",
       "target": "tests_poll_room_test_firealarm",
       "weight": 1.0
     },
@@ -64257,7 +64257,7 @@
       "relation": "calls",
       "source": "tests_poll_room_test",
       "source_file": "tests/poll-room.test.ts",
-      "source_location": "L650",
+      "source_location": "L653",
       "target": "tests_poll_room_test_tap",
       "weight": 1.0
     },
@@ -66009,7 +66009,7 @@
       "relation": "calls",
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L110",
+      "source_location": "L113",
       "target": "tests_worker_test_capturingrooms",
       "weight": 1.0
     },
@@ -66021,7 +66021,7 @@
       "relation": "calls",
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L159",
+      "source_location": "L162",
       "target": "tests_worker_test_fetchpath",
       "weight": 1.0
     },
@@ -66033,7 +66033,7 @@
       "relation": "calls",
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L195",
+      "source_location": "L198",
       "target": "tests_worker_test_sha256",
       "weight": 1.0
     },
@@ -66045,7 +66045,7 @@
       "relation": "calls",
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L220",
+      "source_location": "L223",
       "target": "tests_worker_test_live",
       "weight": 1.0
     },
@@ -66057,7 +66057,7 @@
       "relation": "calls",
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L488",
+      "source_location": "L491",
       "target": "tests_worker_test_lastforwarded",
       "weight": 1.0
     },
@@ -66069,7 +66069,7 @@
       "relation": "calls",
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L662",
+      "source_location": "L685",
       "target": "tests_worker_test_activity",
       "weight": 1.0
     },
@@ -66081,7 +66081,7 @@
       "relation": "calls",
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L675",
+      "source_location": "L698",
       "target": "tests_worker_test_refusedkey",
       "weight": 1.0
     },
@@ -66093,7 +66093,7 @@
       "relation": "calls",
       "source": "tests_worker_test_activity",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L648",
+      "source_location": "L671",
       "target": "tests_worker_test_fetchpath",
       "weight": 1.0
     },
@@ -66105,7 +66105,7 @@
       "relation": "calls",
       "source": "tests_worker_test_capturingrooms",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L78",
+      "source_location": "L79",
       "target": "tests_helpers_room_roomnamespace",
       "weight": 1.0
     },
@@ -66117,7 +66117,7 @@
       "relation": "calls",
       "source": "tests_worker_test_live",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L73",
+      "source_location": "L74",
       "target": "tests_worker_test_fetchpath",
       "weight": 1.0
     },
@@ -66129,7 +66129,7 @@
       "relation": "calls",
       "source": "tests_worker_test_refusedkey",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L655",
+      "source_location": "L678",
       "target": "tests_helpers_room_serversocketof",
       "weight": 1.0
     },
@@ -66141,7 +66141,7 @@
       "relation": "calls",
       "source": "worker_index_activityresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L157",
+      "source_location": "L158",
       "target": "app_server_http_server_requiresameorigin",
       "weight": 1.0
     },
@@ -66153,7 +66153,7 @@
       "relation": "calls",
       "source": "worker_index_activityresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L158",
+      "source_location": "L159",
       "target": "app_server_http_server_queryparams",
       "weight": 1.0
     },
@@ -66165,7 +66165,7 @@
       "relation": "calls",
       "source": "worker_index_activityresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L162",
+      "source_location": "L163",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -66177,7 +66177,7 @@
       "relation": "calls",
       "source": "worker_index_activityresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L165",
+      "source_location": "L166",
       "target": "app_server_data_server_getstreamer",
       "weight": 1.0
     },
@@ -66189,7 +66189,7 @@
       "relation": "calls",
       "source": "worker_index_activityresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L166",
+      "source_location": "L167",
       "target": "app_server_access_server_isstreamerlisted",
       "weight": 1.0
     },
@@ -66201,7 +66201,7 @@
       "relation": "calls",
       "source": "worker_index_activityresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L168",
+      "source_location": "L169",
       "target": "app_server_overlay_key_server_overlaykeyoutput",
       "weight": 1.0
     },
@@ -66213,7 +66213,7 @@
       "relation": "calls",
       "source": "worker_index_activityresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L170",
+      "source_location": "L171",
       "target": "app_server_dock_key_server_dockkeymatches",
       "weight": 1.0
     },
@@ -66225,7 +66225,7 @@
       "relation": "calls",
       "source": "worker_index_activityresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L171",
+      "source_location": "L172",
       "target": "app_server_auth_server_getviewer",
       "weight": 1.0
     },
@@ -66237,7 +66237,7 @@
       "relation": "calls",
       "source": "worker_index_activityresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L174",
+      "source_location": "L175",
       "target": "worker_index_keyrefused",
       "weight": 1.0
     },
@@ -66249,7 +66249,7 @@
       "relation": "calls",
       "source": "worker_index_activityresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L175",
+      "source_location": "L176",
       "target": "app_server_ingest_call_server_callingest",
       "weight": 1.0
     },
@@ -66357,7 +66357,7 @@
       "relation": "calls",
       "source": "worker_index_fetch",
       "source_file": "worker/index.ts",
-      "source_location": "L324",
+      "source_location": "L325",
       "target": "app_server_test_environment_config_validatetestenvironment",
       "weight": 1.0
     },
@@ -66369,7 +66369,7 @@
       "relation": "calls",
       "source": "worker_index_fetch",
       "source_file": "worker/index.ts",
-      "source_location": "L325",
+      "source_location": "L326",
       "target": "app_server_http_server_getorigin",
       "weight": 1.0
     },
@@ -66381,7 +66381,7 @@
       "relation": "calls",
       "source": "worker_index_fetch",
       "source_file": "worker/index.ts",
-      "source_location": "L326",
+      "source_location": "L327",
       "target": "worker_index_httpsredirect",
       "weight": 1.0
     },
@@ -66393,7 +66393,7 @@
       "relation": "calls",
       "source": "worker_index_fetch",
       "source_file": "worker/index.ts",
-      "source_location": "L327",
+      "source_location": "L328",
       "target": "worker_index_secured",
       "weight": 1.0
     },
@@ -66405,7 +66405,7 @@
       "relation": "calls",
       "source": "worker_index_fetch",
       "source_file": "worker/index.ts",
-      "source_location": "L328",
+      "source_location": "L329",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -66417,7 +66417,7 @@
       "relation": "calls",
       "source": "worker_index_fetch",
       "source_file": "worker/index.ts",
-      "source_location": "L330",
+      "source_location": "L331",
       "target": "worker_index_clientkey",
       "weight": 1.0
     },
@@ -66429,7 +66429,7 @@
       "relation": "calls",
       "source": "worker_index_fetch",
       "source_file": "worker/index.ts",
-      "source_location": "L338",
+      "source_location": "L339",
       "target": "worker_index_quotascope_24615190bf5a",
       "weight": 1.0
     },
@@ -66441,7 +66441,7 @@
       "relation": "calls",
       "source": "worker_index_fetch",
       "source_file": "worker/index.ts",
-      "source_location": "L341",
+      "source_location": "L342",
       "target": "app_server_test_environment_server_requiretestaccess",
       "weight": 1.0
     },
@@ -66453,7 +66453,7 @@
       "relation": "calls",
       "source": "worker_index_fetch",
       "source_file": "worker/index.ts",
-      "source_location": "L342",
+      "source_location": "L343",
       "target": "worker_index_routeresponse",
       "weight": 1.0
     },
@@ -66465,7 +66465,7 @@
       "relation": "calls",
       "source": "worker_index_fetch",
       "source_file": "worker/index.ts",
-      "source_location": "L344",
+      "source_location": "L345",
       "target": "app_server_http_server_errorresponse",
       "weight": 1.0
     },
@@ -66477,7 +66477,7 @@
       "relation": "calls",
       "source": "worker_index_imageresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L236",
+      "source_location": "L237",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -66489,7 +66489,7 @@
       "relation": "calls",
       "source": "worker_index_imageresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L238",
+      "source_location": "L239",
       "target": "app_server_stream_images_server_servestreamimage",
       "weight": 1.0
     },
@@ -66501,7 +66501,7 @@
       "relation": "calls",
       "source": "worker_index_imageresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L239",
+      "source_location": "L240",
       "target": "app_server_images_server_serveimage",
       "weight": 1.0
     },
@@ -66585,7 +66585,7 @@
       "relation": "calls",
       "source": "worker_index_liveresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L137",
+      "source_location": "L138",
       "target": "app_server_overlay_key_server_overlaykeyoutput",
       "weight": 1.0
     },
@@ -66597,7 +66597,7 @@
       "relation": "calls",
       "source": "worker_index_liveresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L140",
+      "source_location": "L142",
       "target": "app_server_dock_key_server_dockkeymatches",
       "weight": 1.0
     },
@@ -66621,7 +66621,7 @@
       "relation": "calls",
       "source": "worker_index_routeresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L257",
+      "source_location": "L258",
       "target": "app_server_test_environment_server_testenvironmentresponse",
       "weight": 1.0
     },
@@ -66633,7 +66633,7 @@
       "relation": "calls",
       "source": "worker_index_routeresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L258",
+      "source_location": "L259",
       "target": "app_server_channel_tokens_server_channelsoff",
       "weight": 1.0
     },
@@ -66645,7 +66645,7 @@
       "relation": "calls",
       "source": "worker_index_routeresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L262",
+      "source_location": "L263",
       "target": "worker_index_webhookresponse",
       "weight": 1.0
     },
@@ -66657,7 +66657,7 @@
       "relation": "calls",
       "source": "worker_index_routeresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L264",
+      "source_location": "L265",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -66669,7 +66669,7 @@
       "relation": "calls",
       "source": "worker_index_routeresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L265",
+      "source_location": "L266",
       "target": "worker_index_activityresponse",
       "weight": 1.0
     },
@@ -66681,7 +66681,7 @@
       "relation": "calls",
       "source": "worker_index_routeresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L267",
+      "source_location": "L268",
       "target": "app_server_sitemap_server_sitemapresponse",
       "weight": 1.0
     },
@@ -66693,7 +66693,7 @@
       "relation": "calls",
       "source": "worker_index_routeresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L269",
+      "source_location": "L270",
       "target": "worker_index_calendarresponse",
       "weight": 1.0
     },
@@ -66705,7 +66705,7 @@
       "relation": "calls",
       "source": "worker_index_routeresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L271",
+      "source_location": "L272",
       "target": "worker_index_liveresponse",
       "weight": 1.0
     },
@@ -66717,7 +66717,7 @@
       "relation": "calls",
       "source": "worker_index_routeresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L273",
+      "source_location": "L274",
       "target": "worker_index_imageresponse",
       "weight": 1.0
     },
@@ -66729,7 +66729,7 @@
       "relation": "calls",
       "source": "worker_index_routeresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L277",
+      "source_location": "L278",
       "target": "worker_index_handler",
       "weight": 1.0
     },
@@ -66741,7 +66741,7 @@
       "relation": "calls",
       "source": "worker_index_scheduled",
       "source_file": "worker/index.ts",
-      "source_location": "L284",
+      "source_location": "L285",
       "target": "app_server_test_environment_config_validatetestenvironment",
       "weight": 1.0
     },
@@ -66753,7 +66753,7 @@
       "relation": "calls",
       "source": "worker_index_scheduled",
       "source_file": "worker/index.ts",
-      "source_location": "L285",
+      "source_location": "L286",
       "target": "app_server_test_environment_server_requiretestdatabase",
       "weight": 1.0
     },
@@ -66765,7 +66765,7 @@
       "relation": "calls",
       "source": "worker_index_scheduled",
       "source_file": "worker/index.ts",
-      "source_location": "L288",
+      "source_location": "L289",
       "target": "app_server_translation_jobs_server_translatepending",
       "weight": 1.0
     },
@@ -66777,7 +66777,7 @@
       "relation": "calls",
       "source": "worker_index_scheduled",
       "source_file": "worker/index.ts",
-      "source_location": "L308",
+      "source_location": "L309",
       "target": "app_server_http_server_logerror",
       "weight": 1.0
     },
@@ -66789,7 +66789,7 @@
       "relation": "calls",
       "source": "worker_index_scheduled",
       "source_file": "worker/index.ts",
-      "source_location": "L313",
+      "source_location": "L314",
       "target": "worker_index_fetch",
       "weight": 1.0
     },
@@ -66801,7 +66801,7 @@
       "relation": "calls",
       "source": "worker_index_secured",
       "source_file": "worker/index.ts",
-      "source_location": "L227",
+      "source_location": "L228",
       "target": "app_server_http_server_securityheaders",
       "weight": 1.0
     },
@@ -66813,7 +66813,7 @@
       "relation": "calls",
       "source": "worker_index_webhookresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L195",
+      "source_location": "L196",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -66825,7 +66825,7 @@
       "relation": "calls",
       "source": "worker_index_webhookresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L198",
+      "source_location": "L199",
       "target": "app_server_channel_webhooks_server_twitchwebhook",
       "weight": 1.0
     },
@@ -66837,7 +66837,7 @@
       "relation": "calls",
       "source": "worker_index_webhookresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L199",
+      "source_location": "L200",
       "target": "app_server_channel_webhooks_server_kickwebhook",
       "weight": 1.0
     },
@@ -66849,7 +66849,7 @@
       "relation": "calls",
       "source": "worker_index_webhookresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L201",
+      "source_location": "L202",
       "target": "app_server_channel_webhooks_server_logrejectedwebhook",
       "weight": 1.0
     },
@@ -66861,7 +66861,7 @@
       "relation": "calls",
       "source": "worker_index_webhookresponse",
       "source_file": "worker/index.ts",
-      "source_location": "L202",
+      "source_location": "L203",
       "target": "app_server_channel_webhooks_server_recordrejectedwebhook",
       "weight": 1.0
     },
@@ -135042,6 +135042,30 @@
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
       "source_location": "L10",
+      "target": "app_server_channel_webhooks_server_resetkickkey",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_worker_test",
+      "source_file": "tests/worker.test.ts",
+      "source_location": "L10",
+      "target": "app_server_channel_webhooks_server_resetroutes",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_worker_test",
+      "source_file": "tests/worker.test.ts",
+      "source_location": "L11",
       "target": "app_server_schedule_server_createevents",
       "weight": 1.0
     },
@@ -135053,7 +135077,7 @@
       "relation": "imports",
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L12",
+      "source_location": "L13",
       "target": "tests_helpers_api_apicaller",
       "weight": 1.0
     },
@@ -135065,7 +135089,7 @@
       "relation": "imports",
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L13",
+      "source_location": "L14",
       "target": "tests_helpers_channels_installfakeproviders",
       "weight": 1.0
     },
@@ -135077,7 +135101,7 @@
       "relation": "imports",
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L14",
+      "source_location": "L15",
       "target": "tests_helpers_database_createtestdatabase",
       "weight": 1.0
     },
@@ -135089,7 +135113,7 @@
       "relation": "imports",
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L14",
+      "source_location": "L15",
       "target": "tests_helpers_database_testdatabase",
       "weight": 1.0
     },
@@ -135101,7 +135125,7 @@
       "relation": "imports",
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L15",
+      "source_location": "L16",
       "target": "tests_helpers_room_installworkersruntime",
       "weight": 1.0
     },
@@ -135113,7 +135137,7 @@
       "relation": "imports",
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L15",
+      "source_location": "L16",
       "target": "tests_helpers_room_roomnamespace",
       "weight": 1.0
     },
@@ -135125,7 +135149,7 @@
       "relation": "imports",
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L15",
+      "source_location": "L16",
       "target": "tests_helpers_room_serversocketof",
       "weight": 1.0
     },
@@ -135186,19 +135210,7 @@
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
       "source_location": "L7",
-      "target": "app_server_overlay_key_server_hashoverlaykey",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_worker_test",
-      "source_file": "tests/worker.test.ts",
-      "source_location": "L7",
-      "target": "app_server_overlay_key_server_regenerateoverlaykey",
+      "target": "app_server_dock_key_server_regeneratedockkey",
       "weight": 1.0
     },
     {
@@ -135210,31 +135222,31 @@
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
       "source_location": "L8",
+      "target": "app_server_overlay_key_server_hashoverlaykey",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_worker_test",
+      "source_file": "tests/worker.test.ts",
+      "source_location": "L8",
+      "target": "app_server_overlay_key_server_regenerateoverlaykey",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_worker_test",
+      "source_file": "tests/worker.test.ts",
+      "source_location": "L9",
       "target": "app_server_poll_room_pollroom",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_worker_test",
-      "source_file": "tests/worker.test.ts",
-      "source_location": "L9",
-      "target": "app_server_channel_webhooks_server_resetkickkey",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_worker_test",
-      "source_file": "tests/worker.test.ts",
-      "source_location": "L9",
-      "target": "app_server_channel_webhooks_server_resetroutes",
       "weight": 1.0
     },
     {
@@ -172508,7 +172520,7 @@
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
       "source_location": "L10",
-      "target": "app_server_schedule_server",
+      "target": "app_server_channel_webhooks_server",
       "weight": 1.0
     },
     {
@@ -172520,7 +172532,7 @@
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
       "source_location": "L11",
-      "target": "worker_index",
+      "target": "app_server_schedule_server",
       "weight": 1.0
     },
     {
@@ -172532,7 +172544,7 @@
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
       "source_location": "L12",
-      "target": "tests_helpers_api",
+      "target": "worker_index",
       "weight": 1.0
     },
     {
@@ -172544,7 +172556,7 @@
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
       "source_location": "L13",
-      "target": "tests_helpers_channels",
+      "target": "tests_helpers_api",
       "weight": 1.0
     },
     {
@@ -172556,7 +172568,7 @@
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
       "source_location": "L14",
-      "target": "tests_helpers_database",
+      "target": "tests_helpers_channels",
       "weight": 1.0
     },
     {
@@ -172568,6 +172580,18 @@
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
       "source_location": "L15",
+      "target": "tests_helpers_database",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_worker_test",
+      "source_file": "tests/worker.test.ts",
+      "source_location": "L16",
       "target": "tests_helpers_room",
       "weight": 1.0
     },
@@ -172628,7 +172652,7 @@
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
       "source_location": "L7",
-      "target": "app_server_overlay_key_server",
+      "target": "app_server_dock_key_server",
       "weight": 1.0
     },
     {
@@ -172640,7 +172664,7 @@
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
       "source_location": "L8",
-      "target": "app_server_poll_room",
+      "target": "app_server_overlay_key_server",
       "weight": 1.0
     },
     {
@@ -172652,7 +172676,7 @@
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
       "source_location": "L9",
-      "target": "app_server_channel_webhooks_server",
+      "target": "app_server_poll_room",
       "weight": 1.0
     },
     {
@@ -223094,7 +223118,7 @@
       "relation": "contains",
       "source": "tests_poll_room_test",
       "source_file": "tests/poll-room.test.ts",
-      "source_location": "L481",
+      "source_location": "L484",
       "target": "tests_poll_room_test_sources",
       "weight": 1.0
     },
@@ -224700,7 +224724,7 @@
       "relation": "contains",
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L18",
+      "source_location": "L19",
       "target": "tests_worker_test_buffer",
       "weight": 1.0
     },
@@ -224711,7 +224735,7 @@
       "relation": "contains",
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L23",
+      "source_location": "L24",
       "target": "tests_worker_test_router",
       "weight": 1.0
     },
@@ -224722,7 +224746,7 @@
       "relation": "contains",
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L50",
+      "source_location": "L51",
       "target": "tests_worker_test_png",
       "weight": 1.0
     },
@@ -224733,7 +224757,7 @@
       "relation": "contains",
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L57",
+      "source_location": "L58",
       "target": "tests_worker_test_limiter",
       "weight": 1.0
     },
@@ -224744,7 +224768,7 @@
       "relation": "contains",
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L58",
+      "source_location": "L59",
       "target": "tests_worker_test_forwarded",
       "weight": 1.0
     },
@@ -224755,7 +224779,7 @@
       "relation": "contains",
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L60",
+      "source_location": "L61",
       "target": "tests_worker_test_cookie",
       "weight": 1.0
     },
@@ -224766,7 +224790,7 @@
       "relation": "contains",
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L62",
+      "source_location": "L63",
       "target": "tests_worker_test_sha256",
       "weight": 1.0
     },
@@ -224777,7 +224801,7 @@
       "relation": "contains",
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L647",
+      "source_location": "L670",
       "target": "tests_worker_test_activity",
       "weight": 1.0
     },
@@ -224788,7 +224812,7 @@
       "relation": "contains",
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L652",
+      "source_location": "L675",
       "target": "tests_worker_test_refusedkey",
       "weight": 1.0
     },
@@ -224799,7 +224823,7 @@
       "relation": "contains",
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L67",
+      "source_location": "L68",
       "target": "tests_worker_test_fetchpath",
       "weight": 1.0
     },
@@ -224810,7 +224834,7 @@
       "relation": "contains",
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L72",
+      "source_location": "L73",
       "target": "tests_worker_test_live",
       "weight": 1.0
     },
@@ -224821,7 +224845,7 @@
       "relation": "contains",
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L77",
+      "source_location": "L78",
       "target": "tests_worker_test_capturingrooms",
       "weight": 1.0
     },
@@ -224832,7 +224856,7 @@
       "relation": "contains",
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L86",
+      "source_location": "L87",
       "target": "tests_worker_test_lastforwarded",
       "weight": 1.0
     },
@@ -224843,7 +224867,7 @@
       "relation": "contains",
       "source": "tests_worker_test",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L928",
+      "source_location": "L951",
       "target": "tests_worker_test_get",
       "weight": 1.0
     },
@@ -224865,7 +224889,7 @@
       "relation": "contains",
       "source": "worker_index",
       "source_file": "worker/index.ts",
-      "source_location": "L150",
+      "source_location": "L151",
       "target": "worker_index_activityresponse",
       "weight": 1.0
     },
@@ -224876,7 +224900,7 @@
       "relation": "contains",
       "source": "worker_index",
       "source_file": "worker/index.ts",
-      "source_location": "L182",
+      "source_location": "L183",
       "target": "worker_index_keyrefused",
       "weight": 1.0
     },
@@ -224887,7 +224911,7 @@
       "relation": "contains",
       "source": "worker_index",
       "source_file": "worker/index.ts",
-      "source_location": "L189",
+      "source_location": "L190",
       "target": "worker_index_webhookresponse",
       "weight": 1.0
     },
@@ -224898,7 +224922,7 @@
       "relation": "contains",
       "source": "worker_index",
       "source_file": "worker/index.ts",
-      "source_location": "L213",
+      "source_location": "L214",
       "target": "worker_index_httpsredirect",
       "weight": 1.0
     },
@@ -224909,7 +224933,7 @@
       "relation": "contains",
       "source": "worker_index",
       "source_file": "worker/index.ts",
-      "source_location": "L221",
+      "source_location": "L222",
       "target": "worker_index_secured",
       "weight": 1.0
     },
@@ -224920,7 +224944,7 @@
       "relation": "contains",
       "source": "worker_index",
       "source_file": "worker/index.ts",
-      "source_location": "L235",
+      "source_location": "L236",
       "target": "worker_index_imageresponse",
       "weight": 1.0
     },
@@ -224931,7 +224955,7 @@
       "relation": "contains",
       "source": "worker_index",
       "source_file": "worker/index.ts",
-      "source_location": "L245",
+      "source_location": "L246",
       "target": "worker_index_routeresponse",
       "weight": 1.0
     },
@@ -224942,7 +224966,7 @@
       "relation": "contains",
       "source": "worker_index",
       "source_file": "worker/index.ts",
-      "source_location": "L283",
+      "source_location": "L284",
       "target": "worker_index_scheduled",
       "weight": 1.0
     },
@@ -224953,7 +224977,7 @@
       "relation": "contains",
       "source": "worker_index",
       "source_file": "worker/index.ts",
-      "source_location": "L317",
+      "source_location": "L318",
       "target": "worker_index_fetch",
       "weight": 1.0
     },
@@ -232623,7 +232647,7 @@
       "relation": "indirect_call",
       "source": "worker_index_scheduled",
       "source_file": "worker/index.ts",
-      "source_location": "L292",
+      "source_location": "L293",
       "target": "app_server_cleanup_server_cleanexpireddata",
       "weight": 1.0
     },
@@ -232635,7 +232659,7 @@
       "relation": "indirect_call",
       "source": "worker_index_scheduled",
       "source_file": "worker/index.ts",
-      "source_location": "L294",
+      "source_location": "L295",
       "target": "app_server_schedule_server_topupseries",
       "weight": 1.0
     },
@@ -232647,7 +232671,7 @@
       "relation": "indirect_call",
       "source": "worker_index_scheduled",
       "source_file": "worker/index.ts",
-      "source_location": "L296",
+      "source_location": "L297",
       "target": "app_server_channels_server_expireyoutubeconnections",
       "weight": 1.0
     },
@@ -232659,7 +232683,7 @@
       "relation": "indirect_call",
       "source": "worker_index_scheduled",
       "source_file": "worker/index.ts",
-      "source_location": "L298",
+      "source_location": "L299",
       "target": "app_server_channels_server_repairchannelsubscriptions",
       "weight": 1.0
     },
@@ -232671,7 +232695,7 @@
       "relation": "indirect_call",
       "source": "worker_index_scheduled",
       "source_file": "worker/index.ts",
-      "source_location": "L300",
+      "source_location": "L301",
       "target": "app_server_schedule_import_server_importschedules",
       "weight": 1.0
     },
@@ -240864,7 +240888,7 @@
       "label": "Sources",
       "norm_label": "sources",
       "source_file": "tests/poll-room.test.ts",
-      "source_location": "L481"
+      "source_location": "L484"
     },
     {
       "_callable": true,
@@ -275613,7 +275637,7 @@
       "label": "activity()",
       "norm_label": "activity()",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L647"
+      "source_location": "L670"
     },
     {
       "_callable": true,
@@ -275624,7 +275648,7 @@
       "label": "capturingRooms()",
       "norm_label": "capturingrooms()",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L77"
+      "source_location": "L78"
     },
     {
       "_callable": true,
@@ -275635,7 +275659,7 @@
       "label": "fetchPath()",
       "norm_label": "fetchpath()",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L67"
+      "source_location": "L68"
     },
     {
       "_callable": true,
@@ -275650,14 +275674,14 @@
             "callee": "prepare",
             "file": "tests/worker.test.ts",
             "lang": "typescript",
-            "line": "L932",
+            "line": "L955",
             "receiver_type": "D1Database"
           }
         ]
       },
       "norm_label": "get()",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L928"
+      "source_location": "L951"
     },
     {
       "_callable": true,
@@ -275668,7 +275692,7 @@
       "label": "lastForwarded()",
       "norm_label": "lastforwarded()",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L86"
+      "source_location": "L87"
     },
     {
       "_callable": true,
@@ -275679,7 +275703,7 @@
       "label": "live()",
       "norm_label": "live()",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L72"
+      "source_location": "L73"
     },
     {
       "_callable": true,
@@ -275690,7 +275714,7 @@
       "label": "refusedKey()",
       "norm_label": "refusedkey()",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L652"
+      "source_location": "L675"
     },
     {
       "_callable": true,
@@ -275701,7 +275725,7 @@
       "label": "sha256()",
       "norm_label": "sha256()",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L62"
+      "source_location": "L63"
     },
     {
       "_callable": true,
@@ -275712,7 +275736,7 @@
       "label": "activityResponse()",
       "norm_label": "activityresponse()",
       "source_file": "worker/index.ts",
-      "source_location": "L150"
+      "source_location": "L151"
     },
     {
       "_callable": true,
@@ -275756,7 +275780,7 @@
       "label": "fetch()",
       "norm_label": "fetch()",
       "source_file": "worker/index.ts",
-      "source_location": "L317"
+      "source_location": "L318"
     },
     {
       "_callable": true,
@@ -275767,7 +275791,7 @@
       "label": "httpsRedirect()",
       "norm_label": "httpsredirect()",
       "source_file": "worker/index.ts",
-      "source_location": "L213"
+      "source_location": "L214"
     },
     {
       "_callable": true,
@@ -275778,7 +275802,7 @@
       "label": "imageResponse()",
       "norm_label": "imageresponse()",
       "source_file": "worker/index.ts",
-      "source_location": "L235"
+      "source_location": "L236"
     },
     {
       "_callable": true,
@@ -275789,7 +275813,7 @@
       "label": "keyRefused()",
       "norm_label": "keyrefused()",
       "source_file": "worker/index.ts",
-      "source_location": "L182"
+      "source_location": "L183"
     },
     {
       "_callable": true,
@@ -275826,14 +275850,14 @@
             "callee": "set",
             "file": "worker/index.ts",
             "lang": "typescript",
-            "line": "L276",
+            "line": "L277",
             "receiver_type": "RouterContextProvider"
           }
         ]
       },
       "norm_label": "routeresponse()",
       "source_file": "worker/index.ts",
-      "source_location": "L245"
+      "source_location": "L246"
     },
     {
       "_callable": true,
@@ -275844,7 +275868,7 @@
       "label": "scheduled()",
       "norm_label": "scheduled()",
       "source_file": "worker/index.ts",
-      "source_location": "L283"
+      "source_location": "L284"
     },
     {
       "_callable": true,
@@ -275855,7 +275879,7 @@
       "label": "secured()",
       "norm_label": "secured()",
       "source_file": "worker/index.ts",
-      "source_location": "L221"
+      "source_location": "L222"
     },
     {
       "_callable": true,
@@ -275877,7 +275901,7 @@
       "label": "webhookResponse()",
       "norm_label": "webhookresponse()",
       "source_file": "worker/index.ts",
-      "source_location": "L189"
+      "source_location": "L190"
     },
     {
       "_origin": "ast",
@@ -291932,7 +291956,7 @@
       "label": "Buffer",
       "norm_label": "buffer",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L18"
+      "source_location": "L19"
     },
     {
       "_origin": "ast",
@@ -291942,7 +291966,7 @@
       "label": "{ cookie }",
       "norm_label": "{ cookie }",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L60"
+      "source_location": "L61"
     },
     {
       "_origin": "ast",
@@ -291952,7 +291976,7 @@
       "label": "forwarded",
       "norm_label": "forwarded",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L58"
+      "source_location": "L59"
     },
     {
       "_origin": "ast",
@@ -291962,7 +291986,7 @@
       "label": "limiter",
       "norm_label": "limiter",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L57"
+      "source_location": "L58"
     },
     {
       "_origin": "ast",
@@ -291972,7 +291996,7 @@
       "label": "png",
       "norm_label": "png",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L50"
+      "source_location": "L51"
     },
     {
       "_origin": "ast",
@@ -291982,7 +292006,7 @@
       "label": "router",
       "norm_label": "router",
       "source_file": "tests/worker.test.ts",
-      "source_location": "L23"
+      "source_location": "L24"
     },
     {
       "_origin": "ast",

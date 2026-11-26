@@ -451,6 +451,8 @@ describe("live room admission", (): void => {
     const source = await join({ key: KEY, overlay: true });
     // The dock has no account: its key alone gives it the place of the owner.
     const dock = await join({ key: KEY, dock: true });
+    // A dock in a browser with the session of the owner has the mark of the dock key too.
+    const signedIn = await join({ key: KEY, user: "owner-1", owner: true, dock: true });
     const sources = (socket: FakeSocket): { count: number } | undefined =>
       lastOf<{ sources: { count: number } }>(socket, "overlay")?.sources;
     // The dock gets the OBS sources, as a tab of the owner does. It is not one of them.
@@ -460,6 +462,7 @@ describe("live room admission", (): void => {
     expect((await post("overlay-key", { output: "dock" })).status).toBe(204);
     expect(dock.ofType("unavailable")).toHaveLength(1);
     expect([dock.closeCode, dock.closeReason]).toEqual([1001, "Overlay key revoked"]);
+    expect([signedIn.closeCode, signedIn.closeReason]).toEqual([1001, "Overlay key revoked"]);
     expect([owner.open, source.open]).toEqual([true, true]);
     expect(sources(owner)).toMatchObject({ count: 1 });
     // A new overlay key does not close a dock.

@@ -131,14 +131,15 @@ async function liveResponse(
     "X-Stream-Bullets-Client": key,
   });
   if (viewer) headers.set("X-SB-User", viewer.id);
-  if (viewer?.id === streamer.ownerId) headers.set("X-SB-Owner", "1");
-  // Invalid/revoked keys join as signed-out viewers. The header names the output of the key.
-  else {
-    const output: Orientation | null = await overlayKeyOutput(env, streamer.id, overlayKey);
-    if (output) headers.set("X-SB-Overlay", output);
-    // The key of the OBS dock gets the seat and the snapshot of the owner.
-    else if (await dockKeyMatches(env, streamer.id, overlayKey)) headers.set("X-SB-Dock", "1");
-  }
+  const owner: boolean = viewer?.id === streamer.ownerId;
+  if (owner) headers.set("X-SB-Owner", "1");
+  // Invalid/revoked keys join as signed-out viewers. The header names the output of the key. A session of the owner
+  // needs no overlay key.
+  const output: Orientation | null = owner ? null : await overlayKeyOutput(env, streamer.id, overlayKey);
+  if (output) headers.set("X-SB-Overlay", output);
+  // The key of the OBS dock gets the seat and the snapshot of the owner. A dock in a browser with the session of the
+  // owner gets the mark of its key too, so a new dock link also closes that dock.
+  else if (await dockKeyMatches(env, streamer.id, overlayKey)) headers.set("X-SB-Dock", "1");
   const room = env.POLL_ROOMS.get(env.POLL_ROOMS.idFromName(streamer.id));
   return room.fetch(`https://poll-room.internal/subscribe?streamerId=${encodeURIComponent(streamer.id)}`, { headers });
 }

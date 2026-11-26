@@ -637,6 +637,11 @@ test("the OBS dock runs the live controls with its own link in a narrow panel, a
   expect(refused.status()).toBe(403);
   expect((await overlay(owner)).showResults).toBe(false);
 
+  // The same dock link in a browser with the session of the owner: a new dock link must close this dock too.
+  const ownerDock = await newPage(owner);
+  await ownerDock.goto(dockUrl);
+  await expect(ownerDock.locator("[data-live-poll-title]")).toHaveText("Tea or coffee");
+
   // A new dock link closes the open dock at once: its controls go, and it tells the owner what to do.
   await section.getByRole("button", { name: "Regenerate dock link" }).click();
   const confirm = tools.getByRole("dialog", { name: "Regenerate the dock link?" });
@@ -646,6 +651,8 @@ test("the OBS dock runs the live controls with its own link in a narrow panel, a
   await expect(dock.locator("[data-dock-closed]")).toBeVisible();
   await expect(dock.locator("[data-dock-closed]")).toContainText("This dock link does not work");
   await expect(dock.locator("[data-live-part]")).toHaveCount(0);
+  await expect(ownerDock.locator("[data-dock-closed]")).toBeVisible();
+  await expect(ownerDock.locator("[data-live-part]")).toHaveCount(0);
   // The new link opens the dock again.
   await dock.goto(await field.inputValue());
   await expect(dock.locator("[data-live-poll-title]")).toHaveText("Tea or coffee");
