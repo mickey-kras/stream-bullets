@@ -29325,7 +29325,7 @@
       "relation": "calls",
       "source": "app_lib_activity_parseactivitymessage",
       "source_file": "app/lib/activity.ts",
-      "source_location": "L391",
+      "source_location": "L392",
       "target": "app_lib_playground_protocol_parseframe",
       "weight": 1.0
     },
@@ -29385,7 +29385,7 @@
       "relation": "calls",
       "source": "app_lib_activity_snapshotevents",
       "source_file": "app/lib/activity.ts",
-      "source_location": "L319",
+      "source_location": "L320",
       "target": "app_lib_activity_unknownkind",
       "weight": 1.0
     },
@@ -29745,8 +29745,20 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_dismiss",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L221",
+      "source_location": "L220",
       "target": "app_lib_chat_feed_active",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_chat_feed_dismisscommands",
+      "source_file": "app/lib/chat-feed.ts",
+      "source_location": "L231",
+      "target": "app_lib_chat_feed_dismiss",
       "weight": 1.0
     },
     {
@@ -29783,18 +29795,6 @@
       "source_file": "app/lib/chat-feed.ts",
       "source_location": "L177",
       "target": "app_lib_chat_feed_graphemes",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_lib_chat_feed_filtercommands",
-      "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L231",
-      "target": "app_lib_chat_feed_dismiss",
       "weight": 1.0
     },
     {
@@ -29841,7 +29841,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_nextwakeat",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L472",
+      "source_location": "L474",
       "target": "app_lib_chat_feed_limitsof",
       "weight": 1.0
     },
@@ -29853,7 +29853,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_nextwakeat",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L481",
+      "source_location": "L483",
       "target": "app_lib_chat_feed_lastpromotion",
       "weight": 1.0
     },
@@ -30010,7 +30010,7 @@
       "source": "app_lib_chat_feed_reduce",
       "source_file": "app/lib/chat-feed.ts",
       "source_location": "L454",
-      "target": "app_lib_chat_feed_filtercommands",
+      "target": "app_lib_chat_feed_dismisscommands",
       "weight": 1.0
     },
     {
@@ -30021,7 +30021,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_reduce",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L457",
+      "source_location": "L459",
       "target": "app_lib_chat_feed_dismiss",
       "weight": 1.0
     },
@@ -30033,7 +30033,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_reduce",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L460",
+      "source_location": "L462",
       "target": "app_lib_chat_feed_initialchatstate",
       "weight": 1.0
     },
@@ -30045,7 +30045,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_reduce",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L465",
+      "source_location": "L467",
       "target": "app_lib_chat_feed_receivesnapshot",
       "weight": 1.0
     },
@@ -30057,7 +30057,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_reduce",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L466",
+      "source_location": "L468",
       "target": "app_lib_chat_feed_receiveevent",
       "weight": 1.0
     },
@@ -190862,7 +190862,7 @@
       "relation": "contains",
       "source": "app_lib_activity",
       "source_file": "app/lib/activity.ts",
-      "source_location": "L253",
+      "source_location": "L254",
       "target": "app_lib_activity_activityeventschema",
       "weight": 1.0
     },
@@ -190873,7 +190873,7 @@
       "relation": "contains",
       "source": "app_lib_activity",
       "source_file": "app/lib/activity.ts",
-      "source_location": "L279",
+      "source_location": "L280",
       "target": "app_lib_activity_activitymessage",
       "weight": 1.0
     },
@@ -190884,7 +190884,7 @@
       "relation": "contains",
       "source": "app_lib_activity",
       "source_file": "app/lib/activity.ts",
-      "source_location": "L291",
+      "source_location": "L292",
       "target": "app_lib_activity_messageforplatform",
       "weight": 1.0
     },
@@ -190895,7 +190895,7 @@
       "relation": "contains",
       "source": "app_lib_activity",
       "source_file": "app/lib/activity.ts",
-      "source_location": "L298",
+      "source_location": "L299",
       "target": "app_lib_activity_event_kinds",
       "weight": 1.0
     },
@@ -190906,7 +190906,7 @@
       "relation": "contains",
       "source": "app_lib_activity",
       "source_file": "app/lib/activity.ts",
-      "source_location": "L309",
+      "source_location": "L310",
       "target": "app_lib_activity_unknownkind",
       "weight": 1.0
     },
@@ -190917,7 +190917,7 @@
       "relation": "contains",
       "source": "app_lib_activity",
       "source_file": "app/lib/activity.ts",
-      "source_location": "L316",
+      "source_location": "L317",
       "target": "app_lib_activity_snapshotevents",
       "weight": 1.0
     },
@@ -190928,7 +190928,7 @@
       "relation": "contains",
       "source": "app_lib_activity",
       "source_file": "app/lib/activity.ts",
-      "source_location": "L322",
+      "source_location": "L323",
       "target": "app_lib_activity_messageschema",
       "weight": 1.0
     },
@@ -190939,7 +190939,7 @@
       "relation": "contains",
       "source": "app_lib_activity",
       "source_file": "app/lib/activity.ts",
-      "source_location": "L334",
+      "source_location": "L335",
       "target": "app_lib_activity_deliveries_kept",
       "weight": 1.0
     },
@@ -190950,7 +190950,7 @@
       "relation": "contains",
       "source": "app_lib_activity",
       "source_file": "app/lib/activity.ts",
-      "source_location": "L341",
+      "source_location": "L342",
       "target": "app_lib_activity_acceptdelivery",
       "weight": 1.0
     },
@@ -190961,7 +190961,7 @@
       "relation": "contains",
       "source": "app_lib_activity",
       "source_file": "app/lib/activity.ts",
-      "source_location": "L350",
+      "source_location": "L351",
       "target": "app_lib_activity_supporttotals",
       "weight": 1.0
     },
@@ -190972,7 +190972,7 @@
       "relation": "contains",
       "source": "app_lib_activity",
       "source_file": "app/lib/activity.ts",
-      "source_location": "L363",
+      "source_location": "L364",
       "target": "app_lib_activity_supporttotals_2290a9eb91e8",
       "weight": 1.0
     },
@@ -190983,7 +190983,7 @@
       "relation": "contains",
       "source": "app_lib_activity",
       "source_file": "app/lib/activity.ts",
-      "source_location": "L378",
+      "source_location": "L379",
       "target": "app_lib_activity_max_activity_message_length",
       "weight": 1.0
     },
@@ -190994,7 +190994,7 @@
       "relation": "contains",
       "source": "app_lib_activity",
       "source_file": "app/lib/activity.ts",
-      "source_location": "L381",
+      "source_location": "L382",
       "target": "app_lib_activity_parseactivitymessage",
       "weight": 1.0
     },
@@ -191599,7 +191599,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L218",
+      "source_location": "L217",
       "target": "app_lib_chat_feed_dismiss",
       "weight": 1.0
     },
@@ -191611,7 +191611,7 @@
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
       "source_location": "L230",
-      "target": "app_lib_chat_feed_filtercommands",
+      "target": "app_lib_chat_feed_dismisscommands",
       "weight": 1.0
     },
     {
@@ -191797,7 +191797,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L471",
+      "source_location": "L473",
       "target": "app_lib_chat_feed_nextwakeat",
       "weight": 1.0
     },
@@ -191819,7 +191819,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L489",
+      "source_location": "L491",
       "target": "app_lib_chat_feed_sample",
       "weight": 1.0
     },
@@ -191830,7 +191830,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L514",
+      "source_location": "L516",
       "target": "app_lib_chat_feed_sample_chat",
       "weight": 1.0
     },
@@ -191841,7 +191841,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L545",
+      "source_location": "L547",
       "target": "app_lib_chat_feed_samplechatat",
       "weight": 1.0
     },
@@ -236259,7 +236259,7 @@
       "label": "ActivityMessage",
       "norm_label": "activitymessage",
       "source_file": "app/lib/activity.ts",
-      "source_location": "L279"
+      "source_location": "L280"
     },
     {
       "_callable": true,
@@ -236415,7 +236415,7 @@
       "label": "SupportTotals",
       "norm_label": "supporttotals",
       "source_file": "app/lib/activity.ts",
-      "source_location": "L350"
+      "source_location": "L351"
     },
     {
       "_callable": true,
@@ -253876,7 +253876,7 @@
       "label": "acceptDelivery()",
       "norm_label": "acceptdelivery()",
       "source_file": "app/lib/activity.ts",
-      "source_location": "L341"
+      "source_location": "L342"
     },
     {
       "_callable": true,
@@ -253909,7 +253909,7 @@
       "label": "messageForPlatform()",
       "norm_label": "messageforplatform()",
       "source_file": "app/lib/activity.ts",
-      "source_location": "L291"
+      "source_location": "L292"
     },
     {
       "_callable": true,
@@ -253920,7 +253920,7 @@
       "label": "parseActivityMessage()",
       "norm_label": "parseactivitymessage()",
       "source_file": "app/lib/activity.ts",
-      "source_location": "L381"
+      "source_location": "L382"
     },
     {
       "_callable": true,
@@ -254096,7 +254096,7 @@
       "label": "supportTotals()",
       "norm_label": "supporttotals()",
       "source_file": "app/lib/activity.ts",
-      "source_location": "L363"
+      "source_location": "L364"
     },
     {
       "_callable": true,
@@ -254107,7 +254107,7 @@
       "label": "unknownKind()",
       "norm_label": "unknownkind()",
       "source_file": "app/lib/activity.ts",
-      "source_location": "L309"
+      "source_location": "L310"
     },
     {
       "_callable": true,
@@ -254272,7 +254272,18 @@
       "label": "dismiss()",
       "norm_label": "dismiss()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L218"
+      "source_location": "L217"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_chat_feed_dismisscommands",
+      "label": "dismissCommands()",
+      "norm_label": "dismisscommands()",
+      "source_file": "app/lib/chat-feed.ts",
+      "source_location": "L230"
     },
     {
       "_callable": true,
@@ -254284,17 +254295,6 @@
       "norm_label": "displayfragments()",
       "source_file": "app/lib/chat-feed.ts",
       "source_location": "L161"
-    },
-    {
-      "_callable": true,
-      "_origin": "ast",
-      "community": null,
-      "file_type": "code",
-      "id": "app_lib_chat_feed_filtercommands",
-      "label": "filterCommands()",
-      "norm_label": "filtercommands()",
-      "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L230"
     },
     {
       "_callable": true,
@@ -254382,7 +254382,7 @@
       "label": "nextWakeAt()",
       "norm_label": "nextwakeat()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L471"
+      "source_location": "L473"
     },
     {
       "_callable": true,
@@ -254470,7 +254470,7 @@
       "label": "sample()",
       "norm_label": "sample()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L489"
+      "source_location": "L491"
     },
     {
       "_callable": true,
@@ -254481,7 +254481,7 @@
       "label": "sampleChatAt()",
       "norm_label": "samplechatat()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L545"
+      "source_location": "L547"
     },
     {
       "_callable": true,
@@ -280408,7 +280408,7 @@
       "label": "activityEventSchema",
       "norm_label": "activityeventschema",
       "source_file": "app/lib/activity.ts",
-      "source_location": "L253"
+      "source_location": "L254"
     },
     {
       "_origin": "ast",
@@ -280478,7 +280478,7 @@
       "label": "DELIVERIES_KEPT",
       "norm_label": "deliveries_kept",
       "source_file": "app/lib/activity.ts",
-      "source_location": "L334"
+      "source_location": "L335"
     },
     {
       "_origin": "ast",
@@ -280508,7 +280508,7 @@
       "label": "EVENT_KINDS",
       "norm_label": "event_kinds",
       "source_file": "app/lib/activity.ts",
-      "source_location": "L298"
+      "source_location": "L299"
     },
     {
       "_origin": "ast",
@@ -280538,7 +280538,7 @@
       "label": "MAX_ACTIVITY_MESSAGE_LENGTH",
       "norm_label": "max_activity_message_length",
       "source_file": "app/lib/activity.ts",
-      "source_location": "L378"
+      "source_location": "L379"
     },
     {
       "_origin": "ast",
@@ -280578,7 +280578,7 @@
       "label": "messageSchema",
       "norm_label": "messageschema",
       "source_file": "app/lib/activity.ts",
-      "source_location": "L322"
+      "source_location": "L323"
     },
     {
       "_origin": "ast",
@@ -280618,7 +280618,7 @@
       "label": "snapshotEvents",
       "norm_label": "snapshotevents",
       "source_file": "app/lib/activity.ts",
-      "source_location": "L316"
+      "source_location": "L317"
     },
     {
       "_origin": "ast",
@@ -280828,7 +280828,7 @@
       "label": "SAMPLE_CHAT",
       "norm_label": "sample_chat",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L514"
+      "source_location": "L516"
     },
     {
       "_origin": "ast",
