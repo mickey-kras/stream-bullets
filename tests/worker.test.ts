@@ -4,6 +4,7 @@ import type { LoaderFunctionArgs, ServerBuild } from "react-router";
 import type { AppContext, AppEnv } from "../app/env";
 import { appContext } from "../app/env";
 import { KEY_REFUSED_CLOSE } from "../app/lib/activity-socket";
+import { regenerateDockKey } from "../app/server/dock-key.server";
 import { hashOverlayKey, regenerateOverlayKey } from "../app/server/overlay-key.server";
 import { PollRoom } from "../app/server/poll-room";
 import { resetKickKey, resetRoutes } from "../app/server/channel-webhooks.server";
@@ -89,6 +90,7 @@ function lastForwarded(): {
   user: string | null;
   owner: string | null;
   overlay: string | null;
+  dock: string | null;
 } {
   const request = forwarded.at(-1);
   if (!request) throw new Error("Nothing reached the room");
@@ -98,6 +100,7 @@ function lastForwarded(): {
     user: request.headers.get("X-SB-User"),
     owner: request.headers.get("X-SB-Owner"),
     overlay: request.headers.get("X-SB-Overlay"),
+    dock: request.headers.get("X-SB-Dock"),
   };
 }
 
@@ -491,6 +494,7 @@ describe("Worker live connections", (): void => {
       user: null,
       owner: null,
       overlay: null,
+      dock: null,
     });
     expect(forwarded[0].headers.get("Upgrade")).toBe("websocket");
   });
@@ -533,6 +537,25 @@ describe("Worker live connections", (): void => {
     await env.DB.prepare("UPDATE streamers SET status='frozen' WHERE id=?").bind(pageId).run();
     await live("zed_page", {}, `?key=${next}`);
     expect(lastForwarded().overlay).toBe("horizontal");
+  });
+
+  it("marks a socket with the current dock key, also in a browser with the session of the owner", async (): Promise<void> => {
+    const active = { id: pageId, status: "active" } as const;
+    const key = await regenerateDockKey(env, "owner", active);
+    await live("zed_page", {}, `?key=${key}`);
+    expect(lastForwarded()).toMatchObject({ user: null, owner: null, overlay: null, dock: "1" });
+    // The room closes the sockets with this mark at a new dock link. A dock of the signed-in owner needs it too.
+    await live("zed_page", { Cookie: await cookie("owner") }, `?key=${key}`);
+    expect(lastForwarded()).toMatchObject({ user: "owner", owner: "1", overlay: null, dock: "1" });
+    // A tab of the owner without a key, and a client that names the mark itself, do not get it.
+    await live("zed_page", { Cookie: await cookie("owner") });
+    expect(lastForwarded()).toMatchObject({ owner: "1", dock: null });
+    await live("zed_page", { "X-SB-Dock": "1" });
+    expect(lastForwarded().dock).toBeNull();
+    // The old key stops with a new dock link.
+    await regenerateDockKey(env, "owner", active);
+    await live("zed_page", { Cookie: await cookie("owner") }, `?key=${key}`);
+    expect(lastForwarded()).toMatchObject({ owner: "1", dock: null });
   });
 
   it("names the output of the key: each output has its own key, and a new key for one keeps the other", async (): Promise<void> => {
