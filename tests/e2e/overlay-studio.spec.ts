@@ -869,6 +869,12 @@ test("the owner picks a preset in the list, changes it, resets it, and keeps lay
   await expect(list).toHaveText("Raid night");
   await expect(frame.locator('[data-grid-box="camera"]')).toHaveCount(1);
 
+  // A second tab of the owner is open. It must get the new name and the deleted layout without a load.
+  const other = await newPage(owner);
+  await other.goto("/tools?view=overlay");
+  const otherList = other.locator('[data-layout-picker="horizontal"]').getByRole("combobox", { name: "Layout" });
+  await expect(otherList).toHaveText("Raid night");
+
   // The layout that the page had first is a layout of the owner now. It gets a new name, and then it goes.
   await picker.getByRole("button", { name: "Rename or delete layouts" }).click();
   const mine = page.getByRole("dialog", { name: "Your layouts" });
@@ -882,12 +888,20 @@ test("the owner picks a preset in the list, changes it, resets it, and keeps lay
   done = layoutSaved(page);
   await first.getByRole("button", { name: "Save name" }).click();
   await done;
+  await otherList.click();
+  await expect(other.getByRole("option", { name: "Cozy" })).toBeVisible();
+  await other.keyboard.press("Escape");
   const cozy = mine.locator("[data-layout-row]").filter({ has: page.getByLabel("Name of Cozy") });
   done = layoutSaved(page);
   await cozy.getByRole("button", { name: "Delete" }).click();
   await done;
   await expect(mine.locator("[data-layout-row]")).toHaveCount(1);
   await page.keyboard.press("Escape");
+  await otherList.click();
+  await expect(other.getByRole("option", { name: "Raid night" })).toBeVisible();
+  await expect(other.getByRole("option", { name: "Cozy" })).toHaveCount(0);
+  await other.keyboard.press("Escape");
+  await close(other);
 
   // The layouts hold after a load, and the other output has its own list.
   await page.reload();
