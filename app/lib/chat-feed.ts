@@ -99,6 +99,8 @@ export type ChatAction =
   | { type: "message"; message: ActivityMessage; now: number; serverOffset?: number }
   | { type: "tick"; now: number }
   | { type: "filter"; hideCommands: boolean; now: number }
+  /** The output now shows `platform` only: the rows of the other platforms leave and do not come back. */
+  | { type: "platform"; platform: ActivityPlatform; now: number }
   | { type: "reset" };
 
 export function initialChatState(): ChatState {
@@ -212,17 +214,21 @@ function hidden(chat: ActivityChat, options: ChatOptions): boolean {
 }
 
 /** Applies a turned-on hideCommands to shown and queued rows (see ChatAction `filter`). */
-function filterCommands(state: ChatState, hideCommands: boolean, now: number): ChatState {
-  if (!hideCommands) return state;
+/** The rows that `gone` matches leave the screen, and the waiting rows that it matches never enter. */
+function dismiss(state: ChatState, gone: (row: ChatRow) => boolean, now: number): ChatState {
   let changed = false;
   const rows: ChatRow[] = state.rows.map((row: ChatRow): ChatRow => {
-    if (!row.command || !active(row)) return row;
+    if (!gone(row) || !active(row)) return row;
     changed = true;
     return { ...row, phase: "leaving", phaseAt: now, animate: false };
   });
-  const pending: ChatRow[] = state.pending.filter((row: ChatRow): boolean => !row.command);
+  const pending: ChatRow[] = state.pending.filter((row: ChatRow): boolean => !gone(row));
   if (pending.length !== state.pending.length) changed = true;
   return changed ? { ...state, rows, pending } : state;
+}
+
+function filterCommands(state: ChatState, hideCommands: boolean, now: number): ChatState {
+  return hideCommands ? dismiss(state, (row: ChatRow): boolean => row.command, now) : state;
 }
 
 function active(row: ChatRow): boolean {
@@ -446,6 +452,10 @@ function reduce(state: ChatState, action: Exclude<ChatAction, { type: "reset" }>
   if (action.type === "tick") return advance(state, action.now, limits);
   if (action.type === "filter")
     return advance(filterCommands(state, action.hideCommands, action.now), action.now, limits);
+  if (action.type === "platform") {
+    const other = (row: ChatRow): boolean => row.platform !== action.platform;
+    return advance(dismiss(state, other, action.now), action.now, limits);
+  }
   const { message, now } = action;
   if (message.type === "unavailable") return { ...initialChatState(), epoch: state.epoch + 1 };
   // Other message types (playground frames) are not chat.

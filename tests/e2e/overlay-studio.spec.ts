@@ -901,7 +901,7 @@ test("the owner picks a preset in the list, changes it, resets it, and keeps lay
   await expect(other.getByRole("option", { name: "Raid night" })).toBeVisible();
   await expect(other.getByRole("option", { name: "Cozy" })).toHaveCount(0);
   await other.keyboard.press("Escape");
-  await other.close();
+  await close(other);
 
   // The layouts hold after a load, and the other output has its own list.
   await page.reload();

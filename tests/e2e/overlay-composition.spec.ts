@@ -982,14 +982,15 @@ test("an output with the Twitch switch on shows Twitch chat only, and the other 
     await expect(merged.page.locator(".ov-composition")).toHaveAttribute("data-overlay-platform", "twitch");
     await expect(merged.rows).toHaveCount(1);
     await expect(merged.rows).toContainText("from twitch");
-    // Off again: the rows from before the switch show again, and a new message of another platform shows.
+    // Off again: the Twitch row is still there, and a new message of another platform shows. The rows that left do
+    // not come back: the page got no moderation for them while the switch was on.
     await turn(false);
     await expect(merged.page.locator(".ov-composition")).not.toHaveAttribute("data-overlay-platform");
     merged.send(event(message({ platform: "kick", id: "m6", user: "Kai", text: "kick is back" })));
-    await expect(merged.rows).toHaveCount(4);
+    await expect(merged.rows).toHaveCount(2);
     await expect(merged.chat).toContainText("from twitch");
-    await expect(merged.chat).toContainText("from youtube");
     await expect(merged.chat).toContainText("kick is back");
+    await expect(merged.chat).not.toContainText("from youtube");
     expect(merged.sockets).toHaveLength(1);
     await Promise.all([close(only.page), close(merged.page), close(owner)]);
   } finally {

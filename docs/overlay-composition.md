@@ -109,8 +109,8 @@ With the switch on, the output shows only what comes from Twitch:
 - Each other event of the activity feed that is not from Twitch does not show.
 
 A change of the switch during a stream applies at once.
-The Twitch messages on screen stay. The messages of the other platforms go.
-When the switch goes off again, the messages from before that are not too old show again.
+The Twitch messages on screen stay. The messages of the other platforms go, and they do not come back.
+When the switch goes off again, the other platforms show from their next message.
 
 Polls, topics, the message banner, and the other content layers do not change.
 The **Live** section and the full-screen chat always show each platform.

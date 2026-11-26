@@ -12,7 +12,6 @@ import {
   nextWakeAt,
   type ChatAction,
   type ChatOptions,
-  type ChatRow,
   type ChatState,
 } from "../../lib/chat-feed";
 import { chatTestScript } from "../../lib/chat-test";
@@ -106,7 +105,11 @@ function useChatState(
   useEffect(() => {
     optionsRef.current = still ? { hideCommands, limits: STILL_LIMITS } : { hideCommands };
     offsetRef.current = serverOffset;
-    platformRef.current = platform;
+    if (platformRef.current !== platform) {
+      platformRef.current = platform;
+      // The events of the other platforms stop here, also their moderation. Their rows thus leave for good.
+      if (platform !== null) dispatch({ type: "platform", platform, now: Date.now() });
+    }
     if (appliedHide.current === hideCommands) return;
     appliedHide.current = hideCommands;
     dispatch({ type: "filter", hideCommands, now: Date.now() });
@@ -192,15 +195,5 @@ export function useChat({
     hideCommands,
     serverOffset,
   );
-  const view: ChatState = test ? trial : chat;
-  // The state takes no event of the other platforms from the moment the output shows one platform. The rows from
-  // before that moment stay in the state, so the rows of the one platform do not leave the screen. The others do not
-  // show, and they show again when the output shows each platform again.
-  return useMemo<ChatView>(
-    () =>
-      platform === null
-        ? view
-        : { ...view, rows: view.rows.filter((row: ChatRow): boolean => row.platform === platform) },
-    [view, platform],
-  );
+  return test ? trial : chat;
 }
