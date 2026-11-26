@@ -1,0 +1,235 @@
+{
+  "source": "https://developers.google.com/youtube/v3/live/docs/liveChatMessages",
+  "read": "2026-11-26",
+  "note": "The reference has no example response. Each item has the fields of the documented resource for its type, with invented values. `amountMicros` is a string of digits, as the API sends a 64-bit number.",
+  "items": [
+    {
+      "kind": "youtube#liveChatMessage",
+      "etag": "etag",
+      "id": "LCC.superchat1",
+      "snippet": {
+        "type": "superChatEvent",
+        "liveChatId": "chat-1",
+        "authorChannelId": "UCviewer0000000000000001",
+        "publishedAt": "2026-11-26T10:00:00.000Z",
+        "hasDisplayContent": true,
+        "displayMessage": "display text",
+        "superChatDetails": {
+          "amountMicros": "5000000",
+          "currency": "USD",
+          "amountDisplayString": "$5.00",
+          "userComment": "Great stream",
+          "tier": 2
+        }
+      },
+      "authorDetails": {
+        "channelId": "UCviewer0000000000000001",
+        "channelUrl": "http://www.youtube.com/channel/UCviewer0000000000000001",
+        "displayName": "Viewer One",
+        "profileImageUrl": "https://example.com/viewer.jpg",
+        "isVerified": false,
+        "isChatOwner": false,
+        "isChatSponsor": true,
+        "isChatModerator": false
+      }
+    },
+    {
+      "kind": "youtube#liveChatMessage",
+      "etag": "etag",
+      "id": "LCC.sticker1",
+      "snippet": {
+        "type": "superStickerEvent",
+        "liveChatId": "chat-1",
+        "authorChannelId": "UCviewer0000000000000001",
+        "publishedAt": "2026-11-26T10:00:00.000Z",
+        "hasDisplayContent": true,
+        "displayMessage": "display text",
+        "superStickerDetails": {
+          "superStickerMetadata": {
+            "stickerId": "s1",
+            "altText": "A cat that waves",
+            "language": "en"
+          },
+          "amountMicros": "2000000",
+          "currency": "EUR",
+          "amountDisplayString": "€2.00",
+          "tier": 1
+        }
+      },
+      "authorDetails": {
+        "channelId": "UCviewer0000000000000001",
+        "channelUrl": "http://www.youtube.com/channel/UCviewer0000000000000001",
+        "displayName": "Viewer One",
+        "profileImageUrl": "https://example.com/viewer.jpg",
+        "isVerified": false,
+        "isChatOwner": false,
+        "isChatSponsor": true,
+        "isChatModerator": false
+      }
+    },
+    {
+      "kind": "youtube#liveChatMessage",
+      "etag": "etag",
+      "id": "LCC.member1",
+      "snippet": {
+        "type": "newSponsorEvent",
+        "liveChatId": "chat-1",
+        "authorChannelId": "UCviewer0000000000000001",
+        "publishedAt": "2026-11-26T10:00:00.000Z",
+        "hasDisplayContent": true,
+        "displayMessage": "display text",
+        "newSponsorDetails": {
+          "memberLevelName": "Fan",
+          "isUpgrade": false
+        }
+      },
+      "authorDetails": {
+        "channelId": "UCviewer0000000000000001",
+        "channelUrl": "http://www.youtube.com/channel/UCviewer0000000000000001",
+        "displayName": "Viewer One",
+        "profileImageUrl": "https://example.com/viewer.jpg",
+        "isVerified": false,
+        "isChatOwner": false,
+        "isChatSponsor": true,
+        "isChatModerator": false
+      }
+    },
+    {
+      "kind": "youtube#liveChatMessage",
+      "etag": "etag",
+      "id": "LCC.milestone1",
+      "snippet": {
+        "type": "memberMilestoneChatEvent",
+        "liveChatId": "chat-1",
+        "authorChannelId": "UCviewer0000000000000001",
+        "publishedAt": "2026-11-26T10:00:00.000Z",
+        "hasDisplayContent": true,
+        "displayMessage": "display text",
+        "memberMilestoneChatDetails": {
+          "userComment": "Seven months",
+          "memberMonth": 7,
+          "memberLevelName": "Fan"
+        }
+      },
+      "authorDetails": {
+        "channelId": "UCviewer0000000000000001",
+        "channelUrl": "http://www.youtube.com/channel/UCviewer0000000000000001",
+        "displayName": "Viewer One",
+        "profileImageUrl": "https://example.com/viewer.jpg",
+        "isVerified": false,
+        "isChatOwner": false,
+        "isChatSponsor": true,
+        "isChatModerator": false
+      }
+    },
+    {
+      "kind": "youtube#liveChatMessage",
+      "etag": "etag",
+      "id": "LCC.gifting1",
+      "snippet": {
+        "type": "membershipGiftingEvent",
+        "liveChatId": "chat-1",
+        "authorChannelId": "UCviewer0000000000000001",
+        "publishedAt": "2026-11-26T10:00:00.000Z",
+        "hasDisplayContent": true,
+        "displayMessage": "display text",
+        "membershipGiftingDetails": {
+          "giftMembershipsCount": 5,
+          "giftMembershipsLevelName": "Fan"
+        }
+      },
+      "authorDetails": {
+        "channelId": "UCviewer0000000000000001",
+        "channelUrl": "http://www.youtube.com/channel/UCviewer0000000000000001",
+        "displayName": "Viewer One",
+        "profileImageUrl": "https://example.com/viewer.jpg",
+        "isVerified": false,
+        "isChatOwner": false,
+        "isChatSponsor": true,
+        "isChatModerator": false
+      }
+    },
+    {
+      "kind": "youtube#liveChatMessage",
+      "etag": "etag",
+      "id": "LCC.received1",
+      "snippet": {
+        "type": "giftMembershipReceivedEvent",
+        "liveChatId": "chat-1",
+        "authorChannelId": "UCviewer0000000000000001",
+        "publishedAt": "2026-11-26T10:00:00.000Z",
+        "hasDisplayContent": true,
+        "displayMessage": "display text",
+        "giftMembershipReceivedDetails": {
+          "memberLevelName": "Fan",
+          "gifterChannelId": "UCviewer0000000000000001",
+          "associatedMembershipGiftingMessageId": "LCC.gifting1"
+        }
+      },
+      "authorDetails": {
+        "channelId": "UCviewer0000000000000001",
+        "channelUrl": "http://www.youtube.com/channel/UCviewer0000000000000001",
+        "displayName": "Viewer One",
+        "profileImageUrl": "https://example.com/viewer.jpg",
+        "isVerified": false,
+        "isChatOwner": false,
+        "isChatSponsor": true,
+        "isChatModerator": false
+      }
+    },
+    {
+      "kind": "youtube#liveChatMessage",
+      "etag": "etag",
+      "id": "LCC.received2",
+      "snippet": {
+        "type": "giftMembershipReceivedEvent",
+        "liveChatId": "chat-1",
+        "authorChannelId": "UCviewer0000000000000001",
+        "publishedAt": "2026-11-26T10:00:00.000Z",
+        "hasDisplayContent": true,
+        "displayMessage": "display text",
+        "giftMembershipReceivedDetails": {
+          "memberLevelName": "Fan",
+          "gifterChannelId": "UCviewer0000000000000001",
+          "associatedMembershipGiftingMessageId": "LCC.gifting1"
+        }
+      },
+      "authorDetails": {
+        "channelId": "UCviewer0000000000000001",
+        "channelUrl": "http://www.youtube.com/channel/UCviewer0000000000000001",
+        "displayName": "Viewer One",
+        "profileImageUrl": "https://example.com/viewer.jpg",
+        "isVerified": false,
+        "isChatOwner": false,
+        "isChatSponsor": true,
+        "isChatModerator": false
+      }
+    },
+    {
+      "kind": "youtube#liveChatMessage",
+      "etag": "etag",
+      "id": "LCC.text1",
+      "snippet": {
+        "type": "textMessageEvent",
+        "liveChatId": "chat-1",
+        "authorChannelId": "UCviewer0000000000000001",
+        "publishedAt": "2026-11-26T10:00:00.000Z",
+        "hasDisplayContent": true,
+        "displayMessage": "display text",
+        "textMessageDetails": {
+          "messageText": "hello"
+        }
+      },
+      "authorDetails": {
+        "channelId": "UCviewer0000000000000001",
+        "channelUrl": "http://www.youtube.com/channel/UCviewer0000000000000001",
+        "displayName": "Viewer One",
+        "profileImageUrl": "https://example.com/viewer.jpg",
+        "isVerified": false,
+        "isChatOwner": false,
+        "isChatSponsor": true,
+        "isChatModerator": false
+      }
+    }
+  ]
+}

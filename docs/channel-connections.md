@@ -138,7 +138,81 @@ These rules make each support event count one time:
 - A consumer can show a replay. `supportTotals` never counts a replay, and it never counts the same `id` again.
   Thus a replayed alert does not change a goal or a revenue record.
 
-This section is the format only. The feed does not send support events until the server reads them from the providers.
+This section is the format only. See [Support events of each provider](#support-events-of-each-provider) for the provider events.
+
+### Support events of each provider
+
+`app/server/channel-support.ts` turns the provider events below into support events.
+The feed does not send them yet. The server does not subscribe to these events, and it does not read them from a YouTube page.
+A later change adds the subscriptions and the switch of the streamer.
+
+The tables give, for each provider event: the kind, the amount, the person that the event names, and the permission.
+The facts are from the provider documentation of 2026-11-26.
+
+Twitch sends each event as an EventSub notification:
+
+| EventSub type | Kind | `amount` | `sender` | Scope |
+| --- | --- | --- | --- | --- |
+| `channel.follow` (version 2) | `follow` | `null` | The follower | `moderator:read:followers` |
+| `channel.subscribe` | `subscription` | 1 | The subscriber | `channel:read:subscriptions` |
+| `channel.subscription.message` | `subscription` | All months so far (`cumulative_months`) | The subscriber | `channel:read:subscriptions` |
+| `channel.subscription.gift` | `gift` | Gifts in the bundle (`total`) | The person who gives | `channel:read:subscriptions` |
+| `channel.cheer` | `bits` | Bits | The person who cheers | `bits:read` |
+| `channel.raid` | `raid` | Viewers | The channel that raids | None |
+
+- Anonymity: only `channel.cheer` and `channel.subscription.gift` have `is_anonymous`. Twitch then sends no user, and the event has `anonymous: true` and `sender: null`.
+- A gift bundle also sends `channel.subscribe` with `is_gift: true` for each person who got a gift. Those give no event, so the bundle counts one time.
+- A cheer also sends `channel.bits.use`. The server reads `channel.cheer` only, so Bits count one time.
+- Twitch does not send `channel.subscribe` for a renewal. A renewal shows only when the subscriber sends a message with it.
+- The delivery ID is the header `Twitch-Eventsub-Message-Id`. Twitch sends a notification again with the same ID.
+- The scopes are new. The connection of today has none of them. `channel.raid` needs no scope.
+
+Kick sends each event as a webhook:
+
+| Webhook event | Kind | `amount` | `sender` |
+| --- | --- | --- | --- |
+| `channel.followed` | `follow` | `null` | `follower` |
+| `channel.subscription.new` | `subscription` | Months (`duration`) | `subscriber` |
+| `channel.subscription.renewal` | `subscription` | Months (`duration`) | `subscriber` |
+| `channel.subscription.gifts` | `gift` | The number of `giftees` | `gifter` |
+| `kicks.gifted` | `kicks` | KICKs (`gift.amount`) | `sender` |
+
+- Anonymity: only `channel.subscription.gifts` has an anonymous `gifter`. Kick then sends null for each field of the gifter, and the event has `anonymous: true` and `sender: null`.
+- A gift bundle is one webhook. The event does not name the people who got a gift.
+- The delivery ID is the header `Kick-Event-Message-Id`. Kick calls it the idempotent key.
+- Permission: the Kick documentation names only `events:subscribe` for webhook events. The connection of today has this scope.
+
+YouTube sends each event as a message of the live chat, in the same page as the chat:
+
+| `snippet.type` | Kind | `amount` | `currency` |
+| --- | --- | --- | --- |
+| `superChatEvent` | `super_chat` | `amountMicros` | The ISO 4217 code |
+| `superStickerEvent` | `super_sticker` | `amountMicros` | The ISO 4217 code |
+| `newSponsorEvent` | `membership` | 1 | `null` |
+| `memberMilestoneChatEvent` | `membership` | Months (`memberMonth`) | `null` |
+| `membershipGiftingEvent` | `gift` | `giftMembershipsCount` | `null` |
+
+- The `sender` is the author of the message (`authorDetails`). YouTube has no anonymous support in chat.
+- A gift bundle is one `membershipGiftingEvent`. Each person who got a gift also makes a `giftMembershipReceivedEvent`, which gives no event.
+- The delivery ID is the ID of the message. A page that comes again has the same IDs.
+- Permission: these messages come with the chat that the server reads today. They need no new scope and no more calls of the API, so they use no more quota.
+- YouTube has no chat message for a new channel subscriber, so the feed has no `follow` from YouTube.
+- `giftEvent` (Jewels) has no kind in the feed. The server does not read it.
+
+### Native polls, predictions, and rewards
+
+StreamBullets has its own polls. It does not read the native polls, predictions, or rewards of a provider, and it asks for no permission for them.
+
+| Provider | Feature | How the provider offers it | StreamBullets reads it |
+| --- | --- | --- | --- |
+| Twitch | Polls | EventSub `channel.poll.begin`, `.progress`, `.end` with `channel:read:polls` | No |
+| Twitch | Predictions | EventSub `channel.prediction.begin`, `.progress`, `.lock`, `.end` with `channel:read:predictions` | No |
+| Twitch | Channel Points rewards | EventSub `channel.channel_points_custom_reward_redemption.add` and `.update` with `channel:read:redemptions` | No |
+| Twitch | Hype Train | EventSub `channel.hype_train.begin`, `.progress`, `.end` with `channel:read:hype_train` | No |
+| YouTube | Live polls | Live chat message of the type `pollEvent` | No |
+| YouTube | Predictions and rewards | The documentation of the API names none | No |
+| Kick | Polls and predictions | The Kick documentation names no event | No |
+| Kick | Channel rewards | Webhook `channel.reward.redemption.updated` | No |
 
 ### Rules for consumers
 
