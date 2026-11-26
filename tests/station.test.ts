@@ -17,7 +17,7 @@ import { buildSigns } from "../app/components/station/signs";
 import { buildAtom } from "../app/components/station/atom";
 import { buildAtmosphere } from "../app/components/station/atmosphere";
 import { poster } from "../app/components/station/poster";
-import { Station } from "../app/components/station/station";
+import { Station, stationHost } from "../app/components/station/station";
 import { installRecordingCanvas, RecordingCanvas } from "./helpers/recording-canvas";
 
 beforeEach((): void => {
@@ -211,4 +211,15 @@ it("renders a static station before JavaScript or WebGL is available", (): void 
   // Phones get the frame of the phone camera.
   expect(html).toMatch(/<source media="\(max-width: 700px\)" srcSet="\/assets\/station-poster-phone\.webp" width="\d+" height="\d+"\/>/);
   expect(html).not.toContain("data-live");
+});
+
+it("skips mounting WebGL for crawlers and keeps the host for browsers", (): void => {
+  const element = {} as HTMLDivElement;
+  vi.stubGlobal("navigator", { userAgent: "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)" });
+  expect(stationHost(element)).toBeNull();
+  vi.stubGlobal("navigator", {
+    userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+  });
+  expect(stationHost(element)).toBe(element);
+  expect(stationHost(null)).toBeNull();
 });

@@ -210,9 +210,9 @@ function furnishings() {
   };
 }
 
-export function createPalette(compact: boolean) {
+export function createPalette(compact: boolean, software = false) {
   // Tiles stay above screen resolution: about 0.85 tiles per model unit.
-  M.setTileResolution(compact ? 256 : 512);
+  M.setTileResolution(software ? 128 : compact ? 256 : 512);
   const tiles: Tiles = {
     teal: M.tealPaint(11),
     steel: M.platformSteel(12),
