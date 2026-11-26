@@ -58761,7 +58761,7 @@
       "relation": "calls",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L194",
+      "source_location": "L195",
       "target": "app_lib_activity_platform",
       "weight": 1.0
     },
@@ -58773,7 +58773,7 @@
       "relation": "calls",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L218",
+      "source_location": "L219",
       "target": "tests_activity_capacity_test_openfleet",
       "weight": 1.0
     },
@@ -58785,7 +58785,7 @@
       "relation": "calls",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L229",
+      "source_location": "L230",
       "target": "tests_activity_capacity_test_sleep",
       "weight": 1.0
     },
@@ -58797,7 +58797,7 @@
       "relation": "calls",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L232",
+      "source_location": "L233",
       "target": "tests_activity_capacity_test_received",
       "weight": 1.0
     },
@@ -58809,7 +58809,7 @@
       "relation": "calls",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L232",
+      "source_location": "L233",
       "target": "tests_activity_capacity_test_settled",
       "weight": 1.0
     },
@@ -58821,7 +58821,7 @@
       "relation": "calls",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L234",
+      "source_location": "L235",
       "target": "tests_activity_capacity_test_missing",
       "weight": 1.0
     },
@@ -58833,7 +58833,7 @@
       "relation": "calls",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L239",
+      "source_location": "L240",
       "target": "tests_activity_capacity_test_pagereports",
       "weight": 1.0
     },
@@ -58845,7 +58845,7 @@
       "relation": "calls",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L252",
+      "source_location": "L253",
       "target": "tests_activity_capacity_test_total",
       "weight": 1.0
     },
@@ -58857,7 +58857,7 @@
       "relation": "calls",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L271",
+      "source_location": "L272",
       "target": "tests_activity_capacity_test_openclients",
       "weight": 1.0
     },
@@ -58869,7 +58869,7 @@
       "relation": "calls",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L271",
+      "source_location": "L272",
       "target": "tests_activity_capacity_test_viralconsumers",
       "weight": 1.0
     },
@@ -58881,7 +58881,7 @@
       "relation": "calls",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L385",
+      "source_location": "L391",
       "target": "tests_activity_capacity_test_pooled",
       "weight": 1.0
     },
@@ -58893,7 +58893,7 @@
       "relation": "calls",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L388",
+      "source_location": "L394",
       "target": "tests_activity_capacity_test_reconnectburst",
       "weight": 1.0
     },
@@ -58905,7 +58905,7 @@
       "relation": "calls",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L456",
+      "source_location": "L462",
       "target": "tests_activity_capacity_test_chatpage",
       "weight": 1.0
     },
@@ -58917,7 +58917,7 @@
       "relation": "calls",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L462",
+      "source_location": "L468",
       "target": "tests_activity_capacity_test_streamid",
       "weight": 1.0
     },
@@ -58929,7 +58929,7 @@
       "relation": "calls",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L488",
+      "source_location": "L494",
       "target": "tests_activity_capacity_test_runtimeresidentbytes",
       "weight": 1.0
     },
@@ -58941,7 +58941,7 @@
       "relation": "calls",
       "source": "tests_activity_capacity_test_chatpage",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L408",
+      "source_location": "L414",
       "target": "tests_activity_capacity_test_streamid",
       "weight": 1.0
     },
@@ -58953,7 +58953,7 @@
       "relation": "calls",
       "source": "tests_activity_capacity_test_chatpage",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L408",
+      "source_location": "L414",
       "target": "tests_helpers_channels_youtubetext",
       "weight": 1.0
     },
@@ -58965,7 +58965,7 @@
       "relation": "calls",
       "source": "tests_activity_capacity_test_openclients",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L138",
+      "source_location": "L139",
       "target": "tests_activity_capacity_test_pooled",
       "weight": 1.0
     },
@@ -58977,7 +58977,7 @@
       "relation": "calls",
       "source": "tests_activity_capacity_test_openfleet",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L151",
+      "source_location": "L152",
       "target": "tests_activity_capacity_test_openclients",
       "weight": 1.0
     },
@@ -58989,7 +58989,7 @@
       "relation": "calls",
       "source": "tests_activity_capacity_test_openfleet",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L153",
+      "source_location": "L154",
       "target": "tests_activity_capacity_test_settled",
       "weight": 1.0
     },
@@ -59001,7 +59001,7 @@
       "relation": "calls",
       "source": "tests_activity_capacity_test_pagereports",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L127",
+      "source_location": "L128",
       "target": "tests_activity_capacity_test_pooled",
       "weight": 1.0
     },
@@ -59013,7 +59013,7 @@
       "relation": "calls",
       "source": "tests_activity_capacity_test_reconnectburst",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L336",
+      "source_location": "L342",
       "target": "tests_activity_capacity_test_pagereports",
       "weight": 1.0
     },
@@ -59025,7 +59025,7 @@
       "relation": "calls",
       "source": "tests_activity_capacity_test_reconnectburst",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L342",
+      "source_location": "L348",
       "target": "tests_activity_capacity_test_total",
       "weight": 1.0
     },
@@ -59037,7 +59037,7 @@
       "relation": "calls",
       "source": "tests_activity_capacity_test_reconnectburst",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L344",
+      "source_location": "L350",
       "target": "tests_activity_capacity_test_sleep",
       "weight": 1.0
     },
@@ -59049,7 +59049,7 @@
       "relation": "calls",
       "source": "tests_activity_capacity_test_reconnectburst",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L355",
+      "source_location": "L361",
       "target": "tests_helpers_activity_harness_percentiles_8796e1235fe6",
       "weight": 1.0
     },
@@ -59061,7 +59061,7 @@
       "relation": "calls",
       "source": "tests_activity_capacity_test_settled",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L92",
+      "source_location": "L93",
       "target": "tests_activity_capacity_test_sleep",
       "weight": 1.0
     },
@@ -72360,7 +72360,7 @@
       "relation": "references",
       "source": "tests_activity_capacity_test_counters",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L417",
+      "source_location": "L423",
       "target": "tests_helpers_activity_worker_ingestreport",
       "weight": 1.0
     },
@@ -72372,7 +72372,7 @@
       "relation": "references",
       "source": "tests_activity_capacity_test_counters",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L418",
+      "source_location": "L424",
       "target": "tests_helpers_activity_worker_workerreport",
       "weight": 1.0
     },
@@ -72384,7 +72384,7 @@
       "relation": "references",
       "source": "tests_activity_capacity_test_fleet",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L67",
+      "source_location": "L68",
       "target": "tests_helpers_activity_harness_page",
       "weight": 1.0
     },
@@ -72396,7 +72396,7 @@
       "relation": "references",
       "source": "tests_activity_capacity_test_fleet",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L68",
+      "source_location": "L69",
       "target": "tests_helpers_activity_harness_activityclient",
       "weight": 1.0
     },
@@ -117523,6 +117523,18 @@
       "source_file": "tests/activity-capacity.test.ts",
       "source_location": "L24",
       "target": "tests_helpers_load_targets_event_latency_p95_ms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_capacity_test",
+      "source_file": "tests/activity-capacity.test.ts",
+      "source_location": "L24",
+      "target": "tests_helpers_load_targets_fleet_reconnect_snapshot_p95_ms",
       "weight": 1.0
     },
     {
@@ -222129,7 +222141,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L433",
+      "source_location": "L434",
       "target": "docs_channel_connections_token_encryption_and_rotation",
       "weight": 1.0
     },
@@ -222140,7 +222152,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L487",
+      "source_location": "L488",
       "target": "docs_channel_connections_disconnect",
       "weight": 1.0
     },
@@ -222162,7 +222174,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L622",
+      "source_location": "L623",
       "target": "docs_channel_connections_logs_and_alerts",
       "weight": 1.0
     },
@@ -222173,7 +222185,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L652",
+      "source_location": "L653",
       "target": "docs_channel_connections_overlay_key",
       "weight": 1.0
     },
@@ -222184,7 +222196,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L667",
+      "source_location": "L668",
       "target": "docs_channel_connections_setup",
       "weight": 1.0
     },
@@ -222195,7 +222207,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L695",
+      "source_location": "L696",
       "target": "docs_channel_connections_runbook",
       "weight": 1.0
     },
@@ -222206,7 +222218,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L720",
+      "source_location": "L721",
       "target": "docs_channel_connections_turn_the_feature_off",
       "weight": 1.0
     },
@@ -222217,7 +222229,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L758",
+      "source_location": "L759",
       "target": "docs_channel_connections_rollback",
       "weight": 1.0
     },
@@ -222228,7 +222240,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L769",
+      "source_location": "L770",
       "target": "docs_channel_connections_threat_model",
       "weight": 1.0
     },
@@ -222239,7 +222251,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L830",
+      "source_location": "L831",
       "target": "docs_channel_connections_stored_youtube_data",
       "weight": 1.0
     },
@@ -222250,7 +222262,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L869",
+      "source_location": "L870",
       "target": "docs_channel_connections_facts_not_checked",
       "weight": 1.0
     },
@@ -222261,7 +222273,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L513",
+      "source_location": "L514",
       "target": "docs_channel_connections_provider_subscriptions",
       "weight": 1.0
     },
@@ -222272,7 +222284,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L526",
+      "source_location": "L527",
       "target": "docs_channel_connections_subscription_repair",
       "weight": 1.0
     },
@@ -222283,7 +222295,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L574",
+      "source_location": "L575",
       "target": "docs_channel_connections_refused_webhooks",
       "weight": 1.0
     },
@@ -222294,7 +222306,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L598",
+      "source_location": "L599",
       "target": "docs_channel_connections_account_deletion",
       "weight": 1.0
     },
@@ -222305,7 +222317,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L606",
+      "source_location": "L607",
       "target": "docs_channel_connections_callback_failures",
       "weight": 1.0
     },
@@ -222371,7 +222383,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L771",
+      "source_location": "L772",
       "target": "docs_channel_connections_assets",
       "weight": 1.0
     },
@@ -222382,7 +222394,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L779",
+      "source_location": "L780",
       "target": "docs_channel_connections_actors",
       "weight": 1.0
     },
@@ -222393,7 +222405,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L787",
+      "source_location": "L788",
       "target": "docs_channel_connections_threats_and_mitigations",
       "weight": 1.0
     },
@@ -222404,7 +222416,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L816",
+      "source_location": "L817",
       "target": "docs_channel_connections_residual_risks",
       "weight": 1.0
     },
@@ -222415,7 +222427,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_token_encryption_and_rotation",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L476",
+      "source_location": "L477",
       "target": "docs_channel_connections_refresh",
       "weight": 1.0
     },
@@ -222844,8 +222856,8 @@
       "relation": "contains",
       "source": "docs_live_room_capacity_live_room_capacity",
       "source_file": "docs/live-room-capacity.md",
-      "source_location": "L108",
-      "target": "docs_live_room_capacity_recovery_api",
+      "source_location": "L102",
+      "target": "docs_live_room_capacity_proposed_targets",
       "weight": 1.0
     },
     {
@@ -222855,29 +222867,7 @@
       "relation": "contains",
       "source": "docs_live_room_capacity_live_room_capacity",
       "source_file": "docs/live-room-capacity.md",
-      "source_location": "L28",
-      "target": "docs_live_room_capacity_workload",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "docs_live_room_capacity_live_room_capacity",
-      "source_file": "docs/live-room-capacity.md",
-      "source_location": "L46",
-      "target": "docs_live_room_capacity_results_and_limits",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "docs_live_room_capacity_live_room_capacity",
-      "source_file": "docs/live-room-capacity.md",
-      "source_location": "L8",
+      "source_location": "L135",
       "target": "docs_live_room_capacity_reproduce_locally",
       "weight": 1.0
     },
@@ -222888,7 +222878,51 @@
       "relation": "contains",
       "source": "docs_live_room_capacity_live_room_capacity",
       "source_file": "docs/live-room-capacity.md",
-      "source_location": "L85",
+      "source_location": "L155",
+      "target": "docs_live_room_capacity_workload",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_live_room_capacity_live_room_capacity",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L173",
+      "target": "docs_live_room_capacity_results_and_limits",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_live_room_capacity_live_room_capacity",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L212",
+      "target": "docs_live_room_capacity_activity_load_tests",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_live_room_capacity_live_room_capacity",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L249",
+      "target": "docs_live_room_capacity_activity_results_and_limits",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_live_room_capacity_live_room_capacity",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L303",
       "target": "docs_live_room_capacity_bounded_reliability_change",
       "weight": 1.0
     },
@@ -222899,8 +222933,41 @@
       "relation": "contains",
       "source": "docs_live_room_capacity_live_room_capacity",
       "source_file": "docs/live-room-capacity.md",
-      "source_location": "L96",
+      "source_location": "L314",
       "target": "docs_live_room_capacity_remaining_bottlenecks",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_live_room_capacity_live_room_capacity",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L326",
+      "target": "docs_live_room_capacity_recovery_api",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_live_room_capacity_live_room_capacity",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L8",
+      "target": "docs_live_room_capacity_load_model",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_live_room_capacity_load_model",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L83",
+      "target": "docs_live_room_capacity_cost_for_one_live_channel_hour",
       "weight": 1.0
     },
     {
@@ -224164,7 +224231,7 @@
       "relation": "contains",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L101",
+      "source_location": "L102",
       "target": "tests_activity_capacity_test_pooled",
       "weight": 1.0
     },
@@ -224175,7 +224242,7 @@
       "relation": "contains",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L114",
+      "source_location": "L115",
       "target": "tests_activity_capacity_test_received",
       "weight": 1.0
     },
@@ -224186,7 +224253,7 @@
       "relation": "contains",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L122",
+      "source_location": "L123",
       "target": "tests_activity_capacity_test_missing",
       "weight": 1.0
     },
@@ -224197,7 +224264,7 @@
       "relation": "contains",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L126",
+      "source_location": "L127",
       "target": "tests_activity_capacity_test_pagereports",
       "weight": 1.0
     },
@@ -224208,7 +224275,7 @@
       "relation": "contains",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L130",
+      "source_location": "L131",
       "target": "tests_activity_capacity_test_counter",
       "weight": 1.0
     },
@@ -224219,7 +224286,7 @@
       "relation": "contains",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L132",
+      "source_location": "L133",
       "target": "tests_activity_capacity_test_total",
       "weight": 1.0
     },
@@ -224230,7 +224297,7 @@
       "relation": "contains",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L137",
+      "source_location": "L138",
       "target": "tests_activity_capacity_test_openclients",
       "weight": 1.0
     },
@@ -224241,7 +224308,7 @@
       "relation": "contains",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L145",
+      "source_location": "L146",
       "target": "tests_activity_capacity_test_openfleet",
       "weight": 1.0
     },
@@ -224252,7 +224319,7 @@
       "relation": "contains",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L159",
+      "source_location": "L160",
       "target": "tests_activity_capacity_test_viralconsumers",
       "weight": 1.0
     },
@@ -224263,7 +224330,7 @@
       "relation": "contains",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L170",
+      "source_location": "L171",
       "target": "tests_activity_capacity_test_runtimeresidentbytes",
       "weight": 1.0
     },
@@ -224274,7 +224341,7 @@
       "relation": "contains",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L335",
+      "source_location": "L336",
       "target": "tests_activity_capacity_test_reconnectburst",
       "weight": 1.0
     },
@@ -224285,7 +224352,7 @@
       "relation": "contains",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L396",
+      "source_location": "L402",
       "target": "tests_activity_capacity_test_streamid",
       "weight": 1.0
     },
@@ -224296,7 +224363,7 @@
       "relation": "contains",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L401",
+      "source_location": "L407",
       "target": "tests_activity_capacity_test_chatpage",
       "weight": 1.0
     },
@@ -224307,7 +224374,7 @@
       "relation": "contains",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L416",
+      "source_location": "L422",
       "target": "tests_activity_capacity_test_counters",
       "weight": 1.0
     },
@@ -224318,7 +224385,7 @@
       "relation": "contains",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L66",
+      "source_location": "L67",
       "target": "tests_activity_capacity_test_fleet",
       "weight": 1.0
     },
@@ -224329,7 +224396,7 @@
       "relation": "contains",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L77",
+      "source_location": "L78",
       "target": "tests_activity_capacity_test_reports",
       "weight": 1.0
     },
@@ -224340,7 +224407,7 @@
       "relation": "contains",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L79",
+      "source_location": "L80",
       "target": "tests_activity_capacity_test_sleep",
       "weight": 1.0
     },
@@ -224351,7 +224418,7 @@
       "relation": "contains",
       "source": "tests_activity_capacity_test",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L86",
+      "source_location": "L87",
       "target": "tests_activity_capacity_test_settled",
       "weight": 1.0
     },
@@ -230182,7 +230249,7 @@
       "source": "tests_helpers_load_targets",
       "source_file": "tests/helpers/load-targets.ts",
       "source_location": "L46",
-      "target": "tests_helpers_load_targets_provider_requests_per_reconnect",
+      "target": "tests_helpers_load_targets_fleet_reconnect_snapshot_p95_ms",
       "weight": 1.0
     },
     {
@@ -230193,6 +230260,17 @@
       "source": "tests_helpers_load_targets",
       "source_file": "tests/helpers/load-targets.ts",
       "source_location": "L49",
+      "target": "tests_helpers_load_targets_provider_requests_per_reconnect",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_helpers_load_targets",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L52",
       "target": "tests_helpers_load_targets_youtube_units_per_live_hour",
       "weight": 1.0
     },
@@ -230203,7 +230281,7 @@
       "relation": "contains",
       "source": "tests_helpers_load_targets",
       "source_file": "tests/helpers/load-targets.ts",
-      "source_location": "L55",
+      "source_location": "L58",
       "target": "tests_helpers_load_targets_cost_drivers_per_live_hour",
       "weight": 1.0
     },
@@ -239497,6 +239575,17 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "references",
+      "source": "docs_channel_connections",
+      "source_file": "docs/channel-connections.md",
+      "source_location": "L411",
+      "target": "docs_live_room_capacity",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "references",
       "source": "docs_characters",
       "source_file": "docs/characters.md",
       "source_location": "L140",
@@ -239534,6 +239623,17 @@
       "source_file": "docs/live-room-capacity.md",
       "source_location": "L5",
       "target": "docs_streamer_tools",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "references",
+      "source": "docs_live_room_capacity",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L77",
+      "target": "docs_channel_connections",
       "weight": 1.0
     },
     {
@@ -243819,7 +243919,7 @@
       "relation": "references",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L492",
+      "source_location": "L493",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -243843,7 +243943,7 @@
       "relation": "references",
       "source": "docs_channel_connections_refresh",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L478",
+      "source_location": "L479",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -243855,7 +243955,7 @@
       "relation": "references",
       "source": "docs_channel_connections_rollback",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L760",
+      "source_location": "L761",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -243879,7 +243979,7 @@
       "relation": "references",
       "source": "docs_channel_connections_setup",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L686",
+      "source_location": "L687",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -243891,7 +243991,7 @@
       "relation": "references",
       "source": "docs_channel_connections_threats_and_mitigations",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L799",
+      "source_location": "L800",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -243904,6 +244004,18 @@
       "source": "docs_characters_server_host",
       "source_file": "docs/characters.md",
       "source_location": "L291",
+      "target": "app_server_channel_ingest_channelingest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "context": "ChannelIngest",
+      "relation": "references",
+      "source": "docs_live_room_capacity_activity_load_tests",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L222",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -244009,9 +244121,21 @@
       "confidence_score": 0.95,
       "context": "PollRoom",
       "relation": "references",
+      "source": "docs_live_room_capacity_load_model",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L79",
+      "target": "app_server_poll_room_pollroom",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "context": "PollRoom",
+      "relation": "references",
       "source": "docs_live_room_capacity_reproduce_locally",
       "source_file": "docs/live-room-capacity.md",
-      "source_location": "L17",
+      "source_location": "L144",
       "target": "app_server_poll_room_pollroom",
       "weight": 1.0
     },
@@ -251698,7 +251822,7 @@
       "label": "Counter",
       "norm_label": "counter",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L130"
+      "source_location": "L131"
     },
     {
       "_callable": true,
@@ -251710,7 +251834,7 @@
       "label": "Counters",
       "norm_label": "counters",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L416"
+      "source_location": "L422"
     },
     {
       "_callable": true,
@@ -251722,7 +251846,7 @@
       "label": "Fleet",
       "norm_label": "fleet",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L66"
+      "source_location": "L67"
     },
     {
       "_callable": true,
@@ -280532,7 +280656,7 @@
       "label": "chatPage()",
       "norm_label": "chatpage()",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L401"
+      "source_location": "L407"
     },
     {
       "_callable": true,
@@ -280543,7 +280667,7 @@
       "label": "missing()",
       "norm_label": "missing()",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L122"
+      "source_location": "L123"
     },
     {
       "_callable": true,
@@ -280554,7 +280678,7 @@
       "label": "openClients()",
       "norm_label": "openclients()",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L137"
+      "source_location": "L138"
     },
     {
       "_callable": true,
@@ -280565,7 +280689,7 @@
       "label": "openFleet()",
       "norm_label": "openfleet()",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L145"
+      "source_location": "L146"
     },
     {
       "_callable": true,
@@ -280576,7 +280700,7 @@
       "label": "pageReports()",
       "norm_label": "pagereports()",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L126"
+      "source_location": "L127"
     },
     {
       "_callable": true,
@@ -280587,7 +280711,7 @@
       "label": "pooled()",
       "norm_label": "pooled()",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L101"
+      "source_location": "L102"
     },
     {
       "_callable": true,
@@ -280598,7 +280722,7 @@
       "label": "received()",
       "norm_label": "received()",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L114"
+      "source_location": "L115"
     },
     {
       "_callable": true,
@@ -280609,7 +280733,7 @@
       "label": "reconnectBurst()",
       "norm_label": "reconnectburst()",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L335"
+      "source_location": "L336"
     },
     {
       "_callable": true,
@@ -280620,7 +280744,7 @@
       "label": "runtimeResidentBytes()",
       "norm_label": "runtimeresidentbytes()",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L170"
+      "source_location": "L171"
     },
     {
       "_callable": true,
@@ -280631,7 +280755,7 @@
       "label": "settled()",
       "norm_label": "settled()",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L86"
+      "source_location": "L87"
     },
     {
       "_callable": true,
@@ -280642,7 +280766,7 @@
       "label": "sleep()",
       "norm_label": "sleep()",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L79"
+      "source_location": "L80"
     },
     {
       "_callable": true,
@@ -280653,7 +280777,7 @@
       "label": "streamId()",
       "norm_label": "streamid()",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L396"
+      "source_location": "L402"
     },
     {
       "_callable": true,
@@ -280664,7 +280788,7 @@
       "label": "total()",
       "norm_label": "total()",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L132"
+      "source_location": "L133"
     },
     {
       "_callable": true,
@@ -280675,7 +280799,7 @@
       "label": "viralConsumers()",
       "norm_label": "viralconsumers()",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L159"
+      "source_location": "L160"
     },
     {
       "_callable": true,
@@ -300972,7 +301096,7 @@
       "label": "reports",
       "norm_label": "reports",
       "source_file": "tests/activity-capacity.test.ts",
-      "source_location": "L77"
+      "source_location": "L78"
     },
     {
       "_origin": "ast",
@@ -304235,7 +304359,7 @@
       "label": "COST_DRIVERS_PER_LIVE_HOUR",
       "norm_label": "cost_drivers_per_live_hour",
       "source_file": "tests/helpers/load-targets.ts",
-      "source_location": "L55"
+      "source_location": "L58"
     },
     {
       "_origin": "ast",
@@ -304256,6 +304380,16 @@
       "norm_label": "event_latency_p95_ms",
       "source_file": "tests/helpers/load-targets.ts",
       "source_location": "L13"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_helpers_load_targets_fleet_reconnect_snapshot_p95_ms",
+      "label": "FLEET_RECONNECT_SNAPSHOT_P95_MS",
+      "norm_label": "fleet_reconnect_snapshot_p95_ms",
+      "source_file": "tests/helpers/load-targets.ts",
+      "source_location": "L46"
     },
     {
       "_origin": "ast",
@@ -304295,7 +304429,7 @@
       "label": "PROVIDER_REQUESTS_PER_RECONNECT",
       "norm_label": "provider_requests_per_reconnect",
       "source_file": "tests/helpers/load-targets.ts",
-      "source_location": "L46"
+      "source_location": "L49"
     },
     {
       "_origin": "ast",
@@ -304345,7 +304479,7 @@
       "label": "YOUTUBE_UNITS_PER_LIVE_HOUR",
       "norm_label": "youtube_units_per_live_hour",
       "source_file": "tests/helpers/load-targets.ts",
-      "source_location": "L49"
+      "source_location": "L52"
     },
     {
       "_origin": "ast",
@@ -306534,7 +306668,7 @@
       "node_kind": "heading",
       "norm_label": "account deletion",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L598"
+      "source_location": "L599"
     },
     {
       "_origin": "ast",
@@ -306545,7 +306679,7 @@
       "node_kind": "heading",
       "norm_label": "actors",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L779"
+      "source_location": "L780"
     },
     {
       "_origin": "ast",
@@ -306556,7 +306690,7 @@
       "node_kind": "heading",
       "norm_label": "assets",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L771"
+      "source_location": "L772"
     },
     {
       "_origin": "ast",
@@ -306567,7 +306701,7 @@
       "node_kind": "heading",
       "norm_label": "callback failures",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L606"
+      "source_location": "L607"
     },
     {
       "_origin": "ast",
@@ -306622,7 +306756,7 @@
       "node_kind": "heading",
       "norm_label": "disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L487"
+      "source_location": "L488"
     },
     {
       "_origin": "ast",
@@ -306644,7 +306778,7 @@
       "node_kind": "heading",
       "norm_label": "facts not checked",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L869"
+      "source_location": "L870"
     },
     {
       "_origin": "ast",
@@ -306677,7 +306811,7 @@
       "node_kind": "heading",
       "norm_label": "logs and alerts",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L622"
+      "source_location": "L623"
     },
     {
       "_origin": "ast",
@@ -306699,7 +306833,7 @@
       "node_kind": "heading",
       "norm_label": "overlay key",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L652"
+      "source_location": "L653"
     },
     {
       "_origin": "ast",
@@ -306721,7 +306855,7 @@
       "node_kind": "heading",
       "norm_label": "provider subscriptions",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L513"
+      "source_location": "L514"
     },
     {
       "_origin": "ast",
@@ -306732,7 +306866,7 @@
       "node_kind": "heading",
       "norm_label": "refresh",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L476"
+      "source_location": "L477"
     },
     {
       "_origin": "ast",
@@ -306743,7 +306877,7 @@
       "node_kind": "heading",
       "norm_label": "refused webhooks",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L574"
+      "source_location": "L575"
     },
     {
       "_origin": "ast",
@@ -306754,7 +306888,7 @@
       "node_kind": "heading",
       "norm_label": "residual risks",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L816"
+      "source_location": "L817"
     },
     {
       "_origin": "ast",
@@ -306765,7 +306899,7 @@
       "node_kind": "heading",
       "norm_label": "rollback",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L758"
+      "source_location": "L759"
     },
     {
       "_origin": "ast",
@@ -306787,7 +306921,7 @@
       "node_kind": "heading",
       "norm_label": "runbook",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L695"
+      "source_location": "L696"
     },
     {
       "_origin": "ast",
@@ -306809,7 +306943,7 @@
       "node_kind": "heading",
       "norm_label": "setup",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L667"
+      "source_location": "L668"
     },
     {
       "_origin": "ast",
@@ -306820,7 +306954,7 @@
       "node_kind": "heading",
       "norm_label": "stored youtube data",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L830"
+      "source_location": "L831"
     },
     {
       "_origin": "ast",
@@ -306831,7 +306965,7 @@
       "node_kind": "heading",
       "norm_label": "subscription repair",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L526"
+      "source_location": "L527"
     },
     {
       "_origin": "ast",
@@ -306853,7 +306987,7 @@
       "node_kind": "heading",
       "norm_label": "threat model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L769"
+      "source_location": "L770"
     },
     {
       "_origin": "ast",
@@ -306864,7 +306998,7 @@
       "node_kind": "heading",
       "norm_label": "threats and mitigations",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L787"
+      "source_location": "L788"
     },
     {
       "_origin": "ast",
@@ -306875,7 +307009,7 @@
       "node_kind": "heading",
       "norm_label": "token encryption and rotation",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L433"
+      "source_location": "L434"
     },
     {
       "_origin": "ast",
@@ -306886,7 +307020,7 @@
       "node_kind": "heading",
       "norm_label": "turn the feature off",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L720"
+      "source_location": "L721"
     },
     {
       "_origin": "ast",
@@ -307365,12 +307499,45 @@
       "_origin": "ast",
       "community": null,
       "file_type": "document",
+      "id": "docs_live_room_capacity_activity_load_tests",
+      "label": "Activity load tests",
+      "node_kind": "heading",
+      "norm_label": "activity load tests",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L212"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_live_room_capacity_activity_results_and_limits",
+      "label": "Activity results and limits",
+      "node_kind": "heading",
+      "norm_label": "activity results and limits",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L249"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
       "id": "docs_live_room_capacity_bounded_reliability_change",
       "label": "Bounded reliability change",
       "node_kind": "heading",
       "norm_label": "bounded reliability change",
       "source_file": "docs/live-room-capacity.md",
-      "source_location": "L85"
+      "source_location": "L303"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_live_room_capacity_cost_for_one_live_channel_hour",
+      "label": "Cost for one live channel-hour",
+      "node_kind": "heading",
+      "norm_label": "cost for one live channel-hour",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L83"
     },
     {
       "_origin": "ast",
@@ -307387,12 +307554,34 @@
       "_origin": "ast",
       "community": null,
       "file_type": "document",
+      "id": "docs_live_room_capacity_load_model",
+      "label": "Load model",
+      "node_kind": "heading",
+      "norm_label": "load model",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L8"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_live_room_capacity_proposed_targets",
+      "label": "Proposed targets",
+      "node_kind": "heading",
+      "norm_label": "proposed targets",
+      "source_file": "docs/live-room-capacity.md",
+      "source_location": "L102"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
       "id": "docs_live_room_capacity_recovery_api",
       "label": "Recovery API",
       "node_kind": "heading",
       "norm_label": "recovery api",
       "source_file": "docs/live-room-capacity.md",
-      "source_location": "L108"
+      "source_location": "L326"
     },
     {
       "_origin": "ast",
@@ -307403,7 +307592,7 @@
       "node_kind": "heading",
       "norm_label": "remaining bottlenecks",
       "source_file": "docs/live-room-capacity.md",
-      "source_location": "L96"
+      "source_location": "L314"
     },
     {
       "_origin": "ast",
@@ -307414,7 +307603,7 @@
       "node_kind": "heading",
       "norm_label": "reproduce locally",
       "source_file": "docs/live-room-capacity.md",
-      "source_location": "L8"
+      "source_location": "L135"
     },
     {
       "_origin": "ast",
@@ -307425,7 +307614,7 @@
       "node_kind": "heading",
       "norm_label": "results and limits",
       "source_file": "docs/live-room-capacity.md",
-      "source_location": "L46"
+      "source_location": "L173"
     },
     {
       "_origin": "ast",
@@ -307436,7 +307625,7 @@
       "node_kind": "heading",
       "norm_label": "workload",
       "source_file": "docs/live-room-capacity.md",
-      "source_location": "L28"
+      "source_location": "L155"
     },
     {
       "_origin": "ast",

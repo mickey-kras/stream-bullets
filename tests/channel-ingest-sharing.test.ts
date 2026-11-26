@@ -218,13 +218,13 @@ describe("one provider ingestion for each connected channel", (): void => {
     expect(subscriptions).toHaveLength(requiredSubscriptions("twitch").length + requiredSubscriptions("kick").length);
     const owner = await listen("owner");
     const one = await live(period);
-    // One consumer: the object only reads the subscription lists, once in each check interval.
-    expect(one.requests.length).toBeGreaterThan(0);
-    expect(
-      one.requests.every(
-        (call: ProviderCall): boolean => call.method === "GET" || call.url.pathname.endsWith("/token"),
-      ),
-    ).toBe(true);
+    // One consumer: one check of each channel in each interval. A check reads the list of the provider.
+    const check = [
+      "POST id.twitch.tv/oauth2/token",
+      "GET api.twitch.tv/helix/eventsub/subscriptions",
+      "GET api.kick.com/public/v1/events/subscriptions",
+    ];
+    expect(paths(one.requests)).toEqual(Array.from({ length: period / RECONCILE_INTERVAL_MS }, () => check).flat());
     const from = fake.calls.length;
     const others = [await listen("dock"), await listen("horizontal"), await listen("vertical")];
     expect(fake.calls).toHaveLength(from);

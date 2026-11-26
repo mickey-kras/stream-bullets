@@ -408,6 +408,7 @@ follows this reset, also across summer time.
 | Budget for all pages | 9,000 each day: about 5 hours of live chat at the floor |
 
 YouTube can ask for a longer interval with `pollingIntervalMillis`. Then a page uses fewer units.
+The [load model](live-room-capacity.md#load-model) compares this quota with one million registered streamers.
 
 The floor is 20 seconds after a page without items. It is 10 seconds again after a page with items.
 The floor is also 20 seconds after the feed spends 80% of the page budget or of the shared budget.

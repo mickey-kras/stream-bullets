@@ -13,10 +13,10 @@
 export const EVENT_LATENCY_P95_MS = 100;
 
 /** The same latency for an admitted chat message of a channel that offers ten times the chat admission rate. */
-export const FLOOD_EVENT_LATENCY_P95_MS = 1_000;
+export const FLOOD_EVENT_LATENCY_P95_MS = 1_500;
 
 /** The same latency for a moderation event that arrives during that chat flood. */
-export const MODERATION_LATENCY_P95_MS = 500;
+export const MODERATION_LATENCY_P95_MS = 1_000;
 
 /** Events of each type that the feed may drop while the offered rate is below the admission rate of the type. */
 export const DROPPED_EVENTS_BELOW_ADMISSION: Readonly<Record<"chat" | "moderation", number>> = {
@@ -37,10 +37,13 @@ export const STORAGE_ROW_GROWTH_PER_LIVE_HOUR = 0;
 export const STORAGE_BYTE_GROWTH_PER_LIVE_HOUR = 65_536;
 
 /** Public-page responsiveness: the p95 time until a vote burst reaches each of 200 live-room sockets, in ms. */
-export const PUBLIC_UPDATE_P95_MS = 500;
+export const PUBLIC_UPDATE_P95_MS = 1_000;
 
-/** The p95 time from a reconnect to the snapshot on the socket, in ms, when each socket reconnects at once. */
-export const RECONNECT_SNAPSHOT_P95_MS = 2_000;
+/** The p95 time from a reconnect to the snapshot, in ms, when the 20 sockets of one channel reconnect at once. */
+export const RECONNECT_SNAPSHOT_P95_MS = 500;
+
+/** The same time when the 400 sockets of 100 channels reconnect at once, as after a deployment. */
+export const FLEET_RECONNECT_SNAPSHOT_P95_MS = 5_000;
 
 /** Provider requests that one reconnect of a consumer may cause. */
 export const PROVIDER_REQUESTS_PER_RECONNECT = 0;

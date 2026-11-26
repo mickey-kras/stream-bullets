@@ -25,6 +25,7 @@ import {
   COST_DRIVERS_PER_LIVE_HOUR,
   DROPPED_EVENTS_BELOW_ADMISSION,
   EVENT_LATENCY_P95_MS,
+  FLEET_RECONNECT_SNAPSHOT_P95_MS,
   FLOOD_EVENT_LATENCY_P95_MS,
   LOST_ADMITTED_EVENTS,
   MODERATION_LATENCY_P95_MS,
@@ -332,7 +333,12 @@ it("bounds one viral channel and never holds moderation back", {
 });
 
 /** Closes the sockets of the pages, opens them again at once, and checks one snapshot and no provider request each. */
-async function reconnectBurst(scenario: string, pages: readonly Page[], consumers: readonly Consumer[]): Promise<void> {
+async function reconnectBurst(
+  scenario: string,
+  pages: readonly Page[],
+  consumers: readonly Consumer[],
+  targetP95Ms: number,
+): Promise<void> {
   const before: IngestReport[] = await pageReports(pages);
   // The snapshot of a page has each message that its object stores.
   const stored = new Map<Page, number>(pages.map((page: Page, index: number) => [page, before[index].events]));
@@ -370,7 +376,7 @@ async function reconnectBurst(scenario: string, pages: readonly Page[], consumer
     expect(client.snapshots[0].events).toHaveLength(stored.get(client.page) ?? -1);
   }
   expect(providerRequests / clients.length).toBeLessThanOrEqual(PROVIDER_REQUESTS_PER_RECONNECT);
-  expect(snapshot.p95).toBeLessThanOrEqual(RECONNECT_SNAPSHOT_P95_MS);
+  expect(snapshot.p95).toBeLessThanOrEqual(targetP95Ms);
   for (const page of pages) harness.closeClients(page);
 }
 
@@ -385,11 +391,11 @@ it("answers a reconnect burst with one snapshot each and no provider request", {
   await pooled(SNAPSHOT_SIZE + 20, 20, (index: number): Promise<number> => harness.chat(viral, `burst-${index}`));
   await settled((): number => received(clients));
   expect((await harness.report(viral)).events).toBe(SNAPSHOT_SIZE);
-  await reconnectBurst("reconnect-burst-viral-channel", [viral], viralConsumers());
+  await reconnectBurst("reconnect-burst-viral-channel", [viral], viralConsumers(), RECONNECT_SNAPSHOT_P95_MS);
   // A deployment closes the sockets of each live channel at once.
   const { pages }: Fleet = await openFleet();
   fleet = null;
-  await reconnectBurst("reconnect-burst-all-channels", pages, CONSUMERS);
+  await reconnectBurst("reconnect-burst-all-channels", pages, CONSUMERS, FLEET_RECONNECT_SNAPSHOT_P95_MS);
 });
 
 /** A message id of the stream. Each id has the same length, so the stored bytes of each hour compare. */
