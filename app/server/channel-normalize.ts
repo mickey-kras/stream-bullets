@@ -32,8 +32,8 @@ export function cleanText(value: string, max: number = MAX_TEXT_LENGTH): string 
   return text;
 }
 
-const id = z.union([z.string().regex(/^[\w:.-]{1,128}$/), z.number().int().nonnegative()]).transform(String);
-const name = z
+export const id = z.union([z.string().regex(/^[\w:.-]{1,128}$/), z.number().int().nonnegative()]).transform(String);
+export const name = z
   .string()
   .max(200)
   .transform((value: string): string => cleanText(value, 100));
