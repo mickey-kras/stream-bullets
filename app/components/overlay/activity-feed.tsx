@@ -116,16 +116,25 @@ export function useActivityFeed(
     if (!on) return;
     const url: string = activityUrl(globalThis.location.origin, handle, key, { characters });
     const listeners: Set<Listener> = listenersRef.current;
-    // A new socket sends its own snapshot: the history of the socket before it tells nothing.
-    historyRef.current = emptyHistory();
-    return acquire(
+    const release = acquire(
       url,
       (message: ActivityMessage): void => {
         historyRef.current = keepHistory(historyRef.current, message);
         for (const listener of Array.from(listeners)) listener(message);
       },
-      setStatus,
+      (next: ActivitySocketStatus): void => {
+        // A socket that is not live misses moderation. Its history is thus not the truth for a late reader, and
+        // the next snapshot of the socket starts a new history.
+        if (next !== "live") historyRef.current = emptyHistory();
+        setStatus(next);
+      },
     );
+    // The history goes with its socket, in the cleanup. React runs each cleanup of a change before the effects of
+    // the readers that mount in that change, so a new reader never gets the chat of a closed socket.
+    return (): void => {
+      release();
+      historyRef.current = emptyHistory();
+    };
   }, [handle, key, on, characters]);
   const subscribe = useMemo(
     () =>

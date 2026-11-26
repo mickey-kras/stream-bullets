@@ -10029,7 +10029,7 @@
       "relation": "calls",
       "source": "app_components_overlay_activity_feed_useactivityfeed",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L121",
+      "source_location": "L119",
       "target": "app_components_overlay_activity_feed_acquire",
       "weight": 1.0
     },
@@ -10041,7 +10041,7 @@
       "relation": "calls",
       "source": "app_components_overlay_activity_feed_useactivityfeed",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L124",
+      "source_location": "L122",
       "target": "app_lib_activity_history_keephistory",
       "weight": 1.0
     },
@@ -10053,7 +10053,7 @@
       "relation": "calls",
       "source": "app_components_overlay_activity_feed_useactivityfeed",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L135",
+      "source_location": "L144",
       "target": "app_lib_activity_history_historysnapshot",
       "weight": 1.0
     },
@@ -62193,7 +62193,7 @@
       "relation": "calls",
       "source": "tests_e2e_overlay_composition_spec",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L1046",
+      "source_location": "L1078",
       "target": "tests_e2e_overlay_composition_spec_settestend",
       "weight": 1.0
     },
@@ -62409,7 +62409,7 @@
       "relation": "calls",
       "source": "tests_e2e_overlay_composition_spec_settestend",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L1002",
+      "source_location": "L1034",
       "target": "tests_e2e_fixtures_runsql",
       "weight": 1.0
     },
@@ -226155,17 +226155,6 @@
       "relation": "contains",
       "source": "tests_e2e_overlay_composition_spec",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L1001",
-      "target": "tests_e2e_overlay_composition_spec_settestend",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "tests_e2e_overlay_composition_spec",
-      "source_file": "tests/e2e/overlay-composition.spec.ts",
       "source_location": "L101",
       "target": "tests_e2e_overlay_composition_spec_chatat",
       "weight": 1.0
@@ -226179,6 +226168,17 @@
       "source_file": "tests/e2e/overlay-composition.spec.ts",
       "source_location": "L102",
       "target": "tests_e2e_overlay_composition_spec_default_chat",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_overlay_composition_spec",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L1033",
+      "target": "tests_e2e_overlay_composition_spec_settestend",
       "weight": 1.0
     },
     {
@@ -280968,7 +280968,7 @@
       "label": "setTestEnd()",
       "norm_label": "settestend()",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L1001"
+      "source_location": "L1033"
     },
     {
       "_callable": true,
