@@ -247,7 +247,7 @@ const supportSchema: z.ZodType<ActivitySupport> = z
 
 /** True for a support event. */
 export function isSupport(event: ActivityEvent): event is ActivitySupport {
-  return SUPPORT_KINDS.some((kind: SupportKind): boolean => kind === event.kind);
+  return (SUPPORT_KINDS as readonly string[]).includes(event.kind);
 }
 
 export const activityEventSchema: z.ZodType<ActivityEvent> = z.union([
@@ -368,8 +368,8 @@ export function supportTotals(events: readonly ActivitySupport[]): SupportTotals
     counted.add(event.id);
     totals.events[event.kind] = (totals.events[event.kind] ?? 0) + 1;
     if (event.amount === null) continue;
-    if (event.currency !== null) totals.money[event.currency] = (totals.money[event.currency] ?? 0) + event.amount;
-    else totals.amounts[event.kind] = (totals.amounts[event.kind] ?? 0) + event.amount;
+    if (event.currency === null) totals.amounts[event.kind] = (totals.amounts[event.kind] ?? 0) + event.amount;
+    else totals.money[event.currency] = (totals.money[event.currency] ?? 0) + event.amount;
   }
   return totals;
 }

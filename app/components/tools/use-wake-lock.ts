@@ -47,7 +47,7 @@ export function useWakeLock(active: boolean): WakeLockState {
     return (): void => {
       ended = true;
       document.removeEventListener("visibilitychange", shown);
-      void sentinel?.release();
+      sentinel?.release().catch(() => undefined);
     };
   }, [active, supported]);
   if (!supported) return "unsupported";

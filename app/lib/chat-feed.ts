@@ -213,7 +213,6 @@ function hidden(chat: ActivityChat, options: ChatOptions): boolean {
   return options.hideCommands && isChatCommand(chat.text);
 }
 
-/** Applies a turned-on hideCommands to shown and queued rows (see ChatAction `filter`). */
 /** The rows that `gone` matches leave the screen, and the waiting rows that it matches never enter. */
 function dismiss(state: ChatState, gone: (row: ChatRow) => boolean, now: number): ChatState {
   let changed = false;
@@ -227,8 +226,9 @@ function dismiss(state: ChatState, gone: (row: ChatRow) => boolean, now: number)
   return changed ? { ...state, rows, pending } : state;
 }
 
-function filterCommands(state: ChatState, hideCommands: boolean, now: number): ChatState {
-  return hideCommands ? dismiss(state, (row: ChatRow): boolean => row.command, now) : state;
+/** Applies a turned-on hideCommands to shown and queued rows (see ChatAction `filter`). */
+function dismissCommands(state: ChatState, now: number): ChatState {
+  return dismiss(state, (row: ChatRow): boolean => row.command, now);
 }
 
 function active(row: ChatRow): boolean {
@@ -451,7 +451,7 @@ function reduce(state: ChatState, action: Exclude<ChatAction, { type: "reset" }>
   const limits: ChatLimits = limitsOf(options);
   if (action.type === "tick") return advance(state, action.now, limits);
   if (action.type === "filter")
-    return advance(filterCommands(state, action.hideCommands, action.now), action.now, limits);
+    return advance(action.hideCommands ? dismissCommands(state, action.now) : state, action.now, limits);
   if (action.type === "platform") {
     const other = (row: ChatRow): boolean => row.platform !== action.platform;
     return advance(dismiss(state, other, action.now), action.now, limits);
