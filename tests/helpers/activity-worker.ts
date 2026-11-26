@@ -79,7 +79,8 @@ function countedStatement(raw: D1PreparedStatement, counts: { d1Statements: numb
 function countedDatabase(db: D1Database, counts: { d1Statements: number }): D1Database {
   return new Proxy(db, {
     get(target: D1Database, key: string | symbol): unknown {
-      if (key === "prepare") return (query: string): D1PreparedStatement => countedStatement(target.prepare(query), counts);
+      if (key === "prepare")
+        return (query: string): D1PreparedStatement => countedStatement(target.prepare(query), counts);
       if (key === "batch")
         return (statements: D1PreparedStatement[]): Promise<D1Result[]> => {
           counts.d1Statements += statements.length;

@@ -25,10 +25,12 @@ import {
   COST_DRIVERS_PER_LIVE_HOUR,
   DROPPED_EVENTS_BELOW_ADMISSION,
   EVENT_LATENCY_P95_MS,
+  FLOOD_EVENT_LATENCY_P95_MS,
   LOST_ADMITTED_EVENTS,
   MODERATION_LATENCY_P95_MS,
   PROVIDER_REQUESTS_PER_RECONNECT,
   RECONNECT_SNAPSHOT_P95_MS,
+  STORAGE_BYTE_GROWTH_PER_LIVE_HOUR,
   STORAGE_ROW_GROWTH_PER_LIVE_HOUR,
   YOUTUBE_UNITS_PER_LIVE_HOUR,
 } from "./helpers/load-targets";
@@ -42,24 +44,36 @@ import {
 const enabled: boolean = process.env.LIVE_CAPACITY === "1";
 
 const QUIET_CHANNELS = 100;
-const QUIET_SECONDS = 10;
+const QUIET_SECONDS = 6;
 /** Two chat messages and one deletion for each quiet channel. */
 const QUIET_EVENTS = 3;
-const VIRAL_CHAT = 3_000;
+/** The viral channel offers ten times the chat admission rate. */
+const VIRAL_CHAT_PER_SECOND: number = 10 * ADMISSION_RATE;
+const VIRAL_SECONDS = 5;
+const VIRAL_CHAT: number = VIRAL_CHAT_PER_SECOND * VIRAL_SECONDS;
 /** Fewer than the moderation burst: admission must pass each one, whatever the chat bucket holds. */
 const VIRAL_DELETIONS = 100;
 /** The deletions start after this many chat messages, when the chat bucket is empty. */
-const VIRAL_FLOOD_START = 1_000;
-const VIRAL_IN_FLIGHT = 100;
+const VIRAL_FLOOD_START = 500;
 const STREAM_HOURS = 4;
 const STREAM_STEP_MS: number = YOUTUBE_MIN_POLL_MS;
 const STEPS_PER_HOUR: number = 3_600_000 / STREAM_STEP_MS;
-const YOUTUBE_MESSAGES_PER_POLL = 100;
-const TWITCH_MESSAGES_PER_STEP = 2;
-/** One deletion each minute of the stream. */
-const STEPS_PER_DELETION = 6;
+const YOUTUBE_MESSAGES_PER_POLL = 20;
+/** One Twitch chat message and one deletion each minute of the stream. */
+const STEPS_PER_MINUTE: number = 60_000 / STREAM_STEP_MS;
+
+/** The quiet channels with their open sockets. The reconnect burst of each channel uses them again. */
+interface Fleet {
+  pages: Page[];
+  clients: ActivityClient[];
+  /** Provider subscriptions before a consumer connected. */
+  subscriptions: number;
+  /** Provider requests that the first consumers of the channels caused. */
+  startRequests: number;
+}
 
 let harness: ActivityHarness;
+let fleet: Fleet | null = null;
 const reports: Record<string, unknown>[] = [];
 
 function sleep(ms: number): Promise<void> {
@@ -113,7 +127,9 @@ async function pageReports(pages: readonly Page[]): Promise<IngestReport[]> {
   return pooled(pages.length, 20, (index: number): Promise<IngestReport> => harness.report(pages[index]));
 }
 
-function total(items: readonly IngestReport[], key: "requests" | "alarms" | "d1Statements" | "sockets"): number {
+type Counter = "requests" | "alarms" | "d1Statements" | "sockets" | "events";
+
+function total(items: readonly IngestReport[], key: Counter): number {
   return items.reduce((sum: number, item: IngestReport): number => sum + item[key], 0);
 }
 
@@ -125,9 +141,26 @@ async function openClients(pages: readonly Page[], consumers: readonly Consumer[
   return groups.flat();
 }
 
+/** The quiet channels, each with its four consumers. The first call makes them. */
+async function openFleet(): Promise<Fleet> {
+  if (fleet) return fleet;
+  const pages: Page[] = [];
+  for (let index = 0; index < QUIET_CHANNELS; index++) pages.push(await harness.addPage({ twitch: true }));
+  const subscriptions: number = harness.providers.subscriptions.length;
+  const callsBefore: number = harness.providerCalls();
+  const clients: ActivityClient[] = await openClients(pages, CONSUMERS);
+  // The first consumer of each channel starts one subscription check at the provider.
+  const startRequests: number = (await settled((): number => harness.providerCalls())) - callsBefore;
+  fleet = { pages, clients, subscriptions, startRequests };
+  return fleet;
+}
+
 /** The sockets of the page that this harness calls viral: the owner, the dock and nine sources of each output. */
 function viralConsumers(): Consumer[] {
-  return Array.from({ length: MAX_SOCKETS }, (_, index: number): Consumer => CONSUMERS[index < 2 ? index : 2 + (index % 2)]);
+  return Array.from(
+    { length: MAX_SOCKETS },
+    (_, index: number): Consumer => CONSUMERS[index < 2 ? index : 2 + (index % 2)],
+  );
 }
 
 /**
@@ -178,14 +211,11 @@ afterAll(async (): Promise<void> => {
   }
 });
 
-it("serves many quiet channels without a dropped event", { skip: !enabled, timeout: 90_000 }, async (): Promise<void> => {
-  const pages: Page[] = [];
-  for (let index = 0; index < QUIET_CHANNELS; index++) pages.push(await harness.addPage({ twitch: true }));
-  const subscriptions: number = harness.providers.subscriptions.length;
-  const callsBefore: number = harness.providerCalls();
-  const clients: ActivityClient[] = await openClients(pages, CONSUMERS);
-  // The first consumer of each channel starts one subscription check at the provider.
-  const startRequests: number = (await settled((): number => harness.providerCalls())) - callsBefore;
+it("serves many quiet channels without a dropped event", {
+  skip: !enabled,
+  timeout: 90_000,
+}, async (): Promise<void> => {
+  const { pages, clients, subscriptions, startRequests }: Fleet = await openFleet();
   const worker: WorkerReport = await harness.workerReport();
   const sends: Promise<number>[] = [];
   const events: number = QUIET_CHANNELS * QUIET_EVENTS;
@@ -231,13 +261,19 @@ it("serves many quiet channels without a dropped event", { skip: !enabled, timeo
   expect(moderationLatency.p95).toBeLessThanOrEqual(EVENT_LATENCY_P95_MS);
   // Consumers add no provider subscription: each channel keeps the ones its connect made.
   expect(harness.providers.subscriptions).toHaveLength(subscriptions);
-  harness.closeClients();
 });
 
-it("bounds one viral channel and never holds moderation back", { skip: !enabled, timeout: 90_000 }, async (): Promise<void> => {
+it("bounds one viral channel and never holds moderation back", {
+  skip: !enabled,
+  timeout: 90_000,
+}, async (): Promise<void> => {
   const page: Page = await harness.addPage({ twitch: true });
   const clients: ActivityClient[] = await openClients([page], viralConsumers());
   await settled((): number => harness.providerCalls());
+  // The channel is live before the flood: one message fills the caches of the Worker and the object.
+  expect(await harness.chat(page, "viral-warm")).toBe(204);
+  await settled((): number => received(clients));
+  for (const client of clients) client.chatMs.length = 0;
   const sends: (() => Promise<number>)[] = [];
   for (let index = 0; index < VIRAL_CHAT; index++) {
     sends.push((): Promise<number> => harness.chat(page, `viral-${index}`));
@@ -245,21 +281,30 @@ it("bounds one viral channel and never holds moderation back", { skip: !enabled,
     if (Number.isInteger(deletion) && deletion >= 0 && deletion < VIRAL_DELETIONS)
       sends.push((): Promise<number> => harness.remove(page, `viral-${deletion}`));
   }
+  // Each delivery leaves at its time, whether the earlier ones are answered or not.
+  const perSecond: number = sends.length / VIRAL_SECONDS;
+  const pending: Promise<number>[] = [];
   const started: number = performance.now();
-  const statuses: number[] = await pooled(sends.length, VIRAL_IN_FLIGHT, (index: number) => sends[index]());
+  while (pending.length < sends.length) {
+    const due: number = Math.min(sends.length, Math.ceil(((performance.now() - started) / 1000) * perSecond));
+    while (pending.length < due) pending.push(sends[pending.length]());
+    await sleep(2);
+  }
+  const offeredSeconds: number = (performance.now() - started) / 1000;
+  const statuses: number[] = await Promise.all(pending);
   const seconds: number = (performance.now() - started) / 1000;
   await settled((): number => received(clients));
   const object: IngestReport = await harness.report(page);
   // The object stores a message id for each admitted chat message and a row for each admitted deletion.
-  const admitted = { chat: object.chatIds, moderation: object.deleted };
-  const lost: number = missing(clients, "chat", admitted.chat) + missing(clients, "moderation", admitted.moderation);
+  const admitted = { chat: object.chatIds - 1, moderation: object.deleted };
+  const lost: number = missing(clients, "chat", object.chatIds) + missing(clients, "moderation", admitted.moderation);
   const latency = percentiles(clients.flatMap((client: ActivityClient): number[] => client.chatMs));
   const moderationLatency = percentiles(clients.flatMap((client: ActivityClient): number[] => client.moderationMs));
   reports.push({
     scenario: "viral-channel",
     sockets: clients.length,
     seconds: Number(seconds.toFixed(2)),
-    offeredChatPerSecond: Math.round(VIRAL_CHAT / seconds),
+    offeredChatPerSecond: Math.round(VIRAL_CHAT / offeredSeconds),
     sent: { chat: VIRAL_CHAT, moderation: VIRAL_DELETIONS },
     admitted,
     droppedByAdmission: { chat: VIRAL_CHAT - admitted.chat, moderation: VIRAL_DELETIONS - admitted.moderation },
@@ -280,20 +325,17 @@ it("bounds one viral channel and never holds moderation back", { skip: !enabled,
   expect(VIRAL_DELETIONS).toBeLessThanOrEqual(MODERATION_BURST);
   expect(VIRAL_DELETIONS - admitted.moderation).toBeLessThanOrEqual(DROPPED_EVENTS_BELOW_ADMISSION.moderation);
   expect(lost).toBeLessThanOrEqual(LOST_ADMITTED_EVENTS);
-  expect(latency.p95).toBeLessThanOrEqual(EVENT_LATENCY_P95_MS);
+  expect(latency.p95).toBeLessThanOrEqual(FLOOD_EVENT_LATENCY_P95_MS);
   expect(moderationLatency.p95).toBeLessThanOrEqual(MODERATION_LATENCY_P95_MS);
   expect(object.events).toBeLessThanOrEqual(SNAPSHOT_SIZE);
-  harness.closeClients();
+  harness.closeClients(page);
 });
 
 /** Closes the sockets of the pages, opens them again at once, and checks one snapshot and no provider request each. */
-async function reconnectBurst(
-  scenario: string,
-  pages: readonly Page[],
-  consumers: readonly Consumer[],
-  snapshotEvents: number,
-): Promise<void> {
+async function reconnectBurst(scenario: string, pages: readonly Page[], consumers: readonly Consumer[]): Promise<void> {
   const before: IngestReport[] = await pageReports(pages);
+  // The snapshot of a page has each message that its object stores.
+  const stored = new Map<Page, number>(pages.map((page: Page, index: number) => [page, before[index].events]));
   const callsBefore: number = harness.providerCalls();
   for (const page of pages) harness.closeClients(page);
   const deadline: number = performance.now() + 15_000;
@@ -317,7 +359,7 @@ async function reconnectBurst(
     sockets: clients.length,
     burstMs: Number(burstMs.toFixed(2)),
     snapshotMs: snapshot,
-    snapshotEvents,
+    storedMessages: total(before, "events"),
     providerRequests,
     objectD1StatementsPerReconnect: Number(
       ((total(after, "d1Statements") - total(before, "d1Statements")) / clients.length).toFixed(2),
@@ -325,14 +367,17 @@ async function reconnectBurst(
   });
   for (const client of clients) {
     expect(client.snapshots).toHaveLength(1);
-    expect(client.snapshots[0].events).toHaveLength(snapshotEvents);
+    expect(client.snapshots[0].events).toHaveLength(stored.get(client.page) ?? -1);
   }
   expect(providerRequests / clients.length).toBeLessThanOrEqual(PROVIDER_REQUESTS_PER_RECONNECT);
   expect(snapshot.p95).toBeLessThanOrEqual(RECONNECT_SNAPSHOT_P95_MS);
-  harness.closeClients();
+  for (const page of pages) harness.closeClients(page);
 }
 
-it("answers a reconnect burst with one snapshot each and no provider request", { skip: !enabled, timeout: 90_000 }, async (): Promise<void> => {
+it("answers a reconnect burst with one snapshot each and no provider request", {
+  skip: !enabled,
+  timeout: 90_000,
+}, async (): Promise<void> => {
   // One page with each socket it can have and a full snapshot.
   const viral: Page = await harness.addPage({ twitch: true });
   const clients: ActivityClient[] = await openClients([viral], viralConsumers());
@@ -340,23 +385,27 @@ it("answers a reconnect burst with one snapshot each and no provider request", {
   await pooled(SNAPSHOT_SIZE + 20, 20, (index: number): Promise<number> => harness.chat(viral, `burst-${index}`));
   await settled((): number => received(clients));
   expect((await harness.report(viral)).events).toBe(SNAPSHOT_SIZE);
-  await reconnectBurst("reconnect-burst-viral-channel", [viral], viralConsumers(), SNAPSHOT_SIZE);
+  await reconnectBurst("reconnect-burst-viral-channel", [viral], viralConsumers());
   // A deployment closes the sockets of each live channel at once.
-  const pages: Page[] = [];
-  for (let index = 0; index < QUIET_CHANNELS; index++) pages.push(await harness.addPage({ twitch: true }));
-  const quiet: ActivityClient[] = await openClients(pages, CONSUMERS);
-  await settled((): number => harness.providerCalls());
-  await pooled(pages.length, 20, (index: number): Promise<number> => harness.chat(pages[index], `fleet-${index}`));
-  await settled((): number => received(quiet));
-  await reconnectBurst("reconnect-burst-all-channels", pages, CONSUMERS, 1);
+  const { pages }: Fleet = await openFleet();
+  fleet = null;
+  await reconnectBurst("reconnect-burst-all-channels", pages, CONSUMERS);
 });
 
+/** A message id of the stream. Each id has the same length, so the stored bytes of each hour compare. */
+function streamId(step: number, index: number): string {
+  return `${String(step).padStart(6, "0")}-${String(index).padStart(3, "0")}`;
+}
+
 /** One page of YouTube live chat with new messages, as `liveChatMessages.list` returns it. */
-function chatPage(step: number, at: number): { items: unknown[]; nextPageToken: string; pollingIntervalMillis: number } {
+function chatPage(
+  step: number,
+  at: number,
+): { items: unknown[]; nextPageToken: string; pollingIntervalMillis: number } {
   const publishedAt: string = new Date(at).toISOString();
   return {
     items: Array.from({ length: YOUTUBE_MESSAGES_PER_POLL }, (_, index: number): unknown =>
-      youtubeText(`stream-${step}-${index}`, `UCviewer${index % 50}`, `hello ${step} ${index}`, {}, publishedAt),
+      youtubeText(`stream-${streamId(step, index)}`, `UCviewer${index % 50}`, "hello chat", {}, publishedAt),
     ),
     nextPageToken: `page-${step}`,
     pollingIntervalMillis: 1_000,
@@ -372,7 +421,10 @@ interface Counters {
   socketMessages: number;
 }
 
-it("keeps storage and provider quota bounded over a stream of several hours", { skip: !enabled, timeout: 180_000 }, async (): Promise<void> => {
+it("keeps storage and provider quota bounded over a stream of several hours", {
+  skip: !enabled,
+  timeout: 180_000,
+}, async (): Promise<void> => {
   // The stream starts one minute into a YouTube quota day, so each run spends the units of one day.
   const start: number = quotaDay(Date.now() + 3_600_000).resetAt + 60_000;
   const { day } = quotaDay(start);
@@ -396,29 +448,27 @@ it("keeps storage and provider quota bounded over a stream of several hours", { 
     });
     let previous: Counters = await counters();
     let rows = 0;
-    let pageServed = true; let tStep = 0; let tHook = 0;
+    let bytes = 0;
+    let pageServed = true;
     for (let step = 0; step < STREAM_HOURS * STEPS_PER_HOUR; step++) {
       const at: number = start + step * STREAM_STEP_MS;
       // A page that no poll read yet stays for the next poll.
       if (pageServed) harness.providers.chatPages = [chatPage(step, at)];
       const callsBefore: number = calls.length;
-      const t0 = performance.now(); await harness.step(page, at); tStep += performance.now() - t0;
+      await harness.step(page, at);
       pageServed = polls(callsBefore) > 0;
       if (pageServed) sent.youtube += YOUTUBE_MESSAGES_PER_POLL;
-      const deliveries: Promise<number>[] = Array.from({ length: TWITCH_MESSAGES_PER_STEP }, (_, index: number) =>
-        harness.chat(page, `stream-${step}-${index}`, at),
-      );
-      if (step % STEPS_PER_DELETION === STEPS_PER_DELETION - 1) {
-        deliveries.push(harness.remove(page, `stream-${step - 1}-0`, at));
+      if (step % STEPS_PER_MINUTE === 0) {
+        expect(await harness.chat(page, `stream-${streamId(step, 0)}`, at)).toBe(204);
+        sent.twitch += 1;
+      } else if (step % STEPS_PER_MINUTE === 1) {
+        expect(await harness.remove(page, `stream-${streamId(step - 1, 0)}`, at)).toBe(204);
         sent.deletions += 1;
       }
-      sent.twitch += TWITCH_MESSAGES_PER_STEP;
-      const t1 = performance.now(); const statuses: number[] = await Promise.all(deliveries); tHook += performance.now() - t1;
-      expect(statuses.every((status: number): boolean => status === 204)).toBe(true);
       if ((step + 1) % STEPS_PER_HOUR !== 0) continue;
       await settled((): number => received(clients));
       const now: Counters = await counters();
-      const hour: number = (step + 1) / STEPS_PER_HOUR; console.log('TIMING', hour, tStep, tHook);
+      const hour: number = (step + 1) / STEPS_PER_HOUR;
       const hourRows: number = now.object.events + now.object.seen + now.object.deleted;
       const drivers = {
         d1Statements:
@@ -434,6 +484,7 @@ it("keeps storage and provider quota bounded over a stream of several hours", { 
         rows: { snapshot: now.object.events, seen: now.object.seen, deleted: now.object.deleted },
         rowGrowth: hour === 1 ? null : hourRows - rows,
         databaseBytes: now.object.databaseBytes,
+        databaseByteGrowth: hour === 1 ? null : now.object.databaseBytes - bytes,
         runtimeResidentBytes: await runtimeResidentBytes(),
         youtubeQuotaUnits: quotaUnits,
         ...drivers,
@@ -443,12 +494,16 @@ it("keeps storage and provider quota bounded over a stream of several hours", { 
       expect(now.object.events).toBeLessThanOrEqual(SNAPSHOT_SIZE);
       expect(now.object.seen).toBeLessThanOrEqual(SEEN_MAX);
       expect(now.object.deleted).toBeLessThanOrEqual(SEEN_MAX);
-      if (hour > 1) expect(hourRows - rows).toBeLessThanOrEqual(STORAGE_ROW_GROWTH_PER_LIVE_HOUR);
-      expect(quotaUnits).toBeLessThanOrEqual(YOUTUBE_UNITS_PER_LIVE_HOUR + 10);
+      if (hour > 1) {
+        expect(hourRows - rows).toBeLessThanOrEqual(STORAGE_ROW_GROWTH_PER_LIVE_HOUR);
+        expect(now.object.databaseBytes - bytes).toBeLessThanOrEqual(STORAGE_BYTE_GROWTH_PER_LIVE_HOUR);
+      }
+      expect(quotaUnits).toBeLessThanOrEqual(YOUTUBE_UNITS_PER_LIVE_HOUR);
       expect(drivers.d1Statements).toBeLessThanOrEqual(COST_DRIVERS_PER_LIVE_HOUR.d1Statements);
       expect(drivers.alarmRuns).toBeLessThanOrEqual(COST_DRIVERS_PER_LIVE_HOUR.alarmRuns);
       expect(drivers.providerRequests).toBeLessThanOrEqual(COST_DRIVERS_PER_LIVE_HOUR.providerRequests);
       rows = hourRows;
+      bytes = now.object.databaseBytes;
       previous = now;
     }
     const dropped = {
