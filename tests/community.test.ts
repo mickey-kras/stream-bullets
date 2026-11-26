@@ -80,20 +80,21 @@ describe("thread ordering", (): void => {
   it("puts replies oldest first and collapses after two", (): void => {
     const replies = [comment("c", 30, "a"), comment("b", 10, "a"), comment("d", 40, "b"), comment("e", 30, "a")];
     expect(orderReplies(replies).map((reply) => reply.id)).toEqual(["b", "c", "e", "d"]);
-    expect(visibleReplies(replies, false)).toMatchObject({ hidden: 2 });
-    expect(visibleReplies(replies, false).shown.map((reply) => reply.id)).toEqual(["b", "c"]);
-    expect(visibleReplies(replies, true).hidden).toBe(0);
-    const thread: CommentThread = { ...comment("a", 1, null), replies };
-    expect(replyParent(thread, replies[2])?.id).toBe("b");
-    expect(replyParent(thread, replies[0])?.id).toBe("a");
+    const window = { replies, replyCount: replies.length, earlierReplies: 0 };
+    expect(visibleReplies(window, false)).toMatchObject({ later: 2 });
+    expect(visibleReplies(window, false).shown.map((reply) => reply.id)).toEqual(["b", "c"]);
+    expect(visibleReplies(window, true).later).toBe(0);
+    const thread: CommentThread = { ...comment("a", 1, null), ...window };
+    expect(replyParent(thread, replies[2])).toBe(replies[1]);
+    expect(replyParent(thread, replies[0])).toBe(thread);
     expect(replyParent(thread, comment("x", 1, "gone"))).toBeNull();
   });
 
   it("orders top-level comments by the chosen sort", (): void => {
     const threads: CommentThread[] = [
-      { ...comment("old", 1, null, { likes: 5 }), replies: [] },
-      { ...comment("new", 3, null, { likes: 1 }), replies: [] },
-      { ...comment("mid", 2, null, { likes: 5 }), replies: [] },
+      { ...comment("old", 1, null, { likes: 5 }), replies: [], replyCount: 0, earlierReplies: 0 },
+      { ...comment("new", 3, null, { likes: 1 }), replies: [], replyCount: 0, earlierReplies: 0 },
+      { ...comment("mid", 2, null, { likes: 5 }), replies: [], replyCount: 0, earlierReplies: 0 },
     ];
     expect(orderThreads(threads, "newest").map((thread) => thread.id)).toEqual(["new", "mid", "old"]);
     expect(orderThreads(threads, "top").map((thread) => thread.id)).toEqual(["mid", "old", "new"]);

@@ -5,10 +5,14 @@ import {
   blockLanes,
   blockPosition,
   eventsOn,
+  firstWeekday,
   gridHours,
   sliceOn,
+  visibleDays,
   visibleRange,
 } from "../app/components/schedule/schedule-calendar";
+import { platformLabel } from "../app/components/schedule/format";
+import { DEFAULT_LOCALE, loadCatalog, setLocaleSource, type Locale } from "../app/i18n";
 import { atMark, nextMark, ServerOffset, startClock } from "../app/lib/clock";
 import {
   effectiveStatus,
@@ -280,6 +284,42 @@ describe("time zones and weekly series", (): void => {
     expect(effectiveStatus("scheduled", start, 60, start)).toBe("live");
     expect(effectiveStatus("scheduled", start, 60, start + 60 * 60_000)).toBe("ended");
     expect(effectiveStatus("cancelled", start, 60, start + 1)).toBe("cancelled");
+  });
+});
+
+describe("the first day of the week", (): void => {
+  afterEach((): void => setLocaleSource((): Locale => DEFAULT_LOCALE));
+
+  it("reads getWeekInfo() of current browsers and the older weekInfo accessor", (): void => {
+    expect(firstWeekday({ getWeekInfo: () => ({ firstDay: 1 }) })).toBe(1);
+    expect(firstWeekday({ weekInfo: { firstDay: 1 } })).toBe(1);
+    // Intl counts Sunday as 7.
+    expect(firstWeekday({ getWeekInfo: () => ({ firstDay: 7 }), weekInfo: { firstDay: 1 } })).toBe(0);
+    expect(firstWeekday({})).toBe(0);
+  });
+
+  it("starts the week and the month grid on Monday in German and on Sunday in English", (): void => {
+    const thursday = Date.UTC(2026, 10, 26, 12);
+    const weekday = (time: number): number => new Date(time).getUTCDay();
+    setLocaleSource((): Locale => "de");
+    expect(firstWeekday()).toBe(1);
+    expect(weekday(visibleDays("week", thursday, "UTC")[0])).toBe(1);
+    expect(weekday(visibleDays("month", thursday, "UTC")[0])).toBe(1);
+    setLocaleSource((): Locale => "en");
+    expect(weekday(visibleDays("week", thursday, "UTC")[0])).toBe(0);
+  });
+});
+
+describe("platform names", (): void => {
+  afterEach((): void => setLocaleSource((): Locale => DEFAULT_LOCALE));
+
+  it("translates Other and keeps the brand names", async (): Promise<void> => {
+    await loadCatalog("de");
+    setLocaleSource((): Locale => "de");
+    expect(platformLabel.other).toBe("Andere");
+    expect(platformLabel.twitch).toBe("Twitch");
+    setLocaleSource((): Locale => "en");
+    expect(platformLabel.other).toBe("Other");
   });
 });
 

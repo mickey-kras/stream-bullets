@@ -235,6 +235,9 @@ export interface Comment {
   translation?: { text: string; mentions: CommentMention[]; from?: Locale } | null;
   // The "Answered" mark of the page owner; absent when the comment has none.
   answer?: CommentAnswer;
+  // A reply of a thread: the name of the author of its parent, empty when the parent was removed. The parent may
+  // not be among the loaded replies.
+  parentAuthor?: string;
 }
 
 export interface CommentAnswer {
@@ -256,8 +259,12 @@ export interface AnsweredStream {
 }
 
 // Top-level comment with replies flattened oldest first (`?view=thread`).
+// A root comment with a window of its replies, oldest first: `earlierReplies` older ones come before `replies`, and
+// the rest of `replyCount` after them. `GET /api/comments/:id/replies` loads more.
 export interface CommentThread extends Comment {
   replies: Comment[];
+  replyCount: number;
+  earlierReplies: number;
 }
 
 export interface BoardSnapshot {

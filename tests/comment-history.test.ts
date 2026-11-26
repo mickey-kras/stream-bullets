@@ -184,3 +184,28 @@ describe("comment history", (): void => {
     ]);
   });
 });
+
+describe("the replies of a thread", (): void => {
+  async function replies(path: string): Promise<Response> {
+    return call("GET", path);
+  }
+
+  it("pages the replies through the API and refuses a bad anchor", async (): Promise<void> => {
+    const root = await seedComment();
+    const first = await seedComment(topic, "viewer", root);
+    const second = await seedComment(topic, "rival", first);
+    await env.DB.prepare("UPDATE entry_comments SET created_at=2000 WHERE id=?").bind(second).run();
+    const response = await replies(`comments/${root}/replies?after=${first}`);
+    expect(response.status).toBe(200);
+    expect((await response.json<{ replies: { id: string; parentAuthor: string }[] }>()).replies).toMatchObject([
+      { id: second, parentAuthor: "viewer" },
+    ]);
+    expect((await replies(`comments/${root}/replies?after=${first}&before=${second}`)).status).toBe(400);
+    expect((await replies(`comments/${root}/replies?after=nope`)).status).toBe(400);
+    expect((await replies(`comments/${root}/replies?cursor=x`)).status).toBe(400);
+    // A reply is no thread, and a thread on a hidden page is not found.
+    expect((await replies(`comments/${first}/replies`)).status).toBe(404);
+    await env.DB.prepare("UPDATE streamers SET status='suspended' WHERE id=?").bind(page).run();
+    expect((await replies(`comments/${root}/replies`)).status).toBe(404);
+  });
+});

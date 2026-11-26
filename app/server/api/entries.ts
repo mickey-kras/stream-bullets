@@ -8,7 +8,14 @@ import {
   translateAnswers,
   setAnswerLead,
 } from "../comment-answers.server";
-import { getCommentThread, listCommentRevisions, listComments, mutateComment } from "../comments.server";
+import {
+  getCommentThread,
+  listCommentRevisions,
+  listComments,
+  listReplies,
+  mutateComment,
+  type ReplyAnchor,
+} from "../comments.server";
 import { mentionCandidates } from "../discussion-notifications.server";
 import { getVisibleEntry } from "../data.server";
 import { HttpError, json, queryParams, readJson } from "../http.server";
@@ -23,6 +30,12 @@ import { get, parsedQuery, requireViewer, write, type ApiRoute } from "./router"
 
 const entryPath = /entries\/([a-f0-9-]{36})(\/comments)?/;
 
+// One anchor at most: the page after one reply or the page before one.
+const replyQuerySchema = z
+  .object({ after: z.string().uuid().optional(), before: z.string().uuid().optional() })
+  .strict()
+  .refine((value): boolean => !(value.after && value.before), "Use after or before, not both.");
+
 export const entryRoutes: ApiRoute[] = [
   get(/comments\/([a-f0-9-]{36})/, async ({ request, env, match, viewer }) => {
     queryParams(request, []);
@@ -33,6 +46,20 @@ export const entryRoutes: ApiRoute[] = [
     await attachTranslations(env, comments, locale, viewer?.keepOriginal ?? []);
     await attachAnswerTranslations(env, comments, locale, viewer?.keepOriginal ?? []);
     return json(result);
+  }),
+  // GET /api/comments/:id/replies?after=<replyId> | before=<replyId> → {replies}: up to 50 replies of the thread of
+  // root comment `:id` next to that reply, oldest first; the first 50 without either.
+  get(/comments\/([a-f0-9-]{36})\/replies/, async ({ request, env, match, viewer }) => {
+    if (!z.string().uuid().safeParse(match[1]).success) throw new HttpError(404, "Comment not found.");
+    const query = parsedQuery(request, ["after", "before"], replyQuerySchema);
+    let anchor: ReplyAnchor | null = null;
+    if (query.after) anchor = { direction: "after", id: query.after };
+    else if (query.before) anchor = { direction: "before", id: query.before };
+    const replies: Comment[] = await listReplies(env, match[1], viewer?.id ?? null, anchor);
+    const locale = requestLocale(request, viewer?.locale ?? null);
+    await attachTranslations(env, replies, locale, viewer?.keepOriginal ?? []);
+    await attachAnswerTranslations(env, replies, locale, viewer?.keepOriginal ?? []);
+    return json({ replies });
   }),
   // GET /api/comments/:id/history → {revisions: [{text, mentions, writtenAt, editedAt}]}, oldest first. The page
   // owner and admins (with step-up) only; 404 for everyone else, also when signed out.

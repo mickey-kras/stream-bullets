@@ -44,7 +44,7 @@ English also shows `error` for `step_up_required` and `other_key_required`.
 | `PATCH /api/streamer` | `{name?, about?, handle?, logoMode?: "profile" \| "logo"}`. At least one field | `{streamer}` |
 | `PUT /api/images/logo` | PNG, JPEG, or WebP body with `Content-Type`. At most 5 MB | `{url}` |
 | `DELETE /api/images/logo` | None | `{logo: null}` |
-| `GET /api/entries/:id/comments?view=thread` | `sort`, `cursor` query parameters | `{comments: CommentThread[], nextCursor}`. Paged parents with all-depth `replies`, oldest first, keeping `parentId` |
+| `GET /api/entries/:id/comments?view=thread` | `sort`, `cursor` query parameters | `{comments: CommentThread[], nextCursor}`. Paged parents, each with its 2 oldest replies of any depth, `replyCount` and `earlierReplies: 0`. A reply keeps `parentId` and has `parentAuthor`, empty when the parent was removed |
 
 - Handle changes need 30 days. Early changes return `409` with the code `handle_cooldown`.
   `details.retryAt` is the ISO timestamp of the next allowed change.
@@ -268,7 +268,8 @@ Streamer-page writes must call `assertStreamerWritable()`.
 | `GET /api/comments/:id/history` | None | `{revisions: {text, mentions, writtenAt, editedAt}[]}`, oldest first. The texts before each edit, kept for 90 days. Only the page owner and administrators can read them. An administrator needs a fresh step-up. Other accounts and signed-out readers get `404`. |
 | `POST /api/comments/:id/answer` | `{action: "mark"}`, `{action: "unmark"}` or `{action: "offset", offsetSeconds}` (0 to 172800) | `{answer: {markedAt, stream} \| null}`. Only the page owner can set, change or remove the mark. Other accounts get `404`. `stream` is null when the page was not live at the mark. It has `platform`, `title`, `startedAt`, `offsetSeconds` and `link`. The link has a time code for a YouTube video and a Twitch VOD. `offset` on a mark without a stream gets `409`. A comment shows its mark as `answer`. A removed comment loses its mark. |
 | `GET /api/streamer/answer-lead`, `PUT /api/streamer/answer-lead` | `{leadMinutes}` (0 to 60) | `{leadMinutes}`. The time code of a new mark is this many minutes before the mark. The default is 5. The signed-in owner's page only. |
-| `GET /api/comments/:id` | None | `{comment, rootId, thread, handle, entryId}`. Exact comment and its thread, subject to page access. |
+| `GET /api/comments/:id` | None | `{comment, rootId, thread, handle, entryId}`. Exact comment and its thread, subject to page access. For a reply, `thread.replies` holds the 10 replies before and after it, and `thread.earlierReplies` counts the older ones it leaves out. |
+| `GET /api/comments/:id/replies` | `after` or `before` query parameter: the ID of a reply of the thread | `{replies: Comment[]}`. Up to 50 replies of root comment `:id` after or before that reply, oldest first; the first 50 without a parameter. A reply or a hidden page gets `404`, both parameters `400`. |
 | `POST /api/comments/:id/translation` | `{locale, text}`. `text` is the comment text that the reader sees. The answer is `409` when the comment changed. | `{translation: {text, mentions} \| null}`. Signed-in accounts only. `null`: the comment needs no translation, or the translation failed a check. `503` when translation is off. |
 | `GET /api/entries/:id/mention-candidates` | `query`, at most 40 characters | `{users}`. At most 10 public profiles or participants in this community. Requires sign-in. |
 | `GET /api/notifications` | Optional opaque `cursor` | `NotificationSnapshot`: at most 50 notifications, unread count, preferences and next cursor. Requires sign-in. |

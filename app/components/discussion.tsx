@@ -8,7 +8,7 @@ import { useCommentTranslation } from "./comment-translation";
 import type { MentionSelection } from "./mention-input";
 import { intlLocale, t } from "../i18n";
 import { useShell } from "../lib/shell";
-import { orderThreads, replyParent, visibleReplies } from "../lib/threads";
+import { orderReplies, orderThreads, replyParent, visibleReplies, withReplies } from "../lib/threads";
 import type { Comment, CommentThread, SortOrder, StreamerStatus, ThreadSnapshot, Viewer } from "../types";
 import { KeyConfirm } from "./admin/key-confirm";
 import { errorMessage, needsStepUp, postJson, requestJson } from "./api";
@@ -284,7 +284,7 @@ function CommentArticle({
   rules,
 }: Readonly<{
   comment: Comment;
-  parent: Comment | null | undefined;
+  parent: Pick<Comment, "author" | "removed"> | null | undefined;
   rules: CommentRules;
 }>): ReactNode {
   const [editing, setEditing] = useState<boolean>(false);
@@ -426,17 +426,21 @@ function Thread({
   replyTo,
   replyBox,
   targetId,
+  onLoadReplies,
 }: Readonly<{
   thread: CommentThread;
   rules: CommentRules;
   replyTo: Comment | null;
   replyBox: ReactNode;
   targetId: string | null;
+  // Loads the page of replies before or after the loaded ones.
+  onLoadReplies: (thread: CommentThread, before: boolean) => Promise<void>;
 }>): ReactNode {
   const [expanded, setExpanded] = useState<boolean>(false);
   const [hidden, setHidden] = useState<boolean>(false);
-  const { shown, hidden: more } = visibleReplies(
-    thread.replies,
+  const [loadingReplies, setLoadingReplies] = useState<boolean>(false);
+  const { shown, earlier, later, unloaded } = visibleReplies(
+    thread,
     expanded || Boolean(targetId && thread.replies.some((reply: Comment) => reply.id === targetId)),
   );
   const replying =
@@ -454,7 +458,11 @@ function Thread({
       rules.onReply(comment);
     },
   };
-  const count = thread.replies.length;
+  const load = (before: boolean): void => {
+    setLoadingReplies(true);
+    onLoadReplies(thread, before).finally(() => setLoadingReplies(false));
+  };
+  const count = thread.replyCount;
   const listId = `replies-${thread.id}`;
   const showRepliesLabel: string = t(count === 1 ? "discussion.showReply" : "discussion.showReplies", { count });
   return (
@@ -477,26 +485,45 @@ function Thread({
           className="replies"
           id={listId}
           hidden={hidden}
+          aria-busy={loadingReplies}
           aria-label={t("discussion.repliesTo", {
             name: thread.removed ? t("discussion.removedParent") : thread.author,
           })}
         >
+          {earlier > 0 && (
+            <li className="thread-more">
+              <button
+                type="button"
+                className="text-button"
+                disabled={loadingReplies}
+                aria-controls={listId}
+                onClick={() => load(true)}
+              >
+                <Icon name="chevron-up" size={16} />
+                {t(earlier === 1 ? "discussion.viewEarlierOne" : "discussion.viewEarlier", { count: earlier })}
+              </button>
+            </li>
+          )}
           {shown.map((reply: Comment) => (
             <li key={reply.id}>
               <CommentArticle comment={reply} parent={replyParent(thread, reply)} rules={threadRules} />
             </li>
           ))}
-          {more > 0 && (
+          {later > 0 && (
             <li className="thread-more">
               <button
                 type="button"
                 className="text-button"
+                disabled={loadingReplies}
                 aria-expanded={false}
                 aria-controls={listId}
-                onClick={() => setExpanded(true)}
+                onClick={() => {
+                  setExpanded(true);
+                  if (unloaded > 0) load(false);
+                }}
               >
                 <Icon name="chevron-down" size={16} />
-                {t(more === 1 ? "discussion.viewMoreOne" : "discussion.viewMore", { count: more })}
+                {t(later === 1 ? "discussion.viewMoreOne" : "discussion.viewMore", { count: later })}
               </button>
             </li>
           )}
@@ -505,6 +532,32 @@ function Thread({
       )}
     </li>
   );
+}
+
+// One page of replies of thread `rootId` after or before reply `anchor`; the first page without one.
+async function fetchReplies(
+  rootId: string,
+  anchor: { before: boolean; id: string } | null,
+  signal?: AbortSignal,
+): Promise<Comment[]> {
+  const query: string = anchor ? `?${anchor.before ? "before" : "after"}=${encodeURIComponent(anchor.id)}` : "";
+  const page = await requestJson<{ replies: Comment[] }>(
+    `/api/comments/${encodeURIComponent(rootId)}/replies${query}`,
+    { signal },
+  );
+  return page.replies;
+}
+
+// The first `count` replies of a thread, loaded again after a refresh of the discussion.
+async function repliesFromStart(thread: CommentThread, count: number, signal: AbortSignal): Promise<CommentThread> {
+  let loaded: CommentThread = { ...thread, replies: [], earlierReplies: 0 };
+  let page: Comment[];
+  do {
+    const last: Comment | undefined = loaded.replies.at(-1);
+    page = await fetchReplies(thread.id, last ? { before: false, id: last.id } : null, signal);
+    loaded = withReplies(loaded, page, false);
+  } while (page.length > 0 && loaded.replies.length < count && loaded.replies.length < thread.replyCount);
+  return loaded;
 }
 
 async function fetchThreads(
@@ -600,6 +653,10 @@ export function Discussion({
   const [reported, setReported] = useState<Set<string>>(new Set());
   const [signIn, setSignIn] = useState<boolean>(false);
   const pages = useRef<number>(1);
+  // Threads whose replies the reader loaded from the start, with how many: a refresh loads as many again.
+  const loadedReplies = useRef<Map<string, number>>(new Map());
+  // The reply the viewer posted last: a refresh loads the replies around it, so it shows in a long thread.
+  const postedReply = useRef<string | null>(null);
   const focusedTarget = useRef<string | null>(null);
   const restoredPosition = useRef<boolean>(false);
   const requestController = useRef<AbortController | null>(null);
@@ -617,7 +674,13 @@ export function Discussion({
       .then(async (result) => {
         let values = result.threads;
         let targetError = "";
-        const targets = new Set([targetId, draftStore.getSnapshot().draft.replyId]);
+        for (const [id, count] of loadedReplies.current) {
+          const thread = values.find((value: CommentThread) => value.id === id);
+          if (!thread || thread.replies.length >= Math.min(count, thread.replyCount)) continue;
+          const loaded = await repliesFromStart(thread, count, controller.signal);
+          values = values.map((value: CommentThread) => (value.id === id ? loaded : value));
+        }
+        const targets = new Set([targetId, draftStore.getSnapshot().draft.replyId, postedReply.current]);
         for (const id of targets) {
           if (id === null || (id !== targetId && findComment(values, id))) continue;
           try {
@@ -630,7 +693,9 @@ export function Discussion({
             if (exact.entryId !== entryId) throw new Error(t("discussion.commentUnavailable"));
             values = mergeThreads(values, [exact.thread], sort);
           } catch (error_: unknown) {
-            targetError = errorMessage(error_);
+            // The viewer's own reply can be gone by now: that is no error to show.
+            if (id === postedReply.current) postedReply.current = null;
+            else targetError = errorMessage(error_);
           }
         }
         if (controller.signal.aborted) return;
@@ -707,16 +772,36 @@ export function Discussion({
     }
   }
 
+  async function loadReplies(thread: CommentThread, before: boolean): Promise<void> {
+    const ordered: Comment[] = thread.replies.length ? orderReplies(thread.replies) : [];
+    const edge: Comment | undefined = before ? ordered[0] : ordered.at(-1);
+    try {
+      const page = await fetchReplies(thread.id, edge ? { before, id: edge.id } : null);
+      setThreads((current: CommentThread[]) =>
+        current.map((value: CommentThread) => {
+          if (value.id !== thread.id) return value;
+          const next = withReplies(value, page, before);
+          if (next.earlierReplies === 0) loadedReplies.current.set(next.id, next.replies.length);
+          return next;
+        }),
+      );
+    } catch (error_: unknown) {
+      setError(errorMessage(error_));
+    }
+  }
+
   function post(value: string, parentId: string | null): void {
-    void run(() =>
-      postJson(`/api/streamers/${encodeURIComponent(handle)}`, {
+    void run(async () => {
+      const result = await postJson<{ id: string }>(`/api/streamers/${encodeURIComponent(handle)}`, {
         action: "comment",
         id: entryId,
         text: value,
         mentions: parentId ? replyMentions : mentions,
         parentId,
-      }),
-    )
+      });
+      if (parentId) postedReply.current = result.id;
+      return result;
+    })
       .then(() => {
         if (parentId) {
           changeDraft({ replyText: "", replyMentions: [], replyId: null });
@@ -860,6 +945,7 @@ export function Discussion({
             replyTo={replyTo}
             replyBox={replyBox}
             targetId={targetId}
+            onLoadReplies={loadReplies}
           />
         ))}
       </ul>

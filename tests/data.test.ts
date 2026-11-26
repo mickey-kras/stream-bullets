@@ -1,7 +1,7 @@
 import { Buffer as NodeBuffer } from "node:buffer";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import type { AppEnv } from "../app/env";
-import type { Streamer } from "../app/types";
+import type { Comment, CommentThread, Streamer } from "../app/types";
 import {
   consumeMutationQuota,
   getEntry,
@@ -13,7 +13,7 @@ import {
   mutateEntry,
   saveStreamer,
 } from "../app/server/data.server";
-import { listComments, mutateComment } from "../app/server/comments.server";
+import { getCommentThread, listComments, listReplies, mutateComment } from "../app/server/comments.server";
 import { createTestDatabase } from "./helpers/database";
 import type { TestDatabase } from "./helpers/database";
 import { startOfQuotaWindow } from "./helpers/quota";
@@ -452,6 +452,47 @@ describe("discussion", (): void => {
     expect((await listComments(env, topic.id, null, { sort: "newest", cursor: null })).comments).toContainEqual(
       expect.objectContaining({ id, removed: true, avatarPreset: null }),
     );
+  });
+
+  it("sends a preview of each thread and pages its replies, also around a linked reply", async (): Promise<void> => {
+    const id = await seedEntry();
+    const root = await seedComment(id);
+    const reply = (index: number): string => `00000000-0000-4000-8000-${String(index).padStart(12, "0")}`;
+    // 120 replies, oldest first: an odd one answers the root, an even one the reply before it.
+    await env.DB.prepare(`WITH RECURSIVE n(i) AS (SELECT 1 UNION ALL SELECT i + 1 FROM n WHERE i < 120)
+      INSERT INTO entry_comments (id,entry_id,author_id,text,created_at,parent_id)
+      SELECT printf('00000000-0000-4000-8000-%012d', i), ?, 'other', 'Reply ' || i, 1000 + i,
+        CASE WHEN i % 2 = 1 THEN ? ELSE printf('00000000-0000-4000-8000-%012d', i - 1) END FROM n`)
+      .bind(id, root)
+      .run();
+    const ids = (replies: { id: string }[]): string[] => replies.map((value: { id: string }): string => value.id);
+    const range = (from: number, to: number): string[] =>
+      Array.from({ length: to - from + 1 }, (_: unknown, index: number): string => reply(from + index));
+
+    const listed = await listComments(env, id, null, { sort: "newest", cursor: null, view: "thread" });
+    const [thread] = listed.comments as CommentThread[];
+    expect(thread).toMatchObject({ id: root, replyCount: 120, earlierReplies: 0 });
+    expect(ids(thread.replies)).toEqual(range(1, 2));
+    expect(thread.replies.map((value: Comment) => value.parentAuthor)).toEqual(["viewer", "other"]);
+
+    expect(ids(await listReplies(env, root, null, { direction: "after", id: reply(2) }))).toEqual(range(3, 52));
+    expect(ids(await listReplies(env, root, null, { direction: "before", id: reply(60) }))).toEqual(range(10, 59));
+    expect(ids(await listReplies(env, root, null, null))).toEqual(range(1, 50));
+    expect(await listReplies(env, root, null, { direction: "after", id: reply(120) })).toEqual([]);
+
+    // A link to reply 60 brings the 10 replies before and after it, not the whole thread.
+    const linked = await getCommentThread(env, reply(60), null);
+    expect(linked.thread).toMatchObject({ id: root, replyCount: 120, earlierReplies: 49 });
+    expect(ids(linked.thread.replies)).toEqual(range(50, 70));
+    const linkedRoot = await getCommentThread(env, root, null);
+    expect(ids(linkedRoot.thread.replies)).toEqual(range(1, 2));
+
+    // A removed parent shows no name; only a root comment has a page of replies.
+    await mutateComment(env, "other", { action: "delete", id: reply(1) });
+    expect((await listReplies(env, root, null, null))[0]).toMatchObject({ id: reply(1), removed: true });
+    expect((await listReplies(env, root, null, null))[1]).toMatchObject({ id: reply(2), parentAuthor: "" });
+    await expect(listReplies(env, reply(3), null, null)).rejects.toMatchObject({ status: 404 });
+    await expect(listReplies(env, crypto.randomUUID(), null, null)).rejects.toMatchObject({ status: 404 });
   });
 
   it("makes comment likes idempotent and strips provider avatar URLs", async (): Promise<void> => {

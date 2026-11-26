@@ -23,6 +23,7 @@ import {
   getVisibleEntry,
 } from "./data.server";
 import { HttpError } from "./http.server";
+import { VISIBLE_REPLIES } from "../lib/threads";
 import { commentActionSchema, commentQuerySchema, type CommentQuery } from "./validation";
 
 // Flat/threaded discussions, likes, and removal placeholders.
@@ -79,26 +80,115 @@ function commentValue(row: CommentRow): Comment {
   };
 }
 
-// Every reply under the given top-level comments, any depth, oldest first within each thread.
-async function threadReplies(env: AppEnv, rootIds: string[], viewerId: string | null): Promise<Map<string, Comment[]>> {
-  if (rootIds.length === 0) return new Map<string, Comment[]>();
-  const replies = new Map<string, Comment[]>(rootIds.map((id: string): [string, Comment[]] => [id, []]));
-  const { results } = await env.DB.prepare(`
-    WITH RECURSIVE thread(root, id) AS (
-      SELECT c.id, c.id FROM entry_comments c WHERE c.id IN (SELECT value FROM json_each(?))
-      UNION ALL SELECT t.root, c.id FROM entry_comments c JOIN thread t ON c.parent_id=t.id
-    )
-    SELECT t.root, ${commentColumns}
-    FROM thread t JOIN entry_comments c ON c.id=t.id JOIN user u ON u.id=c.author_id
-    WHERE t.id<>t.root ORDER BY t.root, c.created_at, c.id
-  `)
-    .bind(JSON.stringify(rootIds), viewerId ?? "", viewerId ?? "")
-    .all<CommentRow & { root: string }>();
-  for (const row of results) replies.get(row.root)?.push(commentValue(row));
-  return replies;
+// The replies one request loads at most.
+const REPLY_PAGE_SIZE = 50;
+// The replies before and after the comment of a link to a reply.
+const LINKED_CONTEXT = 10;
+
+interface ReplyRow extends CommentRow {
+  parent_author: string | null;
+  parent_removed: number | null;
 }
 
-// Page flat comments or top-level threads by newest/likes; attach replies oldest first.
+// The replies of a thread, any depth, as one list, oldest first.
+const threadIds = `thread(root, id) AS (
+      SELECT c.id, c.id FROM entry_comments c WHERE c.id IN (SELECT value FROM json_each(?))
+      UNION ALL SELECT t.root, c.id FROM entry_comments c JOIN thread t ON c.parent_id=t.id
+    )`;
+const replyColumns = `${commentColumns}, pu.name AS parent_author, p.removed_at IS NOT NULL AS parent_removed`;
+const replyJoins = `JOIN entry_comments c ON c.id=t.id JOIN user u ON u.id=c.author_id
+    LEFT JOIN entry_comments p ON p.id=c.parent_id LEFT JOIN user pu ON pu.id=p.author_id`;
+
+function replyValue(row: ReplyRow): Comment {
+  const parentAuthor = row.parent_removed === 1 ? "" : (row.parent_author ?? "");
+  return { ...commentValue(row), parentAuthor };
+}
+
+interface ReplyWindow {
+  replies: Comment[];
+  replyCount: number;
+  earlierReplies: number;
+}
+
+// The first `VISIBLE_REPLIES` replies of each root, or, with `focus`, the replies around that reply. Each thread also
+// gets its reply count, so the page can load the rest on demand.
+async function replyWindows(
+  env: AppEnv,
+  rootIds: string[],
+  viewerId: string | null,
+  focus: string | null = null,
+): Promise<Map<string, ReplyWindow>> {
+  const windows = new Map<string, ReplyWindow>(
+    rootIds.map((id: string): [string, ReplyWindow] => [id, { replies: [], replyCount: 0, earlierReplies: 0 }]),
+  );
+  if (rootIds.length === 0) return windows;
+  const { results } = await env.DB.prepare(`
+    WITH RECURSIVE ${threadIds}, ordered AS (
+      SELECT t.root, t.id, row_number() OVER (PARTITION BY t.root ORDER BY c.created_at, c.id) AS n,
+        count(*) OVER (PARTITION BY t.root) AS total
+      FROM thread t JOIN entry_comments c ON c.id=t.id WHERE t.id<>t.root
+    ), focus AS (SELECT root, n FROM ordered WHERE id=?)
+    SELECT o.root, o.n, o.total, ${replyColumns}
+    FROM ordered o LEFT JOIN focus f ON f.root=o.root JOIN entry_comments c ON c.id=o.id JOIN user u ON u.id=c.author_id
+      LEFT JOIN entry_comments p ON p.id=c.parent_id LEFT JOIN user pu ON pu.id=p.author_id
+    WHERE (f.n IS NULL AND o.n <= ?) OR o.n BETWEEN f.n - ? AND f.n + ?
+    ORDER BY o.root, o.n
+  `)
+    .bind(
+      JSON.stringify(rootIds),
+      focus ?? "",
+      viewerId ?? "",
+      viewerId ?? "",
+      VISIBLE_REPLIES,
+      LINKED_CONTEXT,
+      LINKED_CONTEXT,
+    )
+    .all<ReplyRow & { root: string; n: number; total: number }>();
+  for (const row of results) {
+    const window = windows.get(row.root);
+    if (!window) continue;
+    if (window.replies.length === 0) window.earlierReplies = row.n - 1;
+    window.replyCount = row.total;
+    window.replies.push(replyValue(row));
+  }
+  return windows;
+}
+
+// Where a page of replies starts: just after or just before one reply of the thread.
+export interface ReplyAnchor {
+  direction: "after" | "before";
+  id: string;
+}
+
+// The replies of thread `rootId` next to `anchor`, oldest first; the first ones without an anchor.
+async function replyPage(
+  env: AppEnv,
+  rootId: string,
+  viewerId: string | null,
+  anchor: ReplyAnchor | null,
+): Promise<Comment[]> {
+  const before = anchor?.direction === "before";
+  const order = before ? "DESC" : "ASC";
+  const where = anchor
+    ? `AND (c.created_at, c.id) ${before ? "<" : ">"} (SELECT created_at, id FROM entry_comments WHERE id=?)`
+    : "";
+  const { results } = await env.DB.prepare(`
+    WITH RECURSIVE ${threadIds}
+    SELECT ${replyColumns} FROM thread t ${replyJoins}
+    WHERE t.id<>t.root ${where}
+    ORDER BY c.created_at ${order}, c.id ${order} LIMIT ?
+  `)
+    .bind(JSON.stringify([rootId]), viewerId ?? "", viewerId ?? "", ...(anchor ? [anchor.id] : []), REPLY_PAGE_SIZE)
+    .all<ReplyRow>();
+  const replies: Comment[] = results.map(replyValue);
+  return before ? replies.reverse() : replies;
+}
+
+function threadValue(row: CommentRow, window: ReplyWindow | undefined): CommentThread {
+  return { ...commentValue(row), ...(window ?? { replies: [], replyCount: 0, earlierReplies: 0 }) };
+}
+
+// Page flat comments or top-level threads by newest/likes; each thread has a preview of its oldest replies.
 // Both views retain removed parents as placeholders.
 export async function listComments(
   env: AppEnv,
@@ -130,15 +220,13 @@ export async function listComments(
       ? encodeCursor({ scope, sort: query.sort, query: "", score: last.likes, time: last.created_at, id: last.id })
       : null;
   if (!threaded) return { comments: rows.map(commentValue), nextCursor };
-  const replies = await threadReplies(
+  const windows = await replyWindows(
     env,
     rows.map((row: CommentRow): string => row.id),
     viewerId,
   );
   return {
-    comments: rows.map(
-      (row: CommentRow): CommentThread => ({ ...commentValue(row), replies: replies.get(row.id) ?? [] }),
-    ),
+    comments: rows.map((row: CommentRow): CommentThread => threadValue(row, windows.get(row.id))),
     nextCursor,
   };
 }
@@ -344,14 +432,29 @@ export async function getCommentThread(
     .bind(row.entry_id)
     .first<{ handle: string }>();
   if (!rootRow || !page) throw new HttpError(404, "Comment not found.");
-  const replies = await threadReplies(env, [root.id], viewerId);
+  // A linked reply comes with the replies around it, not with the whole thread.
+  const windows = await replyWindows(env, [root.id], viewerId, id === root.id ? null : id);
   return {
     comment: commentValue(row),
     rootId: root.id,
-    thread: { ...commentValue(rootRow), replies: replies.get(root.id) ?? [] },
+    thread: threadValue(rootRow, windows.get(root.id)),
     handle: page.handle,
     entryId: row.entry_id,
   };
+}
+
+// `GET /api/comments/:id/replies`: up to 50 replies of a thread after or before one of its replies, oldest first.
+export async function listReplies(
+  env: AppEnv,
+  rootId: string,
+  viewerId: string | null,
+  anchor: ReplyAnchor | null,
+): Promise<Comment[]> {
+  const root = await env.DB.prepare("SELECT entry_id FROM entry_comments WHERE id=? AND parent_id IS NULL")
+    .bind(rootId)
+    .first<{ entry_id: string }>();
+  if (!root || !(await getVisibleEntry(env, root.entry_id, viewerId))) throw new HttpError(404, "Comment not found.");
+  return replyPage(env, rootId, viewerId, anchor);
 }
 
 // Earlier texts kept for 90 days after the edit that replaced them.

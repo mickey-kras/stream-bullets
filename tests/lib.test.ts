@@ -27,7 +27,7 @@ import {
 } from "../app/lib/shell";
 import { eventsJsonLd, personJsonLd, postingJsonLd, siteJsonLd } from "../app/lib/structured-data";
 import { supportLabel } from "../app/lib/support";
-import { replyParent, visibleReplies } from "../app/lib/threads";
+import { replyParent, visibleReplies, withReplies } from "../app/lib/threads";
 import { usePrefs } from "../app/lib/use-prefs";
 import { formatDate, isValidZone, parseDate } from "../app/lib/zoned";
 import type { Comment, StreamEvent } from "../app/types";
@@ -308,19 +308,55 @@ describe("comment threads", (): void => {
     ({ id, createdAt: 0, parentId: null, removed: false, likes: 0, ...extra }) as Comment;
 
 
-  it("shows two replies until the thread is expanded", (): void => {
-    const replies = [comment("r3", { createdAt: 3 }), comment("r1", { createdAt: 1 }), comment("r2", { createdAt: 2 })];
-    expect(visibleReplies(replies, false)).toEqual({ shown: [replies[1], replies[2]], hidden: 1 });
-    expect(visibleReplies(replies, true).hidden).toBe(0);
+  const window = (replies: Comment[], replyCount: number = replies.length, earlierReplies: number = 0) => ({
+    replies,
+    replyCount,
+    earlierReplies,
   });
 
-  it("finds the parent a reply answers", (): void => {
+  it("shows two replies until the thread is expanded, and counts the ones not loaded", (): void => {
+    const replies = [comment("r3", { createdAt: 3 }), comment("r1", { createdAt: 1 }), comment("r2", { createdAt: 2 })];
+    expect(visibleReplies(window(replies), false)).toEqual({
+      shown: [replies[1], replies[2]],
+      earlier: 0,
+      later: 1,
+      unloaded: 0,
+    });
+    expect(visibleReplies(window(replies), true)).toMatchObject({ later: 0, unloaded: 0 });
+    // The server sent the first two of 10 000 replies.
+    expect(visibleReplies(window(replies.slice(1), 10_000), false)).toMatchObject({ later: 9_998, unloaded: 9_998 });
+    // A linked reply comes with its window: all of it shows, after 40 earlier and before 30 later replies.
+    expect(visibleReplies(window(replies, 73, 40), false)).toEqual({
+      shown: [replies[1], replies[2], replies[0]],
+      earlier: 40,
+      later: 30,
+      unloaded: 30,
+    });
+  });
+
+  it("adds a page of replies once each and lowers the earlier count for an earlier page", (): void => {
+    const thread = { ...comment("t"), ...window([comment("r5", { createdAt: 5 })], 9, 4) };
+    const earlier = withReplies(thread, [comment("r3", { createdAt: 3 }), comment("r4", { createdAt: 4 })], true);
+    expect(earlier.replies.map((reply: Comment) => reply.id)).toEqual(["r3", "r4", "r5"]);
+    expect(earlier.earlierReplies).toBe(2);
+    const again = withReplies(earlier, [comment("r4", { createdAt: 4 }), comment("r6", { createdAt: 6 })], false);
+    expect(again.replies.map((reply: Comment) => reply.id)).toEqual(["r3", "r4", "r5", "r6"]);
+    expect(again).toMatchObject({ earlierReplies: 2, replyCount: 9 });
+  });
+
+  it("finds the parent a reply answers, also when the parent is not loaded", (): void => {
     const reply = comment("r2", { parentId: "r1" });
-    const thread = { ...comment("t"), replies: [comment("r1", { parentId: "t" }), reply] };
-    expect(replyParent(thread, reply)?.id).toBe("r1");
+    const thread = { ...comment("t"), ...window([comment("r1", { parentId: "t" }), reply]) };
+    expect(replyParent(thread, reply)).toBe(thread.replies[0]);
     expect(replyParent(thread, thread.replies[0])).toBe(thread);
     expect(replyParent(thread, comment("x"))).toBeNull();
     expect(replyParent(thread, comment("y", { parentId: "gone" }))).toBeNull();
+    expect(replyParent(thread, comment("z", { parentId: "far", parentAuthor: "Ana" }))).toEqual({
+      author: "Ana",
+      removed: false,
+    });
+    // An empty name: the parent was removed.
+    expect(replyParent(thread, comment("w", { parentId: "far", parentAuthor: "" }))).toBeNull();
   });
 });
 

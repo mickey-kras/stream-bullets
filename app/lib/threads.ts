@@ -1,6 +1,6 @@
 import type { Comment, CommentThread } from "../types";
 
-// Initial visible reply count.
+// Initial visible reply count. The server sends this many replies of each thread before it is opened.
 export const VISIBLE_REPLIES = 2;
 
 // Flatten replies under the root, oldest first, at one indent level.
@@ -8,18 +8,47 @@ export function orderReplies(replies: readonly Comment[]): Comment[] {
   return [...replies].sort((a: Comment, b: Comment): number => a.createdAt - b.createdAt || a.id.localeCompare(b.id));
 }
 
-// Show two replies until expanded; return the hidden count.
-export function visibleReplies(replies: readonly Comment[], expanded: boolean): { shown: Comment[]; hidden: number } {
-  const ordered = orderReplies(replies);
-  const shown = expanded ? ordered : ordered.slice(0, VISIBLE_REPLIES);
-  return { shown, hidden: ordered.length - shown.length };
+type ReplyWindow = Pick<CommentThread, "replies" | "replyCount" | "earlierReplies">;
+
+// The loaded replies a thread shows: two until it is opened, all of a window that starts after the first reply.
+// `earlier` replies come before them and `later` ones after; `unloaded` of the later ones are not loaded yet.
+export function visibleReplies(
+  thread: ReplyWindow,
+  expanded: boolean,
+): { shown: Comment[]; earlier: number; later: number; unloaded: number } {
+  const ordered = orderReplies(thread.replies);
+  const shown = expanded || thread.earlierReplies > 0 ? ordered : ordered.slice(0, VISIBLE_REPLIES);
+  const after: number = Math.max(0, thread.replyCount - thread.earlierReplies);
+  return {
+    shown,
+    earlier: thread.earlierReplies,
+    later: Math.max(0, after - shown.length),
+    unloaded: Math.max(0, after - ordered.length),
+  };
 }
 
-// Parent author for the reply link; null means a removed comment.
-export function replyParent(thread: CommentThread, reply: Comment): Comment | null {
+// Adds a page of replies to a thread without duplicates. A page before the loaded ones lowers `earlierReplies`.
+export function withReplies(thread: CommentThread, page: readonly Comment[], before: boolean): CommentThread {
+  const known = new Set<string>(thread.replies.map((reply: Comment): string => reply.id));
+  const added: Comment[] = page.filter((reply: Comment): boolean => !known.has(reply.id));
+  return {
+    ...thread,
+    replies: orderReplies([...thread.replies, ...added]),
+    earlierReplies: before ? Math.max(0, thread.earlierReplies - added.length) : thread.earlierReplies,
+    replyCount: Math.max(thread.replyCount, thread.earlierReplies + thread.replies.length + added.length),
+  };
+}
+
+// The author a reply answers; null means a removed comment. A parent that is not loaded comes from `parentAuthor`.
+export function replyParent(
+  thread: CommentThread,
+  reply: Comment,
+): Pick<Comment, "author" | "removed"> | null {
   if (!reply.parentId) return null;
   if (reply.parentId === thread.id) return thread;
-  return thread.replies.find((comment: Comment): boolean => comment.id === reply.parentId) ?? null;
+  const loaded = thread.replies.find((comment: Comment): boolean => comment.id === reply.parentId);
+  if (loaded) return loaded;
+  return reply.parentAuthor ? { author: reply.parentAuthor, removed: false } : null;
 }
 
 // Newest or most liked; ties favor newer comments.

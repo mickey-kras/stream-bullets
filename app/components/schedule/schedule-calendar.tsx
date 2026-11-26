@@ -28,9 +28,12 @@ const MINUTE_MS = 60_000;
 
 type Timed = Pick<StreamEvent, "startsAt" | "durationMin">;
 
-// Sunday = 0. Use Intl locale week starts where available; English starts Sunday.
-function firstWeekday(): number {
-  const info = (new Intl.Locale(intlLocale()) as Intl.Locale & { weekInfo?: { firstDay: number } }).weekInfo;
+// The week data of a locale: `getWeekInfo()` in current browsers, the older `weekInfo` accessor in others.
+type WeekLocale = { getWeekInfo?: () => { firstDay: number }; weekInfo?: { firstDay: number } };
+
+// Sunday = 0. Use the Intl week start of the locale where available; without one the week starts on Sunday.
+export function firstWeekday(locale: WeekLocale = new Intl.Locale(intlLocale()) as WeekLocale): number {
+  const info = typeof locale.getWeekInfo === "function" ? locale.getWeekInfo() : locale.weekInfo;
   return info ? info.firstDay % 7 : 0;
 }
 
