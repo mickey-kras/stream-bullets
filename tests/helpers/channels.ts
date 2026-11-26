@@ -113,8 +113,18 @@ function platformOfToken(url: URL): "twitch" | "youtube" | "kick" {
   return "kick";
 }
 
+/** The answer of the fake providers to one request. */
+export type ProviderFetch = (input: string | URL | Request, init?: RequestInit) => Promise<Response>;
+
 /** Installs the fake as `fetch`. Undo with vi.unstubAllGlobals(). */
 export function installFakeProviders(): FakeProviders {
+  const { fake, fetch } = fakeProviders();
+  vi.stubGlobal("fetch", fetch);
+  return fake;
+}
+
+/** The fake and its `fetch`, for a caller that routes provider requests itself (tests/helpers/activity-harness.ts). */
+export function fakeProviders(): { fake: FakeProviders; fetch: ProviderFetch } {
   const fake: FakeProviders = {
     calls: [],
     tokenStatus: 200,
@@ -147,7 +157,7 @@ export function installFakeProviders(): FakeProviders {
   };
   let subscription = 0;
   let page = 0;
-  vi.stubGlobal("fetch", async (input: string | URL | Request, init: RequestInit = {}): Promise<Response> => {
+  const fetch: ProviderFetch = async (input: string | URL | Request, init: RequestInit = {}): Promise<Response> => {
     const request = new Request(input, init);
     const url = new URL(request.url);
     const body = await request.text();
@@ -296,8 +306,8 @@ export function installFakeProviders(): FakeProviders {
     if (path === "api.kick.com/public/v1/public-key")
       return fake.kickPublicKey ? json({ data: { public_key: fake.kickPublicKey } }) : json({ message: "down" }, 503);
     return json({ error: `unexpected ${request.method} ${path}` }, 599);
-  });
-  return fake;
+  };
+  return { fake, fetch };
 }
 
 /** A YouTube text message as liveChatMessages.list returns it. */

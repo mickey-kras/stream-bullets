@@ -568,6 +568,7 @@ follows this reset, also across summer time.
 | Budget for all pages | 9,000 each day: about 5 hours of live chat at the floor |
 
 YouTube can ask for a longer interval with `pollingIntervalMillis`. Then a page uses fewer units.
+The [load model](live-room-capacity.md#load-model) compares this quota with one million registered streamers.
 
 Support events use no quota. The object reads them from each chat page that it reads for chat.
 It makes the same calls with support events on and off.
