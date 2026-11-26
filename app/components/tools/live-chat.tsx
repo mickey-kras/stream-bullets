@@ -21,8 +21,10 @@ import {
   liveChatReducer,
   newSince,
   nextChatTextStep,
+  rowKey,
   shownRows,
   type LiveChatRow,
+  type LiveRow,
 } from "../../lib/live-chat";
 import { toolsPath } from "../../lib/shell";
 import type { ActivityFeed, ActivityFeedStatus } from "../overlay/activity-feed";
@@ -33,6 +35,7 @@ import { PLATFORM_NAMES } from "../overlay/wasteland/theme";
 import { useReturnFocus } from "../ui/dialog";
 import { Icon } from "../ui/icon";
 import { LivePart } from "./live-part";
+import { SupportRow } from "./live-support";
 import { useWakeLock, type WakeLockState } from "./use-wake-lock";
 
 const PLATFORMS: readonly ActivityPlatform[] = ["twitch", "youtube", "kick"];
@@ -87,11 +90,11 @@ function ChatRow({ row }: Readonly<{ row: LiveChatRow }>): ReactNode {
 
 /** The chat log with its pause and its platform filters: one state for the panel and for the full-screen view. */
 export interface ChatModel {
-  /** The rows in view: the platforms that are not hidden, up to the pause. */
-  rows: LiveChatRow[];
+  /** The rows in view, chat and support events: the platforms that are not hidden, up to the pause. */
+  rows: LiveRow[];
   /** True while the list keeps its place. */
   paused: boolean;
-  /** The messages that arrived after the pause. */
+  /** The rows that arrived after the pause. */
   waiting: number;
   pause: () => void;
   jump: () => void;
@@ -112,10 +115,10 @@ function firstInView(list: HTMLElement): string | null {
 }
 
 /**
- * The merged chat of the connected platforms, for the owner. New messages keep the newest in view. A scroll up, or
- * the pause button, pauses the list: it then keeps its place and counts the new messages. "Jump to latest" resumes
- * it. The pause and the platform filters are local to this browser. A moderated message keeps its row and loses
- * its text, also while the list is paused.
+ * The merged chat of the connected platforms, for the owner, with their support events. New rows keep the newest
+ * in view. A scroll up, or the pause button, pauses the list: it then keeps its place and counts the new rows.
+ * "Jump to latest" resumes it. The pause and the platform filters are local to this browser. A moderated message
+ * keeps its row and loses its text, also while the list is paused.
  */
 export function useChatModel(feed: ActivityFeed): ChatModel {
   const [state, dispatch] = useReducer(liveChatReducer, undefined, initialLiveChat);
@@ -130,8 +133,8 @@ export function useChatModel(feed: ActivityFeed): ChatModel {
   // The first row in view of a list that the streamer scrolled while it is paused. Null: the list is at its end.
   const anchor = useRef<string | null>(null);
   const sizes = useRef<ResizeObserver | null>(null);
-  const rows: LiveChatRow[] = shownRows(state.rows, hidden).filter(
-    (row: LiveChatRow): boolean => pausedAt === null || row.seq <= pausedAt,
+  const rows: LiveRow[] = shownRows(state.rows, hidden).filter(
+    (row: LiveRow): boolean => pausedAt === null || row.seq <= pausedAt,
   );
   const last: number = rows.at(-1)?.seq ?? 0;
   const toEnd = useCallback((current: HTMLDivElement): void => {
@@ -231,7 +234,7 @@ function ChatList({
   onScroll,
   style,
 }: Readonly<{
-  rows: readonly LiveChatRow[];
+  rows: readonly LiveRow[];
   paused: boolean;
   listRef: (element: HTMLDivElement | null) => void;
   onScroll: (event: UIEvent<HTMLDivElement>) => void;
@@ -250,9 +253,9 @@ function ChatList({
           data-paused={paused || undefined}
         >
           <ol className="tl-chat-list" style={style}>
-            {rows.map((row: LiveChatRow) => (
-              <ChatRow key={row.id} row={row} />
-            ))}
+            {rows.map((row: LiveRow) =>
+              row.kind === "chat" ? <ChatRow key={row.id} row={row} /> : <SupportRow key={rowKey(row)} row={row} />,
+            )}
           </ol>
         </div>
       </ScrollArea.Viewport>

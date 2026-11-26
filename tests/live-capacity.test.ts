@@ -4,6 +4,7 @@ import { Miniflare } from "miniflare";
 import { fileURLToPath } from "node:url";
 import { cpus, platform, arch, totalmem } from "node:os";
 import { writeFile } from "node:fs/promises";
+import { PUBLIC_UPDATE_P95_MS } from "./helpers/load-targets";
 import { LIVE_SCHEMA, liveRows } from "./helpers/room";
 import type { LiveSnapshot } from "../app/types";
 
@@ -200,6 +201,8 @@ it("measures local room admission, saturation, votes, mash and recovery", { skip
     expect((await request("refresh")).status).toBe(204);
   }));
   await Promise.all(updates);
+  // The proposed target of public-page responsiveness (docs/live-room-capacity.md).
+  expect(percentiles(latency).p95).toBeLessThanOrEqual(PUBLIC_UPDATE_P95_MS);
   const afterVotes: Metrics = await metrics();
   reports.push({ scenario: "20-votes-200-sockets", updateMs: percentiles(latency), roomD1Statements: afterVotes.statements - beforeVotes.statements, fixtureVoteStatements: 40 });
   const members: Client[] = current.filter((client: Client): boolean => client.role === "member").slice(0, 20);

@@ -22,7 +22,7 @@ They never read or change the `account` table of Better Auth or the linked login
 9. For YouTube, the `ChannelIngest` object reads the live chat with a poll while a consumer listens.
 10. Consumers connect to `/api/activity/:handle` with a WebSocket. They get a snapshot first. Live events come next.
 
-Connect, reconnect, and disconnect need a sign-in from the last 10 minutes.
+Connect, reconnect, disconnect, and a change of the support events need a sign-in from the last 10 minutes.
 With an older session, the card of the platform shows a prompt. It names the platform and the sign-in provider of the account.
 The sign-in sends no age confirmation and no display name. The server reads them only when it creates an account.
 
@@ -31,6 +31,7 @@ After the sign-in, the page reads this value once and removes it. A value older 
 
 The value also holds the handle of the page. A value for a different page does nothing.
 A connect then continues to the platform without a second click. For a disconnect, its button gets focus.
+For a change of the support events, the switch gets focus.
 
 The address never carries this value. Thus a link from another site cannot start a connect.
 
@@ -155,7 +156,21 @@ The feed sends them only when the streamer turns support events on for the chann
 Each connection has its own switch (`support_events`). A new connection has the switch off.
 
 `POST /api/channels/:platform/support` changes the switch. See [API reference](api.md#channel-connections).
-The switch in **Streamer tools** and the activity feed in **Live** and in the dock are not there yet. A later change adds them.
+
+The card of each connected channel in **Streamer tools** has the switch (`app/components/channels/support-switch.tsx`).
+The card tells which events the platform has. A platform without a connection has no switch.
+
+- While the Twitch switch is off, the card names the three permissions in plain words: read followers, read subscribers, and read Bits.
+  It also tells that the Twitch page opens when Twitch does not have them.
+- The cards of YouTube and Kick name no permission.
+- When the answer has a `url`, the browser goes to that address.
+- When the answer has no `url`, the switch shows the `support` value of the answer.
+  If the streamer turned the switch on and `support` is false, the card shows the `support_denied` text.
+- The switch takes no change while a change of a channel runs.
+- A failed change shows its cause, as a failed connect does.
+
+**Live** and the dock show the support events in the chat list. See [Chat](streamer-tools.md#chat).
+The overlay chat shows no support event. Alerts on stream are a different feature.
 
 The switch does these things when the streamer turns it on:
 
@@ -553,6 +568,7 @@ follows this reset, also across summer time.
 | Budget for all pages | 9,000 each day: about 5 hours of live chat at the floor |
 
 YouTube can ask for a longer interval with `pollingIntervalMillis`. Then a page uses fewer units.
+The [load model](live-room-capacity.md#load-model) compares this quota with one million registered streamers.
 
 Support events use no quota. The object reads them from each chat page that it reads for chat.
 It makes the same calls with support events on and off.

@@ -34,7 +34,7 @@ function channel(
     lastEventAt: null,
     updatedAt: 1,
   };
-  return { platform, available, connection: status ? connection : null };
+  return { platform, available, connection: status ? connection : null, support: false, supportScopes: [] };
 }
 
 describe("channelHealth", (): void => {
@@ -67,12 +67,11 @@ describe("the response of GET /api/channels", (): void => {
     const twitch: ChannelView = { ...channel("twitch", "active"), support: true, supportScopes: ["bits:read"] };
     const kick: ChannelView = { ...channel("kick", null), support: false, supportScopes: [] };
     expect(channelsResponseSchema.parse({ channels: [twitch, kick] })).toEqual({ channels: [twitch, kick] });
-    // A server from before the support events sends neither field.
-    expect(channelsResponseSchema.parse({ channels: [channel("youtube", "active")] })).toEqual({
-      channels: [channel("youtube", "active")],
-    });
     const wrong: unknown = { channels: [{ ...twitch, support: "yes" }] };
     expect(channelsResponseSchema.safeParse(wrong).success).toBe(false);
+    // The card needs both fields for its switch.
+    const before: unknown = { platform: "kick", available: true, connection: null };
+    expect(channelsResponseSchema.safeParse({ channels: [before] }).success).toBe(false);
   });
 
   it("refuses another shape", (): void => {

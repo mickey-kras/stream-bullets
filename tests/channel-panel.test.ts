@@ -18,7 +18,13 @@ function connection(status: Connection["status"], code: string | null): Connecti
 }
 
 function channel(platform: ActivityPlatform, status: Connection["status"] | null, available: boolean = true): ChannelView {
-  return { platform, available, connection: status ? connection(status, null) : null };
+  return {
+    platform,
+    available,
+    connection: status ? connection(status, null) : null,
+    support: false,
+    supportScopes: [],
+  };
 }
 
 describe("the channels step", (): void => {
@@ -125,6 +131,11 @@ describe("parseIntent", (): void => {
     expect(parseIntent(stored({ platform: "kick", action: "disconnect", at: now }), now, "owner_page")).toEqual({
       platform: "kick",
       action: "disconnect",
+    });
+    // A change of the support events needs a recent sign-in too.
+    expect(parseIntent(stored({ platform: "twitch", action: "support", at: now }), now, "owner_page")).toEqual({
+      platform: "twitch",
+      action: "support",
     });
   });
 

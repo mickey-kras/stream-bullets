@@ -868,6 +868,99 @@ test("channel conflicts reload the list and expired authentication leaves a sign
   }
 });
 
+test("the support events switch of a connected channel shows each answer of the server", async ({ browser }) => {
+  const connectionId: string = randomUUID();
+  const accountId: string = randomUUID();
+  const now: number = Date.now();
+  await runSql("channel-support-seed", [
+    `INSERT INTO account(id,account_id,provider_id,user_id,created_at,updated_at) VALUES ('${accountId}','e2e-google-support','google',(SELECT id FROM user WHERE name='featureowner'),${now},${now});`,
+    `INSERT INTO channel_connections(id,streamer_id,platform,external_id,display_name,scopes,status,status_code,created_at,updated_at,last_event_at) VALUES ('${connectionId}',(SELECT id FROM streamers WHERE handle='feature_host'),'kick','support-kick','Support Kick','','active',NULL,${now},${now},NULL);`,
+  ]);
+  const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 92));
+  try {
+    const page = await newPage(owner);
+    await page.goto("/tools?view=channels");
+    await page.getByText("Connected: Kick", { exact: true }).click();
+    const kick = page.locator('[data-channel="kick"]');
+    const toggle = kick.getByRole("checkbox", { name: "Kick support events" });
+    await expect(toggle).not.toBeChecked();
+    await expect(toggle).toHaveAccessibleDescription(
+      "Shows follows, subscriptions, gifted subscriptions and KICKs in Live and in the OBS dock.",
+    );
+    // A platform without a connection has no switch.
+    await expect(page.getByRole("checkbox", { name: "Twitch support events" })).toHaveCount(0);
+
+    // The server of this case: each answer, and the state that the list of the page then reads.
+    let answer: { status: number; json: Record<string, unknown>; stored?: 0 | 1 } = {
+      status: 200,
+      json: { url: null, support: true },
+      stored: 1,
+    };
+    const bodies: unknown[] = [];
+    await page.route("**/api/channels/kick/support", async (route: Route) => {
+      bodies.push(route.request().postDataJSON());
+      if (answer.stored !== undefined)
+        await runSql("channel-support-store", [
+          `UPDATE channel_connections SET support_events=${answer.stored} WHERE id='${connectionId}';`,
+        ]);
+      await route.fulfill({ status: answer.status, json: answer.json });
+    });
+    const alert = kick.locator('.ch-support [role="alert"]');
+
+    // The keyboard turns the switch on. It keeps the focus, and it stays on after the list loads again.
+    const reloaded = page.waitForResponse((response) => new URL(response.url()).pathname === "/tools.data");
+    await toggle.focus();
+    await page.keyboard.press("Space");
+    await expect(toggle).toBeChecked();
+    await expect(toggle).toBeFocused();
+    await reloaded;
+    await expect(toggle).toBeChecked();
+    await expect(alert).toHaveCount(0);
+    answer = { status: 200, json: { url: null, support: false }, stored: 0 };
+    await toggle.click();
+    await expect(toggle).not.toBeChecked();
+    await expect(alert).toHaveCount(0);
+    expect(bodies).toEqual([{ on: true }, { on: false }]);
+
+    // The provider refuses the support events: the switch stays off, and the card says why.
+    answer = { status: 200, json: { url: null, support: false } };
+    await toggle.click();
+    await expect(alert).toHaveText(
+      "The channel is connected. Kick did not give the permissions for support events, so they stay off.",
+    );
+    await expect(toggle).not.toBeChecked();
+
+    // A failed change shows its cause. The next change takes the refusal away.
+    answer = { status: 500, json: { error: "The request failed. Please try again." } };
+    await toggle.click();
+    await expect(page.locator(".sb-toast").filter({ hasText: "The request failed. Please try again." })).toBeVisible();
+    await expect(toggle).not.toBeChecked();
+    await expect(toggle).not.toHaveAttribute("aria-disabled", "true");
+    await expect(alert).toHaveCount(0);
+
+    // An old sign-in: the card shows the prompt for a new one.
+    answer = { status: 403, json: { error: "Sign in again to change channel connections.", code: "reauth_required" } };
+    await toggle.click();
+    await expect(kick.locator(".ch-reauth p").first()).toHaveText(
+      "To change the support events of Kick, first confirm that it is you. Sign in to StreamBullets again with Google. Then change the switch here.",
+    );
+
+    // The answer names the page of the provider: the browser goes there. Here the page is the result of a callback.
+    answer = { status: 200, json: { url: "/tools?view=channels&channel=kick&result=support_denied", support: false } };
+    await toggle.click();
+    await expect(page.locator(".ch-result")).toHaveText(
+      "The channel is connected. Kick did not give the permissions for support events, so they stay off.",
+    );
+    expect(bodies).toHaveLength(6);
+  } finally {
+    await close(owner);
+    await runSql("channel-support-cleanup", [
+      `DELETE FROM channel_connections WHERE id='${connectionId}';`,
+      `DELETE FROM account WHERE id='${accountId}';`,
+    ]);
+  }
+});
+
 test("the grid preview shows its composition only once it is scaled to the frame", async ({ browser }) => {
   const phone = { viewport: { width: 390, height: 844 } };
   // Without JavaScript, hide the unscaled composition to prevent overflow.
