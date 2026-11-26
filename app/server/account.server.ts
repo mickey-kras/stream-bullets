@@ -15,7 +15,7 @@ const NOTES =
   "This file contains the personal data StreamBullets holds about your account. " +
   "Sign-in tokens, provider tokens, session secrets, and security key public keys are not included because they are credentials, not profile data. " +
   "Uploaded images are listed by address; download them from those addresses while your account exists. " +
-  "Other people's comments and votes are not included. " +
+  "Other people's comments and votes are not included; a notification names the comment by its ID only. " +
   "The AI page counter stores only a keyed daily hash of an IP address, which cannot be linked to your account, so it is not included.";
 
 interface UserRow {
@@ -402,6 +402,12 @@ export interface AccountExport {
     resolvedAt: string | null;
   }[];
   images: ImageRecord[];
+  // The account's notification settings and its own inbox: which comment, when, and whether it was read. The text
+  // and the author of the comment are other people's data.
+  notifications: {
+    preferences: { replies: boolean; mentions: boolean };
+    items: { id: string; kind: "reply" | "mention"; commentId: string; createdAt: string; read: boolean }[];
+  };
   legacyPolls: {
     votes: { pollId: string; choice: number }[];
     reactions: { pollId: string; value: number }[];
@@ -737,6 +743,29 @@ async function exportChannels(env: AppEnv, userId: string): Promise<AccountExpor
   }));
 }
 
+async function exportNotifications(env: AppEnv, userId: string): Promise<AccountExport["notifications"]> {
+  const [preferences, items] = await env.DB.batch([
+    env.DB.prepare("SELECT replies,mentions FROM notification_preferences WHERE user_id=?").bind(userId),
+    env.DB.prepare(
+      "SELECT id,kind,comment_id,created_at,read FROM notifications WHERE user_id=? ORDER BY created_at,id",
+    ).bind(userId),
+  ]);
+  const saved = preferences.results[0] as { replies: number; mentions: number } | undefined;
+  return {
+    // Without a stored row both kinds are on.
+    preferences: { replies: (saved?.replies ?? 1) === 1, mentions: (saved?.mentions ?? 1) === 1 },
+    items: (
+      items.results as { id: string; kind: "reply" | "mention"; comment_id: string; created_at: number; read: number }[]
+    ).map((row) => ({
+      id: row.id,
+      kind: row.kind,
+      commentId: row.comment_id,
+      createdAt: iso(row.created_at),
+      read: row.read === 1,
+    })),
+  };
+}
+
 export async function exportAccount(env: AppEnv, userId: string): Promise<AccountExport> {
   const origin = getOrigin(env);
   const now = Date.now();
@@ -880,6 +909,7 @@ export async function exportAccount(env: AppEnv, userId: string): Promise<Accoun
       createdAt: iso(row.created_at),
     })),
     images: await imageRecords(env, userId, origin),
+    notifications: await exportNotifications(env, userId),
     legacyPolls: {
       votes: history.legacyVotes.map((row: LegacyVoteRow) => ({ pollId: row.poll_id, choice: row.choice })),
       reactions: history.legacyReactions.map((row: LegacyReactionRow) => ({ pollId: row.poll_id, value: row.value })),

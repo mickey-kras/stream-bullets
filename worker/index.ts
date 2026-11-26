@@ -1,3 +1,4 @@
+import { NOTICES_PATH, noticesResponse } from "../app/server/notices.server";
 import { sitemapResponse } from "../app/server/sitemap.server";
 import { createRequestHandler, RouterContextProvider } from "react-router";
 import { appContext, type AppContext, type AppEnv } from "../app/env";
@@ -269,6 +270,8 @@ async function routeResponse(
     return await activityResponse(request, env, activity[1], nonce, responseHeaders);
   } else if (path === "/sitemap.xml") {
     return await sitemapResponse(request, env);
+  } else if (path === NOTICES_PATH) {
+    return noticesResponse(request);
   } else if (calendar) {
     return await calendarResponse(request, env, calendar[1], origin);
   } else if (live) {

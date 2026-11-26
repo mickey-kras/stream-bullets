@@ -48,5 +48,6 @@ Check the permitted use, distribution, attribution, notices, and source disclosu
 Block release for unknown or incompatible licenses.
 
 CI runs `node scripts/third-party-notices.ts --check` against `THIRD_PARTY_NOTICES.md`.
+The Worker serves the same file from its build at `/third-party-notices.txt`, so the notices ship with the JavaScript they cover.
 After dependency changes, regenerate the notices. Review changed licenses in the diff.
 Vulnerability checks do not approve licenses. Repeat license review for changed licenses or new runtime dependencies.

@@ -1003,6 +1003,26 @@ describe("Worker cron", (): void => {
   });
 });
 
+describe("third-party notices", (): void => {
+  it("serves the notices of the shipped packages from this build", async (): Promise<void> => {
+    const { readFile } = await import("node:fs/promises");
+    const expected: string = await readFile(new URL("../THIRD_PARTY_NOTICES.md", import.meta.url), "utf8");
+    const response = await fetchPath("/third-party-notices.txt");
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Content-Type")).toBe("text/plain; charset=utf-8");
+    const text = await response.text();
+    expect(text).toBe(expected);
+    expect(text).toMatch(/^## react 19\./m);
+    const head = await worker.fetch(new Request(`${env.APP_ORIGIN}/third-party-notices.txt`, { method: "HEAD" }), env);
+    expect([head.status, await head.text()]).toEqual([200, ""]);
+    const post = await worker.fetch(
+      new Request(`${env.APP_ORIGIN}/third-party-notices.txt`, { method: "POST", headers: { Origin: env.APP_ORIGIN } }),
+      env,
+    );
+    expect(post.status).toBe(405);
+  });
+});
+
 describe("sitemap", (): void => {
   it("serves public pages and all listed profiles, including frozen pages", async (): Promise<void> => {
     await env.DB.prepare(

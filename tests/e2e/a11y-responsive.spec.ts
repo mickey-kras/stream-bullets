@@ -42,7 +42,11 @@ async function expectLabelsFit(locator: Locator): Promise<void> {
 }
 
 async function expectHeaderFits(page: Page): Promise<void> {
-  const controls: Locator = page.locator("header nav > a, header nav > button, header .header-end > .gold, header .header-end .profile, header .landing-brand");
+  // Every visible control of the header: navigation, Streamers, language, notifications, the page action, the account
+  // button and the brand. The account wrapper holds the account button and its closed menu, so it is left out.
+  const controls: Locator = page.locator(
+    "header nav > a, header nav > button, header .header-end > :not(.account-menu-wrap), header .profile, header .landing-brand",
+  );
   await expectLabelsFit(page.locator("header nav > a, header nav > button, header .header-end > .gold"));
   const overlaps: boolean = await controls.evaluateAll((elements: Element[]): boolean => {
     const boxes: DOMRect[] = elements.map((element: Element): DOMRect => element.getBoundingClientRect())

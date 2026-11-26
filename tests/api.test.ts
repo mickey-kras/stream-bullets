@@ -110,6 +110,15 @@ describe("handler table", (): void => {
     expect((await call("HEAD", "me")).status).toBe(200);
   });
 
+  it("checks the origin, the query and the sign-in of a write before it answers 405", async (): Promise<void> => {
+    // DELETE /api/profile is no route: signed in from this site, it gets 405.
+    expect((await call("DELETE", "profile", { user: "viewer" })).status).toBe(405);
+    expect((await call("DELETE", "profile")).status).toBe(401);
+    expect((await call("DELETE", "profile?x=1", { user: "viewer" })).status).toBe(400);
+    const crossSite = await call("DELETE", "profile", { user: "viewer", headers: { "Sec-Fetch-Site": "cross-site" } });
+    expect(crossSite.status).toBe(403);
+  });
+
   it("refuses writes that are signed out, cross-site, or carry a query string", async (): Promise<void> => {
     expect((await call("PATCH", "profile", { body: { name: "X" } })).status).toBe(401);
     const crossSite = await action({

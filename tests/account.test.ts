@@ -545,6 +545,29 @@ describe("account export", (): void => {
     expect(queries.filter((sql: string) => sql.includes("FROM entry_comments x"))).toHaveLength(3);
   });
 
+  it("exports the notification settings and the inbox, without the text of other people's comments", async (): Promise<void> => {
+    expect((await exportAccount(env, "leaver")).notifications).toEqual({
+      preferences: { replies: true, mentions: true },
+      items: [],
+    });
+    await env.DB.batch([
+      env.DB.prepare("INSERT INTO notification_preferences (user_id,replies,mentions) VALUES ('leaver',0,1)"),
+      env.DB.prepare(
+        `INSERT INTO notifications (id,user_id,actor_id,comment_id,kind,created_at,read) VALUES
+          ('n-read','leaver','other','c-reply',?1,?2,1),('n-new','leaver','other','c-reply-2','mention',?3,0)`,
+      ).bind("reply", now, now + 1),
+    ]);
+    const data = await exportAccount(env, "leaver");
+    expect(data.notifications).toEqual({
+      preferences: { replies: false, mentions: true },
+      items: [
+        { id: "n-read", kind: "reply", commentId: "c-reply", createdAt: new Date(now).toISOString(), read: true },
+        { id: "n-new", kind: "mention", commentId: "c-reply-2", createdAt: new Date(now + 1).toISOString(), read: false },
+      ],
+    });
+    expect(JSON.stringify(data.notifications)).not.toContain("Other replies");
+  });
+
   it("exports likes and images stored without a content type", async (): Promise<void> => {
     await env.IMAGES.put("avatar/other", new Uint8Array([1]));
     const data = await exportAccount(env, "other");

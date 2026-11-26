@@ -460,7 +460,7 @@ function Thread({
   };
   const load = (before: boolean): void => {
     setLoadingReplies(true);
-    onLoadReplies(thread, before).finally(() => setLoadingReplies(false));
+    void onLoadReplies(thread, before).finally(() => setLoadingReplies(false));
   };
   const count = thread.replyCount;
   const listId = `replies-${thread.id}`;
@@ -546,6 +546,22 @@ async function fetchReplies(
     { signal },
   );
   return page.replies;
+}
+
+// After a refresh, the threads whose replies the reader had loaded get as many again.
+async function restoreReplies(
+  threads: CommentThread[],
+  loaded: ReadonlyMap<string, number>,
+  signal: AbortSignal,
+): Promise<CommentThread[]> {
+  let values: CommentThread[] = threads;
+  for (const [id, count] of loaded) {
+    const thread = values.find((value: CommentThread) => value.id === id);
+    if (!thread || thread.replies.length >= Math.min(count, thread.replyCount)) continue;
+    const again = await repliesFromStart(thread, count, signal);
+    values = values.map((value: CommentThread) => (value.id === id ? again : value));
+  }
+  return values;
 }
 
 // The first `count` replies of a thread, loaded again after a refresh of the discussion.
@@ -674,12 +690,7 @@ export function Discussion({
       .then(async (result) => {
         let values = result.threads;
         let targetError = "";
-        for (const [id, count] of loadedReplies.current) {
-          const thread = values.find((value: CommentThread) => value.id === id);
-          if (!thread || thread.replies.length >= Math.min(count, thread.replyCount)) continue;
-          const loaded = await repliesFromStart(thread, count, controller.signal);
-          values = values.map((value: CommentThread) => (value.id === id ? loaded : value));
-        }
+        values = await restoreReplies(values, loadedReplies.current, controller.signal);
         const targets = new Set([targetId, draftStore.getSnapshot().draft.replyId, postedReply.current]);
         for (const id of targets) {
           if (id === null || (id !== targetId && findComment(values, id))) continue;

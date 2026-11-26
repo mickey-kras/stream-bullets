@@ -1446,6 +1446,28 @@ describe("ChannelIngest tokens", (): void => {
     expect(await loadTokens(env, id, "kick")).toMatchObject({ accessToken: "kick-access-1", refreshToken: "kick-refresh-1" });
   });
 
+  it("uses each rotated refresh token for the next refresh, over two expiry cycles", async (): Promise<void> => {
+    const id = await addConnection("kick", { expiresAt: Date.now() + 1000 });
+    const expire = (): Promise<D1Result> =>
+      env.DB.prepare("UPDATE channel_tokens SET expires_at=? WHERE connection_id=?").bind(Date.now() - 1, id).run();
+    const sent = (): (string | null)[] =>
+      fake.calls
+        .filter((item) => item.body.includes("grant_type=refresh_token"))
+        .map((item) => new URLSearchParams(item.body).get("refresh_token"));
+    await post("connect", "kick");
+    await expire();
+    await post("connect", "kick");
+    expect(sent()).toEqual(["kick-stored-refresh", "kick-refresh-1"]);
+    expect(await loadTokens(env, id, "kick")).toMatchObject({ accessToken: "kick-access-2", refreshToken: "kick-refresh-2" });
+    // The provider no longer takes a token it rotated away.
+    const stale = await fetch("https://id.kick.com/oauth/token", {
+      method: "POST",
+      body: new URLSearchParams({ grant_type: "refresh_token", refresh_token: "kick-refresh-1" }),
+    });
+    expect(stale.status).toBe(400);
+    expect(fake.refreshes).toBe(2);
+  });
+
   it("keeps the newer tokens when another writer replaced them during a refresh (refresh race)", async (): Promise<void> => {
     const id = await addConnection("kick", { expiresAt: Date.now() - 1 });
     fake.duringRefresh = async (): Promise<void> => {
