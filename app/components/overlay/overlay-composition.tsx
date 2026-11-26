@@ -29,7 +29,7 @@ import {
   type Orientation,
   type PlacedContent,
 } from "../../lib/overlay-layers";
-import { usePlatformFeed, type ActivityFeed } from "./activity-feed";
+import type { ActivityFeed } from "./activity-feed";
 import { CharactersLayer } from "./characters/characters-layer";
 import { usePlaygroundSource } from "./characters/use-playground";
 import { viewForPlatform, type PlaygroundView } from "./characters/view";
@@ -382,7 +382,6 @@ export function OverlayComposition({
   // An output that shows Twitch only drops the chat and the characters of the other platforms. A preview does the
   // same, so the owner sees what the output shows.
   const platform: ActivityPlatform | null = shownPlatform(layers);
-  const chatFeed: ActivityFeed | null = usePlatformFeed(feed, platform);
   const chatSamples: readonly ActivityChat[] | undefined = useMemo(
     () => (platform && samples ? samples.filter((row: ActivityChat): boolean => row.platform === platform) : samples),
     [samples, platform],
@@ -403,7 +402,7 @@ export function OverlayComposition({
       {shows("chat") && chat && (
         <LayerBox layer="chat" rect={chat} frame={frame} alone={alone}>
           <ChatSlot
-            feed={chatFeed}
+            feed={feed}
             hideCommands={layers.chat.hideCommands}
             backgroundOpacity={layers.chat.backgroundOpacity}
             samples={chatSamples}

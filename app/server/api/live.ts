@@ -83,10 +83,10 @@ export const liveRoutes: ApiRoute[] = [
     if (!streamer) throw new HttpError(404, "You do not have a streamer page.");
     await consumeMutationQuota(env, viewer.id);
     const { overlay, layouts, layersChanged } = await updateLayouts(env, viewer.id, streamer.id, action);
-    if (layersChanged) {
-      notifyOverlay(env, streamer.id);
-      notifyPlayground(env, streamer.id);
-    }
+    // Each layout action moves the revision. The other tabs of the owner load the layouts again from that message.
+    notifyOverlay(env, streamer.id);
+    // Only the layers configure the character playground.
+    if (layersChanged) notifyPlayground(env, streamer.id);
     return json({ overlay, layouts });
   }),
   // POST /api/overlay {action: showResults|message|layers|chatTest, ...} → {overlay}
