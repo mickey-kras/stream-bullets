@@ -74,6 +74,11 @@ export interface LiveChatState {
   rows: LiveRow[];
   /** Ids of moderated messages, so a late duplicate never shows a removed message. */
   removed: ReadonlySet<string>;
+  /**
+   * IDs of the support events that the log got. A reconnect snapshot has a support event for 10 minutes, also
+   * after newer rows pushed its row out: the ID keeps it from a second row.
+   */
+  supported: ReadonlySet<string>;
   /** The newest row at the time of the pause: later rows wait. Null while the log follows the newest message. */
   pausedAt: number | null;
 }
@@ -81,7 +86,7 @@ export interface LiveChatState {
 export type LiveChatAction = { type: "message"; message: ActivityMessage } | { type: "pause" } | { type: "resume" };
 
 export function initialLiveChat(): LiveChatState {
-  return { seq: 0, rows: [], removed: new Set<string>(), pausedAt: null };
+  return { seq: 0, rows: [], removed: new Set<string>(), supported: new Set<string>(), pausedAt: null };
 }
 
 function toRow(chat: ActivityChat, seq: number): LiveChatRow {
@@ -101,6 +106,7 @@ function toRow(chat: ActivityChat, seq: number): LiveChatRow {
   };
 }
 
+/** `removed` with `ids`. It keeps the newest MAX_REMOVED_IDS: the oldest ID goes first. */
 function remember(removed: ReadonlySet<string>, ids: readonly string[]): ReadonlySet<string> {
   if (ids.length === 0) return removed;
   const next: string[] = [...removed, ...ids];
@@ -121,9 +127,9 @@ function receiveChat(state: LiveChatState, chat: ActivityChat): LiveChatState {
   return { ...state, seq, rows: newest([...state.rows, toRow(chat, seq)], state.pausedAt) };
 }
 
-/** A replay, a provider retry and the copy of a snapshot have the ID of a row that the log has: no second row. */
+/** A replay, a provider retry and the copy of a snapshot have an ID that the log got before: no second row. */
 function receiveSupport(state: LiveChatState, support: ActivitySupport): LiveChatState {
-  if (state.rows.some((row: LiveRow): boolean => row.kind === "support" && row.id === support.id)) return state;
+  if (state.supported.has(support.id)) return state;
   const seq: number = state.seq + 1;
   const row: LiveSupportRow = {
     kind: "support",
@@ -137,7 +143,8 @@ function receiveSupport(state: LiveChatState, support: ActivitySupport): LiveCha
     text: support.text || null,
     receivedAt: support.receivedAt,
   };
-  return { ...state, seq, rows: newest([...state.rows, row], state.pausedAt) };
+  const supported: ReadonlySet<string> = remember(state.supported, [support.id]);
+  return { ...state, seq, supported, rows: newest([...state.rows, row], state.pausedAt) };
 }
 
 /**

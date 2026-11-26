@@ -301,6 +301,19 @@ describe("support events in the live chat log", (): void => {
     expect(texts(receive(once, event(support("gift", 1, { platform: "kick", amount: 5 }))))).toEqual(["gift", "gift"]);
   });
 
+  it("adds no row for a snapshot copy of a support event whose row newer chat pushed out", (): void => {
+    const gift: ActivitySupport = support("gift", 1, { amount: 5 });
+    const chats: ActivityMessage[] = Array.from({ length: LIVE_CHAT_LIMITS.maxRows }, (_, n: number) =>
+      event(chat(n + 2)),
+    );
+    const busy: LiveChatState = run([event(gift), ...chats]);
+    expect(busy.rows.some((row) => row.kind === "support")).toBe(false);
+    // The server keeps the support event for the snapshot of a reconnect: it is not a new event.
+    const again: LiveChatState = receive(busy, snapshot([{ ...gift, replay: true }]));
+    expect(again.rows).toBe(busy.rows);
+    expect(again.seq).toBe(busy.seq);
+  });
+
   it("keeps a chat message and a support event that have the same ID as two rows", (): void => {
     const state: LiveChatState = run([
       event(chat(1, { platform: "youtube", messageId: "x" })),
