@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ActivityMessage } from "../../lib/activity";
+import { emptyHistory, historySnapshot, keepHistory, type ActivityHistory } from "../../lib/activity-history";
 import {
   activityUrl,
   openActivitySocket,
@@ -10,7 +11,10 @@ import {
 export type ActivityFeedStatus = ActivitySocketStatus | "off";
 
 export interface ActivityFeed {
-  /** Every parsed message of the page's activity socket. Returns the unsubscribe function. */
+  /**
+   * Every parsed message of the page's activity socket. Returns the unsubscribe function. A reader that subscribes
+   * after the snapshot of the socket gets a snapshot of the chat that the feed has (see `ActivityHistory`).
+   */
   subscribe(this: void, listener: (message: ActivityMessage) => void): () => void;
   status: ActivityFeedStatus;
 }
@@ -101,6 +105,7 @@ export function useActivityFeed(
   const on: boolean = enabled && (Boolean(key) || options.owner === true);
   const [status, setStatus] = useState<ActivityFeedStatus>(on ? "connecting" : "off");
   const listenersRef = useRef<Set<Listener>>(new Set<Listener>());
+  const historyRef = useRef<ActivityHistory>(emptyHistory());
   const [session, setSession] = useState<string>(`${handle}:${key}:${on}:${characters}`);
   const current = `${handle}:${key}:${on}:${characters}`;
   if (session !== current) {
@@ -111,9 +116,12 @@ export function useActivityFeed(
     if (!on) return;
     const url: string = activityUrl(globalThis.location.origin, handle, key, { characters });
     const listeners: Set<Listener> = listenersRef.current;
+    // A new socket sends its own snapshot: the history of the socket before it tells nothing.
+    historyRef.current = emptyHistory();
     return acquire(
       url,
       (message: ActivityMessage): void => {
+        historyRef.current = keepHistory(historyRef.current, message);
         for (const listener of Array.from(listeners)) listener(message);
       },
       setStatus,
@@ -123,6 +131,9 @@ export function useActivityFeed(
     () =>
       (listener: Listener): (() => void) => {
         listenersRef.current.add(listener);
+        // The socket sent its snapshot before this reader came: give the reader the chat that the feed has.
+        const kept: ActivityMessage | null = historySnapshot(historyRef.current);
+        if (kept) listener(kept);
         return (): void => {
           listenersRef.current.delete(listener);
         };

@@ -9993,7 +9993,7 @@
       "relation": "calls",
       "source": "app_components_overlay_activity_feed_acquire",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L46",
+      "source_location": "L50",
       "target": "app_lib_activity_socket_openactivitysocket",
       "weight": 1.0
     },
@@ -10005,7 +10005,19 @@
       "relation": "calls",
       "source": "app_components_overlay_activity_feed_useactivityfeed",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L112",
+      "source_location": "L108",
+      "target": "app_lib_activity_history_emptyhistory",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_overlay_activity_feed_useactivityfeed",
+      "source_file": "app/components/overlay/activity-feed.tsx",
+      "source_location": "L117",
       "target": "app_lib_activity_socket_activityurl",
       "weight": 1.0
     },
@@ -10017,8 +10029,32 @@
       "relation": "calls",
       "source": "app_components_overlay_activity_feed_useactivityfeed",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L114",
+      "source_location": "L121",
       "target": "app_components_overlay_activity_feed_acquire",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_overlay_activity_feed_useactivityfeed",
+      "source_file": "app/components/overlay/activity-feed.tsx",
+      "source_location": "L124",
+      "target": "app_lib_activity_history_keephistory",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_overlay_activity_feed_useactivityfeed",
+      "source_file": "app/components/overlay/activity-feed.tsx",
+      "source_location": "L135",
+      "target": "app_lib_activity_history_historysnapshot",
       "weight": 1.0
     },
     {
@@ -29447,6 +29483,66 @@
       "source_file": "app/i18n/server.ts",
       "source_location": "L9",
       "target": "app_i18n_index_loadcatalog",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_activity_history_keepevent",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L47",
+      "target": "app_lib_activity_history_trimmed",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_activity_history_keepevent",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L50",
+      "target": "app_lib_activity_history_without",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_activity_history_keephistory",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L67",
+      "target": "app_lib_activity_history_emptyhistory",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_activity_history_keephistory",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L69",
+      "target": "app_lib_activity_history_trimmed",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_activity_history_keephistory",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L71",
+      "target": "app_lib_activity_history_keepevent",
       "weight": 1.0
     },
     {
@@ -58735,6 +58831,90 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "tests_activity_history_test",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L49",
+      "target": "tests_activity_history_test_after",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_history_test",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L49",
+      "target": "tests_activity_history_test_chat",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_history_test",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L49",
+      "target": "tests_activity_history_test_event",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_history_test",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L53",
+      "target": "tests_activity_history_test_snapshot",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_history_test",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L63",
+      "target": "tests_activity_history_test_kept",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_history_test_after",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L36",
+      "target": "app_lib_activity_history_emptyhistory",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_activity_history_test_kept",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L40",
+      "target": "app_lib_activity_history_historysnapshot",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "tests_activity_socket_test",
       "source_file": "tests/activity-socket.test.ts",
       "source_location": "L153",
@@ -62517,7 +62697,7 @@
       "relation": "calls",
       "source": "tests_e2e_tools_live_spec",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L107",
+      "source_location": "L108",
       "target": "tests_e2e_tools_live_spec_overlay",
       "weight": 1.0
     },
@@ -62529,7 +62709,7 @@
       "relation": "calls",
       "source": "tests_e2e_tools_live_spec",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L226",
+      "source_location": "L227",
       "target": "tests_e2e_tools_live_spec_chat",
       "weight": 1.0
     },
@@ -62541,7 +62721,7 @@
       "relation": "calls",
       "source": "tests_e2e_tools_live_spec",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L401",
+      "source_location": "L445",
       "target": "tests_e2e_tools_live_spec_phone",
       "weight": 1.0
     },
@@ -62553,7 +62733,7 @@
       "relation": "calls",
       "source": "tests_e2e_tools_live_spec",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L427",
+      "source_location": "L471",
       "target": "tests_e2e_tools_live_spec_wakerecord",
       "weight": 1.0
     },
@@ -62565,7 +62745,7 @@
       "relation": "calls",
       "source": "tests_e2e_tools_live_spec",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L50",
+      "source_location": "L51",
       "target": "tests_e2e_tools_live_spec_entry",
       "weight": 1.0
     },
@@ -62577,7 +62757,7 @@
       "relation": "calls",
       "source": "tests_e2e_tools_live_spec",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L79",
+      "source_location": "L80",
       "target": "tests_e2e_tools_live_spec_obspage",
       "weight": 1.0
     },
@@ -62589,7 +62769,7 @@
       "relation": "calls",
       "source": "tests_e2e_tools_live_spec_obspage",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L69",
+      "source_location": "L70",
       "target": "tests_e2e_coverage_newpage",
       "weight": 1.0
     },
@@ -62601,7 +62781,7 @@
       "relation": "calls",
       "source": "tests_e2e_tools_live_spec_phone",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L332",
+      "source_location": "L376",
       "target": "tests_e2e_coverage_newpage",
       "weight": 1.0
     },
@@ -62613,7 +62793,7 @@
       "relation": "calls",
       "source": "tests_e2e_tools_live_spec_phone",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L383",
+      "source_location": "L427",
       "target": "tests_e2e_tools_live_spec_chat",
       "weight": 1.0
     },
@@ -69540,7 +69720,7 @@
       "relation": "references",
       "source": "app_components_overlay_activity_feed_sharedsocket",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L25",
+      "source_location": "L29",
       "target": "app_lib_activity_socket_activitysocket",
       "weight": 1.0
     },
@@ -70346,6 +70526,18 @@
       "source_file": "app/env.ts",
       "source_location": "L57",
       "target": "app_i18n_index_locale",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "relation": "references",
+      "source": "app_lib_activity_history_activityhistory",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L14",
+      "target": "app_lib_activity_activitychat",
       "weight": 1.0
     },
     {
@@ -71724,7 +71916,7 @@
       "relation": "references",
       "source": "app_components_overlay_activity_feed_sharedsocket",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L27",
+      "source_location": "L31",
       "target": "app_lib_activity_socket_activitysocketstatus",
       "weight": 1.0
     },
@@ -78990,6 +79182,54 @@
       "source": "app_components_overlay_activity_feed",
       "source_file": "app/components/overlay/activity-feed.tsx",
       "source_location": "L3",
+      "target": "app_lib_activity_history_activityhistory",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_overlay_activity_feed",
+      "source_file": "app/components/overlay/activity-feed.tsx",
+      "source_location": "L3",
+      "target": "app_lib_activity_history_emptyhistory",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_overlay_activity_feed",
+      "source_file": "app/components/overlay/activity-feed.tsx",
+      "source_location": "L3",
+      "target": "app_lib_activity_history_historysnapshot",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_overlay_activity_feed",
+      "source_file": "app/components/overlay/activity-feed.tsx",
+      "source_location": "L3",
+      "target": "app_lib_activity_history_keephistory",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_overlay_activity_feed",
+      "source_file": "app/components/overlay/activity-feed.tsx",
+      "source_location": "L4",
       "target": "app_lib_activity_socket_activitysocket",
       "weight": 1.0
     },
@@ -79001,7 +79241,7 @@
       "relation": "imports",
       "source": "app_components_overlay_activity_feed",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L3",
+      "source_location": "L4",
       "target": "app_lib_activity_socket_activitysocketstatus",
       "weight": 1.0
     },
@@ -79013,7 +79253,7 @@
       "relation": "imports",
       "source": "app_components_overlay_activity_feed",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L3",
+      "source_location": "L4",
       "target": "app_lib_activity_socket_activityurl",
       "weight": 1.0
     },
@@ -79025,7 +79265,7 @@
       "relation": "imports",
       "source": "app_components_overlay_activity_feed",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L3",
+      "source_location": "L4",
       "target": "app_lib_activity_socket_openactivitysocket",
       "weight": 1.0
     },
@@ -92983,6 +93223,42 @@
       "source_file": "app/lib/activity.ts",
       "source_location": "L4",
       "target": "app_lib_zoned_zonedtime",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_lib_activity_history",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L1",
+      "target": "app_lib_activity_activitychat",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_lib_activity_history",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L1",
+      "target": "app_lib_activity_activityevent",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_lib_activity_history",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L1",
+      "target": "app_lib_activity_activitymessage",
       "weight": 1.0
     },
     {
@@ -116479,6 +116755,114 @@
       "source_file": "tests/account-ui.test.ts",
       "source_location": "L7",
       "target": "app_lib_directory_streamertarget",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_history_test",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L2",
+      "target": "app_lib_activity_activitychat",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_history_test",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L2",
+      "target": "app_lib_activity_activityevent",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_history_test",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L2",
+      "target": "app_lib_activity_activitymessage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_history_test",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L2",
+      "target": "app_lib_activity_activityplatform",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_history_test",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L3",
+      "target": "app_lib_activity_history_activityhistory",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_history_test",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L3",
+      "target": "app_lib_activity_history_emptyhistory",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_history_test",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L3",
+      "target": "app_lib_activity_history_history_size",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_history_test",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L3",
+      "target": "app_lib_activity_history_historysnapshot",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_activity_history_test",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L3",
+      "target": "app_lib_activity_history_keephistory",
       "weight": 1.0
     },
     {
@@ -145174,6 +145558,18 @@
       "source": "app_components_overlay_activity_feed",
       "source_file": "app/components/overlay/activity-feed.tsx",
       "source_location": "L3",
+      "target": "app_lib_activity_history",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_overlay_activity_feed",
+      "source_file": "app/components/overlay/activity-feed.tsx",
+      "source_location": "L4",
       "target": "app_lib_activity_socket",
       "weight": 1.0
     },
@@ -153915,6 +154311,19 @@
       "source_file": "app/lib/activity.ts",
       "source_location": "L4",
       "target": "app_lib_zoned",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_lib_activity_history",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L1",
+      "target": "app_lib_activity",
+      "type_only": true,
       "weight": 1.0
     },
     {
@@ -165821,6 +166230,43 @@
       "source_file": "tests/account-ui.test.ts",
       "source_location": "L7",
       "target": "app_lib_directory",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_activity_history_test",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L1",
+      "target": "ref_vitest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_activity_history_test",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L2",
+      "target": "app_lib_activity",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_activity_history_test",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L3",
+      "target": "app_lib_activity_history",
       "weight": 1.0
     },
     {
@@ -178164,7 +178610,7 @@
       "relation": "references",
       "source": "app_components_overlay_activity_feed_activityfeed_subscribe",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L14",
+      "source_location": "L18",
       "target": "app_lib_activity_activitymessage",
       "weight": 1.0
     },
@@ -185818,7 +186264,7 @@
       "relation": "contains",
       "source": "app_components_overlay_activity_feed",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L10",
+      "source_location": "L11",
       "target": "app_components_overlay_activity_feed_activityfeedstatus",
       "weight": 1.0
     },
@@ -185829,7 +186275,7 @@
       "relation": "contains",
       "source": "app_components_overlay_activity_feed",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L12",
+      "source_location": "L13",
       "target": "app_components_overlay_activity_feed_activityfeed",
       "weight": 1.0
     },
@@ -185840,7 +186286,7 @@
       "relation": "contains",
       "source": "app_components_overlay_activity_feed",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L18",
+      "source_location": "L22",
       "target": "app_components_overlay_activity_feed_listener",
       "weight": 1.0
     },
@@ -185851,7 +186297,7 @@
       "relation": "contains",
       "source": "app_components_overlay_activity_feed",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L24",
+      "source_location": "L28",
       "target": "app_components_overlay_activity_feed_sharedsocket",
       "weight": 1.0
     },
@@ -185862,7 +186308,7 @@
       "relation": "contains",
       "source": "app_components_overlay_activity_feed",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L32",
+      "source_location": "L36",
       "target": "app_components_overlay_activity_feed_shared",
       "weight": 1.0
     },
@@ -185873,7 +186319,7 @@
       "relation": "contains",
       "source": "app_components_overlay_activity_feed",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L34",
+      "source_location": "L38",
       "target": "app_components_overlay_activity_feed_acquire",
       "weight": 1.0
     },
@@ -185884,7 +186330,7 @@
       "relation": "contains",
       "source": "app_components_overlay_activity_feed",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L84",
+      "source_location": "L88",
       "target": "app_components_overlay_activity_feed_activityfeedoptions",
       "weight": 1.0
     },
@@ -185895,7 +186341,7 @@
       "relation": "contains",
       "source": "app_components_overlay_activity_feed",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L94",
+      "source_location": "L98",
       "target": "app_components_overlay_activity_feed_useactivityfeed",
       "weight": 1.0
     },
@@ -196721,6 +197167,105 @@
       "source_file": "app/lib/activity.ts",
       "source_location": "L96",
       "target": "app_lib_activity_activityevent",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_activity_history",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L10",
+      "target": "app_lib_activity_history_activityhistory",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_activity_history",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L20",
+      "target": "app_lib_activity_history_history_size",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_activity_history",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L22",
+      "target": "app_lib_activity_history_emptyhistory",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_activity_history",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L26",
+      "target": "app_lib_activity_history_ischat",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_activity_history",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L31",
+      "target": "app_lib_activity_history_trimmed",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_activity_history",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L38",
+      "target": "app_lib_activity_history_without",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_activity_history",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L43",
+      "target": "app_lib_activity_history_keepevent",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_activity_history",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L66",
+      "target": "app_lib_activity_history_keephistory",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_activity_history",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L76",
+      "target": "app_lib_activity_history_historysnapshot",
       "weight": 1.0
     },
     {
@@ -221403,7 +221948,7 @@
       "relation": "contains",
       "source": "docs_streamer_tools_live",
       "source_file": "docs/streamer-tools.md",
-      "source_location": "L109",
+      "source_location": "L113",
       "target": "docs_streamer_tools_full_screen_chat",
       "weight": 1.0
     },
@@ -221436,7 +221981,7 @@
       "relation": "contains",
       "source": "docs_streamer_tools_live",
       "source_file": "docs/streamer-tools.md",
-      "source_location": "L54",
+      "source_location": "L58",
       "target": "docs_streamer_tools_poll",
       "weight": 1.0
     },
@@ -221447,7 +221992,7 @@
       "relation": "contains",
       "source": "docs_streamer_tools_live",
       "source_file": "docs/streamer-tools.md",
-      "source_location": "L74",
+      "source_location": "L78",
       "target": "docs_streamer_tools_topics_from_your_viewers",
       "weight": 1.0
     },
@@ -221458,7 +222003,7 @@
       "relation": "contains",
       "source": "docs_streamer_tools_live",
       "source_file": "docs/streamer-tools.md",
-      "source_location": "L80",
+      "source_location": "L84",
       "target": "docs_streamer_tools_message_banner",
       "weight": 1.0
     },
@@ -221469,7 +222014,7 @@
       "relation": "contains",
       "source": "docs_streamer_tools_live",
       "source_file": "docs/streamer-tools.md",
-      "source_location": "L87",
+      "source_location": "L91",
       "target": "docs_streamer_tools_chat",
       "weight": 1.0
     },
@@ -221480,7 +222025,7 @@
       "relation": "contains",
       "source": "docs_streamer_tools_obs_dock",
       "source_file": "docs/streamer-tools.md",
-      "source_location": "L155",
+      "source_location": "L159",
       "target": "docs_streamer_tools_dock_link",
       "weight": 1.0
     },
@@ -221491,7 +222036,7 @@
       "relation": "contains",
       "source": "docs_streamer_tools_obs_dock",
       "source_file": "docs/streamer-tools.md",
-      "source_location": "L166",
+      "source_location": "L170",
       "target": "docs_streamer_tools_what_the_dock_key_allows",
       "weight": 1.0
     },
@@ -221502,7 +222047,7 @@
       "relation": "contains",
       "source": "docs_streamer_tools_streamer_tools",
       "source_file": "docs/streamer-tools.md",
-      "source_location": "L144",
+      "source_location": "L148",
       "target": "docs_streamer_tools_obs_dock",
       "weight": 1.0
     },
@@ -221966,6 +222511,61 @@
       "source_file": "tests/account.test.ts",
       "source_location": "L771",
       "target": "tests_account_test_verificationseed",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_activity_history_test",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L13",
+      "target": "tests_activity_history_test_chat",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_activity_history_test",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L31",
+      "target": "tests_activity_history_test_snapshot",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_activity_history_test",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L33",
+      "target": "tests_activity_history_test_event",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_activity_history_test",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L35",
+      "target": "tests_activity_history_test_after",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_activity_history_test",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L39",
+      "target": "tests_activity_history_test_kept",
       "weight": 1.0
     },
     {
@@ -226496,7 +227096,7 @@
       "relation": "contains",
       "source": "tests_e2e_tools_live_spec",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L198",
+      "source_location": "L199",
       "target": "tests_e2e_tools_live_spec_chat",
       "weight": 1.0
     },
@@ -226584,8 +227184,8 @@
       "relation": "contains",
       "source": "tests_e2e_tools_live_spec",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L28",
-      "target": "tests_e2e_tools_live_spec_now",
+      "source_location": "L27",
+      "target": "tests_e2e_tools_live_spec_replay_ip",
       "weight": 1.0
     },
     {
@@ -226596,6 +227196,17 @@
       "source": "tests_e2e_tools_live_spec",
       "source_file": "tests/e2e/tools-live.spec.ts",
       "source_location": "L29",
+      "target": "tests_e2e_tools_live_spec_now",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_tools_live_spec",
+      "source_file": "tests/e2e/tools-live.spec.ts",
+      "source_location": "L30",
       "target": "tests_e2e_tools_live_spec_entry",
       "weight": 1.0
     },
@@ -226606,7 +227217,7 @@
       "relation": "contains",
       "source": "tests_e2e_tools_live_spec",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L32",
+      "source_location": "L33",
       "target": "tests_e2e_tools_live_spec_poll_id",
       "weight": 1.0
     },
@@ -226617,18 +227228,7 @@
       "relation": "contains",
       "source": "tests_e2e_tools_live_spec",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L328",
-      "target": "tests_e2e_tools_live_spec_phone",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "tests_e2e_tools_live_spec",
-      "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L33",
+      "source_location": "L34",
       "target": "tests_e2e_tools_live_spec_topic_a",
       "weight": 1.0
     },
@@ -226639,7 +227239,7 @@
       "relation": "contains",
       "source": "tests_e2e_tools_live_spec",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L34",
+      "source_location": "L35",
       "target": "tests_e2e_tools_live_spec_topic_b",
       "weight": 1.0
     },
@@ -226650,8 +227250,8 @@
       "relation": "contains",
       "source": "tests_e2e_tools_live_spec",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L389",
-      "target": "tests_e2e_tools_live_spec_wakerecord",
+      "source_location": "L372",
+      "target": "tests_e2e_tools_live_spec_phone",
       "weight": 1.0
     },
     {
@@ -226661,7 +227261,7 @@
       "relation": "contains",
       "source": "tests_e2e_tools_live_spec",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L42",
+      "source_location": "L43",
       "target": "tests_e2e_tools_live_spec_livelayers",
       "weight": 1.0
     },
@@ -226672,7 +227272,18 @@
       "relation": "contains",
       "source": "tests_e2e_tools_live_spec",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L62",
+      "source_location": "L433",
+      "target": "tests_e2e_tools_live_spec_wakerecord",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_tools_live_spec",
+      "source_file": "tests/e2e/tools-live.spec.ts",
+      "source_location": "L63",
       "target": "tests_e2e_tools_live_spec_overlay",
       "weight": 1.0
     },
@@ -226683,7 +227294,7 @@
       "relation": "contains",
       "source": "tests_e2e_tools_live_spec",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L68",
+      "source_location": "L69",
       "target": "tests_e2e_tools_live_spec_obspage",
       "weight": 1.0
     },
@@ -232151,7 +232762,7 @@
       "relation": "method",
       "source": "app_components_overlay_activity_feed_activityfeed",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L14",
+      "source_location": "L18",
       "target": "app_components_overlay_activity_feed_activityfeed_subscribe",
       "weight": 1.0
     },
@@ -236463,7 +237074,7 @@
       "relation": "references",
       "source": "docs_streamer_tools",
       "source_file": "docs/streamer-tools.md",
-      "source_location": "L183",
+      "source_location": "L187",
       "target": "docs_live_room_capacity",
       "weight": 1.0
     },
@@ -237026,6 +237637,18 @@
       "confidence_score": 0.85,
       "context": "argument",
       "relation": "indirect_call",
+      "source": "app_lib_activity_history_keephistory",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L69",
+      "target": "app_lib_activity_history_ischat",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
       "source": "app_lib_activity_socket_openactivitysocket_drop",
       "source_file": "app/lib/activity-socket.ts",
       "source_location": "L127",
@@ -237270,6 +237893,18 @@
       "source_file": "app/server/validation.ts",
       "source_location": "L418",
       "target": "app_server_validation_iscardtarget",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
+      "source": "tests_activity_history_test_after",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L36",
+      "target": "app_lib_activity_history_keephistory",
       "weight": 1.0
     },
     {
@@ -241910,7 +242545,7 @@
       "label": "ActivityFeed",
       "norm_label": "activityfeed",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L12"
+      "source_location": "L13"
     },
     {
       "_callable": true,
@@ -241922,7 +242557,7 @@
       "label": "ActivityFeedOptions",
       "norm_label": "activityfeedoptions",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L84"
+      "source_location": "L88"
     },
     {
       "_callable": true,
@@ -241934,7 +242569,7 @@
       "label": "ActivityFeedStatus",
       "norm_label": "activityfeedstatus",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L10"
+      "source_location": "L11"
     },
     {
       "_callable": true,
@@ -241946,7 +242581,7 @@
       "label": "Listener",
       "norm_label": "listener",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L18"
+      "source_location": "L22"
     },
     {
       "_callable": true,
@@ -241958,7 +242593,7 @@
       "label": "SharedSocket",
       "norm_label": "sharedsocket",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L24"
+      "source_location": "L28"
     },
     {
       "_callable": true,
@@ -243687,6 +244322,18 @@
       "norm_label": "connectresult",
       "source_file": "app/lib/activity.ts",
       "source_location": "L125"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_activity_history_activityhistory",
+      "label": "ActivityHistory",
+      "norm_label": "activityhistory",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L10"
     },
     {
       "_callable": true,
@@ -252572,7 +253219,7 @@
       "label": "acquire()",
       "norm_label": "acquire()",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L34"
+      "source_location": "L38"
     },
     {
       "_callable": true,
@@ -252583,7 +253230,7 @@
       "label": ".subscribe()",
       "norm_label": ".subscribe()",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L14"
+      "source_location": "L18"
     },
     {
       "_callable": true,
@@ -252594,7 +253241,7 @@
       "label": "useActivityFeed()",
       "norm_label": "useactivityfeed()",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L94"
+      "source_location": "L98"
     },
     {
       "_callable": true,
@@ -261490,6 +262137,83 @@
       "norm_label": "acceptdelivery()",
       "source_file": "app/lib/activity.ts",
       "source_location": "L341"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_activity_history_emptyhistory",
+      "label": "emptyHistory()",
+      "norm_label": "emptyhistory()",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L22"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_activity_history_historysnapshot",
+      "label": "historySnapshot()",
+      "norm_label": "historysnapshot()",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L76"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_activity_history_ischat",
+      "label": "isChat()",
+      "norm_label": "ischat()",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L26"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_activity_history_keepevent",
+      "label": "keepEvent()",
+      "norm_label": "keepevent()",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L43"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_activity_history_keephistory",
+      "label": "keepHistory()",
+      "norm_label": "keephistory()",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L66"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_activity_history_trimmed",
+      "label": "trimmed()",
+      "norm_label": "trimmed()",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L31"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_activity_history_without",
+      "label": "without()",
+      "norm_label": "without()",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L38"
     },
     {
       "_callable": true,
@@ -277078,6 +277802,61 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_activity_history_test_after",
+      "label": "after()",
+      "norm_label": "after()",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L35"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_activity_history_test_chat",
+      "label": "chat()",
+      "norm_label": "chat()",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L13"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_activity_history_test_event",
+      "label": "event()",
+      "norm_label": "event()",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L33"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_activity_history_test_kept",
+      "label": "kept()",
+      "norm_label": "kept()",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L39"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_activity_history_test_snapshot",
+      "label": "snapshot()",
+      "norm_label": "snapshot()",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L31"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_activity_socket_test_fakesocket_close",
       "label": ".close()",
       "norm_label": ".close()",
@@ -280440,7 +281219,7 @@
       "label": "chat()",
       "norm_label": "chat()",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L198"
+      "source_location": "L199"
     },
     {
       "_callable": true,
@@ -280451,7 +281230,7 @@
       "label": "entry()",
       "norm_label": "entry()",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L29"
+      "source_location": "L30"
     },
     {
       "_callable": true,
@@ -280462,7 +281241,7 @@
       "label": "obsPage()",
       "norm_label": "obspage()",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L68"
+      "source_location": "L69"
     },
     {
       "_callable": true,
@@ -280473,7 +281252,7 @@
       "label": "overlay()",
       "norm_label": "overlay()",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L62"
+      "source_location": "L63"
     },
     {
       "_callable": true,
@@ -280488,21 +281267,21 @@
             "callee": "dispatchEvent",
             "file": "tests/e2e/tools-live.spec.ts",
             "lang": "typescript",
-            "line": "L345",
+            "line": "L389",
             "receiver_type": "EventTarget"
           },
           {
             "callee": "send",
             "file": "tests/e2e/tools-live.spec.ts",
             "lang": "typescript",
-            "line": "L384",
+            "line": "L428",
             "receiver_type": "WebSocketRoute"
           }
         ]
       },
       "norm_label": "phone()",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L328"
+      "source_location": "L372"
     },
     {
       "_callable": true,
@@ -280513,7 +281292,7 @@
       "label": "wakeRecord()",
       "norm_label": "wakerecord()",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L389"
+      "source_location": "L433"
     },
     {
       "_callable": true,
@@ -286355,7 +287134,7 @@
       "label": "shared",
       "norm_label": "shared",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L32"
+      "source_location": "L36"
     },
     {
       "_origin": "ast",
@@ -288957,6 +289736,26 @@
       "norm_label": "event_kinds",
       "source_file": "app/lib/activity.ts",
       "source_location": "L298"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_activity_history",
+      "label": "activity-history.ts",
+      "norm_label": "activity-history.ts",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_activity_history_history_size",
+      "label": "HISTORY_SIZE",
+      "norm_label": "history_size",
+      "source_file": "app/lib/activity-history.ts",
+      "source_location": "L20"
     },
     {
       "_origin": "ast",
@@ -296852,6 +297651,16 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_activity_history_test",
+      "label": "activity-history.test.ts",
+      "norm_label": "activity-history.test.ts",
+      "source_file": "tests/activity-history.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_activity_socket_test",
       "label": "activity-socket.test.ts",
       "norm_label": "activity-socket.test.ts",
@@ -299617,42 +300426,49 @@
             "callee": "send",
             "file": "tests/e2e/tools-live.spec.ts",
             "lang": "typescript",
-            "line": "L227",
+            "line": "L228",
             "receiver_type": "WebSocketRoute"
+          },
+          {
+            "callee": "locator",
+            "file": "tests/e2e/tools-live.spec.ts",
+            "lang": "typescript",
+            "line": "L305",
+            "receiver_type": "Locator"
           },
           {
             "callee": "close",
             "file": "tests/e2e/tools-live.spec.ts",
             "lang": "typescript",
-            "line": "L294",
+            "line": "L338",
             "receiver_type": "WebSocketRoute"
           },
           {
             "callee": "connectToServer",
             "file": "tests/e2e/tools-live.spec.ts",
             "lang": "typescript",
-            "line": "L297",
+            "line": "L341",
             "receiver_type": "WebSocketRoute"
           },
           {
             "callee": "evaluate",
             "file": "tests/e2e/tools-live.spec.ts",
             "lang": "typescript",
-            "line": "L507",
+            "line": "L551",
             "receiver_type": "Locator"
           },
           {
             "callee": "getBoundingClientRect",
             "file": "tests/e2e/tools-live.spec.ts",
             "lang": "typescript",
-            "line": "L508",
+            "line": "L552",
             "receiver_type": "Element"
           },
           {
             "callee": "querySelectorAll",
             "file": "tests/e2e/tools-live.spec.ts",
             "lang": "typescript",
-            "line": "L509",
+            "line": "L553",
             "receiver_type": "Element"
           }
         ]
@@ -299699,7 +300515,7 @@
       "label": "liveLayers",
       "norm_label": "livelayers",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L42"
+      "source_location": "L43"
     },
     {
       "_origin": "ast",
@@ -299709,7 +300525,7 @@
       "label": "now",
       "norm_label": "now",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L28"
+      "source_location": "L29"
     },
     {
       "_origin": "ast",
@@ -299739,7 +300555,7 @@
       "label": "POLL_ID",
       "norm_label": "poll_id",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L32"
+      "source_location": "L33"
     },
     {
       "_origin": "ast",
@@ -299765,11 +300581,21 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_e2e_tools_live_spec_replay_ip",
+      "label": "REPLAY_IP",
+      "norm_label": "replay_ip",
+      "source_file": "tests/e2e/tools-live.spec.ts",
+      "source_location": "L27"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_e2e_tools_live_spec_topic_a",
       "label": "TOPIC_A",
       "norm_label": "topic_a",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L33"
+      "source_location": "L34"
     },
     {
       "_origin": "ast",
@@ -299779,7 +300605,7 @@
       "label": "TOPIC_B",
       "norm_label": "topic_b",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L34"
+      "source_location": "L35"
     },
     {
       "_origin": "ast",
@@ -303849,7 +304675,7 @@
       "node_kind": "heading",
       "norm_label": "chat",
       "source_file": "docs/streamer-tools.md",
-      "source_location": "L87"
+      "source_location": "L91"
     },
     {
       "_origin": "ast",
@@ -303860,7 +304686,7 @@
       "node_kind": "heading",
       "norm_label": "dock link",
       "source_file": "docs/streamer-tools.md",
-      "source_location": "L155"
+      "source_location": "L159"
     },
     {
       "_origin": "ast",
@@ -303871,7 +304697,7 @@
       "node_kind": "heading",
       "norm_label": "full-screen chat",
       "source_file": "docs/streamer-tools.md",
-      "source_location": "L109"
+      "source_location": "L113"
     },
     {
       "_origin": "ast",
@@ -303893,7 +304719,7 @@
       "node_kind": "heading",
       "norm_label": "message banner",
       "source_file": "docs/streamer-tools.md",
-      "source_location": "L80"
+      "source_location": "L84"
     },
     {
       "_origin": "ast",
@@ -303904,7 +304730,7 @@
       "node_kind": "heading",
       "norm_label": "obs dock",
       "source_file": "docs/streamer-tools.md",
-      "source_location": "L144"
+      "source_location": "L148"
     },
     {
       "_origin": "ast",
@@ -303915,7 +304741,7 @@
       "node_kind": "heading",
       "norm_label": "poll",
       "source_file": "docs/streamer-tools.md",
-      "source_location": "L54"
+      "source_location": "L58"
     },
     {
       "_origin": "ast",
@@ -303937,7 +304763,7 @@
       "node_kind": "heading",
       "norm_label": "topics from your viewers",
       "source_file": "docs/streamer-tools.md",
-      "source_location": "L74"
+      "source_location": "L78"
     },
     {
       "_origin": "ast",
@@ -303959,7 +304785,7 @@
       "node_kind": "heading",
       "norm_label": "what the dock key allows",
       "source_file": "docs/streamer-tools.md",
-      "source_location": "L166"
+      "source_location": "L170"
     },
     {
       "_origin": "ast",

@@ -51,6 +51,10 @@ If that output shows Twitch chat only, the preview does the same.
 See [Twitch chat only](overlay-composition.md#twitch-chat-only).
 It uses the activity feed of the owner, without an overlay key.
 
+Live reads that feed through one connection, for the preview and for the chat part.
+The page keeps the recent chat of that connection, without the messages that a moderator removed.
+When the chat layer goes on stream while Live is open, the preview shows that recent chat at once, as OBS does.
+
 ### Poll
 
 The part shows the poll of the poll layer. The poll layer shows the latest active poll, or the poll that the owner
