@@ -1,0 +1,14 @@
+{
+  "name": "StreamBullets Streamer tools",
+  "short_name": "StreamBullets",
+  "description": "The merged chat of your stream, full screen.",
+  "start_url": "/tools?view=live&chat=full",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0a2025",
+  "theme_color": "#061a1e",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

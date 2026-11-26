@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode, type RefObject } from "react";
 import { t, tAround, type MessageId, type MessageVars } from "../../i18n";
 import { CHARACTERS_MAX, CHARACTERS_TIMEOUT } from "../../lib/overlay-layers";
+import { channelsSectionPath } from "../../lib/shell";
 import {
   type ModeView,
   type PlaygroundControl,
@@ -288,7 +289,7 @@ export function useCharactersControl(feed: ActivityFeed | null, enabled: boolean
 }
 
 /**
- * The characters settings in the editor: timeout, maximum, pause, reset and the participants with a Remove button. Buttons
+ * The characters settings in the editor: timeout, maximum, pause, clear, reset and the participants with a Remove button. Buttons
  * never take the `disabled` attribute: they keep focus while their request runs and ignore presses while busy or
  * unavailable. A polite region says what changed.
  */
@@ -376,6 +377,17 @@ export function CharactersControls({
           aria-disabled={controlUnavailable}
           aria-describedby={enabled ? undefined : needsId}
           onClick={() => {
+            if (!controlUnavailable) void send({ op: "clear" }, { done: "overlay.characters.clearDone" });
+          }}
+          data-characters-clear
+        >
+          {t("overlay.characters.clear")}
+        </button>
+        <button
+          type="button"
+          aria-disabled={controlUnavailable}
+          aria-describedby={enabled ? undefined : needsId}
+          onClick={() => {
             if (!controlUnavailable) setConfirming(true);
           }}
           data-characters-reset
@@ -429,7 +441,7 @@ export function CharactersControls({
           {feed ? (
             <>
               {linkBefore}
-              <a className="text-link" href="#channels-title">
+              <a className="text-link" href={channelsSectionPath}>
                 {t("overlay.comp.chatSourceLink")}
               </a>
               {linkAfter}

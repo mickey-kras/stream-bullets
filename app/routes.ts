@@ -7,6 +7,7 @@ export default [
   route("settings", "routes/settings.tsx"),
   route("notifications", "routes/notifications.tsx"),
   route("admin", "routes/admin.tsx"),
+  route("tools", "routes/tools.tsx"),
   route("overlay-control", "routes/overlay-control.tsx"),
   route("channels/callback/:platform", "routes/channels-callback.ts"),
   route("privacy", "routes/privacy.tsx"),
@@ -17,5 +18,7 @@ export default [
   // Prevent ":handle/overlay" from matching /api/overlay.
   route("api/overlay", "routes/api.ts", { id: "api-overlay" }),
   route(":handle/overlay", "routes/overlay.tsx"),
+  // The private OBS dock: the live controls of one page, opened with the dock key.
+  route(":handle/dock", "routes/dock.tsx"),
   route(":handle", "routes/streamer.tsx"),
 ] satisfies RouteConfig;

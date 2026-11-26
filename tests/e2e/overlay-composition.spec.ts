@@ -1,7 +1,16 @@
 import type { Locator, WebSocketRoute } from "@playwright/test";
 import { newPage, close, test, expect, type Browser, type Page } from "./coverage";
 import { runSql } from "./fixtures";
-import { CHAT_CELL as DEFAULT_CHAT_CELL, FEATURE_HOST, POLL_CELL, defaultLayers, layersSql } from "./grid-helpers";
+import {
+  CHAT_CELL as DEFAULT_CHAT_CELL,
+  FEATURE_HOST,
+  POLL_CELL,
+  VERTICAL_KEY,
+  defaultLayers,
+  layersSql,
+  noKeysSql,
+  verticalKeySql,
+} from "./grid-helpers";
 import { signedIn } from "./live-helpers";
 import { clientIp } from "./client-ips";
 import type { ActivityChat, ActivityEvent, ActivityPlatform } from "../../app/lib/activity";
@@ -87,7 +96,7 @@ test("an unknown layer renders an empty transparent page", async ({ page }) => {
 });
 
 // A chat cell at the right edge.
-const CHAT_CELL: CellRect = { c: 12, r: 2, w: 4, h: 5 };
+const CHAT_CELL: CellRect = { c: 24, r: 4, w: 8, h: 10 };
 const CHAT_RECT: LayerRect = cellPixels(CHAT_CELL);
 const chatAt = (cell: CellRect): LayersPatch => ({ chat: { enabled: true }, cells: { horizontal: { chat: cell } } });
 const DEFAULT_CHAT: LayerRect = cellPixels(DEFAULT_CHAT_CELL);
@@ -396,7 +405,7 @@ test.describe("merged chat on the overlay", () => {
       await expect(source.rows).toHaveCount(3);
       const canvas = source.page.locator(".ov-layer-canvas");
       const resized = await owner.request.post("/api/overlay", {
-        data: { action: "layers", ...chatAt({ c: 10, r: 0, w: 6, h: 7 }) },
+        data: { action: "layers", ...chatAt({ c: 20, r: 0, w: 12, h: 14 }) },
       });
       expect(resized.status()).toBe(200);
       await expect(canvas).toHaveCSS("height", "840px");
@@ -639,7 +648,7 @@ test("the chat layer has the same geometry on the OBS composition and in the edi
   page.on("websocket", (socket) => {
     if (new URL(socket.url()).pathname.startsWith("/api/activity/")) activity.push(socket.url());
   });
-  await page.goto("/overlay-control");
+  await page.goto("/tools?view=overlay");
   const frame = page.getByRole("region", { name: "Composition preview" });
   await expect(frame).toHaveAttribute("data-scaled", "true");
   const layer = frame.locator('.ov-layer[data-layer="chat"]');
@@ -766,7 +775,7 @@ test("with chat on, the OBS composition matches the editor preview at 1280x720 a
     const owner = await signedIn(browser, "featureowner", DESIGN_IP);
     const editor = await newPage(owner);
     await editor.setViewportSize({ width: 1440, height: 900 });
-    await editor.goto("/overlay-control");
+    await editor.goto("/tools?view=overlay");
     const frame = editor.getByRole("region", { name: "Composition preview" });
     await expect(frame).toHaveAttribute("data-scaled", "true");
     await expect(frame.locator(".ov-stage > *").first()).toBeVisible();
@@ -853,18 +862,21 @@ test("turning the chat on live keeps the content layers in place, without a remo
 });
 
 test("a vertical layout fills a 1080x1920 source and shows each layer inside its cell", async ({ browser }) => {
-  // The poll layer shows the latest active poll: the seeded battle.
-  await setLayers("overlay-vertical", {
-    orientation: "vertical",
-    chat: { enabled: true },
-    cells: { vertical: { chat: { c: 0, r: 8, w: 9, h: 5 }, poll: { c: 1, r: 1, w: 7, h: 4 } } },
-  });
+  // The poll layer shows the latest active poll: the seeded battle. The editor shows the horizontal output: the link
+  // of the vertical output shows the vertical layout all the same.
+  await runSql("overlay-vertical", [
+    layersSql({
+      chat: { enabled: true },
+      cells: { vertical: { chat: { c: 0, r: 16, w: 18, h: 10 }, poll: { c: 2, r: 2, w: 14, h: 8 } } },
+    }),
+    verticalKeySql(),
+  ]);
   try {
     // Half of 1080x1920: every design pixel is half a screen pixel.
     const source = await chatSource(
       browser,
       () => snapshot([message({ platform: "youtube", id: "v1", user: "Tall", text: "vertical chat" })]),
-      "/@feature_host/overlay?key=e2e-key",
+      `/@feature_host/overlay?key=${VERTICAL_KEY}`,
       { width: 540, height: 960 },
     );
     const page: Page = source.page;
@@ -904,7 +916,7 @@ test("a vertical layout fills a 1080x1920 source and shows each layer inside its
       viewport: { width: 540, height: 960 },
       extraHTTPHeaders: { "CF-Connecting-IP": `192.0.2.${DESIGN_IP}` },
     });
-    await alone.goto("/@feature_host/overlay?key=e2e-key&layer=content");
+    await alone.goto(`/@feature_host/overlay?key=${VERTICAL_KEY}&layer=content`);
     await expect(alone.locator(".ov-design")).toHaveAttribute("data-scaled", "true");
     await expect(alone.locator('.ov-layer[data-layer="poll"] .ov-stage > *').first()).toBeVisible();
     const aloneBox = await alone.locator('.ov-layer[data-layer="poll"]').boundingBox();
@@ -916,7 +928,73 @@ test("a vertical layout fills a 1080x1920 source and shows each layer inside its
     await expect(alone.locator('.ov-layer[data-layer="chat"]')).toHaveCount(0);
     await close(alone);
   } finally {
-    await setLayers("overlay-vertical-restore", {});
+    await runSql("overlay-vertical-restore", [layersSql({}), noKeysSql]);
+  }
+});
+
+test("an output with the Twitch switch on shows Twitch chat only, and the other output keeps the merged chat", async ({
+  browser,
+}) => {
+  const tall: CellRect = { c: 0, r: 16, w: 18, h: 10 };
+  await runSql("overlay-twitch-only", [
+    layersSql({
+      chat: { enabled: true },
+      cells: { horizontal: { chat: DEFAULT_CHAT_CELL }, vertical: { chat: tall } },
+      twitchOnly: { vertical: true },
+    }),
+    verticalKeySql(),
+  ]);
+  const rows = (): string =>
+    snapshot([
+      message({ platform: "youtube", id: "m1", user: "Yara", text: "from youtube" }),
+      message({ platform: "twitch", id: "m2", user: "Tess", text: "from twitch" }),
+      message({ platform: "kick", id: "m3", user: "Kai", text: "from kick" }),
+    ]);
+  try {
+    // The vertical output has the switch on: only the Twitch row of the snapshot shows.
+    const only = await chatSource(browser, rows, `/@feature_host/overlay?key=${VERTICAL_KEY}`, {
+      width: 540,
+      height: 960,
+    });
+    await expect(only.rows).toHaveCount(1);
+    await expect(only.rows).toContainText("from twitch");
+    await expect(only.page.locator(".ov-composition")).toHaveAttribute("data-overlay-platform", "twitch");
+    // A new message of another platform does not show. A new Twitch message shows.
+    only.send(event(message({ platform: "kick", id: "m4", user: "Kai", text: "kick again" })));
+    only.send(event(message({ platform: "twitch", id: "m5", user: "Tess", text: "twitch again" })));
+    await expect(only.rows).toHaveCount(2);
+    await expect(only.chat).not.toContainText("kick again");
+    await expect(only.chat).not.toContainText("from youtube");
+    // The horizontal output has the switch off: the same feed shows as the merged chat.
+    const merged = await chatSource(browser, rows, "/@feature_host/overlay?key=e2e-key", { width: 960, height: 540 });
+    await expect(merged.rows).toHaveCount(3);
+    await expect(merged.page.locator(".ov-composition")).not.toHaveAttribute("data-overlay-platform");
+    // The owner turns the switch on for the horizontal output during the stream. The Twitch row stays on screen and
+    // the rows of the other platforms go. The socket stays open, so it sends no second snapshot.
+    const owner = await signedIn(browser, "featureowner", OWNER_IP);
+    const turn = async (on: boolean): Promise<void> => {
+      const done = await owner.request.post("/api/overlay", {
+        data: { action: "layers", twitchOnly: { horizontal: on } },
+      });
+      expect(done.status()).toBe(200);
+    };
+    await turn(true);
+    await expect(merged.page.locator(".ov-composition")).toHaveAttribute("data-overlay-platform", "twitch");
+    await expect(merged.rows).toHaveCount(1);
+    await expect(merged.rows).toContainText("from twitch");
+    // Off again: the Twitch row is still there, and a new message of another platform shows. The rows that left do
+    // not come back: the page got no moderation for them while the switch was on.
+    await turn(false);
+    await expect(merged.page.locator(".ov-composition")).not.toHaveAttribute("data-overlay-platform");
+    merged.send(event(message({ platform: "kick", id: "m6", user: "Kai", text: "kick is back" })));
+    await expect(merged.rows).toHaveCount(2);
+    await expect(merged.chat).toContainText("from twitch");
+    await expect(merged.chat).toContainText("kick is back");
+    await expect(merged.chat).not.toContainText("from youtube");
+    expect(merged.sockets).toHaveLength(1);
+    await Promise.all([close(only.page), close(merged.page), close(owner)]);
+  } finally {
+    await runSql("overlay-twitch-only-restore", [layersSql({}), noKeysSql]);
   }
 });
 

@@ -58,6 +58,20 @@ for (const width of [320, 390]) {
       await expect(page.locator("article.comment")).toHaveCount(24);
       const composer = commentBox(page, "Write a comment");
       await composer.fill("Keep this mobile draft.");
+      // The comment field takes the full row. The Post button is below it.
+      const field = await page.locator(".discussion > .composer > .comment-input").boundingBox();
+      const post = await page.locator(".discussion > .composer > button").boundingBox();
+      const row = await page.locator(".discussion > .composer").boundingBox();
+      expect(field?.width ?? 0).toBeGreaterThanOrEqual((row?.width ?? width) - 1);
+      expect(post?.y ?? 0).toBeGreaterThanOrEqual((field?.y ?? 0) + (field?.height ?? 0));
+      // The delete control is an icon at the right of the Open discussion row.
+      const open = await page.getByRole("button", { name: "Open discussion", exact: true }).boundingBox();
+      const remove = await page.getByRole("button", { name: "Delete topic", exact: true }).boundingBox();
+      expect(remove?.width ?? 0).toBe(44);
+      expect(remove?.height).toBe(open?.height);
+      expect(remove?.x ?? 0).toBeGreaterThanOrEqual((open?.x ?? 0) + (open?.width ?? 0));
+      expect(remove?.y ?? 0).toBeLessThan((open?.y ?? 0) + (open?.height ?? 0));
+      expect((remove?.y ?? 0) + (remove?.height ?? 0)).toBeGreaterThan(open?.y ?? 0);
       await page.getByRole("button", { name: "Open discussion", exact: true }).tap();
       await expect(page).toHaveURL(/discussion=1/);
       await expect(page.getByRole("button", { name: "Back to topic", exact: true })).toBeFocused();
@@ -168,6 +182,11 @@ for (const width of [1280, 390]) {
       await expect(page.locator("article.comment")).toHaveCount(24);
       const composer = page.locator("#detail .ed-content[data-composer]").first();
       await composer.fill("Keep this draft in every language.");
+      // The Post button is below the field at each width. Only a narrow page has the Open discussion button.
+      const field = await page.locator(".discussion > .composer > .comment-input").boundingBox();
+      const post = await page.locator(".discussion > .composer > button").boundingBox();
+      expect(post?.y ?? 0).toBeGreaterThanOrEqual((field?.y ?? 0) + (field?.height ?? 0));
+      await expect(page.getByRole("button", { name: "Open discussion", exact: true })).toHaveCount(width === 390 ? 1 : 0);
       const detail = page.locator("#detail");
       const top = (): Promise<number> => detail.evaluate((element: HTMLElement) => element.scrollTop);
       await detail.evaluate((element: HTMLElement) => {

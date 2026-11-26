@@ -287,6 +287,36 @@ describe("chatReducer: live events", () => {
     expect(ids(state.rows)).toEqual([b.id, d.id]);
   });
 
+  it("drops the shown and queued rows of the other platforms when the output shows one platform", () => {
+    const opts: ChatOptions = { hideCommands: false, limits: { burstThreshold: 100 } };
+    const [a, b, c, d] = [
+      chat({ platform: "youtube" }),
+      chat({ platform: "twitch" }),
+      chat({ platform: "kick" }),
+      chat({ platform: "twitch" }),
+    ];
+    let state = initialChatState();
+    state = send(state, event(a), 0, opts);
+    state = runUntil(state, 500, opts);
+    state = send(state, event(b), 500, opts);
+    state = send(state, event(c), 500, opts);
+    state = send(state, event(d), 500, opts);
+    expect(ids(state.rows)).toEqual([a.id, b.id]);
+    expect(ids(state.pending)).toEqual([c.id, d.id]);
+    state = chatReducer(state, { type: "platform", platform: "twitch", now: 500 }, opts);
+    expect(state.rows.map((row) => [row.id, row.phase])).toEqual([
+      [a.id, "leaving"],
+      [b.id, "entering"],
+    ]);
+    expect(ids(state.pending)).toEqual([d.id]);
+    state = runUntil(state, 500 + CHAT_LIMITS.leaveMs, opts);
+    expect(ids(state.rows)).toEqual([b.id, d.id]);
+    // The rows that left never come back, so a late delete of one of them has nothing to miss.
+    const settled: number = 500 + CHAT_LIMITS.leaveMs + CHAT_LIMITS.enterMs + 80;
+    state = runUntil(state, settled, opts);
+    expect(chatReducer(state, { type: "platform", platform: "twitch", now: settled + 100 }, opts)).toBe(state);
+  });
+
   it("changes nothing when hideCommands turns off or nothing matches", () => {
     let state = send(initialChatState(), event(chat({ text: "hi" })), 0, showAll);
     // After the slide-in, so the filter time ends no phase.
@@ -387,7 +417,7 @@ describe("chatReducer: live events", () => {
     const state = send(initialChatState(), event(chat()), 0);
     const frame: ActivityMessage = {
       type: "playground",
-      v: 1,
+      v: 2,
       full: false,
       tick: 3,
       chars: [],
@@ -583,6 +613,20 @@ describe("chatReducer: snapshots", () => {
     state = send(state, snapshot(full.slice(-10)), T0 + 1100, opts);
     expect(state.rows.some((row) => row.id === old.id)).toBe(false);
     expect(state.rows.every((row) => row.phase === "shown")).toBe(true);
+  });
+
+  it("keeps the rows that are not newer than the boundary of a snapshot, also of a short one", () => {
+    const opts: ChatOptions = { hideCommands: true, limits: { maxRows: 200 } };
+    const old = chat({ receivedAt: T0 - 50_000 });
+    const gone = chat({ receivedAt: T0 + 5 });
+    let state = send(initialChatState(), event(old), T0 - 50_000, opts);
+    state = send(state, event(gone), T0 + 5, opts);
+    // The server told its boundary: a short snapshot tells nothing about the row before it.
+    const short = Array.from({ length: 10 }, (_, i) => chat({ receivedAt: T0 + 10 + i, live: false }));
+    state = send(state, { type: "snapshot", events: short, replay: true, since: T0 }, T0 + 1000, opts);
+    expect(state.rows.some((row) => row.id === old.id)).toBe(true);
+    expect(state.rows.some((row) => row.id === gone.id)).toBe(false);
+    expect(state.rows).toHaveLength(11);
   });
 
   it("flushes queued messages without animation, unless the snapshot removed them", () => {

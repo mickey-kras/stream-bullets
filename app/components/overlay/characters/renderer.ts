@@ -9,14 +9,17 @@ import {
   type Sequence,
   type TerrainPicture,
 } from "../wasteland/playground-theme";
+import { drawBlocks, drawFlags, drawGear, drawRopes, picture, snap } from "./builds";
 import { type Atlas, helmetColor } from "./sprites";
-import type { CharacterState, CharacterView, PlaygroundView, TileView } from "./view";
+import type { BlockView, CharacterState, CharacterView, PlaygroundView, TileView } from "./view";
 
 /** States in which a character only moves around; a name label shows in all other states. */
 const QUIET_STATES: ReadonlySet<CharacterState> = new Set<CharacterState>([
   "walk",
   "goto",
   "idle",
+  "hold",
+  "step",
   "turn",
   "enter",
   "exit",
@@ -60,6 +63,8 @@ export interface RenderMemory {
   particles: Particle[];
   seen: Map<number, { state: CharacterState; t: number }>;
   holes: boolean[];
+  /** The cells that had a block in the previous frame, as "column,row". */
+  blocks: Set<string>;
   labels: Map<string, HTMLCanvasElement>;
   last: number;
   seed: number;
@@ -70,6 +75,7 @@ export function createMemory(): RenderMemory {
     particles: [],
     seen: new Map(),
     holes: [],
+    blocks: new Set(),
     labels: new Map(),
     last: 0,
     seed: 1,
@@ -111,10 +117,6 @@ function burst(
   }
 }
 
-function snap(value: number): number {
-  return Math.round(value * PIXEL_SCALE) / PIXEL_SCALE;
-}
-
 function tilePicture(tiles: readonly TileView[], i: number): TerrainPicture {
   const tile: TileView = tiles[i];
   if (tile.kind === "girder") {
@@ -151,6 +153,15 @@ function spawnEffects(view: PlaygroundView, theme: PlaygroundTheme, atlas: Atlas
     if (hole && memory.holes[i] === false) burst(memory, i * tile + tile / 2, view.world.ground + 4, 10, rock);
     memory.holes[i] = hole;
   });
+  const blocks = new Set<string>(view.blocks.map((b: BlockView): string => `${b.c},${b.r}`));
+  for (const key of memory.blocks) {
+    if (blocks.has(key)) continue;
+    const [c, r] = key.split(",").map(Number);
+    burst(memory, c * tile + tile / 2, view.world.ground - r * tile - tile / 2, 5, (i) =>
+      i % 2 ? rock(i) : { color: theme.particles.soil[i % 2] },
+    );
+  }
+  memory.blocks = blocks;
   const seen = new Map<number, { state: CharacterState; t: number }>();
   for (const c of view.characters) {
     const before = memory.seen.get(c.id);
@@ -158,9 +169,10 @@ function spawnEffects(view: PlaygroundView, theme: PlaygroundTheme, atlas: Atlas
     if (before?.state !== c.state) continue;
     if (c.state === "dig" && Math.floor((before.t - 15) / 20) < Math.floor((c.t - 15) / 20)) {
       const ground: TileView | undefined = view.tiles[Math.floor((c.x + c.dir * 4) / tile)];
-      if (ground?.kind === "dirt") {
-        burst(memory, c.x + c.dir * 8, view.world.ground - 2, 4, rock);
-        burst(memory, c.x + c.dir * 8, view.world.ground - 2, 3, (i) => ({
+      // On a build, the dig is on a block. On the ground, only dirt gives rocks.
+      if (c.y < view.world.ground || ground?.kind === "dirt") {
+        burst(memory, c.x + c.dir * 8, c.y - 2, 4, rock);
+        burst(memory, c.x + c.dir * 8, c.y - 2, 3, (i) => ({
           color: theme.particles.soil[i % 2],
         }));
       }
@@ -200,26 +212,6 @@ function moveParticles(memory: RenderMemory, ticks: number): void {
   });
 }
 
-function picture(
-  ctx: CanvasRenderingContext2D,
-  image: CanvasImageSource,
-  rect: Rect,
-  x: number,
-  y: number,
-  flip: boolean = false,
-): void {
-  const [sx, sy, w, h] = rect;
-  if (!flip) {
-    ctx.drawImage(image, sx, sy, w, h, x, y, w, h);
-    return;
-  }
-  ctx.save();
-  ctx.translate(x + w, y);
-  ctx.scale(-1, 1);
-  ctx.drawImage(image, sx, sy, w, h, 0, 0, w, h);
-  ctx.restore();
-}
-
 type PlaceTerrain = (name: TerrainPicture, x: number, y: number, flip?: boolean) => void;
 
 function drawWorld(
@@ -238,7 +230,8 @@ function drawWorld(
   view.tiles.forEach((_: TileView, i: number): void => at(tilePicture(view.tiles, i), i * tile, view.world.ground));
   drawProps(view, theme, at);
   drawLandmarks(ctx, view, theme, at, now, reduced, blink);
-  drawStairs(ctx, view, theme, atlas.terrain);
+  drawBlocks(ctx, view, theme, atlas.terrain);
+  drawFlags(ctx, view, theme);
 }
 
 /** One prop in the middle of each run of equal tiles, unless a hole is there. */
@@ -293,25 +286,6 @@ function drawLandmarks(
   else at("pad", view.pad + theme.pad.dx, ground + theme.pad.dy);
 }
 
-function drawStairs(
-  ctx: CanvasRenderingContext2D,
-  view: PlaygroundView,
-  theme: PlaygroundTheme,
-  terrain: HTMLImageElement,
-): void {
-  const ground: number = view.world.ground;
-  const [sx, sy, sw] = theme.terrain.rects.step;
-  for (const stair of view.stairs) {
-    const leg: number = Math.max(0, ground - stair.top - 3);
-    ctx.save();
-    ctx.translate(stair.dir > 0 ? stair.x : stair.x + sw, 0);
-    ctx.scale(stair.dir, 1);
-    ctx.drawImage(terrain, sx, sy, sw, 3, 0, stair.top, sw, 3);
-    if (leg > 0) ctx.drawImage(terrain, sx, sy + 3, sw, 1, 0, stair.top + 3, sw, leg);
-    ctx.restore();
-  }
-}
-
 function drawCharacters(
   ctx: CanvasRenderingContext2D,
   view: PlaygroundView,
@@ -325,13 +299,19 @@ function drawCharacters(
     if (!sequence) continue;
     const column: number = reduced ? (sequence.still ?? sequence.frames[0]) : frameAt(sequence, c.t);
     const rect: Rect = [column * cell, rows.indexOf(sequence.row) * cell, cell, cell];
+    const { danceTurnTicks, cheerLift, cheerTicks } = theme.builds;
+    // A dance turns around in time, and a cheer jumps on the spot. The atlas has no pictures for them yet.
+    const turned: boolean = !reduced && c.state === "dance" && Math.floor(c.t / danceTurnTicks) % 2 === 1;
+    const left: boolean = c.dir < 0 !== turned;
+    const lift: number =
+      !reduced && c.state === "cheer" ? Math.abs(Math.sin((c.t / cheerTicks) * Math.PI)) * cheerLift : 0;
     picture(
       ctx,
       atlas.sheets.get(c.platform),
       rect,
-      snap(c.x) - (c.dir < 0 ? cell - anchor.x : anchor.x),
-      snap(c.y) - anchor.y,
-      c.dir < 0,
+      snap(c.x) - (left ? cell - anchor.x : anchor.x),
+      snap(c.y - lift) - anchor.y,
+      left,
     );
   }
 }
@@ -905,7 +885,9 @@ export function draw(
   ctx.imageSmoothingEnabled = false;
   ctx.setTransform(PIXEL_SCALE, 0, 0, PIXEL_SCALE, 0, top);
   drawWorld(ctx, view, theme, atlas, now, options.reduced);
+  drawRopes(ctx, view, theme, options.reduced);
   drawCharacters(ctx, view, theme, atlas, options.reduced);
+  drawGear(ctx, view, theme, now);
   drawParticles(ctx, memory);
   drawMarks(ctx, view, theme);
   const badges = badgesOf(ctx, view, theme, options.badges);

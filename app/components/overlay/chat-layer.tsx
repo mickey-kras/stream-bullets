@@ -75,7 +75,8 @@ function Emote({ name, url }: Readonly<{ name: string; url: string }>): ReactNod
   );
 }
 
-function Fragment({ fragment }: Readonly<{ fragment: ActivityFragment }>): ReactNode {
+/** One part of a chat message: text, or an emote picture from a known host. */
+export function ChatFragment({ fragment }: Readonly<{ fragment: ActivityFragment }>): ReactNode {
   if (fragment.type === "text") return fragment.text;
   return <Emote name={fragment.name} url={fragment.url} />;
 }
@@ -159,7 +160,7 @@ const ChatRowItem = memo(function ChatRowItem({
                   const content: string = JSON.stringify(fragment);
                   const occurrence: number = occurrences.get(content) ?? 0;
                   occurrences.set(content, occurrence + 1);
-                  return <Fragment key={`${content}:${occurrence}`} fragment={fragment} />;
+                  return <ChatFragment key={`${content}:${occurrence}`} fragment={fragment} />;
                 })}
                 {row.truncated && "…"}
               </>

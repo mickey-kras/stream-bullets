@@ -2,6 +2,7 @@ import {
   memo,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useSyncExternalStore,
   type CSSProperties,
@@ -9,7 +10,7 @@ import {
   type RefObject,
 } from "react";
 import { t } from "../../i18n";
-import type { ActivityChat } from "../../lib/activity";
+import type { ActivityChat, ActivityPlatform } from "../../lib/activity";
 import { chatTestLeft } from "../../lib/chat-test";
 import type { ChatView } from "../../lib/fading-rows";
 import {
@@ -19,6 +20,7 @@ import {
   layerPixels,
   onStream,
   placedContent,
+  shownPlatform,
   type ContentSource,
   type GridLayer,
   type LayerRect,
@@ -30,6 +32,7 @@ import {
 import type { ActivityFeed } from "./activity-feed";
 import { CharactersLayer } from "./characters/characters-layer";
 import { usePlaygroundSource } from "./characters/use-playground";
+import { viewForPlatform, type PlaygroundView } from "./characters/view";
 import { ChatLayer } from "./chat-layer";
 import { OverlayStage, type OverlayScene } from "./overlay-stage";
 import { useChat } from "./use-chat";
@@ -41,6 +44,8 @@ export interface OverlayLayerSlotProps {
   feed: ActivityFeed | null;
   /** The layer's cell in design pixels. Its content is laid out in rect.w x rect.h design pixels. */
   rect: LayerRect;
+  /** The one platform whose characters show, or null for all platforms. */
+  platform?: ActivityPlatform | null;
 }
 
 /**
@@ -57,8 +62,15 @@ function charactersFailed(error: Error): void {
 }
 
 /** The characters layer: the playground of the feed's frames. */
-export function CharactersSlot({ feed, rect }: Readonly<OverlayLayerSlotProps>): ReactNode {
-  const source = usePlaygroundSource(feed);
+export function CharactersSlot({ feed, rect, platform = null }: Readonly<OverlayLayerSlotProps>): ReactNode {
+  const all = usePlaygroundSource(feed);
+  const source = useCallback(
+    (now: number): PlaygroundView | null => {
+      const view: PlaygroundView | null = all(now);
+      return view && platform ? viewForPlatform(view, platform) : view;
+    },
+    [all, platform],
+  );
   return (
     <CharactersLayer
       columns={rect.w / CELL_PX}
@@ -248,6 +260,23 @@ function ContentLayers({
 }
 
 /**
+ * The camera frame: a frame with a clear window. The streamer puts the camera in OBS under the overlay source and
+ * makes it as large as the window. The inner edge of the frame is round, so the frame covers the corners of the
+ * camera picture. `hint` shows a text in the window of the editor preview. The text never shows on stream.
+ */
+function CameraFrame({ hint }: Readonly<{ hint: boolean }>): ReactNode {
+  return (
+    <div className="ov-camera" data-overlay-camera>
+      {hint && (
+        <p className="ov-camera-hint" data-camera-hint>
+          {t("overlay.camera.window")}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/**
  * Whether a chat test that ends at `until` (server time) runs now. `serverOffset` is server time minus local time.
  * A local timer ends it at the end time, also without a new server message. Off on the server and during hydration,
  * so the page hydrates without a mismatch.
@@ -286,6 +315,7 @@ const ChatSlot = memo(function ChatSlot({
   samples,
   serverOffset,
   testUntil,
+  platform,
 }: Readonly<{
   feed: ActivityFeed | null;
   /** A boolean, not the layer object: a new layers snapshot (a poll update) keeps the memo when the flag is the same. */
@@ -295,9 +325,11 @@ const ChatSlot = memo(function ChatSlot({
   samples?: readonly ActivityChat[];
   serverOffset: number;
   testUntil: number;
+  /** The one platform that the output shows, also in a chat test. Null: each platform. */
+  platform: ActivityPlatform | null;
 }>): ReactNode {
   const test: boolean = useChatTestOn(testUntil, serverOffset);
-  const chat: ChatView = useChat({ feed, samples, hideCommands, serverOffset, test });
+  const chat: ChatView = useChat({ feed, samples, hideCommands, serverOffset, test, platform });
   // A new list when a test starts or ends: the cards of the other chat go at once and nothing on screen slides in.
   return (
     <>
@@ -317,7 +349,8 @@ const ChatSlot = memo(function ChatSlot({
  * per-layer source: the chat or the characters fill the viewport, and `content` is the content layers at their
  * cells. Null renders them all.
  * `testUntil` is the server time when the chat test ends. `charactersFeed` replaces `feed` for the characters: the
- * editor preview plays sample chat but shows the live playground.
+ * editor preview plays sample chat but shows the live playground. The camera frame is part of `content`.
+ * `cameraHint` marks the window of the camera frame for the owner: a preview sets it, and the overlay page never.
  */
 export function OverlayComposition({
   scene,
@@ -328,6 +361,7 @@ export function OverlayComposition({
   samples,
   serverOffset = 0,
   testUntil = 0,
+  cameraHint = false,
 }: Readonly<{
   scene: OverlayScene;
   layers: OverlayLayers;
@@ -337,29 +371,44 @@ export function OverlayComposition({
   samples?: readonly ActivityChat[];
   serverOffset?: number;
   testUntil?: number;
+  cameraHint?: boolean;
 }>): ReactNode {
   const shows = (layer: OverlayLayer): boolean => only === null || only === layer;
   const alone: boolean = only === "chat" || only === "characters";
   const frame = frameSize(layers.orientation);
   const chat: LayerRect | null = onStream(layers, "chat") ? layerPixels(layers, "chat") : null;
   const characters: LayerRect | null = onStream(layers, "characters") ? layerPixels(layers, "characters") : null;
+  const camera: LayerRect | null = onStream(layers, "camera") ? layerPixels(layers, "camera") : null;
+  // An output that shows Twitch only drops the chat and the characters of the other platforms. A preview does the
+  // same, so the owner sees what the output shows.
+  const platform: ActivityPlatform | null = shownPlatform(layers);
+  const chatSamples: readonly ActivityChat[] | undefined = useMemo(
+    () => (platform && samples ? samples.filter((row: ActivityChat): boolean => row.platform === platform) : samples),
+    [samples, platform],
+  );
   return (
-    <div className="ov-composition" data-overlay-only={only ?? undefined}>
+    <div className="ov-composition" data-overlay-only={only ?? undefined} data-overlay-platform={platform ?? undefined}>
       {shows("characters") && characters && (
         <LayerBox layer="characters" rect={characters} frame={frame} alone={alone}>
-          <CharactersSlot feed={charactersFeed} rect={characters} />
+          <CharactersSlot feed={charactersFeed} rect={characters} platform={platform} />
         </LayerBox>
       )}
       {shows("content") && <ContentLayers scene={scene} layers={layers} frame={frame} />}
+      {shows("content") && camera && (
+        <LayerBox layer="camera" rect={camera} frame={frame} alone={false}>
+          <CameraFrame hint={cameraHint} />
+        </LayerBox>
+      )}
       {shows("chat") && chat && (
         <LayerBox layer="chat" rect={chat} frame={frame} alone={alone}>
           <ChatSlot
             feed={feed}
             hideCommands={layers.chat.hideCommands}
             backgroundOpacity={layers.chat.backgroundOpacity}
-            samples={samples}
+            samples={chatSamples}
             serverOffset={serverOffset}
             testUntil={testUntil}
+            platform={platform}
           />
         </LayerBox>
       )}

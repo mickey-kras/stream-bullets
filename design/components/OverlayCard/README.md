@@ -1,6 +1,6 @@
 The overlay card shows the content of one content layer in OBS.
 
-Sizes are design pixels at 1080p. A grid cell is 120 × 120 design pixels.
+Sizes are design pixels at 1080p. A grid cell is 60 × 60 design pixels.
 Put each card in an `OverlayLayer`. The layer scales the card to its cell and makes it smaller when it does not fit.
 
 | Part | Content |
@@ -10,6 +10,7 @@ Put each card in an `OverlayLayer`. The layer scales the card to its cell and ma
 | `OverlayMash` | The Mash Battle on stream. It has the seconds ring or the winner, the bars, and the **Tap at** link. |
 | `OverlayLayer` | A layer box at its cell in an `OverlayComposition`. |
 | `OverlayQr` | The QR code of a card. Its size comes from the card. |
+| `OverlayCamera` | The camera frame: a frame with a clear window. The streamer shows the camera through the window in OBS. `hint` is the text in the window of the editor. |
 
 ```jsx
 <OverlayComposition>
@@ -29,3 +30,5 @@ Put each card in an `OverlayLayer`. The layer scales the card to its cell and ma
 - An option name of more than 12 characters gets a wide bar with one line.
 - `counts` without a value hides the bars. Use this for a yes or no poll before the reveal.
 - `backgroundOpacity` on the layer changes only the card fill. It does not change the text.
+- The camera frame covers 19 design pixels at each edge of its cell. The remaining area is a clear window.
+  It has no card, so `backgroundOpacity` does not change it.

@@ -10,7 +10,7 @@ They never read or change the `account` table of Better Auth or the linked login
 
 ## Data flow
 
-1. The owner selects **Connect** in **Overlay control**. The API makes a single-use state and a PKCE verifier.
+1. The owner selects **Connect** in the **Channels** section of **Streamer tools**. The API makes a single-use state and a PKCE verifier.
 2. The browser goes to the provider. The owner approves the permissions there.
 3. The provider sends the browser to `/channels/callback/:platform`. The server checks the state and the session.
 4. The server exchanges the code for tokens. It reads the channel identity from the provider.
@@ -61,6 +61,7 @@ It must ignore a message that the parser refuses.
 | `clear` | `platform`, `receivedAt` | A moderator cleared the chat |
 | `clear_user` | `platform`, `userId`, `receivedAt` | A moderator removed all messages of one user |
 | `status` | `platform`, `status`, `code` | The connection changed state |
+| A support kind | `id`, `platform`, `deliveryId`, `sender`, `anonymous`, `amount`, `currency`, optional `text`, `receivedAt`, `replay` | One support event. See [Support events](#support-events). |
 
 The `id` of a chat message is `platform:messageId`. It is unique across platforms.
 A participant is the pair of `platform` and `user.id`. A display name is not an identity.
@@ -68,7 +69,7 @@ The feed never merges participants across platforms.
 
 The socket sends these messages:
 
-- `{"type":"snapshot","events":[...],"replay":true}` once, when the socket opens.
+- `{"type":"snapshot","events":[...],"replay":true,"since":0}` once, when the socket opens.
 - `{"type":"event","event":{...}}` for each live event.
 - `{"type":"unavailable"}` before the server closes the socket. This occurs when the overlay key changes,
   when an administrator suspends the page, and when the owner deletes the account.
@@ -79,10 +80,65 @@ Thus the server accepts a connection with a wrong or revoked key and closes it a
 Each chat message in a snapshot has `live: false`. A consumer must not run a command from such a message.
 Thus a reconnect never runs an old command again.
 
+`since` is a receive time. The snapshot has each message that the server keeps and that is newer than `since`.
+A consumer that has a newer message, which is not in the snapshot, knows that a moderator removed it.
+The snapshot tells nothing about a message that is not newer than `since`.
+The server keeps the newest 100 messages for 10 minutes. `since` is the newest of these times:
+
+- The time 10 minutes before the snapshot.
+- The receive time of the newest message that the limit of 100 removed.
+- The receive time of the newest message of a platform that the owner disconnected.
+- The receive time of the newest message that the size limit of the snapshot left out.
+
 A live chat message also has `live: false` when the platform sent it more than 30 seconds before the server
 received it (`LIVE_WINDOW_MS`). Thus a late provider retry never runs an old command.
 A message without a source time is live. Twitch gives no source time in the chat event.
 Thus the feed uses the time of the webhook message. We did not check that a Twitch retry keeps this time.
+
+### Support events
+
+The feed has one format for support from each platform and for direct tips. These are the kinds:
+
+| Kind | Meaning | `amount` | `currency` |
+| --- | --- | --- | --- |
+| `follow` | A new follower | `null` | `null` |
+| `subscription` | A subscription | Months | `null` |
+| `membership` | A channel membership | Months | `null` |
+| `gift` | A gift bundle: one event for the bundle | Gifts in the bundle | `null` |
+| `raid` | A raid | Viewers | `null` |
+| `bits` | Bits | Bits | `null` |
+| `super_chat` | A Super Chat | Micros of the currency | The ISO 4217 code |
+| `super_sticker` | A Super Sticker | Micros of the currency | The ISO 4217 code |
+| `kicks` | KICKs | KICKs | `null` |
+| `tip` | A direct tip through StreamBullets | Micros of the currency | The ISO 4217 code |
+| `reactions` | A group of reactions: one event for the group | Reactions | `null` |
+
+Each support event has these fields:
+
+- `platform`: `twitch`, `youtube`, or `kick`. Only a `tip` has `direct`.
+- `deliveryId`: the ID that the provider gave the delivery. `id` is `platform:deliveryId`.
+- `sender`: `{id, displayName}` of the supporter on that platform, or `null`.
+- `anonymous`: `true` when the supporter asked for no name. An anonymous event always has `sender: null`.
+- `amount`: the amount in the native unit of the kind. Money is in micros: 1 000 000 is one unit of the currency.
+  The feed never converts an amount to a different unit or currency.
+- `text`: the text that the supporter sent, with at most 500 characters. Show it as text, never as HTML, as for chat text.
+- `replay`: `true` for an event that the server sends again: a replay of the owner, a test, or the snapshot of a reconnect.
+
+The parser refuses a support event that does not agree with its kind.
+Examples are a follow with an amount, money without a currency, and a tip that is not direct.
+
+A consumer ignores the kinds that it does not know.
+An `event` message of an unknown kind is not valid for the parser, and the consumer ignores it.
+A snapshot keeps its other events. Thus a newer server never empties the chat of an older page.
+
+These rules make each support event count one time:
+
+- A provider sends a delivery again after a timeout or an error. The second delivery has the same `deliveryId`.
+  `acceptDelivery` refuses it, so it makes no second event.
+- A consumer can show a replay. `supportTotals` never counts a replay, and it never counts the same `id` again.
+  Thus a replayed alert does not change a goal or a revenue record.
+
+This section is the format only. The feed does not send support events until the server reads them from the providers.
 
 ### Rules for consumers
 
@@ -109,9 +165,10 @@ Thus an open characters source keeps the YouTube poll alive, and each poll costs
 
 The playground runs only while at least one characters socket is open. See [Interactive characters](characters.md).
 
-## Channel health in Overlay control
+## Channel health in Streamer tools
 
-Step 1 of **Overlay control** shows the health of each platform while the page is open.
+The **Channels** section of **Streamer tools** shows the health of each platform while the page is open.
+The page says a change of health in each of its sections.
 The page gets the first list from its loader. It then reads `GET /api/channels` every 20 seconds.
 It reads only while the tab is visible.
 It reads at once when the tab shows again or when the browser is online again.
@@ -594,7 +651,9 @@ The logs hold only fixed codes, platforms, and counts. They never hold an ID, a 
 
 ## Overlay key
 
-The activity socket accepts only the current overlay key of the page or the signed-in owner.
+The activity socket accepts only a current overlay key of the page or the signed-in owner.
+Each output of the overlay has its own key. See [Outputs](overlay-composition.md#outputs).
+
 The key gives read access to the live room and the activity feed. It gives no access to the account,
 to channel management, or to provider tokens. A new overlay key closes the sockets that used the old key.
 The overlay page sends no `Referer`.
@@ -735,7 +794,7 @@ The D1 migrations `0027` and `0028` only add tables and a column. An older Worke
 | Stolen authorization code | PKCE S256 for YouTube and Kick. Twitch does not document PKCE for this flow. Thus the Twitch flow relies on the state and the client secret. |
 | Account substitution | A channel can belong to only one page (`UNIQUE(platform, external_id)`). The callback refuses a channel of another page and revokes the new token, except for a YouTube token (see Callback failures). |
 | Different channel on reconnect | The callback refuses it. The owner must disconnect first. |
-| Redirect abuse | The callback goes only to the fixed path `/overlay-control` with a short result code. It sends no code, state, or token in the URL. |
+| Redirect abuse | The callback goes only to the fixed path `/tools?view=channels` with a short result code. It sends no code, state, or token in the URL. |
 | Stolen session cookie | Connect, reconnect, and disconnect need a sign-in from the last 10 minutes (`reauth_required`). |
 | Cross-streamer access | Every operation uses the own page of the viewer. Each page has its own `ChannelIngest` object. Webhooks go to the page that owns the channel. |
 | Forged webhook | Twitch: HMAC-SHA256 with a constant-time comparison. Kick: RSA PKCS#1 v1.5 SHA-256 with the public key of Kick. The check runs on the raw body before parsing. |
@@ -752,7 +811,7 @@ The D1 migrations `0027` and `0028` only add tables and a column. An older Worke
 | Quota exhaustion | A shared daily budget and a budget for each page. Polls run only while a consumer listens. A stored next poll time, and backoff on errors. |
 | Replay of old commands | The live window: a message that the platform sent more than 30 seconds before it arrived is not live. Snapshot messages are never live. |
 | Suspended page | The object drops deliveries, stops polling, and closes the activity sockets. |
-| Leaked overlay key | The owner makes a new key. The old key stops at once for the live room and the activity feed. |
+| Leaked overlay key | The owner makes a new key for that output. The old key stops at once for the live room and the activity feed. |
 
 ### Residual risks
 

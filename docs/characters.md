@@ -1,7 +1,8 @@
 # Interactive characters
 
-The characters layer shows a small playground at the bottom of the overlay (issue #664).
-Each viewer who writes in the chat gets a character. Chat commands make the character jump, dig, build, wave, or explode.
+The characters layer shows a playground on the overlay (issue #664).
+Each viewer who writes in the chat gets a character. Chat commands move the character and build with blocks.
+The characters start on the ground. The viewers build up from there, as high as the layer.
 The viewer needs no Stream Bullets account.
 
 The server runs the playground. The overlay pages only draw the frames from the server.
@@ -9,7 +10,7 @@ Thus the editor preview, a composition source, and a characters source always sh
 
 | Part | Files |
 | --- | --- |
-| Rules and constants | `app/lib/playground/constants.ts`, `crowd.ts`, `sim.ts`, `terrain.ts` |
+| Rules and constants | `app/lib/playground/constants.ts`, `core.ts`, `crowd.ts`, `sim.ts`, `motion.ts`, `works.ts`, `terrain.ts`, `checkpoint.ts` |
 | Frame contract | `app/lib/playground/protocol.ts` |
 | Characters test | `app/lib/playground/test-crowd.ts` |
 | Server host | `app/server/playground-host.ts`, `app/server/channel-ingest.ts` |
@@ -49,9 +50,18 @@ To change a value, change `app/lib/playground/constants.ts` and this table.
 | Bubble text | 80 user-perceived characters |
 | Name | 24 user-perceived characters. A longer name ends with an ellipsis (…). |
 | Name label after admission | 3 seconds |
-| Hole repair and stair removal | 30 seconds (900 ticks) after the last change |
-| Stair steps at one time | 60. The oldest step goes first. |
-| Steps in one build | 5 |
+| Hole repair in the ground | 30 seconds (900 ticks) after the last hit |
+| Block size | 16 world pixels, the size of a ground tile |
+| Blocks at one time | 47 percent of the cells of the block grid: 357 in a full frame. The oldest block goes first. |
+| Walk of one command | 1 block. A number gives more, to a maximum of 20. |
+| Speed of a commanded walk | 1 world pixel each tick: about 2 blocks each second |
+| Dig, stairs, and bridge of one command | 1 block. A number gives more, to a maximum of 5. |
+| Jetpack | 5 blocks up. A number gives fewer. |
+| Grapple reach | 6 blocks |
+| Boom reach | All builds with their center within 2.3 blocks. Characters within 40 world pixels fly away. |
+| Fall that flattens a character | More than 40 world pixels: 3 blocks or more |
+| Platform places | 20 percent of the visible characters for each platform, and 2 at the minimum |
+| Crown | The highest character that stands 2 blocks or more above the ground |
 | Respawn wait | 2.5 seconds (75 ticks) |
 | Inactivity timeout | 60 seconds. The owner can set 10 to 600 seconds. |
 | Registry | 500 participants. A participant goes after 30 minutes without a message. |
@@ -62,7 +72,11 @@ To change a value, change `app/lib/playground/constants.ts` and this table.
 
 1. A first message registers the participant. The participant then asks for a slot.
 2. A participant with a slot enters through the entrance door.
+   The character then walks to a free place on the ground: the place that is farthest from the other characters.
+   Thus new characters do not stand on each other.
 3. The character walks on the ground. It turns and stops at random times.
+   After a command that steers it, the character stands still between commands.
+   A respawn makes it walk around again.
 4. A new message resets the inactivity time and shows a bubble.
 5. After the timeout without a message, the character walks to the exit door and leaves.
 6. A message while the character walks to the exit cancels an inactivity exit. The character turns to the center.
@@ -84,6 +98,11 @@ The playground chooses the visible participants again after each change:
 - The other active participants get the rotating slots in turn, in the order of registration.
 - When fewer participants wait than rotating slots exist, all of them get a slot.
   Thus no slot stays empty while a participant waits.
+- Each platform with active participants keeps places in the ranked slots, for its highest scores.
+  The places are 20 percent of the maximum, and 2 at the minimum: 8 of 40 for each platform.
+  Thus 1 viewer on Twitch and 1 viewer on Kick stay on screen while 100 viewers write on YouTube.
+  With fewer ranked slots than places, each platform gets its first place before a platform gets a second place.
+  A platform cannot keep more places than it has active participants. The free places go to the highest scores.
 - A participant has at most one slot.
 - The slots include characters that enter, leave, or wait for a respawn. Thus a respawn cannot go above the maximum.
 - When the owner sets a maximum below the number of visible characters, the extra characters lose their slot.
@@ -94,37 +113,79 @@ The rotation order does not change with new messages. Thus a viewer cannot jump 
 
 ## Commands
 
-| Command | Action |
-| --- | --- |
-| `!jump` | Jump, land, and walk on |
-| `!dig` | Dig into dirt. The dirt cracks two times and then breaks. The character falls through the hole. |
-| `!build` | Build a stair of 5 steps. Other characters can use the stair. |
-| `!wave` | Wave and walk on |
-| `!boom` | A cartoon explosion, then a respawn |
+A command is `!` and a word. Some commands take a number, a side, or both, in any sequence: `!dig 3`, `!dig left`, `!dig r 3`.
+The sides are `left`, `right`, `l`, and `r`. Capital letters make no difference.
 
-- A command controls only the character of its sender. Holes and stairs affect all characters.
+| Command | Other words | Action |
+| --- | --- | --- |
+| `!left`, `!right` | `!l`, `!r` | Walk 1 block to that side. `!right 3` walks 3 blocks. The character goes up 1 block alone. At an edge it walks off and falls. After the fall, the walk continues. It stops at a higher wall and at a door zone. |
+| `!look left`, `!look right` | `!turn` | Turn to that side without a step. `!turn` turns around. |
+| `!stop` | | Stop a walk, and stop work of more than one block. It works at once. |
+| `!jump` | | Jump to the side that the character faces. The jump goes as high as a wall of 2 blocks. |
+| `!block` | `!box`, `!crate` | Put a dirt block in front. In front of a block, put a second block on top. |
+| `!up` | `!pillar` | Put a dirt block under the feet. The character goes up 1 block. |
+| `!stairs` | `!build` | Build 1 stair in front and walk up it. `!stairs 3` builds 3 stairs. |
+| `!bridge` | | Put 1 plank in front at the level of the floor and walk on it. `!bridge 3` puts 3 planks. It needs a build to start from. |
+| `!dig` | | Break the block under the feet. `!dig 3` goes 3 blocks down. `!dig left` breaks the block in front and, with a number, walks into the gap and digs on. On the ground, `!dig` makes a hole in dirt. |
+| `!grapple` | `!hook` | Shoot a hook up and to the front. If the hook catches a block, the rope pulls the character on top of that column. |
+| `!jetpack` | `!jet` | Fly 5 blocks up, through blocks. `!jetpack 3` flies 3 blocks. With a block under the feet at the top, the character stays there. If not, it falls back. |
+| `!boom` | | A cartoon explosion, then a respawn. It breaks the builds near the character and throws the characters there. |
+| `!dance`, `!wave`, `!cheer` | `!hi` for `!wave` | Dance, wave, or cheer on the spot |
+| `!push` | `!shove` | Push the character in front. That character flies 1 block or more. |
+| `!flag` | | Plant a flag in the platform color. Each character has one flag. A new flag moves the old one. |
+
+- A command controls only the character of its sender. Blocks and holes affect all characters.
+- A side on a build command turns the character first: `!block left`.
 - Only live chat runs a command. A message from a snapshot or a late provider retry never runs a command.
   See [Channel connections and activity](channel-connections.md#event-contract).
 - A command from a viewer without a character waits in the queue. The character first enters.
   The command then runs when the character walks in the walking limits. The playground never runs a command that viewers cannot see.
 - A command in the cooldown does nothing. A queued command that is older than 10 seconds expires.
+- Work of more than one block ends before the next command starts. `!stop` ends it at once.
 - A character stays on screen until its action ends. Each action has a fixed end.
-- Some commands cannot run: a dig on protected ground, or a build without room. Then a red cross shows above the character.
+- Some commands cannot run: a block in a door zone, a dig on protected ground, a hook that catches nothing.
+  Then a red cross shows above the character.
+- The dig, the dirt blocks, and the stairs use the art of the ground. The dance, the cheer, the grapple, the jetpack, and the push
+  have no art of their own. They use the wave, jump, and build pictures.
 
 ## Terrain
 
-The world size comes from the characters cell. A cell is 40 × 40 world pixels, and a world pixel is 3 pixels of the design.
-The default cell of 16 × 2 cells gives a world of 640 × 80 world pixels.
-The vertical default of 9 × 3 cells gives 360 × 120. The minimum cell of 6 × 2 cells gives 240 × 80.
+The world size comes from the characters cell. A cell is 20 × 20 world pixels, and a world pixel is 3 pixels of the design.
+A cell of 32 × 4 cells across the horizontal frame gives a world of 640 × 80 world pixels.
+A cell of 18 × 6 cells across the vertical frame gives 360 × 120. The minimum cell of 12 × 4 cells gives 240 × 80.
+A full horizontal frame of 32 × 18 cells gives 640 × 360.
 
-- The ground is 18 world pixels above the bottom of the world. More height gives more sky.
+- The ground is 18 world pixels above the bottom of the world. More height gives more room to build.
 - The ground has tiles of 16 world pixels.
 - The entrance zone and the exit zone each have 6 protected girder tiles. The respawn pad is on a protected run.
 - The middle of the ground repeats a pattern: 5 dirt tiles and 3 girder tiles.
 - Only dirt can break. Girders never break, so the entrance and the exit always stay usable.
-- Holes repair and stairs go away 30 seconds after the last change.
+- A hole in the ground repairs 30 seconds after the last hit.
 
 A change of the characters cell makes a new world. The characters keep their relative position, and their actions stop.
+The builds of the old world go.
+
+## Builds
+
+The space above the ground is a grid of cells of 16 world pixels. Each cell holds no block or one block.
+The characters move and build only in the characters cell. To give the viewers less of the screen, make the cell smaller.
+
+| Block | From | Rule |
+| --- | --- | --- |
+| Dirt block | `!block`, `!up` | A wall and a floor. It shows the ground dirt. |
+| Stair | `!stairs` | Four steps up in one direction. A character walks up it, or behind it. |
+| Plank | `!bridge` | A floor of a bridge. To a character at its level, it is a wall. |
+
+- A block holds when it is on solid ground or touches another block, also at a corner.
+- A block that does not hold falls 1 row each 3 ticks. A block that lands on a character breaks, and the character lies flat for a moment.
+- A block over a hole in the ground falls out.
+- Nothing removes a build with time. `!dig` and `!boom` break builds. A dig breaks a block with 3 hits. The block cracks two times. The third hit breaks it.
+- At the block limit, the oldest block goes for each new block.
+- The grid ends 30 world pixels below the top of the world. That space stays free for bubbles and badges.
+- Nobody builds in a door zone below row 5, or above the respawn pad below row 3. Thus the doors and the pad stay usable.
+- A steered character keeps its cell: no block goes there. A character that only walks around does not. A block lifts it.
+- Blocks do not stop a character that leaves. Thus a build cannot keep a character on screen.
+- The highest character on the builds gets a crown. It keeps the crown until a different character stands higher.
 
 ## Bubbles
 
@@ -158,7 +219,7 @@ See the [capability matrix](channel-connections.md#capability-matrix).
 
 ## Controls
 
-The characters layer is one of the layers in step 2 (**Build your overlay**) on **Overlay control**.
+The characters layer is one of the layers in step 1 (**Build your overlay**) of the **Overlay** section of **Streamer tools**.
 To put it on the grid, select its chip in the palette. Its settings show when you select the layer:
 
 - **Show on stream** shows or hides the layer. The layer stays on the grid.
@@ -167,9 +228,10 @@ To put it on the grid, select its chip in the palette. Its settings show when yo
 - **Maximum characters on screen** sets the number of visible characters, from 5 to 40.
   The editor saves the value in the layers (`characters.max`) in the same way.
 - **Pause** stops the playground. The characters stand still and commands do nothing. **Resume** starts it again.
-- **Reset playground** asks for a confirmation. Then all characters go at once and the ground becomes complete again.
+- **Clear all builds** removes all blocks, stairs, planks, and flags with one click. The characters stay and fall to the ground.
+- **Reset playground** asks for a confirmation. Then all characters and all builds go at once and the ground becomes complete again.
   Removed viewers can come back. Chat bans and timeouts stay.
-- Pause and reset need the saved characters layer on stream.
+- Pause, clear, and reset need the saved characters layer on stream.
   When it is off stream, the buttons are unavailable and a hint tells you to show the layer.
 - Viewers see a **PAUSED** badge during a pause, and a **TEST** badge during a test.
 - **Characters on the playground** lists the visible characters with their platforms. **Remove** takes one character off.
@@ -183,7 +245,8 @@ The characters test needs the saved characters layer on stream.
 A start of the test also resumes a paused playground, so the test shows at once.
 During a pause, the text beside the button and the start message tell you this.
 
-The layer is on stream when it has a cell in the selected orientation and **Show on stream** is on.
+The layer is on stream when it has a cell in an output and **Show on stream** is on.
+One playground serves the two outputs. See [Outputs](overlay-composition.md#outputs).
 The preview opens the owner's own characters socket while the characters layer is on stream.
 The editor reads the pause and the test only while the saved characters layer is on stream.
 
@@ -195,7 +258,7 @@ The controls use `POST /api/overlay/characters`. See [API](api.md#overlay-layers
 
 The test plays about 60 synthetic participants on Twitch, YouTube, and Kick for 5 minutes.
 The participants reuse the sample chat users. The script has a fixed seed for each test.
-Each minute has all five commands, a deleted message, and a timeout. From the second minute, each minute also has an exit reversal.
+Each minute has each command, a deleted message, and a timeout. From the second minute, each minute also has an exit reversal.
 
 The test events go only to the playground. They never go to a provider or to the activity sockets.
 Stopping the test removes the synthetic participants. The real participants stay.
@@ -203,14 +266,18 @@ Stopping the test removes the synthetic participants. The real participants stay
 ## Frame protocol
 
 The frames use the activity socket of the page. A socket gets frames only when it asks for them with `characters=1`.
-`app/lib/playground/protocol.ts` has the contract (version 1).
+`app/lib/playground/protocol.ts` has the contract (version 2).
 
-- The first frame on each socket is a full frame (`full: true`). It has `roster`, `bubbles`, `terrain`, and `mode`.
+- The first frame on each socket is a full frame (`full: true`). It has `roster`, `bubbles`, `terrain`, `extras`, and `mode`.
 - A tick frame (`full: false`) comes each 100 ms. It has `chars`. It has the other sections only when they changed.
+- `terrain.blocks` is the block grid as text: one character for each cell, in rows from the ground up.
+  A letter from `a` to `r` gives the kind, the direction, and the damage of a block. A period is an empty cell.
+  The text ends after the highest row that has a block. The full frame has at most 1480 cells.
+- `extras` has the grapple ropes, the flags, and the ID of the character with the crown.
 - A character is a tuple: `[id, x × 10, y × 10, state, ticks in state, direction, flags]`.
 - A reconnect or a restarted object sends a new full frame. The overlay then replaces its state.
 - The overlay ignores a tick frame before the first full frame.
-- A frame is at most 32 KiB. A typical frame is 1 to 1.5 KB.
+- A frame is at most 32 KiB. A typical tick frame is 1 to 1.5 KB. A frame with a changed terrain adds the block grid.
 
 The overlay keeps the newest frames and draws 100 ms behind them. Thus it can move characters smoothly between two frames.
 A move of more than 24 world pixels, or a change of state, does not slide.
@@ -255,9 +322,9 @@ Moderation while the playground stands also sends a full frame. Thus a removed c
 
 The host keeps one checkpoint in the storage of the object (key `playground`, at most 60,000 characters).
 It saves the checkpoint at most each 5 seconds while the state changes, and when the playground stops.
-The checkpoint holds the clock, the registry, the restrictions, the terrain, the rotation, the pause, the test, and the settings.
+The checkpoint holds the clock, the registry, the restrictions, the terrain with its builds and flags, the rotation, the pause, the test, and the settings.
 
-After an eviction, the object restores the checkpoint. The visible characters come back and walk.
+After an eviction, the object restores the checkpoint. The visible characters come back and walk. The builds stay.
 Actions, bubbles, and queued commands are not in the checkpoint. Thus a restored playground never runs an old command again.
 
 While the playground runs, the host keeps an alarm 15 seconds ahead (the watchdog).
@@ -288,6 +355,9 @@ The `test` environment in `wrangler.jsonc` has the binding, so the characters ru
 A rollback to a version without the playground leaves the checkpoint in the object storage.
 The old version does not read it. The alarm of a later version deletes it when it holds no participant.
 After a rollback, refresh each OBS browser source with the characters layer.
+
+Version 2 of the frames and of the checkpoint came with the builds. An overlay page that loaded before the update ignores the new frames, so refresh it.
+A version with a different contract does not read a stored checkpoint. The playground then starts with no characters and no builds.
 
 An old version that saves the layers drops the characters timeout. The timeout then goes back to 60 seconds.
 A version without the maximum drops `characters.max` in the same way. The maximum then goes back to 40.
@@ -353,7 +423,7 @@ The art ships under the project license.
 
 ## OBS setup
 
-1. On **Overlay control**, select the **Characters** chip in the palette. The layer goes on the grid and on stream.
+1. In the **Overlay** section of **Streamer tools**, select the **Characters** chip in the palette. The layer goes on the grid and on stream.
    Drag the layer to its place and drag a handle to give it its size.
 2. Use the composition URL, or add a browser source with the characters layer URL:
 
@@ -361,8 +431,8 @@ The art ships under the project license.
    https://<origin>/@<handle>/overlay?key=<key>&layer=characters
    ```
 
-3. Give the source the size of the characters cell. **Overlay control** shows it under **Layer URLs**.
-   A cell across the bottom of the horizontal frame is 1920 × 240.
+3. Give the source the size of the characters cell. The **Overlay** section shows it under **Layer URLs**.
+   A cell across the bottom of the horizontal frame is 1920 × 240. A cell of the full frame is 1920 × 1080.
 4. Keep the background of the source transparent.
 5. Select **Start test** to see the playground in OBS before you go live.
 6. After an update of Stream Bullets, refresh the browser source once.

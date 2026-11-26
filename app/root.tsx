@@ -24,8 +24,9 @@ import { loadShell } from "./lib/shell.server";
 import { type ShellData } from "./lib/shell";
 import "./styles.css";
 
-// OBS routes omit site chrome.
-const bareRoutes: ReadonlySet<string> = new Set(["routes/overlay"]);
+// OBS routes omit site chrome. The dock has controls, so it keeps the toasts: a failed action must tell the streamer.
+const OVERLAY_ROUTE = "routes/overlay";
+const DOCK_ROUTE = "routes/dock";
 
 // Shared header, account menu and footer data.
 export const loader = withRouteErrors(async ({ request, context }: LoaderFunctionArgs): Promise<ShellData> => {
@@ -114,8 +115,14 @@ function SkipLink(): ReactNode {
 }
 
 export default function App(): ReactNode {
-  const bare: boolean = useMatches().some((match) => bareRoutes.has(match.id));
-  if (bare) return <Outlet />;
+  const routes: ReadonlySet<string> = new Set(useMatches().map((match): string => match.id));
+  if (routes.has(OVERLAY_ROUTE)) return <Outlet />;
+  if (routes.has(DOCK_ROUTE))
+    return (
+      <ToastProvider>
+        <Outlet />
+      </ToastProvider>
+    );
   return (
     <ToastProvider>
       <SkipLink />

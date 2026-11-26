@@ -62,7 +62,7 @@ async function listen(
   options: { characters?: boolean; overlay?: boolean; streamerId?: string } = {},
 ): Promise<FakeSocket> {
   const streamerId = options.streamerId ?? page;
-  const headers: Record<string, string> = options.overlay ? { "X-SB-Overlay": "1" } : { "X-SB-Owner": "1" };
+  const headers: Record<string, string> = options.overlay ? { "X-SB-Overlay": "horizontal" } : { "X-SB-Owner": "1" };
   const response = await ingest
     .get(ingest.idFromName(streamerId))
     .fetch(url("subscribe", streamerId, options.characters === false ? {} : { characters: "1" }), {
@@ -117,11 +117,11 @@ function lastMode(socket: FakeSocket): { paused: boolean; test: boolean } | unde
   return mode;
 }
 
-/** The stairs the frames of a socket add up to. */
-function lastStairs(socket: FakeSocket): unknown[] | undefined {
-  let stairs: unknown[] | undefined;
-  for (const frame of frames(socket)) if (frame.terrain) stairs = frame.terrain.stairs;
-  return stairs;
+/** The terrain that the frames of a socket add up to. */
+function lastTerrain(socket: FakeSocket): { ground: string; blocks: string } | undefined {
+  let terrain: { ground: string; blocks: string } | undefined;
+  for (const frame of frames(socket)) if (frame.terrain) terrain = frame.terrain;
+  return terrain;
 }
 
 function state(streamerId: string = page): RoomState {
@@ -146,8 +146,8 @@ const ON: OverlayLayers = {
   ...DEFAULT_LAYERS,
   characters: { enabled: true, timeout: 60, max: 40 },
   cells: {
-    horizontal: { ...emptyCells(), characters: { c: 0, r: 7, w: 16, h: 2 } },
-    vertical: { ...emptyCells(), characters: { c: 0, r: 13, w: 9, h: 3 } },
+    horizontal: { ...emptyCells(), characters: { c: 0, r: 14, w: 32, h: 4 } },
+    vertical: { ...emptyCells(), characters: { c: 0, r: 26, w: 18, h: 6 } },
   },
 };
 
@@ -239,7 +239,7 @@ describe("characters sockets", (): void => {
     expect(socket.messages<{ type: string }>().map((message) => message.type)).toEqual(["snapshot", "playground"]);
     const [full] = frames(socket);
     expect(full).toMatchObject({ full: true, tick: 0, chars: [], roster: [], mode: { paused: false, test: false } });
-    // The default characters cell is 16 x 2: a world of 640 x 80 logical px.
+    // The characters cell is 32 x 4: a world of 640 x 80 logical px.
     expect(full.full && full.terrain).toMatchObject({ w: 640, h: 80 });
     expect(vi.getTimerCount()).toBe(1);
     expect(state().storage.alarm).toBe(T0 + WATCHDOG_MS);
@@ -521,12 +521,12 @@ describe("eviction", (): void => {
 describe("closing", (): void => {
   it("stops for a revoked overlay key and keeps the owner's socket running", async (): Promise<void> => {
     const overlay = await listen({ overlay: true });
-    expect((await post("overlay-key")).status).toBe(204);
+    expect((await post("overlay-key", { output: "horizontal" })).status).toBe(204);
     expect(overlay.closeCode).toBe(1001);
     advance(FRAME_MS);
     expect(vi.getTimerCount()).toBe(0);
     const owner = await listen();
-    await post("overlay-key");
+    await post("overlay-key", { output: "horizontal" });
     expect(owner.open).toBe(true);
     advance(FRAME_MS);
     expect(vi.getTimerCount()).toBe(1);
@@ -738,21 +738,36 @@ describe("controls", (): void => {
     expect(registry.map((record) => record[2])).toEqual(["u1"]);
   });
 
-  it("shows terrain that expires while paused: stairs built before the pause go at the alarm", async (): Promise<void> => {
+  it("shows terrain that expires while paused: a hole dug before the pause repairs at the alarm", async (): Promise<void> => {
     const socket = await listen();
-    await deliver([chat("m1", "u1", "hello")]);
+    const users: string[] = ["u1", "u2", "u3", "u4", "u5", "u6", "u7", "u8"];
+    await deliver(users.map((user: string, i: number) => chat(`m${i}`, user, "hello")));
     advance(10_000);
-    await deliver([chat("m2", "u1", "!build")]);
-    advance(15_000);
-    expect(lastStairs(socket)?.length).toBeGreaterThan(0);
+    await deliver(users.map((user: string, i: number) => chat(`d${i}`, user, "!dig")));
+    advance(5_000);
+    expect(lastTerrain(socket)?.ground).toMatch(/[123]/);
     await control({ op: "pause" });
     const sent: number = socket.sent.length;
     const ends: number = Date.now() + 31_000;
     for (let i = 0; i < 20 && Date.now() <= ends; i += 1) await fireAlarm();
     expect(Date.now()).toBeGreaterThan(ends);
     expect(socket.sent.length).toBeGreaterThan(sent);
-    expect(lastStairs(socket)).toEqual([]);
+    expect(lastTerrain(socket)?.ground).toMatch(/^[g0]+$/);
     expect(lastMode(socket)).toEqual({ paused: true, test: false });
+  });
+
+  it("clears the builds with one control and keeps the characters", async (): Promise<void> => {
+    const socket = await listen();
+    const users: string[] = ["u1", "u2", "u3", "u4", "u5", "u6", "u7", "u8"];
+    await deliver(users.map((user: string, i: number) => chat(`m${i}`, user, "hello")));
+    advance(10_000);
+    await deliver(users.map((user: string, i: number) => chat(`b${i}`, user, "!up")));
+    advance(5_000);
+    expect(lastTerrain(socket)?.blocks).toMatch(/a/);
+    expect((await control({ op: "clear" })).status).toBe(200);
+    advance(FRAME_MS);
+    expect(lastTerrain(socket)?.blocks).toBe("");
+    expect(roster(socket)).toHaveLength(users.length);
   });
 
   it("forgets a viewer 30 minutes after their last message while paused, and shows and saves it", async (): Promise<void> => {
@@ -786,7 +801,7 @@ describe("configuration", (): void => {
     const narrow: OverlayLayers = {
       ...ON,
       characters: { enabled: true, timeout: 120, max: 40 },
-      cells: { ...ON.cells, horizontal: { ...ON.cells.horizontal, characters: { c: 0, r: 7, w: 8, h: 2 } } },
+      cells: { ...ON.cells, horizontal: { ...ON.cells.horizontal, characters: { c: 0, r: 14, w: 16, h: 4 } } },
     };
     await setLayers(narrow);
     queries.length = 0;
@@ -795,23 +810,41 @@ describe("configuration", (): void => {
     advance(FRAME_MS);
     const resized = frames(socket).at(-1);
     expect(resized?.terrain).toMatchObject({ w: 320, h: 80 });
+    // The terrain of the last frame that sent one: a frame without a change of the world sends none.
+    const lastTerrain = (): PlaygroundFrame["terrain"] =>
+      frames(socket)
+        .filter((frame: PlaygroundFrame): boolean => frame.terrain !== undefined)
+        .at(-1)?.terrain;
+    // One playground serves the two outputs. The output that the editor shows does not change its size.
     await setLayers({ ...narrow, orientation: "vertical" });
     await post("playground-config");
     advance(FRAME_MS);
-    expect(frames(socket).at(-1)?.terrain).toMatchObject({ w: 360, h: 120 });
+    expect(frames(socket).at(-1)?.terrain).toBeUndefined();
+    expect(lastTerrain()).toMatchObject({ w: 320, h: 80 });
+    // Without a horizontal cell, the vertical cell gives the size, with each selected output.
+    for (const orientation of ["horizontal", "vertical"] as const) {
+      await setLayers({ ...narrow, cells: { ...narrow.cells, horizontal: emptyCells() }, orientation });
+      await post("playground-config");
+      advance(FRAME_MS);
+      expect(lastTerrain()).toMatchObject({ w: 360, h: 120 });
+    }
     await setLayers(DEFAULT_LAYERS);
     await post("playground-config");
     expect(vi.getTimerCount()).toBe(0);
     await setLayers(ON);
     await post("playground-config");
     expect(vi.getTimerCount()).toBe(1);
-    // Off the grid of the selected orientation, the layer is off stream: the playground stops.
+    // On the grid of one output only, the layer is on stream there: the playground runs, with each selected output.
     await setLayers({ ...ON, cells: { ...ON.cells, horizontal: emptyCells() } });
     await post("playground-config");
-    expect(vi.getTimerCount()).toBe(0);
-    await setLayers({ ...ON, cells: { ...ON.cells, horizontal: emptyCells() }, orientation: "vertical" });
+    expect(vi.getTimerCount()).toBe(1);
+    await setLayers({ ...ON, cells: { ...ON.cells, vertical: emptyCells() }, orientation: "vertical" });
     await post("playground-config");
     expect(vi.getTimerCount()).toBe(1);
+    // Off the grid of the two outputs, the layer is off stream: the playground stops.
+    await setLayers({ ...ON, cells: { horizontal: emptyCells(), vertical: emptyCells() } });
+    await post("playground-config");
+    expect(vi.getTimerCount()).toBe(0);
   });
 
   it("does not read the layers while no characters socket listens", async (): Promise<void> => {
@@ -825,7 +858,7 @@ describe("configuration", (): void => {
     const queries = watchQueries();
     const narrow: OverlayLayers = {
       ...ON,
-      cells: { ...ON.cells, horizontal: { ...ON.cells.horizontal, characters: { c: 0, r: 7, w: 8, h: 2 } } },
+      cells: { ...ON.cells, horizontal: { ...ON.cells.horizontal, characters: { c: 0, r: 14, w: 16, h: 4 } } },
     };
     // The second change arrives while the first read runs; its read must see the newer layers.
     const first: Promise<Response> = post("playground-config");
@@ -917,7 +950,8 @@ describe("PlaygroundHost", (): void => {
     const playground = new PlaygroundHost({
       storage: {
         get: (key: string): Promise<unknown> => Promise.resolve(values.get(key)),
-        put: options.put ?? ((key: string, value: unknown): Promise<void> => Promise.resolve(void values.set(key, value))),
+        put:
+          options.put ?? ((key: string, value: unknown): Promise<void> => Promise.resolve(void values.set(key, value))),
         delete: options.remove ?? ((key: string): Promise<boolean> => Promise.resolve(values.delete(key))),
       } as unknown as DurableObjectStorage,
       sockets: (): WebSocket[] => sockets,

@@ -1,8 +1,8 @@
-import type { ActivityEvent } from "./activity";
+import type { ActivityEvent, ActivityPlatform } from "./activity";
 import { SAMPLE_CHAT } from "./chat-feed";
 
 /**
- * The chat test (issue #663): a dry run of the chat layer in OBS. The owner starts it in Overlay control. The server
+ * The chat test (issue #663): a dry run of the chat layer in OBS. The owner starts it in Streamer tools. The server
  * keeps only its end time; each overlay page makes the sample chat itself. Nothing goes to a provider.
  */
 
@@ -25,6 +25,12 @@ export const CHAT_TEST_SCRIPT: readonly ActivityEvent[] = [
   ...SAMPLE_CHAT.slice(4),
   { kind: "ban", platform: timedOut.platform, userId: timedOut.user.id, until: SAMPLE_TIMEOUT_MS, receivedAt: 0 },
 ];
+
+/** What a test plays on an output that shows `platform` only. Null: the whole script. */
+export function chatTestScript(platform: ActivityPlatform | null): readonly ActivityEvent[] {
+  if (platform === null) return CHAT_TEST_SCRIPT;
+  return CHAT_TEST_SCRIPT.filter((event: ActivityEvent): boolean => event.platform === platform);
+}
 
 /** Milliseconds left in a test that ends at `until` (server time), at server time `now`. Zero when it is off. */
 export function chatTestLeft(until: number, now: number): number {

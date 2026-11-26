@@ -9,7 +9,7 @@ import { providerName, Reauthenticate } from "../shell/sign-in-dialog";
 import { Dialog, DialogActions } from "../ui/dialog";
 import { Icon, type IconName } from "../ui/icon";
 import { useToast } from "../ui/toast";
-import { paths, useShell } from "../../lib/shell";
+import { paths, toolsPath, useShell } from "../../lib/shell";
 import { detached } from "../../lib/detached";
 import { PlatformIcon } from "../overlay/wasteland/glyphs";
 
@@ -290,8 +290,13 @@ export function ChannelPanel({
     resultShown.current = true;
     document.getElementById("channels-title")?.scrollIntoView({ block: "start" });
     banner.current?.focus();
-    detached(navigate(location.pathname, { replace: true, preventScrollReset: true }));
-  }, [initialResult, location.pathname, navigate]);
+    const search = new URLSearchParams(location.search);
+    search.delete("channel");
+    search.delete("result");
+    detached(
+      navigate({ pathname: location.pathname, search: search.toString() }, { replace: true, preventScrollReset: true }),
+    );
+  }, [initialResult, location.pathname, location.search, navigate]);
 
   // Coming back to the page from the back-forward cache (after the provider) must not leave buttons disabled.
   useEffect((): (() => void) => {
@@ -500,7 +505,7 @@ export function ChannelPanel({
                     )}
                     <Reauthenticate
                       providers={signInProviders}
-                      callbackURL="/overlay-control"
+                      callbackURL={toolsPath("channels")}
                       onStart={() => rememberIntent(reauth, owner)}
                     />
                   </div>

@@ -100,7 +100,7 @@ English also shows `error` for `step_up_required` and `other_key_required`.
 | `POST /api/channels/:platform/connect` | `{}` | `{authorizeUrl}`. The browser then goes to the provider. |
 | `POST /api/channels/:platform/reconnect` | `{}` | `{authorizeUrl}`. The connection row stays. |
 | `DELETE /api/channels/:platform` | none, or `{}` | `{revoked}`: true when the provider confirmed the revoke. `404` when the page has no connection for the platform. `409` (`channel_conflict`) when the row changed during the disconnect. A reconnect replaced it, or another disconnect or the expiry job removed it. |
-| `GET /channels/callback/:platform` | provider query | A redirect to `/overlay-control?channel=<platform>&result=<code>`. |
+| `GET /channels/callback/:platform` | provider query | A redirect to `/tools?view=channels&channel=<platform>&result=<code>`. |
 | `GET /api/activity/:handle` | WebSocket upgrade, optional `key`, optional `characters=1` | The activity feed. Only the current overlay key or the signed-in owner can connect. With `characters=1` the socket also gets the character playground frames. `400` for another `characters` value or another parameter. `426` without a WebSocket upgrade, `403` without a key or owner session. A wrong or revoked key gets a socket that the server closes at once with the code `4403`. `404` for a missing or suspended page, `503` while the `CHANNELS_OFF` secret exists. |
 | `POST /hooks/twitch`, `POST /hooks/kick` | signed provider webhook | `204`, or `200` with the challenge for a Twitch subscription check. `410` for a signed Twitch notification of an unknown channel. Twitch counts it as a failed delivery. It revokes the subscription after repeated failures. `403` for a bad signature or an old timestamp. `413` for a large body. `429` when an address with too many forged webhooks reaches the per-address limit. `503` when the server cannot check the webhook. |
 
@@ -118,20 +118,22 @@ English also shows `error` for `step_up_required` and `other_key_required`.
 | Endpoint | Body | Response |
 | --- | --- | --- |
 | `GET /api/overlay` | - | `{overlay, data, handle}`. The `OverlayState` of the page of the signed-in owner, and the polls, topics, and cards for the pickers |
-| `POST /api/overlay` | `{action: "layers", write?, orientation?, chat?: {enabled?, hideCommands?, backgroundOpacity?}, characters?: {enabled?, timeout?, max?}, items?: {poll?, topic?, next?, message?, card?, support?}, cells?: {horizontal?, vertical?}}` | `{overlay}`. The whole new `OverlayState`, with `layers` |
+| `POST /api/overlay` | `{action: "layers", write?, orientation?, chat?: {enabled?, hideCommands?, backgroundOpacity?}, characters?: {enabled?, timeout?, max?}, items?: {poll?, topic?, next?, message?, card?, support?}, camera?: {enabled?}, cells?: {horizontal?, vertical?}, twitchOnly?: {horizontal?, vertical?}}` | `{overlay}`. The whole new `OverlayState`, with `layers` |
 | `POST /api/overlay` | `{action: "showResults", on: boolean}` | `{overlay}`. The whole new `OverlayState`, with `showResults` |
 | `POST /api/overlay` | `{action: "message", text, style: "info" \| "hype"}` | `{overlay}`. The whole new `OverlayState`, with `message` and `messageStyle` |
 | `POST /api/overlay` | `{action: "chatTest", on: boolean}` | `{overlay}`. The whole new `OverlayState`, with `chatTestUntil` |
-| `POST /api/overlay/key` | `{}` | `{url}`. A new private overlay link for the page of the signed-in owner. The old link stops immediately. |
-| `POST /api/overlay/key/show` | `{}` | `{url}`. The current private overlay link, or `null` when the server kept no key. Only the owner can read it. |
-| `POST /api/overlay/characters` | `{op: "status" \| "test" \| "stopTest" \| "pause" \| "resume" \| "reset"}` or `{op: "remove", id}` | `{paused, testEndsAt}`. The state of the character playground |
-| `GET /@handle/overlay?key&layer&poll` | Optional `layer`: `content`, `chat`, or `characters`. Optional `poll`: a poll ID | The overlay page. Without `layer`, it shows the composition. With `layer`, it shows that part alone. An unknown value shows an empty page. |
+| `POST /api/overlay/key` | `{output?: "horizontal" \| "vertical"}` | `{url}`. A new private link for one output of the page of the signed-in owner. The old link of that output stops immediately. The link of the other output stays. Without `output`, the output is `horizontal`. |
+| `POST /api/overlay/key/show` | `{output?: "horizontal" \| "vertical"}` | `{url}`. The current private link of one output, or `null` when the server kept no key for it. Only the owner can read it. |
+| `POST /api/overlay/characters` | `{op: "status" \| "test" \| "stopTest" \| "pause" \| "resume" \| "reset" \| "clear"}` or `{op: "remove", id}` | `{paused, testEndsAt}`. The state of the character playground |
+| `GET /@handle/overlay?key&layer&poll` | Optional `layer`: `content`, `chat`, or `characters`. Optional `poll`: a poll ID | The overlay page of one output. The key gives the output: horizontal or vertical. Without a valid key, the page shows the horizontal output. Without `layer`, it shows the composition. With `layer`, it shows that part alone. An unknown value shows an empty page. |
 
-- The overlay shows only the layers on the grid: `chat`, `characters`, and the content layers.
+- The overlay shows only the layers on the grid: `chat`, `characters`, the content layers, and `camera`.
   The content layers are `poll`, `topic`, `next`, `message`, `card`, and `support`. Each content layer shows one content source.
-  A layer is on stream when it has a cell in the selected orientation and its `enabled` value is `true`.
-- `orientation` is `horizontal` (a grid of 16 × 9 cells) or `vertical` (9 × 16 cells). A cell is 120 pixels.
-- Each orientation in `cells` holds `{chat?, characters?, poll?, topic?, next?, message?, card?, support?}`.
+  A layer is on stream in an output when it has a cell in the orientation of that output and its `enabled` value is `true`.
+- `orientation` is `horizontal` (a grid of 32 × 18 cells) or `vertical` (18 × 32 cells). A cell is 60 pixels.
+  It is the output that the editor shows. Each output has its own link, and OBS can show the two outputs together.
+  See [Outputs](overlay-composition.md#outputs).
+- Each orientation in `cells` holds `{chat?, characters?, poll?, topic?, next?, message?, card?, support?, camera?}`.
   Each value is a cell rectangle `{c, r, w, h}` of whole cells, or `null`. With `null`, the layer is not on the grid.
   `c + w` is at most the number of columns, and `r + h` is at most the number of rows.
 - Each value in `items` holds the settings of one content layer: `{enabled?, ref?, backgroundOpacity?, qr?}`.
@@ -142,9 +144,13 @@ English also shows `error` for `step_up_required` and `other_key_required`.
   - `qr` shows a QR code in the card of the layer. A viewer scans it to open the public page of the item.
     The `message` layer accepts the value and never shows a code.
     See [QR code](overlay-composition.md#qr-code).
+- `twitchOnly` has one boolean for each output. With `true`, that output shows chat and characters from Twitch only.
+  The default is `false`: the merged chat. See [Twitch chat only](overlay-composition.md#twitch-chat-only).
+- `camera` is the camera frame: a frame with a clear window. It has only the `enabled` value.
+  See [Camera frame](overlay-composition.md#camera-frame).
 - `chat.backgroundOpacity` is the opacity of the message cards in percent: an integer from 0 to 100 that is a multiple of 5.
   Other values return `400`. See [Message background](overlay-composition.md#message-background).
-- The minimum size is 3 × 2 cells for `chat`, 6 × 2 for `characters`, and 4 × 2 for each content layer.
+- The minimum size is 6 × 4 cells for `chat`, 12 × 4 for `characters`, 8 × 4 for each content layer, and 6 × 4 for `camera`.
 - After the merge, no two layers can overlap in an orientation. A layer without a cell does not count.
   A layer with a cell counts also while its `enabled` value is `false`.
 - The stored layers have a limit of 4000 characters. The server stores only the cells and the settings that are not the defaults.
@@ -170,10 +176,10 @@ English also shows `error` for `step_up_required` and `other_key_required`.
   - `test` starts the characters test for 5 minutes, or starts it again. It also ends a pause.
     It returns `400` when the saved characters layer is off stream.
   - With the saved characters layer off stream, the playground keeps nothing. Then each operation returns `{paused: false, testEndsAt: null}`, and `remove` returns `404`.
-  - `stopTest` stops the test. `pause` and `resume` stop and start the playground. `reset` removes all characters.
+  - `stopTest` stops the test. `pause` and `resume` stop and start the playground. `reset` removes all characters and all builds. `clear` removes all builds and keeps the characters.
   - `remove` removes the character with the frame `id`. It returns `404` when no character has that `id`.
   - `testEndsAt` is the server time at which the test ends, or `null` when no test runs.
-  - `test`, `reset`, and `remove` count against the write quota. The other operations do not.
+  - `test`, `reset`, `clear`, and `remove` count against the write quota. The other operations do not.
   - It returns `503` while the `CHANNELS_OFF` secret exists, when the deployment has no `CHANNEL_INGEST` binding, or when the playground cannot answer.
 - The action changes the streamer page of the signed-in user. A user who does not own a page gets `404`.
 - Errors: `400` for an invalid body, a cell outside the grid, or overlapping layers, `401` without sign-in, and `403` for another origin.
@@ -194,6 +200,54 @@ English also shows `error` for `step_up_required` and `other_key_required`.
   The server converts saved state from before this change by itself.
   See [State from before the overlay studio](overlay-composition.md#state-from-before-the-overlay-studio).
 - See [Overlay composition and merged chat](overlay-composition.md) for the layers, the URLs, the test, and the chat limits.
+
+## Overlay layouts
+
+Each output of the overlay has its own layouts, and one of them is on stream.
+See [Layouts](overlay-composition.md#layouts).
+
+| Endpoint | Body | Response |
+| --- | --- | --- |
+| `GET /api/overlay` | - | The response also has `layouts`: `{horizontal, vertical}`, each with `active` and `saved` |
+| `POST /api/overlay/layouts` | `{action: "select", output, id, keep}` | `{overlay, layouts}`. The layout `id` is on stream |
+| `POST /api/overlay/layouts` | `{action: "create", output, name, from: "empty" \| "current", keep}` | `{overlay, layouts}`. A new layout of the streamer is on stream |
+| `POST /api/overlay/layouts` | `{action: "rename", output, id, name}` | `{overlay, layouts}` |
+| `POST /api/overlay/layouts` | `{action: "delete", output, id}` | `{overlay, layouts}` |
+| `POST /api/overlay/layouts` | `{action: "reset", output}` | `{overlay, layouts}`. The preset on stream has the cells that it comes with |
+
+- `output` is `horizontal` or `vertical`.
+- `id` is the ID of a layout of the streamer, or the ID of a preset: `preset:chatting`, `preset:gameplay`, or `preset:vertical`.
+  A preset of the other output returns `404`.
+- `active` is the ID of the layout on stream, or `null` when the layout on stream has no saved copy.
+- `saved` holds `{id, name, cells}` for each layout of the streamer, and for each preset that the streamer used.
+  The cells of the layout on stream are in `overlay.layers.cells`. Its `cells` in `saved` can be old.
+- `name` and `keep` are one line of 1 to 40 characters.
+  `keep` is the name for a layout on stream that has no saved copy: it then becomes a layout of the streamer.
+- Each output can have 8 layouts of the streamer. One more returns `400` with the code `layout_limit`.
+- The server refuses to delete the layout on stream (`400`), to rename a preset (`400`), and to reset when no preset is on stream (`400`).
+- `select`, `create`, and `reset` change the layers. Overlay pages get the new `layers` through the live room, without a reload.
+- Each action increases `overlay.revision`, and the live room sends the new revision. Another open tab of the owner then loads the layouts again.
+- Only the owner of the page can use these endpoints. Unknown fields return `400`.
+
+## OBS dock
+
+See [OBS dock](streamer-tools.md#obs-dock).
+
+| Endpoint | Body | Response |
+| --- | --- | --- |
+| `POST /api/dock/key` | `{}` | `{url}`. A new dock link for the page of the signed-in owner. The link shows one time. The old link stops immediately. |
+| `POST /api/dock/:handle/overlay` | `{action: "showResults" \| "message" \| "layers", ...}` | `{overlay}`. A live control from the dock |
+| `POST /api/dock/:handle/poll` | `{id}` | `{id}`. The poll takes no more votes |
+| `GET /@handle/dock?key` | - | The dock page. Without the current dock key, the answer is `404`. |
+
+- The two dock endpoints with `:handle` need no session. They need the dock key in the `X-SB-Dock-Key` header.
+  A call without the current dock key of that page returns `403` with the code `dock_key`.
+- `overlay` takes the same actions as `POST /api/overlay`, with these limits.
+  A `layers` action can have only `items`, only for `poll`, `topic`, and `message`, and only the fields `enabled`, `ref`, and `qr`.
+  `chatTest` and each other field return `403` with the code `dock_action`.
+- An overlay key is not a dock key. It returns `403`.
+- The live room (`/api/live/:handle`) and the activity feed (`/api/activity/:handle`) accept the dock key in `key`.
+  A dock then has the seat and the data of the owner.
 
 ## Later phases
 

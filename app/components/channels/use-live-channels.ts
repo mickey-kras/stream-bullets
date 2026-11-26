@@ -75,7 +75,7 @@ export function startChannelRefresh(
 }
 
 /**
- * The channels of the open Overlay control page. They start as the loader's list, so the first render needs no
+ * The channels of the open Streamer tools page. They start as the loader's list, so the first render needs no
  * read. A newer loader list replaces a list from an older read. `stale` is true while reads keep failing.
  */
 export function useLiveChannels(loaded: ChannelView[]): { channels: ChannelView[]; stale: boolean } {

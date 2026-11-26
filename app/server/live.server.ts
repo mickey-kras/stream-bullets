@@ -1,5 +1,6 @@
 import { waitUntil } from "cloudflare:workers";
 import type { AppEnv } from "../env";
+import type { Orientation } from "../lib/overlay-layers";
 import { activityAvailable } from "./channel-tokens.server";
 import { callIngest } from "./ingest-call.server";
 
@@ -59,10 +60,16 @@ export function notifyPlayground(env: AppEnv, streamerId: string): void {
   if (activityAvailable(env)) waitUntil(callActivity(env, streamerId, "playground-config"));
 }
 
-// Asks the live room and the activity feed to drop the sockets that came in with a revoked overlay key.
-export function notifyOverlayKey(env: AppEnv, streamerId: string): void {
-  callRoom(env, streamerId, "overlay-key");
-  waitUntil(callActivity(env, streamerId, "overlay-key"));
+// Asks the live room and the activity feed to drop the sockets that came in with the revoked key of one output.
+export function notifyOverlayKey(env: AppEnv, streamerId: string, output: Orientation): void {
+  callRoom(env, streamerId, "overlay-key", { output });
+  waitUntil(callActivity(env, streamerId, "overlay-key", { output }));
+}
+
+// Asks the live room and the activity feed to drop the sockets that came in with the replaced key of the OBS dock.
+export function notifyDockKey(env: AppEnv, streamerId: string): void {
+  callRoom(env, streamerId, "overlay-key", { output: "dock" });
+  waitUntil(callActivity(env, streamerId, "overlay-key", { output: "dock" }));
 }
 
 /** Asks the activity feed to check the page's status: a suspended page closes every activity socket. */
@@ -74,9 +81,14 @@ async function callActivity(
   env: AppEnv,
   streamerId: string,
   path: "overlay-key" | "page-status" | "playground-config",
+  body?: unknown,
 ): Promise<void> {
   try {
-    const result = await callIngest(env, streamerId, path);
+    const init: RequestInit | undefined =
+      body === undefined
+        ? undefined
+        : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) };
+    const result = await callIngest(env, streamerId, path, { init });
     if (!result.ok) console.error("activity_notify_failed", { path, status: result.status });
   } catch (error_: unknown) {
     console.error("activity_notify_failed", {

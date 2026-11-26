@@ -3,7 +3,8 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import { SAMPLE_CHAT } from "../app/lib/chat-feed";
 import type { AppEnv } from "../app/env";
 import { MAX_ACTIVITY_MESSAGE_LENGTH, parseActivityMessage, quotaDay, type ActivityChat, type ActivityEvent } from "../app/lib/activity";
-import { ChannelIngest, snapshotMessage } from "../app/server/channel-ingest";
+import { ChannelIngest } from "../app/server/channel-ingest";
+import { snapshotMessage } from "../app/server/channel-ingest-events";
 import {
   ADMISSION_BURST,
   BACKOFF_MAX_MS,
@@ -34,7 +35,7 @@ import { recordRejectedWebhook, resetRoutes, WebhookRejected } from "../app/serv
 
 import { installFakeProviders, youtubeText, type FakeProviders, type ProviderCall } from "./helpers/channels";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
-import { installWorkersRuntime, RoomNamespace, serverSocketOf, type FakeSocket, type RoomState } from "./helpers/room";
+import { FakeSocket, installWorkersRuntime, RoomNamespace, serverSocketOf, type RoomState } from "./helpers/room";
 
 vi.mock("cloudflare:workers", () => import("./helpers/room"));
 
@@ -97,6 +98,13 @@ function state(): RoomState {
 
 function room(): ChannelIngest {
   return ingest.entry(page).room;
+}
+
+/** The boundary of the snapshot a consumer that connects now receives: it has each kept message that is newer. */
+async function snapshotSince(): Promise<number | undefined> {
+  const [first] = (await listen()).messages<{ type: string; since?: number }>();
+  expect(first.type).toBe("snapshot");
+  return first.since;
 }
 
 /** The snapshot a consumer that connects now receives. */
@@ -202,18 +210,20 @@ describe("snapshotMessage", (): void => {
   it("keeps a full snapshot of large messages inside the consumer limit, newest first", (): void => {
     const events = Array.from({ length: 100 }, (_, index) => emoteChat(index));
     expect(JSON.stringify({ type: "snapshot", events, replay: true }).length).toBeGreaterThan(MAX_ACTIVITY_MESSAGE_LENGTH);
-    const message = snapshotMessage(events);
+    const message = snapshotMessage(events, 0);
     expect(message.length).toBeLessThanOrEqual(MAX_ACTIVITY_MESSAGE_LENGTH);
     const parsed = parseActivityMessage(message);
-    expect(parsed?.type).toBe("snapshot");
-    const kept = parsed?.type === "snapshot" ? parsed.events : [];
+    if (parsed?.type !== "snapshot") throw new Error("The message is not a snapshot.");
+    const kept = parsed.events;
     expect(kept.length).toBeGreaterThan(0);
     expect(kept.at(-1)).toMatchObject({ messageId: "m99" });
+    // The boundary is the newest message that was left out: the snapshot tells nothing about it or older ones.
+    expect(parsed.since).toBe(events.length - kept.length - 1);
   });
 
   it("sends a small snapshot whole", (): void => {
     const events = [emoteChat(1), emoteChat(2)];
-    expect(snapshotMessage(events)).toBe(JSON.stringify({ type: "snapshot", events, replay: true }));
+    expect(snapshotMessage(events, 7)).toBe(JSON.stringify({ type: "snapshot", events, replay: true, since: 7 }));
   });
 });
 
@@ -227,8 +237,9 @@ describe("ChannelIngest requests", (): void => {
     expect((await post("event", "tiktok", {})).status).toBe(400);
     // Once bound to a page, the object refuses any other.
     const other = ingest.entry(otherPage);
-    await ingest.get(ingest.idFromName(otherPage)).fetch(url("overlay-key").replace(page, otherPage), { method: "POST" });
-    expect((await other.room.fetch(new Request(url("overlay-key"), { method: "POST" }))).status).toBe(400);
+    const notice = { method: "POST", body: JSON.stringify({ output: "horizontal" }) };
+    expect((await ingest.get(ingest.idFromName(otherPage)).fetch(url("overlay-key").replace(page, otherPage), notice)).status).toBe(204);
+    expect((await other.room.fetch(new Request(url("overlay-key"), notice))).status).toBe(400);
   });
 
   it("takes sample chat only in the test deployment, as new live messages each time", async (): Promise<void> => {
@@ -250,7 +261,7 @@ describe("ChannelIngest requests", (): void => {
       TWITCH_EVENTSUB_SECRET: undefined,
       CHANNEL_TOKEN_KEYS: undefined,
     });
-    const socket = await listen({ "X-SB-Overlay": "1" });
+    const socket = await listen({ "X-SB-Overlay": "horizontal" });
     expect((await post("test-chat", "twitch")).status).toBe(204);
     const live = socket.ofType<{ event: ActivityChat }>("event").map(({ event }) => event);
     expect(live).toHaveLength(SAMPLE_CHAT.length);
@@ -268,19 +279,72 @@ describe("ChannelIngest requests", (): void => {
     const stub = ingest.get(ingest.idFromName(page));
     expect((await stub.fetch(url("subscribe"))).status).toBe(426);
     expect((await stub.fetch(url("subscribe"), { headers: { Upgrade: "websocket" } })).status).toBe(403);
-    const overlay = await listen({ "X-SB-Overlay": "1" });
-    expect(state().tagsOf(overlay)).toEqual(["activity", "overlay-key"]);
-    expect(overlay.messages()).toEqual([{ type: "snapshot", events: [], replay: true }]);
+    const overlay = await listen({ "X-SB-Overlay": "horizontal" });
+    expect(state().tagsOf(overlay)).toEqual(["activity", "overlay-key", "output:horizontal"]);
+    // A header that names no output is not the word of the Worker for a key.
+    for (const value of ["1", "diagonal"])
+      expect((await stub.fetch(url("subscribe"), { headers: { Upgrade: "websocket", "X-SB-Overlay": value } })).status).toBe(403);
+    const [first, ...rest] = overlay.messages<{ since?: number }>();
+    expect(first).toMatchObject({ type: "snapshot", events: [], replay: true });
+    expect(first.since).toBeLessThanOrEqual(Date.now() - SNAPSHOT_MAX_AGE_MS);
+    expect(rest).toEqual([]);
     for (let index = 1; index < MAX_SOCKETS; index++) await listen();
     expect((await stub.fetch(url("subscribe"), { headers: { Upgrade: "websocket", "X-SB-Owner": "1" } })).status).toBe(429);
   });
 
+  it("serves the two outputs from one ingestion: a second output makes no provider call", async (): Promise<void> => {
+    await addConnection("twitch");
+    await addConnection("youtube");
+    await addConnection("kick");
+    const urls = (): string[] => fake.calls.map((call) => `${call.method} ${call.url}`);
+    const horizontal = await listen({ "X-SB-Overlay": "horizontal" });
+    // One round of the alarm with one output: the calls that the page makes for its chat.
+    await room().alarm();
+    // The stub counts the calls: the first round sets up the chat of the three platforms.
+    expect(urls().length).toBeGreaterThan(0);
+    const alarmAt: number | null = state().storage.alarm;
+    // The OBS source of the other output joins. It starts no provider call and moves no poll forward.
+    fake.calls.length = 0;
+    const vertical = await listen({ "X-SB-Overlay": "vertical" });
+    expect(urls()).toEqual([]);
+    expect(state().storage.alarm).toBe(alarmAt);
+    // A message from each platform reaches the two outputs as the same event.
+    await deliver("d1", [chat("m1")]);
+    await deliver("k1", [chat("k1", "u2", "kick")], "kick");
+    const events = (socket: FakeSocket): ActivityChat[] =>
+      socket.ofType<{ event: ActivityChat }>("event").map((message) => message.event);
+    expect(events(horizontal).map((event) => event.id)).toEqual(["twitch:m1", "kick:k1"]);
+    expect(events(vertical)).toEqual(events(horizontal));
+    expect(urls()).toEqual([]);
+    // The next round of the alarm reads the YouTube chat one time for the two outputs, and calls nothing else.
+    vi.setSystemTime(Date.now() + 60_000);
+    fake.calls.length = 0;
+    await room().alarm();
+    expect(urls()).toHaveLength(1);
+    expect(urls()[0]).toContain("/youtube/v3/liveChat/messages?");
+  });
+
   it("closes a socket that sends anything, and the overlay-key sockets when the key changes", async (): Promise<void> => {
     const owner = await listen();
-    const overlay = await listen({ "X-SB-Overlay": "1" });
-    expect((await post("overlay-key", "twitch")).status).toBe(204);
+    const overlay = await listen({ "X-SB-Overlay": "horizontal" });
+    const vertical = await listen({ "X-SB-Overlay": "vertical" });
+    expect(state().tagsOf(vertical)).toEqual(["activity", "overlay-key", "output:vertical"]);
+    // A notice without an output closes nothing.
+    for (const body of [undefined, {}, { output: "diagonal" }])
+      expect((await post("overlay-key", "twitch", body)).status, JSON.stringify(body)).toBe(400);
+    expect([overlay.open, vertical.open]).toEqual([true, true]);
+    // A new key for one output closes the sockets of that output. The other output stays.
+    expect((await post("overlay-key", "twitch", { output: "horizontal" })).status).toBe(204);
     expect(overlay.closeCode).toBe(1001);
     expect(overlay.ofType("unavailable")).toHaveLength(1);
+    expect([owner.open, vertical.open]).toEqual([true, true]);
+    expect(vertical.ofType("unavailable")).toHaveLength(0);
+    // An OBS socket from before the two outputs has no tag for its output: a new key for one output closes it.
+    const old = new FakeSocket();
+    state().acceptWebSocket(old, ["activity", "overlay-key"]);
+    expect((await post("overlay-key", "twitch", { output: "vertical" })).status).toBe(204);
+    expect([vertical.closeCode, vertical.closeReason]).toEqual([1001, "Overlay key revoked"]);
+    expect([old.closeCode, old.closeReason]).toEqual([1001, "Overlay key revoked"]);
     expect(owner.open).toBe(true);
     room().webSocketMessage(owner as unknown as WebSocket);
     expect(owner.closeCode).toBe(1008);
@@ -353,6 +417,30 @@ describe("ChannelIngest deliveries", (): void => {
     expect(events[0].id).toBe("twitch:m50");
     vi.spyOn(Date, "now").mockReturnValue(start + SNAPSHOT_MAX_AGE_MS + 1);
     expect(await snapshot()).toEqual([]);
+  });
+
+  it("tells a consumer from which receive time the snapshot has each kept message", async (): Promise<void> => {
+    await addConnection("twitch");
+    await addConnection("kick");
+    const start = Date.now();
+    vi.spyOn(Date, "now").mockReturnValue(start);
+    // A quiet chat: the snapshot has each message of the time that the object keeps one.
+    await deliver("d0", [chat("m0", "u", "twitch", start - 5000)]);
+    expect(await snapshotSince()).toBe(start - SNAPSHOT_MAX_AGE_MS);
+    // The size limit removes the two oldest messages. A deleted message does not move the boundary.
+    const more = Array.from({ length: SNAPSHOT_SIZE + 1 }, (_, n) => chat(`n${n}`, "u", "twitch", start - 4000 + n));
+    for (let at = 0; at < more.length; at += 50) await deliver(`d${at + 1}`, more.slice(at, at + 50));
+    expect(await snapshotSince()).toBe(start - 4000);
+    await deliver("del", [{ kind: "delete", platform: "twitch", messageId: `n${SNAPSHOT_SIZE}`, receivedAt: start }]);
+    expect(await snapshot()).toHaveLength(SNAPSHOT_SIZE - 1);
+    expect(await snapshotSince()).toBe(start - 4000);
+    // The messages of a disconnected platform go without moderation: the boundary moves past them.
+    await deliver("k1", [chat("k1", "a", "kick", start - 10)], "kick");
+    await post("disconnect", "kick");
+    expect(await snapshotSince()).toBe(start - 10);
+    // After the time that the object keeps a message, the boundary follows the clock again.
+    vi.spyOn(Date, "now").mockReturnValue(start + SNAPSHOT_MAX_AGE_MS);
+    expect(await snapshotSince()).toBe(start);
   });
 
   it("expires stored messages with the alarm, also when no further delivery comes", async (): Promise<void> => {
@@ -591,15 +679,15 @@ describe("ChannelIngest load and robustness", (): void => {
       batch: real.batch.bind(real),
     } as unknown as D1Database;
     const stub = ingest.get(ingest.idFromName(page));
-    const pending = stub.fetch(url("subscribe"), { headers: { Upgrade: "websocket", "X-SB-Overlay": "1" } });
+    const pending = stub.fetch(url("subscribe"), { headers: { Upgrade: "websocket", "X-SB-Overlay": "horizontal" } });
     await new Promise((resolve) => setTimeout(resolve, 10));
-    expect((await post("overlay-key", "twitch")).status).toBe(204);
+    expect((await post("overlay-key", "twitch", { output: "horizontal" })).status).toBe(204);
     release();
     expect((await pending).status).toBe(403);
     expect(state().getWebSockets("overlay-key")).toHaveLength(0);
     env.DB = real;
     // A request with the new key afterwards connects.
-    expect((await stub.fetch(url("subscribe"), { headers: { Upgrade: "websocket", "X-SB-Overlay": "1" } })).status).toBe(101);
+    expect((await stub.fetch(url("subscribe"), { headers: { Upgrade: "websocket", "X-SB-Overlay": "horizontal" } })).status).toBe(101);
   });
 
   it("keeps a reconnect when the hourly refresh of the old authorization is refused", async (): Promise<void> => {

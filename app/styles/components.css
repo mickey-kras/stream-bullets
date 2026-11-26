@@ -957,6 +957,8 @@ svg.icon-thumbs-up-filled, svg.icon-thumbs-down-filled { fill: currentColor; }
   .mash-overlay .mash-ring span { font-size: 42px; }
 }
 .ov-control { padding-top: 24px; }
+/* The section links of Streamer tools: in line with the head and the steps of the page. */
+.status-tabs.tools-tabs { display: flex; max-width: 1300px; margin: 16px auto 0; }
 .ov-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 20px; max-width: 1300px; margin: 0 auto; }
 .ov-frame { aspect-ratio: 16 / 9; overflow: hidden; border-radius: var(--radius-control); border: 2px solid var(--line); background: repeating-conic-gradient(var(--mock-check-a) 0 25%, var(--mock-check-b) 0 50%) 0 0 / 24px 24px; position: relative; }
 .ov-scaler { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform: scale(var(--ov-scale, .3)); transform-origin: 0 0; container-type: inline-size; visibility: hidden; }
@@ -1701,7 +1703,11 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 .ch-terms { flex-basis: 100%; font-size: 0.875rem; }
 
 .discussion-focus-bar { display: none; }
-.open-discussion { display: none; }
+/* A wide page shows the discussion below the topic, so only a narrow page has this button. */
+.detail-actions > button.open-discussion { display: none; }
+/* Open discussion is at the left. The delete and report controls are at the right of the same row. */
+.detail-actions { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px 10px; margin-top: 14px; }
+.detail-actions > .content-actions { margin-top: 0; margin-left: auto; }
 .comment-meta strong, .comment-meta time, .reply-mention { min-width: 0; overflow-wrap: anywhere; }
 .comment-direct { flex-wrap: wrap; gap: 4px 10px; }
 .mention-input { position: relative; min-width: 0; flex: 1; }
@@ -1733,7 +1739,11 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 .ed-content .ed-strike { text-decoration: line-through; }
 .ed-content .ed-code { padding: 1px 5px; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--field); font: 0.875em/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; }
 .ed-content .mention { color: var(--gold); font-weight: 600; }
-.composer:has(.comment-input) > .gold { align-self: flex-end; }
+/* The Post button is below the field at each width. The avatar has its own column. */
+.composer:has(.comment-input) { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 0; }
+.composer:has(.comment-input) > .user-avatar { margin-right: 14px; }
+.composer:has(.comment-input) > :is(.comment-input, .gold) { grid-column: 2; }
+.composer:has(.comment-input) > .gold { justify-self: end; }
 .comment-editor .ed-content { min-height: 86px; }
 @media (max-width: 720px) { .inline-reply .composer .ed-content { min-height: 86px; } }
 .comment-editor { display: grid; gap: 8px; min-width: 0; }
@@ -1750,16 +1760,20 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 .notification-badge { display: inline-grid; place-items: center; min-width: 1.5em; min-height: 1.5em; padding: 1px 4px; border-radius: 999px; background: var(--gold); color: var(--on-gold); font-size: .75rem; font-weight: 700; line-height: 1; }
 
 @media (max-width: 43.75em) {
-  .open-discussion { display: inline-flex; align-items: center; gap: 8px; margin-block: 8px; }
+  .detail-actions { margin-block: 8px; }
+  .detail-actions > button.open-discussion { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 6px 12px; font-size: 1rem; }
+  .detail-actions > .content-actions { flex-wrap: nowrap; gap: 8px; }
+  /* The text stays as the accessible name. Only the icon shows. */
+  .detail-actions > .content-actions > button { justify-content: center; width: 44px; min-height: 44px; padding: 0; font-size: 0; }
+  .detail-actions > .content-actions > button svg.ico { width: 20px; height: 20px; }
   .discussion { padding-inline: 12px; }
   .comment { gap: 8px; }
   .comment .user-avatar, .comment .removed-avatar { width: 30px; height: 30px; flex: 0 0 30px; }
   .replies { margin-left: 12px; }
   .thread.has-replies::before { left: 14px; }
   .replies > li > .comment::before { left: -7px; width: 5px; }
-  .discussion > .composer { gap: 8px; flex-wrap: wrap; }
-  .discussion > .composer > :is(textarea, .mention-input) { flex: 1 1 100%; }
-  .discussion > .composer > button { margin-left: auto; }
+  .discussion > .composer .ed-content { min-height: 86px; }
+  .discussion > .composer textarea { min-height: 88px; }
   .composer textarea { overflow-wrap: anywhere; touch-action: auto; overscroll-behavior-y: auto; max-height: min(150px, 30dvh); }
   .discussion-focus { position: fixed; z-index: 20; top: var(--discussion-top, 0px); left: 0; width: 100%; height: var(--discussion-height, 100dvh); padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); background: var(--bg); display: flex; flex-direction: column; min-height: 0; }
   body:has(.discussion-focus) > .site-footer, .discussion-focus > :is(.site-header, .fab) { display: none !important; }
