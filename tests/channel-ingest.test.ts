@@ -2059,6 +2059,40 @@ describe("ChannelIngest YouTube polling", (): void => {
     expect(on.replays.filter(isSupport).map((event) => [event.id, event.replay])).toEqual(support.map((event) => [event.id, true]));
   });
 
+  it("uses the support choice of now for a YouTube page that came while the streamer changed the switch", async (): Promise<void> => {
+    await addConnection("youtube", { support: true });
+    const socket = await listen();
+    await poll();
+    const real = globalThis.fetch;
+    /** The next page of chat comes while the streamer sets the switch to `on`. */
+    async function pageDuringChange(on: boolean): Promise<void> {
+      let changed = false;
+      vi.stubGlobal("fetch", async (input: string, init?: RequestInit): Promise<Response> => {
+        const response = await real(input, init);
+        if (!changed && new URL(input).pathname.endsWith("/liveChat/messages")) {
+          changed = true;
+          // The API writes the choice and tells the object.
+          await env.DB.prepare("UPDATE channel_connections SET support_events=? WHERE platform='youtube'").bind(on ? 1 : 0).run();
+          await post("support", "youtube");
+        }
+        return response;
+      });
+      fake.chatPages = [{ items: youtubeFixture.items, nextPageToken: on ? "p2" : "p1", pollingIntervalMillis: 100 }];
+      await poll();
+      vi.stubGlobal("fetch", real);
+    }
+    const kinds = (): string[] => socket.ofType<{ event: ActivityEvent }>("event").map((message) => message.event.kind);
+    const stored = (): unknown[] => state().storage.sql.exec("SELECT id FROM support").toArray();
+    // Off during the page: the page gives its chat, and no support event is stored or sent.
+    await pageDuringChange(false);
+    expect(kinds()).toEqual(["chat"]);
+    expect(stored()).toEqual([]);
+    // On during the page: the support events of that page are not lost.
+    await pageDuringChange(true);
+    expect(kinds()).toEqual(["chat", "super_chat", "super_sticker", "membership", "membership", "gift"]);
+    expect(stored()).toHaveLength(5);
+  });
+
   it("starts polling on connect and keeps a pending wait across a reconnect", async (): Promise<void> => {
     await addConnection("youtube");
     expect(await (await post("connect", "youtube")).json()).toEqual({ status: "active", code: null });
