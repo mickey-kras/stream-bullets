@@ -226,6 +226,7 @@ See [Layouts](overlay-composition.md#layouts).
 - Each output can have 8 layouts of the streamer. One more returns `400` with the code `layout_limit`.
 - The server refuses to delete the layout on stream (`400`), to rename a preset (`400`), and to reset when no preset is on stream (`400`).
 - `select`, `create`, and `reset` change the layers. Overlay pages get the new `layers` through the live room, without a reload.
+- Each action increases `overlay.revision`, and the live room sends the new revision. Another open tab of the owner then loads the layouts again.
 - Only the owner of the page can use these endpoints. Unknown fields return `400`.
 
 ## OBS dock

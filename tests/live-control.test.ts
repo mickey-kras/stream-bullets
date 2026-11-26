@@ -1469,12 +1469,15 @@ describe("overlay control", (): void => {
       expect(made.layouts.horizontal.active).toBe(mine.id);
       expect(made.overlay.layers.cells.horizontal).toEqual({ ...emptyCells(), chat: chatCell });
       roomCalls = [];
-      // A new name and a deleted layout do not change the picture: OBS gets no message.
+      ingestCalls = [];
+      // A new name and a deleted layout do not change the picture. The room still gets a message for each, because
+      // the other tabs of the owner load the list of layouts again from it.
       const renamed = await state(await layout({ action: "rename", output: "horizontal", id: kept.id, name: "Cozy" }));
       expect(renamed.layouts.horizontal.saved[0].name).toBe("Cozy");
       const deleted = await state(await layout({ action: "delete", output: "horizontal", id: kept.id }));
       expect(deleted.layouts.horizontal.saved.map((item) => item.id)).toEqual([mine.id]);
-      expect(roomCalls).toEqual([]);
+      expect(roomCalls).toEqual(Array.from({ length: 2 }, () => ({ path: `/overlay?streamerId=${page}`, body: "" })));
+      expect(ingestCalls).toEqual([]);
       // The layout on stream cannot go.
       expect((await layout({ action: "delete", output: "horizontal", id: mine.id })).status).toBe(400);
       expect((await layout({ action: "rename", output: "horizontal", id: "preset:gameplay", name: "Mine" })).status).toBe(400);

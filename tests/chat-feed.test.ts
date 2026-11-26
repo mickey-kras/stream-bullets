@@ -287,6 +287,36 @@ describe("chatReducer: live events", () => {
     expect(ids(state.rows)).toEqual([b.id, d.id]);
   });
 
+  it("drops the shown and queued rows of the other platforms when the output shows one platform", () => {
+    const opts: ChatOptions = { hideCommands: false, limits: { burstThreshold: 100 } };
+    const [a, b, c, d] = [
+      chat({ platform: "youtube" }),
+      chat({ platform: "twitch" }),
+      chat({ platform: "kick" }),
+      chat({ platform: "twitch" }),
+    ];
+    let state = initialChatState();
+    state = send(state, event(a), 0, opts);
+    state = runUntil(state, 500, opts);
+    state = send(state, event(b), 500, opts);
+    state = send(state, event(c), 500, opts);
+    state = send(state, event(d), 500, opts);
+    expect(ids(state.rows)).toEqual([a.id, b.id]);
+    expect(ids(state.pending)).toEqual([c.id, d.id]);
+    state = chatReducer(state, { type: "platform", platform: "twitch", now: 500 }, opts);
+    expect(state.rows.map((row) => [row.id, row.phase])).toEqual([
+      [a.id, "leaving"],
+      [b.id, "entering"],
+    ]);
+    expect(ids(state.pending)).toEqual([d.id]);
+    state = runUntil(state, 500 + CHAT_LIMITS.leaveMs, opts);
+    expect(ids(state.rows)).toEqual([b.id, d.id]);
+    // The rows that left never come back, so a late delete of one of them has nothing to miss.
+    const settled: number = 500 + CHAT_LIMITS.leaveMs + CHAT_LIMITS.enterMs + 80;
+    state = runUntil(state, settled, opts);
+    expect(chatReducer(state, { type: "platform", platform: "twitch", now: settled + 100 }, opts)).toBe(state);
+  });
+
   it("changes nothing when hideCommands turns off or nothing matches", () => {
     let state = send(initialChatState(), event(chat({ text: "hi" })), 0, showAll);
     // After the slide-in, so the filter time ends no phase.
