@@ -220155,6 +220155,17 @@
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
       "source_location": "L869",
+      "target": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_channel_connections_channel_connections_and_activity",
+      "source_file": "docs/channel-connections.md",
+      "source_location": "L977",
       "target": "docs_channel_connections_facts_not_checked",
       "weight": 1.0
     },
@@ -220266,6 +220277,50 @@
       "source_file": "docs/channel-connections.md",
       "source_location": "L387",
       "target": "docs_channel_connections_youtube_quota",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
+      "source_file": "docs/channel-connections.md",
+      "source_location": "L883",
+      "target": "docs_channel_connections_instagram",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
+      "source_file": "docs/channel-connections.md",
+      "source_location": "L914",
+      "target": "docs_channel_connections_facebook_live",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
+      "source_file": "docs/channel-connections.md",
+      "source_location": "L949",
+      "target": "docs_channel_connections_tiktok",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
+      "source_file": "docs/channel-connections.md",
+      "source_location": "L970",
+      "target": "docs_channel_connections_decisions_for_the_owner",
       "weight": 1.0
     },
     {
@@ -302398,6 +302453,17 @@
       "_origin": "ast",
       "community": null,
       "file_type": "document",
+      "id": "docs_channel_connections_decisions_for_the_owner",
+      "label": "Decisions for the owner",
+      "node_kind": "heading",
+      "norm_label": "decisions for the owner",
+      "source_file": "docs/channel-connections.md",
+      "source_location": "L970"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
       "id": "docs_channel_connections_disconnect",
       "label": "Disconnect",
       "node_kind": "heading",
@@ -302420,12 +302486,34 @@
       "_origin": "ast",
       "community": null,
       "file_type": "document",
+      "id": "docs_channel_connections_facebook_live",
+      "label": "Facebook Live",
+      "node_kind": "heading",
+      "norm_label": "facebook live",
+      "source_file": "docs/channel-connections.md",
+      "source_location": "L914"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
       "id": "docs_channel_connections_facts_not_checked",
       "label": "Facts not checked",
       "node_kind": "heading",
       "norm_label": "facts not checked",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L869"
+      "source_location": "L977"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_channel_connections_instagram",
+      "label": "Instagram",
+      "node_kind": "heading",
+      "norm_label": "instagram",
+      "source_file": "docs/channel-connections.md",
+      "source_location": "L883"
     },
     {
       "_origin": "ast",
@@ -302525,6 +302613,17 @@
       "norm_label": "refused webhooks",
       "source_file": "docs/channel-connections.md",
       "source_location": "L574"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
+      "label": "Research for Instagram, Facebook Live, and TikTok",
+      "node_kind": "heading",
+      "norm_label": "research for instagram, facebook live, and tiktok",
+      "source_file": "docs/channel-connections.md",
+      "source_location": "L869"
     },
     {
       "_origin": "ast",
@@ -302646,6 +302745,17 @@
       "norm_label": "threats and mitigations",
       "source_file": "docs/channel-connections.md",
       "source_location": "L787"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_channel_connections_tiktok",
+      "label": "TikTok",
+      "node_kind": "heading",
+      "norm_label": "tiktok",
+      "source_file": "docs/channel-connections.md",
+      "source_location": "L949"
     },
     {
       "_origin": "ast",

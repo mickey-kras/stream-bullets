@@ -866,6 +866,114 @@ row at the same time.
 The terms of service and the controls tell owners that a YouTube connection binds them to the YouTube Terms of
 Service. The privacy policy links the Google Privacy Policy and the Google security settings.
 
+## Research for Instagram, Facebook Live, and TikTok
+
+This section records what the official documentation of each provider says about live comments.
+It is the research step of #1038, #1039, and #1040. No code reads these providers.
+We read the documentation on November 26, 2026.
+
+Each row has one of these states:
+
+- **Confirmed**: we read the full official page, and the page says it.
+- **Excerpt**: we read only a search excerpt of the official page.
+- **Not confirmed**: the official documentation does not say it, or the page did not open.
+
+The feed uses official APIs only. It does not scrape a page, and it uses no unofficial connector.
+
+### Instagram
+
+Meta has an official API for the comments of a live broadcast. It serves professional accounts only.
+
+| Subject | Result | State | Source |
+| --- | --- | --- | --- |
+| Push | The webhook field `live_comments` sends each comment of a live broadcast. | Confirmed | [Webhook fields](https://developers.facebook.com/documentation/instagram-platform/webhooks/fields) |
+| Pull | `GET /{ig-user-id}/live_media` with the field `comments`. It gives only a broadcast that is live at that time. | Confirmed | [IG User live media](https://developers.facebook.com/documentation/instagram-platform/instagram-graph-api/reference/ig-user/live_media) |
+| Account types | Professional accounts (business or creator). The documentation has no path for a personal account. | Confirmed | [Overview](https://developers.facebook.com/documentation/instagram-platform/overview) |
+| Account visibility | The account must be public. A private account gets no comment notification. | Confirmed | [Webhook setup](https://developers.facebook.com/documentation/instagram-platform/webhooks/setup) |
+| Permissions for the webhook, Instagram Login | `instagram_business_basic` and `instagram_business_manage_comments` | Confirmed | [Webhook fields](https://developers.facebook.com/documentation/instagram-platform/webhooks/fields) |
+| Permissions for the webhook, Facebook Login | `instagram_basic`, `instagram_manage_comments`, `pages_manage_metadata`, `pages_read_engagement`, and `pages_show_list`. The account needs a linked Facebook Page. | Confirmed | [Webhook fields](https://developers.facebook.com/documentation/instagram-platform/webhooks/fields) |
+| Permissions for the pull | `instagram_basic` and `pages_read_engagement`, with Facebook Login. The page names no other login. | Confirmed | [IG User live media](https://developers.facebook.com/documentation/instagram-platform/instagram-graph-api/reference/ig-user/live_media) |
+| App review | `live_comments` needs a published app and Advanced Access. Advanced Access needs App Review and Business Verification. | Confirmed | [Webhook setup](https://developers.facebook.com/documentation/instagram-platform/webhooks/setup) |
+| Comment data | The Instagram-scoped ID and the username of the person, the comment ID, the text, and the media ID. | Confirmed | [Webhook examples](https://developers.facebook.com/documentation/instagram-platform/webhooks/examples) |
+| End of the broadcast | The notifications stop when the broadcast ends. Meta sends no notification from before the subscription. | Confirmed | [Webhook setup](https://developers.facebook.com/documentation/instagram-platform/webhooks/setup) |
+| Rate limit | 4,800 calls for each impression of the account in 24 hours, for each app and account. | Confirmed | [Overview](https://developers.facebook.com/documentation/instagram-platform/overview) |
+| Limits of the pull | 50 comments for each query, and no filter by time. | Confirmed | [IG Media comments](https://developers.facebook.com/documentation/instagram-platform/instagram-graph-api/reference/ig-media/comments) |
+| Reactions, viewer count, and joins | No official page names them. | Not confirmed | None |
+| Stream key for OBS | Live Producer gives a stream key on instagram.com. The page is from 2022 and says that Instagram limits the access. The key changes for each broadcast. | Confirmed | [Live Producer](https://about.instagram.com/blog/tips-and-tricks/instagram-live-producer) |
+
+The documentation does not answer these questions:
+
+- If the pull works with a token of Instagram Login. The page names only Facebook Login.
+- If Standard Access is enough for the account of the app owner. The overview says yes, and the webhook setup says that Advanced Access is necessary.
+- If `live_comments` covers a broadcast that starts in Live Producer.
+- Who gets Live Producer today.
+
+Result for #1038: the connection is possible with the webhook `live_comments`.
+Before any code, Meta must approve the app: App Review and Business Verification. Only the owner can do that.
+
+### Facebook Live
+
+Meta has an official API for the comments and the reactions of a live video.
+Meta removed parts of its reference, so some facts have no current official source.
+
+| Subject | Result | State | Source |
+| --- | --- | --- | --- |
+| Pull | `GET /{live-video-id}/comments` and `GET /{live-video-id}/reactions`. Meta says to poll them each few seconds. | Confirmed | [Interact with viewers](https://developers.facebook.com/documentation/live-video-api/interact-with-viewers) |
+| Push | Server-Sent Events from `streaming-graph.facebook.com`: `/{live-video-id}/live_comments` and `/{live-video-id}/live_reactions`. | Confirmed | [Interact with viewers](https://developers.facebook.com/documentation/live-video-api/interact-with-viewers) |
+| Reference of the push | The pages for the parameters and the limits of Server-Sent Events open the start page of the Live Video API. | Not confirmed | None |
+| App review | The API needs App Review for its feature and for each permission. | Confirmed | [API for live video](https://developers.facebook.com/documentation/live-video-api) |
+| Permissions that the page names | `publish_video` for a profile. `pages_manage_posts` and `pages_read_engagement` for a Page. The page lists them for publishing. | Confirmed | [Live Video API](https://developers.facebook.com/documentation/live-video-api) |
+| Permissions to read comments | The same permissions as for the video. The reference of the live video gives a 404 error. | Not confirmed | [Comments](https://developers.facebook.com/docs/graph-api/reference/v27.0/object/comments) |
+| Profiles | Meta holds back the identity and the comments of other people on the content of a profile, unless those people authorize the app. | Confirmed | [Comments](https://developers.facebook.com/docs/graph-api/reference/v27.0/object/comments) |
+| Groups | In version 19.0, Meta removed the permissions for groups. No current page says that an app can read the comments of a live video in a group. | Not confirmed | None |
+| Identity of the person | The examples show `from` with a name and an ID. The current field table of a comment does not list `from`. | Not confirmed | [Comment](https://developers.facebook.com/docs/graph-api/reference/comment/) |
+| Quality filter | A live video filters low-quality comments by default (`live_filter`). | Confirmed | [Live video comments](https://developers.facebook.com/docs/graph-api/reference/live-video/comments) |
+| Reactions | The reaction types, and a total count in `summary`. | Confirmed | [Live video reactions](https://developers.facebook.com/docs/graph-api/reference/live-video/reactions) |
+| The ID of a live video that a different tool started | The reference index lists the edges `live_videos`. The pages of those edges say that an app cannot read them. | Not confirmed | [Reference](https://developers.facebook.com/documentation/live-video-api/reference) |
+| Rate limit | 200 calls for each user in one hour for an app, and 4,800 calls for each engaged user in 24 hours for a Page. No page says which one applies to live comments. | Excerpt | [Rate limits](https://developers.facebook.com/docs/graph-api/overview/rate-limiting) |
+| Stream key for OBS | Each live video has a stream URL. The URL expires 24 hours after its creation, and a stream can use it for 8 hours. | Confirmed | [Overview](https://developers.facebook.com/documentation/live-video-api/overview) |
+| Who can go live | The account is 60 days old or older. A Page or a profile in professional mode has 100 followers or more. | Confirmed | [Live Video API](https://developers.facebook.com/documentation/live-video-api) |
+
+The documentation does not answer these questions:
+
+- Which token and which permission read the comments of a Page live video and of a profile live video.
+- If Meta sends `from`, and for which token.
+- If Meta still maintains Server-Sent Events. The last entry of the changelog is from September 14, 2021.
+- How an app finds the ID of a live video that OBS started with a stream key.
+- If Business Verification is necessary for the Pages of other people.
+
+Result for #1040: the connection is possible for a Page. The documentation does not confirm a profile or a group.
+Before any code, Meta must approve the app in App Review, and a test with a Page must answer the open questions.
+Only the owner can start the App Review.
+
+### TikTok
+
+We found no official API that reads TikTok LIVE chat, gifts, or events.
+The pages of `developers.tiktok.com` and `www.tiktok.com` did not open in the environment of this research.
+Thus each row is from a search excerpt, and the research does not prove that no such API exists.
+
+| Subject | Result | State | Source |
+| --- | --- | --- | --- |
+| Developer products | Share Kit, Login Kit, Content Posting API, Research API, Display API, Embed Videos, Data Portability API, Green Screen Kit, and Commercial Content API. None is for LIVE. | Excerpt | [TikTok for Developers](https://developers.tiktok.com/doc/oauth-user-access-token-management) |
+| An API, a scope, or a partner program for LIVE chat | None found. | Not confirmed | [TikTok for Developers](https://developers.tiktok.com/) |
+| Webhooks | The events that we saw are for the Content Posting API. None is for LIVE. | Excerpt | [Content Posting API](https://developers.tiktok.com/doc/content-posting-api-reference-get-video-status) |
+| Data Portability API | It exports the LIVE history of a user, with the LIVE comments, as an archive. It is not a live feed. | Excerpt | [Data types](https://developers.tiktok.com/doc/data-portability-data-types) |
+| Terms of Service, global | They forbid automated scripts that collect information from the service. | Excerpt | [Terms of Service](https://www.tiktok.com/legal/page/global/terms-of-service/en) |
+| Terms of Service, United States | They forbid automated extraction of data without written approval. | Excerpt | [Terms of Service](https://www.tiktok.com/legal/page/us/terms-of-service/en) |
+| Stream key for OBS | No official text about who gets a server URL and a stream key. | Not confirmed | None |
+
+Result for #1039: no official connection is possible today.
+An unofficial connector reads LIVE chat without an API, and the terms forbid that without written approval.
+The feed has no such connector unless the owner decides it in writing.
+Read the TikTok pages for developers again before that decision, from a network that can open them.
+
+### Decisions for the owner
+
+- **Instagram:** start App Review and Business Verification at Meta for `live_comments`, or keep #1038 open.
+- **Facebook Live:** start App Review for the Live Video API, and test with a Page, or keep #1040 open.
+- **TikTok:** keep #1039 open until TikTok has an official API, or decide in writing to use an unofficial connector.
+- Privacy and Terms must describe each new source of data before its release.
+
 ## Facts not checked
 
 The provider documentation does not give these details, or we did not test them with live traffic:
