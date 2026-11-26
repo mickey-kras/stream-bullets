@@ -1546,5 +1546,6 @@
   "overlay.dock.confirmBody": "Stary link od razu przestaje działać, a każdy otwarty dok się zamyka. Wklej nowy link do OBS.",
   "overlay.dock.ready": "Nowy link doku gotowy. Skopiuj go do OBS.",
   "dock.closed.title": "Ten link doku nie działa",
-  "dock.closed.body": "Utwórz nowy link doku w narzędziach streamera, w sekcji Nakładka, i wklej go do OBS."
+  "dock.closed.body": "Utwórz nowy link doku w narzędziach streamera, w sekcji Nakładka, i wklej go do OBS.",
+  "channels.result.supportDenied": "Kanał jest połączony. {platform} nie przyznał uprawnień do zdarzeń wsparcia, więc pozostają wyłączone."
 }

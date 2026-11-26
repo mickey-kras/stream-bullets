@@ -5,6 +5,8 @@ import { quotaDay } from "../lib/activity";
 /** Chat messages kept for the reconnect snapshot, and for how long. */
 export const SNAPSHOT_SIZE = 100;
 export const SNAPSHOT_MAX_AGE_MS = 10 * 60_000;
+/** Support events kept for the reconnect snapshot. They stay as long as the chat messages. */
+export const SUPPORT_SNAPSHOT_SIZE = 50;
 /** Admission: a token bucket per page for chat. Messages past it are dropped and counted, never queued. */
 export const ADMISSION_RATE = 50;
 export const ADMISSION_BURST = 200;
@@ -15,17 +17,27 @@ export const ADMISSION_BURST = 200;
 export const MODERATION_RATE = 20;
 export const MODERATION_BURST = 200;
 /**
+ * Support events have their own bucket too. Thus a flood of follows from bot accounts never holds moderation back,
+ * and it cannot take over the object.
+ */
+export const SUPPORT_RATE = 10;
+export const SUPPORT_BURST = 100;
+/**
  * Delivery and message ids, and the ids of deleted messages, are remembered this long. It is longer than the
  * webhook freshness window (MAX_WEBHOOK_AGE_MS, 10 minutes), so a retry inside that window is always recognized.
  */
 export const SEEN_TTL_MS = 15 * 60_000;
 /**
  * At most this many ids of each table. A delivery id is stored only for a delivery with at least one admitted
- * event, a message id only for admitted chat, and a ban key only for an admitted ban. In 10 minutes the object
- * admits at most C = 50 × 600 + 200 chat messages and M = 20 × 600 + 200 moderation events, so the ids of that
- * window fit in 2C + 2M. The count limit removes the oldest ids only beyond that.
+ * event, a message id only for admitted chat, a ban key only for an admitted ban, and a support id only for an
+ * admitted support event. In 10 minutes the object admits at most C = 50 × 600 + 200 chat messages,
+ * M = 20 × 600 + 200 moderation events and S = 10 × 600 + 100 support events, so the ids of that window fit in
+ * 2C + 2M + 2S. The count limit removes the oldest ids only beyond that.
  */
-export const SEEN_MAX = 2 * (ADMISSION_RATE * 600 + ADMISSION_BURST) + 2 * (MODERATION_RATE * 600 + MODERATION_BURST);
+export const SEEN_MAX =
+  2 * (ADMISSION_RATE * 600 + ADMISSION_BURST) +
+  2 * (MODERATION_RATE * 600 + MODERATION_BURST) +
+  2 * (SUPPORT_RATE * 600 + SUPPORT_BURST);
 /** How often a connection read that cache clears keep overtaking is tried before the object answers none. */
 export const CONNECTION_READS = 3;
 /** A connection read from D1 is used for this long, so a burst of deliveries does not read D1 each time. */
@@ -72,16 +84,51 @@ export const YOUTUBE_PAGE_DAILY_BUDGET = 9_000;
 /** Refresh an access token this long before it expires. */
 export const REFRESH_MARGIN_MS = 60_000;
 
-export type Admission = "chat" | "moderation";
-export type Bucket = { tokens: number; at: number };
+type Admission = "chat" | "moderation" | "support";
+type Bucket = { tokens: number; at: number };
 
-export const ADMISSIONS: Readonly<Record<Admission, { rate: number; burst: number }>> = {
+const ADMISSIONS: Readonly<Record<Admission, { rate: number; burst: number }>> = {
   chat: { rate: ADMISSION_RATE, burst: ADMISSION_BURST },
   moderation: { rate: MODERATION_RATE, burst: MODERATION_BURST },
+  support: { rate: SUPPORT_RATE, burst: SUPPORT_BURST },
 };
 
-export function newBuckets(): Record<Admission, Bucket> {
-  return { chat: { tokens: ADMISSION_BURST, at: 0 }, moderation: { tokens: MODERATION_BURST, at: 0 } };
+function newBuckets(): Record<Admission, Bucket> {
+  return {
+    chat: { tokens: ADMISSION_BURST, at: 0 },
+    moderation: { tokens: MODERATION_BURST, at: 0 },
+    support: { tokens: SUPPORT_BURST, at: 0 },
+  };
+}
+
+/** The token buckets of one ingest object, and the count of the events that they refused. */
+export class Admissions {
+  private buckets: Record<Admission, Bucket> = newBuckets();
+  private readonly dropped: Record<Admission, number> = { chat: 0, moderation: 0, support: 0 };
+  private loggedAt = 0;
+
+  /** Takes up to `count` tokens from a bucket and returns how many it got. The rest is dropped and counted. */
+  admit(kind: Admission, count: number, now: number): number {
+    if (count === 0) return 0;
+    const { rate, burst } = ADMISSIONS[kind];
+    const bucket = this.buckets[kind];
+    const tokens = Math.min(burst, bucket.tokens + (Math.max(0, now - bucket.at) / 1000) * rate);
+    const admitted = Math.min(count, Math.floor(tokens));
+    this.buckets[kind] = { tokens: tokens - admitted, at: now };
+    this.dropped[kind] += count - admitted;
+    // Only counts, at most one log each minute: never an id or a text.
+    if (admitted < count && now - this.loggedAt >= 60_000) {
+      console.warn("channel_ingest_dropped", { ...this.dropped });
+      for (const name of Object.keys(ADMISSIONS) as Admission[]) this.dropped[name] = 0;
+      this.loggedAt = now;
+    }
+    return admitted;
+  }
+
+  /** Full buckets again: the page went away, and the object starts as new. */
+  reset(): void {
+    this.buckets = newBuckets();
+  }
 }
 
 /** Provider subscriptions are checked at most this often while a consumer listens. */

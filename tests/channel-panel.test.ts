@@ -52,6 +52,9 @@ describe("resultMessage", (): void => {
     const messages = CONNECT_RESULTS.map((result) => resultMessage("kick", result));
     expect(new Set(messages).size).toBe(CONNECT_RESULTS.length);
     expect(resultMessage("kick", "connected")).toBe("Kick connected.");
+    expect(resultMessage("twitch", "support_denied")).toBe(
+      "The channel is connected. Twitch did not give the permissions for support events, so they stay off.",
+    );
     expect(resultMessage("youtube", "channel_taken")).toBe(
       "This YouTube channel is already connected to another StreamBullets page.",
     );

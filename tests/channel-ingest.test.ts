@@ -2,9 +2,19 @@ import nodeCrypto from "node:crypto";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { SAMPLE_CHAT } from "../app/lib/chat-feed";
 import type { AppEnv } from "../app/env";
-import { MAX_ACTIVITY_MESSAGE_LENGTH, parseActivityMessage, quotaDay, type ActivityChat, type ActivityEvent } from "../app/lib/activity";
+import {
+  MAX_ACTIVITY_MESSAGE_LENGTH,
+  activityEventSchema,
+  isSupport,
+  parseActivityMessage,
+  quotaDay,
+  supportTotals,
+  type ActivityChat,
+  type ActivityEvent,
+  type ActivitySupport,
+} from "../app/lib/activity";
 import { ChannelIngest } from "../app/server/channel-ingest";
-import { snapshotMessage } from "../app/server/channel-ingest-events";
+import { snapshotEvents, snapshotMessage } from "../app/server/channel-ingest-events";
 import {
   ADMISSION_BURST,
   BACKOFF_MAX_MS,
@@ -18,6 +28,8 @@ import {
   MAX_SOCKETS,
   SNAPSHOT_MAX_AGE_MS,
   SNAPSHOT_SIZE,
+  SUPPORT_BURST,
+  SUPPORT_SNAPSHOT_SIZE,
   YOUTUBE_DAILY_BUDGET,
   YOUTUBE_IDLE_POLL_MS,
   YOUTUBE_MIN_POLL_MS,
@@ -36,6 +48,7 @@ import { recordRejectedWebhook, resetRoutes, WebhookRejected } from "../app/serv
 import { installFakeProviders, youtubeText, type FakeProviders, type ProviderCall } from "./helpers/channels";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
 import { FakeSocket, installWorkersRuntime, RoomNamespace, serverSocketOf, type RoomState } from "./helpers/room";
+import youtubeFixture from "./fixtures/providers/youtube-support.json";
 
 vi.mock("cloudflare:workers", () => import("./helpers/room"));
 
@@ -79,6 +92,26 @@ function chat(messageId: string, userId = "u1", platform: "twitch" | "kick" | "y
   };
 }
 
+/** A follow as the Worker normalizes it. `deliveryId` is the id that the provider gave the delivery. */
+function follow(deliveryId: string, platform: "twitch" | "kick" | "youtube" = "twitch", receivedAt = Date.now()): ActivitySupport {
+  return {
+    kind: "follow",
+    id: `${platform}:${deliveryId}`,
+    platform,
+    deliveryId,
+    sender: { id: "s1", displayName: "Supporter" },
+    anonymous: false,
+    amount: null,
+    currency: null,
+    receivedAt,
+    replay: false,
+  };
+}
+
+function cheer(deliveryId: string, bits: number, receivedAt = Date.now()): ActivitySupport {
+  return { ...follow(deliveryId, "twitch", receivedAt), kind: "bits", amount: bits };
+}
+
 /** A delivery as the Worker forwards it, for the channel the test connection uses (`111` for Twitch and Kick). */
 function deliver(deliveryId: string, events: ActivityEvent[], platform = "twitch", channelId = "111"): Promise<Response> {
   return post("event", platform, { deliveryId, channelId, events });
@@ -117,14 +150,14 @@ async function snapshot(): Promise<ActivityChat[]> {
 
 async function addConnection(
   platform: "twitch" | "youtube" | "kick",
-  options: { status?: string; expiresAt?: number | null; externalId?: string } = {},
+  options: { status?: string; expiresAt?: number | null; externalId?: string; support?: boolean } = {},
 ): Promise<string> {
   const id = `conn-${platform}`;
   await env.DB.batch([
     env.DB.prepare(
-      `INSERT INTO channel_connections (id,streamer_id,platform,external_id,display_name,scopes,status,created_at,updated_at)
-        VALUES (?,?,?,?,'Host','',?,1,1)`,
-    ).bind(id, page, platform, options.externalId ?? (platform === "youtube" ? "UCchannel1" : "111"), options.status ?? "active"),
+      `INSERT INTO channel_connections (id,streamer_id,platform,external_id,display_name,scopes,status,created_at,updated_at,support_events)
+        VALUES (?,?,?,?,'Host','',?,1,1,?)`,
+    ).bind(id, page, platform, options.externalId ?? (platform === "youtube" ? "UCchannel1" : "111"), options.status ?? "active", options.support ? 1 : 0),
     await tokenStatement(env, id, platform, {
       accessToken: `${platform}-stored-access`,
       refreshToken: `${platform}-stored-refresh`,
@@ -224,6 +257,33 @@ describe("snapshotMessage", (): void => {
   it("sends a small snapshot whole", (): void => {
     const events = [emoteChat(1), emoteChat(2)];
     expect(snapshotMessage(events, 7)).toBe(JSON.stringify({ type: "snapshot", events, replay: true, since: 7 }));
+  });
+
+  it("puts each support event before the first message that the server received after it", (): void => {
+    const chats = [emoteChat(10), emoteChat(30), emoteChat(20), emoteChat(40)];
+    const support = [follow("a", "twitch", 5), follow("b", "twitch", 25), follow("c", "twitch", 25), follow("d", "twitch", 99)];
+    const order = snapshotEvents(chats, support).map((event) => ("id" in event ? event.id : ""));
+    // Each list keeps its own order: the message of time 20 stays after the one of time 30.
+    expect(order).toEqual(["twitch:a", "twitch:m10", "twitch:b", "twitch:c", "twitch:m30", "twitch:m20", "twitch:m40", "twitch:d"]);
+    expect(snapshotEvents([], support)).toEqual(support);
+    expect(snapshotEvents(chats, [])).toEqual(chats);
+  });
+
+  it("never moves the boundary of chat for a support event that the size limit leaves out", (): void => {
+    const late = 9_999_999;
+    const support = Array.from({ length: 10 }, (_, index) => follow(`f${index}`, "twitch", late));
+    const chats = Array.from({ length: 100 }, (_, index) => emoteChat(index));
+    const parsed = parseActivityMessage(snapshotMessage([...support, ...chats], 0));
+    if (parsed?.type !== "snapshot") throw new Error("The message is not a snapshot.");
+    const kept = parsed.events.filter((event) => event.kind === "chat");
+    expect(parsed.events.filter(isSupport)).toEqual([]);
+    expect(kept.length).toBeLessThan(chats.length);
+    // The boundary is the newest message that was left out, not the later time of a support event.
+    expect(parsed.since).toBe(chats.length - kept.length - 1);
+    // With only support events left out, the boundary stays where the object put it.
+    const few = [...support, emoteChat(1)];
+    const whole = JSON.stringify({ type: "snapshot", events: few, replay: true, since: 7 });
+    expect(snapshotMessage(few, 7)).toBe(whole);
   });
 });
 
@@ -519,11 +579,175 @@ describe("ChannelIngest deliveries", (): void => {
     for (let batch = 0; batch < 6; batch++)
       await deliver(`d${batch}`, Array.from({ length: 60 }, (_, index) => chat(`m${batch}-${index}`)));
     expect(socket.ofType("event")).toHaveLength(ADMISSION_BURST);
-    expect(warn).toHaveBeenCalledWith("channel_ingest_dropped", { chat: 50, moderation: 0 });
+    expect(warn).toHaveBeenCalledWith("channel_ingest_dropped", { chat: 50, moderation: 0, support: 0 });
     // The bucket refills over time.
     vi.spyOn(Date, "now").mockReturnValue(now + 1000);
     await deliver("later", [chat("later")]);
     expect(socket.ofType("event")).toHaveLength(ADMISSION_BURST + 1);
+  });
+});
+
+describe("ChannelIngest support events", (): void => {
+  type Sent = { event: ActivityEvent };
+
+  function sent(socket: FakeSocket): ActivityEvent[] {
+    return socket.ofType<Sent>("event").map((message) => message.event);
+  }
+
+  /** The whole snapshot a consumer that connects now receives: chat and support. */
+  async function fullSnapshot(): Promise<{ events: ActivityEvent[]; since?: number }> {
+    const [raw] = (await listen()).sent;
+    const parsed = parseActivityMessage(raw);
+    if (parsed?.type !== "snapshot") throw new Error("The message is not a snapshot.");
+    return { events: parsed.events, since: parsed.since };
+  }
+
+  /** The streamer changes the switch: the API writes the choice and tells the object. */
+  async function setSupport(platform: string, on: boolean): Promise<void> {
+    await env.DB.prepare("UPDATE channel_connections SET support_events=? WHERE platform=?").bind(on ? 1 : 0, platform).run();
+    expect((await post("support", platform)).status).toBe(200);
+  }
+
+  function stored(): string[] {
+    return state().storage.sql.exec<{ id: string }>("SELECT id FROM support ORDER BY seq").toArray().map((row) => row.id);
+  }
+
+  it("accepts a support event only while the streamer has support events on, and the chat of the delivery goes on", async (): Promise<void> => {
+    await addConnection("twitch");
+    vi.spyOn(console, "warn").mockImplementation((): void => undefined);
+    const socket = await listen();
+    await deliver("d1", [chat("m1"), follow("f1")]);
+    expect(sent(socket).map((event) => event.kind)).toEqual(["chat"]);
+    // A dropped event leaves nothing: no stored event and no id.
+    expect(stored()).toEqual([]);
+    expect(state().storage.sql.exec("SELECT key FROM seen WHERE key LIKE 'support:%'").toArray()).toEqual([]);
+    // A delivery with nothing but a dropped support event is not remembered either.
+    await deliver("d2", [follow("f2")]);
+    expect(state().storage.sql.exec("SELECT key FROM seen WHERE key = 'delivery:twitch:d2'").toArray()).toEqual([]);
+    await setSupport("twitch", true);
+    await deliver("d3", [chat("m3"), follow("f3")]);
+    expect(sent(socket).map((event) => [event.kind, "id" in event ? event.id : ""])).toEqual([
+      ["chat", "twitch:m1"],
+      ["chat", "twitch:m3"],
+      ["follow", "twitch:f3"],
+    ]);
+    expect(sent(socket)[2]).toMatchObject({ deliveryId: "f3", platform: "twitch", amount: null, replay: false });
+    expect(stored()).toEqual(["twitch:f3"]);
+    await setSupport("twitch", false);
+    await deliver("d4", [follow("f4"), chat("m4")]);
+    expect(sent(socket).map((event) => event.kind)).toEqual(["chat", "chat", "follow", "chat"]);
+    // A direct tip and an event of another platform never come in a provider delivery.
+    await setSupport("twitch", true);
+    const tip = { ...cheer("t1", 5_000_000), kind: "tip", platform: "direct", id: "direct:t1", currency: "USD" } as ActivityEvent;
+    await deliver("d5", [tip, follow("f5", "kick")]);
+    expect(sent(socket)).toHaveLength(4);
+  });
+
+  it("counts a support event one time, however often the delivery or the event comes again", async (): Promise<void> => {
+    await addConnection("twitch", { support: true });
+    const socket = await listen();
+    await deliver("d1", [cheer("c1", 100)]);
+    // The provider sends the delivery again, and a copy comes under another delivery id.
+    await deliver("d1", [cheer("c1", 100)]);
+    await deliver("d2", [cheer("c1", 100)]);
+    await deliver("d3", [cheer("c1", 100), cheer("c2", 50)]);
+    const events = sent(socket).filter(isSupport);
+    expect(events.map((event) => [event.id, event.replay])).toEqual([
+      ["twitch:c1", false],
+      ["twitch:c2", false],
+    ]);
+    expect(supportTotals(events)).toEqual({ events: { bits: 2 }, amounts: { bits: 150 }, money: {} });
+    expect(stored()).toEqual(["twitch:c1", "twitch:c2"]);
+    // The snapshot of a reconnect has them as replays: a consumer that counts both still has the same sums.
+    const replayed = (await fullSnapshot()).events.filter(isSupport);
+    expect(replayed.map((event) => event.replay)).toEqual([true, true]);
+    expect(supportTotals([...events, ...replayed])).toEqual({ events: { bits: 2 }, amounts: { bits: 150 }, money: {} });
+  });
+
+  it("gives a reconnecting consumer the support events as replays between the chat, and leaves the boundary of chat as it is", async (): Promise<void> => {
+    await addConnection("twitch", { support: true });
+    await addConnection("kick", { support: true });
+    const start = Date.now();
+    vi.spyOn(Date, "now").mockReturnValue(start);
+    await deliver("d1", [chat("m1", "u", "twitch", start - 4000)]);
+    await deliver("d2", [follow("f1", "twitch", start - 3000)]);
+    await deliver("d3", [chat("m2", "u", "twitch", start - 2000), cheer("c1", 100, start - 1000)]);
+    await deliver("k1", [follow("kf", "kick", start - 500)], "kick");
+    const first = await fullSnapshot();
+    expect(first.events.map((event) => ("id" in event ? event.id : event.kind))).toEqual([
+      "twitch:m1",
+      "twitch:f1",
+      "twitch:m2",
+      "twitch:c1",
+      "kick:kf",
+    ]);
+    expect(first.events.filter(isSupport).every((event) => event.replay)).toBe(true);
+    expect(first.events.filter((event) => event.kind === "chat").every((event) => !event.live)).toBe(true);
+    expect(first.since).toBe(start - SNAPSHOT_MAX_AGE_MS);
+    // A deletion removes its message and no support event.
+    await deliver("del", [{ kind: "delete", platform: "twitch", messageId: "m2", receivedAt: start }]);
+    expect((await fullSnapshot()).events.map((event) => ("id" in event ? event.id : event.kind))).toEqual([
+      "twitch:m1",
+      "twitch:f1",
+      "twitch:c1",
+      "kick:kf",
+    ]);
+    // The object keeps the newest 50 support events. The ones that go do not move the boundary of chat.
+    for (let batch = 0; batch < 2; batch++)
+      await deliver(`more${batch}`, Array.from({ length: 30 }, (_, index) => follow(`n${batch * 30 + index}`, "twitch", start)));
+    const full = await fullSnapshot();
+    const support = full.events.filter(isSupport);
+    expect(support).toHaveLength(SUPPORT_SNAPSHOT_SIZE);
+    expect(support[0].id).toBe("twitch:n10");
+    expect(full.events.filter((event) => event.kind === "chat").map((event) => ("id" in event ? event.id : ""))).toEqual(["twitch:m1"]);
+    expect(full.since).toBe(start - SNAPSHOT_MAX_AGE_MS);
+    // A disconnect removes the support events of its platform.
+    await deliver("k2", [follow("kf2", "kick", start)], "kick");
+    expect(stored()).toContain("kick:kf2");
+    await post("disconnect", "kick");
+    expect(stored().filter((id) => id.startsWith("kick:"))).toEqual([]);
+    expect((await fullSnapshot()).since).toBe(start - SNAPSHOT_MAX_AGE_MS);
+    // After 10 minutes the snapshot has no event, and the alarm removes the rows.
+    vi.spyOn(Date, "now").mockReturnValue(start + SNAPSHOT_MAX_AGE_MS + 1);
+    expect((await fullSnapshot()).events).toEqual([]);
+    expect(stored()).toEqual([]);
+  });
+
+  it("expires stored support events with the alarm, also when no further delivery comes", async (): Promise<void> => {
+    await addConnection("twitch", { support: true });
+    const start = Date.now();
+    vi.spyOn(Date, "now").mockReturnValue(start);
+    await deliver("d1", [follow("f1", "twitch", start)]);
+    expect(state().storage.alarm).toBe(start + SNAPSHOT_MAX_AGE_MS + 1);
+    expect(stored()).toEqual(["twitch:f1"]);
+    vi.spyOn(Date, "now").mockReturnValue(start + SNAPSHOT_MAX_AGE_MS + 1);
+    await room().alarm();
+    expect(stored()).toEqual([]);
+    // The ids stay for the whole freshness window: a late retry of the provider makes no second event.
+    expect(state().storage.alarm).toBe(start + SEEN_TTL_MS + 1);
+    const socket = await listen();
+    await deliver("d1", [follow("f1", "twitch", start)]);
+    await deliver("d9", [follow("f1", "twitch", start)]);
+    expect(sent(socket)).toEqual([]);
+  });
+
+  it("bounds a flood of support events with its own bucket, so moderation and chat still pass", async (): Promise<void> => {
+    await addConnection("twitch", { support: true });
+    const warn = vi.spyOn(console, "warn").mockImplementation((): void => undefined);
+    const now = Date.now();
+    vi.spyOn(Date, "now").mockReturnValue(now);
+    const socket = await listen();
+    await deliver("d0", [chat("m0")]);
+    for (let batch = 0; batch < 3; batch++)
+      await deliver(`f${batch}`, Array.from({ length: 50 }, (_, index) => follow(`f${batch}-${index}`)));
+    expect(sent(socket).filter(isSupport)).toHaveLength(SUPPORT_BURST);
+    expect(warn).toHaveBeenCalledWith("channel_ingest_dropped", { chat: 0, moderation: 0, support: 50 });
+    await deliver("del", [{ kind: "delete", platform: "twitch", messageId: "m0", receivedAt: now }, chat("m1")]);
+    expect(sent(socket).slice(-2).map((event) => event.kind)).toEqual(["delete", "chat"]);
+    // A refused event was not counted: it passes when the provider sends it again later.
+    vi.spyOn(Date, "now").mockReturnValue(now + 1000);
+    await deliver("retry", [follow("f2-49")]);
+    expect(sent(socket).at(-1)).toMatchObject({ kind: "follow", id: "twitch:f2-49" });
   });
 });
 
@@ -744,7 +968,7 @@ describe("ChannelIngest load and robustness", (): void => {
     // A chat flood empties the chat bucket; the excess is dropped and counted.
     for (let index = 0; index <= ADMISSION_BURST; index++) await deliver(`chat-${index}`, [chat(`m${index}`)]);
     expect(sql.exec("SELECT key FROM seen WHERE key = ?", `delivery:twitch:chat-${ADMISSION_BURST}`).toArray()).toEqual([]);
-    expect(warn).toHaveBeenCalledWith("channel_ingest_dropped", { chat: 1, moderation: 0 });
+    expect(warn).toHaveBeenCalledWith("channel_ingest_dropped", { chat: 1, moderation: 0, support: 0 });
     // A delete inside a delivery of more chat still goes through at once and leaves the snapshot.
     const socket = await listen();
     const flood = Array.from({ length: 10 }, (_, index) => chat(`late-${index}`));
@@ -834,7 +1058,7 @@ describe("ChannelIngest load and robustness", (): void => {
     // Distinct deliveries stop at the moderation burst.
     for (let index = 0; index < MODERATION_BURST + 20; index++) await deliver(`ban-${index}`, [ban(`u${index}`)], "kick");
     expect(socket.ofType("event")).toHaveLength(MODERATION_BURST);
-    expect(warn).toHaveBeenCalledWith("channel_ingest_dropped", { chat: 0, moderation: 1 });
+    expect(warn).toHaveBeenCalledWith("channel_ingest_dropped", { chat: 0, moderation: 1, support: 0 });
     // Status events are never taken from a delivery.
     await deliver("status", [{ kind: "status", platform: "kick", status: "active" }], "kick");
     expect(socket.ofType("event")).toHaveLength(MODERATION_BURST);
@@ -1789,6 +2013,84 @@ describe("ChannelIngest YouTube polling", (): void => {
     await state().storage.deleteAlarm();
     await poll();
     expect(state().storage.alarm).toBeNull();
+  });
+
+  it("reads YouTube support events from the chat page only while the switch is on, with the same requests and quota", async (): Promise<void> => {
+    /** One run of a new object: the broadcast check, the page of the fixture, and the same page again. */
+    async function run(support: boolean): Promise<{ events: ActivityEvent[]; calls: string[]; units: unknown; replays: ActivityEvent[] }> {
+      await env.DB.batch([env.DB.prepare("DELETE FROM channel_connections"), env.DB.prepare("DELETE FROM app_rate_limits")]);
+      fake = installFakeProviders();
+      ingest = new RoomNamespace((roomState: RoomState) => new ChannelIngest(roomState as unknown as DurableObjectState, env));
+      env.CHANNEL_INGEST = ingest as unknown as DurableObjectNamespace;
+      await addConnection("youtube", { support });
+      const socket = await listen();
+      fake.chatPages = [{ items: youtubeFixture.items, nextPageToken: "p1", pollingIntervalMillis: 100 }];
+      for (let index = 0; index < 3; index++) await poll();
+      const [raw] = (await listen()).sent;
+      const snapshot = parseActivityMessage(raw);
+      return {
+        events: socket.ofType<{ event: ActivityEvent }>("event").map((message) => message.event),
+        calls: fake.calls.map((item) => `${item.method} ${item.url.pathname}${item.url.search}`),
+        units: await quota(`youtube-quota:${quotaDay(clock).day}:${page}`),
+        replays: snapshot?.type === "snapshot" ? snapshot.events : [],
+      };
+    }
+    const off = await run(false);
+    const on = await run(true);
+    expect(off.events.map((event) => event.kind)).toEqual(["chat"]);
+    // The page came two times: each support event of it counts one time, and the gift bundle is one event.
+    expect(on.events.map((event) => [event.kind, "id" in event ? event.id : ""])).toEqual([
+      ["chat", "youtube:LCC.text1"],
+      ["super_chat", "youtube:LCC.superchat1"],
+      ["super_sticker", "youtube:LCC.sticker1"],
+      ["membership", "youtube:LCC.member1"],
+      ["membership", "youtube:LCC.milestone1"],
+      ["gift", "youtube:LCC.gifting1"],
+    ]);
+    const support = on.events.filter(isSupport);
+    expect(support.every((event) => !event.replay && activityEventSchema.safeParse(event).success)).toBe(true);
+    expect(support[0]).toMatchObject({ amount: 5_000_000, currency: "USD", text: "Great stream", sender: { displayName: "Viewer One" } });
+    // No further request and no further quota: the support events come from the page of the chat.
+    expect(off.calls.filter((entry) => entry.includes("/liveChat/messages"))).toHaveLength(2);
+    expect(on.calls).toEqual(off.calls);
+    expect(on.units).toBe(off.units);
+    expect(on.units).toBe(12);
+    expect(off.replays.filter(isSupport)).toEqual([]);
+    expect(on.replays.filter(isSupport).map((event) => [event.id, event.replay])).toEqual(support.map((event) => [event.id, true]));
+  });
+
+  it("uses the support choice of now for a YouTube page that came while the streamer changed the switch", async (): Promise<void> => {
+    await addConnection("youtube", { support: true });
+    const socket = await listen();
+    await poll();
+    const real = globalThis.fetch;
+    /** The next page of chat comes while the streamer sets the switch to `on`. */
+    async function pageDuringChange(on: boolean): Promise<void> {
+      let changed = false;
+      vi.stubGlobal("fetch", async (input: string, init?: RequestInit): Promise<Response> => {
+        const response = await real(input, init);
+        if (!changed && new URL(input).pathname.endsWith("/liveChat/messages")) {
+          changed = true;
+          // The API writes the choice and tells the object.
+          await env.DB.prepare("UPDATE channel_connections SET support_events=? WHERE platform='youtube'").bind(on ? 1 : 0).run();
+          await post("support", "youtube");
+        }
+        return response;
+      });
+      fake.chatPages = [{ items: youtubeFixture.items, nextPageToken: on ? "p2" : "p1", pollingIntervalMillis: 100 }];
+      await poll();
+      vi.stubGlobal("fetch", real);
+    }
+    const kinds = (): string[] => socket.ofType<{ event: ActivityEvent }>("event").map((message) => message.event.kind);
+    const stored = (): unknown[] => state().storage.sql.exec("SELECT id FROM support").toArray();
+    // Off during the page: the page gives its chat, and no support event is stored or sent.
+    await pageDuringChange(false);
+    expect(kinds()).toEqual(["chat"]);
+    expect(stored()).toEqual([]);
+    // On during the page: the support events of that page are not lost.
+    await pageDuringChange(true);
+    expect(kinds()).toEqual(["chat", "super_chat", "super_sticker", "membership", "membership", "gift"]);
+    expect(stored()).toHaveLength(5);
   });
 
   it("starts polling on connect and keeps a pending wait across a reconnect", async (): Promise<void> => {

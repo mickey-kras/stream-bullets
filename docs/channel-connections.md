@@ -2,6 +2,7 @@
 
 A streamer can connect one Twitch, one YouTube, and one Kick channel to a StreamBullets page.
 The connected channels supply one activity feed with chat and moderation events.
+The feed also has support events, such as follows and subscriptions, when the streamer turns them on.
 Overlay consumers, such as merged chat and interactive characters, read this feed.
 All consumers use the same connection and the same ingestion. Each page has its own feed.
 
@@ -42,7 +43,7 @@ The code is in these files:
 | Provider calls | `app/server/channel-providers.server.ts` |
 | Token encryption | `app/server/channel-tokens.server.ts` |
 | Webhook checks | `app/server/channel-webhooks.server.ts` |
-| Payload normalization | `app/server/channel-normalize.ts` |
+| Payload normalization | `app/server/channel-normalize.ts`, `app/server/channel-support.ts` |
 | Ingestion, snapshot, YouTube poll | `app/server/channel-ingest.ts` |
 | Provider subscriptions and their repair | `app/server/channel-ingest-subscriptions.ts`, `app/server/channel-repair.server.ts` |
 | Streamer controls | `app/components/channels/channel-panel.tsx`, `app/components/channels/channels-step.tsx` |
@@ -90,6 +91,10 @@ The server keeps the newest 100 messages for 10 minutes. `since` is the newest o
 - The receive time of the newest message of a platform that the owner disconnected.
 - The receive time of the newest message that the size limit of the snapshot left out.
 
+A snapshot also has the support events that the server keeps: the newest 50, for 10 minutes.
+Each of them has `replay: true`. The events of a snapshot are in the order of their receive times.
+A support event never changes `since`: no moderation removes a support event.
+
 A live chat message also has `live: false` when the platform sent it more than 30 seconds before the server
 received it (`LIVE_WINDOW_MS`). Thus a late provider retry never runs an old command.
 A message without a source time is live. Twitch gives no source time in the chat event.
@@ -135,6 +140,9 @@ These rules make each support event count one time:
 
 - A provider sends a delivery again after a timeout or an error. The second delivery has the same `deliveryId`.
   `acceptDelivery` refuses it, so it makes no second event.
+- The `ChannelIngest` object keeps the `id` of each support event for 15 minutes. It does not send an event with a known `id` again.
+  This also applies to a YouTube page that comes again.
+- A live support event has `replay: false`. The same event in the snapshot of a reconnect has `replay: true`.
 - A consumer can show a replay. `supportTotals` never counts a replay, and it never counts the same `id` again.
   Thus a replayed alert does not change a goal or a revenue record.
 
@@ -143,8 +151,37 @@ This section is the format only. See [Support events of each provider](#support-
 ### Support events of each provider
 
 `app/server/channel-support.ts` turns the provider events below into support events.
-The feed does not send them yet. The server does not subscribe to these events, and it does not read them from a YouTube page.
-A later change adds the subscriptions and the switch of the streamer.
+The feed sends them only when the streamer turns support events on for the channel.
+Each connection has its own switch (`support_events`). A new connection has the switch off.
+
+`POST /api/channels/:platform/support` changes the switch. See [API reference](api.md#channel-connections).
+The switch in **Streamer tools** and the activity feed in **Live** and in the dock are not there yet. A later change adds them.
+
+The switch does these things when the streamer turns it on:
+
+- Twitch: the support events need three new scopes. A connection without them gets the address of the Twitch permission page.
+  The streamer approves the scopes there, and the callback turns the switch on.
+  A connection that has the scopes gets the switch on immediately.
+- YouTube and Kick: the switch needs no new permission and no visit to the provider.
+- The `ChannelIngest` object makes the Twitch and Kick subscriptions of the support events. It keeps the chat subscriptions.
+- For YouTube, the object reads the support events from each chat page that it reads for chat.
+
+When the streamer turns the switch off, the object deletes the subscriptions of the support events. The chat subscriptions stay.
+
+While the switch is off, the object drops each support event. It does not store the event, and it does not keep the ID.
+The chat events of the same delivery continue.
+
+A refusal of the provider never stops chat:
+
+- Twitch does not give the three scopes: the callback connects the channel for chat and answers `support_denied`. The switch stays off.
+- Twitch answers 403 for a subscription of a support event: the object turns the switch off.
+- Kick answers 401 or 403 for the support events, or makes no subscription for one of them: the object turns the switch off.
+- In each case the connection stays `active`, and the chat subscriptions stay.
+- For a refused subscription, the object writes the `channel_support_refused` log.
+  A callback and a change of the switch then show the switch as off (`support_denied`, or `support: false`).
+- The next subscription check deletes a subscription of a support event that stays at the provider.
+
+A reconnect keeps the switch. For Twitch, a reconnect of a channel with the switch on asks for the three scopes again.
 
 The tables give, for each provider event: the kind, the amount, the person that the event names, and the permission.
 The facts are from the provider documentation of 2026-11-26.
@@ -165,7 +202,9 @@ Twitch sends each event as an EventSub notification:
 - A cheer also sends `channel.bits.use`. The server reads `channel.cheer` only, so Bits count one time.
 - Twitch does not send `channel.subscribe` for a renewal. A renewal shows only when the subscriber sends a message with it.
 - The delivery ID is the header `Twitch-Eventsub-Message-Id`. Twitch sends a notification again with the same ID.
-- The scopes are new. The connection of today has none of them. `channel.raid` needs no scope.
+- The scopes are optional. The server asks for them only when the streamer turns support events on. `channel.raid` needs no scope.
+- The condition of `channel.raid` names the channel in `to_broadcaster_user_id`. Each other type names it in `broadcaster_user_id`.
+- The server makes the chat subscriptions first. Thus a refused support subscription leaves chat as it is.
 
 Kick sends each event as a webhook:
 
@@ -179,8 +218,12 @@ Kick sends each event as a webhook:
 
 - Anonymity: only `channel.subscription.gifts` has an anonymous `gifter`. Kick then sends null for each field of the gifter, and the event has `anonymous: true` and `sender: null`.
 - A gift bundle is one webhook. The event does not name the people who got a gift.
-- The delivery ID is the header `Kick-Event-Message-Id`. Kick calls it the idempotent key.
-- Permission: the Kick documentation names only `events:subscribe` for webhook events. The connection of today has this scope.
+- The ID of an event is from its content: the event type, the person, and the time `created_at`. A gift bundle adds its size and the first person who got a gift. KICKs add the amount.
+- A follow has no time. Its ID is the event type and the person, so a second follow of the same person is the same event.
+- An event without `created_at` has the header `Kick-Event-Message-Id` as its ID. Kick calls it the idempotent key.
+- Kick signs the webhooks of all apps with one key. A copy that a different app got has a different message ID and the same content. Thus the copy makes the same event ID and counts one time.
+- Permission: the Kick documentation names only `events:subscribe` for webhook events. Each connection has this scope.
+- The server asks Kick for the chat events first, and for the support events in a second call.
 
 YouTube sends each event as a message of the live chat, in the same page as the chat:
 
@@ -195,7 +238,7 @@ YouTube sends each event as a message of the live chat, in the same page as the 
 - The `sender` is the author of the message (`authorDetails`). YouTube has no anonymous support in chat.
 - A gift bundle is one `membershipGiftingEvent`. Each person who got a gift also makes a `giftMembershipReceivedEvent`, which gives no event.
 - The delivery ID is the ID of the message. A page that comes again has the same IDs.
-- Permission: these messages come with the chat that the server reads today. They need no new scope and no more calls of the API, so they use no more quota.
+- Permission: these messages come with the chat that the server reads. They need no new scope and no more calls of the API, so they use no more quota.
 - YouTube has no chat message for a new channel subscriber, so the feed has no `follow` from YouTube.
 - `giftEvent` (Jewels) has no kind in the feed. The server does not read it.
 
@@ -317,6 +360,24 @@ The feed uses these provider subscriptions:
 
 The callback refuses an authorization that gives fewer scopes than the list above.
 
+Support events have optional scopes. The server asks for them only when the streamer turns support events on:
+
+| Platform | Optional scopes | Notes |
+| --- | --- | --- |
+| Twitch | `moderator:read:followers`, `channel:read:subscriptions`, `bits:read` | Read-only scopes for follows, subscriptions, gifts, and Bits. A raid needs no scope. |
+| YouTube | None | The support events are messages of the chat that `youtube.readonly` reads. |
+| Kick | None | The Kick documentation names only `events:subscribe` for webhook events. |
+
+The rule of the callback does not change for the optional scopes. An authorization without them connects the channel for chat.
+The result is then `support_denied`, and the support events stay off.
+`GET /api/channels` names the optional scopes of each platform (`supportScopes`). It never names the scopes that a connection has.
+
+With support events on, the feed also uses these provider subscriptions:
+
+- Twitch: `channel.follow` (version 2), and `channel.subscribe`, `channel.subscription.gift`, `channel.subscription.message`, `channel.cheer`, and `channel.raid` (version 1).
+- Kick: `channel.followed`, `channel.subscription.new`, `channel.subscription.renewal`, `channel.subscription.gifts`, and `kicks.gifted` (version 1).
+- YouTube: no subscription and no more calls.
+
 ## Scheduled streams
 
 The schedule of a page shows the scheduled streams of its connected Twitch and YouTube channels.
@@ -393,10 +454,13 @@ The test deployment reads no platform. It uses the synthetic streams of `testStr
 | Events in one delivery | 50, of any kind |
 | Chat admission per page | 50 chat messages each second, burst of 200. Only new chat messages cost a token. |
 | Moderation admission per page | 20 deletions, bans, timeouts, and clears each second, burst of 200, in a separate bucket. Thus a chat flood never holds moderation back. |
-| Dropped events | The object drops what its buckets refuse. It counts the drops in the `channel_ingest_dropped` log (`chat`, `moderation`). |
+| Support admission per page | 10 support events each second, burst of 100, in a separate bucket. Only new support events cost a token. Thus a flood of follows never holds moderation back. |
+| Dropped events | The object drops what its buckets refuse. It counts the drops in the `channel_ingest_dropped` log (`chat`, `moderation`, `support`). |
 | Snapshot | The last 100 chat messages, for at most 10 minutes |
-| Delivery IDs, message IDs, and ban keys for deduplication | 15 minutes, at most 84,800 IDs |
-| IDs of deleted messages | 15 minutes, at most 84,800 IDs, in a separate table |
+| Support snapshot | The last 50 support events, for at most 10 minutes |
+| Support events | One event for each delivery ID. The object refuses a known ID for 15 minutes. |
+| Delivery IDs, message IDs, ban keys, and support event IDs for deduplication | 15 minutes, at most 97,000 IDs |
+| IDs of deleted messages | 15 minutes, at most 97,000 IDs, in a separate table |
 | Kick message IDs that a Worker isolate forwarded | The last 10,000 |
 | Connection data in the Worker and in the object | The cache keeps it for 30 seconds |
 | Live window | A chat message is live only if the platform sent it at most 30 seconds before it arrived |
@@ -416,16 +480,23 @@ The test deployment reads no platform. It uses the synthetic streams of `testStr
 | Webhook health writes | One each minute for each key and Worker isolate |
 | Watchdog report | At most one each hour for each channel |
 
-The object keeps the snapshot and the IDs in its own SQLite storage. A snapshot never holds a message older than
-10 minutes. An alarm also deletes expired messages and IDs from storage. To limit wakeups, the alarm runs at most
+The object keeps the snapshot and the IDs in its own SQLite storage. A snapshot never holds a message or a support
+event older than 10 minutes. An alarm also deletes expired messages, support events, and IDs from storage. To limit wakeups, the alarm runs at most
 once each minute. Thus storage can keep an expired item for up to one more minute.
 A deletion, ban, timeout, or clear removes the matching messages before the object sends the next event or snapshot.
 
 The ID limit covers the webhook freshness window at the admission limits. In 10 minutes the object admits at
 most C = 50 × 600 + 200 = 30,200 chat messages and M = 20 × 600 + 200 = 12,200 moderation events.
+It also admits at most S = 10 × 600 + 100 = 6,100 support events.
+
 The object keeps the ID of every delivery with at least one admitted event. It also keeps the ID of every
-admitted chat message, and a content key for every admitted ban. Thus the IDs of 10 minutes fit in
-2C + 2M = 84,800. The object always finds a provider retry inside the 10-minute window.
+admitted chat message, a content key for every admitted ban, and the ID of every admitted support event.
+Thus the IDs of 10 minutes fit in 2C + 2M + 2S = 97,000.
+The object always finds a provider retry inside the 10-minute window.
+
+A support event has no moderation. Thus the support snapshot needs no boundary such as `since`.
+A disconnect removes the support events of its platform from the snapshot.
+The object keeps no ID of a support event that it dropped while the switch was off.
 
 The object also keeps the IDs of moderation deliveries. A repeated clear or ban is not harmless: it can remove
 chat that arrived after the first one. Deleted message IDs have their own table with the same count limit. The
@@ -483,6 +554,11 @@ follows this reset, also across summer time.
 
 YouTube can ask for a longer interval with `pollingIntervalMillis`. Then a page uses fewer units.
 The [load model](live-room-capacity.md#load-model) compares this quota with one million registered streamers.
+
+Support events use no quota. The object reads them from each chat page that it reads for chat.
+It makes the same calls with support events on and off.
+With support events on, the first page after a connect can hold support events from before the consumer connected.
+The object sends each of them one time, as a live event with `replay: false`.
 
 The floor is 20 seconds after a page without items. It is 10 seconds again after a page with items.
 The floor is also 20 seconds after the feed spends 80% of the page budget or of the shared budget.
@@ -567,7 +643,7 @@ A disconnect needs a recent sign-in. The server then does these steps:
 2. The `ChannelIngest` object reads the list of subscriptions for the channel from the provider.
    It deletes them and the subscriptions that it stored.
 3. The object asks the provider to revoke the authorization. This step is best effort.
-4. The object removes the messages of that platform from the snapshot. It stops the YouTube poll.
+4. The object removes the messages and the support events of that platform from the snapshot. It stops the YouTube poll.
 5. The API deletes the connection row and its tokens. It writes an audit record.
 
 The object keeps the subscription IDs that the provider did not delete. A later connect deletes them first.
@@ -598,12 +674,21 @@ If Twitch answers that a subscription exists (409), the object adopts the IDs of
 If a type stays without a subscription for this callback, the connect fails with `subscribe_failed`. This occurs
 when another deployment holds the subscription, or when the object cannot read the list.
 
+With support events on, a connect also makes the subscriptions of the support events, after the chat subscriptions.
+A Twitch `channel.raid` subscription names the channel in `to_broadcaster_user_id`. The list filter and the webhook accept this field.
+If the provider refuses a subscription of a support event, the connect does not fail. The object turns support events off for the connection.
+See [Support events of each provider](#support-events-of-each-provider).
+
 ### Subscription repair
 
 The object repairs Twitch and Kick subscriptions without the owner. A check reads the list of the provider for
 the channel. It deletes each subscription that the provider reports as ended. It creates each required type that
-has no enabled or pending subscription. It never changes an enabled or pending subscription. Thus a check of a
-healthy channel changes nothing.
+has no enabled or pending subscription. It never changes an enabled or pending subscription of a required type.
+Thus a check of a healthy channel changes nothing.
+
+The required types follow the switch of the connection. With support events on, a check also requires the types of the support events.
+With support events off, a check deletes each subscription of a support event. It keeps the chat subscriptions.
+When the streamer changes the switch, the API asks the object for a check immediately. This check does not wait for the 10 minutes.
 
 Twitch reports a status for each subscription. `enabled` is healthy. `webhook_callback_verification_pending`
 waits for the callback check. Every other status means that the subscription ended. The Twitch check uses only
@@ -628,7 +713,8 @@ The check sets the status that its result proves. If the provider reports each r
 becomes `active`. If the provider refuses a missing type, the connection gets `error` with `subscribe_failed`.
 An `error` that already has a code keeps that code. A list that the object cannot read changes no status.
 
-A refused Kick refresh sets `needs_reauth`. A Twitch 403 for a new subscription also sets `needs_reauth`.
+A refused Kick refresh sets `needs_reauth`. A Twitch 403 for a new chat subscription also sets `needs_reauth`.
+A refusal for a subscription of a support event sets no status. The check turns support events off for the connection.
 
 A failed check runs again with backoff, from 1 second up to 5 minutes, with jitter. Without a consumer, the
 object stops at the longest backoff. The hourly job then tries the channel again.
@@ -718,7 +804,9 @@ The logs hold only fixed codes, platforms, and counts. They never hold an ID, a 
 | `channel_webhook_health_failed` | The Worker cannot write a webhook health count to D1. The log holds the error class. | Alert when it repeats |
 | `channel_status_changed` | A connection is not active, with its code | Look at the `authorization_revoked` counts each day |
 | `channel_connect_failed` | The object cannot make the subscriptions | Alert when it repeats |
-| `channel_ingest_dropped` | The object dropped chat over the admission limit | Information only |
+| `channel_ingest_dropped` | The object dropped chat, moderation, or support events over the admission limit (`chat`, `moderation`, `support`) | Information only |
+| `channel_support_refused` | A provider refused a subscription of a support event (`platform`). The object turned support events off for the connection. Chat continues. | Alert when it repeats for many channels: a changed permission of the provider. |
+| `channel_support_failed` | The API cannot reach the object after a change of the switch. The log holds the error class. The next subscription check applies the change. | Alert when it repeats |
 | `channel_callback_failed`, `channel_connect_cleanup_failed`, `channel_disconnect_failed`, `channel_cleanup_failed` | A step failed. The log holds the error class. | Alert when it repeats |
 | `activity_notify_failed` | A key or suspension notice did not reach the object | Alert when it repeats |
 | `schedule_read_failed` | A schedule read of a platform failed (`platform`). The read changes nothing. The log holds the error class. | Alert when it repeats for a day |
@@ -875,7 +963,7 @@ The D1 migrations `0027` and `0028` only add tables and a column. An older Worke
 | Forged webhook | Twitch: HMAC-SHA256 with a constant-time comparison. Kick: RSA PKCS#1 v1.5 SHA-256 with the public key of Kick. The check runs on the raw body before parsing. |
 | Replayed webhook | A timestamp window of 10 minutes, and deduplication of delivery IDs and message IDs for 15 minutes. |
 | Oversized webhook | A 64 KiB body limit. The Worker checks it while the body streams. |
-| Burst or denial of service | Each page has two token buckets, one for chat and one for moderation. They drop the excess before any database read. Each delivery holds at most 50 events. Each queue, snapshot, and socket list has a limit. Signed webhooks skip the per-address limit, because providers send from shared addresses. Only failures from a sender without the provider key count against that limit. These failures are a bad signature, size, method, query, or a missing body. A stale or unparsable signed delivery never counts. A forged call still costs a body read and a signature check. |
+| Burst or denial of service | Each page has three token buckets: one for chat, one for moderation, and one for support events. They drop the excess before any database read. Each delivery holds at most 50 events. Each queue, snapshot, and socket list has a limit. Signed webhooks skip the per-address limit, because providers send from shared addresses. Only failures from a sender without the provider key count against that limit. These failures are a bad signature, size, method, query, or a missing body. A stale or unparsable signed delivery never counts. A forged call still costs a body read and a signature check. |
 | Replayed moderation | Kick signs the webhooks of all apps with one key. Thus a captured signed ban can come again. The object keeps every accepted delivery ID and limits moderation with its own bucket. |
 | Orphaned Twitch subscription | A signed notification for an unknown channel gets a non-2xx answer (410). Twitch counts it as a failed delivery. It revokes the subscription after repeated failures (`notification_failures_exceeded`). Revocations always get 204. The Worker keeps an unknown channel for 10 seconds. |
 | Sign-in token with channel scopes | Google sign-in does not ask for incremental authorization (`include_granted_scopes`). The YouTube connection does not ask for it too. Thus a sign-in token never carries the YouTube scope. |
@@ -900,6 +988,10 @@ The D1 migrations `0027` and `0028` only add tables and a column. An older Worke
 - We did not check that a revoked Twitch user token also ends the EventSub access of the app. The disconnect also deletes the subscriptions.
 - Some moderation events are not in the provider feeds, such as a Kick message deletion. After such an event, the snapshot can hold the message for up to 10 minutes.
 - Display names and chat text can still hold offensive content. The feed does not filter content.
+- Kick signs the webhooks of all apps with one key. Thus a person with a different Kick app can send a signed copy of a real Kick support event.
+  The ID of a Kick support event is from its content, so the copy makes the same event and counts one time.
+  A Kick support event without `created_at` has only its message ID. A copy of such an event makes a second support event.
+  The copy cannot change the content of the event, and it counts only while the streamer has support events on.
 - This design reduces risk. It does not make the feature fully secure.
 
 ## Stored YouTube data
@@ -960,4 +1052,9 @@ The provider documentation does not give these details, or we did not test them 
   the user token, so the feed uses that token.
 - If Kick sends any message when it removes a subscription. The documentation names none.
 - The repair with live Twitch and Kick traffic. Only tests with stand-in providers cover it.
+- The support events with live Twitch, Kick, and YouTube traffic. Only tests with the documented payloads cover them.
+- The answer of Kick when it refuses a support event. The feed reads 401, 403, and an event without a subscription ID
+  as a refusal.
+- If Twitch revokes only the subscriptions of the support events in some cases. A revocation with
+  `authorization_revoked` sets `needs_reauth` for the connection, also for a subscription of a support event.
 - The URL pattern for Twitch emote images: `https://static-cdn.jtvnw.net/emoticons/v2/<id>/default/dark/1.0`.

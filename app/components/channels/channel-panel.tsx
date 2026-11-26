@@ -34,6 +34,7 @@ const RESULT_MESSAGES: Readonly<Record<ConnectResult, MessageId>> = {
   channel_taken: "channels.result.channelTaken",
   disconnect_first: "channels.result.disconnectFirst",
   scope_missing: "channels.result.scopeMissing",
+  support_denied: "channels.result.supportDenied",
   failed: "channels.result.failed",
 };
 
