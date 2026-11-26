@@ -164,6 +164,17 @@ describe("Worker request checks", (): void => {
     expect(response.headers.get("X-StreamBullets-Binary-Labels")).toBe("1");
   });
 
+  it("names the deployed commit, so the deployment smoke check can tell the Worker versions apart", async (): Promise<void> => {
+    const commit = "0123456789abcdef0123456789abcdef01234567";
+    const served = async (value: string | undefined): Promise<string | null> =>
+      (await worker.fetch(new Request(`${env.APP_ORIGIN}/`), { ...env, DEPLOYED_COMMIT: value })).headers.get(
+        "X-StreamBullets-Revision",
+      );
+    expect(await served(commit)).toBe(commit);
+    expect(await served(undefined)).toBeNull();
+    expect(await served("not a commit")).toBeNull();
+  });
+
   it("answers 421 for another host name, with the error origin in the policy", async (): Promise<void> => {
     const response = await worker.fetch(new Request("https://other.example.test/"), env);
     expect(response.status).toBe(421);

@@ -57,6 +57,8 @@ async function clientKey(request: Request): Promise<string> {
 
 const BINARY_LABELS_COMPATIBILITY_HEADER: string = "X-StreamBullets-Binary-Labels";
 const BINARY_LABELS_COMPATIBILITY_VERSION: string = "1";
+// The commit of this Worker version, which the deployment sets: its smoke check waits for the version it expects.
+const REVISION_HEADER: string = "X-StreamBullets-Revision";
 
 type QuotaScope = "auth" | "connect" | "write" | "private-read";
 
@@ -229,6 +231,7 @@ function secured(
   if (env.APP_ENV === "test") result.headers.set("X-Robots-Tag", "noindex, nofollow");
   result.headers.set("X-Request-ID", context.requestId);
   result.headers.set(BINARY_LABELS_COMPATIBILITY_HEADER, BINARY_LABELS_COMPATIBILITY_VERSION);
+  if (/^[a-f0-9]{40}$/u.test(env.DEPLOYED_COMMIT ?? "")) result.headers.set(REVISION_HEADER, env.DEPLOYED_COMMIT!);
   for (const value of context.responseHeaders.getSetCookie()) result.headers.append("Set-Cookie", value);
   return result;
 }
