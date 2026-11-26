@@ -42861,7 +42861,19 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_poll",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L916",
+      "source_location": "L914",
+      "target": "app_server_channel_ingest_channelingest_connection",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_channel_ingest_channelingest_poll",
+      "source_file": "app/server/channel-ingest.ts",
+      "source_location": "L918",
       "target": "app_server_channel_support_youtubesupport",
       "weight": 1.0
     },
@@ -42873,7 +42885,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_poll",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L917",
+      "source_location": "L919",
       "target": "app_server_channel_ingest_channelingest_admitevents",
       "weight": 1.0
     },
@@ -42885,7 +42897,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_poll",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L917",
+      "source_location": "L919",
       "target": "app_server_channel_ingest_channelingest_ingest",
       "weight": 1.0
     },
@@ -42897,7 +42909,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_poll",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L917",
+      "source_location": "L919",
       "target": "app_server_channel_normalize_youtubeevents",
       "weight": 1.0
     },
@@ -42909,7 +42921,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_poll",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L919",
+      "source_location": "L921",
       "target": "app_server_channel_ingest_channelingest_touch",
       "weight": 1.0
     },
@@ -42921,7 +42933,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_pollfailed",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L952",
+      "source_location": "L954",
       "target": "app_server_channel_ingest_channelingest_setstatus",
       "weight": 1.0
     },
@@ -42933,7 +42945,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_pollfailed",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L965",
+      "source_location": "L967",
       "target": "app_lib_activity_quotaday",
       "weight": 1.0
     },
@@ -43149,7 +43161,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_refreshpollingtitle",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L937",
+      "source_location": "L939",
       "target": "app_server_channel_ingest_channelingest_refreshtitle",
       "weight": 1.0
     },
@@ -60033,7 +60045,19 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2149",
+      "source_location": "L2087",
+      "target": "tests_channel_ingest_test_pageduringchange",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_channel_ingest_test",
+      "source_file": "tests/channel-ingest.test.ts",
+      "source_location": "L2183",
       "target": "tests_channel_ingest_test_provider",
       "weight": 1.0
     },
@@ -60045,7 +60069,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2163",
+      "source_location": "L2197",
       "target": "tests_channel_ingest_test_reconcile",
       "weight": 1.0
     },
@@ -60057,7 +60081,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2164",
+      "source_location": "L2198",
       "target": "tests_channel_ingest_test_subscriptioncalls",
       "weight": 1.0
     },
@@ -60069,7 +60093,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2246",
+      "source_location": "L2280",
       "target": "tests_channel_ingest_test_repairstate",
       "weight": 1.0
     },
@@ -60081,7 +60105,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2247",
+      "source_location": "L2281",
       "target": "tests_channel_ingest_test_alarm",
       "weight": 1.0
     },
@@ -60105,7 +60129,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2484",
+      "source_location": "L2518",
       "target": "tests_channel_ingest_test_forgedminutes",
       "weight": 1.0
     },
@@ -60117,7 +60141,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2489",
+      "source_location": "L2523",
       "target": "tests_channel_ingest_test_rejectedlogs",
       "weight": 1.0
     },
@@ -60357,7 +60381,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test_alarm",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2124",
+      "source_location": "L2158",
       "target": "tests_channel_ingest_test_state",
       "weight": 1.0
     },
@@ -60369,7 +60393,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test_alarm",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2127",
+      "source_location": "L2161",
       "target": "tests_channel_ingest_test_room",
       "weight": 1.0
     },
@@ -60405,7 +60429,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test_forgedminutes",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2138",
+      "source_location": "L2172",
       "target": "app_server_channel_webhooks_server_recordrejectedwebhook",
       "weight": 1.0
     },
@@ -60417,7 +60441,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test_forgedminutes",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2138",
+      "source_location": "L2172",
       "target": "app_server_channel_webhooks_server_webhookrejected",
       "weight": 1.0
     },
@@ -60475,6 +60499,30 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "tests_channel_ingest_test_pageduringchange",
+      "source_file": "tests/channel-ingest.test.ts",
+      "source_location": "L2076",
+      "target": "tests_channel_ingest_test_post",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_channel_ingest_test_pageduringchange",
+      "source_file": "tests/channel-ingest.test.ts",
+      "source_location": "L2081",
+      "target": "tests_channel_ingest_test_poll",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "tests_channel_ingest_test_poll",
       "source_file": "tests/channel-ingest.test.ts",
       "source_location": "L1539",
@@ -60513,7 +60561,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test_reconcile",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2119",
+      "source_location": "L2153",
       "target": "tests_channel_ingest_test_post",
       "weight": 1.0
     },
@@ -60525,7 +60573,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test_repairstate",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2131",
+      "source_location": "L2165",
       "target": "tests_channel_ingest_test_state",
       "weight": 1.0
     },
@@ -181445,7 +181493,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_pollfailed",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L950",
+      "source_location": "L952",
       "target": "app_server_channel_ingest_state_connection",
       "weight": 1.0
     },
@@ -181457,7 +181505,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_pollfailed",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L950",
+      "source_location": "L952",
       "target": "app_server_channel_ingest_state_youtubestate",
       "weight": 1.0
     },
@@ -181493,7 +181541,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_refreshpollingtitle",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L930",
+      "source_location": "L932",
       "target": "app_server_channel_ingest_state_connection",
       "weight": 1.0
     },
@@ -181505,7 +181553,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_refreshpollingtitle",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L930",
+      "source_location": "L932",
       "target": "app_server_channel_ingest_state_youtubestate",
       "weight": 1.0
     },
@@ -225831,7 +225879,18 @@
       "relation": "contains",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2105",
+      "source_location": "L2068",
+      "target": "tests_channel_ingest_test_pageduringchange",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_channel_ingest_test",
+      "source_file": "tests/channel-ingest.test.ts",
+      "source_location": "L2139",
       "target": "tests_channel_ingest_test_provider",
       "weight": 1.0
     },
@@ -225842,7 +225901,7 @@
       "relation": "contains",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2113",
+      "source_location": "L2147",
       "target": "tests_channel_ingest_test_subscriptioncalls",
       "weight": 1.0
     },
@@ -225853,7 +225912,7 @@
       "relation": "contains",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2118",
+      "source_location": "L2152",
       "target": "tests_channel_ingest_test_reconcile",
       "weight": 1.0
     },
@@ -225864,7 +225923,7 @@
       "relation": "contains",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2123",
+      "source_location": "L2157",
       "target": "tests_channel_ingest_test_alarm",
       "weight": 1.0
     },
@@ -225875,7 +225934,7 @@
       "relation": "contains",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2130",
+      "source_location": "L2164",
       "target": "tests_channel_ingest_test_repairstate",
       "weight": 1.0
     },
@@ -225886,7 +225945,7 @@
       "relation": "contains",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2135",
+      "source_location": "L2169",
       "target": "tests_channel_ingest_test_forgedminutes",
       "weight": 1.0
     },
@@ -225897,7 +225956,7 @@
       "relation": "contains",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2142",
+      "source_location": "L2176",
       "target": "tests_channel_ingest_test_rejectedlogs",
       "weight": 1.0
     },
@@ -237558,7 +237617,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L930",
+      "source_location": "L932",
       "target": "app_server_channel_ingest_channelingest_refreshpollingtitle",
       "weight": 1.0
     },
@@ -237569,7 +237628,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L950",
+      "source_location": "L952",
       "target": "app_server_channel_ingest_channelingest_pollfailed",
       "weight": 1.0
     },
@@ -243582,7 +243641,7 @@
       "relation": "indirect_call",
       "source": "tests_channel_ingest_test_provider",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2109",
+      "source_location": "L2143",
       "target": "tests_channels_test_callback",
       "weight": 1.0
     },
@@ -272778,7 +272837,7 @@
       "label": ".pollFailed()",
       "norm_label": ".pollfailed()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L950"
+      "source_location": "L952"
     },
     {
       "_callable": true,
@@ -272833,7 +272892,7 @@
       "label": ".refreshPollingTitle()",
       "norm_label": ".refreshpollingtitle()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L930"
+      "source_location": "L932"
     },
     {
       "_callable": true,
@@ -281607,7 +281666,7 @@
       "label": "alarm()",
       "norm_label": "alarm()",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2123"
+      "source_location": "L2157"
     },
     {
       "_callable": true,
@@ -281695,7 +281754,7 @@
       "label": "forgedMinutes()",
       "norm_label": "forgedminutes()",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2135"
+      "source_location": "L2169"
     },
     {
       "_callable": true,
@@ -281718,6 +281777,17 @@
       "norm_label": "listen()",
       "source_file": "tests/channel-ingest.test.ts",
       "source_location": "L120"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_channel_ingest_test_pageduringchange",
+      "label": "pageDuringChange()",
+      "norm_label": "pageduringchange()",
+      "source_file": "tests/channel-ingest.test.ts",
+      "source_location": "L2068"
     },
     {
       "_callable": true,
@@ -281761,7 +281831,7 @@
       "label": "provider()",
       "norm_label": "provider()",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2105"
+      "source_location": "L2139"
     },
     {
       "_callable": true,
@@ -281783,7 +281853,7 @@
       "label": "reconcile()",
       "norm_label": "reconcile()",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2118"
+      "source_location": "L2152"
     },
     {
       "_callable": true,
@@ -281794,7 +281864,7 @@
       "label": "rejectedLogs()",
       "norm_label": "rejectedlogs()",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2142"
+      "source_location": "L2176"
     },
     {
       "_callable": true,
@@ -281805,7 +281875,7 @@
       "label": "repairState()",
       "norm_label": "repairstate()",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2130"
+      "source_location": "L2164"
     },
     {
       "_callable": true,
@@ -281915,7 +281985,7 @@
       "label": "subscriptionCalls()",
       "norm_label": "subscriptioncalls()",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2113"
+      "source_location": "L2147"
     },
     {
       "_callable": true,

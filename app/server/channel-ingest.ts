@@ -910,10 +910,12 @@ export class ChannelIngest extends DurableObject<AppEnv> {
       return now - since < YOUTUBE_STARTUP_WINDOW_MS ? YOUTUBE_STARTUP_POLL_MS : YOUTUBE_IDLE_POLL_MS;
     }
     const page = await youtubeChatPage(tokens.accessToken, state.liveChatId, state.pageToken);
+    // The streamer can change the support events while the page comes: the choice of now decides, not the old one.
+    const wanted: boolean = (await this.connection("youtube"))?.support === true;
     current();
     // The first page is ingested too: messages sent before LIVE_WINDOW_MS are not live, so no old command runs.
     // The support events come from the same page: they cost no further call and no quota.
-    const support = connection.support ? youtubeSupport(page.items, now) : [];
+    const support = wanted ? youtubeSupport(page.items, now) : [];
     this.ingest(this.admitEvents([...youtubeEvents(page.items, connection.externalId, now), ...support], now), now);
     state.pageToken = page.nextPageToken;
     if (page.items.length > 0) await this.touch("youtube", connection, now);
