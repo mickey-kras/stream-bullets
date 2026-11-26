@@ -221342,7 +221342,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1051",
+      "source_location": "L1060",
       "target": "docs_channel_connections_facts_not_checked",
       "weight": 1.0
     },
@@ -221683,7 +221683,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1023",
+      "source_location": "L1031",
       "target": "docs_channel_connections_tiktok",
       "weight": 1.0
     },
@@ -221694,7 +221694,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1044",
+      "source_location": "L1052",
       "target": "docs_channel_connections_decisions_for_the_owner",
       "weight": 1.0
     },
@@ -221716,7 +221716,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L988",
+      "source_location": "L995",
       "target": "docs_channel_connections_facebook_live",
       "weight": 1.0
     },
@@ -304518,7 +304518,7 @@
       "node_kind": "heading",
       "norm_label": "decisions for the owner",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1044"
+      "source_location": "L1052"
     },
     {
       "_origin": "ast",
@@ -304551,7 +304551,7 @@
       "node_kind": "heading",
       "norm_label": "facebook live",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L988"
+      "source_location": "L995"
     },
     {
       "_origin": "ast",
@@ -304562,7 +304562,7 @@
       "node_kind": "heading",
       "norm_label": "facts not checked",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1051"
+      "source_location": "L1060"
     },
     {
       "_origin": "ast",
@@ -304837,7 +304837,7 @@
       "node_kind": "heading",
       "norm_label": "tiktok",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1023"
+      "source_location": "L1031"
     },
     {
       "_origin": "ast",

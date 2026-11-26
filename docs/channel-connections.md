@@ -968,6 +968,7 @@ Meta has an official API for the comments of a live broadcast. It serves profess
 | Permissions for the webhook, Facebook Login | `instagram_basic`, `instagram_manage_comments`, `pages_manage_metadata`, `pages_read_engagement`, and `pages_show_list`. The account needs a linked Facebook Page. | Confirmed | [Webhook fields](https://developers.facebook.com/documentation/instagram-platform/webhooks/fields) |
 | Permissions for the pull | `instagram_basic` and `pages_read_engagement`, with Facebook Login. The page names no other login. | Confirmed | [IG User live media](https://developers.facebook.com/documentation/instagram-platform/instagram-graph-api/reference/ig-user/live_media) |
 | App review | `live_comments` needs a published app and Advanced Access. Advanced Access needs App Review and Business Verification. | Confirmed | [Webhook setup](https://developers.facebook.com/documentation/instagram-platform/webhooks/setup) |
+| What App Review needs | A working app that Meta can test, and a screen recording for each permission. A permission without a recording gets no approval. | Confirmed | [App Review](https://developers.facebook.com/docs/resp-plat-initiatives/app-review/introduction) |
 | Comment data | The Instagram-scoped ID and the username of the person, the comment ID, the text, and the media ID. | Confirmed | [Webhook examples](https://developers.facebook.com/documentation/instagram-platform/webhooks/examples) |
 | End of the broadcast | The notifications stop when the broadcast ends. Meta sends no notification from before the subscription. | Confirmed | [Webhook setup](https://developers.facebook.com/documentation/instagram-platform/webhooks/setup) |
 | Rate limit | 4,800 calls for each impression of the account in 24 hours, for each app and account. | Confirmed | [Overview](https://developers.facebook.com/documentation/instagram-platform/overview) |
@@ -983,7 +984,13 @@ The documentation does not answer these questions:
 - Who gets Live Producer today.
 
 Result for #1038: the connection is possible with the webhook `live_comments`.
-Before any code, Meta must approve the app: App Review and Business Verification. Only the owner can do that.
+App Review comes after the code, not before it. Meta tests a working app and follows a screen recording for each permission.
+The work has this sequence:
+
+1. The owner makes the Meta app and starts Business Verification.
+2. Development and test use an account that has a role on the app.
+3. The owner sends the working app to App Review.
+4. Meta approves the app. Only then can the connection release to other streamers.
 
 ### Facebook Live
 
@@ -1017,8 +1024,9 @@ The documentation does not answer these questions:
 - If Business Verification is necessary for the Pages of other people.
 
 Result for #1040: the connection is possible for a Page. The documentation does not confirm a profile or a group.
-Before any code, Meta must approve the app in App Review, and a test with a Page must answer the open questions.
-Only the owner can start the App Review.
+A test with a Page of the owner must answer the open questions first.
+App Review comes after the code, as for Instagram. Meta must approve the app before the release to other streamers.
+Only the owner can make the Meta app and start the App Review.
 
 ### TikTok
 
@@ -1043,8 +1051,9 @@ Read the TikTok pages for developers again before that decision, from a network 
 
 ### Decisions for the owner
 
-- **Instagram:** start App Review and Business Verification at Meta for `live_comments`, or keep #1038 open.
-- **Facebook Live:** start App Review for the Live Video API, and test with a Page, or keep #1040 open.
+- **Instagram:** make the Meta app and start Business Verification, so that the development can start. Or keep #1038 open.
+- **Facebook Live:** make the Meta app and give a Page for the test, so that the development can start. Or keep #1040 open.
+- **App Review:** send each working connection to App Review before its release.
 - **TikTok:** keep #1039 open until TikTok has an official API, or decide in writing to use an unofficial connector.
 - Privacy and Terms must describe each new source of data before its release.
 
