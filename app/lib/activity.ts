@@ -247,7 +247,8 @@ const supportSchema: z.ZodType<ActivitySupport> = z
 
 /** True for a support event. */
 export function isSupport(event: ActivityEvent): event is ActivitySupport {
-  return (SUPPORT_KINDS as readonly string[]).includes(event.kind);
+  const kinds: readonly string[] = SUPPORT_KINDS;
+  return kinds.includes(event.kind);
 }
 
 export const activityEventSchema: z.ZodType<ActivityEvent> = z.union([

@@ -115,7 +115,7 @@ function SkipLink(): ReactNode {
 }
 
 export default function App(): ReactNode {
-  const routes = new Set<string>(useMatches().map((match): string => match.id));
+  const routes: ReadonlySet<string> = new Set(useMatches().map((match): string => match.id));
   if (routes.has(OVERLAY_ROUTE)) return <Outlet />;
   if (routes.has(DOCK_ROUTE))
     return (

@@ -160,10 +160,10 @@
   background: var(--modal);
 }
 .tl-chat-row {
-  animation: tl-chat-in 0.2s ease-out;
   padding: 4px 0;
   line-height: 1.45;
   overflow-wrap: anywhere;
+  animation: tl-chat-in 0.2s ease-out;
 }
 .tl-chat-row .tl-chat-icon {
   display: inline-block;
