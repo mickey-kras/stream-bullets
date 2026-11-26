@@ -23,7 +23,7 @@
     "deploy": "pnpm build:production && wrangler deploy --config build/server/wrangler.json"
   },
   "dependencies": {
-    "@better-auth/drizzle-adapter": "1.7.25",
+    "@better-auth/drizzle-adapter": "1.7.26",
     "@lexical/code-core": "0.53.0",
     "@lexical/history": "0.53.0",
     "@lexical/link": "0.53.0",
