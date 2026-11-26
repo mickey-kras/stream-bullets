@@ -998,6 +998,38 @@ test("an output with the Twitch switch on shows Twitch chat only, and the other 
   }
 });
 
+test("a chat layer that goes off and on again shows no chat of its closed socket", async ({ browser }) => {
+  await setLayers("overlay-history-reset", CHAT_ON);
+  const owner = await signedIn(browser, "featureowner", OWNER_IP);
+  const first: ActivityChat = message({ platform: "twitch", id: "h1", user: "Ann", text: "removed while hidden" });
+  const second: ActivityChat = message({ platform: "twitch", id: "h2", user: "Bo", text: "still in chat" });
+  // The first socket sends the two messages. The socket after it sends no snapshot until the test sends one.
+  const quiet: string = event({ kind: "status", platform: "twitch", status: "active" });
+  const source = await chatSource(browser, (index: number): string => (index === 0 ? snapshot([first, second]) : quiet));
+  const layers = async (enabled: boolean): Promise<void> => {
+    const done = await owner.request.post("/api/overlay", { data: { action: "layers", chat: { enabled } } });
+    expect(done.status()).toBe(200);
+  };
+  try {
+    await expect(source.rows).toHaveCount(2);
+    // The owner hides the chat: the page closes its socket. A moderator then removes the first message.
+    await layers(false);
+    await expect(source.chat).toHaveCount(0);
+    await layers(true);
+    await expect.poll(() => source.sockets.length).toBe(2);
+    await expect(source.chat).toBeAttached();
+    // The page has nothing from the closed socket. It waits for the snapshot of the new socket.
+    await expect(source.rows).toHaveCount(0);
+    source.send(snapshot([second]));
+    await expect(source.rows).toHaveCount(1);
+    await expect(source.chat).toContainText("still in chat");
+    await expect(source.chat).not.toContainText("removed while hidden");
+  } finally {
+    await Promise.all([close(source.page), close(owner)]);
+    await runSql("overlay-history-reset-restore", [resetLayers]);
+  }
+});
+
 const setTestEnd = (until: number): Promise<void> =>
   runSql("overlay-test-end", [
     `UPDATE overlay_state SET chat_test_until=${until}, revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`,
