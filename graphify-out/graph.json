@@ -21801,7 +21801,7 @@
       "relation": "calls",
       "source": "app_components_station_palette_createpalette",
       "source_file": "app/components/station/palette.ts",
-      "source_location": "L231",
+      "source_location": "L234",
       "target": "app_components_station_palette_lamps",
       "weight": 1.0
     },
@@ -21813,7 +21813,7 @@
       "relation": "calls",
       "source": "app_components_station_palette_createpalette",
       "source_file": "app/components/station/palette.ts",
-      "source_location": "L239",
+      "source_location": "L242",
       "target": "app_components_station_palette_metals",
       "weight": 1.0
     },
@@ -21825,7 +21825,7 @@
       "relation": "calls",
       "source": "app_components_station_palette_createpalette",
       "source_file": "app/components/station/palette.ts",
-      "source_location": "L240",
+      "source_location": "L243",
       "target": "app_components_station_palette_paints",
       "weight": 1.0
     },
@@ -21837,7 +21837,7 @@
       "relation": "calls",
       "source": "app_components_station_palette_createpalette",
       "source_file": "app/components/station/palette.ts",
-      "source_location": "L242",
+      "source_location": "L245",
       "target": "app_components_station_palette_furnishings",
       "weight": 1.0
     },
