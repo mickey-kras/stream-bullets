@@ -1506,5 +1506,6 @@
   "overlay.dock.confirmBody": "L’ancien lien cesse de fonctionner immédiatement et chaque dock ouvert se ferme. Collez le nouveau lien dans OBS.",
   "overlay.dock.ready": "Nouveau lien du dock prêt. Copiez-le dans OBS.",
   "dock.closed.title": "Ce lien du dock ne fonctionne pas",
-  "dock.closed.body": "Créez un nouveau lien du dock dans les outils du streamer, section Overlay, et collez-le dans OBS."
+  "dock.closed.body": "Créez un nouveau lien du dock dans les outils du streamer, section Overlay, et collez-le dans OBS.",
+  "channels.result.supportDenied": "La chaîne est connectée. {platform} n’a pas accordé les autorisations pour les événements de soutien, ils restent donc désactivés."
 }

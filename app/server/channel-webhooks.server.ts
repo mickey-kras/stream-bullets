@@ -4,6 +4,7 @@ import type { ActivityEvent, ActivityPlatform, ChannelStatusCode } from "../lib/
 import { channelsOff } from "./channel-tokens.server";
 import { kickEvents, twitchEvents } from "./channel-normalize";
 import { markWebhookAccepted, markWebhookRejected, resetWebhookHealth } from "./channel-repair.server";
+import { kickSupport, twitchSupport } from "./channel-support";
 import { connectionForChannel, forgetRoutes, routeFor } from "./channels.server";
 import { HttpError, readBody } from "./http.server";
 import { callIngest } from "./ingest-call.server";
@@ -167,12 +168,25 @@ async function postStatus(
   await deliverToIngest(env, connection.streamerId, "status", platform, JSON.stringify({ code }));
 }
 
+const twitchId = z.string().regex(/^\d{1,32}$/);
+
+/**
+ * The channel that a subscription is for. A raid names it as `to_broadcaster_user_id`, with no
+ * `broadcaster_user_id`; each other type of the feed names it as `broadcaster_user_id`.
+ */
+const twitchCondition = z
+  .union([z.object({ broadcaster_user_id: twitchId }), z.object({ to_broadcaster_user_id: twitchId })])
+  .transform((condition): { broadcaster_user_id: string } => ({
+    broadcaster_user_id:
+      "broadcaster_user_id" in condition ? condition.broadcaster_user_id : condition.to_broadcaster_user_id,
+  }));
+
 const twitchBodySchema = z.object({
   challenge: z.string().max(1024).optional(),
   subscription: z.object({
     type: z.string().max(100),
     status: z.string().max(64).optional(),
-    condition: z.object({ broadcaster_user_id: z.string().regex(/^\d{1,32}$/) }),
+    condition: twitchCondition,
   }),
   event: z.unknown().optional(),
 });
@@ -197,9 +211,7 @@ async function confirmTwitchSubscription(
 }
 
 /** The channel of a signed Twitch body that failed the full schema, for the refusal count. */
-const twitchChannelSchema = z.object({
-  subscription: z.object({ condition: z.object({ broadcaster_user_id: z.string().regex(/^\d{1,32}$/) }) }),
-});
+const twitchChannelSchema = z.object({ subscription: z.object({ condition: twitchCondition }) });
 
 interface TwitchMessage {
   id: string;
@@ -259,7 +271,12 @@ async function twitchDelivery(
       : new Response(null, { status: 204 });
   if (!TWITCH_MESSAGE_ID.test(message.id))
     throw new WebhookRejected(403, "Invalid message id.", "payload", false, broadcaster);
-  const events = twitchEvents(parsed.subscription.type, parsed.event, now, Date.parse(message.timestamp));
+  const { type } = parsed.subscription;
+  // The message id is the delivery id of a support event: Twitch sends a notification again with the same id.
+  const events: ActivityEvent[] = [
+    ...twitchEvents(type, parsed.event, now, Date.parse(message.timestamp)),
+    ...twitchSupport(type, parsed.event, message.id, now),
+  ];
   // A signed notification for an unknown channel gets a 410: Twitch counts failures and revokes the subscription.
   if (!(await forward(env, "twitch", broadcaster, message.id, events, now))) {
     sampled("channel_webhook_unknown_channel", "twitch", {}, now);
@@ -409,8 +426,9 @@ export async function kickWebhook(
   // Reserved before the forward, so parallel copies count as repeats. A failed forward releases the id: it answers
   // 5xx, and Kick's retry must get through.
   rememberKickId(id);
+  const events: ActivityEvent[] = [...kickEvents(type, payload, now), ...kickSupport(type, payload, id, now)];
   try {
-    await forward(env, "kick", String(broadcaster.data.broadcaster.user_id), id, kickEvents(type, payload, now), now);
+    await forward(env, "kick", String(broadcaster.data.broadcaster.user_id), id, events, now);
   } catch (error: unknown) {
     recentKick.delete(id);
     throw error;

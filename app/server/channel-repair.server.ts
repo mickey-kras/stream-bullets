@@ -10,6 +10,7 @@ import {
   unsubscribe,
   type ProviderSubscription,
 } from "./channel-providers.server";
+import { SUPPORT_SUBSCRIPTIONS } from "./channel-support";
 import { getOrigin, logError } from "./http.server";
 
 /** Repair of provider subscriptions without the owner, and the webhook health that the watchdog reads. */
@@ -22,48 +23,65 @@ export interface Reconciled {
   changed: boolean;
   /** `reauth`: the provider refused the authorization. `provider`: another provider call failed. */
   failure: "reauth" | "provider" | null;
+  /** The provider refused a type that only support events need. The types of chat are not part of it. */
+  supportRefused: boolean;
 }
 
 function delivering(item: ProviderSubscription): boolean {
   return item.health !== "unhealthy";
 }
 
-/** Creates the missing types. Returns the ids a Twitch 409 pointed to: the list must show them as delivering. */
+/**
+ * Creates the missing types. Returns the ids a Twitch 409 pointed to: the list must show them as delivering.
+ * `refused` is true when the provider refused a type that only support events need.
+ */
 async function createMissing(
   env: AppEnv,
   platform: ActivityPlatform,
-  externalId: string,
-  accessToken: string | null,
+  channel: { externalId: string; accessToken: string | null; support: boolean },
   missing: readonly string[],
   created: string[],
-): Promise<string[]> {
+): Promise<{ adopted: string[]; refused: boolean }> {
   const origin = getOrigin(env);
-  const { conflicts } = await subscribe(env, platform, externalId, accessToken, origin, created, missing);
-  if (conflicts.length === 0) return [];
+  const { externalId, accessToken } = channel;
+  const scope = { only: missing, support: channel.support };
+  const { conflicts, refused } = await subscribe(env, platform, externalId, accessToken, origin, created, scope);
+  if (conflicts.length === 0) return { adopted: [], refused };
   const listed = (await listSubscriptions(env, platform, externalId, accessToken, origin)) ?? [];
   const adopted = listed.filter((item) => conflicts.includes(item.type) && delivering(item));
   if (conflicts.some((type) => !adopted.some((item) => item.type === type))) throw new ProviderError(409);
-  return adopted.map((item) => item.id);
+  return { adopted: adopted.map((item) => item.id), refused };
 }
 
-/** Deletes the subscriptions the provider reports as ended and creates the missing types. Healthy ones stay. */
+/**
+ * Deletes the subscriptions the provider reports as ended and creates the missing types. Healthy ones stay. With
+ * `support`, the types of support events are required too. Without it, their subscriptions are deleted: the
+ * streamer turned the support events off, or the provider refused them.
+ */
 export async function reconcileSubscriptions(
   env: AppEnv,
   platform: ActivityPlatform,
   externalId: string,
   accessToken: string | null,
+  support: boolean,
 ): Promise<Reconciled> {
   const listed = await listSubscriptions(env, platform, externalId, accessToken, getOrigin(env));
-  if (listed === null) return { ids: null, changed: false, failure: "provider" };
-  const ended = listed.filter((item) => !delivering(item)).map((item) => item.id);
+  if (listed === null) return { ids: null, changed: false, failure: "provider", supportRefused: false };
+  const wanted = (item: ProviderSubscription): boolean =>
+    delivering(item) && (support || !SUPPORT_SUBSCRIPTIONS[platform].includes(item.type));
+  const ended = listed.filter((item) => !wanted(item)).map((item) => item.id);
   const left = await unsubscribe(env, platform, ended, accessToken);
-  const kept = listed.filter(delivering);
-  const missing = requiredSubscriptions(platform).filter((type) => !kept.some((item) => item.type === type));
+  const kept = listed.filter(wanted);
+  const missing = requiredSubscriptions(platform, support).filter((type) => !kept.some((item) => item.type === type));
   const created: string[] = [];
   let adopted: string[] = [];
   let failure: Reconciled["failure"] = null;
+  let supportRefused = false;
   try {
-    if (missing.length > 0) adopted = await createMissing(env, platform, externalId, accessToken, missing, created);
+    if (missing.length > 0) {
+      const channel = { externalId, accessToken, support };
+      ({ adopted, refused: supportRefused } = await createMissing(env, platform, channel, missing, created));
+    }
   } catch (error: unknown) {
     failure = error instanceof ReauthRequired ? "reauth" : "provider";
   }
@@ -71,6 +89,7 @@ export async function reconcileSubscriptions(
     ids: [...new Set([...kept.map((item) => item.id), ...left, ...created, ...adopted])],
     changed: left.length < ended.length || created.length > 0,
     failure,
+    supportRefused,
   };
 }
 

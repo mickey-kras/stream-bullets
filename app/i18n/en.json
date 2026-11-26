@@ -230,6 +230,7 @@
   "channels.result.scopeMissing": "Allow every requested {platform} permission to connect this channel.",
   "channels.result.sessionMismatch": "This connection started in another account. Start again from your own account.",
   "channels.result.stateInvalid": "This connection link expired or was already used. Start again.",
+  "channels.result.supportDenied": "The channel is connected. {platform} did not give the permissions for support events, so they stay off.",
   "channels.revokeUnconfirmed": "{platform} disconnected. {platform} did not confirm the revoke, so remove the app in your {platform} settings too.",
   "channels.starts.connected": "Chat starts as soon as the channel is connected.",
   "channels.starts.overlay": "Chat starts when an overlay with your overlay link is open.",
