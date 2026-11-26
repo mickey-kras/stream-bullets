@@ -164,13 +164,22 @@ const SHOTS: Record<StationView, Shot> = {
 // Idle delay before returning from orbit to hero view.
 const RETURN_AFTER_MS = 4000;
 
-function createRenderer(wrap: HTMLDivElement, compact: boolean): THREE.WebGLRenderer {
+export function isSoftwareRenderer(renderer: Pick<THREE.WebGLRenderer, "getContext">): boolean {
+  const gl: WebGLRenderingContext | WebGL2RenderingContext | undefined = renderer.getContext?.();
+  if (typeof gl?.getParameter !== "function") return false;
+  const debug = gl.getExtension?.("WEBGL_debug_renderer_info");
+  const name: unknown = gl.getParameter(debug ? debug.UNMASKED_RENDERER_WEBGL : gl.RENDERER);
+  return typeof name === "string" && /swiftshader|llvmpipe|software|basic render/i.test(name);
+}
+
+function createRenderer(compact: boolean): { renderer: THREE.WebGLRenderer; software: boolean } {
   const renderer = new THREE.WebGLRenderer({
     antialias: true,
     powerPreference: "high-performance",
   });
+  const software: boolean = isSoftwareRenderer(renderer);
   renderer.setPixelRatio(Math.min(globalThis.devicePixelRatio, compact ? 1.25 : 1.6));
-  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.enabled = !software;
   renderer.shadowMap.type = THREE.PCFShadowMap;
   // Fixed lighting/geometry permit on-demand shadows.
   renderer.shadowMap.autoUpdate = false;
@@ -184,7 +193,7 @@ function createRenderer(wrap: HTMLDivElement, compact: boolean): THREE.WebGLRend
   );
   // Canvas drags orbit the station.
   renderer.domElement.style.touchAction = "none";
-  return renderer;
+  return { renderer, software };
 }
 
 // Teal sky, warm horizon and softbox reflections.
@@ -234,11 +243,11 @@ function createEnvironment(renderer: THREE.WebGLRenderer): THREE.WebGLRenderTarg
   return target;
 }
 
-function addLights(scene: THREE.Scene, compact: boolean): THREE.DirectionalLight {
+function addLights(scene: THREE.Scene, compact: boolean, software: boolean): THREE.DirectionalLight {
   scene.add(new THREE.HemisphereLight("#b4c6bb", "#3a2814", 0.95));
   const key = new THREE.DirectionalLight("#ffdcaa", 3);
   key.position.set(-7, 12, 9);
-  key.castShadow = true;
+  key.castShadow = !software;
   const shadowSize = compact ? 1024 : 2048;
   key.shadow.mapSize.set(shadowSize, shadowSize);
   Object.assign(key.shadow.camera, {
@@ -270,12 +279,12 @@ function addLights(scene: THREE.Scene, compact: boolean): THREE.DirectionalLight
 }
 
 // Lamp/neon bloom, vignette and grain.
-function createPost(renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera) {
+function createPost(renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera, software: boolean) {
   const composer = new EffectComposer(
     renderer,
     new THREE.WebGLRenderTarget(1, 1, {
       type: THREE.HalfFloatType,
-      samples: 4,
+      samples: software ? 0 : 4,
     }),
   );
   composer.addPass(new RenderPass(scene, camera));
@@ -445,11 +454,13 @@ export async function createStation(
   const lifecycle = new AbortController();
   const listen = { signal: lifecycle.signal };
   const compact: MediaQueryList = globalThis.matchMedia("(max-width: 700px)");
-  const k = createKit(compact.matches, options.family ?? "Oswald, sans-serif");
+  // Fail before building procedural textures when WebGL is unavailable.
+  const { renderer, software } = createRenderer(compact.matches);
+  const k = createKit(compact.matches, options.family ?? "Oswald, sans-serif", software);
   await pause();
   const shots: Record<StationView, Shot> = { ...SHOTS, hero: compact.matches ? PHONE_HERO : SHOTS.hero };
   const state = {
-    playing: !motionReduced(),
+    playing: !software && !motionReduced(),
     dragging: false,
     dirty: true,
     clock: 0,
@@ -462,7 +473,6 @@ export async function createStation(
     shadowTilt: Number.NaN,
   };
 
-  const renderer = createRenderer(wrap, compact.matches);
   const scene = new THREE.Scene();
   scene.background = T.backdrop();
   scene.fog = new THREE.Fog("#123a3c", 42, 95);
@@ -473,8 +483,8 @@ export async function createStation(
   const station = new THREE.Group();
   scene.add(station);
   const { tilt, signs } = await buildModel(k, scene, station);
-  const key = addLights(scene, compact.matches);
-  const { composer, bloom, finish } = createPost(renderer, scene, camera);
+  const key = addLights(scene, compact.matches, software);
+  const { composer, bloom, finish } = createPost(renderer, scene, camera, software);
   // Compile shaders asynchronously where supported to avoid first-frame stalls. Compile for the composer
   // target: screen programs have other tone mapping and are not used.
   renderer.setRenderTarget?.(composer.readBuffer);
@@ -528,7 +538,7 @@ export async function createStation(
   const look = createLook(wrap, lifecycle.signal);
   const flips = createFlips(signs, wrap, renderer.domElement, lifecycle.signal, options.onSign);
   watchMotion((reduced: boolean): void => {
-    state.playing = !reduced;
+    state.playing = !software && !reduced;
     state.dirty = true;
   }, lifecycle.signal);
 
