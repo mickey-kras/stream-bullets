@@ -189,7 +189,7 @@ export class ActivityHarness {
     if (page.twitch) {
       statements.push(connection("twitch", page.twitch));
       // A connect made the subscriptions of a connected channel. The fake holds them as Twitch does.
-      for (const type of requiredSubscriptions("twitch"))
+      for (const type of requiredSubscriptions("twitch", false))
         this.providers.subscriptions.push({
           platform: "twitch",
           id: `capacity-sub-${index}-${type}`,

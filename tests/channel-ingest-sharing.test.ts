@@ -215,7 +215,9 @@ describe("one provider ingestion for each connected channel", (): void => {
     }
     // The connect made each subscription that the two channels need. Twitch and Kick push: nothing polls.
     const subscriptions = fake.subscriptions.map((item): string => item.id);
-    expect(subscriptions).toHaveLength(requiredSubscriptions("twitch").length + requiredSubscriptions("kick").length);
+    expect(subscriptions).toHaveLength(
+      requiredSubscriptions("twitch", false).length + requiredSubscriptions("kick", false).length,
+    );
     const owner = await listen("owner");
     const one = await live(period);
     // One consumer: one check of each channel in each interval. A check reads the list of the provider.
