@@ -182,6 +182,11 @@ for (const width of [1280, 390]) {
       await expect(page.locator("article.comment")).toHaveCount(24);
       const composer = page.locator("#detail .ed-content[data-composer]").first();
       await composer.fill("Keep this draft in every language.");
+      // The Post button is below the field at each width. Only a narrow page has the Open discussion button.
+      const field = await page.locator(".discussion > .composer > .comment-input").boundingBox();
+      const post = await page.locator(".discussion > .composer > button").boundingBox();
+      expect(post?.y ?? 0).toBeGreaterThanOrEqual((field?.y ?? 0) + (field?.height ?? 0));
+      await expect(page.getByRole("button", { name: "Open discussion", exact: true })).toHaveCount(width === 390 ? 1 : 0);
       const detail = page.locator("#detail");
       const top = (): Promise<number> => detail.evaluate((element: HTMLElement) => element.scrollTop);
       await detail.evaluate((element: HTMLElement) => {

@@ -261,7 +261,8 @@ export class Works {
     for (const o of this.sim.visible()) {
       const near: boolean = Math.abs(o.x - p.x) <= BOOM_THROW_PX && Math.abs(o.y - p.y) <= BOOM_THROW_PX;
       if (o === p || !near || FIXED_STATES.has(o.state)) continue;
-      const away: 1 | -1 = o.x === p.x ? p.dir : o.x > p.x ? 1 : -1;
+      let away: 1 | -1 = p.dir;
+      if (o.x !== p.x) away = o.x > p.x ? 1 : -1;
       this.motion.fling(o, away, THROW_VX, THROW_VY);
     }
   }
@@ -306,7 +307,9 @@ export class Works {
       this.terrain.flags.push({ id: p.id, c: job.c, r: job.r });
     } else if (job.kind !== "dig") {
       if (!this.canBuild(job.c, job.r, p)) return false;
-      const kind = job.kind === "stairs" ? "stair" : job.kind === "bridge" ? "plank" : "dirt";
+      let kind: "stair" | "plank" | "dirt" = "dirt";
+      if (job.kind === "stairs") kind = "stair";
+      else if (job.kind === "bridge") kind = "plank";
       // Only a stair has a direction.
       placeBlock(this.world, this.terrain, job.c, job.r, kind, kind === "stair" ? p.dir : 1);
     }
@@ -324,6 +327,6 @@ export class Works {
     if (p.t < DURATION.buildEnd) return;
     if (job?.kind === "up") this.motion.tween(p, "climb", p.x, floorY(this.world, job.r + 1), "hold");
     else if (job?.kind === "stairs" || job?.kind === "bridge") this.motion.walkOn(p, job.c);
-    else setState(p, job ? "hold" : p.piloted ? "hold" : "walk");
+    else setState(p, job || p.piloted ? "hold" : "walk");
   }
 }
