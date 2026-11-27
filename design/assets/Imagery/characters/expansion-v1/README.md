@@ -1,7 +1,7 @@
 # Courier sprite expansion
 
 Seven new character rows and five prop groups for the wasteland playground.
-Runtime files and state mappings are unchanged. Review this art before atlas integration.
+This change does not touch runtime files or state mappings. Review this art before atlas integration.
 
 ## Repo audit
 
@@ -49,7 +49,7 @@ Rope frames contain a short grip stub. Match the drawn rope attachment during in
 
 Character poses face right. Mirror them at the anchor for left-facing actions.
 Grounded feet end at cell row 29, with anchor `(16,30)`, as in the current atlas.
-Suspended frames retain their movement within the cell.
+Suspended frames keep their movement within the cell.
 All sprite alpha is binary. Transparent gutters surround character poses.
 
 ## Props
@@ -78,8 +78,8 @@ The combined sheet needs 19 rows. Move the loose equipment strip below row 18.
 With the current 16-pixel equipment strip, each region would be 128 by 624 pixels.
 
 Update the row union, theme mappings, equipment rectangles, content hashes, and renderer tests together.
-Remove the drawn pack and flame when the jetpack row and flame prop are wired in.
-Remove the dance mirroring and cheer bobbing stand-ins when the new rows are wired in.
+Remove the drawn pack and flame when you connect the jetpack row and flame prop.
+Remove the dance mirroring and cheer bobbing stand-ins when you connect the new rows.
 
 Use the cloth mask with the existing platform color. Keep ropes as drawn lines.
 
@@ -90,4 +90,4 @@ The visible pixels and alpha of the 4-times export match the logical sheet exact
 Prop checks cover bridge depth, matching seams, flag poles, and neutral cloth masks.
 Review sheets show the exported files, not the larger generation concepts.
 
-These are art handoff assets. Check timing, equipment tint, rope attachment, and left-facing poses in the game before release.
+These are art handoff assets. Check the timing, the equipment tint, the rope attachment, and the left-facing poses in the game before release.
