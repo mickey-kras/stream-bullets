@@ -206,14 +206,17 @@
   max-width: 24rem;
   min-width: 0;
 }
-/* A long layout name wraps in the list. It is not cut. */
+/* A long layout name wraps in the list. It is not cut. The list is 44 px high with one line, as the other controls
+   of the toolbar are, and it grows with the lines of the name. A name without a space breaks inside the word. */
 .ov-layout .cselect-trigger {
   height: auto;
   min-height: 44px;
+  padding-block: 8px;
   text-align: start;
 }
 .ov-layout .cselect-value {
   overflow: visible;
+  overflow-wrap: anywhere;
   white-space: normal;
   text-overflow: clip;
 }
