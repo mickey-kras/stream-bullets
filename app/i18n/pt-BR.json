@@ -907,7 +907,7 @@
   "overlay.comp.chatSourceLink": "Conectar canais",
   "overlay.comp.failed": "Layout não salvo: {error}",
   "overlay.comp.hideCommands": "Ocultar comandos do chat (!jump)",
-  "overlay.comp.hideCommandsHint": "Mensagens que começam com ! não aparecem na live.",
+  "overlay.comp.hideCommandsHint": "Mensagens que começam com ! não aparecem no chat da live, em Ao vivo nem no dock do OBS. Os personagens continuam se movendo.",
   "overlay.comp.leaveFailed": "Sua última mudança de layout não foi salva. Faça a mudança de novo. Motivo: {error}",
   "overlay.comp.liveNote": "As mudanças entram no ar na hora",
   "overlay.comp.preview": "Prévia da composição",
