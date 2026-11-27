@@ -576,6 +576,29 @@ async function restoreReplies(
   return values;
 }
 
+// Shows comment `id` of thread `exact`. A reply just after the reader's loaded replies extends them by one page;
+// otherwise the thread shows the window around the comment, which `exact` holds.
+async function withComment(
+  values: CommentThread[],
+  exact: CommentThread,
+  id: string,
+  loaded: Map<string, LoadedReplies>,
+  signal: AbortSignal,
+  sort: SortOrder,
+): Promise<CommentThread[]> {
+  const current: CommentThread | undefined = values.find((thread: CommentThread) => thread.id === exact.id);
+  const last: Comment | undefined = current ? orderReplies(current.replies).at(-1) : undefined;
+  if (current && last && loaded.has(current.id)) {
+    const page = await fetchReplies(current.id, { direction: "after", cursor: replyCursor(last) }, signal);
+    const next: CommentThread = withReplies(current, page.replies, false);
+    if (next.replies.some((reply: Comment) => reply.id === id)) {
+      loaded.set(next.id, { from: loaded.get(next.id)?.from ?? null, count: next.replies.length });
+      return values.map((thread: CommentThread) => (thread.id === next.id ? next : thread));
+    }
+  }
+  return mergeThreads(values, [exact], sort);
+}
+
 // `window.count` replies of a thread from the place where the reader's window started.
 async function repliesFrom(thread: CommentThread, window: LoadedReplies, signal: AbortSignal): Promise<CommentThread> {
   const first = await fetchReplies(
@@ -711,6 +734,8 @@ export function Discussion({
       .then(async (result) => {
         let values = result.threads;
         let targetError = "";
+        values = await restoreReplies(values, loadedReplies.current, controller.signal);
+        const listed = new Set<string>(values.map((thread: CommentThread) => thread.id));
         const targets = new Set([targetId, draftStore.getSnapshot().draft.replyId, postedReply.current]);
         for (const id of targets) {
           if (id === null || (id !== targetId && findComment(values, id))) continue;
@@ -723,15 +748,18 @@ export function Discussion({
             });
             if (exact.entryId !== entryId) throw new Error(t("discussion.commentUnavailable"));
             // A comment that the refreshed list already shows keeps its thread, with the replies loaded again.
-            if (!findComment(values, id)) values = mergeThreads(values, [exact.thread], sort);
+            if (!findComment(values, id))
+              values = await withComment(values, exact.thread, id, loadedReplies.current, controller.signal, sort);
           } catch (error_: unknown) {
             // The viewer's own reply can be gone by now: that is no error to show.
             if (id === postedReply.current) postedReply.current = null;
             else targetError = errorMessage(error_);
           }
         }
-        // Last, so a thread that a link brought in gets the replies the reader had loaded in it too.
-        values = await restoreReplies(values, loadedReplies.current, controller.signal);
+        // A thread that only a link brought in gets the replies the reader had loaded in it too.
+        const linked = values.filter((thread: CommentThread) => !listed.has(thread.id));
+        const restored = await restoreReplies(linked, loadedReplies.current, controller.signal);
+        values = values.map((thread: CommentThread) => restored.find((value) => value.id === thread.id) ?? thread);
         if (controller.signal.aborted) return;
         pages.current = result.pages;
         setThreads(values);
