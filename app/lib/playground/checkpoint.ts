@@ -29,7 +29,7 @@ export function restoreTerrain(world: World, terrain: Terrain, data: Checkpoint)
     .map(([id, c, r]): Flag => ({ id, c, r }));
 }
 
-/** id, platform, user id, name, score, scoreAt, lastScored, lastChat, lastCommand, admitted, admittedAt, x, removed. */
+/** id, platform, user id, name, score, scoreAt, lastScored, lastChat, lastCommand, admitted, admittedAt, x, removed, optional lastMovement (legacy records omit it). */
 export type ParticipantRecord = [
   number,
   ActivityPlatform,
@@ -44,6 +44,7 @@ export type ParticipantRecord = [
   number,
   number,
   0 | 1,
+  number?,
 ];
 
 export interface Checkpoint {
@@ -55,6 +56,8 @@ export interface Checkpoint {
   testEndsAt: number | null;
   timeoutSeconds: number;
   visibleMax: number;
+  /** The owner setting for `!push`. It is here so that a restored playground keeps it before the layers are read. */
+  pushEnabled: boolean;
   /** The logical px of one cell of `cellsW` and `cellsH`. */
   cell: number;
   cellsW: number;
@@ -89,6 +92,7 @@ export function toRecord(p: Participant): ParticipantRecord {
     p.admittedAt,
     Math.round(p.x * 10) / 10,
     p.removed ? 1 : 0,
+    p.lastMovement,
   ];
 }
 
@@ -107,6 +111,7 @@ export function fromRecord(record: ParticipantRecord, clock: number, walkSpread:
     admittedAt,
     x,
     removed,
+    lastMovement = lastCommand,
   ] = record;
   const speed: number = WALK_SPEED + walkSpread * (mulberry32(id)() - 0.5);
   const p: Participant = newParticipant(siteKey(platform, userId), id, platform, userId, name, clock, speed);
@@ -116,6 +121,7 @@ export function fromRecord(record: ParticipantRecord, clock: number, walkSpread:
     lastScored,
     lastChat,
     lastCommand,
+    lastMovement,
     admitted: admitted === 1,
     admittedAt,
     x,
@@ -146,6 +152,8 @@ export const checkpointSchema: z.ZodType<Checkpoint> = z
     timeoutSeconds: z.number().int().min(CHARACTERS_TIMEOUT.min).max(CHARACTERS_TIMEOUT.max),
     // A checkpoint from before this setting has no value: it takes the default.
     visibleMax: z.number().int().min(CHARACTERS_MAX.min).max(CHARACTERS_MAX.max).default(CHARACTERS_MAX.default),
+    // A checkpoint from before this setting has no value: `!push` was on.
+    pushEnabled: z.boolean().default(true),
     // A checkpoint from before the cells of 60 design px has no value: its cells are twice as large.
     cell: z.union([z.literal(CELL_LOGICAL), z.literal(COARSE_CELL_LOGICAL)]).default(COARSE_CELL_LOGICAL),
     cellsW: z.number().int(),
@@ -175,6 +183,7 @@ export const checkpointSchema: z.ZodType<Checkpoint> = z
           tick,
           finite,
           z.union([z.literal(0), z.literal(1)]),
+          tick.optional(),
         ]),
       )
       .max(REGISTRY_MAX),

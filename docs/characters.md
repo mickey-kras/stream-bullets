@@ -43,7 +43,8 @@ To change a value, change `app/lib/playground/constants.ts` and this table.
 | Minimum time on screen | 10 seconds (300 ticks) |
 | Score of a message | +1, at most one time in 3 seconds (90 ticks) |
 | Score decay | `exp(-elapsed / 1800 ticks)`, a time constant of 60 seconds |
-| Command cooldown | 3 seconds (90 ticks) for each viewer |
+| Movement cooldown | 1 second (30 ticks) for `!left`, `!right`, `!look` and their aliases, per viewer |
+| Other command cooldown | 3 seconds (90 ticks), independent of movement, per viewer |
 | Queued commands | 1 for each viewer. It expires after 10 seconds (300 ticks). |
 | Queued reactions | 1 for each character. It expires after 10 seconds (300 ticks). See [Reactions](#reactions). |
 | Bubble time | 4 seconds for a message, 2 seconds for a command |
@@ -148,7 +149,8 @@ With reduced motion, the demos stand still.
   See [Channel connections and activity](channel-connections.md#event-contract).
 - A command from a viewer without a character waits in the queue. The character first enters.
   The command then runs when the character walks in the walking limits. The playground never runs a command that viewers cannot see.
-- A command in the cooldown does nothing. A queued command that is older than 10 seconds expires.
+- The owner can disable `!push` and `!shove` in the characters settings. This also cancels queued and unfinished pushes.
+- A command in its cooldown group does nothing. A queued command that is older than 10 seconds expires.
 - Work of more than one block ends before the next command starts. `!stop` ends it at once.
 - A character stays on screen until its action ends. Each action has a fixed end.
 - Some commands cannot run: a block in a door zone, a dig on protected ground, a hook that catches nothing.
@@ -461,8 +463,8 @@ We added that art to the two files with Python, Pillow, and NumPy:
    Thus a new row gets the same platform color as an old row.
 3. The props are below the terrain pictures: the planks, the hook, the flames, the crown, and the viewer flags.
    The mask of the flag cloth is beside the flags. It gets the platform color.
-   The playground does not use the new stair picture: its steps do not agree with the steps of the rules.
-   A stair keeps its four treads of the stair step.
+   The stair redraw now matches the collision profile: heights 4, 8, 12, and 16 px start at columns 0, 3, 5, and 8.
+   The renderer uses the complete tile and mirrors it for stairs to the left.
 4. Each file keeps one palette of 256 colors. To fit, we joined the two nearest opaque colors until the file had 256 values.
    No color channel changed by more than 7 of 255. The alpha is exact.
 
@@ -487,3 +489,9 @@ The art ships under the project license.
 
 Each open characters source keeps the playground running and uses one activity socket.
 Close the sources that you do not use.
+
+### Shared playground badges
+
+The top strip shows Highest and Blocks once for the whole playground. Highest shows the crown holder's platform, name, and height in blocks. The renderer hides Highest without a crown holder. On a platform-only output, the crown and Highest use the highest eligible character of that platform. Blocks shows all built blocks against the shared build limit, including on platform-only outputs. At the limit, the oldest block crumbles.
+
+Both badges need at least 180 canvas px of height and 360 px of width. Blocks requires 600 px of width. Labels must fit the available space. Mode badges take priority, then Highest, then Blocks. Speech bubbles avoid the occupied top strip.

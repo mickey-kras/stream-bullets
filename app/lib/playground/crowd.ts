@@ -1,6 +1,7 @@
 import type { ActivityPlatform } from "../activity";
 import {
   COMMAND_COOLDOWN_TICKS,
+  MOVEMENT_COOLDOWN_TICKS,
   PLATFORM_RESERVE_MIN,
   PLATFORM_RESERVE_SHARE,
   RANKED_SHARE,
@@ -120,6 +121,7 @@ export interface Participant {
   lastScored: number;
   lastChat: number;
   lastCommand: number;
+  lastMovement: number;
   /** Removed by the owner: never admitted again until a reset or registry expiry. */
   removed: boolean;
   /** Holds a visible slot (entrance, exit and respawn included). */
@@ -191,6 +193,7 @@ export function newParticipant(
     lastScored: clock - SCORE_COOLDOWN_TICKS,
     lastChat: clock,
     lastCommand: clock - COMMAND_COOLDOWN_TICKS,
+    lastMovement: clock - MOVEMENT_COOLDOWN_TICKS,
     removed: false,
     admitted: false,
     admittedAt: 0,

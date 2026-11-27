@@ -55,6 +55,8 @@ export const SCORE_DECAY_TICKS = 1800;
 
 /** A viewer can give one command in this interval (3 s). Commands in the interval are ignored. */
 export const COMMAND_COOLDOWN_TICKS = 90;
+/** !left, !right and !look have their own, shorter interval (1 s). */
+export const MOVEMENT_COOLDOWN_TICKS = 30;
 /**
  * A queued command (one per viewer) expires this long (10 s) after it arrived. Queued text expires too, and so does a
  * queued reaction (see `PlaygroundSim.react`).

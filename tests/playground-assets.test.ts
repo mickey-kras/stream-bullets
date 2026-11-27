@@ -138,6 +138,15 @@ describe("playground atlas files", () => {
     for (const [x, y, w, h] of frames) expect(x >= 0 && y >= 0 && x + w <= strip[2] && y + h <= strip[3]).toBe(true);
   });
 
+  it("matches the stair collision profile at every pixel column", () => {
+    const { width, alpha } = alphaOf(terrain);
+    const [sx, sy, w, h] = theme.terrain.rects.stair;
+    for (let x = 0; x < w; x++) {
+      const rise: number = x < 3 ? 4 : x < 5 ? 8 : x < 8 ? 12 : 16;
+      for (let y = 0; y < h; y++) expect(alpha[(sy + y) * width + sx + x]).toBe(y < h - rise ? 0 : 255);
+    }
+  });
+
   it("place the loose equipment below the animation cells", () => {
     const { helmet, boot, rows, cell, regionWidth, regionHeight } = theme.courier;
     for (const [x, y, w, h] of [helmet, boot]) {

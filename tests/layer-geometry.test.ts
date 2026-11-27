@@ -118,13 +118,22 @@ describe("grid edits", () => {
 });
 
 describe("field-level patches", () => {
+  it("saves and clears the push switch independently of other character settings", () => {
+    const before: OverlayLayers = layers();
+    const after: OverlayLayers = { ...before, characters: { ...before.characters, pushEnabled: false } };
+    const sent: LayersPatch = diffLayers(before, after);
+    expect(sent).toEqual({ characters: { pushEnabled: false } });
+    expect(withoutSent(sent, sent)).toEqual({});
+    expect(withoutSent({ characters: { pushEnabled: true } }, sent)).toEqual({ characters: { pushEnabled: true } });
+  });
+
   it("diffs only the changed fields", () => {
     const before = layers();
     expect(diffLayers(before, layers())).toEqual({});
     const after: OverlayLayers = {
       orientation: "vertical",
       chat: { enabled: false, hideCommands: false, backgroundOpacity: 40 },
-      characters: { enabled: true, timeout: 90, max: 12 },
+      characters: { enabled: true, pushEnabled: false, timeout: 90, max: 12 },
       camera: { enabled: true },
       alerts: {
         enabled: true,
@@ -145,7 +154,7 @@ describe("field-level patches", () => {
     expect(diffLayers(before, after)).toEqual({
       orientation: "vertical",
       chat: { enabled: false, hideCommands: false, backgroundOpacity: 40 },
-      characters: { enabled: true, timeout: 90, max: 12 },
+      characters: { enabled: true, pushEnabled: false, timeout: 90, max: 12 },
       camera: { enabled: true },
       alerts: { enabled: true, rules: { follow: { banner: true }, bits: { min: 250, chat: false } } },
       goal: { enabled: true, title: "New subscribers", counts: "follows", target: 100 },
