@@ -78,6 +78,16 @@ export function replyParent(thread: CommentThread, reply: Comment): Pick<Comment
   return reply.parentAuthor ? { author: reply.parentAuthor, removed: false } : null;
 }
 
+// A later page of root comments brings threads with their 2-reply preview. A thread the discussion already shows
+// keeps its loaded replies, such as the window of a linked reply or the pages the reader loaded.
+export function keepReplyWindows(current: readonly CommentThread[], page: readonly CommentThread[]): CommentThread[] {
+  return page.map((thread: CommentThread): CommentThread => {
+    const shown: CommentThread | undefined = current.find((value: CommentThread) => value.id === thread.id);
+    if (!shown) return thread;
+    return { ...thread, replies: shown.replies, earlierReplies: shown.earlierReplies, replyCount: shown.replyCount };
+  });
+}
+
 // Newest or most liked; ties favor newer comments.
 export function orderThreads(threads: readonly CommentThread[], sort: "newest" | "top"): CommentThread[] {
   return [...threads].sort(

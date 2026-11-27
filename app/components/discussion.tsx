@@ -9,6 +9,7 @@ import type { MentionSelection } from "./mention-input";
 import { intlLocale, t } from "../i18n";
 import { useShell } from "../lib/shell";
 import {
+  keepReplyWindows,
   orderReplies,
   orderThreads,
   replyCursor,
@@ -1054,7 +1055,9 @@ export function Discussion({
               .then((result) => {
                 if (controller.signal.aborted) return;
                 pages.current += 1;
-                setThreads((current: CommentThread[]) => mergeThreads(current, result.threads, sort));
+                setThreads((current: CommentThread[]) =>
+                  mergeThreads(current, keepReplyWindows(current, result.threads), sort),
+                );
                 setCursor(result.cursor);
               })
               .catch((error_: unknown) => {

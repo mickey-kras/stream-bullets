@@ -27,7 +27,7 @@ import {
 } from "../app/lib/shell";
 import { eventsJsonLd, personJsonLd, postingJsonLd, siteJsonLd } from "../app/lib/structured-data";
 import { supportLabel } from "../app/lib/support";
-import { replyParent, visibleReplies, withPage, withReplies } from "../app/lib/threads";
+import { keepReplyWindows, replyParent, visibleReplies, withPage, withReplies } from "../app/lib/threads";
 import { usePrefs } from "../app/lib/use-prefs";
 import { formatDate, isValidZone, parseDate } from "../app/lib/zoned";
 import type { Comment, StreamEvent } from "../app/types";
@@ -380,6 +380,19 @@ describe("comment threads", (): void => {
       earlierReplies: 0,
       replyCount: 21,
     });
+  });
+
+  it("keeps the loaded replies of a thread that a later page of root comments brings again", (): void => {
+    const linked = { ...comment("t", { likes: 1 }), ...window([comment("r60", { createdAt: 60 })], 120, 59) };
+    const other = { ...comment("u"), ...window([comment("u1")], 1) };
+    const page = [
+      { ...comment("t", { likes: 4 }), ...window([comment("r1", { createdAt: 1 })], 121) },
+      { ...comment("v"), ...window([], 0) },
+    ];
+    expect(keepReplyWindows([linked, other], page)).toEqual([
+      { ...page[0], replies: linked.replies, earlierReplies: 59, replyCount: 120 },
+      page[1],
+    ]);
   });
 
   it("finds the parent a reply answers, also when the parent is not loaded", (): void => {
