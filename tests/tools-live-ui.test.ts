@@ -538,16 +538,14 @@ describe("Live section", (): void => {
       available: true,
       connection: { ...connection, status: "active" },
       support: false,
-      supportScopes: [],
     },
     {
       platform: "youtube",
       available: true,
       connection: { ...connection, status: "error" },
       support: false,
-      supportScopes: [],
     },
-    { platform: "kick", available: true, connection: null, support: false, supportScopes: [] },
+    { platform: "kick", available: true, connection: null, support: false },
   ];
 
   function section(more: Partial<Parameters<typeof LiveSection>[0]> = {}): string {
@@ -600,7 +598,6 @@ describe("Live section", (): void => {
         available: false,
         connection: { ...connection, status: "active" },
         support: false,
-        supportScopes: [],
       },
     ];
     expect(section({ channels: off })).not.toContain("Kick:");

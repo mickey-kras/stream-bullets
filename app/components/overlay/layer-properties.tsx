@@ -2,7 +2,7 @@ import { useContext, useId, useState, type FormEvent, type ReactNode } from "rea
 import { t, tAround, type MessageId } from "../../i18n";
 import { withEnabled, withItem } from "../../lib/layer-geometry";
 import { MASH_NAME } from "../../lib/mash";
-import { channelsSectionPath } from "../../lib/shell";
+import { channelsSectionPath, paths } from "../../lib/shell";
 import {
   LAYER_BACKGROUND,
   layerEnabled,
@@ -377,7 +377,14 @@ export function LayerProperties({
       <h3 className="ov-props-name" id={titleId}>
         {t(LAYER_NAMES[layer])}
       </h3>
-      {layer === "characters" && <p className="muted ov-comp-note">{t("overlay.characters.intro")}</p>}
+      {layer === "characters" && (
+        <p className="muted ov-comp-note">
+          {t("overlay.characters.intro")}{" "}
+          <a className="text-link" href={paths.commands} target="_blank" rel="noopener noreferrer">
+            {t("overlay.characters.commandsLink")}
+          </a>
+        </p>
+      )}
       <label className="choice">
         <input
           type="checkbox"

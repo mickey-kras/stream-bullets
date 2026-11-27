@@ -130,21 +130,25 @@ describe("channel provider clients", (): void => {
     expect(await subscribe(env, "youtube", "UC", "t", "https://app.test", [])).toEqual({ conflicts: [], refused: false });
   });
 
-  it("asks for the support scopes only when support is wanted", (): void => {
+  it("asks for the support scopes at each authorization: three more for Twitch, none for YouTube and Kick", (): void => {
     const input = { state: "s", redirectUri: "https://app.test/cb", codeChallenge: "c" };
-    const scopes = (platform: "twitch" | "youtube" | "kick", support: boolean): string[] =>
-      new URL(authorizationUrl(env, platform, { ...input, support })).searchParams.get("scope")?.split(" ") ?? [];
+    const scopes = (platform: "twitch" | "youtube" | "kick"): string[] =>
+      new URL(authorizationUrl(env, platform, input)).searchParams.get("scope")?.split(" ") ?? [];
     expect(SUPPORT_SCOPES).toEqual({
       twitch: ["moderator:read:followers", "channel:read:subscriptions", "bits:read"],
       youtube: [],
       kick: [],
     });
-    for (const platform of ["twitch", "youtube", "kick"] as const) {
-      expect(scopes(platform, false)).toEqual(PROVIDERS[platform].scopes);
-      expect(scopes(platform, true)).toEqual([...PROVIDERS[platform].scopes, ...SUPPORT_SCOPES[platform]]);
-    }
+    expect(scopes("twitch")).toEqual([
+      ...PROVIDERS.twitch.scopes,
+      "moderator:read:followers",
+      "channel:read:subscriptions",
+      "bits:read",
+    ]);
+    expect(scopes("youtube")).toEqual(PROVIDERS.youtube.scopes);
+    expect(scopes("kick")).toEqual(PROVIDERS.kick.scopes);
     // Only read scopes: support events never give a right to change the channel.
-    expect(scopes("twitch", true).join(" ")).not.toMatch(/manage|edit|write/);
+    expect(scopes("twitch").join(" ")).not.toMatch(/manage|edit|write/);
   });
 
   it("makes the support subscriptions after the chat ones, each with its version and condition", async (): Promise<void> => {
