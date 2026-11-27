@@ -85,6 +85,11 @@ The UI kits put the parts together:
 - `WebsiteKit` is a streamer page that you can click through. It has the topic board, the polls, the directory, and the landing page.
 - `ObsOverlayKit` is the 1920×1080 overlay with a live poll and chat that moves.
 
+Two pages show Streamer tools:
+
+- `OverlayControl` has screenshots of the Overlay section of the app.
+- `StreamerTools` has the approved design of all the sections and a live preview of its patterns. The app does not have all of this design yet.
+
 ## Text
 
 - Write short sentences in the active voice. Put one idea in a sentence. Start with the verb: "Suggest topics. Vote. Shape the stream."
@@ -109,7 +114,7 @@ The UI kits put the parts together:
 - Borders are 1px lines in `line`. Inputs use `input-border`. Secondary buttons use `btn-border`. Comments and empty states use a dashed line.
 - Red (`live`, `status-live`) has one meaning: the stream is live.
 - Destructive actions use the `danger-*` tokens and a word on the button.
-- A status always has a word. Do not show a status with color only.
+- A status always has a word or an icon with a name. The name of a status icon is its tooltip and its accessible name. Do not show a status with color only.
 - Do not add colors. The colors with names that start with `c-` are one-off shades, not tokens. They are in `components/bundle.css`.
 
 ## Themes
@@ -166,6 +171,7 @@ The UI kits put the parts together:
 - On hover, the border of a secondary button becomes gold and the fill becomes `btn-hover`. A gold button becomes `gold-hover`. A link becomes gold. A button on the landing page goes up 2px.
 - A pressed control (`aria-pressed`) has a gold fill, such as votes and tabs. A selected poll option gets a gold border or a gold inner ring. A pressed control does not get smaller.
 - A disabled button has 55% opacity and the wait cursor.
+- Buttons that are together in a row or in a column have the same width. In a card, the row fills the width of the card.
 
 ## Focus
 
@@ -192,6 +198,10 @@ Do not remove it.
 - The thumb icons come from Bootstrap Icons (MIT license) at a scale of 24px. A filled thumb means "pressed".
 - The OBS chat has its own mustard platform icons for Twitch, YouTube, and Kick. ChatLayer imports them from `app/components/overlay/wasteland/glyphs.tsx`.
 - Do not use an icon font, PNG icons, emoji, or Unicode characters as icons. Icons are decorative. The control holds the label.
+- A button can show an icon without text when the icon is clear: `save`, `reset`, `play`, `pencil`, `copy`, and `close`. Give it a tooltip and an accessible name. If the icon is not clear without text, show the text.
+- A status icon comes before the name that it describes. Use `success` for a healthy state and `rejected` for a problem that needs the user.
+- Use `sync` for a state that repairs itself. The `sync` icon turns. It does not turn when the viewer asks for reduced motion.
+- The sections of Streamer tools have the icons `live`, `layers`, `channels`, and `reports`.
 - The logo is the antenna mark. Use the files in `public/brand` or `assets/Logos`. Do not draw it again.
 
 ## Motion
