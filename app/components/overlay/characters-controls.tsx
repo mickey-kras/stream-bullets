@@ -299,12 +299,16 @@ export function CharactersControls({
   onTimeout,
   max,
   onMax,
+  pushEnabled,
+  onPushEnabled,
 }: Readonly<{
   control: CharactersControl;
   timeout: number;
   onTimeout: (seconds: number) => void;
   max: number;
   onMax: (count: number) => void;
+  pushEnabled: boolean;
+  onPushEnabled: (enabled: boolean) => void;
 }>): ReactNode {
   const { feed, enabled, roster, off, statusError, busy, paused, news, setNews, send } = playground;
   const needsId: string = useId();
@@ -352,6 +356,10 @@ export function CharactersControls({
     <div className="ov-chars" data-characters-controls>
       <NumberField setting={TIMEOUT_SETTING} value={timeout} onValue={onTimeout} />
       <NumberField setting={MAX_SETTING} value={max} onValue={onMax} />
+      <label className="ov-chars-row">
+        <input type="checkbox" checked={pushEnabled} onChange={(event) => onPushEnabled(event.currentTarget.checked)} />
+        <span>{t("overlay.characters.pushEnabled")}</span>
+      </label>
       {off && (
         <p className="muted ov-comp-note" data-characters-off>
           {t("overlay.characters.off")}

@@ -406,6 +406,10 @@ export function LayerProperties({
           onTimeout={(timeout: number) =>
             change((current: OverlayLayers) => ({ ...current, characters: { ...current.characters, timeout } }))
           }
+          pushEnabled={layers.characters.pushEnabled}
+          onPushEnabled={(pushEnabled: boolean) =>
+            change((current: OverlayLayers) => ({ ...current, characters: { ...current.characters, pushEnabled } }))
+          }
           max={layers.characters.max}
           onMax={(max: number) =>
             change((current: OverlayLayers) => ({ ...current, characters: { ...current.characters, max } }))

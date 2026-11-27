@@ -57,6 +57,7 @@ export const CHAT_BACKGROUND = LAYER_BACKGROUND;
 
 export interface CharactersLayer {
   enabled: boolean;
+  pushEnabled: boolean;
   /** Seconds without chat before a character walks out (CHARACTERS_TIMEOUT). */
   timeout: number;
   /** The most characters on screen at one time (CHARACTERS_MAX). */
@@ -160,7 +161,7 @@ function defaultItem(layer: ContentLayer): ContentItem {
 export const DEFAULT_LAYERS: OverlayLayers = {
   orientation: "horizontal",
   chat: { enabled: false, hideCommands: true, backgroundOpacity: CHAT_BACKGROUND.default },
-  characters: { enabled: false, timeout: CHARACTERS_TIMEOUT.default, max: CHARACTERS_MAX.default },
+  characters: { enabled: false, pushEnabled: true, timeout: CHARACTERS_TIMEOUT.default, max: CHARACTERS_MAX.default },
   camera: { enabled: false },
   items: contentRecord(defaultItem),
   cells: {
@@ -369,6 +370,7 @@ export const layersPatchSchema = z
     characters: z
       .object({
         enabled: z.boolean().optional(),
+        pushEnabled: z.boolean().optional(),
         timeout: characterTimeout.optional(),
         max: characterMax.optional(),
       })
@@ -451,6 +453,7 @@ export const storedLayersSchema: z.ZodType<OverlayLayers, unknown> = fallback(
     characters: fallback(
       z.object({
         enabled: fallback(z.boolean(), DEFAULT_LAYERS.characters.enabled),
+        pushEnabled: fallback(z.boolean(), DEFAULT_LAYERS.characters.pushEnabled),
         timeout: fallback(characterTimeout, DEFAULT_LAYERS.characters.timeout),
         max: fallback(characterMax, DEFAULT_LAYERS.characters.max),
       }),
@@ -569,6 +572,7 @@ export function mergeLayers(current: OverlayLayers, patch: LayersPatch): Overlay
     },
     characters: {
       enabled: patch.characters?.enabled ?? current.characters.enabled,
+      pushEnabled: patch.characters?.pushEnabled ?? current.characters.pushEnabled,
       timeout: patch.characters?.timeout ?? current.characters.timeout,
       max: patch.characters?.max ?? current.characters.max,
     },

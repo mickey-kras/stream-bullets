@@ -91,3 +91,14 @@ Prop checks cover bridge depth, matching seams, flag poles, and neutral cloth ma
 Review sheets show the exported files, not the larger generation concepts.
 
 These are art handoff assets. Check the timing, the equipment tint, the rope attachment, and the left-facing poses in the game before release.
+
+## Stair collision update
+
+`stairs-right.png` is the 16 by 16 runtime tile; `stairs-right-4x.png` is its 4 times export.
+The tile replaces the stair in `props.png` and is packed at (128, 154) in the runtime terrain atlas.
+Its column heights are 4 px at x 0, 8 px at x 3, 12 px at x 5, and 16 px at x 8.
+The renderer mirrors it for stairs to the left. `review-stair.png` shows the final exported pixels.
+The earlier `review-props.png` shows the original proposal; use `review-stair.png` for the revised stair.
+
+The built-in image generator supplied the wood texture. The export crops and scales each step with nearest-neighbor sampling and applies the exact collision silhouette.
+Prompt: one transparent side-view 16 by 16 pixel stair, rising left to right, worn brown wood and rusty metal matching the props sheet; heights 4, 8, 12, 16 at columns 0, 3, 5, 8; solid risers, limited palette, no text or logos.

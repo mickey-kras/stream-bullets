@@ -19,6 +19,7 @@ import {
   JUMP_VY,
   MARK_TICKS,
   MIN_STAY_TICKS,
+  MOVEMENT_COOLDOWN_TICKS,
   NEW_TICKS,
   PUSH_VX,
   PUSH_VY,
@@ -156,6 +157,7 @@ export class PlaygroundSim implements SimHost {
   /** Restricted participants by `platform:userId`: the tick at which the restriction ends. */
   readonly restrictions = new Map<string, number>();
   private active = false;
+  private pushEnabled = true;
   private nextId = 1;
   private timeoutSeconds: number = CHARACTERS_TIMEOUT.default;
   private maxVisible: number = CHARACTERS_MAX.default;
@@ -201,6 +203,16 @@ export class PlaygroundSim implements SimHost {
   setVisibleMax(count: number): void {
     if (!Number.isFinite(count)) throw new RangeError(`playground maximum must be a number: ${count}`);
     this.maxVisible = Math.min(CHARACTERS_MAX.max, Math.max(CHARACTERS_MAX.min, Math.round(count)));
+  }
+
+  /** Applies the owner setting immediately, including queued and unfinished pushes. */
+  setPushEnabled(enabled: boolean): void {
+    this.pushEnabled = enabled;
+    if (enabled) return;
+    for (const p of this.participants.values()) {
+      if (p.pending?.name === "push") p.pending = null;
+      if (p.state === "push") this.rest(p);
+    }
   }
 
   /** The participants in registration order. */
@@ -255,15 +267,23 @@ export class PlaygroundSim implements SimHost {
   private queue(p: Participant, event: ActivityChat): void {
     const call: CommandCall | null = parseCommand(event.text);
     if (call) {
-      if (this.clock - p.lastCommand < COMMAND_COOLDOWN_TICKS) return;
-      p.lastCommand = this.clock;
-      // A stop works at once, also in the middle of a walk or of work of more than one step.
-      if (call.name === "stop") this.halt(p);
-      else p.pending = { ...call, expires: this.clock + COMMAND_EXPIRY_TICKS, key: event.id };
+      this.queueCommand(p, call, event.id);
       return;
     }
     const text: string = boundText(event.text, BUBBLE_LENGTH, BUBBLE_MAX_UNITS, CUT_MARK);
     if (text) p.pendingText = { text, expires: this.clock + COMMAND_EXPIRY_TICKS, key: event.id };
+  }
+
+  private queueCommand(p: Participant, call: CommandCall, key: string): void {
+    if (call.name === "push" && !this.pushEnabled) return;
+    const movement: boolean = call.name === "left" || call.name === "right" || call.name === "look";
+    const last: number = movement ? p.lastMovement : p.lastCommand;
+    if (this.clock - last < (movement ? MOVEMENT_COOLDOWN_TICKS : COMMAND_COOLDOWN_TICKS)) return;
+    if (movement) p.lastMovement = this.clock;
+    else p.lastCommand = this.clock;
+    // A stop works at once, also in the middle of a walk or of work of more than one step.
+    if (call.name === "stop") this.halt(p);
+    else p.pending = { ...call, expires: this.clock + COMMAND_EXPIRY_TICKS, key };
   }
 
   private register(key: string, platform: ActivityPlatform, userId: string): Participant {
@@ -585,6 +605,7 @@ export class PlaygroundSim implements SimHost {
 
   /** Starts a command action. The caller makes sure the character is walking or standing inside the walking limits. */
   perform(p: Participant, command: Command, key = "", n = 0, side: Side = 0): void {
+    if (command === "push" && !this.pushEnabled) return;
     const words: string[] = [`!${command}`];
     if (side !== 0) words.push(side < 0 ? "left" : "right");
     if (n > 0) words.push(String(n));

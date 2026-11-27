@@ -29,7 +29,7 @@ export function restoreTerrain(world: World, terrain: Terrain, data: Checkpoint)
     .map(([id, c, r]): Flag => ({ id, c, r }));
 }
 
-/** id, platform, user id, name, score, scoreAt, lastScored, lastChat, lastCommand, admitted, admittedAt, x, removed. */
+/** id, platform, user id, name, score, scoreAt, lastScored, lastChat, lastCommand, admitted, admittedAt, x, removed, optional lastMovement (legacy records omit it). */
 export type ParticipantRecord = [
   number,
   ActivityPlatform,
@@ -44,6 +44,7 @@ export type ParticipantRecord = [
   number,
   number,
   0 | 1,
+  number?,
 ];
 
 export interface Checkpoint {
@@ -89,6 +90,7 @@ export function toRecord(p: Participant): ParticipantRecord {
     p.admittedAt,
     Math.round(p.x * 10) / 10,
     p.removed ? 1 : 0,
+    p.lastMovement,
   ];
 }
 
@@ -107,6 +109,7 @@ export function fromRecord(record: ParticipantRecord, clock: number, walkSpread:
     admittedAt,
     x,
     removed,
+    lastMovement = lastCommand,
   ] = record;
   const speed: number = WALK_SPEED + walkSpread * (mulberry32(id)() - 0.5);
   const p: Participant = newParticipant(siteKey(platform, userId), id, platform, userId, name, clock, speed);
@@ -116,6 +119,7 @@ export function fromRecord(record: ParticipantRecord, clock: number, walkSpread:
     lastScored,
     lastChat,
     lastCommand,
+    lastMovement,
     admitted: admitted === 1,
     admittedAt,
     x,
@@ -175,6 +179,7 @@ export const checkpointSchema: z.ZodType<Checkpoint> = z
           tick,
           finite,
           z.union([z.literal(0), z.literal(1)]),
+          tick.optional(),
         ]),
       )
       .max(REGISTRY_MAX),

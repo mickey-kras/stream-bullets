@@ -114,7 +114,7 @@ describe("grid and defaults", (): void => {
     expect(DEFAULT_LAYERS).toEqual({
       orientation: "horizontal",
       chat: { enabled: false, hideCommands: true, backgroundOpacity: 100 },
-      characters: { enabled: false, timeout: 60, max: 40 },
+      characters: { enabled: false, pushEnabled: true, timeout: 60, max: 40 },
       camera: { enabled: false },
       items: defaultItems,
       cells: {
@@ -266,7 +266,7 @@ describe("stored layers", (): void => {
     const layers = {
       orientation: "vertical",
       chat: { enabled: true, hideCommands: false, backgroundOpacity: 35 },
-      characters: { enabled: true, timeout: 60, max: 40 },
+      characters: { enabled: true, pushEnabled: true, timeout: 60, max: 40 },
       camera: { enabled: true },
       items: {
         ...defaultItems,
@@ -433,7 +433,7 @@ describe("stored layers", (): void => {
     const full: OverlayLayers = {
       orientation: "horizontal",
       chat: { enabled: false, hideCommands: false, backgroundOpacity: 100 },
-      characters: { enabled: false, timeout: 600, max: 5 },
+      characters: { enabled: false, pushEnabled: true, timeout: 600, max: 5 },
       camera: { enabled: true },
       items: {
         poll: { ...changed, ref, qr: false },
@@ -829,6 +829,7 @@ describe("layer patches", (): void => {
     expect(removed.cells.vertical).toEqual(LAID.cells.vertical);
     expect(mergeLayers(next, { characters: { enabled: true } }).characters).toEqual({
       enabled: true,
+      pushEnabled: true,
       timeout: 60,
       max: 40,
     });
@@ -883,8 +884,9 @@ describe("characters timeout", (): void => {
     expect(read(10)).toBe(10);
     expect(read(600)).toBe(600);
     for (const value of [undefined, 9, 601, 30.5, "60", null]) expect(read(value)).toBe(60);
-    expect(storedLayersSchema.parse({ characters: { enabled: true, timeout: 5 } }).characters).toEqual({
+    expect(storedLayersSchema.parse({ characters: { enabled: true, pushEnabled: true, timeout: 5 } }).characters).toEqual({
       enabled: true,
+      pushEnabled: true,
       timeout: 60,
       max: 40,
     });
@@ -898,16 +900,18 @@ describe("characters timeout", (): void => {
     const enabled: OverlayLayers = mergeLayers(DEFAULT_LAYERS, { characters: { enabled: true } });
     expect(mergeLayers(enabled, { characters: { timeout: 300 } }).characters).toEqual({
       enabled: true,
+      pushEnabled: true,
       timeout: 300,
       max: 40,
     });
     expect(
       mergeLayers(
-        { ...enabled, characters: { enabled: true, timeout: 300, max: 40 } },
+        { ...enabled, characters: { enabled: true, pushEnabled: true, timeout: 300, max: 40 } },
         { characters: { enabled: false } },
       ).characters,
     ).toEqual({
       enabled: false,
+      pushEnabled: true,
       timeout: 300,
       max: 40,
     });
@@ -928,8 +932,9 @@ describe("characters maximum", (): void => {
     expect(read(40)).toBe(40);
     for (const value of [undefined, 4, 41, 12.5, "12", null]) expect(read(value)).toBe(40);
     // A text from before this setting keeps its timeout.
-    expect(storedLayersSchema.parse({ characters: { enabled: true, timeout: 90 } }).characters).toEqual({
+    expect(storedLayersSchema.parse({ characters: { enabled: true, pushEnabled: true, timeout: 90 } }).characters).toEqual({
       enabled: true,
+      pushEnabled: true,
       timeout: 90,
       max: 40,
     });
@@ -941,9 +946,10 @@ describe("characters maximum", (): void => {
     for (const max of [4, 41, 12.5, "12", null, Number.NaN])
       expect(layersPatchSchema.safeParse({ characters: { max } }).success).toBe(false);
     const lowered: OverlayLayers = mergeLayers(DEFAULT_LAYERS, { characters: { max: 12 } });
-    expect(lowered.characters).toEqual({ enabled: false, timeout: 60, max: 12 });
+    expect(lowered.characters).toEqual({ enabled: false, pushEnabled: true, timeout: 60, max: 12 });
     expect(mergeLayers(lowered, { characters: { timeout: 30 } }).characters).toEqual({
       enabled: false,
+      pushEnabled: true,
       timeout: 30,
       max: 12,
     });
@@ -952,7 +958,7 @@ describe("characters maximum", (): void => {
   it("stores the maximum and reads it again", (): void => {
     const lowered: OverlayLayers = mergeLayers(DEFAULT_LAYERS, { characters: { max: 12 } });
     const text: string = storedLayersText(lowered);
-    expect(JSON.parse(text)).toMatchObject({ characters: { enabled: false, timeout: 60, max: 12 } });
+    expect(JSON.parse(text)).toMatchObject({ characters: { enabled: false, pushEnabled: true, timeout: 60, max: 12 } });
     expect(storedLayersSchema.parse(JSON.parse(text))).toEqual(lowered);
   });
 });
@@ -965,5 +971,15 @@ describe("layer parameter of the overlay URL", (): void => {
     expect(parseLayerParam("characters")).toBe("characters");
     for (const value of ["", "Chat", "chat ", "all", "__proto__", "toString"])
       expect(parseLayerParam(value)).toBe("unknown");
+  });
+});
+
+describe("push setting", (): void => {
+  it("defaults existing overlays to enabled and persists a disabled switch", (): void => {
+    expect(storedLayersSchema.parse({ characters: {} }).characters.pushEnabled).toBe(true);
+    expect(layersPatchSchema.safeParse({ characters: { pushEnabled: "false" } }).success).toBe(false);
+    const layers: OverlayLayers = mergeLayers(DEFAULT_LAYERS, { characters: { pushEnabled: false } });
+    expect(storedLayersSchema.parse(JSON.parse(storedLayersText(layers))).characters.pushEnabled).toBe(false);
+    expect(mergeLayers(layers, { characters: { timeout: 30 } }).characters.pushEnabled).toBe(false);
   });
 });

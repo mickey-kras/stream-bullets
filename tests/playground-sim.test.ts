@@ -188,6 +188,52 @@ describe("prototype scenarios (640 x 120 world)", () => {
     expect(Math.abs(chars[0].score - (41 * Math.exp(-90 / 1800) + 1))).toBeLessThan(1e-9);
   });
 
+  it("shares a 30-tick movement timer across aliases, independent of the 90-tick action timer", () => {
+    const { sim, chars, message } = proto();
+    const p: Participant = chars[0];
+    message(p, "!l");
+    message(p, "!wave");
+    expect(p.pending?.name).toBe("wave");
+    sim.clock = 29;
+    message(p, "!r");
+    expect(p.pending?.name).toBe("wave");
+    sim.clock = 30;
+    message(p, "!turn");
+    expect(p.pending?.name).toBe("look");
+    message(p, "!jump");
+    expect(p.pending?.name).toBe("look");
+    sim.clock = 60;
+    message(p, "!right");
+    expect(p.pending?.name).toBe("right");
+    sim.clock = 89;
+    message(p, "!cheer");
+    expect(p.pending?.name).toBe("right");
+    sim.clock = 90;
+    message(p, "!cheer");
+    expect(p.pending?.name).toBe("cheer");
+    const back = PlaygroundSim.restore(sim.checkpoint(), { rng: () => 0.9 });
+    expect(back.list()[0].lastMovement).toBe(60);
+    expect(back.list()[0].lastCommand).toBe(90);
+  });
+
+  it("cancels queued and unfinished pushes when disabled, including the shove alias", () => {
+    const { sim, chars, message } = proto();
+    const p: Participant = chars[0];
+    message(p, "!shove");
+    expect(p.pending?.name).toBe("push");
+    setState(p, "push", { victim: chars[1].id });
+    sim.setPushEnabled(false);
+    expect(p.pending).toBeNull();
+    expect(p.state).not.toBe("push");
+    sim.clock = 90;
+    message(p, "!shove");
+    expect(p.pending).toBeNull();
+    expect(p.lastCommand).toBe(0);
+    sim.setPushEnabled(true);
+    message(p, "!push");
+    expect(p.pending?.name).toBe("push");
+  });
+
   it("reverses a timeout exit on a message", () => {
     const { sim, chars, message, tick } = proto();
     sim.select();
@@ -1010,6 +1056,14 @@ describe("checkpoint", () => {
     expect(() => PlaygroundSim.restore(JSON.stringify({ ...now, cell: 30 }), { rng: mulberry32(3) })).toThrow(
       "playground checkpoint invalid",
     );
+  });
+
+  it("restores a legacy registry without a separate movement timer", () => {
+    const { sim } = crowd(5);
+    const old = JSON.parse(sim.checkpoint()) as { registry: unknown[][] };
+    for (const record of old.registry) record.pop();
+    const back = PlaygroundSim.restore(JSON.stringify(old), { rng: mulberry32(3) });
+    for (const p of back.list()) expect(p.lastMovement).toBe(p.lastCommand);
   });
 
   it("refuses a malformed checkpoint", () => {

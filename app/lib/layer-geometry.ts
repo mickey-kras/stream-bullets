@@ -133,6 +133,8 @@ export function diffLayers(before: OverlayLayers, after: OverlayLayers): LayersP
   if (before.chat.backgroundOpacity !== after.chat.backgroundOpacity)
     patch.chat = { ...patch.chat, backgroundOpacity: after.chat.backgroundOpacity };
   if (before.characters.enabled !== after.characters.enabled) patch.characters = { enabled: after.characters.enabled };
+  if (before.characters.pushEnabled !== after.characters.pushEnabled)
+    patch.characters = { ...patch.characters, pushEnabled: after.characters.pushEnabled };
   if (before.characters.timeout !== after.characters.timeout)
     patch.characters = { ...patch.characters, timeout: after.characters.timeout };
   if (before.characters.max !== after.characters.max)
@@ -194,7 +196,7 @@ export function withoutSent(draft: LayersPatch, sent: LayersPatch): LayersPatch 
   const result: LayersPatch = compact(draft);
   removeSentFields(result, sent, ["orientation"]);
   removeSentFields(result.chat, sent.chat, ["enabled", "hideCommands", "backgroundOpacity"]);
-  removeSentFields(result.characters, sent.characters, ["enabled"]);
+  removeSentFields(result.characters, sent.characters, ["enabled", "pushEnabled", "timeout", "max"]);
   removeSentFields(result.camera, sent.camera, ["enabled"]);
   removeSentFields(result.twitchOnly, sent.twitchOnly, ORIENTATIONS);
   for (const layer of CONTENT_LAYERS) removeSentFields(result.items?.[layer], sent.items?.[layer], ITEM_FIELDS);
