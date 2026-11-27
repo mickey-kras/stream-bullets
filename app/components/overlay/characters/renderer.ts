@@ -844,7 +844,9 @@ export function badgesOf(
   }
   for (const text of texts) place(cut(text, 24));
   if (ctx.canvas.height < 180 || ctx.canvas.width < 360) return placed;
-  const holder: CharacterView | undefined = view.characters.find((character: CharacterView): boolean => character.id === view.crown);
+  const holder: CharacterView | undefined = view.characters.find(
+    (character: CharacterView): boolean => character.id === view.crown,
+  );
   if (holder && badges.highest) {
     const height: number = Math.floor((view.world.ground - holder.y) / TILE);
     place(`${badges.highest}: ${cut(holder.name, 16)} · ${height}`, holder.platform);
@@ -855,11 +857,7 @@ export function badgesOf(
   return placed;
 }
 
-function drawBadges(
-  ctx: CanvasRenderingContext2D,
-  theme: PlaygroundTheme,
-  placed: readonly Badge[],
-): void {
+function drawBadges(ctx: CanvasRenderingContext2D, theme: PlaygroundTheme, placed: readonly Badge[]): void {
   const size: number = theme.label.name.size;
   ctx.font = `600 ${size}px ${theme.label.font}`;
   ctx.textBaseline = "middle";
@@ -871,7 +869,14 @@ function drawBadges(
     ctx.roundRect(left, BADGE_MARGIN, width, size + 12, 6);
     ctx.fill();
     ctx.fillStyle = theme.label.badge.ink;
-    if (platform) drawGlyph(ctx, glyphOf(platform), left + 10, BADGE_MARGIN + (size + 12 - GLYPH_PX) / 2, helmetColor(theme, platform));
+    if (platform)
+      drawGlyph(
+        ctx,
+        glyphOf(platform),
+        left + 10,
+        BADGE_MARGIN + (size + 12 - GLYPH_PX) / 2,
+        helmetColor(theme, platform),
+      );
     ctx.fillStyle = theme.label.badge.ink;
     ctx.fillText(label, left + 10 + (platform ? GLYPH_PX + GLYPH_GAP : 0), BADGE_MARGIN + (size + 12) / 2 + 1);
   }

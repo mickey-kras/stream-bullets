@@ -75,7 +75,7 @@ export function viewForPlatform(view: PlaygroundView, platform: string): Playgro
     speakers: view.speakers.filter((id: number): boolean => ids.has(id)),
     ropes: view.ropes.filter((rope: RopeView): boolean => ids.has(rope.id)),
     flags: view.flags.filter((flag: FlagView): boolean => flag.platform === platform),
-    crown: view.crown !== null && ids.has(view.crown) ? view.crown : holder?.id ?? null,
+    crown: view.crown !== null && ids.has(view.crown) ? view.crown : (holder?.id ?? null),
   };
 }
 

@@ -463,6 +463,6 @@ Close the sources that you do not use.
 
 ### Shared playground badges
 
-The top strip shows Highest and Blocks once for the whole playground. Highest shows the crown holder's platform, name, and height in blocks. It is hidden without a crown holder. On a platform-only output, the crown and Highest use the highest eligible character of that platform. Blocks shows all built blocks against the shared build limit, including on platform-only outputs. At the limit, the oldest block crumbles.
+The top strip shows Highest and Blocks once for the whole playground. Highest shows the crown holder's platform, name, and height in blocks. The renderer hides Highest without a crown holder. On a platform-only output, the crown and Highest use the highest eligible character of that platform. Blocks shows all built blocks against the shared build limit, including on platform-only outputs. At the limit, the oldest block crumbles.
 
-Both badges require at least 180 canvas px of height and 360 px of width. Blocks requires 600 px of width. Labels must fit the available space; mode badges take priority, then Highest, then Blocks. Speech bubbles avoid the occupied top strip.
+Both badges need at least 180 canvas px of height and 360 px of width. Blocks requires 600 px of width. Labels must fit the available space. Mode badges take priority, then Highest, then Blocks. Speech bubbles avoid the occupied top strip.
