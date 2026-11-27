@@ -7365,7 +7365,19 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L1026",
+      "source_location": "L1002",
+      "target": "app_components_ui_icon_button_iconbutton",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_discussion_discussion",
+      "source_file": "app/components/discussion.tsx",
+      "source_location": "L1030",
       "target": "app_components_shell_sign_in_dialog_signindialog",
       "weight": 1.0
     },
@@ -7377,7 +7389,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L1036",
+      "source_location": "L1040",
       "target": "app_components_discussion_thread",
       "weight": 1.0
     },
@@ -7389,7 +7401,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L1062",
+      "source_location": "L1066",
       "target": "app_components_discussion_mergethreads",
       "weight": 1.0
     },
@@ -7401,7 +7413,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L1062",
+      "source_location": "L1066",
       "target": "app_lib_threads_keepreplywindows",
       "weight": 1.0
     },
@@ -7509,7 +7521,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L853",
+      "source_location": "L857",
       "target": "app_components_api_needsstepup",
       "weight": 1.0
     },
@@ -7521,7 +7533,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L861",
+      "source_location": "L865",
       "target": "app_lib_threads_orderreplies",
       "weight": 1.0
     },
@@ -7533,7 +7545,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L866",
+      "source_location": "L870",
       "target": "app_lib_threads_replycursor",
       "weight": 1.0
     },
@@ -7545,7 +7557,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L872",
+      "source_location": "L876",
       "target": "app_lib_threads_atedge",
       "weight": 1.0
     },
@@ -7557,7 +7569,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L874",
+      "source_location": "L878",
       "target": "app_lib_threads_withpage",
       "weight": 1.0
     },
@@ -7569,7 +7581,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L911",
+      "source_location": "L915",
       "target": "app_components_discussion_discussion_run",
       "weight": 1.0
     },
@@ -7581,7 +7593,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L912",
+      "source_location": "L916",
       "target": "app_components_api_postjson",
       "weight": 1.0
     },
@@ -7593,7 +7605,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L928",
+      "source_location": "L932",
       "target": "app_components_discussion_updatecomment",
       "weight": 1.0
     },
@@ -7605,7 +7617,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L958",
+      "source_location": "L962",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -7617,7 +7629,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L962",
+      "source_location": "L966",
       "target": "app_components_discussion_composer",
       "weight": 1.0
     },
@@ -7629,7 +7641,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L975",
+      "source_location": "L979",
       "target": "app_components_discussion_discussion_post",
       "weight": 1.0
     },
@@ -7641,20 +7653,8 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L985",
+      "source_location": "L989",
       "target": "app_components_ui_select_select",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_discussion_discussion",
-      "source_file": "app/components/discussion.tsx",
-      "source_location": "L998",
-      "target": "app_components_ui_icon_button_iconbutton",
       "weight": 1.0
     },
     {
@@ -7665,7 +7665,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion_loadreplies",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L861",
+      "source_location": "L865",
       "target": "app_lib_threads_orderreplies",
       "weight": 1.0
     },
@@ -7677,7 +7677,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion_loadreplies",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L864",
+      "source_location": "L868",
       "target": "app_components_discussion_fetchreplies",
       "weight": 1.0
     },
@@ -7689,7 +7689,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion_loadreplies",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L866",
+      "source_location": "L870",
       "target": "app_lib_threads_replycursor",
       "weight": 1.0
     },
@@ -7701,7 +7701,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion_loadreplies",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L872",
+      "source_location": "L876",
       "target": "app_lib_threads_atedge",
       "weight": 1.0
     },
@@ -7713,7 +7713,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion_loadreplies",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L874",
+      "source_location": "L878",
       "target": "app_lib_threads_withpage",
       "weight": 1.0
     },
@@ -7725,7 +7725,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion_loadreplies",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L884",
+      "source_location": "L888",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -7737,7 +7737,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion_post",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L889",
+      "source_location": "L893",
       "target": "app_components_discussion_discussion_run",
       "weight": 1.0
     },
@@ -7749,7 +7749,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion_run",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L853",
+      "source_location": "L857",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -7761,7 +7761,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion_run",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L853",
+      "source_location": "L857",
       "target": "app_components_api_needsstepup",
       "weight": 1.0
     },
@@ -10545,7 +10545,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_builds_drawblocks",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L73",
+      "source_location": "L87",
       "target": "app_components_overlay_characters_builds_dirtpicture",
       "weight": 1.0
     },
@@ -10557,7 +10557,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_builds_drawblocks",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L73",
+      "source_location": "L87",
       "target": "app_components_overlay_characters_builds_picture",
       "weight": 1.0
     },
@@ -10569,7 +10569,19 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_builds_drawblocks",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L74",
+      "source_location": "L88",
+      "target": "app_components_overlay_characters_builds_plankpicture",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_overlay_characters_builds_drawblocks",
+      "source_file": "app/components/overlay/characters/builds.ts",
+      "source_location": "L93",
       "target": "app_components_overlay_characters_builds_tread",
       "weight": 1.0
     },
@@ -10581,8 +10593,44 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_builds_drawflags",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L91",
-      "target": "app_components_overlay_characters_sprites_helmetcolor",
+      "source_location": "L114",
+      "target": "app_components_overlay_characters_builds_loopframe",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_overlay_characters_builds_drawflags",
+      "source_file": "app/components/overlay/characters/builds.ts",
+      "source_location": "L116",
+      "target": "app_components_overlay_characters_builds_picture",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_overlay_characters_builds_drawgear",
+      "source_file": "app/components/overlay/characters/builds.ts",
+      "source_location": "L171",
+      "target": "app_components_overlay_characters_builds_loopframe",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_overlay_characters_builds_drawgear",
+      "source_file": "app/components/overlay/characters/builds.ts",
+      "source_location": "L175",
+      "target": "app_components_overlay_characters_builds_picture",
       "weight": 1.0
     },
     {
@@ -10593,7 +10641,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_builds_drawropes",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L112",
+      "source_location": "L139",
       "target": "app_components_overlay_characters_builds_ropeshare",
       "weight": 1.0
     },
@@ -10605,8 +10653,20 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_builds_drawropes",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L113",
+      "source_location": "L141",
       "target": "app_components_overlay_characters_builds_snap",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_overlay_characters_builds_drawropes",
+      "source_file": "app/components/overlay/characters/builds.ts",
+      "source_location": "L156",
+      "target": "app_components_overlay_characters_builds_picture",
       "weight": 1.0
     },
     {
@@ -10989,7 +11049,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_badgesof",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L835",
+      "source_location": "L830",
       "target": "app_components_overlay_characters_renderer_cut",
       "weight": 1.0
     },
@@ -11001,7 +11061,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_bubble",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L521",
+      "source_location": "L516",
       "target": "app_components_overlay_characters_renderer_labelcanvas",
       "weight": 1.0
     },
@@ -11013,7 +11073,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_bubble",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L523",
+      "source_location": "L518",
       "target": "app_components_overlay_characters_renderer_wrap",
       "weight": 1.0
     },
@@ -11025,7 +11085,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_bubble",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L525",
+      "source_location": "L520",
       "target": "app_components_overlay_characters_renderer_cut",
       "weight": 1.0
     },
@@ -11037,7 +11097,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_bubble",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L534",
+      "source_location": "L529",
       "target": "app_components_overlay_characters_renderer_lineheight",
       "weight": 1.0
     },
@@ -11049,7 +11109,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_bubble",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L551",
+      "source_location": "L546",
       "target": "app_components_overlay_characters_renderer_drawglyph",
       "weight": 1.0
     },
@@ -11061,7 +11121,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_bubble",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L551",
+      "source_location": "L546",
       "target": "app_components_overlay_characters_sprites_helmetcolor",
       "weight": 1.0
     },
@@ -11073,7 +11133,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_bubble",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L551",
+      "source_location": "L546",
       "target": "app_components_overlay_wasteland_glyphs_glyphof",
       "weight": 1.0
     },
@@ -11085,7 +11145,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_bubble",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L555",
+      "source_location": "L550",
       "target": "app_components_overlay_characters_renderer_textdirection",
       "weight": 1.0
     },
@@ -11097,7 +11157,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_bubblelines",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L576",
+      "source_location": "L571",
       "target": "app_components_overlay_characters_renderer_lineheight",
       "weight": 1.0
     },
@@ -11121,7 +11181,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_cut",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L353",
+      "source_location": "L348",
       "target": "app_lib_chat_feed_graphemes",
       "weight": 1.0
     },
@@ -11133,7 +11193,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_draw",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L879",
+      "source_location": "L874",
       "target": "app_components_overlay_characters_renderer_moveparticles",
       "weight": 1.0
     },
@@ -11145,7 +11205,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_draw",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L880",
+      "source_location": "L875",
       "target": "app_components_overlay_characters_renderer_spawneffects",
       "weight": 1.0
     },
@@ -11157,7 +11217,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_draw",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L887",
+      "source_location": "L882",
       "target": "app_components_overlay_characters_renderer_drawworld",
       "weight": 1.0
     },
@@ -11169,7 +11229,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_draw",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L888",
+      "source_location": "L883",
       "target": "app_components_overlay_characters_builds_drawropes",
       "weight": 1.0
     },
@@ -11181,7 +11241,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_draw",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L889",
+      "source_location": "L884",
       "target": "app_components_overlay_characters_renderer_drawcharacters",
       "weight": 1.0
     },
@@ -11193,7 +11253,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_draw",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L890",
+      "source_location": "L885",
       "target": "app_components_overlay_characters_builds_drawgear",
       "weight": 1.0
     },
@@ -11205,7 +11265,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_draw",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L891",
+      "source_location": "L886",
       "target": "app_components_overlay_characters_renderer_drawparticles",
       "weight": 1.0
     },
@@ -11217,7 +11277,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_draw",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L892",
+      "source_location": "L887",
       "target": "app_components_overlay_characters_renderer_drawmarks",
       "weight": 1.0
     },
@@ -11229,7 +11289,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_draw",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L893",
+      "source_location": "L888",
       "target": "app_components_overlay_characters_renderer_badgesof",
       "weight": 1.0
     },
@@ -11241,7 +11301,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_draw",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L902",
+      "source_location": "L897",
       "target": "app_components_overlay_characters_renderer_drawlabels",
       "weight": 1.0
     },
@@ -11253,7 +11313,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_draw",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L904",
+      "source_location": "L899",
       "target": "app_components_overlay_characters_renderer_drawbadges",
       "weight": 1.0
     },
@@ -11277,7 +11337,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_drawcharacters",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L308",
+      "source_location": "L303",
       "target": "app_components_overlay_characters_builds_picture",
       "weight": 1.0
     },
@@ -11289,7 +11349,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_drawcharacters",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L312",
+      "source_location": "L307",
       "target": "app_components_overlay_characters_builds_snap",
       "weight": 1.0
     },
@@ -11301,7 +11361,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_drawlabels",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L761",
+      "source_location": "L756",
       "target": "app_components_overlay_characters_renderer_showslabel",
       "weight": 1.0
     },
@@ -11313,7 +11373,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_drawlabels",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L763",
+      "source_location": "L758",
       "target": "app_components_overlay_characters_builds_snap",
       "weight": 1.0
     },
@@ -11325,7 +11385,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_drawlabels",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L768",
+      "source_location": "L763",
       "target": "app_components_overlay_characters_renderer_bubblecap",
       "weight": 1.0
     },
@@ -11337,7 +11397,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_drawlabels",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L771",
+      "source_location": "L766",
       "target": "app_components_overlay_characters_renderer_cached",
       "weight": 1.0
     },
@@ -11349,7 +11409,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_drawlabels",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L772",
+      "source_location": "L767",
       "target": "app_components_overlay_characters_renderer_bubble",
       "weight": 1.0
     },
@@ -11361,7 +11421,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_drawlabels",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L778",
+      "source_location": "L773",
       "target": "app_components_overlay_characters_renderer_bubblelines",
       "weight": 1.0
     },
@@ -11373,7 +11433,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_drawlabels",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L780",
+      "source_location": "L775",
       "target": "app_components_overlay_characters_renderer_layoutbubbles",
       "weight": 1.0
     },
@@ -11385,7 +11445,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_drawlabels",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L792",
+      "source_location": "L787",
       "target": "app_components_overlay_characters_renderer_tailbase",
       "weight": 1.0
     },
@@ -11397,7 +11457,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_drawlabels",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L802",
+      "source_location": "L797",
       "target": "app_components_overlay_characters_renderer_nametag",
       "weight": 1.0
     },
@@ -11409,7 +11469,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_drawlabels",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L810",
+      "source_location": "L805",
       "target": "app_components_overlay_characters_renderer_overlaps",
       "weight": 1.0
     },
@@ -11421,7 +11481,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_drawlabels",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L816",
+      "source_location": "L811",
       "target": "app_components_overlay_characters_renderer_drawtail",
       "weight": 1.0
     },
@@ -11433,7 +11493,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_drawparticles",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L343",
+      "source_location": "L338",
       "target": "app_components_overlay_characters_builds_picture",
       "weight": 1.0
     },
@@ -11457,7 +11517,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_drawtail",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L701",
+      "source_location": "L696",
       "target": "app_components_overlay_characters_renderer_tailgeometry",
       "weight": 1.0
     },
@@ -11541,7 +11601,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_layoutbubbles",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L656",
+      "source_location": "L651",
       "target": "app_components_overlay_characters_renderer_tailbase",
       "weight": 1.0
     },
@@ -11553,7 +11613,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_nametag",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L454",
+      "source_location": "L449",
       "target": "app_components_overlay_characters_renderer_labelcanvas",
       "weight": 1.0
     },
@@ -11565,7 +11625,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_nametag",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L456",
+      "source_location": "L451",
       "target": "app_components_overlay_characters_renderer_cut",
       "weight": 1.0
     },
@@ -11577,7 +11637,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_nametag",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L472",
+      "source_location": "L467",
       "target": "app_components_overlay_characters_renderer_drawglyph",
       "weight": 1.0
     },
@@ -11589,7 +11649,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_nametag",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L472",
+      "source_location": "L467",
       "target": "app_components_overlay_characters_sprites_helmetcolor",
       "weight": 1.0
     },
@@ -11601,7 +11661,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_nametag",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L472",
+      "source_location": "L467",
       "target": "app_components_overlay_wasteland_glyphs_glyphof",
       "weight": 1.0
     },
@@ -11613,7 +11673,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_nametag",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L477",
+      "source_location": "L472",
       "target": "app_components_overlay_characters_renderer_textdirection",
       "weight": 1.0
     },
@@ -11637,7 +11697,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_withcutmark",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L400",
+      "source_location": "L395",
       "target": "app_lib_chat_feed_graphemes",
       "weight": 1.0
     },
@@ -11649,7 +11709,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_wrap",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L370",
+      "source_location": "L365",
       "target": "app_lib_chat_feed_graphemes",
       "weight": 1.0
     },
@@ -11661,7 +11721,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_wrap",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L379",
+      "source_location": "L374",
       "target": "app_components_overlay_characters_renderer_breakline",
       "weight": 1.0
     },
@@ -11673,7 +11733,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_renderer_wrap",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L385",
+      "source_location": "L380",
       "target": "app_components_overlay_characters_renderer_withcutmark",
       "weight": 1.0
     },
@@ -11685,19 +11745,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_sprites_loadatlas",
       "source_file": "app/components/overlay/characters/sprites.ts",
-      "source_location": "L86",
-      "target": "app_components_overlay_characters_sprites_loadimage",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_overlay_characters_sprites_loadatlas",
-      "source_file": "app/components/overlay/characters/sprites.ts",
-      "source_location": "L89",
+      "source_location": "L102",
       "target": "app_components_overlay_characters_sprites_sheetcache",
       "weight": 1.0
     },
@@ -11709,8 +11757,32 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_sprites_loadatlas",
       "source_file": "app/components/overlay/characters/sprites.ts",
-      "source_location": "L89",
+      "source_location": "L102",
       "target": "app_components_overlay_characters_sprites_tintsheet",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_overlay_characters_sprites_loadatlas",
+      "source_file": "app/components/overlay/characters/sprites.ts",
+      "source_location": "L103",
+      "target": "app_components_overlay_characters_sprites_tinted",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_overlay_characters_sprites_loadatlas",
+      "source_file": "app/components/overlay/characters/sprites.ts",
+      "source_location": "L98",
+      "target": "app_components_overlay_characters_sprites_loadimage",
       "weight": 1.0
     },
     {
@@ -11731,10 +11803,22 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "app_components_overlay_characters_sprites_tinted",
+      "source_file": "app/components/overlay/characters/sprites.ts",
+      "source_location": "L57",
+      "target": "app_components_overlay_characters_sprites_canvas",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "app_components_overlay_characters_sprites_tintsheet",
       "source_file": "app/components/overlay/characters/sprites.ts",
-      "source_location": "L55",
-      "target": "app_components_overlay_characters_sprites_canvas",
+      "source_location": "L75",
+      "target": "app_components_overlay_characters_sprites_tinted",
       "weight": 1.0
     },
     {
@@ -69285,7 +69369,7 @@
       "relation": "calls",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L381",
+      "source_location": "L382",
       "target": "tests_playground_render_test_renderer",
       "weight": 1.0
     },
@@ -69393,7 +69477,7 @@
       "relation": "calls",
       "source": "tests_playground_render_test_renderer",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L373",
+      "source_location": "L374",
       "target": "app_components_overlay_characters_renderer_draw",
       "weight": 1.0
     },
@@ -73680,7 +73764,7 @@
       "relation": "references",
       "source": "app_components_overlay_wasteland_playground_theme_playgroundtheme",
       "source_file": "app/components/overlay/wasteland/playground-theme.ts",
-      "source_location": "L24",
+      "source_location": "L26",
       "target": "app_components_overlay_characters_view_characterrow",
       "weight": 1.0
     },
@@ -73692,7 +73776,7 @@
       "relation": "references",
       "source": "app_components_overlay_wasteland_playground_theme_sequence",
       "source_file": "app/components/overlay/wasteland/playground-theme.ts",
-      "source_location": "L14",
+      "source_location": "L16",
       "target": "app_components_overlay_characters_view_characterrow",
       "weight": 1.0
     },
@@ -75672,7 +75756,7 @@
       "relation": "references",
       "source": "app_components_overlay_wasteland_playground_theme_playgroundtheme",
       "source_file": "app/components/overlay/wasteland/playground-theme.ts",
-      "source_location": "L42",
+      "source_location": "L44",
       "target": "app_components_overlay_characters_view_characterstate",
       "weight": 1.0
     },
@@ -83574,6 +83658,66 @@
       "relation": "imports",
       "source": "app_components_overlay_characters_builds",
       "source_file": "app/components/overlay/characters/builds.ts",
+      "source_location": "L1",
+      "target": "app_lib_playground_constants_tick_hz",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_overlay_characters_builds",
+      "source_file": "app/components/overlay/characters/builds.ts",
+      "source_location": "L10",
+      "target": "app_components_overlay_characters_view_blockview",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_overlay_characters_builds",
+      "source_file": "app/components/overlay/characters/builds.ts",
+      "source_location": "L10",
+      "target": "app_components_overlay_characters_view_characterview",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_overlay_characters_builds",
+      "source_file": "app/components/overlay/characters/builds.ts",
+      "source_location": "L10",
+      "target": "app_components_overlay_characters_view_playgroundview",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_overlay_characters_builds",
+      "source_file": "app/components/overlay/characters/builds.ts",
+      "source_location": "L10",
+      "target": "app_components_overlay_characters_view_ropeview",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_overlay_characters_builds",
+      "source_file": "app/components/overlay/characters/builds.ts",
       "source_location": "L2",
       "target": "app_components_overlay_wasteland_playground_theme_pixel_scale",
       "weight": 1.0
@@ -83588,6 +83732,18 @@
       "source_file": "app/components/overlay/characters/builds.ts",
       "source_location": "L2",
       "target": "app_components_overlay_wasteland_playground_theme_playgroundtheme",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_overlay_characters_builds",
+      "source_file": "app/components/overlay/characters/builds.ts",
+      "source_location": "L2",
+      "target": "app_components_overlay_wasteland_playground_theme_point",
       "weight": 1.0
     },
     {
@@ -83622,56 +83778,8 @@
       "relation": "imports",
       "source": "app_components_overlay_characters_builds",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L3",
-      "target": "app_components_overlay_characters_sprites_helmetcolor",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_components_overlay_characters_builds",
-      "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L4",
-      "target": "app_components_overlay_characters_view_blockview",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_components_overlay_characters_builds",
-      "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L4",
-      "target": "app_components_overlay_characters_view_characterview",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_components_overlay_characters_builds",
-      "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L4",
-      "target": "app_components_overlay_characters_view_playgroundview",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_components_overlay_characters_builds",
-      "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L4",
-      "target": "app_components_overlay_characters_view_ropeview",
+      "source_location": "L9",
+      "target": "app_components_overlay_characters_sprites_atlas",
       "weight": 1.0
     },
     {
@@ -84404,6 +84512,18 @@
       "source_file": "app/components/overlay/characters/sprites.ts",
       "source_location": "L1",
       "target": "app_components_overlay_wasteland_playground_theme_playgroundtheme",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_overlay_characters_sprites",
+      "source_file": "app/components/overlay/characters/sprites.ts",
+      "source_location": "L1",
+      "target": "app_components_overlay_wasteland_playground_theme_rect",
       "weight": 1.0
     },
     {
@@ -88232,6 +88352,18 @@
       "source_file": "app/components/overlay/wasteland/glyphs.tsx",
       "source_location": "L2",
       "target": "app_lib_activity_activityplatform",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_overlay_wasteland_playground_theme",
+      "source_file": "app/components/overlay/wasteland/playground-theme.ts",
+      "source_location": "L1",
+      "target": "app_components_overlay_characters_view_character_rows",
       "weight": 1.0
     },
     {
@@ -153952,6 +154084,19 @@
       "relation": "imports_from",
       "source": "app_components_overlay_characters_builds",
       "source_file": "app/components/overlay/characters/builds.ts",
+      "source_location": "L10",
+      "target": "app_components_overlay_characters_view",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_overlay_characters_builds",
+      "source_file": "app/components/overlay/characters/builds.ts",
       "source_location": "L2",
       "target": "app_components_overlay_wasteland_playground_theme",
       "weight": 1.0
@@ -153964,20 +154109,8 @@
       "relation": "imports_from",
       "source": "app_components_overlay_characters_builds",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L3",
+      "source_location": "L9",
       "target": "app_components_overlay_characters_sprites",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports_from",
-      "source": "app_components_overlay_characters_builds",
-      "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L4",
-      "target": "app_components_overlay_characters_view",
       "type_only": true,
       "weight": 1.0
     },
@@ -156543,7 +156676,6 @@
       "source_file": "app/components/overlay/wasteland/playground-theme.ts",
       "source_location": "L1",
       "target": "app_components_overlay_characters_view",
-      "type_only": true,
       "weight": 1.0
     },
     {
@@ -191394,7 +191526,7 @@
       "relation": "inherits",
       "source": "app_components_overlay_characters_view_blockview",
       "source_file": "app/components/overlay/characters/view.ts",
-      "source_location": "L76",
+      "source_location": "L83",
       "target": "app_lib_playground_protocol_blockcell",
       "weight": 1.0
     },
@@ -195248,7 +195380,7 @@
       "relation": "contains",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L844",
+      "source_location": "L848",
       "target": "app_components_discussion_discussion_run",
       "weight": 1.0
     },
@@ -195259,7 +195391,7 @@
       "relation": "contains",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L860",
+      "source_location": "L864",
       "target": "app_components_discussion_discussion_loadreplies",
       "weight": 1.0
     },
@@ -195270,7 +195402,7 @@
       "relation": "contains",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L888",
+      "source_location": "L892",
       "target": "app_components_discussion_discussion_post",
       "weight": 1.0
     },
@@ -196755,8 +196887,8 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_builds",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L103",
-      "target": "app_components_overlay_characters_builds_drawropes",
+      "source_location": "L100",
+      "target": "app_components_overlay_characters_builds_loopframe",
       "weight": 1.0
     },
     {
@@ -196766,73 +196898,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_builds",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L11",
-      "target": "app_components_overlay_characters_builds_snap",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_overlay_characters_builds",
-      "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L132",
-      "target": "app_components_overlay_characters_builds_drawgear",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_overlay_characters_builds",
-      "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L15",
-      "target": "app_components_overlay_characters_builds_picture",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_overlay_characters_builds",
-      "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L36",
-      "target": "app_components_overlay_characters_builds_tread",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_overlay_characters_builds",
-      "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L55",
-      "target": "app_components_overlay_characters_builds_dirtpicture",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_overlay_characters_builds",
-      "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L61",
-      "target": "app_components_overlay_characters_builds_drawblocks",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_overlay_characters_builds",
-      "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L85",
+      "source_location": "L105",
       "target": "app_components_overlay_characters_builds_drawflags",
       "weight": 1.0
     },
@@ -196843,8 +196909,96 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_builds",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L97",
+      "source_location": "L121",
       "target": "app_components_overlay_characters_builds_ropeshare",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_overlay_characters_builds",
+      "source_file": "app/components/overlay/characters/builds.ts",
+      "source_location": "L127",
+      "target": "app_components_overlay_characters_builds_drawropes",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_overlay_characters_builds",
+      "source_file": "app/components/overlay/characters/builds.ts",
+      "source_location": "L161",
+      "target": "app_components_overlay_characters_builds_drawgear",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_overlay_characters_builds",
+      "source_file": "app/components/overlay/characters/builds.ts",
+      "source_location": "L17",
+      "target": "app_components_overlay_characters_builds_snap",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_overlay_characters_builds",
+      "source_file": "app/components/overlay/characters/builds.ts",
+      "source_location": "L21",
+      "target": "app_components_overlay_characters_builds_picture",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_overlay_characters_builds",
+      "source_file": "app/components/overlay/characters/builds.ts",
+      "source_location": "L42",
+      "target": "app_components_overlay_characters_builds_tread",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_overlay_characters_builds",
+      "source_file": "app/components/overlay/characters/builds.ts",
+      "source_location": "L61",
+      "target": "app_components_overlay_characters_builds_dirtpicture",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_overlay_characters_builds",
+      "source_file": "app/components/overlay/characters/builds.ts",
+      "source_location": "L67",
+      "target": "app_components_overlay_characters_builds_plankpicture",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_overlay_characters_builds",
+      "source_file": "app/components/overlay/characters/builds.ts",
+      "source_location": "L75",
+      "target": "app_components_overlay_characters_builds_drawblocks",
       "weight": 1.0
     },
     {
@@ -197283,7 +197437,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L319",
+      "source_location": "L314",
       "target": "app_components_overlay_characters_renderer_drawmarks",
       "weight": 1.0
     },
@@ -197294,7 +197448,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L337",
+      "source_location": "L332",
       "target": "app_components_overlay_characters_renderer_drawparticles",
       "weight": 1.0
     },
@@ -197305,8 +197459,19 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L352",
+      "source_location": "L347",
       "target": "app_components_overlay_characters_renderer_cut",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_overlay_characters_renderer",
+      "source_file": "app/components/overlay/characters/renderer.ts",
+      "source_location": "L356",
+      "target": "app_components_overlay_characters_renderer_textdirection",
       "weight": 1.0
     },
     {
@@ -197328,17 +197493,6 @@
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
       "source_location": "L361",
-      "target": "app_components_overlay_characters_renderer_textdirection",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_overlay_characters_renderer",
-      "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L366",
       "target": "app_components_overlay_characters_renderer_wrap",
       "weight": 1.0
     },
@@ -197349,7 +197503,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L390",
+      "source_location": "L385",
       "target": "app_components_overlay_characters_renderer_breakline",
       "weight": 1.0
     },
@@ -197360,7 +197514,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L397",
+      "source_location": "L392",
       "target": "app_components_overlay_characters_renderer_withcutmark",
       "weight": 1.0
     },
@@ -197371,8 +197525,19 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L404",
+      "source_location": "L399",
       "target": "app_components_overlay_characters_renderer_labelcanvas",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_overlay_characters_renderer",
+      "source_file": "app/components/overlay/characters/renderer.ts",
+      "source_location": "L408",
+      "target": "app_components_overlay_characters_renderer_cached",
       "weight": 1.0
     },
     {
@@ -197393,18 +197558,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L413",
-      "target": "app_components_overlay_characters_renderer_cached",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_overlay_characters_renderer",
-      "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L429",
+      "source_location": "L424",
       "target": "app_components_overlay_characters_renderer_drawglyph",
       "weight": 1.0
     },
@@ -197415,7 +197569,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L451",
+      "source_location": "L446",
       "target": "app_components_overlay_characters_renderer_nametag",
       "weight": 1.0
     },
@@ -197437,7 +197591,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L496",
+      "source_location": "L491",
       "target": "app_components_overlay_characters_renderer_bubble_gap",
       "weight": 1.0
     },
@@ -197448,7 +197602,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L498",
+      "source_location": "L493",
       "target": "app_components_overlay_characters_renderer_leader_min",
       "weight": 1.0
     },
@@ -197459,7 +197613,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L502",
+      "source_location": "L497",
       "target": "app_components_overlay_characters_renderer_lineheight",
       "weight": 1.0
     },
@@ -197470,7 +197624,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L507",
+      "source_location": "L502",
       "target": "app_components_overlay_characters_renderer_bubble",
       "weight": 1.0
     },
@@ -197481,7 +197635,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L575",
+      "source_location": "L570",
       "target": "app_components_overlay_characters_renderer_bubblelines",
       "weight": 1.0
     },
@@ -197492,7 +197646,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L581",
+      "source_location": "L576",
       "target": "app_components_overlay_characters_renderer_bubblecap",
       "weight": 1.0
     },
@@ -197503,7 +197657,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L586",
+      "source_location": "L581",
       "target": "app_components_overlay_characters_renderer_bubbleitem",
       "weight": 1.0
     },
@@ -197514,7 +197668,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L592",
+      "source_location": "L587",
       "target": "app_components_overlay_characters_renderer_bubbleslot",
       "weight": 1.0
     },
@@ -197525,7 +197679,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L600",
+      "source_location": "L595",
       "target": "app_components_overlay_characters_renderer_row",
       "weight": 1.0
     },
@@ -197536,7 +197690,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L609",
+      "source_location": "L604",
       "target": "app_components_overlay_characters_renderer_head",
       "weight": 1.0
     },
@@ -197547,7 +197701,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L616",
+      "source_location": "L611",
       "target": "app_components_overlay_characters_renderer_layoutbubbles",
       "weight": 1.0
     },
@@ -197569,7 +197723,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L661",
+      "source_location": "L656",
       "target": "app_components_overlay_characters_renderer_tailbase",
       "weight": 1.0
     },
@@ -197580,7 +197734,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L671",
+      "source_location": "L666",
       "target": "app_components_overlay_characters_renderer_tailgeometry",
       "weight": 1.0
     },
@@ -197591,7 +197745,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L679",
+      "source_location": "L674",
       "target": "app_components_overlay_characters_renderer_box",
       "weight": 1.0
     },
@@ -197602,7 +197756,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L686",
+      "source_location": "L681",
       "target": "app_components_overlay_characters_renderer_overlaps",
       "weight": 1.0
     },
@@ -197613,7 +197767,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L694",
+      "source_location": "L689",
       "target": "app_components_overlay_characters_renderer_drawtail",
       "weight": 1.0
     },
@@ -197635,7 +197789,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L741",
+      "source_location": "L736",
       "target": "app_components_overlay_characters_renderer_badgeband",
       "weight": 1.0
     },
@@ -197646,7 +197800,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L751",
+      "source_location": "L746",
       "target": "app_components_overlay_characters_renderer_drawlabels",
       "weight": 1.0
     },
@@ -197657,7 +197811,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L825",
+      "source_location": "L820",
       "target": "app_components_overlay_characters_renderer_badgesof",
       "weight": 1.0
     },
@@ -197668,7 +197822,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L842",
+      "source_location": "L837",
       "target": "app_components_overlay_characters_renderer_drawbadges",
       "weight": 1.0
     },
@@ -197690,7 +197844,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_renderer",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L866",
+      "source_location": "L861",
       "target": "app_components_overlay_characters_renderer_draw",
       "weight": 1.0
     },
@@ -197756,7 +197910,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_sprites",
       "source_file": "app/components/overlay/characters/sprites.ts",
-      "source_location": "L40",
+      "source_location": "L42",
       "target": "app_components_overlay_characters_sprites_canvas",
       "weight": 1.0
     },
@@ -197767,8 +197921,8 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_sprites",
       "source_file": "app/components/overlay/characters/sprites.ts",
-      "source_location": "L53",
-      "target": "app_components_overlay_characters_sprites_tintsheet",
+      "source_location": "L55",
+      "target": "app_components_overlay_characters_sprites_tinted",
       "weight": 1.0
     },
     {
@@ -197779,7 +197933,7 @@
       "source": "app_components_overlay_characters_sprites",
       "source_file": "app/components/overlay/characters/sprites.ts",
       "source_location": "L73",
-      "target": "app_components_overlay_characters_sprites_loadimage",
+      "target": "app_components_overlay_characters_sprites_tintsheet",
       "weight": 1.0
     },
     {
@@ -197790,6 +197944,17 @@
       "source": "app_components_overlay_characters_sprites",
       "source_file": "app/components/overlay/characters/sprites.ts",
       "source_location": "L85",
+      "target": "app_components_overlay_characters_sprites_loadimage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_overlay_characters_sprites",
+      "source_file": "app/components/overlay/characters/sprites.ts",
+      "source_location": "L97",
       "target": "app_components_overlay_characters_sprites_loadatlas",
       "weight": 1.0
     },
@@ -197833,7 +197998,18 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_view",
       "source_file": "app/components/overlay/characters/view.ts",
-      "source_location": "L23",
+      "source_location": "L103",
+      "target": "app_components_overlay_characters_view_playgroundview",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_overlay_characters_view",
+      "source_file": "app/components/overlay/characters/view.ts",
+      "source_location": "L30",
       "target": "app_components_overlay_characters_view_characterrow",
       "weight": 1.0
     },
@@ -197844,7 +198020,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_view",
       "source_file": "app/components/overlay/characters/view.ts",
-      "source_location": "L26",
+      "source_location": "L33",
       "target": "app_components_overlay_characters_view_characterstate",
       "weight": 1.0
     },
@@ -197855,7 +198031,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_view",
       "source_file": "app/components/overlay/characters/view.ts",
-      "source_location": "L28",
+      "source_location": "L35",
       "target": "app_components_overlay_characters_view_characterview",
       "weight": 1.0
     },
@@ -197866,7 +198042,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_view",
       "source_file": "app/components/overlay/characters/view.ts",
-      "source_location": "L51",
+      "source_location": "L58",
       "target": "app_components_overlay_characters_view_viewforplatform",
       "weight": 1.0
     },
@@ -197877,7 +198053,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_view",
       "source_file": "app/components/overlay/characters/view.ts",
-      "source_location": "L67",
+      "source_location": "L74",
       "target": "app_components_overlay_characters_view_tilestage",
       "weight": 1.0
     },
@@ -197888,7 +198064,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_view",
       "source_file": "app/components/overlay/characters/view.ts",
-      "source_location": "L69",
+      "source_location": "L76",
       "target": "app_components_overlay_characters_view_tileview",
       "weight": 1.0
     },
@@ -197899,7 +198075,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_view",
       "source_file": "app/components/overlay/characters/view.ts",
-      "source_location": "L76",
+      "source_location": "L83",
       "target": "app_components_overlay_characters_view_blockview",
       "weight": 1.0
     },
@@ -197910,7 +198086,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_view",
       "source_file": "app/components/overlay/characters/view.ts",
-      "source_location": "L82",
+      "source_location": "L89",
       "target": "app_components_overlay_characters_view_ropeview",
       "weight": 1.0
     },
@@ -197932,19 +198108,8 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_view",
       "source_file": "app/components/overlay/characters/view.ts",
-      "source_location": "L90",
+      "source_location": "L97",
       "target": "app_components_overlay_characters_view_flagview",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_overlay_characters_view",
-      "source_file": "app/components/overlay/characters/view.ts",
-      "source_location": "L96",
-      "target": "app_components_overlay_characters_view_playgroundview",
       "weight": 1.0
     },
     {
@@ -200121,7 +200286,7 @@
       "relation": "contains",
       "source": "app_components_overlay_wasteland_playground_theme",
       "source_file": "app/components/overlay/wasteland/playground-theme.ts",
-      "source_location": "L112",
+      "source_location": "L115",
       "target": "app_components_overlay_wasteland_playground_theme_terrainpicture",
       "weight": 1.0
     },
@@ -200132,7 +200297,18 @@
       "relation": "contains",
       "source": "app_components_overlay_wasteland_playground_theme",
       "source_file": "app/components/overlay/wasteland/playground-theme.ts",
-      "source_location": "L13",
+      "source_location": "L12",
+      "target": "app_components_overlay_wasteland_playground_theme_point",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_overlay_wasteland_playground_theme",
+      "source_file": "app/components/overlay/wasteland/playground-theme.ts",
+      "source_location": "L15",
       "target": "app_components_overlay_wasteland_playground_theme_sequence",
       "weight": 1.0
     },
@@ -200143,7 +200319,7 @@
       "relation": "contains",
       "source": "app_components_overlay_wasteland_playground_theme",
       "source_file": "app/components/overlay/wasteland/playground-theme.ts",
-      "source_location": "L148",
+      "source_location": "L159",
       "target": "app_components_overlay_wasteland_playground_theme_pixel_scale",
       "weight": 1.0
     },
@@ -200154,7 +200330,7 @@
       "relation": "contains",
       "source": "app_components_overlay_wasteland_playground_theme",
       "source_file": "app/components/overlay/wasteland/playground-theme.ts",
-      "source_location": "L150",
+      "source_location": "L161",
       "target": "app_components_overlay_wasteland_playground_theme_loop4",
       "weight": 1.0
     },
@@ -200165,7 +200341,7 @@
       "relation": "contains",
       "source": "app_components_overlay_wasteland_playground_theme",
       "source_file": "app/components/overlay/wasteland/playground-theme.ts",
-      "source_location": "L152",
+      "source_location": "L163",
       "target": "app_components_overlay_wasteland_playground_theme_wasteland_playground",
       "weight": 1.0
     },
@@ -200176,7 +200352,7 @@
       "relation": "contains",
       "source": "app_components_overlay_wasteland_playground_theme",
       "source_file": "app/components/overlay/wasteland/playground-theme.ts",
-      "source_location": "L23",
+      "source_location": "L25",
       "target": "app_components_overlay_wasteland_playground_theme_playgroundtheme",
       "weight": 1.0
     },
@@ -233506,7 +233682,7 @@
       "relation": "contains",
       "source": "docs_characters_interactive_characters",
       "source_file": "docs/characters.md",
-      "source_location": "L429",
+      "source_location": "L443",
       "target": "docs_characters_obs_setup",
       "weight": 1.0
     },
@@ -244506,7 +244682,7 @@
       "relation": "contains",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L611",
+      "source_location": "L609",
       "target": "tests_playground_render_test_decode",
       "weight": 1.0
     },
@@ -257831,7 +258007,7 @@
       "label": "BadgeBand",
       "norm_label": "badgeband",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L741"
+      "source_location": "L736"
     },
     {
       "_callable": true,
@@ -257843,7 +258019,7 @@
       "label": "Box",
       "norm_label": "box",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L679"
+      "source_location": "L674"
     },
     {
       "_callable": true,
@@ -257855,7 +258031,7 @@
       "label": "BubbleItem",
       "norm_label": "bubbleitem",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L586"
+      "source_location": "L581"
     },
     {
       "_callable": true,
@@ -257867,7 +258043,7 @@
       "label": "BubbleSlot",
       "norm_label": "bubbleslot",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L592"
+      "source_location": "L587"
     },
     {
       "_callable": true,
@@ -257891,7 +258067,7 @@
       "label": "Head",
       "norm_label": "head",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L609"
+      "source_location": "L604"
     },
     {
       "_callable": true,
@@ -257939,7 +258115,7 @@
       "label": "Row",
       "norm_label": "row",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L600"
+      "source_location": "L595"
     },
     {
       "_callable": true,
@@ -257975,7 +258151,7 @@
       "label": "BlockView",
       "norm_label": "blockview",
       "source_file": "app/components/overlay/characters/view.ts",
-      "source_location": "L76"
+      "source_location": "L83"
     },
     {
       "_callable": true,
@@ -257987,7 +258163,7 @@
       "label": "CharacterRow",
       "norm_label": "characterrow",
       "source_file": "app/components/overlay/characters/view.ts",
-      "source_location": "L23"
+      "source_location": "L30"
     },
     {
       "_callable": true,
@@ -257999,7 +258175,7 @@
       "label": "CharacterState",
       "norm_label": "characterstate",
       "source_file": "app/components/overlay/characters/view.ts",
-      "source_location": "L26"
+      "source_location": "L33"
     },
     {
       "_callable": true,
@@ -258011,7 +258187,7 @@
       "label": "CharacterView",
       "norm_label": "characterview",
       "source_file": "app/components/overlay/characters/view.ts",
-      "source_location": "L28"
+      "source_location": "L35"
     },
     {
       "_callable": true,
@@ -258023,7 +258199,7 @@
       "label": "FlagView",
       "norm_label": "flagview",
       "source_file": "app/components/overlay/characters/view.ts",
-      "source_location": "L90"
+      "source_location": "L97"
     },
     {
       "_callable": true,
@@ -258035,7 +258211,7 @@
       "label": "PlaygroundView",
       "norm_label": "playgroundview",
       "source_file": "app/components/overlay/characters/view.ts",
-      "source_location": "L96"
+      "source_location": "L103"
     },
     {
       "_callable": true,
@@ -258047,7 +258223,7 @@
       "label": "RopeView",
       "norm_label": "ropeview",
       "source_file": "app/components/overlay/characters/view.ts",
-      "source_location": "L82"
+      "source_location": "L89"
     },
     {
       "_callable": true,
@@ -258059,7 +258235,7 @@
       "label": "TileStage",
       "norm_label": "tilestage",
       "source_file": "app/components/overlay/characters/view.ts",
-      "source_location": "L67"
+      "source_location": "L74"
     },
     {
       "_callable": true,
@@ -258071,7 +258247,7 @@
       "label": "TileView",
       "norm_label": "tileview",
       "source_file": "app/components/overlay/characters/view.ts",
-      "source_location": "L69"
+      "source_location": "L76"
     },
     {
       "_callable": true,
@@ -258503,7 +258679,19 @@
       "label": "PlaygroundTheme",
       "norm_label": "playgroundtheme",
       "source_file": "app/components/overlay/wasteland/playground-theme.ts",
-      "source_location": "L23"
+      "source_location": "L25"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_overlay_wasteland_playground_theme_point",
+      "label": "Point",
+      "norm_label": "point",
+      "source_file": "app/components/overlay/wasteland/playground-theme.ts",
+      "source_location": "L12"
     },
     {
       "_callable": true,
@@ -258527,7 +258715,7 @@
       "label": "Sequence",
       "norm_label": "sequence",
       "source_file": "app/components/overlay/wasteland/playground-theme.ts",
-      "source_location": "L13"
+      "source_location": "L15"
     },
     {
       "_callable": true,
@@ -258539,7 +258727,7 @@
       "label": "TerrainPicture",
       "norm_label": "terrainpicture",
       "source_file": "app/components/overlay/wasteland/playground-theme.ts",
-      "source_location": "L112"
+      "source_location": "L115"
     },
     {
       "_callable": true,
@@ -268128,7 +268316,7 @@
       "label": "loadReplies()",
       "norm_label": "loadreplies()",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L860"
+      "source_location": "L864"
     },
     {
       "_callable": true,
@@ -268139,7 +268327,7 @@
       "label": "post()",
       "norm_label": "post()",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L888"
+      "source_location": "L892"
     },
     {
       "_callable": true,
@@ -268150,7 +268338,7 @@
       "label": "run()",
       "norm_label": "run()",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L844"
+      "source_location": "L848"
     },
     {
       "_callable": true,
@@ -269414,7 +269602,7 @@
       "label": "dirtPicture()",
       "norm_label": "dirtpicture()",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L55"
+      "source_location": "L61"
     },
     {
       "_callable": true,
@@ -269425,7 +269613,7 @@
       "label": "drawBlocks()",
       "norm_label": "drawblocks()",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L61"
+      "source_location": "L75"
     },
     {
       "_callable": true,
@@ -269434,20 +269622,9 @@
       "file_type": "code",
       "id": "app_components_overlay_characters_builds_drawflags",
       "label": "drawFlags()",
-      "metadata": {
-        "unresolved_calls": [
-          {
-            "callee": "fillRect",
-            "file": "app/components/overlay/characters/builds.ts",
-            "lang": "typescript",
-            "line": "L90",
-            "receiver_type": "CanvasRenderingContext2D"
-          }
-        ]
-      },
       "norm_label": "drawflags()",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L85"
+      "source_location": "L105"
     },
     {
       "_callable": true,
@@ -269456,20 +269633,9 @@
       "file_type": "code",
       "id": "app_components_overlay_characters_builds_drawgear",
       "label": "drawGear()",
-      "metadata": {
-        "unresolved_calls": [
-          {
-            "callee": "fillRect",
-            "file": "app/components/overlay/characters/builds.ts",
-            "lang": "typescript",
-            "line": "L145",
-            "receiver_type": "CanvasRenderingContext2D"
-          }
-        ]
-      },
       "norm_label": "drawgear()",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L132"
+      "source_location": "L161"
     },
     {
       "_callable": true,
@@ -269484,42 +269650,46 @@
             "callee": "beginPath",
             "file": "app/components/overlay/characters/builds.ts",
             "lang": "typescript",
-            "line": "L121",
+            "line": "L151",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "moveTo",
             "file": "app/components/overlay/characters/builds.ts",
             "lang": "typescript",
-            "line": "L122",
+            "line": "L152",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "lineTo",
             "file": "app/components/overlay/characters/builds.ts",
             "lang": "typescript",
-            "line": "L123",
+            "line": "L153",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "stroke",
             "file": "app/components/overlay/characters/builds.ts",
             "lang": "typescript",
-            "line": "L124",
-            "receiver_type": "CanvasRenderingContext2D"
-          },
-          {
-            "callee": "fillRect",
-            "file": "app/components/overlay/characters/builds.ts",
-            "lang": "typescript",
-            "line": "L127",
+            "line": "L154",
             "receiver_type": "CanvasRenderingContext2D"
           }
         ]
       },
       "norm_label": "drawropes()",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L103"
+      "source_location": "L127"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_overlay_characters_builds_loopframe",
+      "label": "loopFrame()",
+      "norm_label": "loopframe()",
+      "source_file": "app/components/overlay/characters/builds.ts",
+      "source_location": "L100"
     },
     {
       "_callable": true,
@@ -269534,42 +269704,53 @@
             "callee": "drawImage",
             "file": "app/components/overlay/characters/builds.ts",
             "lang": "typescript",
-            "line": "L25",
+            "line": "L31",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "save",
             "file": "app/components/overlay/characters/builds.ts",
             "lang": "typescript",
-            "line": "L28",
+            "line": "L34",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "translate",
             "file": "app/components/overlay/characters/builds.ts",
             "lang": "typescript",
-            "line": "L29",
+            "line": "L35",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "scale",
             "file": "app/components/overlay/characters/builds.ts",
             "lang": "typescript",
-            "line": "L30",
+            "line": "L36",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "restore",
             "file": "app/components/overlay/characters/builds.ts",
             "lang": "typescript",
-            "line": "L32",
+            "line": "L38",
             "receiver_type": "CanvasRenderingContext2D"
           }
         ]
       },
       "norm_label": "picture()",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L15"
+      "source_location": "L21"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_overlay_characters_builds_plankpicture",
+      "label": "plankPicture()",
+      "norm_label": "plankpicture()",
+      "source_file": "app/components/overlay/characters/builds.ts",
+      "source_location": "L67"
     },
     {
       "_callable": true,
@@ -269580,7 +269761,7 @@
       "label": "ropeShare()",
       "norm_label": "ropeshare()",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L97"
+      "source_location": "L121"
     },
     {
       "_callable": true,
@@ -269591,7 +269772,7 @@
       "label": "snap()",
       "norm_label": "snap()",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L11"
+      "source_location": "L17"
     },
     {
       "_callable": true,
@@ -269606,42 +269787,42 @@
             "callee": "save",
             "file": "app/components/overlay/characters/builds.ts",
             "lang": "typescript",
-            "line": "L46",
+            "line": "L52",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "translate",
             "file": "app/components/overlay/characters/builds.ts",
             "lang": "typescript",
-            "line": "L47",
+            "line": "L53",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "scale",
             "file": "app/components/overlay/characters/builds.ts",
             "lang": "typescript",
-            "line": "L48",
+            "line": "L54",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "drawImage",
             "file": "app/components/overlay/characters/builds.ts",
             "lang": "typescript",
-            "line": "L49",
+            "line": "L55",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "restore",
             "file": "app/components/overlay/characters/builds.ts",
             "lang": "typescript",
-            "line": "L51",
+            "line": "L57",
             "receiver_type": "CanvasRenderingContext2D"
           }
         ]
       },
       "norm_label": "tread()",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L36"
+      "source_location": "L42"
     },
     {
       "_callable": true,
@@ -269865,14 +270046,14 @@
             "callee": "measureText",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L836",
+            "line": "L831",
             "receiver_type": "CanvasRenderingContext2D"
           }
         ]
       },
       "norm_label": "badgesof()",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L825"
+      "source_location": "L820"
     },
     {
       "_callable": true,
@@ -269883,7 +270064,7 @@
       "label": "breakLine()",
       "norm_label": "breakline()",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L390"
+      "source_location": "L385"
     },
     {
       "_callable": true,
@@ -269898,70 +270079,70 @@
             "callee": "beginPath",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L538",
+            "line": "L533",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "roundRect",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L539",
+            "line": "L534",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "fill",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L541",
+            "line": "L536",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "save",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L542",
+            "line": "L537",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "clip",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L543",
+            "line": "L538",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "fillRect",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L545",
+            "line": "L540",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "restore",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L546",
+            "line": "L541",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "stroke",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L549",
+            "line": "L544",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "fillText",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L557",
+            "line": "L552",
             "receiver_type": "CanvasRenderingContext2D"
           }
         ]
       },
       "norm_label": "bubble()",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L507"
+      "source_location": "L502"
     },
     {
       "_callable": true,
@@ -269972,7 +270153,7 @@
       "label": "bubbleCap()",
       "norm_label": "bubblecap()",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L581"
+      "source_location": "L576"
     },
     {
       "_callable": true,
@@ -269983,7 +270164,7 @@
       "label": "bubbleLines()",
       "norm_label": "bubblelines()",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L575"
+      "source_location": "L570"
     },
     {
       "_callable": true,
@@ -270005,7 +270186,7 @@
       "label": "cached()",
       "norm_label": "cached()",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L413"
+      "source_location": "L408"
     },
     {
       "_callable": true,
@@ -270027,7 +270208,7 @@
       "label": "cut()",
       "norm_label": "cut()",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L352"
+      "source_location": "L347"
     },
     {
       "_callable": true,
@@ -270042,21 +270223,21 @@
             "callee": "setTransform",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L883",
+            "line": "L878",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "clearRect",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L884",
+            "line": "L879",
             "receiver_type": "CanvasRenderingContext2D"
           }
         ]
       },
       "norm_label": "draw()",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L866"
+      "source_location": "L861"
     },
     {
       "_callable": true,
@@ -270071,35 +270252,35 @@
             "callee": "beginPath",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L854",
+            "line": "L849",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "roundRect",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L855",
+            "line": "L850",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "fill",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L856",
+            "line": "L851",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "fillText",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L858",
+            "line": "L853",
             "receiver_type": "CanvasRenderingContext2D"
           }
         ]
       },
       "norm_label": "drawbadges()",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L842"
+      "source_location": "L837"
     },
     {
       "_callable": true,
@@ -270125,49 +270306,49 @@
             "callee": "save",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L436",
+            "line": "L431",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "translate",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L437",
+            "line": "L432",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "scale",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L438",
+            "line": "L433",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "fill",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L444",
+            "line": "L439",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "stroke",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L445",
+            "line": "L440",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "restore",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L447",
+            "line": "L442",
             "receiver_type": "CanvasRenderingContext2D"
           }
         ]
       },
       "norm_label": "drawglyph()",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L429"
+      "source_location": "L424"
     },
     {
       "_callable": true,
@@ -270182,14 +270363,14 @@
             "callee": "drawImage",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L810",
+            "line": "L805",
             "receiver_type": "CanvasRenderingContext2D"
           }
         ]
       },
       "norm_label": "drawlabels()",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L751"
+      "source_location": "L746"
     },
     {
       "_callable": true,
@@ -270226,14 +270407,14 @@
             "callee": "fillRect",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L330",
+            "line": "L325",
             "receiver_type": "CanvasRenderingContext2D"
           }
         ]
       },
       "norm_label": "drawmarks()",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L319"
+      "source_location": "L314"
     },
     {
       "_callable": true,
@@ -270248,14 +270429,14 @@
             "callee": "fillRect",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L346",
+            "line": "L341",
             "receiver_type": "CanvasRenderingContext2D"
           }
         ]
       },
       "norm_label": "drawparticles()",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L337"
+      "source_location": "L332"
     },
     {
       "_callable": true,
@@ -270281,56 +270462,56 @@
             "callee": "beginPath",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L714",
+            "line": "L709",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "moveTo",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L715",
+            "line": "L710",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "lineTo",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L716",
+            "line": "L711",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "stroke",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L717",
+            "line": "L712",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "arc",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L721",
+            "line": "L716",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "fill",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L725",
+            "line": "L720",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "fillRect",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L737",
+            "line": "L732",
             "receiver_type": "CanvasRenderingContext2D"
           }
         ]
       },
       "norm_label": "drawtail()",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L694"
+      "source_location": "L689"
     },
     {
       "_callable": true,
@@ -270363,7 +270544,7 @@
       "label": "labelCanvas()",
       "norm_label": "labelcanvas()",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L404"
+      "source_location": "L399"
     },
     {
       "_callable": true,
@@ -270374,7 +270555,7 @@
       "label": "layoutBubbles()",
       "norm_label": "layoutbubbles()",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L616"
+      "source_location": "L611"
     },
     {
       "_callable": true,
@@ -270385,7 +270566,7 @@
       "label": "lineHeight()",
       "norm_label": "lineheight()",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L502"
+      "source_location": "L497"
     },
     {
       "_callable": true,
@@ -270422,49 +270603,49 @@
             "callee": "beginPath",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L462",
+            "line": "L457",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "roundRect",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L463",
+            "line": "L458",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "fill",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L464",
+            "line": "L459",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "moveTo",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L468",
+            "line": "L463",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "lineTo",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L469",
+            "line": "L464",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "fillText",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L479",
+            "line": "L474",
             "receiver_type": "CanvasRenderingContext2D"
           }
         ]
       },
       "norm_label": "nametag()",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L451"
+      "source_location": "L446"
     },
     {
       "_callable": true,
@@ -270486,7 +270667,7 @@
       "label": "overlaps()",
       "norm_label": "overlaps()",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L686"
+      "source_location": "L681"
     },
     {
       "_callable": true,
@@ -270519,7 +270700,7 @@
       "label": "tailBase()",
       "norm_label": "tailbase()",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L661"
+      "source_location": "L656"
     },
     {
       "_callable": true,
@@ -270530,7 +270711,7 @@
       "label": "tailGeometry()",
       "norm_label": "tailgeometry()",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L671"
+      "source_location": "L666"
     },
     {
       "_callable": true,
@@ -270541,7 +270722,7 @@
       "label": "textDirection()",
       "norm_label": "textdirection()",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L361"
+      "source_location": "L356"
     },
     {
       "_callable": true,
@@ -270567,14 +270748,14 @@
             "callee": "measureText",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L399",
+            "line": "L394",
             "receiver_type": "CanvasRenderingContext2D"
           }
         ]
       },
       "norm_label": "withcutmark()",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L397"
+      "source_location": "L392"
     },
     {
       "_callable": true,
@@ -270589,14 +270770,14 @@
             "callee": "measureText",
             "file": "app/components/overlay/characters/renderer.ts",
             "lang": "typescript",
-            "line": "L375",
+            "line": "L370",
             "receiver_type": "CanvasRenderingContext2D"
           }
         ]
       },
       "norm_label": "wrap()",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L366"
+      "source_location": "L361"
     },
     {
       "_callable": true,
@@ -270607,7 +270788,7 @@
       "label": "canvas()",
       "norm_label": "canvas()",
       "source_file": "app/components/overlay/characters/sprites.ts",
-      "source_location": "L40"
+      "source_location": "L42"
     },
     {
       "_callable": true,
@@ -270629,7 +270810,7 @@
       "label": "loadAtlas()",
       "norm_label": "loadatlas()",
       "source_file": "app/components/overlay/characters/sprites.ts",
-      "source_location": "L85"
+      "source_location": "L97"
     },
     {
       "_callable": true,
@@ -270644,14 +270825,14 @@
             "callee": "decode",
             "file": "app/components/overlay/characters/sprites.ts",
             "lang": "typescript",
-            "line": "L76",
+            "line": "L88",
             "receiver_type": "Image"
           }
         ]
       },
       "norm_label": "loadimage()",
       "source_file": "app/components/overlay/characters/sprites.ts",
-      "source_location": "L73"
+      "source_location": "L85"
     },
     {
       "_callable": true,
@@ -270691,11 +270872,22 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_components_overlay_characters_sprites_tinted",
+      "label": "tinted()",
+      "norm_label": "tinted()",
+      "source_file": "app/components/overlay/characters/sprites.ts",
+      "source_location": "L55"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_components_overlay_characters_sprites_tintsheet",
       "label": "tintSheet()",
       "norm_label": "tintsheet()",
       "source_file": "app/components/overlay/characters/sprites.ts",
-      "source_location": "L53"
+      "source_location": "L73"
     },
     {
       "_callable": true,
@@ -270728,7 +270920,7 @@
       "label": "viewForPlatform()",
       "norm_label": "viewforplatform()",
       "source_file": "app/components/overlay/characters/view.ts",
-      "source_location": "L51"
+      "source_location": "L58"
     },
     {
       "_callable": true,
@@ -302243,7 +302435,7 @@
       "label": "decode()",
       "norm_label": "decode()",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L611"
+      "source_location": "L609"
     },
     {
       "_callable": true,
@@ -305611,7 +305803,7 @@
       "label": "BUBBLE_GAP",
       "norm_label": "bubble_gap",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L496"
+      "source_location": "L491"
     },
     {
       "_origin": "ast",
@@ -305621,7 +305813,7 @@
       "label": "LEADER_MIN",
       "norm_label": "leader_min",
       "source_file": "app/components/overlay/characters/renderer.ts",
-      "source_location": "L498"
+      "source_location": "L493"
     },
     {
       "_origin": "ast",
@@ -306211,7 +306403,7 @@
       "label": "LOOP4",
       "norm_label": "loop4",
       "source_file": "app/components/overlay/wasteland/playground-theme.ts",
-      "source_location": "L150"
+      "source_location": "L161"
     },
     {
       "_origin": "ast",
@@ -306221,7 +306413,7 @@
       "label": "PIXEL_SCALE",
       "norm_label": "pixel_scale",
       "source_file": "app/components/overlay/wasteland/playground-theme.ts",
-      "source_location": "L148"
+      "source_location": "L159"
     },
     {
       "_origin": "ast",
@@ -306231,7 +306423,7 @@
       "label": "WASTELAND_PLAYGROUND",
       "norm_label": "wasteland_playground",
       "source_file": "app/components/overlay/wasteland/playground-theme.ts",
-      "source_location": "L152"
+      "source_location": "L163"
     },
     {
       "_origin": "ast",
@@ -323303,7 +323495,7 @@
       "node_kind": "heading",
       "norm_label": "obs setup",
       "source_file": "docs/characters.md",
-      "source_location": "L429"
+      "source_location": "L443"
     },
     {
       "_origin": "ast",
