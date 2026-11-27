@@ -31809,7 +31809,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_difflayers",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L160",
+      "source_location": "L163",
       "target": "app_lib_layer_geometry_diffitems",
       "weight": 1.0
     },
@@ -31821,7 +31821,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_difflayers",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L162",
+      "source_location": "L165",
       "target": "app_lib_layer_geometry_difftwitchonly",
       "weight": 1.0
     },
@@ -31833,19 +31833,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_difflayers",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L178",
-      "target": "app_lib_overlay_layers_changedrules",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_lib_layer_geometry_difflayers",
-      "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L180",
+      "source_location": "L173",
       "target": "app_lib_overlay_layers_changedfields",
       "weight": 1.0
     },
@@ -31857,7 +31845,19 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_difflayers",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L185",
+      "source_location": "L175",
+      "target": "app_lib_overlay_layers_changedrules",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_layer_geometry_difflayers",
+      "source_file": "app/lib/layer-geometry.ts",
+      "source_location": "L182",
       "target": "app_lib_layer_geometry_samecell",
       "weight": 1.0
     },
@@ -31869,7 +31869,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_difflayers",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L189",
+      "source_location": "L186",
       "target": "app_lib_layer_geometry_compact",
       "weight": 1.0
     },
@@ -31881,7 +31881,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_dropcell",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L458",
+      "source_location": "L455",
       "target": "app_lib_layer_geometry_movecell",
       "weight": 1.0
     },
@@ -31893,7 +31893,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_firstfreecell",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L476",
+      "source_location": "L473",
       "target": "app_lib_layer_geometry_placeproblem_58c492526df9",
       "weight": 1.0
     },
@@ -31905,7 +31905,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_growcell",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L418",
+      "source_location": "L415",
       "target": "app_lib_layer_geometry_resizecell",
       "weight": 1.0
     },
@@ -31917,7 +31917,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_handleat",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L445",
+      "source_location": "L442",
       "target": "app_lib_layer_geometry_sideat",
       "weight": 1.0
     },
@@ -31929,7 +31929,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_isemptypatch",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L266",
+      "source_location": "L263",
       "target": "app_lib_layer_geometry_compact",
       "weight": 1.0
     },
@@ -31941,7 +31941,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_layersaction_a1e1e0548f1e",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L271",
+      "source_location": "L268",
       "target": "app_lib_layer_geometry_compact",
       "weight": 1.0
     },
@@ -31953,7 +31953,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_mergepatches",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L206",
+      "source_location": "L203",
       "target": "app_lib_layer_geometry_compact",
       "weight": 1.0
     },
@@ -31965,7 +31965,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_mergepatches",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L213",
+      "source_location": "L210",
       "target": "app_lib_layer_geometry_mergerules",
       "weight": 1.0
     },
@@ -31977,7 +31977,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_mergepatches",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L217",
+      "source_location": "L214",
       "target": "app_lib_layer_geometry_mergeitems",
       "weight": 1.0
     },
@@ -31989,7 +31989,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_placeproblem",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L347",
+      "source_location": "L344",
       "target": "app_lib_overlay_layers_cellsoverlap",
       "weight": 1.0
     },
@@ -32001,7 +32001,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_placeproblem",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L349",
+      "source_location": "L346",
       "target": "app_lib_overlay_layers_cellfits",
       "weight": 1.0
     },
@@ -32013,7 +32013,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_placeproblem_58c492526df9",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L347",
+      "source_location": "L344",
       "target": "app_lib_overlay_layers_cellsoverlap",
       "weight": 1.0
     },
@@ -32025,7 +32025,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_placeproblem_58c492526df9",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L349",
+      "source_location": "L346",
       "target": "app_lib_overlay_layers_cellfits",
       "weight": 1.0
     },
@@ -32037,7 +32037,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_removesentcells",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L227",
+      "source_location": "L224",
       "target": "app_lib_layer_geometry_samecell",
       "weight": 1.0
     },
@@ -32049,7 +32049,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_resizecell",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L411",
+      "source_location": "L408",
       "target": "app_lib_layer_geometry_resizespan",
       "weight": 1.0
     },
@@ -32061,7 +32061,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_withenabled",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L307",
+      "source_location": "L304",
       "target": "app_lib_layer_geometry_withitem",
       "weight": 1.0
     },
@@ -32073,7 +32073,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_withenabled",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L307",
+      "source_location": "L304",
       "target": "app_lib_overlay_layers_iscontentlayer",
       "weight": 1.0
     },
@@ -32085,7 +32085,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_withoutsent",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L245",
+      "source_location": "L242",
       "target": "app_lib_layer_geometry_compact",
       "weight": 1.0
     },
@@ -32097,7 +32097,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_withoutsent",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L246",
+      "source_location": "L243",
       "target": "app_lib_layer_geometry_removesentfields",
       "weight": 1.0
     },
@@ -32109,7 +32109,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_withoutsent",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L260",
+      "source_location": "L257",
       "target": "app_lib_layer_geometry_removesentcells",
       "weight": 1.0
     },
@@ -32121,7 +32121,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_withplaced",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L492",
+      "source_location": "L489",
       "target": "app_lib_layer_geometry_placeproblem_58c492526df9",
       "weight": 1.0
     },
@@ -32133,7 +32133,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_withplaced",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L493",
+      "source_location": "L490",
       "target": "app_lib_layer_geometry_withcell",
       "weight": 1.0
     },
@@ -32145,7 +32145,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_withplaced",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L494",
+      "source_location": "L491",
       "target": "app_lib_layer_geometry_withenabled",
       "weight": 1.0
     },
@@ -32157,7 +32157,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_withremoved",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L318",
+      "source_location": "L315",
       "target": "app_lib_layer_geometry_withcell",
       "weight": 1.0
     },
@@ -74556,7 +74556,7 @@
       "relation": "references",
       "source": "app_lib_layer_geometry_resize",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L372",
+      "source_location": "L369",
       "target": "app_lib_overlay_layers_cellrect",
       "weight": 1.0
     },
@@ -211325,6 +211325,17 @@
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
       "source_location": "L156",
+      "target": "app_lib_layer_geometry_character_fields",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_layer_geometry",
+      "source_file": "app/lib/layer-geometry.ts",
+      "source_location": "L159",
       "target": "app_lib_layer_geometry_difflayers",
       "weight": 1.0
     },
@@ -211335,7 +211346,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L192",
+      "source_location": "L189",
       "target": "app_lib_layer_geometry_mergeitems",
       "weight": 1.0
     },
@@ -211346,7 +211357,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L198",
+      "source_location": "L195",
       "target": "app_lib_layer_geometry_mergerules",
       "weight": 1.0
     },
@@ -211357,7 +211368,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L205",
+      "source_location": "L202",
       "target": "app_lib_layer_geometry_mergepatches",
       "weight": 1.0
     },
@@ -211368,7 +211379,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L225",
+      "source_location": "L222",
       "target": "app_lib_layer_geometry_removesentcells",
       "weight": 1.0
     },
@@ -211379,7 +211390,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L231",
+      "source_location": "L228",
       "target": "app_lib_layer_geometry_removesentfields",
       "weight": 1.0
     },
@@ -211390,7 +211401,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L244",
+      "source_location": "L241",
       "target": "app_lib_layer_geometry_withoutsent",
       "weight": 1.0
     },
@@ -211401,7 +211412,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L265",
+      "source_location": "L262",
       "target": "app_lib_layer_geometry_isemptypatch",
       "weight": 1.0
     },
@@ -211412,7 +211423,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L270",
+      "source_location": "L267",
       "target": "app_lib_layer_geometry_layersaction_a1e1e0548f1e",
       "weight": 1.0
     },
@@ -211423,7 +211434,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L275",
+      "source_location": "L272",
       "target": "app_lib_layer_geometry_withcell",
       "weight": 1.0
     },
@@ -211434,7 +211445,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L286",
+      "source_location": "L283",
       "target": "app_lib_layer_geometry_spancells",
       "weight": 1.0
     },
@@ -211445,7 +211456,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L296",
+      "source_location": "L293",
       "target": "app_lib_layer_geometry_movecell",
       "weight": 1.0
     },
@@ -211456,7 +211467,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L306",
+      "source_location": "L303",
       "target": "app_lib_layer_geometry_withenabled",
       "weight": 1.0
     },
@@ -211467,7 +211478,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L312",
+      "source_location": "L309",
       "target": "app_lib_layer_geometry_withitem",
       "weight": 1.0
     },
@@ -211478,7 +211489,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L317",
+      "source_location": "L314",
       "target": "app_lib_layer_geometry_withremoved",
       "weight": 1.0
     },
@@ -211489,7 +211500,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L322",
+      "source_location": "L319",
       "target": "app_lib_layer_geometry_layerat",
       "weight": 1.0
     },
@@ -211500,7 +211511,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L331",
+      "source_location": "L328",
       "target": "app_lib_layer_geometry_placeproblem",
       "weight": 1.0
     },
@@ -211511,7 +211522,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L337",
+      "source_location": "L334",
       "target": "app_lib_layer_geometry_placeproblem_58c492526df9",
       "weight": 1.0
     },
@@ -211533,7 +211544,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L353",
+      "source_location": "L350",
       "target": "app_lib_layer_geometry_resize_handles",
       "weight": 1.0
     },
@@ -211544,7 +211555,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L354",
+      "source_location": "L351",
       "target": "app_lib_layer_geometry_resizehandle",
       "weight": 1.0
     },
@@ -211555,7 +211566,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L356",
+      "source_location": "L353",
       "target": "app_lib_layer_geometry_side",
       "weight": 1.0
     },
@@ -211566,7 +211577,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L359",
+      "source_location": "L356",
       "target": "app_lib_layer_geometry_handle_sides",
       "weight": 1.0
     },
@@ -211577,7 +211588,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L371",
+      "source_location": "L368",
       "target": "app_lib_layer_geometry_resize",
       "weight": 1.0
     },
@@ -211588,7 +211599,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L376",
+      "source_location": "L373",
       "target": "app_lib_layer_geometry_span",
       "weight": 1.0
     },
@@ -211599,7 +211610,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L383",
+      "source_location": "L380",
       "target": "app_lib_layer_geometry_resizespan",
       "weight": 1.0
     },
@@ -211610,7 +211621,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L401",
+      "source_location": "L398",
       "target": "app_lib_layer_geometry_resizecell",
       "weight": 1.0
     },
@@ -211632,7 +211643,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L417",
+      "source_location": "L414",
       "target": "app_lib_layer_geometry_growcell",
       "weight": 1.0
     },
@@ -211643,7 +211654,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L422",
+      "source_location": "L419",
       "target": "app_lib_layer_geometry_handlelines",
       "weight": 1.0
     },
@@ -211654,7 +211665,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L432",
+      "source_location": "L429",
       "target": "app_lib_layer_geometry_sideat",
       "weight": 1.0
     },
@@ -211665,7 +211676,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L444",
+      "source_location": "L441",
       "target": "app_lib_layer_geometry_handleat",
       "weight": 1.0
     },
@@ -211676,7 +211687,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L456",
+      "source_location": "L453",
       "target": "app_lib_layer_geometry_dropcell",
       "weight": 1.0
     },
@@ -211698,7 +211709,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L465",
+      "source_location": "L462",
       "target": "app_lib_layer_geometry_firstfreecell",
       "weight": 1.0
     },
@@ -211709,7 +211720,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L485",
+      "source_location": "L482",
       "target": "app_lib_layer_geometry_withplaced",
       "weight": 1.0
     },
@@ -261770,7 +261781,7 @@
       "label": "PlaceProblem",
       "norm_label": "placeproblem",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L331"
+      "source_location": "L328"
     },
     {
       "_callable": true,
@@ -261782,7 +261793,7 @@
       "label": "Resize",
       "norm_label": "resize",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L371"
+      "source_location": "L368"
     },
     {
       "_callable": true,
@@ -261794,7 +261805,7 @@
       "label": "ResizeHandle",
       "norm_label": "resizehandle",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L354"
+      "source_location": "L351"
     },
     {
       "_callable": true,
@@ -261806,7 +261817,7 @@
       "label": "Side",
       "norm_label": "side",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L356"
+      "source_location": "L353"
     },
     {
       "_callable": true,
@@ -261818,7 +261829,7 @@
       "label": "Span",
       "norm_label": "span",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L376"
+      "source_location": "L373"
     },
     {
       "_callable": true,
@@ -281360,7 +281371,7 @@
       "label": "diffLayers()",
       "norm_label": "difflayers()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L156"
+      "source_location": "L159"
     },
     {
       "_callable": true,
@@ -281382,7 +281393,7 @@
       "label": "dropCell()",
       "norm_label": "dropcell()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L456"
+      "source_location": "L453"
     },
     {
       "_callable": true,
@@ -281393,7 +281404,7 @@
       "label": "firstFreeCell()",
       "norm_label": "firstfreecell()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L465"
+      "source_location": "L462"
     },
     {
       "_callable": true,
@@ -281404,7 +281415,7 @@
       "label": "growCell()",
       "norm_label": "growcell()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L417"
+      "source_location": "L414"
     },
     {
       "_callable": true,
@@ -281415,7 +281426,7 @@
       "label": "handleAt()",
       "norm_label": "handleat()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L444"
+      "source_location": "L441"
     },
     {
       "_callable": true,
@@ -281426,7 +281437,7 @@
       "label": "handleLines()",
       "norm_label": "handlelines()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L422"
+      "source_location": "L419"
     },
     {
       "_callable": true,
@@ -281437,7 +281448,7 @@
       "label": "isEmptyPatch()",
       "norm_label": "isemptypatch()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L265"
+      "source_location": "L262"
     },
     {
       "_callable": true,
@@ -281448,7 +281459,7 @@
       "label": "layerAt()",
       "norm_label": "layerat()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L322"
+      "source_location": "L319"
     },
     {
       "_callable": true,
@@ -281459,7 +281470,7 @@
       "label": "layersAction()",
       "norm_label": "layersaction()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L270"
+      "source_location": "L267"
     },
     {
       "_callable": true,
@@ -281470,7 +281481,7 @@
       "label": "mergeItems()",
       "norm_label": "mergeitems()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L192"
+      "source_location": "L189"
     },
     {
       "_callable": true,
@@ -281481,7 +281492,7 @@
       "label": "mergePatches()",
       "norm_label": "mergepatches()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L205"
+      "source_location": "L202"
     },
     {
       "_callable": true,
@@ -281492,7 +281503,7 @@
       "label": "mergeRules()",
       "norm_label": "mergerules()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L198"
+      "source_location": "L195"
     },
     {
       "_callable": true,
@@ -281503,7 +281514,7 @@
       "label": "moveCell()",
       "norm_label": "movecell()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L296"
+      "source_location": "L293"
     },
     {
       "_callable": true,
@@ -281525,7 +281536,7 @@
       "label": "placeProblem()",
       "norm_label": "placeproblem()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L337"
+      "source_location": "L334"
     },
     {
       "_callable": true,
@@ -281536,7 +281547,7 @@
       "label": "removeSentCells()",
       "norm_label": "removesentcells()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L225"
+      "source_location": "L222"
     },
     {
       "_callable": true,
@@ -281547,7 +281558,7 @@
       "label": "removeSentFields()",
       "norm_label": "removesentfields()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L231"
+      "source_location": "L228"
     },
     {
       "_callable": true,
@@ -281558,7 +281569,7 @@
       "label": "resizeCell()",
       "norm_label": "resizecell()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L401"
+      "source_location": "L398"
     },
     {
       "_callable": true,
@@ -281569,7 +281580,7 @@
       "label": "resizeSpan()",
       "norm_label": "resizespan()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L383"
+      "source_location": "L380"
     },
     {
       "_callable": true,
@@ -281591,7 +281602,7 @@
       "label": "sideAt()",
       "norm_label": "sideat()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L432"
+      "source_location": "L429"
     },
     {
       "_callable": true,
@@ -281602,7 +281613,7 @@
       "label": "spanCells()",
       "norm_label": "spancells()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L286"
+      "source_location": "L283"
     },
     {
       "_callable": true,
@@ -281613,7 +281624,7 @@
       "label": "withCell()",
       "norm_label": "withcell()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L275"
+      "source_location": "L272"
     },
     {
       "_callable": true,
@@ -281624,7 +281635,7 @@
       "label": "withEnabled()",
       "norm_label": "withenabled()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L306"
+      "source_location": "L303"
     },
     {
       "_callable": true,
@@ -281635,7 +281646,7 @@
       "label": "withItem()",
       "norm_label": "withitem()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L312"
+      "source_location": "L309"
     },
     {
       "_callable": true,
@@ -281646,7 +281657,7 @@
       "label": "withoutSent()",
       "norm_label": "withoutsent()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L244"
+      "source_location": "L241"
     },
     {
       "_callable": true,
@@ -281657,7 +281668,7 @@
       "label": "withPlaced()",
       "norm_label": "withplaced()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L485"
+      "source_location": "L482"
     },
     {
       "_callable": true,
@@ -281668,7 +281679,7 @@
       "label": "withRemoved()",
       "norm_label": "withremoved()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L317"
+      "source_location": "L314"
     },
     {
       "_callable": true,
@@ -310595,11 +310606,21 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_lib_layer_geometry_character_fields",
+      "label": "CHARACTER_FIELDS",
+      "norm_label": "character_fields",
+      "source_file": "app/lib/layer-geometry.ts",
+      "source_location": "L156"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_lib_layer_geometry_handle_sides",
       "label": "HANDLE_SIDES",
       "norm_label": "handle_sides",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L359"
+      "source_location": "L356"
     },
     {
       "_origin": "ast",
@@ -310619,7 +310640,7 @@
       "label": "RESIZE_HANDLES",
       "norm_label": "resize_handles",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L353"
+      "source_location": "L350"
     },
     {
       "_origin": "ast",

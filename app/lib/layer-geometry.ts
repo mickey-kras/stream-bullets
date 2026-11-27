@@ -152,6 +152,9 @@ function diffTwitchOnly(before: OverlayLayers, after: OverlayLayers): Partial<Re
   return changed;
 }
 
+/** The settings of the characters layer, in the order of a patch. */
+const CHARACTER_FIELDS = ["enabled", "pushEnabled", "timeout", "max"] as const;
+
 /** The fields that differ from `before` to `after`, with their `after` values. */
 export function diffLayers(before: OverlayLayers, after: OverlayLayers): LayersPatch {
   const patch: LayersPatch = {
@@ -167,13 +170,7 @@ export function diffLayers(before: OverlayLayers, after: OverlayLayers): LayersP
     patch.chat = { ...patch.chat, hideCommands: after.chat.hideCommands };
   if (before.chat.backgroundOpacity !== after.chat.backgroundOpacity)
     patch.chat = { ...patch.chat, backgroundOpacity: after.chat.backgroundOpacity };
-  if (before.characters.enabled !== after.characters.enabled) patch.characters = { enabled: after.characters.enabled };
-  if (before.characters.pushEnabled !== after.characters.pushEnabled)
-    patch.characters = { ...patch.characters, pushEnabled: after.characters.pushEnabled };
-  if (before.characters.timeout !== after.characters.timeout)
-    patch.characters = { ...patch.characters, timeout: after.characters.timeout };
-  if (before.characters.max !== after.characters.max)
-    patch.characters = { ...patch.characters, max: after.characters.max };
+  patch.characters = changedFields(after.characters, before.characters, CHARACTER_FIELDS);
   if (before.camera.enabled !== after.camera.enabled) patch.camera = { enabled: after.camera.enabled };
   patch.alerts = { rules: changedRules(after.alerts.rules, before.alerts.rules) };
   if (before.alerts.enabled !== after.alerts.enabled) patch.alerts.enabled = after.alerts.enabled;
@@ -245,7 +242,7 @@ export function withoutSent(draft: LayersPatch, sent: LayersPatch): LayersPatch 
   const result: LayersPatch = compact(draft);
   removeSentFields(result, sent, ["orientation"]);
   removeSentFields(result.chat, sent.chat, ["enabled", "hideCommands", "backgroundOpacity"]);
-  removeSentFields(result.characters, sent.characters, ["enabled", "pushEnabled", "timeout", "max"]);
+  removeSentFields(result.characters, sent.characters, CHARACTER_FIELDS);
   removeSentFields(result.camera, sent.camera, ["enabled"]);
   removeSentFields(result.alerts, sent.alerts, ["enabled"]);
   for (const rule of ALERT_RULES)
