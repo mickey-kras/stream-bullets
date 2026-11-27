@@ -73,6 +73,11 @@ export interface PlaygroundTheme {
      * platform colour. Each frame rectangle is in the strip, with the pole at its left edge.
      */
     viewerFlag: { strip: Rect; mask: Rect; frames: readonly Rect[]; ticksPerFrame: number };
+    /**
+     * The left edge of each of the four treads of a stair in its cell, for a stair that rises to the right. The
+     * treads follow the steps of the rules (stairRise in terrain.ts), so a character stands on what it sees.
+     */
+    stairTreads: readonly number[];
   };
   joinSign: { dx: number; dy: number };
   exitSign: { dx: number; dy: number };
@@ -117,7 +122,6 @@ export type TerrainPicture =
   | "plankL"
   | "plankM"
   | "plankR"
-  | "stair"
   | "barrel"
   | "crack1"
   | "crack2"
@@ -148,7 +152,8 @@ export type TerrainPicture =
   | "shrub"
   | "sign"
   | "signExit"
-  | "signJoin";
+  | "signJoin"
+  | "step";
 
 /** Design pixels per world pixel. */
 export const PIXEL_SCALE = 3;
@@ -229,7 +234,6 @@ export const WASTELAND_PLAYGROUND: PlaygroundTheme = {
       plankL: [0, 106, 16, 6],
       plankM: [16, 106, 16, 6],
       plankR: [32, 106, 16, 6],
-      stair: [48, 106, 16, 16],
       barrel: [116, 84, 12, 15],
       crack1: [200, 59, 16, 16],
       crack2: [217, 59, 16, 16],
@@ -261,6 +265,7 @@ export const WASTELAND_PLAYGROUND: PlaygroundTheme = {
       sign: [102, 84, 13, 16],
       signExit: [108, 59, 38, 24],
       signJoin: [147, 59, 38, 24],
+      step: [0, 101, 7, 4],
     },
     girderProps: ["barrel", "railing"],
     dirtProps: ["grass", "sign", "rocks", "shrub", "crate"],
@@ -289,6 +294,7 @@ export const WASTELAND_PLAYGROUND: PlaygroundTheme = {
       ],
       ticksPerFrame: 7,
     },
+    stairTreads: [0, 3, 5, 9],
   },
   joinSign: { dx: 38, dy: -24 },
   exitSign: { dx: -76, dy: -24 },

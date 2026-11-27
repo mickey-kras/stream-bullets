@@ -38,6 +38,25 @@ export function picture(
   ctx.restore();
 }
 
+/** One tread of the step picture (3 px, without its leg) with its left edge at x, turned for a stair to the left. */
+function tread(
+  ctx: CanvasRenderingContext2D,
+  theme: PlaygroundTheme,
+  terrain: HTMLImageElement,
+  x: number,
+  top: number,
+  dir: 1 | -1,
+  leg: number,
+): void {
+  const [sx, sy, sw] = theme.terrain.rects.step;
+  ctx.save();
+  ctx.translate(dir > 0 ? x : x + sw, 0);
+  ctx.scale(dir, 1);
+  ctx.drawImage(terrain, sx, sy, sw, 3, 0, top, sw, 3);
+  ctx.drawImage(terrain, sx, sy + 3, sw, 1, 0, top + 3, sw, leg);
+  ctx.restore();
+}
+
 /** The picture of a dirt block: one of the dirt tiles by its cell, or a cracked tile. */
 function dirtPicture(block: BlockView): TerrainPicture {
   if (block.stage === 0) return (["dirt0", "dirt1", "dirt2"] as const)[(block.c + block.r) % 3];
@@ -52,7 +71,7 @@ function plankPicture(block: BlockView, taken: ReadonlySet<string>): TerrainPict
   return left ? "plankR" : "plankL";
 }
 
-/** The builds: dirt blocks with the ground pictures, planks at the top of their cell, and stairs. */
+/** The builds: dirt blocks with the ground pictures, planks at the top of their cell, and stairs of four treads. */
 export function drawBlocks(
   ctx: CanvasRenderingContext2D,
   view: PlaygroundView,
@@ -60,13 +79,20 @@ export function drawBlocks(
   terrain: HTMLImageElement,
 ): void {
   const { rects, tile } = theme.terrain;
+  const sw: number = rects.step[2];
   const taken = new Set<string>(view.blocks.map((block: BlockView): string => `${block.c},${block.r}`));
   for (const block of view.blocks) {
     const x: number = block.c * tile;
     const y: number = view.world.ground - (block.r + 1) * tile;
     if (block.kind === "dirt") picture(ctx, terrain, rects[dirtPicture(block)], x, y);
     else if (block.kind === "plank") picture(ctx, terrain, rects[plankPicture(block, taken)], x, y);
-    else picture(ctx, terrain, rects.stair, x, y, block.dir < 0);
+    else {
+      theme.builds.stairTreads.forEach((dx: number, i: number): void => {
+        const rise: number = 4 * (i + 1);
+        const left: number = block.dir > 0 ? x + dx : x + tile - sw - dx;
+        tread(ctx, theme, terrain, left, y + tile - rise, block.dir, rise - 3);
+      });
+    }
   }
 }
 

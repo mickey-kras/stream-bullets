@@ -10545,7 +10545,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_builds_drawblocks",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L67",
+      "source_location": "L87",
       "target": "app_components_overlay_characters_builds_dirtpicture",
       "weight": 1.0
     },
@@ -10557,7 +10557,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_builds_drawblocks",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L67",
+      "source_location": "L87",
       "target": "app_components_overlay_characters_builds_picture",
       "weight": 1.0
     },
@@ -10569,8 +10569,20 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_builds_drawblocks",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L68",
+      "source_location": "L88",
       "target": "app_components_overlay_characters_builds_plankpicture",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_overlay_characters_builds_drawblocks",
+      "source_file": "app/components/overlay/characters/builds.ts",
+      "source_location": "L93",
+      "target": "app_components_overlay_characters_builds_tread",
       "weight": 1.0
     },
     {
@@ -10581,7 +10593,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_builds_drawflags",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L88",
+      "source_location": "L114",
       "target": "app_components_overlay_characters_builds_loopframe",
       "weight": 1.0
     },
@@ -10593,7 +10605,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_builds_drawflags",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L90",
+      "source_location": "L116",
       "target": "app_components_overlay_characters_builds_picture",
       "weight": 1.0
     },
@@ -10605,7 +10617,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_builds_drawgear",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L145",
+      "source_location": "L171",
       "target": "app_components_overlay_characters_builds_loopframe",
       "weight": 1.0
     },
@@ -10617,7 +10629,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_builds_drawgear",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L149",
+      "source_location": "L175",
       "target": "app_components_overlay_characters_builds_picture",
       "weight": 1.0
     },
@@ -10629,7 +10641,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_builds_drawropes",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L113",
+      "source_location": "L139",
       "target": "app_components_overlay_characters_builds_ropeshare",
       "weight": 1.0
     },
@@ -10641,7 +10653,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_builds_drawropes",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L115",
+      "source_location": "L141",
       "target": "app_components_overlay_characters_builds_snap",
       "weight": 1.0
     },
@@ -10653,7 +10665,7 @@
       "relation": "calls",
       "source": "app_components_overlay_characters_builds_drawropes",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L130",
+      "source_location": "L156",
       "target": "app_components_overlay_characters_builds_picture",
       "weight": 1.0
     },
@@ -194258,7 +194270,40 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_builds",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L101",
+      "source_location": "L100",
+      "target": "app_components_overlay_characters_builds_loopframe",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_overlay_characters_builds",
+      "source_file": "app/components/overlay/characters/builds.ts",
+      "source_location": "L105",
+      "target": "app_components_overlay_characters_builds_drawflags",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_overlay_characters_builds",
+      "source_file": "app/components/overlay/characters/builds.ts",
+      "source_location": "L121",
+      "target": "app_components_overlay_characters_builds_ropeshare",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_overlay_characters_builds",
+      "source_file": "app/components/overlay/characters/builds.ts",
+      "source_location": "L127",
       "target": "app_components_overlay_characters_builds_drawropes",
       "weight": 1.0
     },
@@ -194269,7 +194314,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_builds",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L135",
+      "source_location": "L161",
       "target": "app_components_overlay_characters_builds_drawgear",
       "weight": 1.0
     },
@@ -194303,6 +194348,17 @@
       "source": "app_components_overlay_characters_builds",
       "source_file": "app/components/overlay/characters/builds.ts",
       "source_location": "L42",
+      "target": "app_components_overlay_characters_builds_tread",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_overlay_characters_builds",
+      "source_file": "app/components/overlay/characters/builds.ts",
+      "source_location": "L61",
       "target": "app_components_overlay_characters_builds_dirtpicture",
       "weight": 1.0
     },
@@ -194313,7 +194369,7 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_builds",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L48",
+      "source_location": "L67",
       "target": "app_components_overlay_characters_builds_plankpicture",
       "weight": 1.0
     },
@@ -194324,41 +194380,8 @@
       "relation": "contains",
       "source": "app_components_overlay_characters_builds",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L56",
+      "source_location": "L75",
       "target": "app_components_overlay_characters_builds_drawblocks",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_overlay_characters_builds",
-      "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L74",
-      "target": "app_components_overlay_characters_builds_loopframe",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_overlay_characters_builds",
-      "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L79",
-      "target": "app_components_overlay_characters_builds_drawflags",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_overlay_characters_builds",
-      "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L95",
-      "target": "app_components_overlay_characters_builds_ropeshare",
       "weight": 1.0
     },
     {
@@ -197470,7 +197493,7 @@
       "relation": "contains",
       "source": "app_components_overlay_wasteland_playground_theme",
       "source_file": "app/components/overlay/wasteland/playground-theme.ts",
-      "source_location": "L110",
+      "source_location": "L115",
       "target": "app_components_overlay_wasteland_playground_theme_terrainpicture",
       "weight": 1.0
     },
@@ -197503,7 +197526,7 @@
       "relation": "contains",
       "source": "app_components_overlay_wasteland_playground_theme",
       "source_file": "app/components/overlay/wasteland/playground-theme.ts",
-      "source_location": "L154",
+      "source_location": "L159",
       "target": "app_components_overlay_wasteland_playground_theme_pixel_scale",
       "weight": 1.0
     },
@@ -197514,7 +197537,7 @@
       "relation": "contains",
       "source": "app_components_overlay_wasteland_playground_theme",
       "source_file": "app/components/overlay/wasteland/playground-theme.ts",
-      "source_location": "L156",
+      "source_location": "L161",
       "target": "app_components_overlay_wasteland_playground_theme_loop4",
       "weight": 1.0
     },
@@ -197525,7 +197548,7 @@
       "relation": "contains",
       "source": "app_components_overlay_wasteland_playground_theme",
       "source_file": "app/components/overlay/wasteland/playground-theme.ts",
-      "source_location": "L158",
+      "source_location": "L163",
       "target": "app_components_overlay_wasteland_playground_theme_wasteland_playground",
       "weight": 1.0
     },
@@ -229920,7 +229943,7 @@
       "relation": "contains",
       "source": "docs_characters_interactive_characters",
       "source_file": "docs/characters.md",
-      "source_location": "L442",
+      "source_location": "L443",
       "target": "docs_characters_obs_setup",
       "weight": 1.0
     },
@@ -240711,7 +240734,7 @@
       "relation": "contains",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L604",
+      "source_location": "L609",
       "target": "tests_playground_render_test_decode",
       "weight": 1.0
     },
@@ -254377,7 +254400,7 @@
       "label": "TerrainPicture",
       "norm_label": "terrainpicture",
       "source_file": "app/components/overlay/wasteland/playground-theme.ts",
-      "source_location": "L110"
+      "source_location": "L115"
     },
     {
       "_callable": true,
@@ -264904,7 +264927,7 @@
       "label": "dirtPicture()",
       "norm_label": "dirtpicture()",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L42"
+      "source_location": "L61"
     },
     {
       "_callable": true,
@@ -264915,7 +264938,7 @@
       "label": "drawBlocks()",
       "norm_label": "drawblocks()",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L56"
+      "source_location": "L75"
     },
     {
       "_callable": true,
@@ -264926,7 +264949,7 @@
       "label": "drawFlags()",
       "norm_label": "drawflags()",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L79"
+      "source_location": "L105"
     },
     {
       "_callable": true,
@@ -264937,7 +264960,7 @@
       "label": "drawGear()",
       "norm_label": "drawgear()",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L135"
+      "source_location": "L161"
     },
     {
       "_callable": true,
@@ -264952,35 +264975,35 @@
             "callee": "beginPath",
             "file": "app/components/overlay/characters/builds.ts",
             "lang": "typescript",
-            "line": "L125",
+            "line": "L151",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "moveTo",
             "file": "app/components/overlay/characters/builds.ts",
             "lang": "typescript",
-            "line": "L126",
+            "line": "L152",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "lineTo",
             "file": "app/components/overlay/characters/builds.ts",
             "lang": "typescript",
-            "line": "L127",
+            "line": "L153",
             "receiver_type": "CanvasRenderingContext2D"
           },
           {
             "callee": "stroke",
             "file": "app/components/overlay/characters/builds.ts",
             "lang": "typescript",
-            "line": "L128",
+            "line": "L154",
             "receiver_type": "CanvasRenderingContext2D"
           }
         ]
       },
       "norm_label": "drawropes()",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L101"
+      "source_location": "L127"
     },
     {
       "_callable": true,
@@ -264991,7 +265014,7 @@
       "label": "loopFrame()",
       "norm_label": "loopframe()",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L74"
+      "source_location": "L100"
     },
     {
       "_callable": true,
@@ -265052,7 +265075,7 @@
       "label": "plankPicture()",
       "norm_label": "plankpicture()",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L48"
+      "source_location": "L67"
     },
     {
       "_callable": true,
@@ -265063,7 +265086,7 @@
       "label": "ropeShare()",
       "norm_label": "ropeshare()",
       "source_file": "app/components/overlay/characters/builds.ts",
-      "source_location": "L95"
+      "source_location": "L121"
     },
     {
       "_callable": true,
@@ -265075,6 +265098,56 @@
       "norm_label": "snap()",
       "source_file": "app/components/overlay/characters/builds.ts",
       "source_location": "L17"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_overlay_characters_builds_tread",
+      "label": "tread()",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "save",
+            "file": "app/components/overlay/characters/builds.ts",
+            "lang": "typescript",
+            "line": "L52",
+            "receiver_type": "CanvasRenderingContext2D"
+          },
+          {
+            "callee": "translate",
+            "file": "app/components/overlay/characters/builds.ts",
+            "lang": "typescript",
+            "line": "L53",
+            "receiver_type": "CanvasRenderingContext2D"
+          },
+          {
+            "callee": "scale",
+            "file": "app/components/overlay/characters/builds.ts",
+            "lang": "typescript",
+            "line": "L54",
+            "receiver_type": "CanvasRenderingContext2D"
+          },
+          {
+            "callee": "drawImage",
+            "file": "app/components/overlay/characters/builds.ts",
+            "lang": "typescript",
+            "line": "L55",
+            "receiver_type": "CanvasRenderingContext2D"
+          },
+          {
+            "callee": "restore",
+            "file": "app/components/overlay/characters/builds.ts",
+            "lang": "typescript",
+            "line": "L57",
+            "receiver_type": "CanvasRenderingContext2D"
+          }
+        ]
+      },
+      "norm_label": "tread()",
+      "source_file": "app/components/overlay/characters/builds.ts",
+      "source_location": "L42"
     },
     {
       "_callable": true,
@@ -297185,7 +297258,7 @@
       "label": "decode()",
       "norm_label": "decode()",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L604"
+      "source_location": "L609"
     },
     {
       "_callable": true,
@@ -301121,7 +301194,7 @@
       "label": "LOOP4",
       "norm_label": "loop4",
       "source_file": "app/components/overlay/wasteland/playground-theme.ts",
-      "source_location": "L156"
+      "source_location": "L161"
     },
     {
       "_origin": "ast",
@@ -301131,7 +301204,7 @@
       "label": "PIXEL_SCALE",
       "norm_label": "pixel_scale",
       "source_file": "app/components/overlay/wasteland/playground-theme.ts",
-      "source_location": "L154"
+      "source_location": "L159"
     },
     {
       "_origin": "ast",
@@ -301141,7 +301214,7 @@
       "label": "WASTELAND_PLAYGROUND",
       "norm_label": "wasteland_playground",
       "source_file": "app/components/overlay/wasteland/playground-theme.ts",
-      "source_location": "L158"
+      "source_location": "L163"
     },
     {
       "_origin": "ast",
@@ -317689,7 +317762,7 @@
       "node_kind": "heading",
       "norm_label": "obs setup",
       "source_file": "docs/characters.md",
-      "source_location": "L442"
+      "source_location": "L443"
     },
     {
       "_origin": "ast",

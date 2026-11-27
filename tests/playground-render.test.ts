@@ -477,9 +477,14 @@ describe("playground canvas rendering", () => {
       expect(pictures).toContainEqual([...theme.terrain.rects[name]]);
     }
     expect(canvas.calls).toContainEqual({ method: "scale", args: [-1, 1] });
-    // The dirt block at (8, 0) uses a ground picture. The stair to the left is the stair picture, turned.
+    // The dirt block at (8, 0) uses a ground picture. The four treads of the stair have legs of 1, 5, 9 and 13 px.
     expect(pictures).toContainEqual([...theme.terrain.rects.dirt2]);
-    expect(pictures).toContainEqual([...theme.terrain.rects.stair]);
+    const legs: unknown[] = canvas.calls
+      .filter(
+        (call) => call.method === "drawImage" && call.args.length === 9 && call.args[3] === 7 && call.args[4] === 1,
+      )
+      .map((call) => call.args[8]);
+    expect(legs).toEqual([1, 5, 9, 13]);
     // A plank with no block beside it is the middle piece.
     expect(pictures).toContainEqual([...theme.terrain.rects.plankM]);
     // The rope of character 1 (two strokes) with its hook, the flag with its pole on x 304 (the second frame at this time), and the crown.

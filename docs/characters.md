@@ -150,7 +150,7 @@ With reduced motion, the demos stand still.
 - A character stays on screen until its action ends. Each action has a fixed end.
 - Some commands cannot run: a block in a door zone, a dig on protected ground, a hook that catches nothing.
   Then a red cross shows above the character.
-- The dig and the dirt blocks use the art of the ground. Each other action has its own pictures.
+- The dig, the dirt blocks, and the stairs use the art of the ground. Each other action has its own pictures.
   The rope of the grapple is a drawn line.
 
 ## Terrain
@@ -422,7 +422,6 @@ We made `public/assets/overlay/wasteland-courier.png` from the courier source wi
 `public/assets/overlay/wasteland-terrain.png` holds the terrain pictures of the prototype.
 We exported them from the drawing code of the prototype in headless Chromium.
 Then we cleaned them to binary alpha and 128 colors. The file also holds the hole edge and the stair step.
-The playground does not use the stair step now.
 
 The art of the second set is in `design/assets/Imagery/characters/expansion-v1`. Its `README.md` gives the source and the checks.
 We added that art to the two files with Python, Pillow, and NumPy:
@@ -431,8 +430,10 @@ We added that art to the two files with Python, Pillow, and NumPy:
    The loose equipment is below row 18.
 2. We made the helmet and scarf masks of the new rows lighter, to the 16 levels of the first masks.
    Thus a new row gets the same platform color as an old row.
-3. The props are below the terrain pictures: the planks, the stair, the hook, the flames, the crown, and the viewer flags.
+3. The props are below the terrain pictures: the planks, the hook, the flames, the crown, and the viewer flags.
    The mask of the flag cloth is beside the flags. It gets the platform color.
+   The playground does not use the new stair picture: its steps do not agree with the steps of the rules.
+   A stair keeps its four treads of the stair step.
 4. Each file keeps one palette of 256 colors. To fit, we joined the two nearest opaque colors until the file had 256 values.
    No color channel changed by more than 7 of 255. The alpha is exact.
 
