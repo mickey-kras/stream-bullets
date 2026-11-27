@@ -8,7 +8,13 @@ import { ChatDeliveryContext } from "../app/components/channels/use-live-channel
 import type { CharactersControl } from "../app/components/overlay/characters-controls";
 import { ChatLayer, chatStyle, shortName } from "../app/components/overlay/chat-layer";
 import { outputSources, type OverlaySources } from "../app/components/live";
-import { LAYER_GROUPS, LayerPalette, type LayerGroup } from "../app/components/overlay/layer-palette";
+import {
+  LAYER_GROUPS,
+  LayerPalette,
+  RECOGNITION_READY,
+  shownGroups,
+  type LayerGroup,
+} from "../app/components/overlay/layer-palette";
 import { LayerProperties, OVERLAY_MESSAGE_MAX } from "../app/components/overlay/layer-properties";
 import { GridHelp, LAYER_NAMES, LayoutGrid, type LayoutGridHandle } from "../app/components/overlay/layout-grid";
 import { CharactersSlot, OverlayComposition, usesDesignCanvas } from "../app/components/overlay/overlay-composition";
@@ -32,6 +38,7 @@ import {
   DEFAULT_LAYERS,
   GRID_LAYERS,
   emptyCells,
+  isContentLayer,
   type ContentSource,
   type GridLayer,
   type Orientation,
@@ -583,7 +590,10 @@ describe("overlay control page", () => {
     );
     // The sequence of the list is the sequence of the groups: the picture, then the content.
     expect(order).toEqual(["chat", "characters", "camera", "poll", "topic", "next", "message", "card", "support"]);
-    expect([...order].sort()).toEqual([...GRID_LAYERS].sort());
+    // The alerts and the goal are layers of the grid with no chip: the list does not show their group yet.
+    expect(RECOGNITION_READY).toBe(false);
+    expect(GRID_LAYERS.filter((layer: GridLayer): boolean => !order.includes(layer))).toEqual(["alerts", "goal"]);
+    expect(html).not.toContain("Recognition");
     const marked: boolean[] = chips.map((chip: string): boolean => chip.includes('data-placed="true"'));
     expect(marked).toEqual([true, false, false, true, false, false, false, false, false]);
     for (const name of ["Chat", "Characters", "Poll", "Topic", "Up next", "Message banner", "Community card"])
@@ -705,8 +715,9 @@ describe("settings of the selected layer", () => {
     expect(html).toMatch(new RegExp(`<h3 class="ov-props-name" id="[^"]+">${t(LAYER_NAMES[layer])}</h3>`));
     expect(html).toContain("Show on stream");
     expect(html).toMatch(/<button type="button" data-props-remove="true">Remove from grid<\/button>/);
-    // The characters and the camera frame have no background. They, the chat and the message banner have no QR code.
-    const plain: boolean = layer === "characters" || layer === "camera";
+    // Only the chat and the content layers have a background. Only the content layers but the message banner have a
+    // QR code.
+    const plain: boolean = layer !== "chat" && !isContentLayer(layer);
     expect(html.includes("data-props-background")).toBe(!plain);
     expect(html.includes("data-props-qr")).toBe(!plain && layer !== "chat" && layer !== "message");
     // The camera frame says where the camera goes.
@@ -987,11 +998,22 @@ describe("layer palette and layout grid", () => {
       [...group.matchAll(/data-comp-layer="([a-z]+)"/g)].map((match: RegExpMatchArray): string => match[1]);
     expect(layersOf(groups[0])).toEqual(["chat", "characters", "camera"]);
     expect(layersOf(groups[1])).toEqual(["poll", "topic", "next", "message", "card", "support"]);
-    // The groups are data: each layer of the grid is in one group, and the list shows each group.
-    expect(LAYER_GROUPS.map((group: LayerGroup): string => group.id)).toEqual(["picture", "content"]);
+    // The groups are data: each layer of the grid is in one group.
+    expect(LAYER_GROUPS.map((group: LayerGroup): string => group.id)).toEqual(["picture", "recognition", "content"]);
     const grouped: GridLayer[] = LAYER_GROUPS.flatMap((group: LayerGroup): readonly GridLayer[] => group.layers);
     expect([...grouped].sort()).toEqual([...GRID_LAYERS].sort());
     expect(new Set(grouped).size).toBe(grouped.length);
+    // The list shows each group but Recognition, until the overlay shows the alerts and the goal.
+    expect(shownGroups().map((group: LayerGroup): string => group.id)).toEqual(["picture", "content"]);
+    expect(shownGroups(false)).toEqual(shownGroups());
+    expect(shownGroups(true)).toEqual(LAYER_GROUPS);
+    expect(LAYER_GROUPS[1]).toEqual({
+      id: "recognition",
+      name: "overlay.group.recognition",
+      layers: ["alerts", "goal"],
+    });
+    expect(t(LAYER_GROUPS[1].name)).toBe("Recognition");
+    expect(LAYER_GROUPS[1].layers.map((layer: GridLayer): string => t(LAYER_NAMES[layer]))).toEqual(["Alerts", "Goal"]);
     // The text about the chips does not show. It is the description of each chip for a screen reader.
     const hint: string | undefined = /<p hidden="" id="([^"]+)" data-comp-palette-hint="true">Select a layer to/.exec(
       html,

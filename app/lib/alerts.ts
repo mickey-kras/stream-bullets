@@ -53,6 +53,19 @@ export const KIND_RULES: Readonly<Record<AlertKind, AlertRuleId>> = {
   topic: "topic",
 };
 
+/** One value for each rule. */
+export function ruleRecord<T>(value: (rule: AlertRuleId) => T): Record<AlertRuleId, T> {
+  return {
+    follow: value("follow"),
+    subscription: value("subscription"),
+    gift: value("gift"),
+    bits: value("bits"),
+    paid: value("paid"),
+    raid: value("raid"),
+    topic: value("topic"),
+  };
+}
+
 function isAlertKind(kind: SupportKind): kind is AlertKind {
   const kinds: readonly string[] = ALERT_KINDS;
   return kinds.includes(kind);
