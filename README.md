@@ -189,7 +189,8 @@ One-time setup:
 - Make the checks mandatory and block direct pushes. See [Quality gates](#quality-gates).
 
 Deployment records a bookmark for D1 Time Travel, applies migrations, uploads Worker and assets, and checks the homepage and stylesheet.
-Migration failure stops deployment. Smoke failure fails the run without automatic schema rollback.
+The Worker sends its commit in `X-StreamBullets-Revision`. The checks wait up to 60 seconds for that commit, so a page from the previous version does not pass.
+Migration failure stops deployment. Smoke failure restores the previous Worker version and checks that it serves its own commit. The rollback does not reverse migrations.
 Keep migrations compatible with the live Worker. Time Travel keeps 7 days on Free and 30 days on Paid.
 
 After fixing a missing secret, rerun the failed job.
