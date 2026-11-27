@@ -20,7 +20,6 @@ import {
   MARK_TICKS,
   MIN_STAY_TICKS,
   MOVEMENT_COOLDOWN_TICKS,
-  NEW_TICKS,
   PUSH_VX,
   PUSH_VY,
   REGISTRY_IDLE_TICKS,
@@ -50,14 +49,8 @@ import {
   BUBBLE_MAX_UNITS,
   type BubbleView,
   boundText,
-  CHAR_STATES,
   type CharState,
-  type CharTuple,
   type ExtrasView,
-  type FlagTuple,
-  FLAG_NEW,
-  FLAG_UNAVAILABLE,
-  FRAME_T_WRAP,
   type ModeView,
   CUT_MARK,
   NAME_GRAPHEMES,
@@ -65,14 +58,12 @@ import {
   PLAYGROUND_VERSION,
   type PlaygroundFullFrame,
   type PlaygroundTickFrame,
-  type RopeTuple,
   type RosterEntry,
   type TerrainView,
 } from "./protocol";
 import {
   blockOrder,
   blocksString,
-  cellX,
   clearBuilds,
   colOf,
   createTerrain,
@@ -110,6 +101,7 @@ import {
   siteKey,
   STANDING_STATES,
 } from "./core";
+import { bubbleViews, charTuples, extrasView } from "./frames";
 import { Motion } from "./motion";
 import { Works } from "./works";
 
@@ -822,35 +814,6 @@ export class PlaygroundSim implements SimHost {
     return this.list().filter((p: Participant): boolean => p.admitted);
   }
 
-  private chars(visible: Participant[]): CharTuple[] {
-    return visible.map((p: Participant): CharTuple => {
-      const flags: number =
-        (p.mark > 0 ? FLAG_UNAVAILABLE : 0) | (this.clock - p.admittedAt < NEW_TICKS ? FLAG_NEW : 0);
-      return [
-        p.id,
-        Math.round(p.x * 10),
-        Math.round(p.y * 10),
-        CHAR_STATES.indexOf(p.state as CharState),
-        p.t % FRAME_T_WRAP,
-        p.dir,
-        flags,
-      ];
-    });
-  }
-
-  private extras(visible: Participant[]): ExtrasView {
-    const ids = new Set<number>(visible.map((p: Participant): number => p.id));
-    return {
-      ropes: visible.flatMap((p: Participant): RopeTuple[] =>
-        p.rope ? [[p.id, Math.round(p.rope.x), Math.round(p.rope.y), p.rope.hit ? 1 : 0]] : [],
-      ),
-      flags: this.terrain.flags
-        .filter((flag: Flag): boolean => ids.has(flag.id))
-        .map((flag: Flag): FlagTuple => [flag.id, cellX(flag.c), floorY(this.world, flag.r)]),
-      crown: this.crown !== null && ids.has(this.crown) ? this.crown : null,
-    };
-  }
-
   private sections(): {
     roster: RosterEntry[];
     bubbles: BubbleView[];
@@ -861,15 +824,9 @@ export class PlaygroundSim implements SimHost {
     const visible: Participant[] = this.visible();
     return {
       roster: visible.map((p: Participant): RosterEntry => ({ id: p.id, platform: p.platform, name: p.name })),
-      // Oldest first, so the overlay draws the newest bubble on top.
-      bubbles: visible
-        .flatMap((p: Participant): [number, BubbleView][] =>
-          p.bubble ? [[p.bubble.at, { id: p.id, text: p.bubble.text }]] : [],
-        )
-        .sort((a: [number, BubbleView], b: [number, BubbleView]): number => a[0] - b[0])
-        .map(([, bubble]: [number, BubbleView]): BubbleView => bubble),
+      bubbles: bubbleViews(visible),
       terrain: terrainView(this.world, this.terrain),
-      extras: this.extras(visible),
+      extras: extrasView(visible, this.world, this.terrain, this.crown),
       mode: { paused: this.paused, test: this.testEndsAt !== null },
     };
   }
@@ -881,7 +838,7 @@ export class PlaygroundSim implements SimHost {
       v: PLAYGROUND_VERSION,
       full: true,
       tick: this.clock,
-      chars: this.chars(this.visible()),
+      chars: charTuples(this.visible(), this.clock),
       ...this.sections(),
     };
   }
@@ -893,7 +850,7 @@ export class PlaygroundSim implements SimHost {
       v: PLAYGROUND_VERSION,
       full: false,
       tick: this.clock,
-      chars: this.chars(this.visible()),
+      chars: charTuples(this.visible(), this.clock),
     };
     const sections = this.sections();
     for (const name of ["roster", "bubbles", "terrain", "extras", "mode"] as const) {
