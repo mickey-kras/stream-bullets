@@ -71,8 +71,8 @@ export function drawBlocks(
 }
 
 /** The frame of a loop at `now` (performance.now()): each frame shows for `ticks` rules ticks. */
-function loopFrame(now: number, ticks: number, count: number, reduced: boolean): number {
-  return reduced ? 0 : Math.floor((now * TICK_HZ) / (1000 * ticks)) % count;
+function loopFrame(now: number, ticks: number, count: number): number {
+  return Math.floor((now * TICK_HZ) / (1000 * ticks)) % count;
 }
 
 /** The flags of the viewers: the cloth has the helmet colour of the owner's platform. The pole stands on flag.x + 4. */
@@ -85,7 +85,7 @@ export function drawFlags(
   reduced: boolean,
 ): void {
   const { frames, ticksPerFrame } = theme.builds.viewerFlag;
-  const frame: Rect = frames[loopFrame(now, ticksPerFrame, frames.length, reduced)];
+  const frame: Rect = frames[reduced ? 0 : loopFrame(now, ticksPerFrame, frames.length)];
   for (const flag of view.flags) {
     picture(ctx, atlas.flags.get(flag.platform), frame, Math.round(flag.x) + 4, Math.round(flag.y) - frame[3]);
   }
@@ -142,7 +142,7 @@ export function drawGear(
 ): void {
   const { rects } = theme.terrain;
   const { flame, crown } = theme.builds;
-  const burn: Rect = rects[flame.pictures[loopFrame(now, 2, flame.pictures.length, reduced)]];
+  const burn: Rect = rects[flame.pictures[reduced ? 0 : loopFrame(now, 2, flame.pictures.length)]];
   for (const c of view.characters) {
     const x: number = Math.round(c.x);
     const y: number = Math.round(c.y);
