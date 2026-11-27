@@ -27,6 +27,7 @@ const DOCK_IP = clientIp("tools-live", 48);
 const REPLAY_IP = clientIp("tools-live", 49);
 const SUPPORT_IP = clientIp("tools-live", 52);
 const SUPPORT_DOCK_IP = clientIp("tools-live", 53);
+const LAYOUT_IP = clientIp("tools-live", 54);
 
 const now: number = Date.now();
 const entry = (id: string, kind: "choice" | "topic", title: string, age: number): string =>
@@ -195,6 +196,134 @@ test("the owner features a viewer topic and puts the message banner on stream", 
   await expect(obsMessage).toHaveCount(0);
   await expect(message.locator("[data-live-message-show]")).toHaveText("Put on stream");
   await close(obs);
+  await close(owner);
+});
+
+interface Box {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  // The text is wider than the box, so a part of it does not show.
+  cut: boolean;
+}
+
+function boxes(locator: Locator): Promise<Box[]> {
+  return locator.evaluateAll((elements: Element[]): Box[] =>
+    elements.map((element: Element): Box => {
+      const { x, y, width, height } = element.getBoundingClientRect();
+      return { x, y, width, height, cut: element.scrollWidth > element.clientWidth + 1 };
+    }),
+  );
+}
+
+test("Live has a link to Overlay beside the preview title, the poll actions in one row, and one width for the buttons of the topics and of the message", async ({
+  browser,
+}) => {
+  const owner = await signedIn(browser, "featureowner", LAYOUT_IP);
+  const page = await newPage(owner);
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/tools?view=live");
+  const poll = page.locator('[data-live-part="poll"]');
+  const row = poll.locator("[data-live-poll-actions]");
+  const feature = page.locator('[data-live-part="topics"] .tl-action');
+  const put = page.locator("[data-live-message-show]");
+  await expect(row.getByRole("button")).toHaveText(["Reveal results", "Close voting", "Take off air"]);
+  await expect(feature).toHaveText(["Feature on stream", "Feature on stream", "Feature on stream"]);
+  await expect(put).toHaveText("Put on stream");
+
+  /** The poll actions are one line of equal columns that fills the part. Each one is a touch target. */
+  const oneRow = async (): Promise<void> => {
+    const [part] = await boxes(poll);
+    const actions: Box[] = await boxes(row.getByRole("button"));
+    expect(actions).toHaveLength(3);
+    for (const action of actions) {
+      expect(action.y).toBe(actions[0].y);
+      expect(action.height).toBe(actions[0].height);
+      expect(action.width).toBeCloseTo(actions[0].width, 0);
+      expect(action.height).toBeGreaterThanOrEqual(44);
+      expect(action.cut).toBe(false);
+    }
+    expect(actions[0].x).toBeCloseTo(part.x, 0);
+    expect(actions[2].x + actions[2].width).toBeCloseTo(part.x + part.width, 0);
+  };
+  /** The buttons that feature a topic and the button of the message banner: one width, one right edge. */
+  const oneWidth = async (): Promise<Box[]> => {
+    const buttons: Box[] = [...(await boxes(feature)), ...(await boxes(put))];
+    expect(buttons).toHaveLength(4);
+    for (const button of buttons) {
+      expect(button.width).toBeCloseTo(buttons[0].width, 0);
+      expect(button.x + button.width).toBeCloseTo(buttons[0].x + buttons[0].width, 0);
+      expect(button.height).toBeGreaterThanOrEqual(44);
+      expect(button.cut).toBe(false);
+    }
+    return buttons;
+  };
+
+  await oneRow();
+  const wide: Box[] = await oneWidth();
+  // On a desktop the buttons are at the end of their rows: the text of a row is wider than its button.
+  const [topics] = await boxes(page.locator('[data-live-part="topics"]'));
+  expect(wide[0].x + wide[0].width).toBeCloseTo(topics.x + topics.width, 0);
+  expect(wide[0].width).toBeLessThan(topics.width / 2);
+
+  // The link beside the title of the preview has only an icon, a name, and a tooltip.
+  const preview = page.locator('[data-live-part="preview"]');
+  const edit = preview.getByRole("link", { name: "Edit the overlay" });
+  await expect(edit).toHaveAttribute("title", "Edit the overlay");
+  await expect(edit).toHaveAttribute("href", "/tools?view=overlay");
+  await expect(edit).toHaveText("");
+  const [link] = await boxes(edit);
+  const [heading] = await boxes(preview.locator(".ov-step-title"));
+  expect(link.width).toBeGreaterThanOrEqual(44);
+  expect(link.height).toBeGreaterThanOrEqual(44);
+  expect(link.x).toBeGreaterThan(heading.x + heading.width);
+  expect(link.y + link.height / 2).toBeGreaterThan(heading.y);
+  expect(link.y + link.height / 2).toBeLessThan(heading.y + heading.height);
+  // The preview is read-only: the link is its only control.
+  await expect(preview.locator("button, input, select, textarea")).toHaveCount(0);
+
+  // The message on stream has two buttons of that width, and the topic on stream keeps the width of its button.
+  await page.locator("[data-live-message]").fill("Back soon.");
+  await put.click();
+  const off = page.locator("[data-live-message-off]");
+  await expect(off).toBeVisible();
+  await feature.first().click();
+  await expect(feature.first()).toHaveText("Take off air");
+  const featured: Box[] = await boxes(feature);
+  const [update] = await boxes(put);
+  const [takeOff] = await boxes(off);
+  for (const button of [...featured, update, takeOff]) expect(button.width).toBeCloseTo(wide[0].width, 0);
+  // The button that takes the message off air is at the end of its row. The button that updates it is before it.
+  expect(takeOff.x + takeOff.width).toBeCloseTo(featured[0].x + featured[0].width, 0);
+  expect(update.y).toBe(takeOff.y);
+  expect(update.x + update.width).toBeLessThan(takeOff.x);
+
+  // A phone keeps the poll actions in one row. The other buttons fill the width of the part.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await oneRow();
+  const narrow: Box[] = await oneWidth();
+  const [part] = await boxes(page.locator('[data-live-part="topics"]'));
+  expect(narrow[0].width).toBeCloseTo(part.width, 0);
+  expect(await page.evaluate((): number => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  // A larger text size has no room for three columns: the actions are one column of equal buttons.
+  await page.evaluate((): void => {
+    document.documentElement.dataset.text = "130";
+  });
+  const stacked: Box[] = await boxes(row.getByRole("button"));
+  expect(new Set(stacked.map((action: Box): number => action.y)).size).toBe(3);
+  for (const action of stacked) {
+    expect(action.width).toBeCloseTo(stacked[0].width, 0);
+    expect(action.cut).toBe(false);
+  }
+  await page.evaluate((): void => {
+    delete document.documentElement.dataset.text;
+  });
+
+  // The link opens the Overlay section.
+  await edit.click();
+  await expect(page).toHaveURL(/\/tools\?view=overlay$/);
+  await expect(page.locator(".ov-head").getByRole("heading", { level: 1 })).toHaveAccessibleName("Overlay");
   await close(owner);
 });
 

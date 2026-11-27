@@ -11,7 +11,7 @@ import { LivePoll } from "../app/components/tools/live-poll";
 import { LiveSection, onAirTitle } from "../app/components/tools/live-section";
 import { supportLine } from "../app/components/tools/live-support";
 import { LIVE_TOPICS, LiveTopics, liveTopics } from "../app/components/tools/live-topics";
-import { DEFAULT_LOCALE, loadCatalog, setLocaleSource, type Locale } from "../app/i18n";
+import { DEFAULT_LOCALE, LOCALES, loadCatalog, setLocaleSource, type Locale } from "../app/i18n";
 import { SUPPORT_KINDS, type ActivityPlatform } from "../app/lib/activity";
 import type { ChannelView } from "../app/lib/channel-health";
 import type { LiveChatRow, LiveSupportRow } from "../app/lib/live-chat";
@@ -121,6 +121,25 @@ describe("poll on stream", (): void => {
     expect(html).toContain("Results show on stream");
   });
 
+  it("has the actions that change the stream in one row, and the link and the QR code above it", (): void => {
+    /** The buttons of the row, by their test attribute, in their order. */
+    const row = (html: string): string[] => {
+      const inner: string = html.split("data-live-poll-actions")[1].split("</div>")[0];
+      return [...inner.matchAll(/<button[^>]*data-live-poll-(\w+)="true"/g)].map((match: RegExpMatchArray) => match[1]);
+    };
+    const html: string = pollPart(stateOf(onGrid));
+    expect(html).toMatch(/<div class="tl-fill-row" data-live-poll-actions="true">/);
+    expect(row(html)).toEqual(["results", "close", "air"]);
+    // The row has only these buttons. Its styles give each of them the same width.
+    const before: string = html.split("data-live-poll-actions")[0];
+    expect(before).toContain("Copy link");
+    expect(before).toContain("data-live-poll-qr");
+    // The buttons of the row have the full size, for a finger.
+    expect(html.split("data-live-poll-actions")[1]).not.toContain("small-button");
+    // A poll that viewers cannot vote on has two actions: the row has two equal columns.
+    expect(row(pollPart(stateOf(onGrid), { polls: [poll("p1", { revealed: true })] }))).toEqual(["results", "air"]);
+  });
+
   it("offers Close voting only while viewers can vote on a poll that is not a Mash Battle", (): void => {
     const state: OverlayState = stateOf(onGrid);
     // The note under the buttons also names Close voting, so look for the button.
@@ -208,6 +227,15 @@ describe("viewer topics", (): void => {
     expect(part(stateOf(off))).not.toContain("Take off air");
   });
 
+  it("gives the button of each topic the class of the common width", (): void => {
+    const layers: OverlayLayers = layersWith({ topic: { ...onGrid.items.topic, ref: "t2" } });
+    const html: string = part(stateOf(layers));
+    // One button for each row, also for the topic on air: the styles give this class one width.
+    expect(html.match(/<button type="button" class="tl-action"/g)).toHaveLength(LIVE_TOPICS);
+    expect(html.match(/<button/g)).toHaveLength(LIVE_TOPICS);
+    expect(html).not.toContain("small-button");
+  });
+
   it("marks the topic on air in the output that the editor does not show", (): void => {
     const layers: OverlayLayers = layersWith({ topic: { ...onGrid.items.topic, ref: "t2" } }, otherOutput);
     const html: string = part(stateOf(layers));
@@ -260,6 +288,21 @@ describe("message banner", (): void => {
     // Nothing changed yet, so there is nothing to update.
     expect(html).toMatch(/<button type="submit"[^>]*disabled=""/);
     expect(html).toMatch(/aria-pressed="true"[^>]*>Hype/);
+  });
+
+  it("gives its buttons the class of the buttons that feature a topic, after the state", (): void => {
+    const draft: string = part(
+      stateOf(layersWith({ message: { ...onGrid.items.message, enabled: false } }), { message: "BRB" }),
+    );
+    // The state is first in the row, and the styles put the buttons at the end of the row.
+    expect(draft).toMatch(
+      /<div class="tl-actions tl-air-row"><span class="tl-state">Off air<\/span><button type="submit" class="tl-action"/,
+    );
+    expect(draft.match(/class="tl-action"/g)).toHaveLength(1);
+    const onAir: string = part(stateOf(onGrid, { message: "BRB" }));
+    expect(onAir.match(/class="tl-action"/g)).toHaveLength(2);
+    expect(onAir.indexOf("data-live-message-show")).toBeLessThan(onAir.indexOf("data-live-message-off"));
+    expect(onAir).not.toContain("small-button");
   });
 
   it("counts a banner on the grid of the output that the editor does not show as on stream", (): void => {
@@ -573,6 +616,37 @@ describe("Live section", (): void => {
     expect(html).not.toContain("ov-conn");
     const empty: string = section({ initial: stateOf(DEFAULT_LAYERS) });
     expect(empty).toContain("No layer is on stream.");
+  });
+
+  it("has a link to the Overlay section beside the title of the preview, and only there", (): void => {
+    const html: string = section();
+    const preview: string = html.split('data-live-part="preview"')[1].split("</section>")[0];
+    // The title and the link are one line. The link has only an icon, so its name is also its tooltip.
+    expect(preview).toMatch(
+      /^><div class="tl-part-head"><h2 class="ov-step-title" id="[^"]+">What OBS shows<\/h2><a class="icon-button" aria-label="Edit the overlay" title="Edit the overlay" href="\/tools\?view=overlay"><svg[^>]*icon-pencil/,
+    );
+    expect(html.match(/class="tl-part-head"/g)).toHaveLength(1);
+    expect(html.match(/aria-label="Edit the overlay"/g)).toHaveLength(1);
+    // The preview stays read-only: it has no button and no field.
+    expect(preview).not.toMatch(/<button|<input|<select|<textarea/);
+  });
+
+  it("names the link to the Overlay section in each language", async (): Promise<void> => {
+    await Promise.all(LOCALES.map((locale: Locale) => loadCatalog(locale)));
+    const names: Set<string> = new Set();
+    try {
+      for (const locale of LOCALES) {
+        setLocaleSource((): Locale => locale);
+        const name: string = /class="icon-button" aria-label="([^"]+)"/.exec(section())?.[1] ?? "";
+        expect(name, locale).not.toBe("");
+        expect(name, locale).not.toContain("!");
+        names.add(name);
+      }
+    } finally {
+      setLocaleSource((): Locale => DEFAULT_LOCALE);
+    }
+    // Each language has its own text: no catalog has the English text as a placeholder.
+    expect(names.size).toBe(LOCALES.length);
   });
 
   it("marks the window of the camera frame in the preview", (): void => {

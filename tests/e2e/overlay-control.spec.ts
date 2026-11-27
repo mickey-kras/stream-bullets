@@ -490,7 +490,7 @@ test("Streamer tools has the Overlay section with two numbered steps and the Cha
     const control = await newPage(owner);
     await control.goto("/tools?view=overlay");
     // The page has one title and the links to its sections. The address names the Overlay section.
-    await expect(control.getByRole("heading", { level: 1 })).toHaveText("Streamer tools");
+    await expect(control.getByRole("heading", { level: 1 })).toHaveAccessibleName("Streamer tools");
     const sections = control.getByRole("navigation", { name: "Streamer tools sections" });
     await expect(sections.getByRole("link")).toHaveText(["Live", "Overlay", "Channels"]);
     await expect(sections.getByRole("link", { name: "Overlay" })).toHaveAttribute("aria-current", "page");
@@ -533,7 +533,7 @@ test("Streamer tools has the Overlay section with two numbered steps and the Cha
     await sections.getByRole("link", { name: "Channels" }).click();
     await expect(control).toHaveURL(/\/tools\?view=channels$/);
     await expect(sections.getByRole("link", { name: "Channels" })).toHaveAttribute("aria-current", "page");
-    await expect(control.getByRole("heading", { level: 1 })).toHaveText("Streamer tools");
+    await expect(control.getByRole("heading", { level: 1 })).toHaveAccessibleName("Streamer tools");
     await expect(control.getByRole("heading", { level: 2 })).toHaveText(["Connect channels"]);
     expect(await steps()).toEqual(["channels"]);
     expect(documents).toBe(0);

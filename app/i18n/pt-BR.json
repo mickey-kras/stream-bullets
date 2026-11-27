@@ -1400,6 +1400,7 @@
   "tools.live.obsUnknown": "O estado do OBS aparece quando as atualizações ao vivo se conectam.",
   "tools.live.openChannels": "Abrir Canais",
   "tools.live.openOverlay": "Abrir Overlay",
+  "tools.live.editOverlay": "Editar o overlay",
   "tools.live.preview": "O que o OBS mostra",
   "tools.live.previewNote": "As mudanças chegam ao OBS na hora.",
   "tools.live.previewEmpty": "Nenhuma camada está na live.",

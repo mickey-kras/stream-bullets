@@ -55,55 +55,52 @@ function PollActions({ scene, state, busy, run, poll }: Readonly<PollProps & { p
     }
   }
   return (
-    <div className="tl-actions">
-      {link && (
-        <button type="button" className="small-button" onClick={() => void copy(link)}>
-          <Icon name="copy" size={16} />
-          {t("tools.live.poll.copyLink")}
-        </button>
-      )}
-      <button
-        type="button"
-        className="small-button"
-        disabled={busy}
-        data-live-poll-qr
-        onClick={() => run({ action: "layers", items: { poll: { qr: !layers.items.poll.qr } } })}
-      >
-        {t(layers.items.poll.qr ? "tools.live.poll.hideQr" : "tools.live.poll.showQr")}
-      </button>
-      <button
-        type="button"
-        className="small-button"
-        disabled={busy}
-        data-live-poll-results
-        onClick={() => run({ action: "showResults", on: !state.showResults })}
-      >
-        <Icon name={state.showResults ? "eye-off" : "eye"} size={16} />
-        {t(state.showResults ? "tools.live.poll.hide" : "tools.live.poll.reveal")}
-      </button>
-      {poll.mash === null && votingOpen(poll, scene.now) && (
+    <>
+      <div className="tl-actions">
+        {link && (
+          <button type="button" className="small-button" onClick={() => void copy(link)}>
+            <Icon name="copy" size={16} />
+            {t("tools.live.poll.copyLink")}
+          </button>
+        )}
         <button
           type="button"
           className="small-button"
-          disabled={closing}
-          data-live-poll-close
-          onClick={() => void close()}
+          disabled={busy}
+          data-live-poll-qr
+          onClick={() => run({ action: "layers", items: { poll: { qr: !layers.items.poll.qr } } })}
         >
-          <Icon name="lock" size={16} />
-          {t("tools.live.poll.close")}
+          {t(layers.items.poll.qr ? "tools.live.poll.hideQr" : "tools.live.poll.showQr")}
         </button>
-      )}
-      <button
-        type="button"
-        className="small-button"
-        disabled={busy}
-        data-live-poll-air
-        onClick={() => run({ action: "layers", items: { poll: { enabled: !onAir } } })}
-      >
-        <Icon name={onAir ? "stop" : "live"} size={16} />
-        {t(onAir ? "tools.live.takeOff" : "tools.live.putOn")}
-      </button>
-    </div>
+      </div>
+      {/* What changes the stream: the results, the end of the vote, and the poll itself. One row, equal columns. */}
+      <div className="tl-fill-row" data-live-poll-actions>
+        <button
+          type="button"
+          disabled={busy}
+          data-live-poll-results
+          onClick={() => run({ action: "showResults", on: !state.showResults })}
+        >
+          <Icon name={state.showResults ? "eye-off" : "eye"} size={18} />
+          {t(state.showResults ? "tools.live.poll.hide" : "tools.live.poll.reveal")}
+        </button>
+        {poll.mash === null && votingOpen(poll, scene.now) && (
+          <button type="button" disabled={closing} data-live-poll-close onClick={() => void close()}>
+            <Icon name="lock" size={18} />
+            {t("tools.live.poll.close")}
+          </button>
+        )}
+        <button
+          type="button"
+          disabled={busy}
+          data-live-poll-air
+          onClick={() => run({ action: "layers", items: { poll: { enabled: !onAir } } })}
+        >
+          <Icon name={onAir ? "stop" : "live"} size={18} />
+          {t(onAir ? "tools.live.takeOff" : "tools.live.putOn")}
+        </button>
+      </div>
+    </>
   );
 }
 

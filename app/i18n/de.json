@@ -1400,6 +1400,7 @@
   "tools.live.obsUnknown": "Der Status von OBS erscheint, sobald die Live-Updates verbunden sind.",
   "tools.live.openChannels": "Kanäle öffnen",
   "tools.live.openOverlay": "Overlay öffnen",
+  "tools.live.editOverlay": "Overlay bearbeiten",
   "tools.live.preview": "Was OBS zeigt",
   "tools.live.previewNote": "Änderungen erreichen OBS sofort.",
   "tools.live.previewEmpty": "Keine Ebene ist im Stream.",
