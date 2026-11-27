@@ -1693,30 +1693,42 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 
 .pref-group :is(.field, .field-label, .cselect, .pref-options) { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
 
-/* Channel connections in the overlay controls (docs/channel-connections.md). */
-.ch-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: 12px; margin: 12px 0 0; padding: 0; list-style: none; }
-.ch-item { display: grid; grid-template-rows: subgrid; grid-row: span 4; row-gap: 4px; min-width: 0; padding: 12px 16px; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--modal); }
-.ch-item p { margin: 6px 0; overflow-wrap: anywhere; }
+/* The Channels section of Streamer tools (docs/channel-connections.md). The cards of one row have one height. */
+.ch-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: 16px; margin: 12px 0 0; padding: 0; list-style: none; }
+.ch-item { display: flex; flex-direction: column; gap: 12px; min-width: 0; padding: 20px; border: 1px solid var(--line); border-radius: var(--radius-panel); background: var(--card); }
+.ch-item p { margin: 0; overflow-wrap: anywhere; }
 .ch-item > * { min-width: 0; }
-.ch-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.ch-logo { flex: none; width: 28px; height: 28px; color: var(--gold); }
-.ch-badge { padding: 2px 8px; border: 1px solid var(--line); border-radius: 999px; font-weight: 600; }
-.ch-mark { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); font-size: 0.875rem; font-weight: 600; }
-.ch-mark[data-health="attention"] .icon { color: var(--live); }
+/* Line 1: the platform at the left. At the right, the status icon and the account on one line, or Connect. */
+.ch-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
+.ch-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border: 1px solid var(--btn-border); border-radius: 999px; font-weight: 600; }
+.ch-logo { flex: none; width: 18px; height: 18px; }
+.ch-who { display: inline-flex; align-items: center; gap: 6px; min-width: 0; font-weight: 600; }
+.ch-account { min-width: 0; overflow-wrap: anywhere; }
+.ch-head > .small-button { display: inline-flex; align-items: center; gap: 6px; }
+/* The status is an icon. Its words are the tooltip, and text that only a screen reader reads. */
+.ch-state { display: inline-flex; flex: none; cursor: help; }
+.ch-state[data-state="healthy"] { color: var(--gold); }
+.ch-state:is([data-state="problem"], [data-state="support_missing"]) { color: var(--status-live); }
+.ch-turn { animation: sb-spin 1.4s linear infinite; transform-origin: center; }
+@media (prefers-reduced-motion: reduce) {
+  .ch-turn { animation: none; }
+}
+html[data-reduced="true"] .ch-turn { animation: none; }
+/* Line 2: Reconnect and Disconnect in two equal columns that fill the card. */
+.ch-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.ch-actions > button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 0; overflow-wrap: anywhere; }
+.ch-actions > button:only-child { grid-column: 1 / -1; }
 .ch-problem { display: flex; align-items: flex-start; gap: 6px; }
 .ch-problem .icon { flex: none; margin-top: 2px; color: var(--live); }
-.ch-support .choice { display: flex; align-items: center; gap: 10px; margin: 0; font-weight: 600; cursor: pointer; }
-.ch-support .choice:has([aria-disabled="true"]) { color: var(--muted); cursor: default; }
-.ch-support [aria-disabled="true"] { opacity: .55; }
-.ch-actions { display: flex; flex-wrap: wrap; align-items: center; align-self: end; gap: 8px; }
-.ch-actions > button { flex: 1 1 12rem; }
-.ch-more > summary { width: fit-content; max-width: 100%; padding: 10px 0; cursor: pointer; color: var(--muted); font-weight: 600; }
-.ch-more > ul { display: grid; gap: 6px; margin: 0 0 6px; padding-left: 1.25em; color: var(--muted); overflow-wrap: anywhere; }
+/* The last line stays at the bottom of the card, so the closed lines of one row are level. */
+.ch-more { margin: auto 0 -10px; border-top: 1px solid var(--line); }
+.ch-more > summary { width: fit-content; max-width: 100%; padding: 10px 0; cursor: pointer; font-weight: 600; }
+.ch-more > ul { display: grid; gap: 6px; margin: 0 0 14px; padding-left: 1.25em; color: var(--muted); overflow-wrap: anywhere; }
 .ch-result { display: block; padding: 8px 12px; border: 1px solid var(--line); border-radius: var(--radius-control); }
-.ch-reauth { margin-top: 8px; padding: 4px 12px 10px; border: 1px solid var(--gold); border-radius: var(--radius-control); }
+.ch-reauth { padding: 4px 12px 10px; border: 1px solid var(--gold); border-radius: var(--radius-control); }
+.ch-reauth p { margin: 6px 0; }
 .reauth-options { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .reauth-options > .form-error { flex-basis: 100%; margin: 0; }
-.ch-terms { flex-basis: 100%; font-size: 0.875rem; }
 
 .discussion-focus-bar { display: none; }
 /* A wide page shows the discussion below the topic, so only a narrow page has this button. */

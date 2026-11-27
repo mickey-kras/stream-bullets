@@ -56,7 +56,7 @@ async function createMissing(
 /**
  * Deletes the subscriptions the provider reports as ended and creates the missing types. Healthy ones stay. With
  * `support`, the types of support events are required too. Without it, their subscriptions are deleted: the
- * streamer turned the support events off, or the provider refused them.
+ * authorization has no scopes for them, or the provider refused them.
  */
 export async function reconcileSubscriptions(
   env: AppEnv,

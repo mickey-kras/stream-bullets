@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } fro
 import { Link, useLocation, useNavigate, useRevalidator } from "react-router";
 import { intlLocale, t, type MessageId } from "../../i18n";
 import { quotaDay, type ActivityPlatform, type ChannelStatusCode, type ConnectResult } from "../../lib/activity";
-import { channelHealth, relativeAge, type ChannelHealth, type ChannelView } from "../../lib/channel-health";
+import { channelCardState, relativeAge, type ChannelCardState, type ChannelView } from "../../lib/channel-health";
 import type { Provider } from "../../types";
 import { ApiError, errorMessage, postJson, sendJson } from "../api";
 import { providerName, Reauthenticate } from "../shell/sign-in-dialog";
@@ -12,11 +12,10 @@ import { useToast } from "../ui/toast";
 import { paths, toolsPath, useShell } from "../../lib/shell";
 import { detached } from "../../lib/detached";
 import { PlatformIcon } from "../overlay/wasteland/glyphs";
-import { changeSupport, supportOutcome, SupportSwitch, type SupportOutcome } from "./support-switch";
 
 export type { ChannelView } from "../../lib/channel-health";
 
-/** How often the age of the last chat event changes on screen. */
+/** How often the age of the last chat event changes in the tooltip of the status icon. */
 const AGE_TICK_MS = 15_000;
 
 /** Brand names stay as they are in every language. */
@@ -51,37 +50,62 @@ const STATUS_MESSAGES: Readonly<Record<ChannelStatusCode, MessageId>> = {
   disconnecting: "channels.status.error",
 };
 
-/** The one sentence of each card: when chat starts (docs/channel-connections.md). */
-const STARTS: Readonly<Record<ActivityPlatform, MessageId>> = {
-  twitch: "channels.starts.connected",
-  youtube: "channels.starts.overlay",
-  kick: "channels.starts.connected",
+/**
+ * The closed details of each card (docs/channel-connections.md): when chat starts, what the feed reads for chat and
+ * for alerts and goals, then the limits and the gaps.
+ */
+const NOTES: Readonly<Record<ActivityPlatform, readonly MessageId[]>> = {
+  twitch: [
+    "channels.starts.connected",
+    "channels.reads.twitch",
+    "channels.readsSupport.twitch",
+    "channels.emotes.twitch",
+    "channels.twitchReconnect",
+  ],
+  youtube: [
+    "channels.starts.overlay",
+    "channels.reads.youtube",
+    "channels.readsSupport.youtube",
+    "channels.limits.youtube",
+    "channels.gaps.youtube",
+  ],
+  kick: [
+    "channels.starts.connected",
+    "channels.reads.kick",
+    "channels.readsSupport.kick",
+    "channels.emotes.kick",
+    "channels.gaps.kick",
+  ],
 };
 
-/** The closed details of each card: what the feed reads, then the limits and the gaps. */
-const NOTES: Readonly<Record<ActivityPlatform, readonly MessageId[]>> = {
-  twitch: ["channels.reads.twitch", "channels.emotes.twitch", "channels.twitchReconnect"],
-  youtube: ["channels.reads.youtube", "channels.limits.youtube", "channels.gaps.youtube"],
-  kick: ["channels.reads.kick", "channels.emotes.kick", "channels.gaps.kick"],
+/**
+ * What the card of a connection without support events says. Only Twitch needs permissions for them: a Twitch
+ * channel from before the support events has none.
+ */
+const SUPPORT_MISSING: Readonly<Record<ActivityPlatform, MessageId>> = {
+  twitch: "channels.supportMissing.twitch",
+  youtube: "channels.supportMissing.other",
+  kick: "channels.supportMissing.other",
+};
+
+/** The icon of each card state: never colour alone. Its tooltip and its text for screen readers hold the words. */
+const STATE_ICONS: Readonly<Record<ChannelCardState, IconName>> = {
+  healthy: "success",
+  repairing: "sync",
+  problem: "rejected",
+  support_missing: "rejected",
 };
 
 /** A change that needs a recent sign-in. The owner signs in again, then the page takes the change up again. */
 export interface ChannelIntent {
   platform: ActivityPlatform;
-  action: "connect" | "disconnect" | "support";
+  action: "connect" | "disconnect";
 }
 
 /** What the sign-in prompt of each change says. */
 const REAUTH_MESSAGES: Readonly<Record<ChannelIntent["action"], MessageId>> = {
   connect: "channels.reauth.connect",
   disconnect: "channels.reauth.disconnect",
-  support: "channels.reauth.support",
-};
-
-/** The control that gets focus after the sign-in, for a change that the page does not repeat by itself. */
-const INTENT_CONTROLS: Readonly<Record<Exclude<ChannelIntent["action"], "connect">, string>> = {
-  disconnect: "[data-disconnect]",
-  support: "[data-support-switch]",
 };
 
 const INTENT_KEY = "sb-channel-intent";
@@ -105,7 +129,7 @@ export function parseIntent(raw: string | null, now: number, owner: string | nul
   // Another account can sign in during the prompt. Its page must not get the channel of the first owner.
   if (storedOwner !== owner) return null;
   if (typeof platform !== "string" || !isPlatform(platform)) return null;
-  if (action !== "connect" && action !== "disconnect" && action !== "support") return null;
+  if (action !== "connect" && action !== "disconnect") return null;
   if (typeof at !== "number" || at > now || now - at > INTENT_MS) return null;
   return { platform, action };
 }
@@ -177,11 +201,6 @@ function useHydrated(): boolean {
   );
 }
 
-/** A spent quota is expected and ends by itself, so it is a polite status; every other problem is an alert. */
-export function problemRole(code: string | null): "status" | "alert" {
-  return code === "quota_exhausted" ? "status" : "alert";
-}
-
 /**
  * When the YouTube quota of the day the status began resets (midnight Pacific Time), in the viewer's own time
  * zone, or null when it already did: polls then resume when an overlay connects.
@@ -212,47 +231,41 @@ export function lastEventText(at: number | null, now: number): string {
   return age === null ? t("channels.lastEventNow") : t("channels.lastEvent", { age });
 }
 
-/** The age of the last chat event. The server does not know the viewer's clock, so the age shows after hydration. */
-function LastEvent({ at, now }: Readonly<{ at: number | null; now: number }>): ReactNode {
-  const hydrated = useHydrated();
-  if (at === null) return <p className="muted">{lastEventText(null, now)}</p>;
-  if (!hydrated) return null;
-  const absolute: string = new Intl.DateTimeFormat(intlLocale(), { dateStyle: "medium", timeStyle: "short" }).format(
-    new Date(at),
-  );
-  return (
-    <p className="muted">
-      <time dateTime={new Date(at).toISOString()} title={absolute}>
-        {lastEventText(at, now)}
-      </time>
-    </p>
-  );
+/**
+ * The words of the status icon of a card: its tooltip and its text for screen readers. `now` is the viewer's
+ * clock, or null during the server render and hydration. A text that needs the viewer's clock or time zone waits
+ * for it: the age of the last chat event, and the reset time of the YouTube quota.
+ */
+export function stateText(channel: ChannelView, state: ChannelCardState, now: number | null): string {
+  const platform: string = PLATFORM_NAMES[channel.platform];
+  if (state === "support_missing") return t(SUPPORT_MISSING[channel.platform], { platform });
+  if (state === "healthy") {
+    const at: number | null = channel.connection?.lastEventAt ?? null;
+    if (at !== null && now === null) return t("channels.health.healthy");
+    return t("channels.health.healthyEvent", { event: lastEventText(at, now ?? 0) });
+  }
+  const waitsForTime: boolean = channel.connection?.code === "quota_exhausted" && now === null;
+  return (waitsForTime ? null : channelProblem(channel)) ?? t("channels.health.attention");
 }
 
-/** The mark of each health state: an icon and words, never colour alone. */
-const HEALTH_MARKS: Readonly<Record<Exclude<ChannelHealth, "unavailable">, readonly [IconName, MessageId]>> = {
-  healthy: ["success", "channels.health.healthy"],
-  attention: ["warning", "channels.health.attention"],
-  none: ["minus", "channels.notConnected"],
-};
-
-/** The health of a card at a glance. A platform that this site does not offer has no mark: its card says so. */
-function HealthMark({ health }: Readonly<{ health: ChannelHealth }>): ReactNode {
-  if (health === "unavailable") return null;
-  const [icon, label] = HEALTH_MARKS[health];
+/**
+ * The status of a connected card: an icon with a tooltip. The same words are text that only a screen reader reads,
+ * so the status has an accessible name without a line of text on the card.
+ */
+function StateIcon({ state, label }: Readonly<{ state: ChannelCardState; label: string }>): ReactNode {
   return (
-    <span className="ch-mark" data-health={health}>
-      <Icon name={icon} size={16} />
-      {t(label)}
+    <span className="ch-state" data-state={state} title={label}>
+      {/* A problem that ends without the owner turns. It stays still for a viewer who asked for less motion. */}
+      <Icon name={STATE_ICONS[state]} size={20} className={state === "repairing" ? "ch-turn" : ""} />
+      <span className="sr-only">{label}</span>
     </span>
   );
 }
 
 /**
- * Streamer controls for the channel connections (docs/channel-connections.md): status, connect, reconnect and
- * disconnect for each platform, and the switch for the support events of a connected channel. Connecting leaves
- * for the provider and comes back with `?channel=&result=`. The panel then shows and announces the result, and
- * removes it from the address.
+ * Streamer controls for the channel connections (docs/channel-connections.md): one card for each platform, with
+ * its status, connect, reconnect and disconnect. Connecting leaves for the provider and comes back with
+ * `?channel=&result=`. The panel then shows and announces the result, and removes it from the address.
  */
 export function ChannelPanel({
   channels,
@@ -283,10 +296,6 @@ export function ChannelPanel({
   /** The change that the server refused because the sign-in is too old. Its card shows the sign-in prompt. */
   const [reauth, setReauth] = useState<ChannelIntent | null>(null);
   const resumed = useRef<boolean>(false);
-  /** The state of a switch from the answer to its change, until the reloaded list has it. */
-  const [support, setSupport] = useState<ReadonlyMap<ActivityPlatform, boolean>>(new Map());
-  /** The platform whose provider refused the support events at the last change of its switch. */
-  const [supportDenied, setSupportDenied] = useState<ActivityPlatform | null>(null);
   /** Platforms whose last disconnect the provider did not confirm: the owner should remove the app there. */
   const [unrevoked, setUnrevoked] = useState<ReadonlySet<ActivityPlatform>>(new Set());
   // The platform of the last disconnect. Until the next dialog opens, the closed dialog does not take focus back.
@@ -296,7 +305,7 @@ export function ChannelPanel({
   const hydrated = useHydrated();
   const [now, setNow] = useState<number>((): number => Date.now());
 
-  // One timer moves the age of every card.
+  // One timer moves the age in the tooltip of every card.
   useEffect((): (() => void) => {
     const timer = setInterval((): void => setNow(Date.now()), AGE_TICK_MS);
     return (): void => clearInterval(timer);
@@ -373,57 +382,21 @@ export function ChannelPanel({
   }
 
   // Back from the sign-in that a change needed: take the change up again. A connect goes on to the provider
-  // without a second click. A disconnect and a change of the support events are not repeated by themselves: the
-  // control gets focus.
+  // without a second click. A disconnect is not repeated by itself: its button gets focus.
   useEffect((): void => {
     if (resumed.current) return;
     resumed.current = true;
     const intent: ChannelIntent | null = takeIntent(owner);
     const channel = intent && channels.find((item: ChannelView): boolean => item.platform === intent.platform);
     if (!intent || !channel?.available || initialResult) return;
-    const details: HTMLDetailsElement | null | undefined = panel.current?.closest("details");
-    if (details) details.open = true;
     // After the effect: the connect sets the busy state.
     if (intent.action === "connect") {
       const reconnect: boolean = channel.connection !== null;
       queueMicrotask((): void => detached(connect(intent.platform, reconnect)));
     } else {
-      const control: string = INTENT_CONTROLS[intent.action];
-      panel.current?.querySelector<HTMLElement>(`[data-channel="${intent.platform}"] ${control}`)?.focus();
+      panel.current?.querySelector<HTMLElement>(`[data-channel="${intent.platform}"] [data-disconnect]`)?.focus();
     }
   });
-
-  function forgetSupport(platform: ActivityPlatform): void {
-    setSupport((current: ReadonlyMap<ActivityPlatform, boolean>): ReadonlyMap<ActivityPlatform, boolean> => {
-      const next = new Map<ActivityPlatform, boolean>(current);
-      next.delete(platform);
-      return next;
-    });
-  }
-
-  async function changeSupportEvents(platform: ActivityPlatform, on: boolean): Promise<void> {
-    setResult(null);
-    setReauth(null);
-    setSupportDenied(null);
-    setBusy(platform);
-    try {
-      const outcome: SupportOutcome = supportOutcome(await changeSupport(platform, on), on);
-      if (outcome.url !== null) {
-        globalThis.location.assign(outcome.url);
-        return;
-      }
-      setSupport((current) => new Map<ActivityPlatform, boolean>(current).set(platform, outcome.support));
-      if (outcome.denied) setSupportDenied(platform);
-      setBusy(null);
-      // The answer is newer than the list on screen. The list of the reload is newer than the answer.
-      detached(revalidator.revalidate().finally((): void => forgetSupport(platform)));
-    } catch (error: unknown) {
-      failed(error, { platform, action: "support" });
-      // Gone already (404): show the current list, which has no switch for this channel.
-      if (error instanceof ApiError && error.status === 404) detached(revalidator.revalidate());
-      setBusy(null);
-    }
-  }
 
   async function disconnect(platform: ActivityPlatform): Promise<void> {
     setResult(null);
@@ -485,100 +458,103 @@ export function ChannelPanel({
         {channels.map((channel: ChannelView) => {
           const name = PLATFORM_NAMES[channel.platform];
           const connection = channel.connection;
-          // The quota message names the reset time in the viewer's time zone, so it shows after hydration.
-          const waitsForTime = connection?.code === "quota_exhausted" && !hydrated;
-          const problem: string | null = waitsForTime ? null : channelProblem(channel);
+          const state: ChannelCardState | null = channelCardState(channel);
           return (
             <li key={channel.platform} className="ch-item" data-channel={channel.platform}>
-              <p className="ch-head">
-                <PlatformIcon className="ch-logo" platform={channel.platform} label="" />
-                <span className="ch-badge">{name}</span>
-                {connection && <strong>{t("channels.connectedAs", { name: connection.displayName })}</strong>}
-                <HealthMark health={channelHealth(channel)} />
-              </p>
-              <div className="ch-body">
-                {channel.available ? <p>{t(STARTS[channel.platform])}</p> : <p>{t("channels.unavailable")}</p>}
-                {connection && <LastEvent at={connection.lastEventAt} now={now} />}
-                {problem && (
-                  // A used-up quota is a known state, not news: it is a status, so it is not read out as an alert.
-                  <p className="ch-problem" role={problemRole(connection?.code ?? null)}>
-                    <Icon name="warning" size={16} />
-                    <span>{problem}</span>
-                  </p>
+              {/* Line 1: the platform at the left. At the right, the status and the account, or Connect. */}
+              <div className="ch-head">
+                <span className="ch-pill">
+                  <PlatformIcon className="ch-logo" platform={channel.platform} label="" />
+                  {name}
+                </span>
+                {connection && (
+                  <span className="ch-who">
+                    {state && <StateIcon state={state} label={stateText(channel, state, hydrated ? now : null)} />}
+                    <span className="ch-account">{connection.displayName}</span>
+                  </span>
                 )}
-                {connection && channel.available && (
-                  <SupportSwitch
-                    channel={channel}
-                    on={support.get(channel.platform) ?? channel.support}
-                    busy={busy !== null}
-                    denied={supportDenied === channel.platform}
-                    onChange={(on: boolean) => void changeSupportEvents(channel.platform, on)}
-                  />
-                )}
-                {!connection && unrevoked.has(channel.platform) && (
-                  <p className="ch-problem">
-                    <Icon name="warning" size={16} />
-                    <span>{t("channels.removeApp", { platform: name })}</span>
-                  </p>
-                )}
-              </div>
-              <div className="ch-actions">
-                {channel.available && channel.platform === "youtube" && !connection && (
-                  <a className="text-link ch-terms" href="https://www.youtube.com/t/terms">
-                    {t("channels.youtubeTerms")}
-                  </a>
-                )}
-                {channel.available && (
+                {!connection && channel.available && (
                   <button
                     type="button"
+                    className="small-button"
                     data-connect
+                    aria-label={t("channels.connect", { platform: name })}
                     disabled={busy !== null}
-                    onClick={() => void connect(channel.platform, connection !== null)}
+                    onClick={() => void connect(channel.platform, false)}
                   >
-                    {connection
-                      ? t("channels.reconnect", { platform: name })
-                      : t("channels.connect", { platform: name })}
+                    <Icon name="link" size={16} />
+                    {t("channels.connectShort")}
                   </button>
                 )}
-                {connection && (
+              </div>
+              {!channel.available && <p className="muted">{t("channels.unavailable")}</p>}
+              {/* Line 2: two equal columns, the same on each card. */}
+              {connection && (
+                <div className="ch-actions">
+                  {channel.available && (
+                    <button
+                      type="button"
+                      data-connect
+                      aria-label={t("channels.reconnect", { platform: name })}
+                      disabled={busy !== null}
+                      onClick={() => void connect(channel.platform, true)}
+                    >
+                      <Icon name="refresh" />
+                      {t("channels.reconnectShort")}
+                    </button>
+                  )}
                   <button
                     type="button"
                     className="danger"
                     data-disconnect
+                    aria-label={t("channels.disconnect", { platform: name })}
                     disabled={busy !== null}
                     onClick={() => {
                       setFocusConnect(null);
                       setConfirming(channel.platform);
                     }}
                   >
-                    {t("channels.disconnect", { platform: name })}
+                    <Icon name="close" />
+                    {t("channels.disconnectShort")}
                   </button>
-                )}
-              </div>
-              <div className="ch-foot">
-                {reauth?.platform === channel.platform && (
-                  <div className="ch-reauth" role="alert">
-                    {signInProviders.length > 0 && (
-                      <p>{t(REAUTH_MESSAGES[reauth.action], { platform: name, provider: signInNames })}</p>
+                </div>
+              )}
+              {!connection && unrevoked.has(channel.platform) && (
+                <p className="ch-problem">
+                  <Icon name="warning" size={16} />
+                  <span>{t("channels.removeApp", { platform: name })}</span>
+                </p>
+              )}
+              {reauth?.platform === channel.platform && (
+                <div className="ch-reauth" role="alert">
+                  {signInProviders.length > 0 && (
+                    <p>{t(REAUTH_MESSAGES[reauth.action], { platform: name, provider: signInNames })}</p>
+                  )}
+                  <Reauthenticate
+                    providers={signInProviders}
+                    callbackURL={toolsPath("channels")}
+                    onStart={() => rememberIntent(reauth, owner)}
+                  />
+                </div>
+              )}
+              {/* The last line: what the feed reads and the limits, closed until the owner opens it. */}
+              {channel.available && (
+                <details className="ch-more">
+                  <summary>{t("channels.more")}</summary>
+                  <ul>
+                    {NOTES[channel.platform].map((id: MessageId) => (
+                      <li key={id}>{t(id)}</li>
+                    ))}
+                    {channel.platform === "youtube" && !connection && (
+                      <li>
+                        <a className="text-link" href="https://www.youtube.com/t/terms">
+                          {t("channels.youtubeTerms")}
+                        </a>
+                      </li>
                     )}
-                    <Reauthenticate
-                      providers={signInProviders}
-                      callbackURL={toolsPath("channels")}
-                      onStart={() => rememberIntent(reauth, owner)}
-                    />
-                  </div>
-                )}
-                {channel.available && (
-                  <details className="ch-more">
-                    <summary>{t("channels.more")}</summary>
-                    <ul>
-                      {NOTES[channel.platform].map((id: MessageId) => (
-                        <li key={id}>{t(id)}</li>
-                      ))}
-                    </ul>
-                  </details>
-                )}
-              </div>
+                  </ul>
+                </details>
+              )}
             </li>
           );
         })}
