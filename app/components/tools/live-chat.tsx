@@ -120,8 +120,8 @@ function firstInView(list: HTMLElement): string | null {
  * "Jump to latest" resumes it. The pause and the platform filters are local to this browser. A moderated message
  * keeps its row and loses its text, also while the list is paused.
  *
- * `hideCommands` is the saved setting of the chat layer (`chat.hideCharacterCommands`): the list then has no row for
- * a character command, and the count of a paused list does not include it.
+ * `hideCommands` is the saved setting of the chat layer (`chat.hideCommands`): the list then has no row for a chat
+ * command, and the count of a paused list does not include it.
  */
 export function useChatModel(feed: ActivityFeed, hideCommands: boolean): ChatModel {
   const [state, dispatch] = useReducer(liveChatReducer, undefined, initialLiveChat);
@@ -507,7 +507,7 @@ export function LiveChat({
 }: Readonly<{
   feed: ActivityFeed;
   delivers: boolean;
-  /** The chat does not show character commands: `chat.hideCharacterCommands` of the saved overlay layers. */
+  /** The chat does not show chat commands: `chat.hideCommands` of the saved overlay layers. */
   hideCommands: boolean;
   /** True while the full-screen view is open. The page keeps this in its address. */
   full?: boolean;

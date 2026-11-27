@@ -722,7 +722,7 @@ describe("tables added by migrations 0006–0012", (): void => {
         // before the overlay studio: the chat was on, so it keeps its cell and takes its old default vertical cell.
         layers: {
           ...DEFAULT_LAYERS,
-          chat: { enabled: true, hideCharacterCommands: false },
+          chat: { enabled: true, hideCommands: true },
           cells: {
             horizontal: { ...DEFAULT_LAYERS.cells.horizontal, chat: { c: 20, r: 0, w: 6, h: 4 } },
             vertical: { ...DEFAULT_LAYERS.cells.vertical, chat: { c: 0, r: 16, w: 18, h: 10 } },

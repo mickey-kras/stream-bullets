@@ -15285,7 +15285,7 @@
       "relation": "calls",
       "source": "app_components_overlay_use_chat_subscribemotion",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L59",
+      "source_location": "L58",
       "target": "app_components_station_motion_watchmotion",
       "weight": 1.0
     },
@@ -15297,7 +15297,7 @@
       "relation": "calls",
       "source": "app_components_overlay_use_chat_usechat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L192",
+      "source_location": "L191",
       "target": "app_components_overlay_use_chat_usechatstate",
       "weight": 1.0
     },
@@ -15309,7 +15309,7 @@
       "relation": "calls",
       "source": "app_components_overlay_use_chat_usechat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L193",
+      "source_location": "L192",
       "target": "app_lib_chat_test_chattestscript",
       "weight": 1.0
     },
@@ -15321,7 +15321,7 @@
       "relation": "calls",
       "source": "app_components_overlay_use_chat_usechatstate",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L103",
+      "source_location": "L102",
       "target": "app_lib_chat_feed_chatreducer",
       "weight": 1.0
     },
@@ -15333,7 +15333,7 @@
       "relation": "calls",
       "source": "app_components_overlay_use_chat_usechatstate",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L133",
+      "source_location": "L132",
       "target": "app_components_overlay_use_chat_sampleevent",
       "weight": 1.0
     },
@@ -15345,7 +15345,7 @@
       "relation": "calls",
       "source": "app_components_overlay_use_chat_usechatstate",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L160",
+      "source_location": "L159",
       "target": "app_lib_activity_messageforplatform",
       "weight": 1.0
     },
@@ -15357,7 +15357,7 @@
       "relation": "calls",
       "source": "app_components_overlay_use_chat_usechatstate",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L165",
+      "source_location": "L164",
       "target": "app_lib_chat_feed_nextwakeat",
       "weight": 1.0
     },
@@ -15369,7 +15369,7 @@
       "relation": "calls",
       "source": "app_components_overlay_use_chat_usechatstate",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L95",
+      "source_location": "L94",
       "target": "app_components_overlay_use_chat_usemotionreduced",
       "weight": 1.0
     },
@@ -30561,7 +30561,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_advance",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L267",
+      "source_location": "L273",
       "target": "app_lib_chat_feed_advancerow",
       "weight": 1.0
     },
@@ -30573,7 +30573,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_advance",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L272",
+      "source_location": "L278",
       "target": "app_lib_chat_feed_lastpromotion",
       "weight": 1.0
     },
@@ -30585,7 +30585,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_advance",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L284",
+      "source_location": "L290",
       "target": "app_lib_chat_feed_bound",
       "weight": 1.0
     },
@@ -30597,7 +30597,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_advancerow",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L254",
+      "source_location": "L260",
       "target": "app_lib_chat_feed_active",
       "weight": 1.0
     },
@@ -30609,7 +30609,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_chatreducer",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L438",
+      "source_location": "L444",
       "target": "app_lib_chat_feed_initialchatstate",
       "weight": 1.0
     },
@@ -30621,7 +30621,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_chatreducer",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L440",
+      "source_location": "L446",
       "target": "app_lib_chat_feed_reduce",
       "weight": 1.0
     },
@@ -30633,7 +30633,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_dismiss",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L214",
+      "source_location": "L220",
       "target": "app_lib_chat_feed_active",
       "weight": 1.0
     },
@@ -30645,7 +30645,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_dismisscommands",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L225",
+      "source_location": "L231",
       "target": "app_lib_chat_feed_dismiss",
       "weight": 1.0
     },
@@ -30657,7 +30657,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_displayfragments",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L159",
+      "source_location": "L165",
       "target": "app_lib_chat_feed_sourcefragments",
       "weight": 1.0
     },
@@ -30669,7 +30669,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_displayfragments",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L163",
+      "source_location": "L169",
       "target": "app_lib_chat_feed_safedisplayfragment",
       "weight": 1.0
     },
@@ -30681,7 +30681,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_displayfragments",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L171",
+      "source_location": "L177",
       "target": "app_lib_chat_feed_graphemes",
       "weight": 1.0
     },
@@ -30693,8 +30693,8 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_hidden",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L207",
-      "target": "app_lib_playground_core_ischaractercommand",
+      "source_location": "L213",
+      "target": "app_lib_chat_feed_ischatcommand",
       "weight": 1.0
     },
     {
@@ -30705,7 +30705,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_moderate",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L347",
+      "source_location": "L353",
       "target": "app_lib_chat_feed_active",
       "weight": 1.0
     },
@@ -30717,7 +30717,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_moderate",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L357",
+      "source_location": "L363",
       "target": "app_lib_chat_feed_remember",
       "weight": 1.0
     },
@@ -30729,7 +30729,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_nextwakeat",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L468",
+      "source_location": "L474",
       "target": "app_lib_chat_feed_limitsof",
       "weight": 1.0
     },
@@ -30741,7 +30741,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_nextwakeat",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L477",
+      "source_location": "L483",
       "target": "app_lib_chat_feed_lastpromotion",
       "weight": 1.0
     },
@@ -30753,7 +30753,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_receivechat",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L322",
+      "source_location": "L328",
       "target": "app_lib_chat_feed_limitsof",
       "weight": 1.0
     },
@@ -30765,7 +30765,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_receivechat",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L325",
+      "source_location": "L331",
       "target": "app_lib_chat_feed_hidden",
       "weight": 1.0
     },
@@ -30777,7 +30777,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_receivechat",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L327",
+      "source_location": "L333",
       "target": "app_lib_chat_feed_torow",
       "weight": 1.0
     },
@@ -30789,7 +30789,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_receiveevent",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L365",
+      "source_location": "L371",
       "target": "app_lib_chat_feed_receivechat",
       "weight": 1.0
     },
@@ -30801,7 +30801,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_receiveevent",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L368",
+      "source_location": "L374",
       "target": "app_lib_chat_feed_moderate",
       "weight": 1.0
     },
@@ -30813,7 +30813,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_receivesnapshot",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L400",
+      "source_location": "L406",
       "target": "app_lib_chat_feed_limitsof",
       "weight": 1.0
     },
@@ -30825,7 +30825,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_receivesnapshot",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L411",
+      "source_location": "L417",
       "target": "app_lib_chat_feed_active",
       "weight": 1.0
     },
@@ -30837,7 +30837,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_receivesnapshot",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L422",
+      "source_location": "L428",
       "target": "app_lib_chat_feed_hidden",
       "weight": 1.0
     },
@@ -30849,7 +30849,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_receivesnapshot",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L427",
+      "source_location": "L433",
       "target": "app_lib_chat_feed_torow",
       "weight": 1.0
     },
@@ -30861,7 +30861,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_receivesnapshot",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L429",
+      "source_location": "L435",
       "target": "app_lib_chat_feed_bound",
       "weight": 1.0
     },
@@ -30873,7 +30873,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_reduce",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L445",
+      "source_location": "L451",
       "target": "app_lib_chat_feed_limitsof",
       "weight": 1.0
     },
@@ -30885,7 +30885,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_reduce",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L446",
+      "source_location": "L452",
       "target": "app_lib_chat_feed_advance",
       "weight": 1.0
     },
@@ -30897,7 +30897,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_reduce",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L448",
+      "source_location": "L454",
       "target": "app_lib_chat_feed_dismisscommands",
       "weight": 1.0
     },
@@ -30909,7 +30909,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_reduce",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L453",
+      "source_location": "L459",
       "target": "app_lib_chat_feed_dismiss",
       "weight": 1.0
     },
@@ -30921,7 +30921,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_reduce",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L456",
+      "source_location": "L462",
       "target": "app_lib_chat_feed_initialchatstate",
       "weight": 1.0
     },
@@ -30933,7 +30933,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_reduce",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L461",
+      "source_location": "L467",
       "target": "app_lib_chat_feed_receivesnapshot",
       "weight": 1.0
     },
@@ -30945,7 +30945,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_reduce",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L462",
+      "source_location": "L468",
       "target": "app_lib_chat_feed_receiveevent",
       "weight": 1.0
     },
@@ -30957,7 +30957,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_safedisplayfragment",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L145",
+      "source_location": "L151",
       "target": "app_lib_chat_feed_safeemoteurl",
       "weight": 1.0
     },
@@ -30969,7 +30969,7 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_torow",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L187",
+      "source_location": "L193",
       "target": "app_lib_chat_feed_displayfragments",
       "weight": 1.0
     },
@@ -30981,8 +30981,8 @@
       "relation": "calls",
       "source": "app_lib_chat_feed_torow",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L202",
-      "target": "app_lib_playground_core_ischaractercommand",
+      "source_location": "L208",
+      "target": "app_lib_chat_feed_ischatcommand",
       "weight": 1.0
     },
     {
@@ -31689,7 +31689,7 @@
       "relation": "calls",
       "source": "app_lib_live_chat_livechatreducer",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L226",
+      "source_location": "L225",
       "target": "app_lib_live_chat_newest",
       "weight": 1.0
     },
@@ -31701,7 +31701,7 @@
       "relation": "calls",
       "source": "app_lib_live_chat_livechatreducer",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L228",
+      "source_location": "L227",
       "target": "app_lib_live_chat_receivesnapshot",
       "weight": 1.0
     },
@@ -31713,7 +31713,7 @@
       "relation": "calls",
       "source": "app_lib_live_chat_livechatreducer",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L229",
+      "source_location": "L228",
       "target": "app_lib_live_chat_receiveevent",
       "weight": 1.0
     },
@@ -31725,7 +31725,7 @@
       "relation": "calls",
       "source": "app_lib_live_chat_moderate",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L170",
+      "source_location": "L169",
       "target": "app_lib_live_chat_remember",
       "weight": 1.0
     },
@@ -31737,7 +31737,7 @@
       "relation": "calls",
       "source": "app_lib_live_chat_newsince",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L260",
+      "source_location": "L259",
       "target": "app_lib_live_chat_shownrows",
       "weight": 1.0
     },
@@ -31749,7 +31749,7 @@
       "relation": "calls",
       "source": "app_lib_live_chat_receivechat",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L134",
+      "source_location": "L133",
       "target": "app_lib_live_chat_newest",
       "weight": 1.0
     },
@@ -31761,7 +31761,7 @@
       "relation": "calls",
       "source": "app_lib_live_chat_receivechat",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L134",
+      "source_location": "L133",
       "target": "app_lib_live_chat_torow",
       "weight": 1.0
     },
@@ -31773,7 +31773,7 @@
       "relation": "calls",
       "source": "app_lib_live_chat_receiveevent",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L178",
+      "source_location": "L177",
       "target": "app_lib_live_chat_receivechat",
       "weight": 1.0
     },
@@ -31785,7 +31785,7 @@
       "relation": "calls",
       "source": "app_lib_live_chat_receiveevent",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L181",
+      "source_location": "L180",
       "target": "app_lib_live_chat_moderate",
       "weight": 1.0
     },
@@ -31797,7 +31797,7 @@
       "relation": "calls",
       "source": "app_lib_live_chat_receiveevent",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L195",
+      "source_location": "L194",
       "target": "app_lib_live_chat_receivesupport",
       "weight": 1.0
     },
@@ -31809,7 +31809,7 @@
       "relation": "calls",
       "source": "app_lib_live_chat_receivesnapshot",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L214",
+      "source_location": "L213",
       "target": "app_lib_live_chat_moderate",
       "weight": 1.0
     },
@@ -31821,7 +31821,7 @@
       "relation": "calls",
       "source": "app_lib_live_chat_receivesnapshot",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L219",
+      "source_location": "L218",
       "target": "app_lib_live_chat_receivechat",
       "weight": 1.0
     },
@@ -31833,7 +31833,7 @@
       "relation": "calls",
       "source": "app_lib_live_chat_receivesnapshot",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L219",
+      "source_location": "L218",
       "target": "app_lib_live_chat_receivesupport",
       "weight": 1.0
     },
@@ -31845,7 +31845,7 @@
       "relation": "calls",
       "source": "app_lib_live_chat_receivesupport",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L153",
+      "source_location": "L152",
       "target": "app_lib_live_chat_remember",
       "weight": 1.0
     },
@@ -31857,7 +31857,7 @@
       "relation": "calls",
       "source": "app_lib_live_chat_receivesupport",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L154",
+      "source_location": "L153",
       "target": "app_lib_live_chat_newest",
       "weight": 1.0
     },
@@ -31869,8 +31869,8 @@
       "relation": "calls",
       "source": "app_lib_live_chat_torow",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L112",
-      "target": "app_lib_playground_core_ischaractercommand",
+      "source_location": "L111",
+      "target": "app_lib_chat_feed_ischatcommand",
       "weight": 1.0
     },
     {
@@ -31881,7 +31881,7 @@
       "relation": "calls",
       "source": "app_lib_live_chat_torow",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L99",
+      "source_location": "L98",
       "target": "app_lib_chat_feed_displayfragments",
       "weight": 1.0
     },
@@ -32085,7 +32085,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_mergecells",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L553",
+      "source_location": "L552",
       "target": "app_lib_overlay_layers_copycell",
       "weight": 1.0
     },
@@ -32097,7 +32097,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_mergecells",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L555",
+      "source_location": "L554",
       "target": "app_lib_overlay_layers_contentrecord",
       "weight": 1.0
     },
@@ -32109,7 +32109,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_mergelayers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L581",
+      "source_location": "L580",
       "target": "app_lib_overlay_layers_contentrecord",
       "weight": 1.0
     },
@@ -32121,7 +32121,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_mergelayers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L581",
+      "source_location": "L580",
       "target": "app_lib_overlay_layers_mergeitem",
       "weight": 1.0
     },
@@ -32133,7 +32133,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_mergelayers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L583",
+      "source_location": "L582",
       "target": "app_lib_overlay_layers_mergecells",
       "weight": 1.0
     },
@@ -32265,7 +32265,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_storedlayersschema",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L474",
+      "source_location": "L473",
       "target": "app_lib_overlay_layers_readcells",
       "weight": 1.0
     },
@@ -32277,7 +32277,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_storedlayersschema",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L491",
+      "source_location": "L490",
       "target": "app_lib_overlay_layers_defaultitems",
       "weight": 1.0
     },
@@ -32289,7 +32289,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_storedlayersschema",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L492",
+      "source_location": "L491",
       "target": "app_lib_overlay_layers_emptycells",
       "weight": 1.0
     },
@@ -32301,7 +32301,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_storedlayerstext",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L534",
+      "source_location": "L533",
       "target": "app_lib_overlay_layers_storeditem",
       "weight": 1.0
     },
@@ -32313,7 +32313,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_storedlayerstext",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L544",
+      "source_location": "L543",
       "target": "app_lib_overlay_layers_storedcells",
       "weight": 1.0
     },
@@ -33115,22 +33115,10 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
-      "source": "app_lib_playground_core_ischaractercommand",
-      "source_file": "app/lib/playground/core.ts",
-      "source_location": "L99",
-      "target": "app_lib_playground_core_parsecommand",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
       "source": "app_lib_playground_core_parsecommand",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L77",
-      "target": "app_lib_playground_core_ischatcommand",
+      "source_location": "L70",
+      "target": "app_lib_chat_feed_ischatcommand",
       "weight": 1.0
     },
     {
@@ -62769,8 +62757,8 @@
       "relation": "calls",
       "source": "tests_chat_feed_test",
       "source_file": "tests/chat-feed.test.ts",
-      "source_location": "L287",
-      "target": "tests_chat_feed_test_snapshot",
+      "source_location": "L457",
+      "target": "tests_chat_feed_test_shownstate",
       "weight": 1.0
     },
     {
@@ -62781,8 +62769,8 @@
       "relation": "calls",
       "source": "tests_chat_feed_test",
       "source_file": "tests/chat-feed.test.ts",
-      "source_location": "L519",
-      "target": "tests_chat_feed_test_shownstate",
+      "source_location": "L551",
+      "target": "tests_chat_feed_test_snapshot",
       "weight": 1.0
     },
     {
@@ -62829,7 +62817,7 @@
       "relation": "calls",
       "source": "tests_chat_feed_test_shownstate",
       "source_file": "tests/chat-feed.test.ts",
-      "source_location": "L508",
+      "source_location": "L446",
       "target": "app_lib_chat_feed_initialchatstate",
       "weight": 1.0
     },
@@ -62841,7 +62829,7 @@
       "relation": "calls",
       "source": "tests_chat_feed_test_shownstate",
       "source_file": "tests/chat-feed.test.ts",
-      "source_location": "L511",
+      "source_location": "L449",
       "target": "tests_chat_feed_test_event",
       "weight": 1.0
     },
@@ -62853,7 +62841,7 @@
       "relation": "calls",
       "source": "tests_chat_feed_test_shownstate",
       "source_file": "tests/chat-feed.test.ts",
-      "source_location": "L511",
+      "source_location": "L449",
       "target": "tests_chat_feed_test_send",
       "weight": 1.0
     },
@@ -63945,7 +63933,7 @@
       "relation": "calls",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L572",
+      "source_location": "L571",
       "target": "tests_e2e_composition_editor_spec_writes",
       "weight": 1.0
     },
@@ -63957,7 +63945,7 @@
       "relation": "calls",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L610",
+      "source_location": "L609",
       "target": "tests_e2e_composition_editor_spec_cardlook",
       "weight": 1.0
     },
@@ -63969,7 +63957,7 @@
       "relation": "calls",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L729",
+      "source_location": "L728",
       "target": "tests_e2e_composition_editor_spec_realtask",
       "weight": 1.0
     },
@@ -63981,7 +63969,7 @@
       "relation": "calls",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L752",
+      "source_location": "L751",
       "target": "tests_e2e_composition_editor_spec_nudgeright",
       "weight": 1.0
     },
@@ -63993,7 +63981,7 @@
       "relation": "calls",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L755",
+      "source_location": "L754",
       "target": "tests_e2e_composition_editor_spec_storedchatcolumn",
       "weight": 1.0
     },
@@ -64005,7 +63993,7 @@
       "relation": "calls",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L804",
+      "source_location": "L803",
       "target": "tests_e2e_composition_editor_spec_leaveinapp",
       "weight": 1.0
     },
@@ -64017,7 +64005,7 @@
       "relation": "calls",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L834",
+      "source_location": "L833",
       "target": "tests_e2e_composition_editor_spec_carryright",
       "weight": 1.0
     },
@@ -64029,7 +64017,7 @@
       "relation": "calls",
       "source": "tests_e2e_composition_editor_spec_storedchatcolumn",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L787",
+      "source_location": "L786",
       "target": "tests_e2e_grid_helpers_storedlayers",
       "weight": 1.0
     },
@@ -64461,7 +64449,7 @@
       "relation": "calls",
       "source": "tests_e2e_overlay_composition_spec",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L1064",
+      "source_location": "L1078",
       "target": "tests_e2e_overlay_composition_spec_settestend",
       "weight": 1.0
     },
@@ -64581,7 +64569,7 @@
       "relation": "calls",
       "source": "tests_e2e_overlay_composition_spec",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L772",
+      "source_location": "L786",
       "target": "tests_e2e_overlay_composition_spec_designrects_a0a8b5c81d17",
       "weight": 1.0
     },
@@ -64593,7 +64581,7 @@
       "relation": "calls",
       "source": "tests_e2e_overlay_composition_spec",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L779",
+      "source_location": "L793",
       "target": "tests_e2e_overlay_composition_spec_expectsamerects",
       "weight": 1.0
     },
@@ -64677,7 +64665,7 @@
       "relation": "calls",
       "source": "tests_e2e_overlay_composition_spec_settestend",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L1020",
+      "source_location": "L1034",
       "target": "tests_e2e_fixtures_runsql",
       "weight": 1.0
     },
@@ -65073,7 +65061,7 @@
       "relation": "calls",
       "source": "tests_e2e_tools_live_spec",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L435",
+      "source_location": "L436",
       "target": "tests_e2e_tools_live_spec_said",
       "weight": 1.0
     },
@@ -65097,7 +65085,7 @@
       "relation": "calls",
       "source": "tests_e2e_tools_live_spec",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L678",
+      "source_location": "L677",
       "target": "tests_e2e_tools_live_spec_phone",
       "weight": 1.0
     },
@@ -65109,7 +65097,7 @@
       "relation": "calls",
       "source": "tests_e2e_tools_live_spec",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L704",
+      "source_location": "L703",
       "target": "tests_e2e_tools_live_spec_wakerecord",
       "weight": 1.0
     },
@@ -65133,7 +65121,7 @@
       "relation": "calls",
       "source": "tests_e2e_tools_live_spec",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L972",
+      "source_location": "L971",
       "target": "tests_e2e_tools_live_spec_support",
       "weight": 1.0
     },
@@ -65157,7 +65145,7 @@
       "relation": "calls",
       "source": "tests_e2e_tools_live_spec_phone",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L609",
+      "source_location": "L608",
       "target": "tests_e2e_coverage_newpage",
       "weight": 1.0
     },
@@ -65169,7 +65157,7 @@
       "relation": "calls",
       "source": "tests_e2e_tools_live_spec_phone",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L660",
+      "source_location": "L659",
       "target": "tests_e2e_tools_live_spec_chat",
       "weight": 1.0
     },
@@ -67137,7 +67125,7 @@
       "relation": "calls",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1571",
+      "source_location": "L1569",
       "target": "tests_live_control_test_characterson",
       "weight": 1.0
     },
@@ -67149,7 +67137,7 @@
       "relation": "calls",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1582",
+      "source_location": "L1580",
       "target": "tests_live_control_test_characters",
       "weight": 1.0
     },
@@ -67161,7 +67149,7 @@
       "relation": "calls",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1837",
+      "source_location": "L1832",
       "target": "tests_live_control_test_event",
       "weight": 1.0
     },
@@ -67305,7 +67293,7 @@
       "relation": "calls",
       "source": "tests_live_control_test_characterson",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1566",
+      "source_location": "L1564",
       "target": "tests_live_control_test_send",
       "weight": 1.0
     },
@@ -67581,7 +67569,7 @@
       "relation": "calls",
       "source": "tests_overlay_layers_test",
       "source_file": "tests/overlay-layers.test.ts",
-      "source_location": "L493",
+      "source_location": "L489",
       "target": "tests_overlay_layers_test_stored",
       "weight": 1.0
     },
@@ -67653,7 +67641,7 @@
       "relation": "calls",
       "source": "tests_overlay_legacy_test",
       "source_file": "tests/overlay-legacy.test.ts",
-      "source_location": "L454",
+      "source_location": "L442",
       "target": "tests_overlay_legacy_test_source",
       "weight": 1.0
     },
@@ -67689,7 +67677,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1132",
+      "source_location": "L1133",
       "target": "tests_overlay_ui_coverage_test_composition",
       "weight": 1.0
     },
@@ -67701,7 +67689,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1133",
+      "source_location": "L1134",
       "target": "tests_overlay_ui_coverage_test_boxes",
       "weight": 1.0
     },
@@ -67713,7 +67701,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1275",
+      "source_location": "L1276",
       "target": "tests_overlay_ui_coverage_test_connected",
       "weight": 1.0
     },
@@ -67725,7 +67713,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1275",
+      "source_location": "L1276",
       "target": "tests_overlay_ui_coverage_test_section",
       "weight": 1.0
     },
@@ -67737,7 +67725,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1289",
+      "source_location": "L1290",
       "target": "tests_overlay_ui_coverage_test_cards",
       "weight": 1.0
     },
@@ -67749,7 +67737,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1295",
+      "source_location": "L1296",
       "target": "tests_overlay_ui_coverage_test_parts",
       "weight": 1.0
     },
@@ -67797,7 +67785,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L726",
+      "source_location": "L727",
       "target": "tests_overlay_ui_coverage_test_test",
       "weight": 1.0
     },
@@ -67809,7 +67797,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L729",
+      "source_location": "L730",
       "target": "tests_overlay_ui_coverage_test_status",
       "weight": 1.0
     },
@@ -67821,7 +67809,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L783",
+      "source_location": "L784",
       "target": "tests_overlay_ui_coverage_test_palette",
       "weight": 1.0
     },
@@ -67833,7 +67821,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L813",
+      "source_location": "L814",
       "target": "tests_overlay_ui_coverage_test_layout",
       "weight": 1.0
     },
@@ -67845,7 +67833,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L831",
+      "source_location": "L832",
       "target": "tests_overlay_ui_coverage_test_poll",
       "weight": 1.0
     },
@@ -67857,7 +67845,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L843",
+      "source_location": "L844",
       "target": "tests_overlay_ui_coverage_test_stage",
       "weight": 1.0
     },
@@ -67869,7 +67857,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test_cards",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1252",
+      "source_location": "L1253",
       "target": "tests_overlay_ui_coverage_test_section",
       "weight": 1.0
     },
@@ -67893,7 +67881,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L716",
+      "source_location": "L717",
       "target": "tests_overlay_ui_coverage_test_playground",
       "weight": 1.0
     },
@@ -68337,7 +68325,7 @@
       "relation": "calls",
       "source": "tests_playground_host_test",
       "source_file": "tests/playground-host.test.ts",
-      "source_location": "L1005",
+      "source_location": "L1008",
       "target": "tests_playground_host_test_host",
       "weight": 1.0
     },
@@ -68445,7 +68433,7 @@
       "relation": "calls",
       "source": "tests_playground_host_test",
       "source_file": "tests/playground-host.test.ts",
-      "source_location": "L301",
+      "source_location": "L304",
       "target": "tests_playground_host_test_room",
       "weight": 1.0
     },
@@ -68457,7 +68445,7 @@
       "relation": "calls",
       "source": "tests_playground_host_test",
       "source_file": "tests/playground-host.test.ts",
-      "source_location": "L375",
+      "source_location": "L378",
       "target": "tests_playground_host_test_firealarm",
       "weight": 1.0
     },
@@ -68469,7 +68457,7 @@
       "relation": "calls",
       "source": "tests_playground_host_test",
       "source_file": "tests/playground-host.test.ts",
-      "source_location": "L401",
+      "source_location": "L404",
       "target": "tests_playground_host_test_control",
       "weight": 1.0
     },
@@ -68481,7 +68469,7 @@
       "relation": "calls",
       "source": "tests_playground_host_test",
       "source_file": "tests/playground-host.test.ts",
-      "source_location": "L424",
+      "source_location": "L427",
       "target": "tests_playground_host_test_post",
       "weight": 1.0
     },
@@ -68493,7 +68481,7 @@
       "relation": "calls",
       "source": "tests_playground_host_test",
       "source_file": "tests/playground-host.test.ts",
-      "source_location": "L586",
+      "source_location": "L589",
       "target": "tests_playground_host_test_lastmode",
       "weight": 1.0
     },
@@ -68505,7 +68493,7 @@
       "relation": "calls",
       "source": "tests_playground_host_test",
       "source_file": "tests/playground-host.test.ts",
-      "source_location": "L762",
+      "source_location": "L765",
       "target": "tests_playground_host_test_lastterrain",
       "weight": 1.0
     },
@@ -68517,7 +68505,7 @@
       "relation": "calls",
       "source": "tests_playground_host_test",
       "source_file": "tests/playground-host.test.ts",
-      "source_location": "L823",
+      "source_location": "L826",
       "target": "tests_playground_host_test_watchqueries",
       "weight": 1.0
     },
@@ -68589,7 +68577,7 @@
       "relation": "calls",
       "source": "tests_playground_host_test_host",
       "source_file": "tests/playground-host.test.ts",
-      "source_location": "L973",
+      "source_location": "L976",
       "target": "app_server_playground_host_playgroundhost",
       "weight": 1.0
     },
@@ -73008,7 +72996,7 @@
       "relation": "references",
       "source": "app_components_overlay_use_chat_chatsource",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L76",
+      "source_location": "L75",
       "target": "app_components_overlay_activity_feed_activityfeed",
       "weight": 1.0
     },
@@ -73020,7 +73008,7 @@
       "relation": "references",
       "source": "app_components_overlay_use_chat_chatsource",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L77",
+      "source_location": "L76",
       "target": "app_lib_activity_activityevent",
       "weight": 1.0
     },
@@ -73032,7 +73020,7 @@
       "relation": "references",
       "source": "app_components_overlay_use_chat_chatsource",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L79",
+      "source_location": "L78",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -73068,7 +73056,7 @@
       "relation": "references",
       "source": "app_components_overlay_use_chat_usechatoptions",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L37",
+      "source_location": "L36",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -73512,7 +73500,7 @@
       "relation": "references",
       "source": "app_lib_chat_feed_chatrow",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L53",
+      "source_location": "L52",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -73524,7 +73512,7 @@
       "relation": "references",
       "source": "app_lib_chat_feed_chatrow",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L57",
+      "source_location": "L56",
       "target": "app_lib_activity_activityfragment",
       "weight": 1.0
     },
@@ -73584,7 +73572,7 @@
       "relation": "references",
       "source": "app_lib_live_chat_livechatrow",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L44",
+      "source_location": "L43",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -73596,7 +73584,7 @@
       "relation": "references",
       "source": "app_lib_live_chat_livechatrow",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L48",
+      "source_location": "L47",
       "target": "app_lib_activity_activityfragment",
       "weight": 1.0
     },
@@ -73608,7 +73596,7 @@
       "relation": "references",
       "source": "app_lib_live_chat_livesupportrow",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L59",
+      "source_location": "L58",
       "target": "app_lib_activity_supportkind",
       "weight": 1.0
     },
@@ -73620,7 +73608,7 @@
       "relation": "references",
       "source": "app_lib_live_chat_livesupportrow",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L60",
+      "source_location": "L59",
       "target": "app_lib_activity_supportsource",
       "weight": 1.0
     },
@@ -73716,7 +73704,7 @@
       "relation": "references",
       "source": "app_lib_playground_core_simhost",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L112",
+      "source_location": "L97",
       "target": "app_lib_playground_terrain_world",
       "weight": 1.0
     },
@@ -73728,7 +73716,7 @@
       "relation": "references",
       "source": "app_lib_playground_core_simhost",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L113",
+      "source_location": "L98",
       "target": "app_lib_playground_terrain_terrain",
       "weight": 1.0
     },
@@ -75072,7 +75060,7 @@
       "relation": "references",
       "source": "app_lib_playground_core_simhost",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L116",
+      "source_location": "L101",
       "target": "app_lib_playground_crowd_participant",
       "weight": 1.0
     },
@@ -97108,18 +97096,6 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports",
-      "source": "app_lib_chat_feed",
-      "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L9",
-      "target": "app_lib_playground_core_ischaractercommand",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
       "source": "app_lib_chat_test",
       "source_file": "app/lib/chat-test.ts",
       "source_location": "L1",
@@ -97567,7 +97543,7 @@
       "source": "app_lib_live_chat",
       "source_file": "app/lib/live-chat.ts",
       "source_location": "L12",
-      "target": "app_lib_chat_feed_max_removed_ids",
+      "target": "app_lib_chat_feed_ischatcommand",
       "weight": 1.0
     },
     {
@@ -97578,8 +97554,8 @@
       "relation": "imports",
       "source": "app_lib_live_chat",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L13",
-      "target": "app_lib_playground_core_ischaractercommand",
+      "source_location": "L12",
+      "target": "app_lib_chat_feed_max_removed_ids",
       "weight": 1.0
     },
     {
@@ -98334,56 +98310,8 @@
       "relation": "imports",
       "source": "app_lib_playground_core",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L3",
-      "target": "app_lib_playground_crowd_command",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_lib_playground_core",
-      "source_file": "app/lib/playground/core.ts",
-      "source_location": "L3",
-      "target": "app_lib_playground_crowd_command_aliases",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_lib_playground_core",
-      "source_file": "app/lib/playground/core.ts",
-      "source_location": "L3",
-      "target": "app_lib_playground_crowd_commandcall",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_lib_playground_core",
-      "source_file": "app/lib/playground/core.ts",
-      "source_location": "L3",
-      "target": "app_lib_playground_crowd_commands",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_lib_playground_core",
-      "source_file": "app/lib/playground/core.ts",
-      "source_location": "L3",
-      "target": "app_lib_playground_crowd_participant",
+      "source_location": "L2",
+      "target": "app_lib_chat_feed_ischatcommand",
       "weight": 1.0
     },
     {
@@ -98395,6 +98323,66 @@
       "source": "app_lib_playground_core",
       "source_file": "app/lib/playground/core.ts",
       "source_location": "L4",
+      "target": "app_lib_playground_crowd_command",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_lib_playground_core",
+      "source_file": "app/lib/playground/core.ts",
+      "source_location": "L4",
+      "target": "app_lib_playground_crowd_command_aliases",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_lib_playground_core",
+      "source_file": "app/lib/playground/core.ts",
+      "source_location": "L4",
+      "target": "app_lib_playground_crowd_commandcall",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_lib_playground_core",
+      "source_file": "app/lib/playground/core.ts",
+      "source_location": "L4",
+      "target": "app_lib_playground_crowd_commands",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_lib_playground_core",
+      "source_file": "app/lib/playground/core.ts",
+      "source_location": "L4",
+      "target": "app_lib_playground_crowd_participant",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_lib_playground_core",
+      "source_file": "app/lib/playground/core.ts",
+      "source_location": "L5",
       "target": "app_lib_playground_protocol_charstate",
       "weight": 1.0
     },
@@ -98406,7 +98394,7 @@
       "relation": "imports",
       "source": "app_lib_playground_core",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "app_lib_playground_terrain_terrain",
       "weight": 1.0
     },
@@ -98418,7 +98406,7 @@
       "relation": "imports",
       "source": "app_lib_playground_core",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "app_lib_playground_terrain_world",
       "weight": 1.0
     },
@@ -126163,6 +126151,18 @@
       "source": "tests_chat_feed_test",
       "source_file": "tests/chat-feed.test.ts",
       "source_location": "L10",
+      "target": "app_lib_chat_feed_ischatcommand",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_chat_feed_test",
+      "source_file": "tests/chat-feed.test.ts",
+      "source_location": "L10",
       "target": "app_lib_chat_feed_max_removed_ids",
       "weight": 1.0
     },
@@ -126272,30 +126272,6 @@
       "source_file": "tests/chat-feed.test.ts",
       "source_location": "L2",
       "target": "app_lib_activity_parseactivitymessage",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_chat_feed_test",
-      "source_file": "tests/chat-feed.test.ts",
-      "source_location": "L24",
-      "target": "app_lib_playground_core_ischaractercommand",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_chat_feed_test",
-      "source_file": "tests/chat-feed.test.ts",
-      "source_location": "L24",
-      "target": "app_lib_playground_core_ischatcommand",
       "weight": 1.0
     },
     {
@@ -136196,6 +136172,18 @@
       "source_file": "tests/live-channels.test.ts",
       "source_location": "L3",
       "target": "app_lib_channel_health_channelview",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_live_chat_test",
+      "source_file": "tests/live-chat.test.ts",
+      "source_location": "L10",
+      "target": "app_lib_chat_feed_ischatcommand",
       "weight": 1.0
     },
     {
@@ -161086,18 +161074,6 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports_from",
-      "source": "app_lib_chat_feed",
-      "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L9",
-      "target": "app_lib_playground_core",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports_from",
       "source": "app_lib_chat_test",
       "source_file": "app/lib/chat-test.ts",
       "source_location": "L1",
@@ -161239,18 +161215,6 @@
       "source_file": "app/lib/live-chat.ts",
       "source_location": "L12",
       "target": "app_lib_chat_feed",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports_from",
-      "source": "app_lib_live_chat",
-      "source_file": "app/lib/live-chat.ts",
-      "source_location": "L13",
-      "target": "app_lib_playground_core",
       "weight": 1.0
     },
     {
@@ -161530,8 +161494,8 @@
       "relation": "imports_from",
       "source": "app_lib_playground_core",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L3",
-      "target": "app_lib_playground_crowd",
+      "source_location": "L2",
+      "target": "app_lib_chat_feed",
       "weight": 1.0
     },
     {
@@ -161543,8 +161507,7 @@
       "source": "app_lib_playground_core",
       "source_file": "app/lib/playground/core.ts",
       "source_location": "L4",
-      "target": "app_lib_playground_protocol",
-      "type_only": true,
+      "target": "app_lib_playground_crowd",
       "weight": 1.0
     },
     {
@@ -161556,8 +161519,19 @@
       "source": "app_lib_playground_core",
       "source_file": "app/lib/playground/core.ts",
       "source_location": "L5",
+      "target": "app_lib_playground_protocol",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_lib_playground_core",
+      "source_file": "app/lib/playground/core.ts",
+      "source_location": "L6",
       "target": "app_lib_playground_terrain",
-      "type_only": true,
       "weight": 1.0
     },
     {
@@ -175457,18 +175431,6 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports_from",
-      "source": "tests_chat_feed_test",
-      "source_file": "tests/chat-feed.test.ts",
-      "source_location": "L24",
-      "target": "app_lib_playground_core",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports_from",
       "source": "tests_chat_test_test",
       "source_file": "tests/chat-test.test.ts",
       "source_location": "L1",
@@ -186639,7 +186601,7 @@
       "relation": "references",
       "source": "app_lib_playground_core_simhost_giveup",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L122",
+      "source_location": "L107",
       "target": "app_lib_playground_crowd_participant",
       "weight": 1.0
     },
@@ -186651,7 +186613,7 @@
       "relation": "references",
       "source": "app_lib_playground_core_simhost_rest",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L120",
+      "source_location": "L105",
       "target": "app_lib_playground_crowd_participant",
       "weight": 1.0
     },
@@ -189091,7 +189053,7 @@
       "relation": "references",
       "source": "app_lib_playground_core_simhost_visible",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L118",
+      "source_location": "L103",
       "target": "app_lib_playground_crowd_participant",
       "weight": 1.0
     },
@@ -189427,7 +189389,7 @@
       "relation": "inherits",
       "source": "app_lib_live_chat_livechatrow",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L42",
+      "source_location": "L41",
       "target": "app_lib_live_chat_rowbase",
       "weight": 1.0
     },
@@ -189439,7 +189401,7 @@
       "relation": "inherits",
       "source": "app_lib_live_chat_livesupportrow",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L57",
+      "source_location": "L56",
       "target": "app_lib_live_chat_rowbase",
       "weight": 1.0
     },
@@ -197491,7 +197453,7 @@
       "relation": "contains",
       "source": "app_components_overlay_use_chat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L184",
+      "source_location": "L183",
       "target": "app_components_overlay_use_chat_usechat",
       "weight": 1.0
     },
@@ -197524,7 +197486,7 @@
       "relation": "contains",
       "source": "app_components_overlay_use_chat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L40",
+      "source_location": "L39",
       "target": "app_components_overlay_use_chat_still_limits",
       "weight": 1.0
     },
@@ -197535,7 +197497,7 @@
       "relation": "contains",
       "source": "app_components_overlay_use_chat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L46",
+      "source_location": "L45",
       "target": "app_components_overlay_use_chat_sampleevent",
       "weight": 1.0
     },
@@ -197546,7 +197508,7 @@
       "relation": "contains",
       "source": "app_components_overlay_use_chat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L57",
+      "source_location": "L56",
       "target": "app_components_overlay_use_chat_subscribemotion",
       "weight": 1.0
     },
@@ -197557,7 +197519,7 @@
       "relation": "contains",
       "source": "app_components_overlay_use_chat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L67",
+      "source_location": "L66",
       "target": "app_components_overlay_use_chat_usemotionreduced",
       "weight": 1.0
     },
@@ -197568,7 +197530,7 @@
       "relation": "contains",
       "source": "app_components_overlay_use_chat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L75",
+      "source_location": "L74",
       "target": "app_components_overlay_use_chat_chatsource",
       "weight": 1.0
     },
@@ -197579,7 +197541,7 @@
       "relation": "contains",
       "source": "app_components_overlay_use_chat",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L88",
+      "source_location": "L87",
       "target": "app_components_overlay_use_chat_usechatstate",
       "weight": 1.0
     },
@@ -206126,18 +206088,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L100",
-      "target": "app_lib_chat_feed_chataction",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_chat_feed",
-      "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L108",
+      "source_location": "L106",
       "target": "app_lib_chat_feed_initialchatstate",
       "weight": 1.0
     },
@@ -206148,7 +206099,18 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L115",
+      "source_location": "L114",
+      "target": "app_lib_chat_feed_ischatcommand",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_chat_feed",
+      "source_file": "app/lib/chat-feed.ts",
+      "source_location": "L121",
       "target": "app_lib_chat_feed_graphemes",
       "weight": 1.0
     },
@@ -206159,7 +206121,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L124",
+      "source_location": "L130",
       "target": "app_lib_chat_feed_safeemoteurl",
       "weight": 1.0
     },
@@ -206170,7 +206132,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L139",
+      "source_location": "L145",
       "target": "app_lib_chat_feed_sourcefragments",
       "weight": 1.0
     },
@@ -206181,7 +206143,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L144",
+      "source_location": "L150",
       "target": "app_lib_chat_feed_safedisplayfragment",
       "weight": 1.0
     },
@@ -206192,7 +206154,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L155",
+      "source_location": "L161",
       "target": "app_lib_chat_feed_displayfragments",
       "weight": 1.0
     },
@@ -206203,7 +206165,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L182",
+      "source_location": "L188",
       "target": "app_lib_chat_feed_limitsof",
       "weight": 1.0
     },
@@ -206214,7 +206176,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L186",
+      "source_location": "L192",
       "target": "app_lib_chat_feed_torow",
       "weight": 1.0
     },
@@ -206225,29 +206187,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L206",
-      "target": "app_lib_chat_feed_hidden",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_chat_feed",
-      "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L211",
-      "target": "app_lib_chat_feed_dismiss",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_chat_feed",
-      "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L22",
+      "source_location": "L21",
       "target": "app_lib_chat_feed_chat_limits",
       "weight": 1.0
     },
@@ -206258,7 +206198,29 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L224",
+      "source_location": "L212",
+      "target": "app_lib_chat_feed_hidden",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_chat_feed",
+      "source_file": "app/lib/chat-feed.ts",
+      "source_location": "L217",
+      "target": "app_lib_chat_feed_dismiss",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_chat_feed",
+      "source_file": "app/lib/chat-feed.ts",
+      "source_location": "L230",
       "target": "app_lib_chat_feed_dismisscommands",
       "weight": 1.0
     },
@@ -206269,7 +206231,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L228",
+      "source_location": "L234",
       "target": "app_lib_chat_feed_active",
       "weight": 1.0
     },
@@ -206280,7 +206242,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L232",
+      "source_location": "L238",
       "target": "app_lib_chat_feed_remember",
       "weight": 1.0
     },
@@ -206291,7 +206253,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L245",
+      "source_location": "L251",
       "target": "app_lib_chat_feed_lastpromotion",
       "weight": 1.0
     },
@@ -206302,7 +206264,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L251",
+      "source_location": "L257",
       "target": "app_lib_chat_feed_advancerow",
       "weight": 1.0
     },
@@ -206313,7 +206275,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L263",
+      "source_location": "L269",
       "target": "app_lib_chat_feed_advance",
       "weight": 1.0
     },
@@ -206324,7 +206286,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L296",
+      "source_location": "L302",
       "target": "app_lib_chat_feed_bound",
       "weight": 1.0
     },
@@ -206335,7 +206297,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L321",
+      "source_location": "L327",
       "target": "app_lib_chat_feed_receivechat",
       "weight": 1.0
     },
@@ -206346,7 +206308,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L333",
+      "source_location": "L339",
       "target": "app_lib_chat_feed_match",
       "weight": 1.0
     },
@@ -206357,7 +206319,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L335",
+      "source_location": "L341",
       "target": "app_lib_chat_feed_moderate",
       "weight": 1.0
     },
@@ -206368,7 +206330,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L362",
+      "source_location": "L368",
       "target": "app_lib_chat_feed_receiveevent",
       "weight": 1.0
     },
@@ -206379,7 +206341,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L39",
+      "source_location": "L38",
       "target": "app_lib_chat_feed_chatlimits",
       "weight": 1.0
     },
@@ -206390,7 +206352,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L392",
+      "source_location": "L398",
       "target": "app_lib_chat_feed_receivesnapshot",
       "weight": 1.0
     },
@@ -206401,7 +206363,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L42",
+      "source_location": "L41",
       "target": "app_lib_chat_feed_max_removed_ids",
       "weight": 1.0
     },
@@ -206412,7 +206374,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L437",
+      "source_location": "L443",
       "target": "app_lib_chat_feed_chatreducer",
       "weight": 1.0
     },
@@ -206423,7 +206385,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L444",
+      "source_location": "L450",
       "target": "app_lib_chat_feed_reduce",
       "weight": 1.0
     },
@@ -206434,18 +206396,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L467",
-      "target": "app_lib_chat_feed_nextwakeat",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_chat_feed",
-      "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L47",
+      "source_location": "L46",
       "target": "app_lib_chat_feed_rowphase",
       "weight": 1.0
     },
@@ -206456,8 +206407,8 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L485",
-      "target": "app_lib_chat_feed_sample",
+      "source_location": "L473",
+      "target": "app_lib_chat_feed_nextwakeat",
       "weight": 1.0
     },
     {
@@ -206467,7 +206418,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L49",
+      "source_location": "L48",
       "target": "app_lib_chat_feed_chatrow",
       "weight": 1.0
     },
@@ -206478,7 +206429,18 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L510",
+      "source_location": "L491",
+      "target": "app_lib_chat_feed_sample",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_chat_feed",
+      "source_file": "app/lib/chat-feed.ts",
+      "source_location": "L516",
       "target": "app_lib_chat_feed_sample_chat",
       "weight": 1.0
     },
@@ -206489,7 +206451,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L541",
+      "source_location": "L547",
       "target": "app_lib_chat_feed_samplechatat",
       "weight": 1.0
     },
@@ -206500,7 +206462,7 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L72",
+      "source_location": "L71",
       "target": "app_lib_chat_feed_chatstate",
       "weight": 1.0
     },
@@ -206511,8 +206473,19 @@
       "relation": "contains",
       "source": "app_lib_chat_feed",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L86",
+      "source_location": "L85",
       "target": "app_lib_chat_feed_chatoptions",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_chat_feed",
+      "source_file": "app/lib/chat-feed.ts",
+      "source_location": "L98",
+      "target": "app_lib_chat_feed_chataction",
       "weight": 1.0
     },
     {
@@ -207732,7 +207705,7 @@
       "relation": "contains",
       "source": "app_lib_live_chat",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L117",
+      "source_location": "L116",
       "target": "app_lib_live_chat_remember",
       "weight": 1.0
     },
@@ -207743,7 +207716,7 @@
       "relation": "contains",
       "source": "app_lib_live_chat",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L124",
+      "source_location": "L123",
       "target": "app_lib_live_chat_newest",
       "weight": 1.0
     },
@@ -207754,7 +207727,7 @@
       "relation": "contains",
       "source": "app_lib_live_chat",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L130",
+      "source_location": "L129",
       "target": "app_lib_live_chat_receivechat",
       "weight": 1.0
     },
@@ -207765,7 +207738,7 @@
       "relation": "contains",
       "source": "app_lib_live_chat",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L138",
+      "source_location": "L137",
       "target": "app_lib_live_chat_receivesupport",
       "weight": 1.0
     },
@@ -207776,7 +207749,7 @@
       "relation": "contains",
       "source": "app_lib_live_chat",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L161",
+      "source_location": "L160",
       "target": "app_lib_live_chat_moderate",
       "weight": 1.0
     },
@@ -207787,7 +207760,7 @@
       "relation": "contains",
       "source": "app_lib_live_chat",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L175",
+      "source_location": "L174",
       "target": "app_lib_live_chat_receiveevent",
       "weight": 1.0
     },
@@ -207798,7 +207771,7 @@
       "relation": "contains",
       "source": "app_lib_live_chat",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L208",
+      "source_location": "L207",
       "target": "app_lib_live_chat_receivesnapshot",
       "weight": 1.0
     },
@@ -207809,7 +207782,7 @@
       "relation": "contains",
       "source": "app_lib_live_chat",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L224",
+      "source_location": "L223",
       "target": "app_lib_live_chat_livechatreducer",
       "weight": 1.0
     },
@@ -207820,7 +207793,7 @@
       "relation": "contains",
       "source": "app_lib_live_chat",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L238",
+      "source_location": "L237",
       "target": "app_lib_live_chat_shownrows",
       "weight": 1.0
     },
@@ -207831,18 +207804,7 @@
       "relation": "contains",
       "source": "app_lib_live_chat",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L253",
-      "target": "app_lib_live_chat_newsince",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_live_chat",
-      "source_file": "app/lib/live-chat.ts",
-      "source_location": "L26",
+      "source_location": "L25",
       "target": "app_lib_live_chat_live_chat_limits",
       "weight": 1.0
     },
@@ -207853,7 +207815,18 @@
       "relation": "contains",
       "source": "app_lib_live_chat",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L264",
+      "source_location": "L252",
+      "target": "app_lib_live_chat_newsince",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_live_chat",
+      "source_file": "app/lib/live-chat.ts",
+      "source_location": "L263",
       "target": "app_lib_live_chat_chat_text_sizes",
       "weight": 1.0
     },
@@ -207864,7 +207837,7 @@
       "relation": "contains",
       "source": "app_lib_live_chat",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L266",
+      "source_location": "L265",
       "target": "app_lib_live_chat_chat_text_default",
       "weight": 1.0
     },
@@ -207875,7 +207848,7 @@
       "relation": "contains",
       "source": "app_lib_live_chat",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L269",
+      "source_location": "L268",
       "target": "app_lib_live_chat_chattextstep",
       "weight": 1.0
     },
@@ -207886,7 +207859,7 @@
       "relation": "contains",
       "source": "app_lib_live_chat",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L276",
+      "source_location": "L275",
       "target": "app_lib_live_chat_nextchattextstep",
       "weight": 1.0
     },
@@ -207897,7 +207870,7 @@
       "relation": "contains",
       "source": "app_lib_live_chat",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L34",
+      "source_location": "L33",
       "target": "app_lib_live_chat_rowbase",
       "weight": 1.0
     },
@@ -207908,7 +207881,7 @@
       "relation": "contains",
       "source": "app_lib_live_chat",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L42",
+      "source_location": "L41",
       "target": "app_lib_live_chat_livechatrow",
       "weight": 1.0
     },
@@ -207919,7 +207892,7 @@
       "relation": "contains",
       "source": "app_lib_live_chat",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L57",
+      "source_location": "L56",
       "target": "app_lib_live_chat_livesupportrow",
       "weight": 1.0
     },
@@ -207930,7 +207903,7 @@
       "relation": "contains",
       "source": "app_lib_live_chat",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L70",
+      "source_location": "L69",
       "target": "app_lib_live_chat_liverow",
       "weight": 1.0
     },
@@ -207941,7 +207914,7 @@
       "relation": "contains",
       "source": "app_lib_live_chat",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L73",
+      "source_location": "L72",
       "target": "app_lib_live_chat_rowkey",
       "weight": 1.0
     },
@@ -207952,7 +207925,7 @@
       "relation": "contains",
       "source": "app_lib_live_chat",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L77",
+      "source_location": "L76",
       "target": "app_lib_live_chat_livechatstate",
       "weight": 1.0
     },
@@ -207963,7 +207936,7 @@
       "relation": "contains",
       "source": "app_lib_live_chat",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L92",
+      "source_location": "L91",
       "target": "app_lib_live_chat_livechataction",
       "weight": 1.0
     },
@@ -207974,7 +207947,7 @@
       "relation": "contains",
       "source": "app_lib_live_chat",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L94",
+      "source_location": "L93",
       "target": "app_lib_live_chat_initiallivechat",
       "weight": 1.0
     },
@@ -207985,7 +207958,7 @@
       "relation": "contains",
       "source": "app_lib_live_chat",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L98",
+      "source_location": "L97",
       "target": "app_lib_live_chat_torow",
       "weight": 1.0
     },
@@ -208887,7 +208860,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L501",
+      "source_location": "L500",
       "target": "app_lib_overlay_layers_layers_version",
       "weight": 1.0
     },
@@ -208898,7 +208871,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L504",
+      "source_location": "L503",
       "target": "app_lib_overlay_layers_stored_layers_length",
       "weight": 1.0
     },
@@ -208909,7 +208882,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L507",
+      "source_location": "L506",
       "target": "app_lib_overlay_layers_storedcells",
       "weight": 1.0
     },
@@ -208920,7 +208893,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L516",
+      "source_location": "L515",
       "target": "app_lib_overlay_layers_storeditem",
       "weight": 1.0
     },
@@ -208931,7 +208904,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L531",
+      "source_location": "L530",
       "target": "app_lib_overlay_layers_storedlayerstext",
       "weight": 1.0
     },
@@ -208942,7 +208915,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L549",
+      "source_location": "L548",
       "target": "app_lib_overlay_layers_mergecells",
       "weight": 1.0
     },
@@ -208953,7 +208926,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L558",
+      "source_location": "L557",
       "target": "app_lib_overlay_layers_mergeitem",
       "weight": 1.0
     },
@@ -208964,7 +208937,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L567",
+      "source_location": "L566",
       "target": "app_lib_overlay_layers_mergelayers",
       "weight": 1.0
     },
@@ -208986,7 +208959,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L594",
+      "source_location": "L593",
       "target": "app_lib_overlay_layers_parselayerparam",
       "weight": 1.0
     },
@@ -209008,7 +208981,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L601",
+      "source_location": "L600",
       "target": "app_lib_overlay_layers_layerurl",
       "weight": 1.0
     },
@@ -210724,40 +210697,7 @@
       "relation": "contains",
       "source": "app_lib_playground_core",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L102",
-      "target": "app_lib_playground_core_clamp",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_playground_core",
-      "source_file": "app/lib/playground/core.ts",
-      "source_location": "L106",
-      "target": "app_lib_playground_core_sitekey",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_playground_core",
-      "source_file": "app/lib/playground/core.ts",
-      "source_location": "L111",
-      "target": "app_lib_playground_core_simhost",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_playground_core",
-      "source_file": "app/lib/playground/core.ts",
-      "source_location": "L13",
+      "source_location": "L14",
       "target": "app_lib_playground_core_mulberry32",
       "weight": 1.0
     },
@@ -210768,7 +210708,7 @@
       "relation": "contains",
       "source": "app_lib_playground_core",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L25",
+      "source_location": "L26",
       "target": "app_lib_playground_core_setstate",
       "weight": 1.0
     },
@@ -210779,7 +210719,7 @@
       "relation": "contains",
       "source": "app_lib_playground_core",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L29",
+      "source_location": "L30",
       "target": "app_lib_playground_core_sides",
       "weight": 1.0
     },
@@ -210790,7 +210730,7 @@
       "relation": "contains",
       "source": "app_lib_playground_core",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L31",
+      "source_location": "L32",
       "target": "app_lib_playground_core_emotes",
       "weight": 1.0
     },
@@ -210801,7 +210741,7 @@
       "relation": "contains",
       "source": "app_lib_playground_core",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L33",
+      "source_location": "L34",
       "target": "app_lib_playground_core_fixed_states",
       "weight": 1.0
     },
@@ -210812,7 +210752,7 @@
       "relation": "contains",
       "source": "app_lib_playground_core",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L42",
+      "source_location": "L43",
       "target": "app_lib_playground_core_halted_states",
       "weight": 1.0
     },
@@ -210823,7 +210763,7 @@
       "relation": "contains",
       "source": "app_lib_playground_core",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L50",
+      "source_location": "L51",
       "target": "app_lib_playground_core_standing_states",
       "weight": 1.0
     },
@@ -210834,18 +210774,7 @@
       "relation": "contains",
       "source": "app_lib_playground_core",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L67",
-      "target": "app_lib_playground_core_ischatcommand",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_playground_core",
-      "source_file": "app/lib/playground/core.ts",
-      "source_location": "L76",
+      "source_location": "L69",
       "target": "app_lib_playground_core_parsecommand",
       "weight": 1.0
     },
@@ -210856,8 +210785,30 @@
       "relation": "contains",
       "source": "app_lib_playground_core",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L98",
-      "target": "app_lib_playground_core_ischaractercommand",
+      "source_location": "L87",
+      "target": "app_lib_playground_core_clamp",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_playground_core",
+      "source_file": "app/lib/playground/core.ts",
+      "source_location": "L91",
+      "target": "app_lib_playground_core_sitekey",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_playground_core",
+      "source_file": "app/lib/playground/core.ts",
+      "source_location": "L96",
+      "target": "app_lib_playground_core_simhost",
       "weight": 1.0
     },
     {
@@ -229369,7 +229320,7 @@
       "relation": "contains",
       "source": "docs_api_api_reference",
       "source_file": "docs/api.md",
-      "source_location": "L208",
+      "source_location": "L209",
       "target": "docs_api_overlay_layouts",
       "weight": 1.0
     },
@@ -229380,7 +229331,7 @@
       "relation": "contains",
       "source": "docs_api_api_reference",
       "source_file": "docs/api.md",
-      "source_location": "L236",
+      "source_location": "L237",
       "target": "docs_api_obs_dock",
       "weight": 1.0
     },
@@ -229402,7 +229353,7 @@
       "relation": "contains",
       "source": "docs_api_api_reference",
       "source_file": "docs/api.md",
-      "source_location": "L256",
+      "source_location": "L257",
       "target": "docs_api_later_phases",
       "weight": 1.0
     },
@@ -229413,7 +229364,7 @@
       "relation": "contains",
       "source": "docs_api_api_reference",
       "source_file": "docs/api.md",
-      "source_location": "L263",
+      "source_location": "L264",
       "target": "docs_api_discussion_updates",
       "weight": 1.0
     },
@@ -229424,7 +229375,7 @@
       "relation": "contains",
       "source": "docs_api_api_reference",
       "source_file": "docs/api.md",
-      "source_location": "L302",
+      "source_location": "L303",
       "target": "docs_api_comment_translation",
       "weight": 1.0
     },
@@ -229435,7 +229386,7 @@
       "relation": "contains",
       "source": "docs_api_api_reference",
       "source_file": "docs/api.md",
-      "source_location": "L337",
+      "source_location": "L338",
       "target": "docs_api_translation_of_new_content",
       "weight": 1.0
     },
@@ -229446,19 +229397,8 @@
       "relation": "contains",
       "source": "docs_api_api_reference",
       "source_file": "docs/api.md",
-      "source_location": "L351",
+      "source_location": "L352",
       "target": "docs_api_topic_and_poll_translation",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "docs_api_api_reference",
-      "source_file": "docs/api.md",
-      "source_location": "L369",
-      "target": "docs_api_page_text_translation",
       "weight": 1.0
     },
     {
@@ -229479,7 +229419,18 @@
       "relation": "contains",
       "source": "docs_api_api_reference",
       "source_file": "docs/api.md",
-      "source_location": "L390",
+      "source_location": "L370",
+      "target": "docs_api_page_text_translation",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_api_api_reference",
+      "source_file": "docs/api.md",
+      "source_location": "L391",
       "target": "docs_api_markdown_in_comments",
       "weight": 1.0
     },
@@ -230975,7 +230926,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_chat_behavior",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L808",
+      "source_location": "L795",
       "target": "docs_overlay_composition_reconnection",
       "weight": 1.0
     },
@@ -231250,7 +231201,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L826",
+      "source_location": "L813",
       "target": "docs_overlay_composition_youtube_quota_and_sockets",
       "weight": 1.0
     },
@@ -231261,7 +231212,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L842",
+      "source_location": "L829",
       "target": "docs_overlay_composition_security",
       "weight": 1.0
     },
@@ -231272,7 +231223,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L858",
+      "source_location": "L845",
       "target": "docs_overlay_composition_limits_and_known_gaps",
       "weight": 1.0
     },
@@ -234022,7 +233973,7 @@
       "relation": "contains",
       "source": "tests_chat_feed_test",
       "source_file": "tests/chat-feed.test.ts",
-      "source_location": "L507",
+      "source_location": "L445",
       "target": "tests_chat_feed_test_shownstate",
       "weight": 1.0
     },
@@ -235298,7 +235249,7 @@
       "relation": "contains",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L582",
+      "source_location": "L581",
       "target": "tests_e2e_composition_editor_spec_cardlook",
       "weight": 1.0
     },
@@ -235309,7 +235260,7 @@
       "relation": "contains",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L691",
+      "source_location": "L690",
       "target": "tests_e2e_composition_editor_spec_realtask",
       "weight": 1.0
     },
@@ -235320,7 +235271,7 @@
       "relation": "contains",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L760",
+      "source_location": "L759",
       "target": "tests_e2e_composition_editor_spec_leaveinapp",
       "weight": 1.0
     },
@@ -235331,7 +235282,7 @@
       "relation": "contains",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L771",
+      "source_location": "L770",
       "target": "tests_e2e_composition_editor_spec_nudgeright",
       "weight": 1.0
     },
@@ -235342,7 +235293,7 @@
       "relation": "contains",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L779",
+      "source_location": "L778",
       "target": "tests_e2e_composition_editor_spec_carryright",
       "weight": 1.0
     },
@@ -235353,7 +235304,7 @@
       "relation": "contains",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L786",
+      "source_location": "L785",
       "target": "tests_e2e_composition_editor_spec_storedchatcolumn",
       "weight": 1.0
     },
@@ -236233,8 +236184,8 @@
       "relation": "contains",
       "source": "tests_e2e_overlay_composition_spec",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L1019",
-      "target": "tests_e2e_overlay_composition_spec_settestend",
+      "source_location": "L102",
+      "target": "tests_e2e_overlay_composition_spec_default_chat",
       "weight": 1.0
     },
     {
@@ -236244,8 +236195,8 @@
       "relation": "contains",
       "source": "tests_e2e_overlay_composition_spec",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L102",
-      "target": "tests_e2e_overlay_composition_spec_default_chat",
+      "source_location": "L1033",
+      "target": "tests_e2e_overlay_composition_spec_settestend",
       "weight": 1.0
     },
     {
@@ -236453,7 +236404,7 @@
       "relation": "contains",
       "source": "tests_e2e_overlay_composition_spec",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L723",
+      "source_location": "L737",
       "target": "tests_e2e_overlay_composition_spec_designrects",
       "weight": 1.0
     },
@@ -236464,7 +236415,7 @@
       "relation": "contains",
       "source": "tests_e2e_overlay_composition_spec",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L729",
+      "source_location": "L743",
       "target": "tests_e2e_overlay_composition_spec_designrects_a0a8b5c81d17",
       "weight": 1.0
     },
@@ -236475,7 +236426,7 @@
       "relation": "contains",
       "source": "tests_e2e_overlay_composition_spec",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L748",
+      "source_location": "L762",
       "target": "tests_e2e_overlay_composition_spec_expectsamerects",
       "weight": 1.0
     },
@@ -237542,7 +237493,7 @@
       "relation": "contains",
       "source": "tests_e2e_tools_live_spec",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L605",
+      "source_location": "L604",
       "target": "tests_e2e_tools_live_spec_phone",
       "weight": 1.0
     },
@@ -237564,7 +237515,7 @@
       "relation": "contains",
       "source": "tests_e2e_tools_live_spec",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L666",
+      "source_location": "L665",
       "target": "tests_e2e_tools_live_spec_wakerecord",
       "weight": 1.0
     },
@@ -237586,7 +237537,7 @@
       "relation": "contains",
       "source": "tests_e2e_tools_live_spec",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L941",
+      "source_location": "L940",
       "target": "tests_e2e_tools_live_spec_support",
       "weight": 1.0
     },
@@ -239775,7 +239726,7 @@
       "relation": "contains",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1555",
+      "source_location": "L1553",
       "target": "tests_live_control_test_characters",
       "weight": 1.0
     },
@@ -239786,7 +239737,7 @@
       "relation": "contains",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1564",
+      "source_location": "L1562",
       "target": "tests_live_control_test_characterson",
       "weight": 1.0
     },
@@ -239797,7 +239748,7 @@
       "relation": "contains",
       "source": "tests_live_control_test",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1823",
+      "source_location": "L1818",
       "target": "tests_live_control_test_event",
       "weight": 1.0
     },
@@ -240479,8 +240430,8 @@
       "relation": "contains",
       "source": "tests_overlay_legacy_test",
       "source_file": "tests/overlay-legacy.test.ts",
-      "source_location": "L44",
-      "target": "tests_overlay_legacy_test_oldtext",
+      "source_location": "L429",
+      "target": "tests_overlay_legacy_test_source",
       "weight": 1.0
     },
     {
@@ -240490,8 +240441,8 @@
       "relation": "contains",
       "source": "tests_overlay_legacy_test",
       "source_file": "tests/overlay-legacy.test.ts",
-      "source_location": "L441",
-      "target": "tests_overlay_legacy_test_source",
+      "source_location": "L44",
+      "target": "tests_overlay_legacy_test_oldtext",
       "weight": 1.0
     },
     {
@@ -240534,7 +240485,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1121",
+      "source_location": "L1122",
       "target": "tests_overlay_ui_coverage_test_composition",
       "weight": 1.0
     },
@@ -240545,7 +240496,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1125",
+      "source_location": "L1126",
       "target": "tests_overlay_ui_coverage_test_boxes",
       "weight": 1.0
     },
@@ -240567,7 +240518,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1223",
+      "source_location": "L1224",
       "target": "tests_overlay_ui_coverage_test_connection",
       "weight": 1.0
     },
@@ -240578,7 +240529,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1238",
+      "source_location": "L1239",
       "target": "tests_overlay_ui_coverage_test_connected",
       "weight": 1.0
     },
@@ -240589,7 +240540,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1241",
+      "source_location": "L1242",
       "target": "tests_overlay_ui_coverage_test_section",
       "weight": 1.0
     },
@@ -240600,7 +240551,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1251",
+      "source_location": "L1252",
       "target": "tests_overlay_ui_coverage_test_cards",
       "weight": 1.0
     },
@@ -240611,7 +240562,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1255",
+      "source_location": "L1256",
       "target": "tests_overlay_ui_coverage_test_parts",
       "weight": 1.0
     },
@@ -240622,7 +240573,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1259",
+      "source_location": "L1260",
       "target": "tests_overlay_ui_coverage_test_status",
       "weight": 1.0
     },
@@ -240721,7 +240672,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L710",
+      "source_location": "L711",
       "target": "tests_overlay_ui_coverage_test_test",
       "weight": 1.0
     },
@@ -240743,7 +240694,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L776",
+      "source_location": "L777",
       "target": "tests_overlay_ui_coverage_test_palette",
       "weight": 1.0
     },
@@ -240754,7 +240705,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L795",
+      "source_location": "L796",
       "target": "tests_overlay_ui_coverage_test_layout",
       "weight": 1.0
     },
@@ -241194,7 +241145,7 @@
       "relation": "contains",
       "source": "tests_playground_host_test",
       "source_file": "tests/playground-host.test.ts",
-      "source_location": "L954",
+      "source_location": "L957",
       "target": "tests_playground_host_test_host",
       "weight": 1.0
     },
@@ -244020,7 +243971,7 @@
       "relation": "method",
       "source": "app_lib_playground_core_simhost",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L118",
+      "source_location": "L103",
       "target": "app_lib_playground_core_simhost_visible",
       "weight": 1.0
     },
@@ -244031,7 +243982,7 @@
       "relation": "method",
       "source": "app_lib_playground_core_simhost",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L120",
+      "source_location": "L105",
       "target": "app_lib_playground_core_simhost_rest",
       "weight": 1.0
     },
@@ -244042,7 +243993,7 @@
       "relation": "method",
       "source": "app_lib_playground_core_simhost",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L122",
+      "source_location": "L107",
       "target": "app_lib_playground_core_simhost_giveup",
       "weight": 1.0
     },
@@ -248134,7 +248085,7 @@
       "relation": "references",
       "source": "docs_api",
       "source_file": "docs/api.md",
-      "source_location": "L238",
+      "source_location": "L239",
       "target": "docs_streamer_tools",
       "weight": 1.0
     },
@@ -248655,7 +248606,7 @@
       "relation": "indirect_call",
       "source": "app_components_overlay_use_chat_usechatstate",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L93",
+      "source_location": "L92",
       "target": "app_lib_chat_feed_initialchatstate",
       "weight": 1.0
     },
@@ -248667,7 +248618,7 @@
       "relation": "indirect_call",
       "source": "app_components_overlay_use_chat_usemotionreduced",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L68",
+      "source_location": "L67",
       "target": "app_components_overlay_use_chat_subscribemotion",
       "weight": 1.0
     },
@@ -248679,7 +248630,7 @@
       "relation": "indirect_call",
       "source": "app_components_overlay_use_chat_usemotionreduced",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L68",
+      "source_location": "L67",
       "target": "app_components_station_motion_motionreduced",
       "weight": 1.0
     },
@@ -248919,7 +248870,7 @@
       "relation": "indirect_call",
       "source": "app_lib_live_chat_receivesnapshot",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L216",
+      "source_location": "L215",
       "target": "app_lib_activity_issupport",
       "weight": 1.0
     },
@@ -248955,7 +248906,7 @@
       "relation": "indirect_call",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L468",
+      "source_location": "L467",
       "target": "app_lib_overlay_layers_defaultitems",
       "weight": 1.0
     },
@@ -248967,7 +248918,7 @@
       "relation": "indirect_call",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L468",
+      "source_location": "L467",
       "target": "app_lib_overlay_layers_storeditemschema",
       "weight": 1.0
     },
@@ -249363,7 +249314,7 @@
       "relation": "indirect_call",
       "source": "tests_chat_feed_test",
       "source_file": "tests/chat-feed.test.ts",
-      "source_location": "L809",
+      "source_location": "L743",
       "target": "tests_channel_ingest_test_cheer",
       "weight": 1.0
     },
@@ -249375,7 +249326,7 @@
       "relation": "indirect_call",
       "source": "tests_chat_feed_test",
       "source_file": "tests/chat-feed.test.ts",
-      "source_location": "L809",
+      "source_location": "L743",
       "target": "tests_channel_ingest_test_follow",
       "weight": 1.0
     },
@@ -249531,7 +249482,7 @@
       "relation": "indirect_call",
       "source": "tests_layer_geometry_test",
       "source_file": "tests/layer-geometry.test.ts",
-      "source_location": "L280",
+      "source_location": "L278",
       "target": "app_components_station_shapes_box",
       "weight": 1.0
     },
@@ -249783,7 +249734,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_layers_test",
       "source_file": "tests/overlay-layers.test.ts",
-      "source_location": "L661",
+      "source_location": "L657",
       "target": "tests_layer_geometry_test_layers",
       "weight": 1.0
     },
@@ -249795,7 +249746,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1026",
+      "source_location": "L1027",
       "target": "app_components_overlay_overlay_composition_charactersslot",
       "weight": 1.0
     },
@@ -249807,7 +249758,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1132",
+      "source_location": "L1133",
       "target": "tests_layer_geometry_test_layers",
       "weight": 1.0
     },
@@ -249819,7 +249770,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1203",
+      "source_location": "L1204",
       "target": "app_components_overlay_overlay_composition_overlaycomposition",
       "weight": 1.0
     },
@@ -249891,7 +249842,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L891",
+      "source_location": "L892",
       "target": "tests_playground_protocol_test_full",
       "weight": 1.0
     },
@@ -249903,7 +249854,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_composition",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1122",
+      "source_location": "L1123",
       "target": "app_components_overlay_overlay_composition_overlaycomposition",
       "weight": 1.0
     },
@@ -249927,7 +249878,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_layout",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L797",
+      "source_location": "L798",
       "target": "app_components_overlay_layout_grid_layoutgrid",
       "weight": 1.0
     },
@@ -249939,7 +249890,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_palette",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L778",
+      "source_location": "L779",
       "target": "app_components_overlay_layer_palette_layerpalette",
       "weight": 1.0
     },
@@ -249951,7 +249902,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_section",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1246",
+      "source_location": "L1247",
       "target": "app_components_channels_channels_step_channelsstep",
       "weight": 1.0
     },
@@ -249987,7 +249938,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L712",
+      "source_location": "L713",
       "target": "app_components_overlay_studio_test_studiotest",
       "weight": 1.0
     },
@@ -252435,7 +252386,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1203",
+      "source_location": "L1204",
       "target": "app_components_channels_channel_panel_channelpanel_shown",
       "weight": 1.0
     },
@@ -252459,7 +252410,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_composition",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1122",
+      "source_location": "L1123",
       "target": "app_components_channels_channel_panel_channelpanel_shown",
       "weight": 1.0
     },
@@ -252471,7 +252422,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_layout",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L803",
+      "source_location": "L804",
       "target": "tests_overlay_ui_coverage_test_nothing",
       "weight": 1.0
     },
@@ -252483,7 +252434,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_palette",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L778",
+      "source_location": "L779",
       "target": "tests_overlay_ui_coverage_test_nothing",
       "weight": 1.0
     },
@@ -252519,7 +252470,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L717",
+      "source_location": "L718",
       "target": "tests_overlay_ui_coverage_test_nothing",
       "weight": 1.0
     },
@@ -252927,7 +252878,7 @@
       "relation": "references",
       "source": "docs_api_discussion_updates",
       "source_file": "docs/api.md",
-      "source_location": "L276",
+      "source_location": "L277",
       "target": "app_types_notificationsnapshot",
       "weight": 1.0
     },
@@ -253059,7 +253010,7 @@
       "relation": "references",
       "source": "docs_api_later_phases",
       "source_file": "docs/api.md",
-      "source_location": "L261",
+      "source_location": "L262",
       "target": "app_server_access_server_assertstreamerwritable",
       "weight": 1.0
     },
@@ -253107,7 +253058,7 @@
       "relation": "references",
       "source": "docs_api_markdown_in_comments",
       "source_file": "docs/api.md",
-      "source_location": "L428",
+      "source_location": "L429",
       "target": "app_lib_comment_markdown_parsecommentmarkdown",
       "weight": 1.0
     },
@@ -253155,7 +253106,7 @@
       "relation": "references",
       "source": "docs_api_later_phases",
       "source_file": "docs/api.md",
-      "source_location": "L260",
+      "source_location": "L261",
       "target": "app_server_api_router_write",
       "weight": 1.0
     }
@@ -254847,7 +254798,7 @@
       "label": "ChatSource",
       "norm_label": "chatsource",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L75"
+      "source_location": "L74"
     },
     {
       "_callable": true,
@@ -256215,7 +256166,7 @@
       "label": "ChatAction",
       "norm_label": "chataction",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L100"
+      "source_location": "L98"
     },
     {
       "_callable": true,
@@ -256227,7 +256178,7 @@
       "label": "ChatLimits",
       "norm_label": "chatlimits",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L39"
+      "source_location": "L38"
     },
     {
       "_callable": true,
@@ -256239,7 +256190,7 @@
       "label": "ChatOptions",
       "norm_label": "chatoptions",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L86"
+      "source_location": "L85"
     },
     {
       "_callable": true,
@@ -256251,7 +256202,7 @@
       "label": "ChatRow",
       "norm_label": "chatrow",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L49"
+      "source_location": "L48"
     },
     {
       "_callable": true,
@@ -256263,7 +256214,7 @@
       "label": "ChatState",
       "norm_label": "chatstate",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L72"
+      "source_location": "L71"
     },
     {
       "_callable": true,
@@ -256275,7 +256226,7 @@
       "label": "Match",
       "norm_label": "match",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L333"
+      "source_location": "L339"
     },
     {
       "_callable": true,
@@ -256287,7 +256238,7 @@
       "label": "RowPhase",
       "norm_label": "rowphase",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L47"
+      "source_location": "L46"
     },
     {
       "_callable": true,
@@ -256599,7 +256550,7 @@
       "label": "LiveChatAction",
       "norm_label": "livechataction",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L92"
+      "source_location": "L91"
     },
     {
       "_callable": true,
@@ -256611,7 +256562,7 @@
       "label": "LiveChatRow",
       "norm_label": "livechatrow",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L42"
+      "source_location": "L41"
     },
     {
       "_callable": true,
@@ -256623,7 +256574,7 @@
       "label": "LiveChatState",
       "norm_label": "livechatstate",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L77"
+      "source_location": "L76"
     },
     {
       "_callable": true,
@@ -256635,7 +256586,7 @@
       "label": "LiveRow",
       "norm_label": "liverow",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L70"
+      "source_location": "L69"
     },
     {
       "_callable": true,
@@ -256647,7 +256598,7 @@
       "label": "LiveSupportRow",
       "norm_label": "livesupportrow",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L57"
+      "source_location": "L56"
     },
     {
       "_callable": true,
@@ -256659,7 +256610,7 @@
       "label": "RowBase",
       "norm_label": "rowbase",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L34"
+      "source_location": "L33"
     },
     {
       "_callable": true,
@@ -257067,7 +257018,7 @@
       "label": "SimHost",
       "norm_label": "simhost",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L111"
+      "source_location": "L96"
     },
     {
       "_callable": true,
@@ -261255,7 +261206,7 @@
       "label": "DesignRects",
       "norm_label": "designrects",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L723"
+      "source_location": "L737"
     },
     {
       "_callable": true,
@@ -261807,7 +261758,7 @@
       "label": "Connection",
       "norm_label": "connection",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1223"
+      "source_location": "L1224"
     },
     {
       "_callable": true,
@@ -268084,7 +268035,7 @@
       "label": "sampleEvent()",
       "norm_label": "sampleevent()",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L46"
+      "source_location": "L45"
     },
     {
       "_callable": true,
@@ -268095,7 +268046,7 @@
       "label": "subscribeMotion()",
       "norm_label": "subscribemotion()",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L57"
+      "source_location": "L56"
     },
     {
       "_callable": true,
@@ -268106,7 +268057,7 @@
       "label": "useChat()",
       "norm_label": "usechat()",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L184"
+      "source_location": "L183"
     },
     {
       "_callable": true,
@@ -268117,7 +268068,7 @@
       "label": "useChatState()",
       "norm_label": "usechatstate()",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L88"
+      "source_location": "L87"
     },
     {
       "_callable": true,
@@ -268128,7 +268079,7 @@
       "label": "useMotionReduced()",
       "norm_label": "usemotionreduced()",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L67"
+      "source_location": "L66"
     },
     {
       "_callable": true,
@@ -274926,7 +274877,7 @@
       "label": "active()",
       "norm_label": "active()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L228"
+      "source_location": "L234"
     },
     {
       "_callable": true,
@@ -274937,7 +274888,7 @@
       "label": "advance()",
       "norm_label": "advance()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L263"
+      "source_location": "L269"
     },
     {
       "_callable": true,
@@ -274948,7 +274899,7 @@
       "label": "advanceRow()",
       "norm_label": "advancerow()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L251"
+      "source_location": "L257"
     },
     {
       "_callable": true,
@@ -274959,7 +274910,7 @@
       "label": "bound()",
       "norm_label": "bound()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L296"
+      "source_location": "L302"
     },
     {
       "_callable": true,
@@ -274970,7 +274921,7 @@
       "label": "chatReducer()",
       "norm_label": "chatreducer()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L437"
+      "source_location": "L443"
     },
     {
       "_callable": true,
@@ -274981,7 +274932,7 @@
       "label": "dismiss()",
       "norm_label": "dismiss()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L211"
+      "source_location": "L217"
     },
     {
       "_callable": true,
@@ -274992,7 +274943,7 @@
       "label": "dismissCommands()",
       "norm_label": "dismisscommands()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L224"
+      "source_location": "L230"
     },
     {
       "_callable": true,
@@ -275003,7 +274954,7 @@
       "label": "displayFragments()",
       "norm_label": "displayfragments()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L155"
+      "source_location": "L161"
     },
     {
       "_callable": true,
@@ -275014,7 +274965,7 @@
       "label": "graphemes()",
       "norm_label": "graphemes()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L115"
+      "source_location": "L121"
     },
     {
       "_callable": true,
@@ -275025,7 +274976,7 @@
       "label": "hidden()",
       "norm_label": "hidden()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L206"
+      "source_location": "L212"
     },
     {
       "_callable": true,
@@ -275036,7 +274987,18 @@
       "label": "initialChatState()",
       "norm_label": "initialchatstate()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L108"
+      "source_location": "L106"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_chat_feed_ischatcommand",
+      "label": "isChatCommand()",
+      "norm_label": "ischatcommand()",
+      "source_file": "app/lib/chat-feed.ts",
+      "source_location": "L114"
     },
     {
       "_callable": true,
@@ -275047,7 +275009,7 @@
       "label": "lastPromotion()",
       "norm_label": "lastpromotion()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L245"
+      "source_location": "L251"
     },
     {
       "_callable": true,
@@ -275058,7 +275020,7 @@
       "label": "limitsOf()",
       "norm_label": "limitsof()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L182"
+      "source_location": "L188"
     },
     {
       "_callable": true,
@@ -275069,7 +275031,7 @@
       "label": "moderate()",
       "norm_label": "moderate()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L335"
+      "source_location": "L341"
     },
     {
       "_callable": true,
@@ -275080,7 +275042,7 @@
       "label": "nextWakeAt()",
       "norm_label": "nextwakeat()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L467"
+      "source_location": "L473"
     },
     {
       "_callable": true,
@@ -275091,7 +275053,7 @@
       "label": "receiveChat()",
       "norm_label": "receivechat()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L321"
+      "source_location": "L327"
     },
     {
       "_callable": true,
@@ -275102,7 +275064,7 @@
       "label": "receiveEvent()",
       "norm_label": "receiveevent()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L362"
+      "source_location": "L368"
     },
     {
       "_callable": true,
@@ -275113,7 +275075,7 @@
       "label": "receiveSnapshot()",
       "norm_label": "receivesnapshot()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L392"
+      "source_location": "L398"
     },
     {
       "_callable": true,
@@ -275124,7 +275086,7 @@
       "label": "reduce()",
       "norm_label": "reduce()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L444"
+      "source_location": "L450"
     },
     {
       "_callable": true,
@@ -275135,7 +275097,7 @@
       "label": "remember()",
       "norm_label": "remember()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L232"
+      "source_location": "L238"
     },
     {
       "_callable": true,
@@ -275146,7 +275108,7 @@
       "label": "safeDisplayFragment()",
       "norm_label": "safedisplayfragment()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L144"
+      "source_location": "L150"
     },
     {
       "_callable": true,
@@ -275157,7 +275119,7 @@
       "label": "safeEmoteUrl()",
       "norm_label": "safeemoteurl()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L124"
+      "source_location": "L130"
     },
     {
       "_callable": true,
@@ -275168,7 +275130,7 @@
       "label": "sample()",
       "norm_label": "sample()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L485"
+      "source_location": "L491"
     },
     {
       "_callable": true,
@@ -275179,7 +275141,7 @@
       "label": "sampleChatAt()",
       "norm_label": "samplechatat()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L541"
+      "source_location": "L547"
     },
     {
       "_callable": true,
@@ -275190,7 +275152,7 @@
       "label": "sourceFragments()",
       "norm_label": "sourcefragments()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L139"
+      "source_location": "L145"
     },
     {
       "_callable": true,
@@ -275201,7 +275163,7 @@
       "label": "toRow()",
       "norm_label": "torow()",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L186"
+      "source_location": "L192"
     },
     {
       "_callable": true,
@@ -276092,7 +276054,7 @@
       "label": "chatTextStep()",
       "norm_label": "chattextstep()",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L269"
+      "source_location": "L268"
     },
     {
       "_callable": true,
@@ -276103,7 +276065,7 @@
       "label": "initialLiveChat()",
       "norm_label": "initiallivechat()",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L94"
+      "source_location": "L93"
     },
     {
       "_callable": true,
@@ -276114,7 +276076,7 @@
       "label": "liveChatReducer()",
       "norm_label": "livechatreducer()",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L224"
+      "source_location": "L223"
     },
     {
       "_callable": true,
@@ -276125,7 +276087,7 @@
       "label": "moderate()",
       "norm_label": "moderate()",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L161"
+      "source_location": "L160"
     },
     {
       "_callable": true,
@@ -276136,7 +276098,7 @@
       "label": "newest()",
       "norm_label": "newest()",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L124"
+      "source_location": "L123"
     },
     {
       "_callable": true,
@@ -276147,7 +276109,7 @@
       "label": "newSince()",
       "norm_label": "newsince()",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L253"
+      "source_location": "L252"
     },
     {
       "_callable": true,
@@ -276158,7 +276120,7 @@
       "label": "nextChatTextStep()",
       "norm_label": "nextchattextstep()",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L276"
+      "source_location": "L275"
     },
     {
       "_callable": true,
@@ -276169,7 +276131,7 @@
       "label": "receiveChat()",
       "norm_label": "receivechat()",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L130"
+      "source_location": "L129"
     },
     {
       "_callable": true,
@@ -276180,7 +276142,7 @@
       "label": "receiveEvent()",
       "norm_label": "receiveevent()",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L175"
+      "source_location": "L174"
     },
     {
       "_callable": true,
@@ -276191,7 +276153,7 @@
       "label": "receiveSnapshot()",
       "norm_label": "receivesnapshot()",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L208"
+      "source_location": "L207"
     },
     {
       "_callable": true,
@@ -276202,7 +276164,7 @@
       "label": "receiveSupport()",
       "norm_label": "receivesupport()",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L138"
+      "source_location": "L137"
     },
     {
       "_callable": true,
@@ -276213,7 +276175,7 @@
       "label": "remember()",
       "norm_label": "remember()",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L117"
+      "source_location": "L116"
     },
     {
       "_callable": true,
@@ -276224,7 +276186,7 @@
       "label": "rowKey()",
       "norm_label": "rowkey()",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L73"
+      "source_location": "L72"
     },
     {
       "_callable": true,
@@ -276235,7 +276197,7 @@
       "label": "shownRows()",
       "norm_label": "shownrows()",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L238"
+      "source_location": "L237"
     },
     {
       "_callable": true,
@@ -276246,7 +276208,7 @@
       "label": "toRow()",
       "norm_label": "torow()",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L98"
+      "source_location": "L97"
     },
     {
       "_callable": true,
@@ -276543,7 +276505,7 @@
       "label": "layerUrl()",
       "norm_label": "layerurl()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L601"
+      "source_location": "L600"
     },
     {
       "_callable": true,
@@ -276554,7 +276516,7 @@
       "label": "mergeCells()",
       "norm_label": "mergecells()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L549"
+      "source_location": "L548"
     },
     {
       "_callable": true,
@@ -276565,7 +276527,7 @@
       "label": "mergeItem()",
       "norm_label": "mergeitem()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L558"
+      "source_location": "L557"
     },
     {
       "_callable": true,
@@ -276576,7 +276538,7 @@
       "label": "mergeLayers()",
       "norm_label": "mergelayers()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L567"
+      "source_location": "L566"
     },
     {
       "_callable": true,
@@ -276620,7 +276582,7 @@
       "label": "parseLayerParam()",
       "norm_label": "parselayerparam()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L594"
+      "source_location": "L593"
     },
     {
       "_callable": true,
@@ -276697,7 +276659,7 @@
       "label": "storedCells()",
       "norm_label": "storedcells()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L507"
+      "source_location": "L506"
     },
     {
       "_callable": true,
@@ -276708,7 +276670,7 @@
       "label": "storedItem()",
       "norm_label": "storeditem()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L516"
+      "source_location": "L515"
     },
     {
       "_callable": true,
@@ -276730,7 +276692,7 @@
       "label": "storedLayersText()",
       "norm_label": "storedlayerstext()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L531"
+      "source_location": "L530"
     },
     {
       "_callable": true,
@@ -277192,29 +277154,7 @@
       "label": "clamp()",
       "norm_label": "clamp()",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L102"
-    },
-    {
-      "_callable": true,
-      "_origin": "ast",
-      "community": null,
-      "file_type": "code",
-      "id": "app_lib_playground_core_ischaractercommand",
-      "label": "isCharacterCommand()",
-      "norm_label": "ischaractercommand()",
-      "source_file": "app/lib/playground/core.ts",
-      "source_location": "L98"
-    },
-    {
-      "_callable": true,
-      "_origin": "ast",
-      "community": null,
-      "file_type": "code",
-      "id": "app_lib_playground_core_ischatcommand",
-      "label": "isChatCommand()",
-      "norm_label": "ischatcommand()",
-      "source_file": "app/lib/playground/core.ts",
-      "source_location": "L67"
+      "source_location": "L87"
     },
     {
       "_callable": true,
@@ -277225,7 +277165,7 @@
       "label": "mulberry32()",
       "norm_label": "mulberry32()",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L13"
+      "source_location": "L14"
     },
     {
       "_callable": true,
@@ -277236,7 +277176,7 @@
       "label": "parseCommand()",
       "norm_label": "parsecommand()",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L76"
+      "source_location": "L69"
     },
     {
       "_callable": true,
@@ -277247,7 +277187,7 @@
       "label": "setState()",
       "norm_label": "setstate()",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L25"
+      "source_location": "L26"
     },
     {
       "_callable": true,
@@ -277258,7 +277198,7 @@
       "label": ".giveUp()",
       "norm_label": ".giveup()",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L122"
+      "source_location": "L107"
     },
     {
       "_callable": true,
@@ -277269,7 +277209,7 @@
       "label": ".rest()",
       "norm_label": ".rest()",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L120"
+      "source_location": "L105"
     },
     {
       "_callable": true,
@@ -277280,7 +277220,7 @@
       "label": ".visible()",
       "norm_label": ".visible()",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L118"
+      "source_location": "L103"
     },
     {
       "_callable": true,
@@ -277291,7 +277231,7 @@
       "label": "siteKey()",
       "norm_label": "sitekey()",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L106"
+      "source_location": "L91"
     },
     {
       "_callable": true,
@@ -292378,7 +292318,7 @@
       "label": "shownState()",
       "norm_label": "shownstate()",
       "source_file": "tests/chat-feed.test.ts",
-      "source_location": "L507"
+      "source_location": "L445"
     },
     {
       "_callable": true,
@@ -293380,14 +293320,14 @@
             "callee": "querySelector",
             "file": "tests/e2e/composition-editor.spec.ts",
             "lang": "typescript",
-            "line": "L587",
+            "line": "L586",
             "receiver_type": "Element"
           }
         ]
       },
       "norm_label": "cardlook()",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L582"
+      "source_location": "L581"
     },
     {
       "_callable": true,
@@ -293398,7 +293338,7 @@
       "label": "carryRight()",
       "norm_label": "carryright()",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L779"
+      "source_location": "L778"
     },
     {
       "_callable": true,
@@ -293420,7 +293360,7 @@
       "label": "leaveInApp()",
       "norm_label": "leaveinapp()",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L760"
+      "source_location": "L759"
     },
     {
       "_callable": true,
@@ -293431,7 +293371,7 @@
       "label": "nudgeRight()",
       "norm_label": "nudgeright()",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L771"
+      "source_location": "L770"
     },
     {
       "_callable": true,
@@ -293442,7 +293382,7 @@
       "label": "realTask()",
       "norm_label": "realtask()",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L691"
+      "source_location": "L690"
     },
     {
       "_callable": true,
@@ -293453,7 +293393,7 @@
       "label": "storedChatColumn()",
       "norm_label": "storedchatcolumn()",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L786"
+      "source_location": "L785"
     },
     {
       "_callable": true,
@@ -294186,14 +294126,14 @@
             "callee": "boundingBox",
             "file": "tests/e2e/overlay-composition.spec.ts",
             "lang": "typescript",
-            "line": "L736",
+            "line": "L750",
             "receiver_type": "Locator"
           }
         ]
       },
       "norm_label": "designrects()",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L729"
+      "source_location": "L743"
     },
     {
       "_callable": true,
@@ -294215,7 +294155,7 @@
       "label": "expectSameRects()",
       "norm_label": "expectsamerects()",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L748"
+      "source_location": "L762"
     },
     {
       "_callable": true,
@@ -294270,7 +294210,7 @@
       "label": "setTestEnd()",
       "norm_label": "settestend()",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L1019"
+      "source_location": "L1033"
     },
     {
       "_callable": true,
@@ -294724,21 +294664,21 @@
             "callee": "dispatchEvent",
             "file": "tests/e2e/tools-live.spec.ts",
             "lang": "typescript",
-            "line": "L622",
+            "line": "L621",
             "receiver_type": "EventTarget"
           },
           {
             "callee": "send",
             "file": "tests/e2e/tools-live.spec.ts",
             "lang": "typescript",
-            "line": "L661",
+            "line": "L660",
             "receiver_type": "WebSocketRoute"
           }
         ]
       },
       "norm_label": "phone()",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L605"
+      "source_location": "L604"
     },
     {
       "_callable": true,
@@ -294760,7 +294700,7 @@
       "label": "support()",
       "norm_label": "support()",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L941"
+      "source_location": "L940"
     },
     {
       "_callable": true,
@@ -294771,7 +294711,7 @@
       "label": "wakeRecord()",
       "norm_label": "wakerecord()",
       "source_file": "tests/e2e/tools-live.spec.ts",
-      "source_location": "L666"
+      "source_location": "L665"
     },
     {
       "_callable": true,
@@ -296957,7 +296897,7 @@
       "label": "characters()",
       "norm_label": "characters()",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1555"
+      "source_location": "L1553"
     },
     {
       "_callable": true,
@@ -296968,7 +296908,7 @@
       "label": "charactersOn()",
       "norm_label": "characterson()",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1564"
+      "source_location": "L1562"
     },
     {
       "_callable": true,
@@ -297001,7 +296941,7 @@
       "label": "event()",
       "norm_label": "event()",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L1823"
+      "source_location": "L1818"
     },
     {
       "_callable": true,
@@ -297419,7 +297359,7 @@
       "label": "source()",
       "norm_label": "source()",
       "source_file": "tests/overlay-legacy.test.ts",
-      "source_location": "L441"
+      "source_location": "L429"
     },
     {
       "_callable": true,
@@ -297430,7 +297370,7 @@
       "label": "boxes()",
       "norm_label": "boxes()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1125"
+      "source_location": "L1126"
     },
     {
       "_callable": true,
@@ -297441,7 +297381,7 @@
       "label": "cards()",
       "norm_label": "cards()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1251"
+      "source_location": "L1252"
     },
     {
       "_callable": true,
@@ -297452,7 +297392,7 @@
       "label": "composition()",
       "norm_label": "composition()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1121"
+      "source_location": "L1122"
     },
     {
       "_callable": true,
@@ -297463,7 +297403,7 @@
       "label": "connected()",
       "norm_label": "connected()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1238"
+      "source_location": "L1239"
     },
     {
       "_callable": true,
@@ -297485,7 +297425,7 @@
       "label": "layout()",
       "norm_label": "layout()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L795"
+      "source_location": "L796"
     },
     {
       "_callable": true,
@@ -297507,7 +297447,7 @@
       "label": "palette()",
       "norm_label": "palette()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L776"
+      "source_location": "L777"
     },
     {
       "_callable": true,
@@ -297518,7 +297458,7 @@
       "label": "parts()",
       "norm_label": "parts()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1255"
+      "source_location": "L1256"
     },
     {
       "_callable": true,
@@ -297551,7 +297491,7 @@
       "label": "section()",
       "norm_label": "section()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1241"
+      "source_location": "L1242"
     },
     {
       "_callable": true,
@@ -297584,7 +297524,7 @@
       "label": "status()",
       "norm_label": "status()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1259"
+      "source_location": "L1260"
     },
     {
       "_callable": true,
@@ -297595,7 +297535,7 @@
       "label": "test()",
       "norm_label": "test()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L710"
+      "source_location": "L711"
     },
     {
       "_callable": true,
@@ -297837,7 +297777,7 @@
       "label": "host()",
       "norm_label": "host()",
       "source_file": "tests/playground-host.test.ts",
-      "source_location": "L954"
+      "source_location": "L957"
     },
     {
       "_callable": true,
@@ -301839,7 +301779,7 @@
       "label": "STILL_LIMITS",
       "norm_label": "still_limits",
       "source_file": "app/components/overlay/use-chat.ts",
-      "source_location": "L40"
+      "source_location": "L39"
     },
     {
       "_origin": "ast",
@@ -304160,7 +304100,7 @@
       "label": "CHAT_LIMITS",
       "norm_label": "chat_limits",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L22"
+      "source_location": "L21"
     },
     {
       "_origin": "ast",
@@ -304170,7 +304110,7 @@
       "label": "MAX_REMOVED_IDS",
       "norm_label": "max_removed_ids",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L42"
+      "source_location": "L41"
     },
     {
       "_origin": "ast",
@@ -304180,7 +304120,7 @@
       "label": "SAMPLE_CHAT",
       "norm_label": "sample_chat",
       "source_file": "app/lib/chat-feed.ts",
-      "source_location": "L510"
+      "source_location": "L516"
     },
     {
       "_origin": "ast",
@@ -304500,7 +304440,7 @@
       "label": "CHAT_TEXT_DEFAULT",
       "norm_label": "chat_text_default",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L266"
+      "source_location": "L265"
     },
     {
       "_origin": "ast",
@@ -304510,7 +304450,7 @@
       "label": "CHAT_TEXT_SIZES",
       "norm_label": "chat_text_sizes",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L264"
+      "source_location": "L263"
     },
     {
       "_origin": "ast",
@@ -304520,7 +304460,7 @@
       "label": "LIVE_CHAT_LIMITS",
       "norm_label": "live_chat_limits",
       "source_file": "app/lib/live-chat.ts",
-      "source_location": "L26"
+      "source_location": "L25"
     },
     {
       "_origin": "ast",
@@ -304870,7 +304810,7 @@
       "label": "LAYERS_VERSION",
       "norm_label": "layers_version",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L501"
+      "source_location": "L500"
     },
     {
       "_origin": "ast",
@@ -304930,7 +304870,7 @@
       "label": "STORED_LAYERS_LENGTH",
       "norm_label": "stored_layers_length",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L504"
+      "source_location": "L503"
     },
     {
       "_origin": "ast",
@@ -305940,7 +305880,7 @@
       "label": "EMOTES",
       "norm_label": "emotes",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L31"
+      "source_location": "L32"
     },
     {
       "_origin": "ast",
@@ -305950,7 +305890,7 @@
       "label": "FIXED_STATES",
       "norm_label": "fixed_states",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L33"
+      "source_location": "L34"
     },
     {
       "_origin": "ast",
@@ -305960,7 +305900,7 @@
       "label": "HALTED_STATES",
       "norm_label": "halted_states",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L42"
+      "source_location": "L43"
     },
     {
       "_origin": "ast",
@@ -305970,7 +305910,7 @@
       "label": "SIDES",
       "norm_label": "sides",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L29"
+      "source_location": "L30"
     },
     {
       "_origin": "ast",
@@ -305980,7 +305920,7 @@
       "label": "STANDING_STATES",
       "norm_label": "standing_states",
       "source_file": "app/lib/playground/core.ts",
-      "source_location": "L50"
+      "source_location": "L51"
     },
     {
       "_origin": "ast",
@@ -314093,14 +314033,14 @@
             "callee": "setAttribute",
             "file": "tests/e2e/overlay-composition.spec.ts",
             "lang": "typescript",
-            "line": "L538",
+            "line": "L554",
             "receiver_type": "HTMLElement"
           },
           {
             "callee": "scrollIntoView",
             "file": "tests/e2e/overlay-composition.spec.ts",
             "lang": "typescript",
-            "line": "L640",
+            "line": "L656",
             "receiver_type": "Element"
           }
         ]
@@ -315077,42 +315017,42 @@
             "callee": "close",
             "file": "tests/e2e/tools-live.spec.ts",
             "lang": "typescript",
-            "line": "L571",
+            "line": "L570",
             "receiver_type": "WebSocketRoute"
           },
           {
             "callee": "connectToServer",
             "file": "tests/e2e/tools-live.spec.ts",
             "lang": "typescript",
-            "line": "L574",
+            "line": "L573",
             "receiver_type": "WebSocketRoute"
           },
           {
             "callee": "boundingBox",
             "file": "tests/e2e/tools-live.spec.ts",
             "lang": "typescript",
-            "line": "L710",
+            "line": "L709",
             "receiver_type": "Locator"
           },
           {
             "callee": "getBoundingClientRect",
             "file": "tests/e2e/tools-live.spec.ts",
             "lang": "typescript",
-            "line": "L785",
+            "line": "L784",
             "receiver_type": "Element"
           },
           {
             "callee": "querySelectorAll",
             "file": "tests/e2e/tools-live.spec.ts",
             "lang": "typescript",
-            "line": "L786",
+            "line": "L785",
             "receiver_type": "Element"
           },
           {
             "callee": "getBoundingClientRect",
             "file": "tests/e2e/tools-live.spec.ts",
             "lang": "typescript",
-            "line": "L787",
+            "line": "L786",
             "receiver_type": "Locator"
           }
         ]
@@ -317550,7 +317490,7 @@
       "node_kind": "heading",
       "norm_label": "comment translation",
       "source_file": "docs/api.md",
-      "source_location": "L302"
+      "source_location": "L303"
     },
     {
       "_origin": "ast",
@@ -317561,7 +317501,7 @@
       "node_kind": "heading",
       "norm_label": "discussion updates",
       "source_file": "docs/api.md",
-      "source_location": "L263"
+      "source_location": "L264"
     },
     {
       "_origin": "ast",
@@ -317572,7 +317512,7 @@
       "node_kind": "heading",
       "norm_label": "later phases",
       "source_file": "docs/api.md",
-      "source_location": "L256"
+      "source_location": "L257"
     },
     {
       "_origin": "ast",
@@ -317583,7 +317523,7 @@
       "node_kind": "heading",
       "norm_label": "markdown in comments",
       "source_file": "docs/api.md",
-      "source_location": "L390"
+      "source_location": "L391"
     },
     {
       "_origin": "ast",
@@ -317605,7 +317545,7 @@
       "node_kind": "heading",
       "norm_label": "obs dock",
       "source_file": "docs/api.md",
-      "source_location": "L236"
+      "source_location": "L237"
     },
     {
       "_origin": "ast",
@@ -317627,7 +317567,7 @@
       "node_kind": "heading",
       "norm_label": "overlay layouts",
       "source_file": "docs/api.md",
-      "source_location": "L208"
+      "source_location": "L209"
     },
     {
       "_origin": "ast",
@@ -317638,7 +317578,7 @@
       "node_kind": "heading",
       "norm_label": "page text translation",
       "source_file": "docs/api.md",
-      "source_location": "L369"
+      "source_location": "L370"
     },
     {
       "_origin": "ast",
@@ -317671,7 +317611,7 @@
       "node_kind": "heading",
       "norm_label": "topic and poll translation",
       "source_file": "docs/api.md",
-      "source_location": "L351"
+      "source_location": "L352"
     },
     {
       "_origin": "ast",
@@ -317682,7 +317622,7 @@
       "node_kind": "heading",
       "norm_label": "translation of new content",
       "source_file": "docs/api.md",
-      "source_location": "L337"
+      "source_location": "L338"
     },
     {
       "_origin": "ast",
@@ -319376,7 +319316,7 @@
       "node_kind": "heading",
       "norm_label": "limits and known gaps",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L858"
+      "source_location": "L845"
     },
     {
       "_origin": "ast",
@@ -319464,7 +319404,7 @@
       "node_kind": "heading",
       "norm_label": "reconnection",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L808"
+      "source_location": "L795"
     },
     {
       "_origin": "ast",
@@ -319486,7 +319426,7 @@
       "node_kind": "heading",
       "norm_label": "security",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L842"
+      "source_location": "L829"
     },
     {
       "_origin": "ast",
@@ -319563,7 +319503,7 @@
       "node_kind": "heading",
       "norm_label": "youtube quota and sockets",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L826"
+      "source_location": "L813"
     },
     {
       "_origin": "ast",

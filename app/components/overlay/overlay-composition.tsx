@@ -403,7 +403,7 @@ export function OverlayComposition({
         <LayerBox layer="chat" rect={chat} frame={frame} alone={alone}>
           <ChatSlot
             feed={feed}
-            hideCommands={layers.chat.hideCharacterCommands}
+            hideCommands={layers.chat.hideCommands}
             backgroundOpacity={layers.chat.backgroundOpacity}
             samples={chatSamples}
             serverOffset={serverOffset}

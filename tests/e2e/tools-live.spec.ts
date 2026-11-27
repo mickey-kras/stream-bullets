@@ -419,10 +419,10 @@ function said(n: number, text: string): Record<string, unknown> {
   return { ...chat(n, "twitch"), text, fragments: [{ type: "text", text }], receivedAt: Date.now() };
 }
 
-test("hide character commands hides the commands in the Live chat, the preview, the full-screen chat and the dock", async ({
+test("hide chat commands applies to the Live chat, the preview, the full-screen chat and the dock, as to the overlay", async ({
   browser,
 }) => {
-  // The chat layer is on stream, so the preview of Live shows the overlay chat. The option is off, as by default.
+  // The chat layer is on stream, so the preview of Live shows the overlay chat. The option is on, as by default.
   await runSql("tools-live-commands", [
     layersSql({ chat: { enabled: true }, cells: { horizontal: { chat: CHAT_CELL, poll: POLL_CELL } } }),
     noDockKey,
@@ -430,14 +430,16 @@ test("hide character commands hides the commands in the Live chat, the preview, 
   const owner = await signedIn(browser, "featureowner", CHAT_IP);
   const page = await newPage(owner);
   await page.setViewportSize({ width: 1440, height: 1000 });
-  // A command, a command with an alias, a number and a side after a full-width mark, and a word that is no command.
+  // A command for a character, one with a full-width mark and arguments, a command of a different bot, and a
+  // message that is not a command.
   const first: Record<string, unknown>[] = [
     said(1, "hello all"),
     said(2, "!jump"),
     said(3, "！HOOK 3 left"),
-    said(4, "!hello"),
+    said(4, "!discord"),
+    said(5, "hello!"),
   ];
-  const all: string[] = ["hello all", "!jump", "！HOOK 3 left", "!hello"];
+  const all: string[] = ["hello all", "!jump", "！HOOK 3 left", "!discord", "hello!"];
   const sockets: WebSocketRoute[] = [];
   await page.routeWebSocket("**/api/activity/**", (socket: WebSocketRoute) => {
     sockets.push(socket);
@@ -450,9 +452,10 @@ test("hide character commands hides the commands in the Live chat, the preview, 
   const texts = (list: Locator): Promise<string[]> => list.locator("[data-chat-row] .tl-chat-text").allTextContents();
   const preview = page.locator(".tl-preview [data-overlay-chat]");
   const onStream = (): Promise<string[]> => preview.locator("li.wl-item:not([data-gone]) .wl-msg").allTextContents();
-  // Off by default: each message shows.
-  await expect.poll(() => texts(log)).toEqual(all);
-  await expect.poll(onStream).toEqual(all);
+  // On by default: no view shows a command, and no row stays for one.
+  await expect.poll(() => texts(log)).toEqual(["hello all", "hello!"]);
+  await expect.poll(onStream).toEqual(["hello all", "hello!"]);
+  await expect(log.locator("[data-chat-row]")).toHaveCount(2);
 
   // The dock has its own link and its own socket.
   const made = await owner.request.post("/api/dock/key", { data: {} });
@@ -466,49 +469,45 @@ test("hide character commands hides the commands in the Live chat, the preview, 
   });
   await dock.goto(((await made.json()) as { url: string }).url);
   const dockLog = dock.locator('[data-live-part="chat"]').getByRole("log", { name: "Chat" });
-  await expect.poll(() => texts(dockLog)).toEqual(all);
+  await expect.poll(() => texts(dockLog)).toEqual(["hello all", "hello!"]);
   // Mark the documents: a reload would drop the mark.
   for (const open of [page, dock])
     await open.evaluate(() => document.documentElement.setAttribute("data-e2e-loaded", "1"));
 
-  // The owner selects the option in a different tab. The commands go from each view, and no row stays for them.
-  const hide = await owner.request.post("/api/overlay", {
-    data: { action: "layers", chat: { hideCharacterCommands: true } },
-  });
-  expect(hide.status()).toBe(200);
-  await expect.poll(() => texts(log)).toEqual(["hello all", "!hello"]);
-  await expect.poll(() => texts(dockLog)).toEqual(["hello all", "!hello"]);
-  await expect.poll(onStream).toEqual(["hello all", "!hello"]);
-  await expect(log.locator("[data-chat-row]")).toHaveCount(2);
-
-  // A new command gets no row and does not count for a paused chat. A word that is no command shows and counts.
+  // A new command gets no row and does not count for a paused chat. A message that is not a command shows and counts.
   await part.getByRole("button", { name: "Pause chat" }).click();
   await expect(part.locator("[data-chat-paused]")).toHaveText("Chat paused. New messages: 0");
-  send(said(5, "!wave"));
-  send(said(6, "!r 2"));
-  send(said(7, "!discord"));
+  send(said(6, "!wave"));
+  send(said(7, "!lurk"));
+  send(said(8, "! hello"));
   await expect(part.locator("[data-chat-paused]")).toHaveText("Chat paused. New messages: 1");
-  await expect.poll(onStream).toEqual(["hello all", "!hello", "!discord"]);
+  await expect.poll(onStream).toEqual(["hello all", "hello!", "! hello"]);
   await part.getByRole("button", { name: "Jump to latest" }).click();
-  await expect.poll(() => texts(log)).toEqual(["hello all", "!hello", "!discord"]);
+  await expect.poll(() => texts(log)).toEqual(["hello all", "hello!", "! hello"]);
 
   // The full-screen chat shows the same rows.
   await part.getByRole("button", { name: "Open chat full screen" }).click();
   const view = page.getByRole("dialog", { name: "Chat, full screen" });
-  await expect.poll(() => texts(view.getByRole("log", { name: "Chat" }))).toEqual(["hello all", "!hello", "!discord"]);
+  await expect.poll(() => texts(view.getByRole("log", { name: "Chat" }))).toEqual(["hello all", "hello!", "! hello"]);
   await view.getByRole("button", { name: "Exit" }).click();
   await expect(view).toHaveCount(0);
 
-  // The owner clears the option: the log shows the commands again in their places.
-  const show = await owner.request.post("/api/overlay", {
-    data: { action: "layers", chat: { hideCharacterCommands: false } },
-  });
+  // The owner clears the option in a different tab: the log shows the commands in their places, without a reload.
+  const show = await owner.request.post("/api/overlay", { data: { action: "layers", chat: { hideCommands: false } } });
   expect(show.status()).toBe(200);
-  await expect.poll(() => texts(log)).toEqual([...all, "!wave", "!r 2", "!discord"]);
+  await expect.poll(() => texts(log)).toEqual([...all, "!wave", "!lurk", "! hello"]);
   await expect.poll(() => texts(dockLog)).toEqual(all);
   // The chat layer does not bring a hidden command back. It shows the commands that come from now on.
-  send(said(8, "!dance"));
-  await expect.poll(onStream).toEqual(["hello all", "!hello", "!discord", "!dance"]);
+  send(said(9, "!dance"));
+  await expect.poll(onStream).toEqual(["hello all", "hello!", "! hello", "!dance"]);
+  await expect.poll(() => texts(log)).toEqual([...all, "!wave", "!lurk", "! hello", "!dance"]);
+
+  // The owner selects the option again: the commands go from each view.
+  const hide = await owner.request.post("/api/overlay", { data: { action: "layers", chat: { hideCommands: true } } });
+  expect(hide.status()).toBe(200);
+  await expect.poll(() => texts(log)).toEqual(["hello all", "hello!", "! hello"]);
+  await expect.poll(() => texts(dockLog)).toEqual(["hello all", "hello!"]);
+  await expect.poll(onStream).toEqual(["hello all", "hello!", "! hello"]);
   // No page loaded again, and Live kept its one socket.
   for (const open of [page, dock]) await expect(open.locator("html")).toHaveAttribute("data-e2e-loaded", "1");
   expect(sockets).toHaveLength(1);

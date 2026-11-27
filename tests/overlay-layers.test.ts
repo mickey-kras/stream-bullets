@@ -114,7 +114,7 @@ describe("grid and defaults", (): void => {
     const none = { chat: null, characters: null, poll: null, topic: null, next: null, message: null, card: null };
     expect(DEFAULT_LAYERS).toEqual({
       orientation: "horizontal",
-      chat: { enabled: false, hideCharacterCommands: false, backgroundOpacity: 100 },
+      chat: { enabled: false, hideCommands: true, backgroundOpacity: 100 },
       characters: { enabled: false, timeout: 60, max: 40 },
       camera: { enabled: false },
       items: defaultItems,
@@ -266,7 +266,7 @@ describe("stored layers", (): void => {
   it("keeps valid cells of both orientations and the selected orientation", (): void => {
     const layers = {
       orientation: "vertical",
-      chat: { enabled: true, hideCharacterCommands: true, backgroundOpacity: 35 },
+      chat: { enabled: true, hideCommands: false, backgroundOpacity: 35 },
       characters: { enabled: true, timeout: 60, max: 40 },
       camera: { enabled: true },
       items: {
@@ -388,37 +388,33 @@ describe("stored layers", (): void => {
     expect(
       storedLayersSchema.parse({
         orientation: "diagonal",
-        chat: { enabled: "yes", hideCharacterCommands: 0, backgroundOpacity: "50" },
+        chat: { enabled: "yes", hideCommands: 0, backgroundOpacity: "50" },
         characters: { enabled: null },
         cells: { horizontal: [], vertical: 3 },
       }),
     ).toEqual(DEFAULT_LAYERS);
   });
 
-  it("reads a chat layer from before the character commands setting, and each incorrect value, as off", (): void => {
+  it("reads a missing or incorrect chat commands setting as on, and keeps a stored value", (): void => {
     const read = (chat: Record<string, unknown>): unknown => storedLayersSchema.parse({ chat }).chat;
-    const off = { enabled: true, hideCharacterCommands: false, backgroundOpacity: 40 };
-    expect(DEFAULT_LAYERS.chat.hideCharacterCommands).toBe(false);
-    // Before issue #1115 the chat had `hideCommands`, on by default, for each message that starts with `!`.
-    expect(read({ enabled: true, hideCommands: true, backgroundOpacity: 40 })).toEqual(off);
-    expect(read({ enabled: true, hideCommands: false, backgroundOpacity: 40 })).toEqual(off);
-    expect(read({ enabled: true, backgroundOpacity: 40 })).toEqual(off);
-    for (const hideCharacterCommands of ["true", "yes", 1, 0, null, [], {}])
-      expect(read({ ...off, hideCharacterCommands }), JSON.stringify(hideCharacterCommands)).toEqual(off);
-    expect(read({ ...off, hideCharacterCommands: true })).toEqual({ ...off, hideCharacterCommands: true });
-    // The setting is in the stored text under its own name, on or off.
-    const on: OverlayLayers = mergeLayers(DEFAULT_LAYERS, { chat: { hideCharacterCommands: true } });
-    expect(on.chat).toEqual({ enabled: false, hideCharacterCommands: true, backgroundOpacity: 100 });
-    expect(storedLayersText(on)).toContain(
-      '"chat":{"enabled":false,"hideCharacterCommands":true,"backgroundOpacity":100}',
-    );
-    expect(storedLayersText(on)).not.toContain("hideCommands");
-    expect(storedLayersSchema.parse(JSON.parse(storedLayersText(on))).chat).toEqual(on.chat);
+    const on = { enabled: true, hideCommands: true, backgroundOpacity: 40 };
+    expect(DEFAULT_LAYERS.chat.hideCommands).toBe(true);
+    // The setting also applies to the chat of the owner now (issue #1115). The stored value reads as before.
+    expect(read({ enabled: true, backgroundOpacity: 40 })).toEqual(on);
+    for (const hideCommands of ["false", "no", 0, 1, null, [], {}])
+      expect(read({ ...on, hideCommands }), JSON.stringify(hideCommands)).toEqual(on);
+    expect(read(on)).toEqual(on);
+    expect(read({ ...on, hideCommands: false })).toEqual({ ...on, hideCommands: false });
+    for (const hideCommands of [true, false]) {
+      const layers: OverlayLayers = mergeLayers(DEFAULT_LAYERS, { chat: { hideCommands } });
+      expect(storedLayersText(layers)).toContain(`"hideCommands":${String(hideCommands)}`);
+      expect(storedLayersSchema.parse(JSON.parse(storedLayersText(layers))).chat.hideCommands).toBe(hideCommands);
+    }
   });
 
   it("reads a missing or incorrect message background as the default and keeps the other chat fields", (): void => {
     const read = (chat: Record<string, unknown>): unknown => storedLayersSchema.parse({ chat }).chat;
-    const old = { enabled: true, hideCharacterCommands: true };
+    const old = { enabled: true, hideCommands: false };
     expect(read(old)).toEqual({ ...old, backgroundOpacity: 100 });
     for (const backgroundOpacity of [3, -5, 105, 2.5, "50", null, Number.NaN])
       expect(read({ ...old, backgroundOpacity })).toEqual({ ...old, backgroundOpacity: 100 });
@@ -454,7 +450,7 @@ describe("stored layers", (): void => {
     const changed: ContentItem = { enabled: false, ref: null, backgroundOpacity: 55, qr: true };
     const full: OverlayLayers = {
       orientation: "horizontal",
-      chat: { enabled: false, hideCharacterCommands: true, backgroundOpacity: 100 },
+      chat: { enabled: false, hideCommands: false, backgroundOpacity: 100 },
       characters: { enabled: false, timeout: 600, max: 5 },
       camera: { enabled: true },
       items: {
@@ -746,9 +742,7 @@ describe("two outputs on stream at the same time", (): void => {
 describe("layer patches", (): void => {
   it("accepts any subset of the known fields", (): void => {
     expect(layersPatchSchema.parse({})).toEqual({});
-    expect(layersPatchSchema.parse({ chat: { hideCharacterCommands: true } })).toEqual({
-      chat: { hideCharacterCommands: true },
-    });
+    expect(layersPatchSchema.parse({ chat: { hideCommands: false } })).toEqual({ chat: { hideCommands: false } });
     expect(layersPatchSchema.parse({ orientation: "vertical", characters: { enabled: true } })).toEqual({
       orientation: "vertical",
       characters: { enabled: true },
@@ -793,10 +787,9 @@ describe("layer patches", (): void => {
       { cells: { horizontal: { chat: { c: 0, r: 0, w: 8, h: 8 }, characters: { c: 0, r: 6, w: 12, h: 4 } } } },
     ],
     ["a null value", { chat: { enabled: null } }],
-    ["a character commands switch as text", { chat: { hideCharacterCommands: "true" } }],
-    ["a character commands switch as a number", { chat: { hideCharacterCommands: 1 } }],
-    ["a null character commands switch", { chat: { hideCharacterCommands: null } }],
-    ["the chat commands switch from before the character commands setting", { chat: { hideCommands: true } }],
+    ["a chat commands switch as text", { chat: { hideCommands: "true" } }],
+    ["a chat commands switch as a number", { chat: { hideCommands: 1 } }],
+    ["a null chat commands switch", { chat: { hideCommands: null } }],
     ["a message background that is not a step of 5", { chat: { backgroundOpacity: 3 } }],
     ["a negative message background", { chat: { backgroundOpacity: -5 } }],
     ["a message background above 100", { chat: { backgroundOpacity: 105 } }],
@@ -829,11 +822,11 @@ describe("layer patches", (): void => {
 
   it("merges the message background alone and keeps it when a patch does not name it", (): void => {
     const faint: OverlayLayers = mergeLayers(DEFAULT_LAYERS, { chat: { backgroundOpacity: 0 } });
-    expect(faint.chat).toEqual({ enabled: false, hideCharacterCommands: false, backgroundOpacity: 0 });
+    expect(faint.chat).toEqual({ enabled: false, hideCommands: true, backgroundOpacity: 0 });
     // A patch from an older editor has no such field.
     expect(mergeLayers(faint, { chat: { enabled: true } }).chat).toEqual({
       enabled: true,
-      hideCharacterCommands: false,
+      hideCommands: true,
       backgroundOpacity: 0,
     });
   });
@@ -847,7 +840,7 @@ describe("layer patches", (): void => {
     expect(next).toEqual({
       ...LAID,
       orientation: "vertical",
-      chat: { enabled: true, hideCharacterCommands: false, backgroundOpacity: 100 },
+      chat: { enabled: true, hideCommands: true, backgroundOpacity: 100 },
       cells: { horizontal: { ...LAID.cells.horizontal, chat: chatCell }, vertical: LAID.cells.vertical },
     });
     expect(next.cells.horizontal.chat).not.toBe(chatCell);

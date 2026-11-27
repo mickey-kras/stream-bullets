@@ -27,7 +27,6 @@ export interface UseChatOptions {
   feed: ActivityFeed | null;
   /** Editor preview: these messages play on a loop and no socket is read. */
   samples?: readonly ActivityChat[];
-  /** The chat does not show character commands: `chat.hideCharacterCommands` of the layers. */
   hideCommands: boolean;
   /** Server time minus local time, when known. */
   serverOffset?: number;

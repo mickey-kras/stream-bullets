@@ -15,13 +15,13 @@ import {
   displayFragments,
   initialChatState,
   graphemes,
+  isChatCommand,
   nextWakeAt,
   safeEmoteUrl,
   type ChatOptions,
   type ChatRow,
   type ChatState,
 } from "../app/lib/chat-feed";
-import { isCharacterCommand, isChatCommand } from "../app/lib/playground/core";
 
 const T0 = 1_800_000_000_000;
 const options: ChatOptions = { hideCommands: true };
@@ -264,68 +264,6 @@ describe("chatReducer: live events", () => {
     const shown = send(initialChatState(), event(command), 0, showAll);
     expect(textOf(shown.rows[0])).toBe("!jump");
     expect(shown.rows[0].command).toBe(true);
-  });
-
-  it.each([
-    "!jump",
-    "!JUMP",
-    "!dig 3",
-    "!dig left",
-    "!dig r 3",
-    "!look right",
-    "!hi",
-    "!hook",
-    "!build 2",
-    "！dance",
-    "\u200b！DIG 3 l",
-    "  !flag now",
-  ])("hides the character command %j and shows it without the option", (text: string) => {
-    const command = chat({ text });
-    expect(isCharacterCommand(text)).toBe(true);
-    expect(send(initialChatState(), event(command), 0).rows).toEqual([]);
-    expect(send(initialChatState(), event(command), 0).pending).toEqual([]);
-    expect(send(initialChatState(), snapshot([{ ...command, live: false }]), 0).rows).toEqual([]);
-    expect(textOf(send(initialChatState(), event(command), 0, showAll).rows[0])).toBe(text);
-    expect(textOf(send(initialChatState(), snapshot([{ ...command, live: false }]), 0, showAll).rows[0])).toBe(text);
-  });
-
-  it.each(["!hello", "!discord", "!jumping", "!прыжок", "! jump", "jump", "I said !jump", "!constructor"])(
-    "shows %j with the option on: it only looks like a command",
-    (text: string) => {
-      const message = chat({ text });
-      expect(isCharacterCommand(text)).toBe(false);
-      const live = send(initialChatState(), event(message), 0);
-      expect(textOf(live.rows[0])).toBe(text);
-      expect(live.rows[0].command).toBe(false);
-      expect(textOf(send(initialChatState(), snapshot([{ ...message, live: false }]), 0).rows[0])).toBe(text);
-    },
-  );
-
-  it("keeps a row that only looks like a command when the option turns on", () => {
-    const [jump, hello] = [chat({ text: "!jump" }), chat({ text: "!hello" })];
-    let state = send(initialChatState(), snapshot([jump, hello]), 0, showAll);
-    expect(state.rows.map(textOf)).toEqual(["!jump", "!hello"]);
-    state = chatReducer(state, { type: "filter", hideCommands: true, now: 10 }, options);
-    expect(state.rows.map((row) => [textOf(row), row.phase])).toEqual([
-      ["!jump", "leaving"],
-      ["!hello", "shown"],
-    ]);
-  });
-
-  it("keeps a removed command removed when the option changes", () => {
-    const command = chat({ text: "!jump" });
-    const gone: ActivityEvent = { kind: "delete", platform: "twitch", messageId: command.messageId, receivedAt: T0 };
-    // The delete comes while the option hides the command: the chat has no row, and it still keeps the ID.
-    let state = send(send(initialChatState(), event(command), 0), event(gone), 1);
-    expect(state.removed.has(command.id)).toBe(true);
-    state = chatReducer(state, { type: "filter", hideCommands: false, now: 2 }, showAll);
-    expect(send(state, event(command), 3, showAll).rows).toEqual([]);
-    expect(send(state, snapshot([{ ...command, live: false }]), 3, showAll).rows).toEqual([]);
-    // The delete comes while the command shows: the row says that it was removed, with the option on or off.
-    let shown = send(initialChatState(), event(command), 0, showAll);
-    shown = send(shown, event(gone), 1, showAll);
-    expect(shown.rows.map((row) => row.phase)).toEqual(["removed"]);
-    expect(chatReducer(shown, { type: "filter", hideCommands: true, now: 2 }, options).rows[0].phase).toBe("removed");
   });
 
   it("removes shown and queued commands when hideCommands turns on", () => {
@@ -768,11 +706,7 @@ describe("nextWakeAt", () => {
 describe("SAMPLE_CHAT", () => {
   it("covers every platform, a command, a badge, an emote and parses as feed messages", () => {
     expect(new Set(SAMPLE_CHAT.map((sample) => sample.platform))).toEqual(new Set(["twitch", "youtube", "kick"]));
-    // The one command is a command for a character, so the preview shows what the option hides.
     expect(SAMPLE_CHAT.filter((sample) => isChatCommand(sample.text))).toHaveLength(1);
-    expect(SAMPLE_CHAT.filter((sample) => isCharacterCommand(sample.text)).map((sample) => sample.text)).toEqual([
-      "!jump",
-    ]);
     expect(SAMPLE_CHAT.some((sample) => sample.badges.length > 0)).toBe(true);
     expect(SAMPLE_CHAT.some((sample) => sample.fragments.some((fragment) => fragment.type === "emote"))).toBe(true);
     expect(SAMPLE_CHAT.some((sample) => sample.text.length > CHAT_LIMITS.maxDisplayChars)).toBe(true);

@@ -220,11 +220,11 @@ function ChatSettings({ layers, change }: Readonly<Pick<SettingsProps, "layers" 
       <label className="choice">
         <input
           type="checkbox"
-          checked={layers.chat.hideCharacterCommands}
+          checked={layers.chat.hideCommands}
           aria-describedby={commandsId}
           onChange={(event) => {
-            const hideCharacterCommands: boolean = event.currentTarget.checked;
-            change((current: OverlayLayers) => ({ ...current, chat: { ...current.chat, hideCharacterCommands } }));
+            const hideCommands: boolean = event.currentTarget.checked;
+            change((current: OverlayLayers) => ({ ...current, chat: { ...current.chat, hideCommands } }));
           }}
           data-props-commands
         />

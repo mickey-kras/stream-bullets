@@ -442,7 +442,7 @@ describe("commands and bubbles", () => {
     const before: number = chars[0].score;
     const sender: Viewer = { platform: chars[0].platform, userId: chars[0].userId, name: chars[0].name };
     const event: ActivityChat = chat(sender, "！JUMP");
-    // The chat layer and the chat log with "Hide character commands" on: no row, and nothing waits to show.
+    // The chat layer and the chat log with "Hide chat commands" on: no row, and nothing waits to show.
     const layer: ChatState = chatReducer(
       initialChatState(),
       { type: "message", message: { type: "event", event }, now: 0 },
@@ -458,9 +458,9 @@ describe("commands and bubbles", () => {
     sim.receive(event);
     expect(chars[0].pending?.name).toBe("jump");
     expect(chars[0].score).toBe(before + 1);
-    // A message that is no command changes nothing for the character, and the views show it.
+    // A hidden command of a different bot changes nothing for the character.
     sim.clock = 90;
-    message(chars[0], "!hello");
+    message(chars[0], "!discord");
     expect(chars[0].pending?.name).toBe("jump");
   });
 

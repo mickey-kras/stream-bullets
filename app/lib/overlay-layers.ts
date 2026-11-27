@@ -46,10 +46,10 @@ export type LayerCells = Record<GridLayer, CellRect | null>;
 export interface ChatLayer {
   enabled: boolean;
   /**
-   * The chat does not show the messages that are commands for the characters (`isCharacterCommand`). It applies to
-   * the chat layer and to the chat log of the owner. The commands still run.
+   * The chat does not show chat commands (`isChatCommand`). It applies to the chat layer and to the chat log of the
+   * owner: Live, the full-screen chat and the OBS dock. The commands still run.
    */
-  hideCharacterCommands: boolean;
+  hideCommands: boolean;
   /** Percent of the card background that shows behind each message (CHAT_BACKGROUND). */
   backgroundOpacity: number;
 }
@@ -163,7 +163,7 @@ function defaultItem(layer: ContentLayer): ContentItem {
 // orientation. The chat, the characters and the camera frame are off until the streamer puts them on the grid.
 export const DEFAULT_LAYERS: OverlayLayers = {
   orientation: "horizontal",
-  chat: { enabled: false, hideCharacterCommands: false, backgroundOpacity: CHAT_BACKGROUND.default },
+  chat: { enabled: false, hideCommands: true, backgroundOpacity: CHAT_BACKGROUND.default },
   characters: { enabled: false, timeout: CHARACTERS_TIMEOUT.default, max: CHARACTERS_MAX.default },
   camera: { enabled: false },
   items: contentRecord(defaultItem),
@@ -365,7 +365,7 @@ export const layersPatchSchema = z
     chat: z
       .object({
         enabled: z.boolean().optional(),
-        hideCharacterCommands: z.boolean().optional(),
+        hideCommands: z.boolean().optional(),
         backgroundOpacity: layerBackground.optional(),
       })
       .strict()
@@ -447,8 +447,7 @@ export const storedLayersSchema: z.ZodType<OverlayLayers, unknown> = fallback(
     chat: fallback(
       z.object({
         enabled: fallback(z.boolean(), DEFAULT_LAYERS.chat.enabled),
-        // A text from before this setting has `hideCommands`: an unknown key now, so the setting reads as off.
-        hideCharacterCommands: fallback(z.boolean(), DEFAULT_LAYERS.chat.hideCharacterCommands),
+        hideCommands: fallback(z.boolean(), DEFAULT_LAYERS.chat.hideCommands),
         backgroundOpacity: fallback(layerBackground, DEFAULT_LAYERS.chat.backgroundOpacity),
       }),
       (): ChatLayer => ({ ...DEFAULT_LAYERS.chat }),
@@ -569,7 +568,7 @@ export function mergeLayers(current: OverlayLayers, patch: LayersPatch): Overlay
     orientation: patch.orientation ?? current.orientation,
     chat: {
       enabled: patch.chat?.enabled ?? current.chat.enabled,
-      hideCharacterCommands: patch.chat?.hideCharacterCommands ?? current.chat.hideCharacterCommands,
+      hideCommands: patch.chat?.hideCommands ?? current.chat.hideCommands,
       backgroundOpacity: patch.chat?.backgroundOpacity ?? current.chat.backgroundOpacity,
     },
     characters: {

@@ -128,8 +128,8 @@ export function diffLayers(before: OverlayLayers, after: OverlayLayers): LayersP
   };
   if (before.orientation !== after.orientation) patch.orientation = after.orientation;
   if (before.chat.enabled !== after.chat.enabled) patch.chat = { enabled: after.chat.enabled };
-  if (before.chat.hideCharacterCommands !== after.chat.hideCharacterCommands)
-    patch.chat = { ...patch.chat, hideCharacterCommands: after.chat.hideCharacterCommands };
+  if (before.chat.hideCommands !== after.chat.hideCommands)
+    patch.chat = { ...patch.chat, hideCommands: after.chat.hideCommands };
   if (before.chat.backgroundOpacity !== after.chat.backgroundOpacity)
     patch.chat = { ...patch.chat, backgroundOpacity: after.chat.backgroundOpacity };
   if (before.characters.enabled !== after.characters.enabled) patch.characters = { enabled: after.characters.enabled };
@@ -193,7 +193,7 @@ function removeSentFields<T extends object>(
 export function withoutSent(draft: LayersPatch, sent: LayersPatch): LayersPatch {
   const result: LayersPatch = compact(draft);
   removeSentFields(result, sent, ["orientation"]);
-  removeSentFields(result.chat, sent.chat, ["enabled", "hideCharacterCommands", "backgroundOpacity"]);
+  removeSentFields(result.chat, sent.chat, ["enabled", "hideCommands", "backgroundOpacity"]);
   removeSentFields(result.characters, sent.characters, ["enabled"]);
   removeSentFields(result.camera, sent.camera, ["enabled"]);
   removeSentFields(result.twitchOnly, sent.twitchOnly, ORIENTATIONS);

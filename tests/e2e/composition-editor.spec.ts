@@ -260,7 +260,7 @@ test("the owner places layers on the grid by mouse and keyboard, and the layout 
   expect((await storedLayers(page)).cells.vertical.chat).toEqual({ c: 6, r: 18, w: 6, h: 4 });
 
   save = saved(page);
-  await panel.getByRole("checkbox", { name: "Hide character commands" }).check();
+  await panel.getByRole("checkbox", { name: "Hide chat commands (!jump)" }).uncheck();
   await save;
   await expect(editor.getByRole("status")).toHaveText("Layout saved.");
 
@@ -268,7 +268,7 @@ test("the owner places layers on the grid by mouse and keyboard, and the layout 
   await expect(frame).toHaveAttribute("data-orientation", "vertical");
   await chip(editor, "chat").click();
   await expect(panel.getByRole("checkbox", { name: "Show on stream" })).toBeChecked();
-  await expect(panel.getByRole("checkbox", { name: "Hide character commands" })).toBeChecked();
+  await expect(panel.getByRole("checkbox", { name: "Hide chat commands (!jump)" })).not.toBeChecked();
   save = saved(page);
   await editor.getByRole("button", { name: "Horizontal 32 × 18" }).click();
   await save;
@@ -524,10 +524,9 @@ test("a save sends only the changed fields, and a failure rolls back only its ow
   await chip(editor, "chat").click();
   const panel = settings(editor);
   const show = panel.getByRole("checkbox", { name: "Show on stream" });
-  const hide = panel.getByRole("checkbox", { name: "Hide character commands" });
+  const hide = panel.getByRole("checkbox", { name: "Hide chat commands (!jump)" });
   await expect(show).not.toBeChecked();
-  // Off by default: the chat shows each message.
-  await expect(hide).not.toBeChecked();
+  await expect(hide).toBeChecked();
   // The chat source note links to the channel cards in the Channels section.
   const connect = panel.getByRole("link", { name: "Connect channels" });
   await expect(connect).toHaveAttribute("href", "/tools?view=channels#channels-title");
@@ -557,7 +556,7 @@ test("a save sends only the changed fields, and a failure rolls back only its ow
   await expect.poll(() => bodies.length).toBe(1);
   await hide.click();
   await expect(show).toBeChecked();
-  await expect(hide).toBeChecked();
+  await expect(hide).not.toBeChecked();
   expect(gate.release).toBeDefined();
   gate.release?.();
   await expect(editor.getByRole("alert")).toContainText("Too many requests");
@@ -566,14 +565,14 @@ test("a save sends only the changed fields, and a failure rolls back only its ow
   gate.next?.();
   expect(withoutWrite(bodies)).toEqual([
     { action: "layers", chat: { enabled: true } },
-    { action: "layers", chat: { hideCharacterCommands: true } },
+    { action: "layers", chat: { hideCommands: false } },
   ]);
   // One editor id, and each request a higher number.
   const [first, second] = writes(bodies);
   expect(second.writer).toBe(first.writer);
   expect(second.seq).toBeGreaterThan(first.seq);
   await expect(show).not.toBeChecked();
-  await expect(hide).toBeChecked();
+  await expect(hide).not.toBeChecked();
   await expect(editor.getByRole("status")).toHaveText("Layout saved.");
   await close(owner);
 });

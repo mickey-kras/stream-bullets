@@ -113,7 +113,7 @@ function DockControls({
       <LiveChat
         feed={feed}
         delivers={delivers}
-        hideCommands={state.layers.chat.hideCharacterCommands}
+        hideCommands={state.layers.chat.hideCommands}
         onAir={onAirTitle(view, state.layers)}
       />
     </>

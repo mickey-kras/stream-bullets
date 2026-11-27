@@ -1,8 +1,9 @@
 import type { ActivityPlatform } from "../activity";
+import { isChatCommand } from "../chat-feed";
 
 import { COMMAND_ALIASES, COMMANDS, type Command, type CommandCall, type Participant } from "./crowd";
-import type { CharState } from "./protocol";
-import type { Terrain, World } from "./terrain";
+import { type CharState } from "./protocol";
+import { type Terrain, type World } from "./terrain";
 
 /**
  * The shared pieces of the playground simulation: the random source, the state change, the command parser and the
@@ -60,14 +61,6 @@ export const STANDING_STATES: ReadonlySet<CharState | "away"> = new Set<CharStat
   "cheer",
 ]);
 
-// Leading white space and invisible format characters (ZWJ, BOM, bidi marks) are skipped. "！" is the full-width "!".
-const COMMAND = /^[\s\p{Cf}]*[!！][\p{L}\p{N}_-]{1,32}(?:\s|$)/u;
-
-/** A message whose first visible text is `!word` (like `!jump` or `！jump`). The word can be a command or not. */
-export function isChatCommand(text: string): boolean {
-  return COMMAND.test(text);
-}
-
 /**
  * The command of a chat text, or null: the word after `!` (a command or an alias, in any letter case), then at most
  * two more words in any order: a number of 1 or 2 digits and a side (`left`, `right`, `l`, `r`). So `!dig`,
@@ -89,14 +82,6 @@ export function parseCommand(text: string): CommandCall | null {
     else if (Object.hasOwn(SIDES, token)) call.side = SIDES[token];
   }
   return call;
-}
-
-/**
- * True when the text is a command for a character: `parseCommand` reads it. The chat views can hide these messages
- * (`chat.hideCharacterCommands` of the overlay layers). `!discord` and `!hello` are no commands of a character.
- */
-export function isCharacterCommand(text: string): boolean {
-  return parseCommand(text) !== null;
 }
 
 export function clamp(value: number, min: number, max: number): number {

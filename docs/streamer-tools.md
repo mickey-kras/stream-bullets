@@ -151,8 +151,8 @@ See [Support events](#support-events).
 
 The pause and the platform buttons apply to this browser only. They do not change what OBS shows.
 
-**Hide character commands** in the settings of the chat layer also applies to this list.
-With the option on, the list has no row for a character command, and a paused list does not count it.
+**Hide chat commands (!jump)** in the settings of the chat layer also applies to this list. The option is on by default.
+With the option on, the list has no row for a command, and a paused list does not count it.
 The list keeps these messages: when you clear the option, they show again in their places.
 See [Commands](overlay-composition.md#commands).
 

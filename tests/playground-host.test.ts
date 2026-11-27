@@ -269,8 +269,11 @@ describe("characters sockets", (): void => {
     expect(first.ofType("event")).toHaveLength(2);
   });
 
-  it("run a command with the chat set to hide character commands, and still send its message", async (): Promise<void> => {
-    await setLayers({ ...ON, chat: { ...ON.chat, enabled: true, hideCharacterCommands: true } });
+  it("run a command with the chat set to hide chat commands, and still send its message", async (): Promise<void> => {
+    // The chat layer is on stream with its default: the chat views hide each command.
+    const hiding: OverlayLayers = { ...ON, chat: { ...ON.chat, enabled: true } };
+    expect(hiding.chat.hideCommands).toBe(true);
+    await setLayers(hiding);
     const socket = await listen();
     await deliver([chat("m1", "u1", "hello")]);
     advance(FRAME_MS * 10);
