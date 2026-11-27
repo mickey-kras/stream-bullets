@@ -61,6 +61,8 @@ export const paths = {
   // Official board with the suggestion dialog open.
   ideas: "/@streambullets?intent=suggest",
   ai: "/ai",
+  // The chat commands of the character playground, for viewers.
+  commands: "/commands",
   streamer: (handle: string): string => `/@${handle}`,
 } as const;
 

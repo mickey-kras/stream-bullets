@@ -1193,6 +1193,19 @@ table.month-grid tr { display: table-row; }
 .ai-counts strong { font: 600 1.75rem/1 var(--heading); }
 .code-block { margin: 0; padding: 14px 16px; overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--field); color: var(--cream); font: 0.875rem/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
 .ai-page code:not(.code-block code) { font-size: 0.9em; color: var(--gold); }
+.commands-page .lead { font-size: 1.1875rem; }
+.commands-page code { color: var(--gold); }
+.command-list { display: grid; gap: 16px; list-style: none; padding: 0; margin-top: 25px; }
+.command-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 320px); gap: 20px; align-items: center; padding: 20px; border: 1px solid var(--line); border-radius: var(--radius-panel); background: var(--card); scroll-margin-top: 90px; }
+.command-row h2 { margin: 0 0 8px; }
+.command-row p { margin: 0 0 8px; }
+.command-lines { display: flex; flex-wrap: wrap; gap: 8px; }
+.command-lines code { padding: 2px 8px; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--field); }
+.command-demo { overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--field); }
+@media (max-width: 43.75em) {
+  .command-row { grid-template-columns: minmax(0, 1fr); }
+  .command-demo { max-width: 320px; }
+}
 .sched-actions .text-button { display: inline-flex; align-items: center; gap: 6px; }
 .ai-list li svg { display: inline-block; vertical-align: -3px; margin-right: 8px; }
 h1[tabindex="-1"]:focus, h1[tabindex="-1"]:focus-visible, .mash-winner-title:focus-visible, main[tabindex="-1"]:focus-visible, :focus:not(:focus-visible) { outline: none; box-shadow: none; }

@@ -134,6 +134,11 @@ The sides are `left`, `right`, `l`, and `r`. Capital letters make no difference.
 | `!push` | `!shove` | Push the character in front. That character flies 1 block or more. |
 | `!flag` | | Plant a flag in the platform color. Each character has one flag. A new flag moves the old one. |
 
+The page `/commands` shows each command to viewers, with a demo. Post its link in the chat.
+The **Characters** properties in the **Overlay** section have a link to the page.
+Each demo runs the rules of the playground in the browser (`app/components/commands/demos.ts`). Thus a demo always agrees with the rules.
+With reduced motion, the demos stand still.
+
 - A command controls only the character of its sender. Blocks and holes affect all characters.
 - A side on a build command turns the character first: `!block left`.
 - Only live chat runs a command. A message from a snapshot or a late provider retry never runs a command.

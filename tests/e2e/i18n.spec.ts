@@ -261,6 +261,7 @@ const phoneScreens: { role: string | null; ip: number; screens: PhoneScreen[] }[
       { name: "privacy", path: "/privacy" },
       { name: "terms", path: "/terms" },
       { name: "ai", path: "/ai" },
+      { name: "commands", path: "/commands" },
       { name: "preferences", path: "/streamers?dialog=a11y" },
       { name: "language", path: "/streamers?dialog=language" },
       { name: "sign-in", path: "/streamers?dialog=profile" },
