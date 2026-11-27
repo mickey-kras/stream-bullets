@@ -1,5 +1,4 @@
-import { DURATION } from "../../../lib/playground/constants";
-import { TICK_HZ } from "../../../lib/playground/constants";
+import { DURATION, TICK_HZ } from "../../../lib/playground/constants";
 import {
   PIXEL_SCALE,
   type PlaygroundTheme,
