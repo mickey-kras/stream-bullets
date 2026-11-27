@@ -16,6 +16,7 @@ import { callIngest } from "./ingest-call.server";
 /** What the API tells the owner for each refusal of the alert host. The code goes with it, for a client's own text. */
 const REFUSAL_TEXT: Readonly<Record<AlertRefusal, string>> = {
   alerts_off_stream: "Put the alerts layer on stream first.",
+  goal_off: "Put the goal layer on the grid first.",
   alert_gone: "This event is too old for a replay.",
   alerts_muted: "Alerts are muted. Turn the mute off first.",
   alerts_unwatched: "No page shows alerts now. Open the overlay in OBS first.",
@@ -26,8 +27,9 @@ const REFUSAL_TEXT: Readonly<Record<AlertRefusal, string>> = {
 
 /**
  * Sends one control of the alerts to the alert host of a page and gives its answer. `ownerId` is the owner of the
- * page: the caller checked the session of the owner or the dock key. A test and a replay use the write quota of
- * the owner. `status`, `mute`, and `skip` never do, so the owner can always read the state and stop the alerts.
+ * page: the caller checked the session of the owner or the dock key. A test, a replay, and a new count of the goal
+ * use the write quota of the owner. `status`, `mute`, and `skip` never do, so the owner can always read the state
+ * and stop the alerts.
  */
 export async function controlAlerts(
   env: AppEnv,
@@ -37,7 +39,8 @@ export async function controlAlerts(
 ): Promise<AlertsReply> {
   await assertStreamerWritable(env, streamerId, ownerId);
   if (!activityAvailable(env)) throw new HttpError(503, "Alerts are off on this server.");
-  if (control.op === "test" || control.op === "replay") await consumeMutationQuota(env, ownerId);
+  const free: boolean = control.op === "status" || control.op === "mute" || control.op === "skip";
+  if (!free) await consumeMutationQuota(env, ownerId);
   const response: Response = await callIngest(env, streamerId, "alerts", {
     init: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(control) },
   });

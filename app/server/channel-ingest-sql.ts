@@ -113,8 +113,11 @@ export const SUPPORT = {
   },
 };
 
-/** The rows of `alert_state`: the muted flag with the alert on stream, and the copy of the layer settings. */
-export type AlertStateKey = "state" | "config";
+/**
+ * The rows of `alert_state`: the muted flag with the alert on stream, the copy of the layer settings, and the count
+ * of the goal.
+ */
+export type AlertStateKey = "state" | "config" | "goal";
 
 /** A stored JSON text as a value. Null: the text is not JSON. The reader checks the shape of the value. */
 function storedJson(body: string): unknown {
@@ -129,12 +132,18 @@ function storedJson(body: string): unknown {
  * What the alert host keeps (app/server/alert-host.ts): one row for each part of its state, and one row for each
  * alert that waits in the line. An alert that waits has the display name and the user ID of the supporter. The row
  * goes when the alert starts, when the owner mutes the alerts, and when the owner disconnects the platform.
+ *
+ * For the goal, the host also keeps the IDs of the newest support events, so an event counts one time, and one key
+ * for each person that a goal for chatters counted. A key is a hash: it has no user ID.
  */
 export const ALERTS = {
   create(sql: SqlStorage): void {
     sql.exec("CREATE TABLE IF NOT EXISTS alert_state (key TEXT PRIMARY KEY, body TEXT NOT NULL)");
     sql.exec(`CREATE TABLE IF NOT EXISTS alert_line (seq INTEGER PRIMARY KEY AUTOINCREMENT, id TEXT NOT NULL UNIQUE,
       body TEXT NOT NULL)`);
+    sql.exec(`CREATE TABLE IF NOT EXISTS alert_counted (seq INTEGER PRIMARY KEY AUTOINCREMENT,
+      id TEXT NOT NULL UNIQUE)`);
+    sql.exec("CREATE TABLE IF NOT EXISTS goal_people (key TEXT PRIMARY KEY)");
   },
   /** The stored value of `key`. Undefined: the row does not exist. Null: its text is not JSON. */
   read(sql: SqlStorage, key: AlertStateKey): unknown {
@@ -166,6 +175,26 @@ export const ALERTS = {
   /** Removes each alert from the line. */
   clear(sql: SqlStorage): void {
     sql.exec("DELETE FROM alert_line");
+  },
+  /**
+   * Remembers the ID of a support event. False: the table has the ID, so the event came before. The table keeps the
+   * newest `kept` IDs.
+   */
+  first(sql: SqlStorage, id: string, kept: number): boolean {
+    const added: { seq: number }[] = sql
+      .exec<{ seq: number }>("INSERT OR IGNORE INTO alert_counted (id) VALUES (?) RETURNING seq", id)
+      .toArray();
+    if (added.length === 0) return false;
+    sql.exec("DELETE FROM alert_counted WHERE seq <= ?", added[0].seq - kept);
+    return true;
+  },
+  /** Adds a person to the people of the goal. False: the goal has the person. */
+  person(sql: SqlStorage, key: string): boolean {
+    return sql.exec("INSERT OR IGNORE INTO goal_people (key) VALUES (?) RETURNING 1", key).toArray().length > 0;
+  },
+  /** Removes the people of the goal: a new count starts. */
+  forgetPeople(sql: SqlStorage): void {
+    sql.exec("DELETE FROM goal_people");
   },
 };
 

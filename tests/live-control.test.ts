@@ -1791,6 +1791,7 @@ describe("overlay control", (): void => {
       { op: "mute", on: false },
       { op: "skip" },
       { op: "replay", id: "twitch:g1" },
+      { op: "goalReset" },
     ];
 
     beforeEach((): void => {
@@ -1810,14 +1811,25 @@ describe("overlay control", (): void => {
       expect(await (await alerts({ op: "status" })).json()).toEqual(reply);
     });
 
-    it("uses the write quota for a test and a replay, never to read, mute or skip", async (): Promise<void> => {
+    it("answers the count of the goal with the state", async (): Promise<void> => {
+      const goal = { counts: "subs", value: 12, startedAt: 1_800_000_000_000 };
+      ingestReply = (): Response => Response.json({ ...reply, goal });
+      expect(await (await alerts({ op: "goalReset" })).json()).toEqual({ ...reply, goal });
+      // A count that breaks the contract is a server error.
+      const log = vi.spyOn(console, "error").mockImplementation((): void => undefined);
+      ingestReply = (): Response => Response.json({ ...reply, goal: { ...goal, counts: "money" } });
+      expect((await alerts({ op: "status" })).status).toBe(500);
+      log.mockRestore();
+    });
+
+    it("uses the write quota for a test, a replay and a new count, never to read, mute or skip", async (): Promise<void> => {
       await startOfQuotaWindow(env.DB);
       await env.DB.prepare(
         `INSERT INTO app_rate_limits (key,count,window_start)
           VALUES ('write:owner',60,CAST(strftime('%s','now') AS INTEGER)/60*60000)
           ON CONFLICT(key) DO UPDATE SET count=60, window_start=excluded.window_start`,
       ).run();
-      for (const control of [{ op: "test" }, { op: "replay", id: "twitch:g1" }])
+      for (const control of [{ op: "test" }, { op: "replay", id: "twitch:g1" }, { op: "goalReset" }])
         expect((await alerts(control)).status).toBe(429);
       for (const control of [{ op: "status" }, { op: "mute", on: true }, { op: "mute", on: false }, { op: "skip" }])
         expect((await alerts(control)).status).toBe(200);
@@ -1844,6 +1856,7 @@ describe("overlay control", (): void => {
         { op: "replay", id: "x".repeat(161) },
         { op: "skip", id: "twitch:g1" },
         { op: "status", extra: true },
+        { op: "goalReset", value: 0 },
       ])
         expect((await alerts(control)).status, JSON.stringify(control)).toBe(400);
       env.CHANNELS_OFF = "1";
@@ -1877,6 +1890,7 @@ describe("overlay control", (): void => {
       }
       expect(texts.size).toBe(Object.keys(ALERT_REFUSALS).length);
       expect(texts).toContain("Put the alerts layer on stream first.");
+      expect(texts).toContain("Put the goal layer on the grid first.");
       expect(texts).toContain("Alerts are muted. Turn the mute off first.");
       expect(texts).toContain("This event is too old for a replay.");
       // A failure that the API does not know is not passed on.

@@ -11,10 +11,10 @@ import { goalProgressSchema } from "./goals";
 /**
  * One control. `status` only reads. `test` plays a sample alert, the gift when it names no kind. `mute` stops the
  * alerts or lets them play again. `skip` ends the alert on stream. `replay` plays the alert of a support event that
- * the server still keeps: `id` is the ID of the event.
+ * the server still keeps: `id` is the ID of the event. `goalReset` starts the count of the goal again at 0.
  */
 export const alertControlSchema = z.union([
-  z.object({ op: z.enum(["status", "skip"]) }).strict(),
+  z.object({ op: z.enum(["status", "skip", "goalReset"]) }).strict(),
   z.object({ op: z.literal("test"), kind: z.enum(TEST_ALERTS).optional() }).strict(),
   z.object({ op: z.literal("mute"), on: z.boolean() }).strict(),
   z.object({ op: z.literal("replay"), id: z.string().min(1).max(160) }).strict(),
@@ -41,6 +41,8 @@ export const alertsReplySchema: z.ZodType<AlertsReply> = z.object({
 export const ALERT_REFUSALS = {
   /** The alerts layer is not on stream in an output. */
   alerts_off_stream: 400,
+  /** The goal layer has no place on the grid of an output, so the page counts no goal. */
+  goal_off: 400,
   /** The event of a replay is not kept: the ID is not known, or the event is too old. */
   alert_gone: 404,
   /** The alerts are muted. */

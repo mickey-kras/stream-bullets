@@ -687,6 +687,20 @@ describe("the key of the OBS dock", (): void => {
       expect((await dock("alerts", control, key)).status, JSON.stringify(control)).toBe(400);
   });
 
+  it("never starts the goal again with the dock key", async (): Promise<void> => {
+    const { key } = await dockUrl();
+    ingestCalls = [];
+    const refused = await dock("alerts", { op: "goalReset" }, key);
+    expect(refused.status).toBe(403);
+    expect(await code(refused)).toBe("dock_action");
+    expect((await dock("alerts", { op: "goalReset", value: 0 }, key)).status).toBe(400);
+    expect((await dock("alerts", { op: "goalReset" }, "wrong")).status).toBe(403);
+    expect(ingestCalls).toEqual([]);
+    // The owner starts it again with the session.
+    expect((await call("POST", "overlay/alerts", { user: "owner", body: { op: "goalReset" } })).status).toBe(200);
+    expect(ingestCalls).toEqual([`/alerts?streamerId=${page} {"op":"goalReset"}`]);
+  });
+
   it("refuses an alert control without the dock key, and for a page that cannot change", async (): Promise<void> => {
     const { key } = await dockUrl();
     const wide = await newUrl("owner", "horizontal");

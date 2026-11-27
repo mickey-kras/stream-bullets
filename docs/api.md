@@ -262,6 +262,7 @@ The alert host of the page plays the alerts on stream. See [Alert host](channel-
 | `POST /api/overlay/alerts` | `{op: "mute", on: boolean}` | The state. With `on: true`, no alert plays. |
 | `POST /api/overlay/alerts` | `{op: "skip"}` | The state. The alert on stream ends, and the next alert starts. |
 | `POST /api/overlay/alerts` | `{op: "replay", id}` | The state. The alert of one support event plays again. |
+| `POST /api/overlay/alerts` | `{op: "goalReset"}` | The state. The count of the goal starts again at 0. |
 
 - The state has the fields of the `alerts` message of the activity socket, without `type`:
 
@@ -271,7 +272,7 @@ The alert host of the page plays the alerts on stream. See [Alert host](channel-
 | `muted` | `true` while the mute is on |
 | `current` | The view of the alert on stream, or `null`. Its `endsAt` is the server time when the banner goes. |
 | `waiting` | The number of alerts in the line |
-| `goal` | `null` in this version |
+| `goal` | `{counts, value, startedAt}`: the count of the goal. `null` when the goal layer has no place on a grid. |
 
 - See [Alerts and the goal](channel-connections.md#alerts-and-the-goal) for the fields of a view.
 - `kind` is `follow`, `subscription`, `gift`, `bits`, `super_chat`, `raid`, `topic`, or `anonymous`. Without `kind`, the test is a `gift`.
@@ -282,7 +283,11 @@ The alert host of the page plays the alerts on stream. See [Alert host](channel-
   While the mute is on, a support event makes no alert. After `on: false`, no alert from the muted time plays.
   The muted state stays until the owner changes it.
 - A test and a replay add no support event, and no page gets an `event` message for them. They do not use `min` of the rule.
-- `test` and `replay` count against the write quota of 60 changes each minute. `status`, `mute`, and `skip` do not.
+  They never change the count of the goal.
+- `goal.counts` is the `counts` value of the goal layer. `goal.value` is the count. `goal.startedAt` is the server time when the count started.
+  See [Goal count](overlay-composition.md#goal-count).
+- `goalReset` sets `goal.value` to 0 and `goal.startedAt` to the server time. An event from before that time does not count.
+- `test`, `replay`, and `goalReset` count against the write quota of 60 changes each minute. `status`, `mute`, and `skip` do not.
   Thus the owner can always read the state and stop the alerts.
 - Only the owner of the page can use this endpoint. Unknown fields return `400`.
 - A refusal of the alert host has a code:
@@ -290,6 +295,7 @@ The alert host of the page plays the alerts on stream. See [Alert host](channel-
 | Status | Code | Cause |
 | --- | --- | --- |
 | `400` | `alerts_off_stream` | A test or a replay, and the saved alerts layer is not on stream in an output |
+| `400` | `goal_off` | `goalReset`, and the saved goal layer has no place on a grid |
 | `404` | `alert_gone` | A replay of an event that the server does not keep: the ID is unknown, or the event is older than 10 minutes |
 | `409` | `alerts_muted` | A test or a replay while the mute is on |
 | `409` | `alerts_unwatched` | A test or a replay while no overlay page, no **Streamer tools** page, and no dock is open |
@@ -320,6 +326,7 @@ See [OBS dock](streamer-tools.md#obs-dock).
   `chatTest` and each other field return `403` with the code `dock_action`. `alerts` and `goal` are such fields.
 - `alerts` takes the same controls as `POST /api/overlay/alerts` and gives the same answers and codes. See [Alert controls](#alert-controls).
   A test and a replay from the dock count against the write quota of the owner.
+  `goalReset` returns `403` with the code `dock_action`: only the session of the owner starts the goal again.
 - An overlay key is not a dock key. It returns `403`.
 - The live room (`/api/live/:handle`) and the activity feed (`/api/activity/:handle`) accept the dock key in `key`.
   A dock then has the seat and the data of the owner.

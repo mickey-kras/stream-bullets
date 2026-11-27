@@ -36,6 +36,11 @@ async function dockPage(env: AppEnv, handle: string, request: Request): Promise<
 const DOCK_LAYERS: ReadonlySet<string> = new Set<string>(["poll", "topic", "message"]);
 const DOCK_FIELDS: ReadonlySet<string> = new Set<string>(["enabled", "ref", "qr"]);
 
+/** The refusal of a change that the dock key does not allow. */
+function dockRefusal(): HttpError {
+  return new HttpError(403, "The dock cannot make this change. Use Streamer tools.", "dock_action");
+}
+
 /**
  * `action` when the dock may send it: the results switch, the message, and for the poll, the topic, and the message
  * banner the switch "Show on stream", the picked item, and the QR code. Each other change belongs to the owner's
@@ -43,7 +48,7 @@ const DOCK_FIELDS: ReadonlySet<string> = new Set<string>(["enabled", "ref", "qr"
  */
 export function dockAction(action: OverlayAction): OverlayAction {
   if (action.action === "showResults" || action.action === "message") return action;
-  const refused = new HttpError(403, "The dock cannot make this change. Use Streamer tools.", "dock_action");
+  const refused: HttpError = dockRefusal();
   if (action.action !== "layers") throw refused;
   const { items, ...others } = action;
   // `others` holds the action name and each other field of the patch.
@@ -79,10 +84,12 @@ export const dockRoutes: ApiRoute[] = [
   }),
   // POST /api/dock/:handle/alerts {op: status|test|mute|skip|replay, kind?, on?, id?} → {at, muted, current,
   // waiting, goal}: a control of the alerts from the dock, with the dock key in the header. The dock acts for the
-  // owner: a test and a replay use the write quota of the owner.
+  // owner: a test and a replay use the write quota of the owner. A new count of the goal belongs to the session of
+  // the owner.
   openWrite("POST", /dock\/([a-z0-9_]{3,30})\/alerts/, async ({ request, env, match }) => {
     const streamer: Streamer = await dockPage(env, match[1], request);
     const control = await readJson(request, alertControlSchema);
+    if (control.op === "goalReset") throw dockRefusal();
     return json(await controlAlerts(env, streamer.id, streamer.ownerId, control));
   }),
   // POST /api/dock/:handle/poll {id} → {id}: closes the voting of a poll of the page.

@@ -77,9 +77,9 @@ export const liveRoutes: ApiRoute[] = [
     if (!status.success) throw new Error("playground status invalid");
     return json(status.data);
   }),
-  // POST /api/overlay/alerts {op: status|test|mute|skip|replay, kind?, on?, id?} → {at, muted, current, waiting,
-  // goal}: the alerts of the page. `status` only reads. A test and a replay use the write quota; the others never
-  // do, so the owner can always read, mute or skip.
+  // POST /api/overlay/alerts {op: status|test|mute|skip|replay|goalReset, kind?, on?, id?} → {at, muted, current,
+  // waiting, goal}: the alerts and the goal of the page. `status` only reads. A test, a replay and a new count of
+  // the goal use the write quota; the others never do, so the owner can always read, mute or skip.
   write("POST", /overlay\/alerts/, async ({ request, env, viewer }) => {
     const control = await readJson(request, alertControlSchema);
     const streamer = await getOwnStreamer(env, viewer.id);

@@ -1,18 +1,22 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import type { AppEnv } from "../app/env";
 import {
+  DELIVERIES_KEPT,
   isSupport,
   parseActivityMessage,
+  type ActivityChat,
   type ActivityEvent,
   type ActivityPlatform,
   type ActivitySupport,
 } from "../app/lib/activity";
 import { alertRefusal, alertsReplySchema, type AlertsReply } from "../app/lib/alert-control";
 import { ALERT_SHOW_MS, DEFAULT_RULES, type AlertRules, type AlertView, type AlertsMessage } from "../app/lib/alerts";
+import type { GoalCount } from "../app/lib/goals";
 import { DEFAULT_LAYERS, emptyCells, storedLayersText, type OverlayLayers } from "../app/lib/overlay-layers";
-import { ALERT_LINE_MAX, AlertHost } from "../app/server/alert-host";
+import { ALERT_LINE_MAX, AlertHost, GOAL_PEOPLE_MAX } from "../app/server/alert-host";
 import { ChannelIngest } from "../app/server/channel-ingest";
-import { SNAPSHOT_MAX_AGE_MS } from "../app/server/channel-ingest-limits";
+import { SEEN_TTL_MS, SNAPSHOT_MAX_AGE_MS } from "../app/server/channel-ingest-limits";
+import { ALERTS } from "../app/server/channel-ingest-sql";
 import { LAYER_CHECK_MS, PlaygroundHost } from "../app/server/playground-host";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
 import {
@@ -100,6 +104,31 @@ function support(
 
 function gift(deliveryId: string, fields: Partial<ActivitySupport> = {}): ActivitySupport {
   return support("gift", deliveryId, { amount: 5, ...fields });
+}
+
+/** A chat message of a viewer. */
+function chat(messageId: string, userId: string): ActivityChat {
+  return {
+    kind: "chat",
+    id: `twitch:${messageId}`,
+    platform: "twitch",
+    channelId: "111",
+    messageId,
+    user: { id: userId, displayName: `Name of ${messageId}` },
+    text: "hello",
+    fragments: [{ type: "text", text: "hello" }],
+    badges: [],
+    sentAt: null,
+    receivedAt: Date.now(),
+    live: true,
+  };
+}
+
+/** `event` with `suffix` at the end of its ID, so the object takes it as a new event. */
+function renamed(event: ActivityEvent, suffix: string): ActivityEvent {
+  if (event.kind === "chat") return { ...event, messageId: `${event.messageId}${suffix}`, id: `${event.id}${suffix}` };
+  if (!isSupport(event)) return event;
+  return { ...event, deliveryId: `${event.deliveryId}${suffix}`, id: `${event.id}${suffix}` };
 }
 
 /** One delivery of the Worker for the connected channel. */
@@ -190,6 +219,19 @@ function layersOn(changes: Partial<AlertRules> = {}, more: Partial<OverlayLayers
   };
 }
 
+/** `base` with the goal layer on the horizontal grid. "Show on stream" is off unless `goal` turns it on. */
+function withGoal(
+  counts: GoalCount,
+  goal: Partial<OverlayLayers["goal"]> = {},
+  base: OverlayLayers = layersOn(),
+): OverlayLayers {
+  return {
+    ...base,
+    goal: { ...DEFAULT_LAYERS.goal, counts, ...goal },
+    cells: { ...base.cells, horizontal: { ...base.cells.horizontal, goal: { c: 0, r: 4, w: 8, h: 2 } } },
+  };
+}
+
 /** Runs the object's alarm at its time, as the runtime does: the alarm is cleared first. */
 async function fireAlarm(): Promise<void> {
   const at: number | null = state().storage.alarm;
@@ -205,6 +247,7 @@ function standalone(layers: OverlayLayers = layersOn()): {
   socket: FakeSocket;
   sockets: FakeSocket[];
   react: Mock<PlaygroundHost["react"]>;
+  readLayers: Mock<() => Promise<OverlayLayers>>;
   schedule: Mock<(at: number) => Promise<void>>;
   kept: Map<string, ActivitySupport>;
   storage: RoomState["storage"];
@@ -215,13 +258,14 @@ function standalone(layers: OverlayLayers = layersOn()): {
   const socket = new FakeSocket();
   const sockets: FakeSocket[] = [socket];
   const react = vi.fn<PlaygroundHost["react"]>((): number => 1);
+  const readLayers = vi.fn<() => Promise<OverlayLayers>>((): Promise<OverlayLayers> => Promise.resolve(layers));
   const schedule = vi.fn<(at: number) => Promise<void>>((): Promise<void> => Promise.resolve());
   const kept = new Map<string, ActivitySupport>();
   const create = (): AlertHost => {
     const host = new AlertHost({
       sql: storage.sql as unknown as SqlStorage,
       sockets: (): WebSocket[] => sockets.filter((item: FakeSocket): boolean => item.open) as unknown as WebSocket[],
-      readLayers: (): Promise<OverlayLayers> => Promise.resolve(layers),
+      readLayers,
       schedule,
       react,
       support: (id: string): ActivitySupport | null => kept.get(id) ?? null,
@@ -232,7 +276,7 @@ function standalone(layers: OverlayLayers = layersOn()): {
   const host = create();
   const send = (body: unknown): Promise<Response> =>
     host.request(new Request("https://channel-ingest.internal/alerts", { method: "POST", body: JSON.stringify(body) }));
-  return { host, socket, sockets, react, schedule, kept, storage, send, restart: create };
+  return { host, socket, sockets, react, readLayers, schedule, kept, storage, send, restart: create };
 }
 
 beforeAll(async (): Promise<void> => {
@@ -882,6 +926,256 @@ describe("the saved layers", (): void => {
   });
 });
 
+describe("the goal", (): void => {
+  it("counts each stored support event one time: never a replay, a test, or an event that comes again", async (): Promise<void> => {
+    await setLayers(withGoal("subs"));
+    const socket = await listen("horizontal");
+    expect(last(socket).goal).toEqual({ counts: "subs", value: 0, startedAt: T0 });
+    await deliver([gift("g1")]);
+    // A gift bundle counts its gifts. The value comes with the state, to each socket.
+    expect(last(socket)).toMatchObject({
+      current: { id: "twitch:g1" },
+      goal: { counts: "subs", value: 5, startedAt: T0 },
+    });
+    await run({ op: "replay", id: "twitch:g1" });
+    await run({ op: "test" });
+    await run({ op: "test", kind: "subscription" });
+    expect((await run({ op: "status" })).goal?.value).toBe(5);
+    // A provider sends the delivery again: the object refuses the ID for 15 minutes.
+    await deliver([gift("g1")]);
+    expect((await run({ op: "status" })).goal?.value).toBe(5);
+    // After that time, and in a new instance, the object stores the event again and sends it again. The host knows
+    // the ID: the event counts for nothing and plays nothing.
+    await run({ op: "mute", on: true });
+    await run({ op: "mute", on: false });
+    ingest.restart(page);
+    vi.setSystemTime(T0 + SEEN_TTL_MS + 1);
+    const next = await listen("vertical");
+    expect(last(next).goal).toEqual({ counts: "subs", value: 5, startedAt: T0 });
+    await deliver([gift("g1")]);
+    expect(next.ofType("event")).toHaveLength(1);
+    expect(alertMessages(next)).toHaveLength(1);
+    expect((await run({ op: "status" })).goal?.value).toBe(5);
+    // A subscription and a membership count 1, not their months. A follow is not for this goal.
+    await deliver([
+      support("subscription", "s1", { amount: 12 }),
+      support("membership", "m1", { amount: 3 }),
+      support("follow", "f1"),
+    ]);
+    expect(last(next).goal).toEqual({ counts: "subs", value: 7, startedAt: T0 });
+    expect(supportRows()).toEqual(["twitch:g1", "twitch:s1", "twitch:m1", "twitch:f1"]);
+  });
+
+  it("counts while the alerts are muted, off stream, or have no page, and not while the layer has no place", async (): Promise<void> => {
+    // The alerts layer is off, no socket is open, and the goal has "Show on stream" off.
+    await setLayers(withGoal("follows", {}, DEFAULT_LAYERS));
+    await deliver([support("follow", "f1")]);
+    expect(await run({ op: "status" })).toMatchObject({ current: null, goal: { counts: "follows", value: 1 } });
+    await setLayers(withGoal("follows"));
+    const socket = await listen();
+    await run({ op: "mute", on: true });
+    await deliver([support("follow", "f2")]);
+    expect(last(socket)).toMatchObject({ muted: true, current: null, goal: { value: 2 } });
+    expect(ones(socket)).toEqual([]);
+    // Off the grid of the two outputs, the page counts no goal. The host keeps the count.
+    await setLayers(layersOn());
+    expect(last(socket).goal).toBeNull();
+    await deliver([support("follow", "f3")]);
+    expect(last(socket).goal).toBeNull();
+    // On the vertical grid only, and with a title and a target: the count goes on from its value.
+    const tall: OverlayLayers = withGoal("follows", { enabled: true, title: "New followers", target: 10 });
+    await setLayers({
+      ...tall,
+      cells: {
+        horizontal: layersOn().cells.horizontal,
+        vertical: { ...emptyCells(), goal: { c: 0, r: 4, w: 8, h: 2 } },
+      },
+    });
+    expect(last(socket).goal).toEqual({ counts: "follows", value: 2, startedAt: T0 });
+    await deliver([support("follow", "f4")]);
+    expect(last(socket).goal?.value).toBe(3);
+  });
+
+  it("does not count an event from before the start of the count", async (): Promise<void> => {
+    vi.setSystemTime(T0 + 5000);
+    await setLayers(withGoal("bits"));
+    const socket = await listen();
+    expect(last(socket).goal).toEqual({ counts: "bits", value: 0, startedAt: T0 + 5000 });
+    await deliver([support("bits", "old", { amount: 100, sentAt: T0 + 4999 })]);
+    expect(last(socket).goal?.value).toBe(0);
+    await deliver([support("bits", "new", { amount: 100, sentAt: T0 + 5000 }), support("bits", "now", { amount: 20 })]);
+    expect(last(socket).goal?.value).toBe(120);
+  });
+
+  it("starts a new count when it counts a different thing, and not for a new title or target", async (): Promise<void> => {
+    await setLayers(withGoal("subs"));
+    const socket = await listen();
+    await deliver([gift("g1")]);
+    const sent: number = states(socket).length;
+    await setLayers(withGoal("subs", { enabled: true, title: "Road to 50", target: 50 }));
+    expect(states(socket)).toHaveLength(sent);
+    expect(last(socket).goal).toEqual({ counts: "subs", value: 5, startedAt: T0 });
+    vi.setSystemTime(T0 + 1000);
+    await setLayers(withGoal("bits"));
+    expect(last(socket).goal).toEqual({ counts: "bits", value: 0, startedAt: T0 + 1000 });
+    await deliver([gift("g2"), support("bits", "b1", { amount: 250 })]);
+    expect(last(socket).goal?.value).toBe(250);
+    vi.setSystemTime(T0 + 2000);
+    await setLayers(withGoal("subs"));
+    expect(last(socket).goal).toEqual({ counts: "subs", value: 0, startedAt: T0 + 2000 });
+  });
+
+  it("counts follows, Bits, and KICKs, each in its own unit, and nothing for votes", async (): Promise<void> => {
+    const socket = await listen();
+    const events: ActivityEvent[] = [
+      support("follow", "f"),
+      support("bits", "b", { amount: 150 }),
+      gift("g"),
+      chat("m", "chatter-id-1"),
+    ];
+    for (const [index, [counts, value]] of (
+      [
+        ["follows", 1],
+        ["bits", 150],
+        ["subs", 5],
+        ["votes", 0],
+      ] as const
+    ).entries()) {
+      await setLayers(withGoal(counts));
+      await deliver(events.map((event: ActivityEvent): ActivityEvent => renamed(event, `${index}`)));
+      await deliver([support("kicks", `k${index}`, { amount: 30, platform: "kick" })], "kick");
+      expect(last(socket).goal, counts).toMatchObject({ counts, value });
+    }
+    await setLayers(withGoal("kicks"));
+    await deliver([support("kicks", "k", { amount: 30, platform: "kick" })], "kick");
+    expect(last(socket).goal).toMatchObject({ counts: "kicks", value: 30 });
+  });
+
+  it("starts again at 0 for the owner, and an ID from before never counts in the new count", async (): Promise<void> => {
+    await setLayers(withGoal("subs"));
+    let socket = await listen();
+    await deliver([gift("g1")]);
+    vi.setSystemTime(T0 + 2000);
+    const reset = await run({ op: "goalReset" });
+    expect(reset.goal).toEqual({ counts: "subs", value: 0, startedAt: T0 + 2000 });
+    expect(last(socket)).toEqual({ type: "alerts", ...reset });
+    // The new count is in storage: a new instance does not go back to the old one.
+    ingest.restart(page);
+    socket = await listen();
+    expect(last(socket).goal).toEqual(reset.goal);
+    vi.setSystemTime(T0 + SEEN_TTL_MS + 1);
+    await deliver([gift("g1")]);
+    expect(last(socket).goal?.value).toBe(0);
+    await deliver([gift("g2")]);
+    expect(last(socket).goal?.value).toBe(5);
+    // The host reads the saved layers for this control: it needs no notice of a change.
+    await setLayers(layersOn(), false);
+    expect(await refused({ op: "goalReset" })).toEqual([400, "goal_off"]);
+    expect(last(socket).goal).toBeNull();
+    await setLayers(withGoal("subs"), false);
+    expect((await run({ op: "goalReset" })).goal).toMatchObject({ counts: "subs", value: 0 });
+  });
+
+  it("counts each person who chats one time, and keeps no user ID", async (): Promise<void> => {
+    await setLayers(withGoal("chatters"));
+    const socket = await listen();
+    await deliver([chat("m1", "chatter-id-1"), chat("m2", "chatter-id-1"), chat("m3", "chatter-id-2")]);
+    expect(last(socket).goal).toEqual({ counts: "chatters", value: 2, startedAt: T0 });
+    // The same ID on a different platform is a different participant.
+    await deliver([{ ...chat("m4", "chatter-id-1"), platform: "kick", id: "kick:m4" }], "kick");
+    expect(last(socket).goal?.value).toBe(3);
+    // A support event and a message from before the count are not for this goal.
+    await deliver([gift("g1"), { ...chat("m5", "chatter-id-3"), sentAt: T0 - 1 }]);
+    expect(last(socket).goal?.value).toBe(3);
+    const sql = state().storage.sql;
+    const people: { key: string }[] = sql.exec<{ key: string }>("SELECT key FROM goal_people").toArray();
+    expect(people).toHaveLength(3);
+    for (const person of people) expect(person.key).toMatch(/^[0-9a-f]{32}$/);
+    const kept: string = JSON.stringify(sql.exec("SELECT body FROM alert_state").toArray());
+    expect(kept).not.toContain("chatter-id");
+    expect(JSON.stringify(alertMessages(socket))).not.toContain("chatter-id");
+    // The count survives a new instance, and a known person does not count again.
+    ingest.restart(page);
+    const next = await listen();
+    await deliver([chat("m6", "chatter-id-2"), chat("m7", "chatter-id-4")]);
+    expect(last(next).goal?.value).toBe(4);
+    // A new count forgets the people.
+    await run({ op: "goalReset" });
+    expect(sql.exec("SELECT key FROM goal_people").toArray()).toEqual([]);
+    await deliver([chat("m8", "chatter-id-1")]);
+    expect(last(next).goal?.value).toBe(1);
+    // A new count has a new salt: the key of a person is not the key of the count before.
+    const again: { key: string }[] = sql.exec<{ key: string }>("SELECT key FROM goal_people").toArray();
+    expect(again).toHaveLength(1);
+    expect(people.map((person): string => person.key)).not.toContain(again[0].key);
+  });
+
+  it("stops the count of chatters at GOAL_PEOPLE_MAX", async (): Promise<void> => {
+    const { host, storage, restart, socket } = standalone(withGoal("chatters"));
+    await host.layersChanged();
+    host.receive(chat("m1", "chatter-id-1"));
+    const stored = storage.sql.exec<{ body: string }>("SELECT body FROM alert_state WHERE key='goal'").toArray()[0];
+    const goal = JSON.parse(stored.body) as { progress: { value: number } };
+    goal.progress.value = GOAL_PEOPLE_MAX - 1;
+    storage.sql.exec("UPDATE alert_state SET body=? WHERE key='goal'", JSON.stringify(goal));
+    const next: AlertHost = restart();
+    next.receive(chat("m2", "chatter-id-2"));
+    next.receive(chat("m3", "chatter-id-3"));
+    expect(last(socket).goal?.value).toBe(GOAL_PEOPLE_MAX);
+    expect(storage.sql.exec("SELECT key FROM goal_people").toArray()).toHaveLength(2);
+  });
+
+  it("starts a new count when the stored count is not valid", async (): Promise<void> => {
+    const { host, storage, restart, socket } = standalone(withGoal("follows"));
+    await host.layersChanged();
+    host.receive(support("follow", "f1"));
+    expect(last(socket).goal?.value).toBe(1);
+    storage.sql.exec(
+      'UPDATE alert_state SET body=\'{"v":1,"progress":{"counts":"follows","value":-4}}\' WHERE key=\'goal\'',
+    );
+    const next: AlertHost = restart();
+    next.receive(support("follow", "f2"));
+    vi.setSystemTime(T0 + 3000);
+    await next.opened(socket as unknown as WebSocket);
+    expect(last(socket).goal).toEqual({ counts: "follows", value: 0, startedAt: T0 + 3000 });
+  });
+
+  it("reads the layers again at the alarm while the goal counts or the host has no copy, also with no page", async (): Promise<void> => {
+    const { host, readLayers, sockets, send } = standalone(withGoal("subs"));
+    sockets.length = 0;
+    // The host has no copy.
+    await host.alarm();
+    expect(readLayers).toHaveBeenCalledTimes(1);
+    // The copy is new.
+    await host.alarm();
+    expect(readLayers).toHaveBeenCalledTimes(1);
+    vi.setSystemTime(T0 + LAYER_CHECK_MS);
+    readLayers.mockResolvedValue(withGoal("bits"));
+    await host.alarm();
+    expect(readLayers).toHaveBeenCalledTimes(2);
+    expect(await (await send({ op: "status" })).json()).toMatchObject({ goal: { counts: "bits", value: 0 } });
+    // With no goal and no page, the host does not use the layers: it reads nothing.
+    readLayers.mockResolvedValue(layersOn());
+    vi.setSystemTime(T0 + 2 * LAYER_CHECK_MS);
+    await host.alarm();
+    vi.setSystemTime(T0 + 3 * LAYER_CHECK_MS);
+    await host.alarm();
+    expect(readLayers).toHaveBeenCalledTimes(3);
+  });
+
+  it("keeps the IDs of the newest DELIVERIES_KEPT support events", (): void => {
+    const sql = new RoomState({ toString: (): string => "ids" }).storage.sql as unknown as SqlStorage;
+    ALERTS.create(sql);
+    for (let index = 0; index <= DELIVERIES_KEPT; index++)
+      expect(ALERTS.first(sql, `twitch:${index}`, DELIVERIES_KEPT)).toBe(true);
+    expect(sql.exec<{ n: number }>("SELECT count(*) AS n FROM alert_counted").toArray()[0].n).toBe(DELIVERIES_KEPT);
+    expect(ALERTS.first(sql, "twitch:1", DELIVERIES_KEPT)).toBe(false);
+    expect(ALERTS.first(sql, `twitch:${DELIVERIES_KEPT}`, DELIVERIES_KEPT)).toBe(false);
+    // The oldest ID left the table.
+    expect(ALERTS.first(sql, "twitch:0", DELIVERIES_KEPT)).toBe(true);
+  });
+});
+
 describe("what the object keeps", (): void => {
   it("restores the alert on stream and the line in a new instance", async (): Promise<void> => {
     await listen();
@@ -971,16 +1265,22 @@ describe("what the object keeps", (): void => {
   });
 
   it("forgets everything when the page goes away", async (): Promise<void> => {
+    await setLayers(withGoal("subs"));
     const socket = await listen();
     await deliver([gift("g1"), gift("g2")]);
     await run({ op: "skip" });
     await run({ op: "mute", on: true });
+    expect(last(socket).goal?.value).toBe(10);
+    vi.setSystemTime(T0 + 4000);
     expect((await post("close")).status).toBe(204);
     expect(socket.open).toBe(false);
     expect(lineRows()).toBe(0);
-    expect(state().storage.sql.exec("SELECT key FROM alert_state").toArray()).toEqual([]);
+    for (const table of ["alert_state", "alert_counted", "goal_people"])
+      expect(state().storage.sql.exec(`SELECT * FROM ${table}`).toArray(), table).toEqual([]);
     const next = await listen();
     expect(last(next)).toMatchObject({ muted: false, current: null, waiting: 0 });
+    // The count of the goal starts again too.
+    expect(last(next).goal).toEqual({ counts: "subs", value: 0, startedAt: T0 + 4000 });
     // The plays start again, and the host reads the layers again before the next alert.
     expect((await run({ op: "test" })).current?.id).toBe("twitch:test-1");
   });

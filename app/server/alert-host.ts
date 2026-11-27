@@ -1,7 +1,10 @@
+import nodeCrypto from "node:crypto";
 import { z } from "zod";
 import {
+  DELIVERIES_KEPT,
   isLiveMessage,
   isSupport,
+  type ActivityChat,
   type ActivityEvent,
   type ActivityPlatform,
   type ActivitySupport,
@@ -36,6 +39,7 @@ import {
   type PendingAlert,
   type StartedAlert,
 } from "../lib/alerts";
+import { GOAL_COUNTS, countSupport, goalProgressSchema, type GoalCount, type GoalProgress } from "../lib/goals";
 import { onAnyOutput, type OverlayLayers } from "../lib/overlay-layers";
 import type { Reaction } from "../lib/playground/crowd";
 import { SNAPSHOT_MAX_AGE_MS } from "./channel-ingest-limits";
@@ -53,6 +57,11 @@ import { LAYER_CHECK_MS, readLayers, type PlaygroundHost, type ReactionSubject }
  * muted, while the alerts layer is off stream, or while no activity socket is open, and none of them plays later.
  * The muted flag, the alert on stream, and the line are in storage, so they survive an eviction of the object.
  *
+ * The host also counts the goal of the page (app/lib/goals.ts), while the goal layer has a place on the grid of an
+ * output. Each stored support event counts one time: the host keeps the IDs of the newest events, so an event that a
+ * provider sends again counts for nothing and plays nothing. The count goes on while the alerts are muted and while
+ * no page listens. A test and a replay never reach it.
+ *
  * A message to a socket has the display name of a supporter and never a user ID. The user ID stays in the line, for
  * the reaction of the character, until the alert starts.
  */
@@ -62,6 +71,12 @@ import { LAYER_CHECK_MS, readLayers, type PlaygroundHost, type ReactionSubject }
  * line holds what plays in SNAPSHOT_MAX_AGE_MS, unless the alert contract sets its own limit.
  */
 export const ALERT_LINE_MAX: number = ALERT_QUEUE_MAX ?? Math.floor(SNAPSHOT_MAX_AGE_MS / ALERT_SHOW_MS);
+
+/**
+ * The largest number of people that a goal for chatters counts. The host keeps one key for each person, so the
+ * storage of a goal has a limit.
+ */
+export const GOAL_PEOPLE_MAX = 100_000;
 
 const NO_STORE = { "Cache-Control": "no-store" } as const;
 
@@ -89,6 +104,15 @@ interface AlertConfig {
   rules: AlertRules;
   /** An output shows chat and characters from Twitch only. */
   twitchOnly: boolean;
+  /** What the goal counts. Null: the goal layer has no place on the grid of an output, so the page counts no goal. */
+  goal: GoalCount | null;
+}
+
+/** The count of the goal, with the salt of the keys of its people. A new count has a new salt. */
+interface StoredGoal {
+  v: 1;
+  progress: GoalProgress;
+  salt: string;
 }
 
 interface StoredState {
@@ -116,6 +140,13 @@ const configSchema: z.ZodType<AlertConfig> = z.object({
   shown: z.boolean(),
   rules: z.object(ruleRecord((): typeof ruleSchema => ruleSchema)),
   twitchOnly: z.boolean(),
+  goal: z.enum(GOAL_COUNTS).nullable(),
+});
+
+const goalSchema: z.ZodType<StoredGoal> = z.object({
+  v: z.literal(1),
+  progress: goalProgressSchema,
+  salt: z.string().min(1).max(64),
 });
 
 /** Only the error class: a message can carry stored text. */
@@ -129,6 +160,14 @@ function refuse(refusal: AlertRefusal): Response {
 
 function alertId(alert: PendingAlert): string {
   return alert.view.id;
+}
+
+/**
+ * The key of a person in the people of a goal. It is a hash with the salt of the count, so the storage of a goal
+ * has no platform user ID.
+ */
+function personKey(salt: string, platform: ActivityPlatform, userId: string): string {
+  return nodeCrypto.createHash("sha256").update(`${salt}:${platform}:${userId}`).digest("hex").slice(0, 32);
 }
 
 /**
@@ -169,6 +208,8 @@ export class AlertHost {
   /** The number of tests and replays, so each play has its own ID. */
   private plays = 0;
   private config: AlertConfig | null = null;
+  /** The count of the goal. It stays while the goal layer is off the grid, and goes on when the layer comes back. */
+  private goal: StoredGoal | null = null;
   /** When this instance of the object read the layers. 0: not yet, so the copy from storage can be old. */
   private configAt = 0;
   /** The state changed since the sockets got it. */
@@ -190,6 +231,7 @@ export class AlertHost {
     const state = stateSchema.safeParse(stored);
     const waiting = z.array(pendingAlertSchema).safeParse(ALERTS.line(sql));
     const config = configSchema.safeParse(ALERTS.read(sql, "config"));
+    const goal = goalSchema.safeParse(ALERTS.read(sql, "goal"));
     const valid: boolean = waiting.success && (state.success || stored === undefined);
     if (!valid) {
       // The reason can quote stored names, so only the event is logged.
@@ -203,6 +245,7 @@ export class AlertHost {
       waiting: valid && waiting.success ? waiting.data : [],
     };
     this.config = config.success ? config.data : null;
+    this.goal = goal.success ? goal.data : null;
     // A new instance must not find the damage again.
     if (!valid) this.save();
   }
@@ -213,25 +256,24 @@ export class AlertHost {
     this.line = EMPTY_LINE;
     this.plays = 0;
     this.config = null;
+    this.goal = null;
     this.configAt = 0;
     this.unsent = false;
     ALERTS.create(this.options.sql);
   }
 
   /**
-   * One event that the object stored and sent to the sockets. Only a live support event makes an alert. The rules
-   * decide what it does: nothing, an alert that plays at once, or a banner that waits for its turn in the line.
+   * One event that the object stored and sent to the sockets. A chat message can count for the goal. A support
+   * event counts for the goal and can make an alert, one time: the object's own memory of IDs is short, so the host
+   * refuses an ID that it knows.
    */
   receive(event: ActivityEvent): void {
-    if (!isSupport(event) || event.replay) return;
     const now: number = Date.now();
-    const config: AlertConfig | null = this.config;
-    if (!config?.shown || this.muted || this.options.sockets().length === 0) return;
-    // A provider can send an old event again a long time after it occurred: it plays no alert.
-    if (!isLiveMessage(event.sentAt ?? null, event.receivedAt)) return;
-    const alert: PendingAlert | null = alertFor(shownEvent(event), config.rules);
-    // A line that is full drops the alert.
-    if (alert !== null) this.add(alert, now);
+    if (event.kind === "chat") this.chatted(event);
+    else if (isSupport(event) && !event.replay && ALERTS.first(this.options.sql, event.id, DELIVERIES_KEPT)) {
+      this.count(event);
+      this.live(event, now);
+    }
     this.flush(now);
   }
 
@@ -256,9 +298,9 @@ export class AlertHost {
     const parsed = alertControlSchema.safeParse(await request.json().catch((): null => null));
     if (!parsed.success) return Response.json({ error: "Invalid control" }, { status: 400, headers: NO_STORE });
     const control: AlertControl = parsed.data;
-    // The owner can send a test right after a layer change, so a test and a replay read the saved layers first. A
-    // read that fails keeps the copy that the host has.
-    const plays: boolean = control.op === "test" || control.op === "replay";
+    // The owner can send a test right after a layer change, so a test, a replay, and a new count of the goal read
+    // the saved layers first. A read that fails keeps the copy that the host has.
+    const plays: boolean = control.op === "test" || control.op === "replay" || control.op === "goalReset";
     if (plays && !(await this.refresh(true)) && this.config === null) return refuse("alerts_unavailable");
     const now: number = Date.now();
     const refusal: AlertRefusal | null = this.control(control, now);
@@ -268,11 +310,13 @@ export class AlertHost {
   }
 
   /**
-   * The object's alarm. It reads the layers again when the copy is old and a page listens, so a missed change does
-   * not stay. Then it ends the alert on stream when its time is over, and starts the next one.
+   * The object's alarm. It reads the layers again when the copy is old and the host uses it: a page listens, the
+   * goal counts, or the host has no copy. Thus a missed change does not stay. Then it ends the alert on stream when
+   * its time is over, and starts the next one.
    */
   async alarm(): Promise<void> {
-    if (this.options.sockets().length > 0 && this.old(Date.now())) await this.refresh();
+    const used: boolean = this.options.sockets().length > 0 || this.config === null || this.counts() !== null;
+    if (used && this.old(Date.now())) await this.refresh();
     const now: number = Date.now();
     // No page listens: the alerts have nobody to play for, and none of them plays later.
     if (this.options.sockets().length === 0) this.clear();
@@ -308,6 +352,12 @@ export class AlertHost {
       case "mute":
         this.mute(control.on);
         return null;
+      case "goalReset": {
+        const counts: GoalCount | null = this.counts();
+        if (counts === null) return "goal_off";
+        this.startGoal(counts, now);
+        return null;
+      }
       case "test": {
         const test = control.kind ?? DEFAULT_TEST_ALERT;
         return this.play((play: number): ActivitySupport => testSupport(test, play, now), "test", now);
@@ -317,6 +367,64 @@ export class AlertHost {
         return this.play((): ActivitySupport | null => this.options.support(control.id, since), "replay", now);
       }
     }
+  }
+
+  /**
+   * The alert of a live support event. The rules decide what it does: nothing, an alert that plays at once, or a
+   * banner that waits for its turn in the line.
+   */
+  private live(event: ActivitySupport, now: number): void {
+    const config: AlertConfig | null = this.config;
+    if (!config?.shown || this.muted || this.options.sockets().length === 0) return;
+    // A provider can send an old event again a long time after it occurred: it plays no alert.
+    if (!isLiveMessage(event.sentAt ?? null, event.receivedAt)) return;
+    const alert: PendingAlert | null = alertFor(shownEvent(event), config.rules);
+    // A line that is full drops the alert.
+    if (alert !== null) this.add(alert, now);
+  }
+
+  /** What the goal of the page counts. Null: the goal layer has no place on a grid, so the page counts no goal. */
+  private counts(): GoalCount | null {
+    return this.config?.goal ?? null;
+  }
+
+  /** The goal that counts now, or null. */
+  private counting(): StoredGoal | null {
+    return this.counts() === null ? null : this.goal;
+  }
+
+  /** Counts a support event for the goal. The alerts do not change this: muted or not, with a page or without one. */
+  private count(event: ActivitySupport): void {
+    const goal: StoredGoal | null = this.counting();
+    if (goal !== null) this.progress(goal, countSupport(goal.progress, event));
+  }
+
+  /**
+   * Counts the sender of a chat message for a goal that counts chatters: one for each participant of a platform,
+   * for a message from the start of the count or later, up to GOAL_PEOPLE_MAX people.
+   */
+  private chatted(event: ActivityChat): void {
+    const goal: StoredGoal | null = this.counting();
+    if (goal?.progress.counts !== "chatters") return;
+    const { value, startedAt } = goal.progress;
+    if ((event.sentAt ?? event.receivedAt) < startedAt || value >= GOAL_PEOPLE_MAX) return;
+    if (!ALERTS.person(this.options.sql, personKey(goal.salt, event.platform, event.user.id))) return;
+    this.progress(goal, { ...goal.progress, value: value + 1 });
+  }
+
+  private progress(goal: StoredGoal, next: GoalProgress): void {
+    if (next === goal.progress) return;
+    this.goal = { ...goal, progress: next };
+    ALERTS.write(this.options.sql, "goal", this.goal);
+    this.unsent = true;
+  }
+
+  /** Starts a new count at 0, from now. The people of the count before are forgotten. */
+  private startGoal(counts: GoalCount, now: number): void {
+    this.goal = { v: 1, progress: { counts, value: 0, startedAt: now }, salt: crypto.randomUUID() };
+    ALERTS.write(this.options.sql, "goal", this.goal);
+    ALERTS.forgetPeople(this.options.sql);
+    this.unsent = true;
   }
 
   /**
@@ -419,7 +527,7 @@ export class AlertHost {
       muted: this.muted,
       current: current !== null && now < current.endsAt ? current : null,
       waiting: this.line.waiting.length,
-      goal: null,
+      goal: this.counting()?.progress ?? null,
     };
   }
 
@@ -477,16 +585,23 @@ export class AlertHost {
   }
 
   private apply(layers: OverlayLayers): void {
+    // The goal counts while its layer has a place on a grid. The switch "Show on stream" does not stop the count.
+    const placed: boolean = layers.cells.horizontal.goal !== null || layers.cells.vertical.goal !== null;
     const config: AlertConfig = {
       shown: onAnyOutput(layers, "alerts"),
       rules: layers.alerts.rules,
       twitchOnly: layers.twitchOnly.horizontal || layers.twitchOnly.vertical,
+      goal: placed ? layers.goal.counts : null,
     };
+    const counted: StoredGoal | null = this.counting();
     this.configAt = Date.now();
     // An unchanged copy writes nothing: the alarm reads the layers every LAYER_CHECK_MS while a page listens.
     if (JSON.stringify(config) !== JSON.stringify(this.config)) ALERTS.write(this.options.sql, "config", config);
     this.config = config;
     // Off stream, the alerts stop: no page shows them.
     if (!config.shown) this.clear();
+    // A goal that counts a different thing starts again. A new title or a new target changes nothing here.
+    if (config.goal !== null && this.goal?.progress.counts !== config.goal) this.startGoal(config.goal, this.configAt);
+    if (this.counting() !== counted) this.unsent = true;
   }
 }
