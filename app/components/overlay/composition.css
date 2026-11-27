@@ -206,6 +206,17 @@
   max-width: 24rem;
   min-width: 0;
 }
+/* A long layout name wraps in the list. It is not cut. */
+.ov-layout .cselect-trigger {
+  height: auto;
+  min-height: 44px;
+  text-align: start;
+}
+.ov-layout .cselect-value {
+  overflow: visible;
+  white-space: normal;
+  text-overflow: clip;
+}
 /* The icon buttons: save as a new layout, reset to the preset, and the test. */
 .ov-comp-tools {
   display: flex;
