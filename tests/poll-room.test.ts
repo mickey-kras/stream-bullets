@@ -975,7 +975,7 @@ describe("live room snapshots", (): void => {
         `INSERT INTO overlay_state (streamer_id, air, preview, position, size, instant, show_results, message, message_style, revision, layers)
         VALUES (?, '{"type":"message","ref":null}', '{"type":"message","ref":null}', 'top', 'l', 0, 1, 'BRB 5 min', 'info', 3, ?)`,
       )
-      .bind(streamerId, JSON.stringify({ chat: { enabled: true, hideCommands: false } }))
+      .bind(streamerId, JSON.stringify({ chat: { enabled: true, hideCharacterCommands: true } }))
       .run();
     expect((await post("overlay")).status).toBe(204);
     const update = lastOf<{ overlay: Record<string, unknown> }>(other, "overlay");
@@ -985,7 +985,7 @@ describe("live room snapshots", (): void => {
     // bar at size L goes to the free space beside the chat.
     expect(update?.overlay.layers).toEqual({
       ...DEFAULT_LAYERS,
-      chat: { ...DEFAULT_LAYERS.chat, enabled: true, hideCommands: false },
+      chat: { ...DEFAULT_LAYERS.chat, enabled: true, hideCharacterCommands: true },
       cells: {
         horizontal: { ...emptyCells(), chat: { c: 0, r: 0, w: 10, h: 14 }, message: { c: 10, r: 0, w: 22, h: 6 } },
         vertical: { ...emptyCells(), chat: { c: 0, r: 16, w: 18, h: 10 }, message: { c: 0, r: 0, w: 18, h: 6 } },

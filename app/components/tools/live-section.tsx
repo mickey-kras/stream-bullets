@@ -210,6 +210,7 @@ export function LiveSection({
           <LiveChat
             feed={feed}
             delivers={deliversChat(channels)}
+            hideCommands={state.layers.chat.hideCharacterCommands}
             full={chatFull}
             onFull={onChatFull}
             onAir={onAirTitle(view, state.layers)}

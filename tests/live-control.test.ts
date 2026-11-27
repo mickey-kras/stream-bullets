@@ -211,6 +211,21 @@ describe("stored overlay and battle values", (): void => {
     expect(overlayValue({ ...row, layers: '{"v":2}' }).layers).toEqual(DEFAULT_LAYERS);
   });
 
+  it("reads a row from before the character commands setting with the setting off", (): void => {
+    // The chat layer had `hideCommands` then, on by default. The new setting is off until the owner selects it.
+    for (const hideCommands of [true, false]) {
+      const stored: string = JSON.stringify({ ...JSON.parse(row.layers), chat: { enabled: true, hideCommands } });
+      expect(overlayValue({ ...row, layers: stored }).layers.chat).toEqual({
+        enabled: true,
+        hideCharacterCommands: false,
+        backgroundOpacity: 100,
+      });
+    }
+    const on: string = JSON.stringify({ ...JSON.parse(row.layers), chat: { hideCharacterCommands: true } });
+    expect(overlayValue({ ...row, layers: on }).layers.chat.hideCharacterCommands).toBe(true);
+    expect(overlayPublic(overlayValue({ ...row, layers: on })).layers.chat.hideCharacterCommands).toBe(true);
+  });
+
   it("converts a row from before the overlay studio: the old source on air becomes a layer", (): void => {
     const old: OverlayRow = { ...row, layers: '{"chat":{"enabled":true}}' };
     expect(legacyLayersText(old.layers)).toBe(true);
@@ -247,7 +262,7 @@ describe("stored overlay and battle values", (): void => {
       "null",
       '"chat"',
       '{"chat":"on","characters":[]}',
-      '{"v":2,"chat":{"enabled":"yes","hideCommands":1},"cells":{"horizontal":{"chat":{"c":0,"r":0,"w":1,"h":1}}}}',
+      '{"v":2,"chat":{"enabled":"yes","hideCharacterCommands":1},"cells":{"horizontal":{"chat":{"c":0,"r":0,"w":1,"h":1}}}}',
     ])
       expect(overlayValue({ ...hidden, layers })).toEqual(rest);
     // Only the bad field takes its default.
@@ -942,14 +957,14 @@ describe("overlay control", (): void => {
       expect(first).toMatchObject({ revision: 1, showResults: true, message: "" });
       expect(first.layers).toEqual({
         ...DEFAULT_LAYERS,
-        chat: { enabled: true, hideCommands: true, backgroundOpacity: 100 },
+        chat: { enabled: true, hideCharacterCommands: false, backgroundOpacity: 100 },
         cells: horizontal({ chat: chatCell }),
       });
       const second = await overlay(
         await send({
           action: "layers",
           orientation: "vertical",
-          chat: { hideCommands: false, backgroundOpacity: 45 },
+          chat: { hideCharacterCommands: true, backgroundOpacity: 45 },
           characters: { enabled: true },
           cells: { horizontal: { poll: { c: 0, r: 0, w: 12, h: 8 } } },
           twitchOnly: { vertical: true },
@@ -957,7 +972,7 @@ describe("overlay control", (): void => {
       );
       expect(second.layers).toEqual({
         orientation: "vertical",
-        chat: { enabled: true, hideCommands: false, backgroundOpacity: 45 },
+        chat: { enabled: true, hideCharacterCommands: true, backgroundOpacity: 45 },
         characters: { enabled: true, timeout: 60, max: 40 },
         camera: { enabled: false },
         twitchOnly: { horizontal: false, vertical: true },
@@ -1047,10 +1062,15 @@ describe("overlay control", (): void => {
         { items: { auto: { enabled: true } } },
         { chat: { rect: { x: 0, y: 0, w: 280, h: 160 } } },
         { chat: { enabled: true, color: "#f00" } },
-        { characters: { hideCommands: false } },
+        { characters: { hideCharacterCommands: true } },
         { content: { enabled: false } },
         { orientation: "square" },
         { chat: { enabled: "yes" } },
+        { chat: { hideCharacterCommands: "true" } },
+        { chat: { hideCharacterCommands: 1 } },
+        { chat: { hideCharacterCommands: null } },
+        // The name of the setting before issue #1115.
+        { chat: { hideCommands: true } },
         { chat: { backgroundOpacity: 3 } },
         { chat: { backgroundOpacity: "50" } },
         { layers: { chat: { enabled: true } } },
@@ -1216,7 +1236,7 @@ describe("overlay control", (): void => {
       const placed = await overlay(
         await send({
           action: "layers",
-          chat: { enabled: true, hideCommands: false, backgroundOpacity: 0 },
+          chat: { enabled: true, hideCharacterCommands: true, backgroundOpacity: 0 },
           characters: { enabled: true, timeout: 600 },
           items,
           cells: { horizontal, vertical: cells(4) },
@@ -1279,7 +1299,7 @@ describe("overlay control", (): void => {
       expect(other.layers).toEqual({ ...DEFAULT_LAYERS, characters: { enabled: true, timeout: 60, max: 40 } });
       expect((await getOverlayState(env, page)).layers).toEqual({
         ...DEFAULT_LAYERS,
-        chat: { enabled: true, hideCommands: true, backgroundOpacity: 100 },
+        chat: { enabled: true, hideCharacterCommands: false, backgroundOpacity: 100 },
         cells: horizontal({ chat: chatCell }),
       });
       await expect(
@@ -1722,7 +1742,10 @@ describe("overlay control", (): void => {
           .chatTestUntil,
       ).toBe(0);
       // Other layer edits keep the test running.
-      const moved = await nextOverlayState(env, page, running, { action: "layers", chat: { hideCommands: false } });
+      const moved = await nextOverlayState(env, page, running, {
+        action: "layers",
+        chat: { hideCharacterCommands: true },
+      });
       expect(moved.chatTestUntil).toBe(9_000);
     });
 

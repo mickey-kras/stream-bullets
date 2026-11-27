@@ -10,6 +10,7 @@ import {
   type SupportSource,
 } from "./activity";
 import { MAX_REMOVED_IDS, displayFragments } from "./chat-feed";
+import { isCharacterCommand } from "./playground/core";
 
 /**
  * The merged chat of the Live section of Streamer tools as a pure state machine (issue #1030). It reads the same
@@ -17,6 +18,9 @@ import { MAX_REMOVED_IDS, displayFragments } from "./chat-feed";
  * messages push it out, nothing animates, and a moderated message stays in its place and says that it was removed.
  * It never runs a chat command. The support events of the feed are rows of the same log (issue #1042): no
  * moderation event removes them.
+ *
+ * The log keeps each message. The owner can hide the commands for the characters (issue #1115): `shownRows` then
+ * leaves their rows out, and the rows show again when the owner clears the setting.
  */
 
 export const LIVE_CHAT_LIMITS = {
@@ -45,6 +49,8 @@ export interface LiveChatRow extends RowBase {
   truncated: boolean;
   /** A moderator deleted the message, or banned or timed out its author. The text does not show. */
   removed: boolean;
+  /** The message is a command for a character (`isCharacterCommand`). A removed row keeps this value. */
+  command: boolean;
 }
 
 /** A support event in the log. The log has one row for each event ID. */
@@ -103,6 +109,7 @@ function toRow(chat: ActivityChat, seq: number): LiveChatRow {
     truncated,
     receivedAt: chat.receivedAt,
     removed: false,
+    command: isCharacterCommand(chat.text),
   };
 }
 
@@ -223,15 +230,34 @@ export function liveChatReducer(state: LiveChatState, action: LiveChatAction): L
   return state;
 }
 
-/** The rows of the platforms that the owner did not filter out. A direct tip is from no platform: it always shows. */
-export function shownRows(rows: readonly LiveRow[], hidden: ReadonlySet<ActivityPlatform>): LiveRow[] {
-  return rows.filter((row: LiveRow): boolean => row.platform === "direct" || !hidden.has(row.platform));
+/**
+ * The rows of the platforms that the owner did not filter out. A direct tip is from no platform: it always shows.
+ * With `hideCommands`, the chat rows that are commands for the characters do not show (`chat.hideCharacterCommands`
+ * of the overlay layers). A support row always shows: its text is no command.
+ */
+export function shownRows(
+  rows: readonly LiveRow[],
+  hidden: ReadonlySet<ActivityPlatform>,
+  hideCommands: boolean = false,
+): LiveRow[] {
+  return rows.filter((row: LiveRow): boolean => {
+    if (hideCommands && row.kind === "chat" && row.command) return false;
+    return row.platform === "direct" || !hidden.has(row.platform);
+  });
 }
 
-/** The rows that arrived after the row `seq`, for the count of a paused chat. Removed messages do not count. */
-export function newSince(rows: readonly LiveRow[], seq: number, hidden: ReadonlySet<ActivityPlatform>): number {
+/**
+ * The rows that arrived after the row `seq`, for the count of a paused chat. Removed messages do not count, and
+ * neither do the rows that `shownRows` leaves out.
+ */
+export function newSince(
+  rows: readonly LiveRow[],
+  seq: number,
+  hidden: ReadonlySet<ActivityPlatform>,
+  hideCommands: boolean = false,
+): number {
   const counts = (row: LiveRow): boolean => row.seq > seq && !(row.kind === "chat" && row.removed);
-  return shownRows(rows, hidden).filter(counts).length;
+  return shownRows(rows, hidden, hideCommands).filter(counts).length;
 }
 
 /** The text sizes of the full-screen chat, as a factor of the normal size. The owner steps through them. */

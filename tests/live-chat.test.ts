@@ -112,6 +112,7 @@ describe("live chat log", (): void => {
       name: "Viewer 2",
       receivedAt: T0 + 2000,
       removed: false,
+      command: false,
       truncated: false,
     });
   });
@@ -434,6 +435,117 @@ describe("live chat filters and the count of a paused chat", (): void => {
     expect(newSince(state.rows, 2, new Set())).toBe(2);
     expect(newSince(state.rows, 2, new Set<ActivityPlatform>(["youtube"]))).toBe(1);
     expect(newSince(state.rows, 5, new Set())).toBe(0);
+  });
+});
+
+describe("character commands in the live chat log", (): void => {
+  const none = new Set<ActivityPlatform>();
+  /** A chat message with `text`. */
+  const said = (n: number, text: string, more: Partial<ActivityChat> = {}): ActivityChat =>
+    chat(n, { text, fragments: [{ type: "text", text }], ...more });
+  /** The texts of the rows that the list shows. */
+  const shown = (state: LiveChatState, hideCommands?: boolean): string[] =>
+    texts({ ...state, rows: shownRows(state.rows, none, hideCommands) });
+  const COMMANDS: readonly string[] = [
+    "!jump",
+    "!JUMP",
+    "!dig 3",
+    "!dig left",
+    "!dig r 3",
+    "!look right",
+    "!hi",
+    "!hook",
+    "!build 2",
+    "！dance",
+    "\u200b！DIG 3 l",
+  ];
+  const LOOKALIKES: readonly string[] = ["!hello", "!discord", "!jumping", "! jump", "jump", "I said !jump"];
+  const mixed: LiveChatState = run([
+    event(said(1, "hello")),
+    ...COMMANDS.map((text: string, index: number) => event(said(10 + index, text))),
+    ...LOOKALIKES.map((text: string, index: number) => event(said(40 + index, text))),
+    event(said(60, "bye")),
+  ]);
+
+  it("shows each message by default, and marks the rows that are character commands", (): void => {
+    const all: string[] = ["hello", ...COMMANDS, ...LOOKALIKES, "bye"];
+    expect(shown(mixed)).toEqual(all);
+    expect(shown(mixed, false)).toEqual(all);
+    expect(
+      chatRows(mixed)
+        .filter((row: LiveChatRow): boolean => row.command)
+        .map((row: LiveChatRow): number => row.seq),
+    ).toEqual(COMMANDS.map((_text: string, index: number): number => index + 2));
+  });
+
+  it("hides the commands, their aliases, numbers and sides, and keeps a message that only looks like one", (): void => {
+    expect(shown(mixed, true)).toEqual(["hello", ...LOOKALIKES, "bye"]);
+    // No row stays for a hidden command: the list has only rows with a text.
+    expect(shownRows(mixed.rows, none, true)).toHaveLength(2 + LOOKALIKES.length);
+  });
+
+  it("keeps the log, so the commands show again in their places when the option goes off", (): void => {
+    expect(shownRows(mixed.rows, none, true)).not.toHaveLength(mixed.rows.length);
+    expect(shown(mixed, false)).toEqual(texts(mixed));
+    expect(mixed.rows.map((row: LiveRow): number => row.seq)).toEqual(mixed.rows.map((_row, index) => index + 1));
+  });
+
+  it("applies the platform filter and the option together, and never hides a support row", (): void => {
+    const state: LiveChatState = run([
+      event(said(1, "!jump")),
+      event(said(2, "!jump", { platform: "kick" })),
+      event(said(3, "hi all", { platform: "kick" })),
+      event(support("tip", 4, { platform: "direct", text: "!jump", amount: 1_000_000, currency: "EUR" })),
+      event(support("bits", 5, { text: "!dance", amount: 100 })),
+    ]);
+    expect(shownRows(state.rows, none, true).map((row) => row.seq)).toEqual([3, 4, 5]);
+    expect(shownRows(state.rows, new Set<ActivityPlatform>(["kick"]), true).map((row) => row.seq)).toEqual([4, 5]);
+    expect(shownRows(state.rows, new Set<ActivityPlatform>(["kick"]), false).map((row) => row.seq)).toEqual([1, 4, 5]);
+  });
+
+  it("does not count a hidden command as a new message of a paused chat", (): void => {
+    const paused: LiveChatState = liveChatReducer(run([event(said(1, "hello"))]), { type: "pause" });
+    const busy: LiveChatState = run(
+      [event(said(2, "!jump")), event(said(3, "！dig 2 left")), event(said(4, "!hello")), event(said(5, "after"))],
+      paused,
+    );
+    expect(newSince(busy.rows, 1, none)).toBe(4);
+    expect(newSince(busy.rows, 1, none, false)).toBe(4);
+    expect(newSince(busy.rows, 1, none, true)).toBe(2);
+    // Only commands came: the count stays at zero.
+    const quiet: LiveChatState = run([event(said(2, "!jump")), event(said(3, "!wave"))], paused);
+    expect(newSince(quiet.rows, 1, none, true)).toBe(0);
+  });
+
+  it("keeps a removed command removed: hidden with the option, a removed row without it", (): void => {
+    const state: LiveChatState = run([
+      event(said(1, "!jump")),
+      event(said(2, "hello")),
+      event({ kind: "delete", platform: "twitch", messageId: "m1", receivedAt: T0 }),
+    ]);
+    expect(shown(state, false)).toEqual(["removed", "hello"]);
+    expect(shown(state, true)).toEqual(["hello"]);
+    expect(chatRows(state)[0]).toMatchObject({ removed: true, command: true, fragments: [] });
+    // A late copy of the deleted command gets no row, with the option on or off.
+    const late: LiveChatState = run([event(said(1, "!jump"))], state);
+    expect(late).toBe(state);
+    // A ban reaches a hidden command too: the row is removed when the option goes off.
+    const banned: LiveChatState = run([
+      event(said(3, "!dance", { user: { id: "u9", displayName: "Nine" } })),
+      event({ kind: "ban", platform: "twitch", userId: "u9", until: null, receivedAt: T0 }),
+    ]);
+    expect(shown(banned, true)).toEqual([]);
+    expect(shown(banned, false)).toEqual(["removed"]);
+  });
+
+  it("hides the commands of a reconnect snapshot, and shows them again without a second row", (): void => {
+    const before: LiveChatState = run([event(said(1, "hello")), event(said(2, "!jump"))]);
+    const after: LiveChatState = receive(
+      before,
+      snapshot([said(1, "hello"), said(2, "!jump"), said(3, "!dig 2"), said(4, "!discord"), said(5, "back")], T0),
+    );
+    expect(shown(after, true)).toEqual(["hello", "!discord", "back"]);
+    expect(shown(after, false)).toEqual(["hello", "!jump", "!dig 2", "!discord", "back"]);
   });
 });
 

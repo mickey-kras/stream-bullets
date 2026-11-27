@@ -122,7 +122,7 @@ describe("field-level patches", () => {
     expect(diffLayers(before, layers())).toEqual({});
     const after: OverlayLayers = {
       orientation: "vertical",
-      chat: { enabled: false, hideCommands: false, backgroundOpacity: 40 },
+      chat: { enabled: false, hideCharacterCommands: true, backgroundOpacity: 40 },
       characters: { enabled: true, timeout: 90, max: 12 },
       camera: { enabled: true },
       items: before.items,
@@ -134,7 +134,7 @@ describe("field-level patches", () => {
     };
     expect(diffLayers(before, after)).toEqual({
       orientation: "vertical",
-      chat: { enabled: false, hideCommands: false, backgroundOpacity: 40 },
+      chat: { enabled: false, hideCharacterCommands: true, backgroundOpacity: 40 },
       characters: { enabled: true, timeout: 90, max: 12 },
       camera: { enabled: true },
       twitchOnly: { vertical: true },
@@ -162,8 +162,8 @@ describe("field-level patches", () => {
     expect(diffLayers(before, { ...before, characters: { ...before.characters, max: 5 } })).toEqual({
       characters: { max: 5 },
     });
-    expect(diffLayers(before, { ...before, chat: { ...before.chat, hideCommands: false } })).toEqual({
-      chat: { hideCommands: false },
+    expect(diffLayers(before, { ...before, chat: { ...before.chat, hideCharacterCommands: true } })).toEqual({
+      chat: { hideCharacterCommands: true },
     });
     expect(diffLayers(before, { ...before, chat: { ...before.chat, backgroundOpacity: 0 } })).toEqual({
       chat: { backgroundOpacity: 0 },
@@ -172,12 +172,12 @@ describe("field-level patches", () => {
 
   it("merges patches with the newer field winning, and checks emptiness", () => {
     const merged = mergePatches(
-      { chat: { enabled: true, hideCommands: true }, cells: { horizontal: { chat: cell, poll: null } } },
+      { chat: { enabled: true, hideCharacterCommands: false }, cells: { horizontal: { chat: cell, poll: null } } },
       { chat: { enabled: false }, orientation: "vertical", cells: { horizontal: { poll: cell } } },
     );
     expect(merged).toEqual({
       orientation: "vertical",
-      chat: { enabled: false, hideCommands: true },
+      chat: { enabled: false, hideCharacterCommands: false },
       cells: { horizontal: { chat: cell, poll: cell } },
     });
     expect(mergePatches({ orientation: "vertical" }, {})).toEqual({ orientation: "vertical" });
@@ -199,24 +199,26 @@ describe("field-level patches", () => {
   it("drops the sent fields that still hold the sent value and keeps later edits", () => {
     const sent: LayersPatch = {
       orientation: "vertical",
-      chat: { enabled: true, hideCommands: false },
+      chat: { enabled: true, hideCharacterCommands: true },
       characters: { enabled: true },
       cells: { horizontal: { chat: cell, poll: null } },
     };
     expect(withoutSent(sent, sent)).toEqual({});
     const later: LayersPatch = {
       orientation: "horizontal",
-      chat: { enabled: true, hideCommands: true },
+      chat: { enabled: true, hideCharacterCommands: false },
       characters: { enabled: false },
       cells: { horizontal: { chat: { ...cell, c: 9 }, poll: null }, vertical: { poll: cell } },
     };
     expect(withoutSent(later, sent)).toEqual({
       orientation: "horizontal",
-      chat: { hideCommands: true },
+      chat: { hideCharacterCommands: false },
       characters: { enabled: false },
       cells: { horizontal: { chat: { ...cell, c: 9 } }, vertical: { poll: cell } },
     });
-    expect(withoutSent({ chat: { hideCommands: true } }, {})).toEqual({ chat: { hideCommands: true } });
+    expect(withoutSent({ chat: { hideCharacterCommands: false } }, {})).toEqual({
+      chat: { hideCharacterCommands: false },
+    });
     const faint: LayersPatch = { chat: { backgroundOpacity: 20 } };
     expect(withoutSent(faint, faint)).toEqual({});
     expect(withoutSent({ chat: { backgroundOpacity: 15 } }, faint)).toEqual({ chat: { backgroundOpacity: 15 } });

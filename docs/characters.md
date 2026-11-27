@@ -135,6 +135,8 @@ The sides are `left`, `right`, `l`, and `r`. Capital letters make no difference.
 | `!flag` | | Plant a flag in the platform color. Each character has one flag. A new flag moves the old one. |
 
 - A command controls only the character of its sender. Blocks and holes affect all characters.
+- The streamer can hide the command messages in the chat with **Hide character commands**. A hidden command still works.
+  See [Commands](overlay-composition.md#commands).
 - A side on a build command turns the character first: `!block left`.
 - Only live chat runs a command. A message from a snapshot or a late provider retry never runs a command.
   See [Channel connections and activity](channel-connections.md#event-contract).

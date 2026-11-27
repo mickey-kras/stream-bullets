@@ -147,7 +147,7 @@ Each layer has the `enabled` setting. The other settings are these:
 
 | Layer | Settings |
 | --- | --- |
-| `chat` | `hideCommands` and `backgroundOpacity`. See [Commands](#commands) and [Message background](#message-background). |
+| `chat` | `hideCharacterCommands` and `backgroundOpacity`. See [Commands](#commands) and [Message background](#message-background). |
 | `characters` | `timeout` and `max`. See [Interactive characters](characters.md). |
 | Each content layer | `ref`, `backgroundOpacity`, and `qr` |
 | `camera` | No other setting. See [Camera frame](#camera-frame). |
@@ -565,7 +565,7 @@ The settings show the name of the selected layer and these controls:
 | **Topic** | Topic | The topic that the layer shows. |
 | **Community card** | Community card | The card that the layer shows. |
 | **Message** and **Message style** | Message banner | The text, up to 120 characters, and the info style or the hype style. **Save message** saves the text. |
-| **Hide chat commands (!jump)** | Chat | See [Commands](#commands). |
+| **Hide character commands** | Chat | See [Commands](#commands). |
 | **Message background** | Chat | See [Message background](#message-background). |
 | **Show QR code** | Each content layer but the message banner | Shows or hides the QR code in the card. See [QR code](#qr-code). |
 | **Background** | Each content layer | The opacity of the card background, from 0 to 100 in steps of 5. |
@@ -775,12 +775,36 @@ The chat keeps the IDs of removed messages. Thus a late copy of a removed messag
 
 ### Commands
 
-The chat hides commands by default. A command is a message that starts with `!` and a word, such as `!jump`.
-The full-width `！` also starts a command. A message that starts with `!` and no word, such as `! hi` or `!!!`, is not a command.
+The chat shows each message by default. This includes the commands for the characters, such as `!jump`.
+To keep the chat clean, select **Hide character commands** in the settings of the chat layer. The default is off.
 
-To show commands, clear **Hide chat commands (!jump)** in the settings of the chat layer.
-When you select the option again, the chat also hides the command rows that are on the screen.
+A character command is a message that the playground reads as a command.
+See [Commands](characters.md#commands) for the commands, their other words, their numbers, and their sides.
+Thus `!jump`, `!JUMP`, `!hook`, `!dig 3 left`, and `！dance` with the full-width `！` are character commands.
+A message that starts with `!` and a different word, such as `!discord` or `!hello`, is not a character command. It always shows.
+
+With the option on, a character command does not show in these views:
+
+- The chat layer in the two outputs, and in each preview of the composition
+- The chat of **Live**, the full-screen chat, and the chat of the OBS dock. See [Chat](streamer-tools.md#chat).
+
+The option changes only what the chat shows. The server sends each message to each page, and the page shows no row for a hidden command.
+Thus a hidden command never shows, also not for a moment, and it leaves no empty row.
+The command still moves the character and still counts for the score of the viewer.
+The option does not change moderation: a removed message stays removed.
+
+- When you select the option, the chat layer also hides the command rows that are on the screen. They fade out as each leaving row.
+- When you clear the option, the chat layer shows the new commands only. An earlier command does not come back.
+- The snapshot of recent chat follows the option. This applies after a reconnect and when the chat layer goes on stream.
+- The sample chat of the editor and of the chat test has one command, `!jump`. The option hides it too.
+
+The editor saves the option with the layers. OBS and the other open pages of the owner get it at once, without a reload.
+The layers store it as `chat.hideCharacterCommands`. A missing or incorrect stored value reads as off.
 The chat never runs a command. It only shows or hides the message.
+
+The stored layers from before this option had the `hideCommands` setting. It hid each message that starts with `!` and a word.
+The chat does not have that setting now, and its stored value has no effect.
+Thus the new option is off until you select it.
 
 ### Reconnection
 

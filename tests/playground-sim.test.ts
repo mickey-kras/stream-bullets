@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { RLO } from "./helpers/hostile-bidi";
 import type { ActivityChat, ActivityEvent, ActivityPlatform } from "../app/lib/activity";
+import { chatReducer, initialChatState, type ChatState } from "../app/lib/chat-feed";
+import { initialLiveChat, liveChatReducer, shownRows, type LiveChatState } from "../app/lib/live-chat";
 import {
   BUBBLE_LENGTH,
   BUBBLE_MAX,
@@ -432,6 +434,34 @@ describe("commands and bubbles", () => {
     expect(parseCommand("!discord")).toBeNull();
     expect(parseCommand("!constructor")).toBeNull();
     expect(parseCommand("jump")).toBeNull();
+  });
+
+  it("runs a command and counts its score while the chat views hide the message", () => {
+    const { sim, chars, message } = proto();
+    sim.select();
+    const before: number = chars[0].score;
+    const sender: Viewer = { platform: chars[0].platform, userId: chars[0].userId, name: chars[0].name };
+    const event: ActivityChat = chat(sender, "！JUMP");
+    // The chat layer and the chat log with "Hide character commands" on: no row, and nothing waits to show.
+    const layer: ChatState = chatReducer(
+      initialChatState(),
+      { type: "message", message: { type: "event", event }, now: 0 },
+      { hideCommands: true },
+    );
+    expect([layer.rows, layer.pending]).toEqual([[], []]);
+    const log: LiveChatState = liveChatReducer(initialLiveChat(), {
+      type: "message",
+      message: { type: "event", event },
+    });
+    expect(shownRows(log.rows, new Set<ActivityPlatform>(), true)).toEqual([]);
+    // The playground gets the same event: the command waits for its turn, and the message counts for the score.
+    sim.receive(event);
+    expect(chars[0].pending?.name).toBe("jump");
+    expect(chars[0].score).toBe(before + 1);
+    // A message that is no command changes nothing for the character, and the views show it.
+    sim.clock = 90;
+    message(chars[0], "!hello");
+    expect(chars[0].pending?.name).toBe("jump");
   });
 
   it("never runs a command from a message that is not live", () => {

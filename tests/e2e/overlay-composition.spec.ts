@@ -471,37 +471,21 @@ test.describe("merged chat on the overlay", () => {
     await close(source.page);
   });
 
-  test("hide commands hides !jump; turning it off shows !jump", async ({ browser }) => {
+  test("the chat shows !jump by default; hide character commands hides it and keeps !hello", async ({ browser }) => {
     let source = await chatSource(browser);
     source.send(event(message({ platform: "kick", id: "c1", user: "Jumper", text: "!jump" })));
-    source.send(
-      event(
-        message({
-          platform: "kick",
-          id: "c2",
-          user: "Jumper",
-          text: "after the command",
-        }),
-      ),
-    );
-    await expect(source.rows).toHaveCount(1);
-    await expect(source.rows.locator(".wl-msg")).toHaveText("after the command");
+    source.send(event(message({ platform: "kick", id: "c2", user: "Jumper", text: "after the command" })));
+    await expect.poll(() => rowTexts(source.rows)).toEqual(["!jump", "after the command"]);
     await close(source.page);
 
-    await setLayers("overlay-chat-commands", { ...CHAT_ON, chat: { enabled: true, hideCommands: false } });
+    await setLayers("overlay-chat-commands", { ...CHAT_ON, chat: { enabled: true, hideCharacterCommands: true } });
     source = await chatSource(browser);
+    // A command, an alias with a number and a side after a full-width mark, and a word that is no command.
     source.send(event(message({ platform: "kick", id: "c3", user: "Jumper", text: "!jump" })));
-    source.send(
-      event(
-        message({
-          platform: "kick",
-          id: "c4",
-          user: "Jumper",
-          text: "after the command",
-        }),
-      ),
-    );
-    await expect.poll(() => rowTexts(source.rows)).toEqual(["!jump", "after the command"]);
+    source.send(event(message({ platform: "twitch", id: "c4", user: "Digger", text: "！HOOK 3 left" })));
+    source.send(event(message({ platform: "youtube", id: "c5", user: "Greeter", text: "!hello" })));
+    source.send(event(message({ platform: "kick", id: "c6", user: "Jumper", text: "after the command" })));
+    await expect.poll(() => rowTexts(source.rows)).toEqual(["!hello", "after the command"]);
     await close(source.page);
   });
 
@@ -713,21 +697,23 @@ for (const viewport of [
   });
 }
 
-test("turning on hide commands removes a command row from an open chat source", async ({ browser }) => {
-  await setLayers("overlay-commands-reset", { ...CHAT_ON, chat: { enabled: true, hideCommands: false } });
+test("turning on hide character commands removes a command row from an open chat source", async ({ browser }) => {
+  await setLayers("overlay-commands-reset", { ...CHAT_ON, chat: { enabled: true, hideCharacterCommands: false } });
   const owner = await signedIn(browser, "featureowner", COMMANDS_IP);
   const source = await chatSource(browser, () =>
     snapshot([
       message({ platform: "kick", id: "h1", user: "Jumper", text: "!jump" }),
-      message({ platform: "twitch", id: "h2", user: "Calm", text: "not a command" }),
+      message({ platform: "twitch", id: "h2", user: "Calm", text: "!discord" }),
     ]),
   );
-  await expect.poll(() => rowTexts(source.rows)).toEqual(["!jump", "not a command"]);
+  await expect.poll(() => rowTexts(source.rows)).toEqual(["!jump", "!discord"]);
   // Mark the document: a reload would drop the mark.
   await source.page.evaluate(() => document.documentElement.setAttribute("data-e2e-loaded", "1"));
-  const hide = await owner.request.post("/api/overlay", { data: { action: "layers", chat: { hideCommands: true } } });
+  const hide = await owner.request.post("/api/overlay", {
+    data: { action: "layers", chat: { hideCharacterCommands: true } },
+  });
   expect(hide.status()).toBe(200);
-  await expect.poll(() => rowTexts(source.rows)).toEqual(["not a command"]);
+  await expect.poll(() => rowTexts(source.rows)).toEqual(["!discord"]);
   await expect(source.page.locator("html")).toHaveAttribute("data-e2e-loaded", "1");
   expect(source.sockets).toHaveLength(1);
   await close(source.page);

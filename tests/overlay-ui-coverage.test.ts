@@ -663,8 +663,13 @@ describe("settings of the selected layer", () => {
 
   it("keeps the chat settings on the chat layer", () => {
     const html: string = settings("chat");
-    expect(html).toContain("Hide chat commands (!jump)");
-    expect(html).toContain('data-props-commands="true" checked=""');
+    // Off by default: the chat shows each message.
+    expect(html).toContain('data-props-commands="true"/><span>Hide character commands</span>');
+    expect(html).toMatch(
+      /<p class="muted ov-comp-note" id="[^"]+">Messages such as !jump do not show in the chat on stream, in Live and in the OBS dock\. The characters still move\.<\/p>/,
+    );
+    const hidden: OverlayLayers = { ...placed, chat: { ...placed.chat, hideCharacterCommands: true } };
+    expect(settings("chat", { layers: hidden })).toContain('data-props-commands="true" checked=""/>');
     expect(html).toContain('<a class="text-link" href="/tools?view=channels#channels-title">Connect channels</a>');
     expect(settings("poll")).not.toContain("data-props-commands");
   });

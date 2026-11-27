@@ -6,6 +6,7 @@ import {
   type ActivityMessage,
   type ActivityPlatform,
 } from "./activity";
+import { isCharacterCommand } from "./playground/core";
 
 /**
  * The merged overlay chat as a pure state machine (issue #663). It consumes the activity feed of #662 and decides
@@ -64,7 +65,7 @@ export interface ChatRow {
   phaseAt: number;
   /** True only for a row that slides in. Snapshot rows and burst rows never animate. */
   animate: boolean;
-  /** True when the message is a chat command (`!word`), so turning on hideCommands can remove it later. */
+  /** True when the message is a character command, so turning on hideCommands can remove it later. */
   command: boolean;
 }
 
@@ -83,6 +84,7 @@ export interface ChatState {
 }
 
 export interface ChatOptions {
+  /** The chat does not show character commands (`isCharacterCommand`): `chat.hideCharacterCommands` of the layers. */
   hideCommands: boolean;
   limits?: Partial<ChatLimits>;
 }
@@ -105,14 +107,6 @@ export type ChatAction =
 
 export function initialChatState(): ChatState {
   return { epoch: 0, at: 0, seq: 0, rows: [], pending: [], removed: new Set<string>() };
-}
-
-// Leading white space and invisible format characters (ZWJ, BOM, bidi marks) are skipped. "！" is the full-width "!".
-const COMMAND = /^[\s\p{Cf}]*[!！][\p{L}\p{N}_-]{1,32}(?:\s|$)/u;
-
-/** A message whose first visible text is `!word` (like `!jump` or `！jump`). The overlay can hide these. */
-export function isChatCommand(text: string): boolean {
-  return COMMAND.test(text);
 }
 
 let segmenter: Intl.Segmenter | null = null;
@@ -205,12 +199,12 @@ function toRow(chat: ActivityChat, seq: number, limits: ChatLimits): ChatRow {
     phase: "shown",
     phaseAt: 0,
     animate: false,
-    command: isChatCommand(chat.text),
+    command: isCharacterCommand(chat.text),
   };
 }
 
 function hidden(chat: ActivityChat, options: ChatOptions): boolean {
-  return options.hideCommands && isChatCommand(chat.text);
+  return options.hideCommands && isCharacterCommand(chat.text);
 }
 
 /** The rows that `gone` matches leave the screen, and the waiting rows that it matches never enter. */

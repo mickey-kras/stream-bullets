@@ -58,7 +58,7 @@ function oldText(
   });
   return JSON.stringify({
     orientation: options.orientation ?? "horizontal",
-    chat: { enabled: options.chat ?? false, hideCommands: false, backgroundOpacity: 40 },
+    chat: { enabled: options.chat ?? false, hideCharacterCommands: true, backgroundOpacity: 40 },
     characters: { enabled: options.characters ?? false, timeout: 90 },
     cells: { horizontal: cells("horizontal"), vertical: cells("vertical") },
   });
@@ -85,7 +85,7 @@ describe("old stored text", (): void => {
   it("reads a text of the current version as it is, also with an old source on air", (): void => {
     const layers: OverlayLayers = {
       ...DEFAULT_LAYERS,
-      chat: { enabled: false, hideCommands: false, backgroundOpacity: 40 },
+      chat: { enabled: false, hideCharacterCommands: true, backgroundOpacity: 40 },
       cells: { horizontal: { ...emptyCells(), chat: { c: 1, r: 3, w: 7, h: 5 } }, vertical: emptyCells() },
     };
     const raw: string = storedLayersText(layers);
@@ -99,7 +99,7 @@ describe("old stored text", (): void => {
     const layers: OverlayLayers = parseStoredLayers(oldText());
     expect(layers).toEqual({
       ...DEFAULT_LAYERS,
-      chat: { enabled: false, hideCommands: false, backgroundOpacity: 40 },
+      chat: { enabled: false, hideCharacterCommands: true, backgroundOpacity: 40 },
       characters: { enabled: false, timeout: 90, max: 40 },
     });
     expect(parseStoredLayers(oldText({ orientation: "vertical" })).orientation).toBe("vertical");
@@ -378,6 +378,18 @@ describe("poll override", (): void => {
 });
 
 describe("cells of 120 px", (): void => {
+  it("reads the chat commands setting of each older text as off", (): void => {
+    // The setting of today hides only character commands, and it is off until the owner selects it (issue #1115).
+    for (const v of [undefined, 2, 3]) {
+      const raw: string = JSON.stringify({ v, chat: { enabled: true, hideCommands: true, backgroundOpacity: 40 } });
+      expect(parseStoredLayers(raw).chat, String(v)).toEqual({
+        enabled: true,
+        hideCharacterCommands: false,
+        backgroundOpacity: 40,
+      });
+    }
+  });
+
   it("reads a text of version 2 with each cell as 2 x 2 cells, and converts once", (): void => {
     const chat: CellRect = { c: 13, r: 0, w: 3, h: 2 };
     const poll: CellRect = { c: 0, r: 0, w: 5, h: 3 };
@@ -385,7 +397,7 @@ describe("cells of 120 px", (): void => {
     const raw: string = JSON.stringify({
       v: 2,
       orientation: "vertical",
-      chat: { enabled: true, hideCommands: false, backgroundOpacity: 55 },
+      chat: { enabled: true, hideCharacterCommands: true, backgroundOpacity: 55 },
       items: { poll: { ref: "p1" } },
       cells: { horizontal: { chat, poll }, vertical: { card } },
     });
@@ -394,7 +406,7 @@ describe("cells of 120 px", (): void => {
     expect(layers).toEqual({
       ...DEFAULT_LAYERS,
       orientation: "vertical",
-      chat: { enabled: true, hideCommands: false, backgroundOpacity: 55 },
+      chat: { enabled: true, hideCharacterCommands: true, backgroundOpacity: 55 },
       items: { ...DEFAULT_LAYERS.items, poll: { ...DEFAULT_LAYERS.items.poll, ref: "p1" } },
       cells: {
         horizontal: { ...emptyCells(), chat: fine(chat), poll: fine(poll) },
