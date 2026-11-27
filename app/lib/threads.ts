@@ -50,23 +50,31 @@ export function withReplies(thread: CommentThread, page: readonly Comment[], bef
 export interface ReplyPage {
   replies: Comment[];
   earlierReplies: number | null;
-  replyCount: number;
+  laterReplies: number | null;
 }
 
-// Adds a page of replies with the counts the server sent: the replies now in the thread, and the ones before the
-// first loaded reply. An empty page shows that nothing more lies in its direction.
+// Adds a page of replies. The server counts the replies before and after the page now, so the thread counts its
+// loaded replies plus those: a reply that another reader deleted, loaded or not, cannot hide or keep "View more".
+// An empty page shows that nothing lies in its direction.
 export function withPage(thread: CommentThread, page: ReplyPage, before: boolean): CommentThread {
   const next: CommentThread = withReplies(thread, page.replies, before);
-  if (page.earlierReplies === null || page.replies.length === 0) {
-    if (before) return { ...next, earlierReplies: 0, replyCount: Math.max(page.replyCount, next.replies.length) };
+  const later: number = Math.max(0, thread.replyCount - thread.earlierReplies - thread.replies.length);
+  const first: Comment | undefined = page.replies[0];
+  const last: Comment | undefined = page.replies.at(-1);
+  if (!first || !last || page.earlierReplies === null || page.laterReplies === null) {
+    if (before) return { ...next, earlierReplies: 0, replyCount: next.replies.length + later };
     return { ...next, replyCount: next.earlierReplies + next.replies.length };
   }
-  const loadedBefore: number = next.replies.findIndex((reply: Comment) => reply.id === page.replies[0].id);
-  return {
-    ...next,
-    earlierReplies: Math.max(0, page.earlierReplies - Math.max(0, loadedBefore)),
-    replyCount: page.replyCount,
-  };
+  const loadedBefore: number = Math.max(
+    0,
+    next.replies.findIndex((reply: Comment) => reply.id === first.id),
+  );
+  const loadedAfter: number =
+    next.replies.length - 1 - next.replies.findIndex((reply: Comment) => reply.id === last.id);
+  const earlierReplies: number =
+    before || thread.replies.length === 0 ? Math.max(0, page.earlierReplies - loadedBefore) : next.earlierReplies;
+  const laterReplies: number = before ? later : Math.max(0, page.laterReplies - loadedAfter);
+  return { ...next, earlierReplies, replyCount: earlierReplies + next.replies.length + laterReplies };
 }
 
 // The author a reply answers; null means a removed comment. A parent that is not loaded comes from `parentAuthor`.

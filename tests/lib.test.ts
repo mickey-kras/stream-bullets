@@ -354,32 +354,44 @@ describe("comment threads", (): void => {
     expect(visibleReplies(earlier, true)).toMatchObject({ earlier: 29, later: 0, unloaded: 0 });
   });
 
-  it("takes the counts of each page from the server, also after other readers deleted replies", (): void => {
-    const replies = (from: number, to: number): Comment[] =>
+  it("counts the loaded replies plus the ones the server reports around each page, also after deletions", (): void => {
+    const replies = (from: number, to: number, without: number[] = []): Comment[] =>
       Array.from({ length: to - from + 1 }, (_: unknown, index: number) =>
         comment(`r${from + index}`, { createdAt: from + index }),
-      );
-    // The preview said 100 replies; reply 50 went away before the reader loaded the rest.
-    let thread = { ...comment("t"), ...window(replies(1, 2), 100) };
-    thread = withPage(thread, { replies: replies(3, 52).filter((r) => r.id !== "r50"), earlierReplies: 2, replyCount: 99 }, false);
-    thread = withPage(thread, { replies: replies(53, 100), earlierReplies: 51, replyCount: 99 }, false);
-    expect(thread).toMatchObject({ earlierReplies: 0, replyCount: 99 });
+      ).filter((reply: Comment) => !without.includes(Number(reply.id.slice(1))));
+    // 103 replies, 1 and 2 loaded; another reader deletes reply 1, which stays in the loaded list.
+    let thread = { ...comment("t"), ...window(replies(1, 2), 103) };
+    thread = withPage(thread, { replies: replies(3, 52), earlierReplies: 1, laterReplies: 50 }, false);
+    thread = withPage(thread, { replies: replies(53, 102), earlierReplies: 51, laterReplies: 1 }, false);
+    expect(thread.replies).toHaveLength(102);
+    // Reply 103 is still to load: "View more" stays.
+    expect(visibleReplies(thread, true)).toMatchObject({ later: 1, unloaded: 1 });
+    thread = withPage(thread, { replies: replies(103, 103), earlierReplies: 101, laterReplies: 0 }, false);
     expect(visibleReplies(thread, true)).toMatchObject({ later: 0, unloaded: 0 });
-    // An empty page after the loaded replies ends the thread there, whatever the count said.
+    // A deleted unloaded reply: the preview said 100, reply 50 went away, and the last page says nothing is left.
+    let deleted = { ...comment("t"), ...window(replies(1, 2), 100) };
+    deleted = withPage(deleted, { replies: replies(3, 52, [50]), earlierReplies: 2, laterReplies: 48 }, false);
+    deleted = withPage(deleted, { replies: replies(53, 100), earlierReplies: 51, laterReplies: 0 }, false);
+    expect(deleted).toMatchObject({ earlierReplies: 0, replyCount: 99 });
+    // An empty page after the loaded replies ends the thread there.
     const stale = { ...comment("t"), ...window(replies(1, 2), 5) };
-    expect(withPage(stale, { replies: [], earlierReplies: null, replyCount: 5 }, false)).toMatchObject({
+    expect(withPage(stale, { replies: [], earlierReplies: null, laterReplies: null }, false)).toMatchObject({
       replyCount: 2,
     });
-    // An earlier page sets the replies before the window; an empty one leaves none.
-    const linked = { ...comment("t"), ...window(replies(80, 100), 100, 79) };
-    expect(withPage(linked, { replies: replies(30, 79), earlierReplies: 29, replyCount: 100 }, true)).toMatchObject({
+    // An earlier page sets the replies before the window and keeps the ones after it; an empty one leaves none before.
+    const linked = { ...comment("t"), ...window(replies(80, 90), 100, 79) };
+    expect(withPage(linked, { replies: replies(30, 79), earlierReplies: 29, laterReplies: 21 }, true)).toMatchObject({
       earlierReplies: 29,
       replyCount: 100,
     });
-    expect(withPage(linked, { replies: [], earlierReplies: null, replyCount: 21 }, true)).toMatchObject({
+    expect(withPage(linked, { replies: [], earlierReplies: null, laterReplies: null }, true)).toMatchObject({
       earlierReplies: 0,
       replyCount: 21,
     });
+    // The first page of a window takes both counts from the server.
+    expect(
+      withPage({ ...linked, replies: [], earlierReplies: 0 }, { replies: replies(60, 109), earlierReplies: 59, laterReplies: 11 }, false),
+    ).toMatchObject({ earlierReplies: 59, replyCount: 120 });
   });
 
   it("keeps the loaded replies of a thread that a later page of root comments brings again", (): void => {

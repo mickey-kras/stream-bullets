@@ -36321,7 +36321,7 @@
       "relation": "calls",
       "source": "app_lib_threads_withpage",
       "source_file": "app/lib/threads.ts",
-      "source_location": "L59",
+      "source_location": "L60",
       "target": "app_lib_threads_withreplies",
       "weight": 1.0
     },
@@ -48057,7 +48057,7 @@
       "relation": "calls",
       "source": "app_server_comments_server_commentpermission_692e5768897b",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L273",
+      "source_location": "L272",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -48093,7 +48093,7 @@
       "relation": "calls",
       "source": "app_server_comments_server_deletecomment",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L362",
+      "source_location": "L361",
       "target": "app_server_comments_server_commentpermission_692e5768897b",
       "weight": 1.0
     },
@@ -48105,8 +48105,20 @@
       "relation": "calls",
       "source": "app_server_comments_server_deletecomment",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L363",
+      "source_location": "L362",
       "target": "app_server_comments_server_removecomment",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_comments_server_getcommentthread",
+      "source_file": "app/server/comments.server.ts",
+      "source_location": "L439",
+      "target": "app_server_data_server_getvisibleentry",
       "weight": 1.0
     },
     {
@@ -48118,18 +48130,6 @@
       "source": "app_server_comments_server_getcommentthread",
       "source_file": "app/server/comments.server.ts",
       "source_location": "L440",
-      "target": "app_server_data_server_getvisibleentry",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_comments_server_getcommentthread",
-      "source_file": "app/server/comments.server.ts",
-      "source_location": "L441",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -48141,7 +48141,7 @@
       "relation": "calls",
       "source": "app_server_comments_server_getcommentthread",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L461",
+      "source_location": "L460",
       "target": "app_server_comments_server_replywindows",
       "weight": 1.0
     },
@@ -48153,7 +48153,7 @@
       "relation": "calls",
       "source": "app_server_comments_server_getcommentthread",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L463",
+      "source_location": "L462",
       "target": "app_server_comments_server_commentvalue",
       "weight": 1.0
     },
@@ -48165,7 +48165,7 @@
       "relation": "calls",
       "source": "app_server_comments_server_getcommentthread",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L465",
+      "source_location": "L464",
       "target": "app_server_comments_server_threadvalue",
       "weight": 1.0
     },
@@ -48177,7 +48177,7 @@
       "relation": "calls",
       "source": "app_server_comments_server_listcommentrevisions",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L502",
+      "source_location": "L501",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -48189,7 +48189,7 @@
       "relation": "calls",
       "source": "app_server_comments_server_listcommentrevisions",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L504",
+      "source_location": "L503",
       "target": "app_server_access_server_isadmin",
       "weight": 1.0
     },
@@ -48201,7 +48201,7 @@
       "relation": "calls",
       "source": "app_server_comments_server_listcomments",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L224",
+      "source_location": "L223",
       "target": "app_server_data_server_parsed",
       "weight": 1.0
     },
@@ -48213,7 +48213,7 @@
       "relation": "calls",
       "source": "app_server_comments_server_listcomments",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L227",
+      "source_location": "L226",
       "target": "app_server_data_server_decodecursor",
       "weight": 1.0
     },
@@ -48225,7 +48225,7 @@
       "relation": "calls",
       "source": "app_server_comments_server_listcomments",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L245",
+      "source_location": "L244",
       "target": "app_server_data_server_encodecursor",
       "weight": 1.0
     },
@@ -48237,7 +48237,7 @@
       "relation": "calls",
       "source": "app_server_comments_server_listcomments",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L248",
+      "source_location": "L247",
       "target": "app_server_comments_server_replywindows",
       "weight": 1.0
     },
@@ -48249,7 +48249,7 @@
       "relation": "calls",
       "source": "app_server_comments_server_listcomments",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L254",
+      "source_location": "L253",
       "target": "app_server_comments_server_threadvalue",
       "weight": 1.0
     },
@@ -48261,7 +48261,7 @@
       "relation": "calls",
       "source": "app_server_comments_server_listreplies",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L481",
+      "source_location": "L480",
       "target": "app_server_data_server_getvisibleentry",
       "weight": 1.0
     },
@@ -48273,7 +48273,7 @@
       "relation": "calls",
       "source": "app_server_comments_server_listreplies",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L481",
+      "source_location": "L480",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -48285,7 +48285,7 @@
       "relation": "calls",
       "source": "app_server_comments_server_listreplies",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L482",
+      "source_location": "L481",
       "target": "app_server_comments_server_replypage_37183b6175fc",
       "weight": 1.0
     },
@@ -48297,7 +48297,7 @@
       "relation": "calls",
       "source": "app_server_comments_server_mutatecomment",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L373",
+      "source_location": "L372",
       "target": "app_server_data_server_parsed",
       "weight": 1.0
     },
@@ -48309,7 +48309,7 @@
       "relation": "calls",
       "source": "app_server_comments_server_mutatecomment",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L374",
+      "source_location": "L373",
       "target": "app_server_data_server_consumemutationquota",
       "weight": 1.0
     },
@@ -48321,7 +48321,7 @@
       "relation": "calls",
       "source": "app_server_comments_server_mutatecomment",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L375",
+      "source_location": "L374",
       "target": "app_server_comments_server_commentpermission_692e5768897b",
       "weight": 1.0
     },
@@ -48333,7 +48333,7 @@
       "relation": "calls",
       "source": "app_server_comments_server_mutatecomment",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L376",
+      "source_location": "L375",
       "target": "app_server_access_server_assertstreamerwritable",
       "weight": 1.0
     },
@@ -48345,7 +48345,7 @@
       "relation": "calls",
       "source": "app_server_comments_server_mutatecomment",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L378",
+      "source_location": "L377",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -48357,7 +48357,7 @@
       "relation": "calls",
       "source": "app_server_comments_server_mutatecomment",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L380",
+      "source_location": "L379",
       "target": "app_server_discussion_notifications_server_validatementions",
       "weight": 1.0
     },
@@ -48369,7 +48369,7 @@
       "relation": "calls",
       "source": "app_server_comments_server_mutatecomment",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L403",
+      "source_location": "L402",
       "target": "app_server_discussion_notifications_server_mentionstatements",
       "weight": 1.0
     },
@@ -48381,7 +48381,7 @@
       "relation": "calls",
       "source": "app_server_comments_server_mutatecomment",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L417",
+      "source_location": "L416",
       "target": "app_server_data_server_applymutation",
       "weight": 1.0
     },
@@ -48393,7 +48393,7 @@
       "relation": "calls",
       "source": "app_server_comments_server_mutatecomment",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L419",
+      "source_location": "L418",
       "target": "app_server_comments_server_removecomment",
       "weight": 1.0
     },
@@ -48405,7 +48405,7 @@
       "relation": "calls",
       "source": "app_server_comments_server_removecomment",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L290",
+      "source_location": "L289",
       "target": "app_server_data_server_adminremoval",
       "weight": 1.0
     },
@@ -48417,7 +48417,7 @@
       "relation": "calls",
       "source": "app_server_comments_server_removecomment",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L352",
+      "source_location": "L351",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -48453,7 +48453,7 @@
       "relation": "calls",
       "source": "app_server_comments_server_threadvalue",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L213",
+      "source_location": "L212",
       "target": "app_server_comments_server_commentvalue",
       "weight": 1.0
     },
@@ -211751,6 +211751,17 @@
       "relation": "contains",
       "source": "app_lib_threads",
       "source_file": "app/lib/threads.ts",
+      "source_location": "L100",
+      "target": "app_lib_threads_orderthreads",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_threads",
+      "source_file": "app/lib/threads.ts",
       "source_location": "L11",
       "target": "app_lib_threads_replywindow",
       "weight": 1.0
@@ -211817,7 +211828,7 @@
       "relation": "contains",
       "source": "app_lib_threads",
       "source_file": "app/lib/threads.ts",
-      "source_location": "L58",
+      "source_location": "L59",
       "target": "app_lib_threads_withpage",
       "weight": 1.0
     },
@@ -211839,7 +211850,7 @@
       "relation": "contains",
       "source": "app_lib_threads",
       "source_file": "app/lib/threads.ts",
-      "source_location": "L73",
+      "source_location": "L81",
       "target": "app_lib_threads_replyparent",
       "weight": 1.0
     },
@@ -211850,19 +211861,8 @@
       "relation": "contains",
       "source": "app_lib_threads",
       "source_file": "app/lib/threads.ts",
-      "source_location": "L83",
+      "source_location": "L91",
       "target": "app_lib_threads_keepreplywindows",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_threads",
-      "source_file": "app/lib/threads.ts",
-      "source_location": "L92",
-      "target": "app_lib_threads_orderthreads",
       "weight": 1.0
     },
     {
@@ -218791,7 +218791,7 @@
       "relation": "contains",
       "source": "app_server_comments_server",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L212",
+      "source_location": "L211",
       "target": "app_server_comments_server_threadvalue",
       "weight": 1.0
     },
@@ -218802,7 +218802,7 @@
       "relation": "contains",
       "source": "app_server_comments_server",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L218",
+      "source_location": "L217",
       "target": "app_server_comments_server_listcomments",
       "weight": 1.0
     },
@@ -218813,7 +218813,7 @@
       "relation": "contains",
       "source": "app_server_comments_server",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L259",
+      "source_location": "L258",
       "target": "app_server_comments_server_commentpermission",
       "weight": 1.0
     },
@@ -218824,7 +218824,7 @@
       "relation": "contains",
       "source": "app_server_comments_server",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L267",
+      "source_location": "L266",
       "target": "app_server_comments_server_commentpermission_692e5768897b",
       "weight": 1.0
     },
@@ -218835,7 +218835,7 @@
       "relation": "contains",
       "source": "app_server_comments_server",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L278",
+      "source_location": "L277",
       "target": "app_server_comments_server_removed_comment_text",
       "weight": 1.0
     },
@@ -218846,7 +218846,7 @@
       "relation": "contains",
       "source": "app_server_comments_server",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L282",
+      "source_location": "L281",
       "target": "app_server_comments_server_removecomment",
       "weight": 1.0
     },
@@ -218868,7 +218868,7 @@
       "relation": "contains",
       "source": "app_server_comments_server",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L356",
+      "source_location": "L355",
       "target": "app_server_comments_server_deletecomment",
       "weight": 1.0
     },
@@ -218879,7 +218879,7 @@
       "relation": "contains",
       "source": "app_server_comments_server",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L367",
+      "source_location": "L366",
       "target": "app_server_comments_server_mutatecomment",
       "weight": 1.0
     },
@@ -218890,7 +218890,7 @@
       "relation": "contains",
       "source": "app_server_comments_server",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L424",
+      "source_location": "L423",
       "target": "app_server_comments_server_getcommentthread",
       "weight": 1.0
     },
@@ -218901,7 +218901,7 @@
       "relation": "contains",
       "source": "app_server_comments_server",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L472",
+      "source_location": "L471",
       "target": "app_server_comments_server_listreplies",
       "weight": 1.0
     },
@@ -218912,7 +218912,7 @@
       "relation": "contains",
       "source": "app_server_comments_server",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L486",
+      "source_location": "L485",
       "target": "app_server_comments_server_revision_retention_ms",
       "weight": 1.0
     },
@@ -218923,7 +218923,7 @@
       "relation": "contains",
       "source": "app_server_comments_server",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L490",
+      "source_location": "L489",
       "target": "app_server_comments_server_listcommentrevisions",
       "weight": 1.0
     },
@@ -247431,7 +247431,7 @@
       "relation": "indirect_call",
       "source": "app_server_comments_server_listcomments",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L247",
+      "source_location": "L246",
       "target": "app_server_comments_server_commentvalue",
       "weight": 1.0
     },
@@ -247443,7 +247443,7 @@
       "relation": "indirect_call",
       "source": "app_server_comments_server_replypage_37183b6175fc",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L206",
+      "source_location": "L205",
       "target": "app_server_comments_server_replyvalue",
       "weight": 1.0
     },
@@ -256899,7 +256899,7 @@
       "label": "CommentPermission",
       "norm_label": "commentpermission",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L259"
+      "source_location": "L258"
     },
     {
       "_callable": true,
@@ -277830,7 +277830,7 @@
       "label": "keepReplyWindows()",
       "norm_label": "keepreplywindows()",
       "source_file": "app/lib/threads.ts",
-      "source_location": "L83"
+      "source_location": "L91"
     },
     {
       "_callable": true,
@@ -277852,7 +277852,7 @@
       "label": "orderThreads()",
       "norm_label": "orderthreads()",
       "source_file": "app/lib/threads.ts",
-      "source_location": "L92"
+      "source_location": "L100"
     },
     {
       "_callable": true,
@@ -277874,7 +277874,7 @@
       "label": "replyParent()",
       "norm_label": "replyparent()",
       "source_file": "app/lib/threads.ts",
-      "source_location": "L73"
+      "source_location": "L81"
     },
     {
       "_callable": true,
@@ -277896,7 +277896,7 @@
       "label": "withPage()",
       "norm_label": "withpage()",
       "source_file": "app/lib/threads.ts",
-      "source_location": "L58"
+      "source_location": "L59"
     },
     {
       "_callable": true,
@@ -282783,7 +282783,7 @@
       "label": "commentPermission()",
       "norm_label": "commentpermission()",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L267"
+      "source_location": "L266"
     },
     {
       "_callable": true,
@@ -282805,7 +282805,7 @@
       "label": "deleteComment()",
       "norm_label": "deletecomment()",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L356"
+      "source_location": "L355"
     },
     {
       "_callable": true,
@@ -282816,7 +282816,7 @@
       "label": "getCommentThread()",
       "norm_label": "getcommentthread()",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L424"
+      "source_location": "L423"
     },
     {
       "_callable": true,
@@ -282827,7 +282827,7 @@
       "label": "listCommentRevisions()",
       "norm_label": "listcommentrevisions()",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L490"
+      "source_location": "L489"
     },
     {
       "_callable": true,
@@ -282838,7 +282838,7 @@
       "label": "listComments()",
       "norm_label": "listcomments()",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L218"
+      "source_location": "L217"
     },
     {
       "_callable": true,
@@ -282849,7 +282849,7 @@
       "label": "listReplies()",
       "norm_label": "listreplies()",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L472"
+      "source_location": "L471"
     },
     {
       "_callable": true,
@@ -282860,7 +282860,7 @@
       "label": "mutateComment()",
       "norm_label": "mutatecomment()",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L367"
+      "source_location": "L366"
     },
     {
       "_callable": true,
@@ -282871,7 +282871,7 @@
       "label": "removeComment()",
       "norm_label": "removecomment()",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L282"
+      "source_location": "L281"
     },
     {
       "_callable": true,
@@ -282915,7 +282915,7 @@
       "label": "threadValue()",
       "norm_label": "threadvalue()",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L212"
+      "source_location": "L211"
     },
     {
       "_callable": true,
@@ -307332,7 +307332,7 @@
       "label": "REMOVED_COMMENT_TEXT",
       "norm_label": "removed_comment_text",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L278"
+      "source_location": "L277"
     },
     {
       "_origin": "ast",
@@ -307342,7 +307342,7 @@
       "label": "REVISION_RETENTION_MS",
       "norm_label": "revision_retention_ms",
       "source_file": "app/server/comments.server.ts",
-      "source_location": "L486"
+      "source_location": "L485"
     },
     {
       "_origin": "ast",
