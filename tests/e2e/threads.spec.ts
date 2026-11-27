@@ -482,3 +482,26 @@ test("a reply the reader posts in a long thread shows with the replies already l
     await close(context);
   }
 });
+
+test("the reply link of a reply outside the loaded replies opens its parent", async ({ browser }) => {
+  const entryId: string = await seedLongThread();
+  // Reply 75 answers reply 10, far outside the window of a link to reply 75.
+  await runSql("threads-parent", [
+    `UPDATE entry_comments SET parent_id='${longReply(10)}' WHERE id='${longReply(75)}';`,
+  ]);
+  const context = await signedIn(browser, "viewer", clientIp("threads", 100));
+  try {
+    const page = await newPage(context);
+    await page.goto(`/@other_host?entry=${entryId}&comment=${longReply(75)}`);
+    const linked = page.locator(`#cm-${longReply(75)}`);
+    await expect(linked).toBeVisible();
+    await expect(page.locator(`#cm-${longReply(10)}`)).toHaveCount(0);
+    await linked.locator(".reply-mention").click();
+    await expect(page).toHaveURL(new RegExp(`comment=${longReply(10)}`));
+    const parent = page.locator(`#cm-${longReply(10)}`);
+    await expect(parent).toContainText("Long reply 10");
+    await expect(parent).toBeFocused();
+  } finally {
+    await close(context);
+  }
+});

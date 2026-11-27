@@ -287,6 +287,7 @@ function CommentArticle({
   parent: Pick<Comment, "author" | "removed"> | null | undefined;
   rules: CommentRules;
 }>): ReactNode {
+  const [, setSearch] = useSearchParams();
   const [editing, setEditing] = useState<boolean>(false);
   const [draft, setDraft] = useState<string>(comment.text);
   const [mentions, setMentions] = useState<MentionSelection[]>(comment.mentions ?? []);
@@ -327,7 +328,24 @@ function CommentArticle({
           )}
         </div>
         {parentName !== null && (
-          <a className="replying reply-mention" href={`#cm-${comment.parentId}`}>
+          <a
+            className="replying reply-mention"
+            href={`#cm-${comment.parentId}`}
+            onClick={(event) => {
+              // A parent outside the loaded replies: open it as a linked comment, which loads and focuses it.
+              if (!comment.parentId || document.getElementById(`cm-${comment.parentId}`)) return;
+              event.preventDefault();
+              const parentId: string = comment.parentId;
+              setSearch(
+                (current: URLSearchParams) => {
+                  const next = new URLSearchParams(current);
+                  next.set("comment", parentId);
+                  return next;
+                },
+                { preventScrollReset: true },
+              );
+            }}
+          >
             <Icon name="reply" size={16} />
             {t("discussion.replyTo", { name: parentName })}
           </a>
