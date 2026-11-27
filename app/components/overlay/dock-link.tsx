@@ -41,7 +41,7 @@ export function DockLink({ hasKey }: Readonly<{ hasKey: boolean }>): ReactNode {
       </p>
       {url && (
         <>
-          <CopyField value={url} label={t("overlay.dock.url")} copyLabel={t("overlay.dock.copy")} layer={null} dock />
+          <CopyField value={url} label={t("overlay.dock.url")} copyLabel={t("overlay.dock.copy")} dock />
           <p className="muted">{t("overlay.dock.once")}</p>
         </>
       )}

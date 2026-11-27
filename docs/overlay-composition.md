@@ -22,7 +22,9 @@ The code is in these files:
 | Content of a layer and its QR code | `app/components/overlay/overlay-stage.tsx`, `app/components/overlay/qr-code.tsx` |
 | Chat appearance and motion | `app/components/overlay/wasteland/`, `app/components/overlay/use-row-motion.ts` |
 | Editor | `app/components/overlay/composition-editor.tsx`, `layout-grid.tsx`, `layer-palette.tsx`, `use-layer-draft.ts` |
+| Layout list and its buttons | `app/components/overlay/layout-picker.tsx` |
 | Layer settings and the test | `app/components/overlay/layer-properties.tsx`, `studio-test.tsx`, `characters-controls.tsx` |
+| Links for OBS | `app/components/overlay/overlay-link.tsx`, `copy-field.tsx` |
 | Overlay page | `app/routes/overlay.tsx` |
 | Overlay actions | `app/server/overlay.server.ts`, `app/server/overlay-state.ts`, `app/server/api/live.ts` |
 
@@ -255,11 +257,12 @@ Each output has its own layouts, and one of them is on stream.
 A layout is the cells of the layers of one output. The settings of a layer are not a part of a layout.
 Thus a poll that the owner picked stays when the layout changes.
 
-The list **Layout** is in the row above the grid, in the step **Build your overlay**. It has these entries:
+The list **Layout** is in the toolbar of the step **Build your overlay**. It has these entries:
 
 - The presets of the output. The horizontal output has **Just chatting** and **Gameplay**. The vertical output has **Vertical**.
 - The layouts of the streamer.
 - **New layout…**
+- **Rename or delete layouts…**, when the streamer has a layout.
 
 When you select a layout, it opens in the grid and goes on stream at once. OBS does not load the page again.
 Each edit of the grid changes the layout on stream and saves at once, as before the layouts.
@@ -273,15 +276,18 @@ The switch of each other layer stays.
 | Vertical | Vertical | The camera frame at the top, then the poll, the chat, and the characters |
 
 A preset that you change keeps your version. The list then shows **preset, changed by you**.
-**Reset to the preset** brings back the cells that the preset comes with.
+The toolbar then shows the `reset` button, **Reset to the preset**. It brings back the cells that the preset comes with.
+The button shows only for a preset that you changed.
 
-**Save as a new layout** and **New layout…** make a layout with your name.
+The `save` button of the toolbar, **Save as a new layout**, and the entry **New layout…** make a layout with your name.
 It starts from a copy of the layout on stream or from an empty grid, and it goes on stream.
 
 A layout action first saves the edits of the grid. The grid takes no edit until the action ends.
 When a different tab changes the layouts, the list shows the new layouts without a load of the page.
 
-**Rename or delete layouts** opens the list of your layouts. Each layout can get a new name.
+The entry **Rename or delete layouts…** opens the list of your layouts. Each layout can get a new name.
+The entry is not a layout, thus the list keeps its value.
+
 You cannot delete the layout on stream. Select a different layout first.
 Each output can have 8 layouts of the streamer. The presets do not count.
 
@@ -395,7 +401,8 @@ https://<origin>/@<handle>/overlay?key=<key of the horizontal output>
 https://<origin>/@<handle>/overlay?key=<key of the vertical output>
 ```
 
-Add the `layer` parameter to the URL of an output to show one part of that output alone. Use one browser source for each part:
+Add the `layer` parameter to the URL of an output to show one part of that output alone. Use one browser source for each part.
+**Streamer tools** does not show a link for each layer. Add the parameter to the link of the output:
 
 ```text
 https://<origin>/@<handle>/overlay?key=<key>&layer=chat
@@ -412,20 +419,33 @@ Each of these layers stays at its cell in the canvas of the output, as in the co
 Thus a content source has the frame size, not the size of one layer.
 
 An unknown `layer` value shows an empty transparent page. It never shows an error.
+A link with the `layer` parameter from an earlier release continues to work.
 
 The `poll` parameter shows one poll in place of the content layers:
 `https://<origin>/@<handle>/overlay?poll=<poll ID>`.
 The poll layer then shows that poll, and no other content layer shows.
 The poll layer keeps its cell. If it is off the grid, it takes the cell of a poll at size M, or free space near it.
 
-The step **Add to OBS** has one part for each output. Each part shows the state of its link in OBS:
-the number of connected sources, or the time when the last source went away.
-A part shows the full URL and the layer URLs when you make a new key, and when you select **Show link**.
-The server keeps the SHA-256 hash of each key for the check, and the encrypted key for **Show link**.
-If you have the composition URL, add `&layer=chat` to its end for a chat source.
+The step **Add to OBS** has one card for each output. A card shows these items:
 
-**Regenerate link** makes a new key for one output. The old key of that output stops at once, and its sockets close.
-The link of the other output continues to work. After a new key, update the OBS sources of that output.
+- The name of the output.
+- The state of its link in OBS: the number of connected sources, or the time when the last source went away.
+- The size of its browser source.
+
+The title row of the step has two buttons at its right edge. Each button applies to the two outputs.
+
+- **Show links** shows the link of each output in its card. Each link has a `copy` button.
+  If an output has no link, **Show links** makes one. On a page without a link, the name of the button is **Create links**.
+  While the links show, the name of the button is **Hide links**. It hides the links again.
+- **Regenerate links** makes a new key for each output, after you confirm.
+  The old keys stop at once, and their sockets close. Then update each OBS source.
+
+While the links show, one line below the cards tells you to keep them private.
+The server keeps the SHA-256 hash of each key for the check, and the encrypted key for **Show links**.
+If the server did not keep the key of an output, the card tells you that the link cannot show again.
+
+The API makes a new key for one output at a time. See [Overlay layers](api.md#overlay-layers).
+A new key for one output does not stop the link of the other output.
 
 ## OBS browser source
 
@@ -437,10 +457,10 @@ Set the size of the browser source for the composition to the frame size of its 
 - For the vertical output, use 1080 × 1920. A different 9:16 size, such as 720 × 1280, also works.
 
 All sizes with the correct aspect ratio show the same layout as the preview.
-The editor shows the correct size under the grid.
+The card of each output in **Add to OBS** shows the correct size. The help for the grid also shows it.
 For a chat source or a characters source, use the size of its cell, or the same ratio at a smaller size.
+The label of the layer on the grid gives the size of its cell.
 For a content source, use the frame size.
-The link panel shows the size for each layer URL.
 
 A larger layer source shows the layer larger.
 
@@ -468,11 +488,11 @@ The old address `/overlay-control` redirects to it. The page has three sections:
 - **Live** (`/tools`) has the controls for a stream. See [Streamer tools](streamer-tools.md#live).
 - **Overlay** (`/tools?view=overlay`) has two numbered steps:
   1. **Build your overlay**: the overlay studio.
-  2. **Add to OBS**: the overlay link.
+  2. **Add to OBS**: the overlay links.
 - **Channels** (`/tools?view=channels`) has the channel connections: one card for each platform.
   The cards follow the channel health while the page is open.
 
-When the page has a link, one line in step 2 shows the OBS connection.
+When an output has a link, its card in step 2 shows the OBS connection.
 It shows the number of connected sources. Without a source, it shows when the last one connected or went away.
 The live room counts the sockets that came in with the current key.
 It sends each change to the owner's tabs.
@@ -482,13 +502,28 @@ The site header has no **Tools** entry.
 
 The studio has these parts:
 
-- A toolbar with the orientation, the preview background, **Start test**, and the note **Changes go live right away**.
-- The palette **Layers · one of each**, with one chip for each layer.
+- A toolbar in one line: the **Horizontal** and **Vertical** tabs, the list **Layout**, and the icon buttons at its right edge.
+- One line below the toolbar: a note about the outputs, the preview background, and the note **Changes go live right away**.
+- The palette **Layers · one of each**, with one chip for each layer, in groups.
 - The grid of the selected orientation on a preview of the frame.
 - The settings of the selected layer.
+- The closed help **How the grid works**.
 
-On a wide screen, the page shows the palette, the grid, and the settings side by side.
-On a narrow screen, such as a phone, they are one below the other in that sequence.
+The icon buttons of the toolbar show an icon and no text. The name of a button is its tooltip and its accessible name.
+
+| Icon | Name | Result |
+| --- | --- | --- |
+| `save` | **Save as a new layout** | Opens the dialog for a new layout. See [Layouts](#layouts). |
+| `reset` | **Reset to the preset** | Brings back the cells of the preset. The button shows only for a preset that you changed. |
+| `play` | **Start test** | Starts the test. During a test, the button shows the `stop` icon and its name is **Stop test**. See [Test](#test). |
+
+On a wide screen, the palette is beside the grid.
+The settings are below the grid of the horizontal output and beside the grid of the vertical output.
+The help is below the grid and the settings.
+On a narrow screen, such as a phone, the palette, the grid, the settings, and the help are one below the other in that sequence.
+
+The help **How the grid works** stays closed until you open it. It tells you how to add, move, and remove a layer, and how to change its size.
+It also gives the keys, the size of a cell, and the size of the browser source in OBS.
 
 The preview uses the same code as the OBS page. Thus the layer positions in the preview and in OBS agree.
 Each layer on the grid shows its name, its size in pixels, and its real content.
@@ -499,11 +534,11 @@ A layer with **Show on stream** off keeps a dashed box on the grid. The preview 
 The grid and the palette are separate parts. The editor holds the selected layer and gives it to both.
 When the page opens, the editor has no selected layer.
 
-In the toolbar, select **Transparent** or **Sample game** for the preview background.
+Above the grid, select **Transparent** or **Sample game** for the preview background.
 
 To change the layout, do these steps:
 
-1. In the toolbar, select **Horizontal 32 × 18** or **Vertical 18 × 32**. This is the output that you edit.
+1. In the toolbar, select **Horizontal** or **Vertical**. This is the output that you edit.
    The selection does not change the picture in OBS. Each output keeps its own layout.
 2. To select a layer, press it on the grid, or select its chip in the palette.
    The selected layer shows eight handles: four on its corners and four on its edges.
@@ -525,7 +560,17 @@ Then the editor does not keep the change. A message under the grid gives the rea
 
 ### Add and remove a layer
 
-The palette shows one chip for each of the nine layers.
+The palette shows one chip for each of the nine layers, in two groups:
+
+| Group | Layers |
+| --- | --- |
+| **Picture** | Chat, Characters, and Camera frame |
+| **Content** | Poll, Topic, Up next, Message banner, Community card, and Support banner |
+
+The title of a group shows its name and the number of its layers, such as **Picture · 3**.
+Each group starts open. Select the title of a group to close it or to open it again.
+The code has the groups as a list (`LAYER_GROUPS`). A new group is one entry in that list.
+
 The chip of a layer on the grid of the selected orientation shows **Placed**.
 Each layer can be on the grid one time.
 
@@ -547,6 +592,7 @@ To remove a layer, use one of these procedures:
   The palette changes color while the pointer is on it. Release the layer there.
 - Select the layer on the grid and press Delete or Backspace.
 - Select the layer and select **Remove from grid** in its settings. The focus then goes to the chip of the layer.
+  A closed group of that chip opens first.
 
 A removed layer has no cell in the selected orientation. OBS does not show it.
 The layer keeps its settings and its cell in the other orientation. Its chip offers it again.
@@ -585,8 +631,10 @@ When you select a layer with its chip, a screen reader reads the selection. The 
 
 ### Keyboard
 
-Tab moves to the toolbar, the chips, the grid, and the settings, in that sequence.
+Tab moves to the toolbar, the preview background, the groups with their chips, the grid, the settings, and the help, in that sequence.
 Enter or Space on a chip adds its layer, or selects the layer if it is on the grid.
+Enter or Space on the title of a group closes or opens the group. The chips of a closed group are not in the tab sequence.
+Enter or Space on **How the grid works** opens or closes the help.
 
 You can use the keyboard on the grid:
 
@@ -605,6 +653,14 @@ To change the size from the top or the left, first change the size, then move th
 A screen reader reads each result from a polite live region under the grid.
 The grid is in a region with the `application` role. Thus a screen reader sends the keys to the grid, also in browse mode.
 If the orientation changes or the grid loses focus during a move or a change of size, the editor cancels it.
+
+The grid and each chip have a description for a screen reader (`aria-describedby`).
+The description of the grid tells how to move a layer, how to change its size, and the keys.
+The description of a chip tells how to add a layer.
+
+Each description is a text with the `hidden` attribute. It is not a part of the help.
+Chromium gives no description from a text in a closed `details` element.
+Thus a description in the help would be empty until you open the help.
 
 ### How the content follows the size
 
@@ -653,7 +709,8 @@ The samples include all three platforms, Unicode text, emoji, an emote, and a co
 ## Test
 
 Use the test to see the chat and the characters in your real OBS scene before you go live.
-In the toolbar of the studio, select **Start test**. The same button, **Stop test**, ends the test at once.
+In the toolbar of the studio, select the `play` button, **Start test**.
+During a test, the same button shows the `stop` icon and has the colors of a pressed control. Its name is then **Stop test**, and it ends the test at once.
 
 One button starts two tests together:
 
@@ -662,10 +719,11 @@ One button starts two tests together:
   See [Characters test](characters.md#characters-test).
 
 If only one of the two layers is on stream, the button starts only that test.
-If neither is on stream, the button does nothing and its text gives the reason.
+If neither is on stream, the button starts nothing. Its tooltip gives the reason, and a message gives the reason when you press it.
 The server also refuses the start of a test whose layer is off stream.
 
-- The text beside the button shows the remaining time of the longer test.
+- The tooltip of **Start test** tells what the test does. A screen reader reads the same text as the description of the button.
+- During a test, the text beside the icon buttons shows the remaining time of the longer test.
   A screen reader reads only the start and the end of the test.
 - A start of the test also ends a pause of the playground.
 - If you take the chat layer off stream, the chat test stops. It does not continue when the layer is on stream again.
@@ -755,7 +813,7 @@ Below 50%, the text and the platform icon get a dark outline. Thus you can read 
 
 Use the slider with a mouse, a finger, or the arrow keys. The preview shows each step at once.
 The editor saves the value after 400 milliseconds without a change. Then OBS shows it without a reload.
-To see the result on a game, select **Sample game** in the toolbar.
+To see the result on a game, select **Sample game** above the grid.
 
 The chat root has the `--wl-bg` CSS property, from 0 to 1. Only the card background reads it.
 The layers store the value as `chat.backgroundOpacity`. A missing or incorrect stored value reads as 100.
@@ -827,7 +885,7 @@ Thus close the overlay sources that you do not use.
 - The overlay page sends no `Referer`. Thus an emote image does not get the key.
 - The overlay key gives access to the activity feed. Without a key or an owner session, the socket gets `403`.
   With a wrong or revoked key, the server closes the socket with the code `4403`, and the page does not try again.
-- **Regenerate link** makes a new key for one output. The old key of that output stops at once, and its open sockets close.
+- **Regenerate links** makes a new key for each output. The old keys stop at once, and their open sockets close.
 - The key of one output gives no control of the other output. A key never gives a control action.
 - The chat ignores `user.color`. It uses the theme colors only.
 

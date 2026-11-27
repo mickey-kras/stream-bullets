@@ -4,14 +4,21 @@ import { CHAT_TEST_MS, chatTestLeft } from "../../lib/chat-test";
 import { CHARACTERS_TEST_MS } from "../../lib/playground/constants";
 import type { OverlayState } from "../../types";
 import { errorMessage, postJson } from "../api";
+import { IconButton } from "../ui/icon-button";
 import { useToast } from "../ui/toast";
 import type { CharactersControl } from "./characters-controls";
 
 /**
- * Start and Stop for the test, with the time left. One button starts the chat test and the characters test together,
- * each when its layer is on stream, and stops the tests that run. The button never takes the `disabled` attribute:
- * it keeps focus during its own requests and when the test ends, and ignores presses while it is unavailable. A
- * polite region says when the test starts, stops or ends; the time left is not read each second.
+ * Start and Stop for the test: one icon button in the toolbar of the studio. It starts the chat test and the
+ * characters test together, each when its layer is on stream, and stops the tests that run. While a test runs, the
+ * button shows the stop icon in the pressed colors and has the name of the stop action, and the time left shows
+ * beside it. The button has no `aria-pressed`: its name changes with its action, and a pressed "Stop test" would
+ * tell a screen reader the opposite.
+ *
+ * The button never takes the `disabled` attribute: it keeps focus during its own requests and when the test ends.
+ * It ignores presses during a request. A press without a layer on stream tells the reason in a toast, because the
+ * text that gives the reason is the tooltip and the description of the button, and a touch screen shows neither.
+ * A polite region says when the test starts, stops or ends; the time left is not read each second.
  */
 export function StudioTest({
   chatUntil,
@@ -73,7 +80,11 @@ export function StudioTest({
   }
   /** Stops the tests that run, or starts the test of each layer on stream. */
   async function press(): Promise<void> {
-    if (unavailable) return;
+    if (sending || characters.busy) return;
+    if (!running && !available) {
+      toast(t("overlay.test.needsLayer"));
+      return;
+    }
     setSending(true);
     const requests: Promise<void>[] = [];
     if (running) {
@@ -99,18 +110,22 @@ export function StudioTest({
     });
     if (characters.enabled && characters.paused) status += ` ${t("overlay.characters.testResumes")}`;
   }
+  const label: string = t(running ? "overlay.test.stop" : "overlay.test.start");
   return (
     <div className="ov-comp-test" data-test-control>
-      <button
-        type="button"
+      <IconButton
+        label={label}
+        // The tooltip of a test that does not run also tells what the test does, or why it cannot start.
+        title={running ? label : `${label}\n${status}`}
+        icon={running ? "stop" : "play"}
         aria-disabled={unavailable}
         aria-describedby={hintId}
         onClick={() => void press()}
         data-test-toggle
-      >
-        {t(running ? "overlay.test.stop" : "overlay.test.start")}
-      </button>
-      <p className="muted ov-comp-note" id={hintId} data-test-status>
+        data-running={running || undefined}
+      />
+      {/* The time left shows while a test runs. Otherwise the text is the description of the button only. */}
+      <p className={running ? "muted ov-comp-note" : "sr-only"} id={hintId} data-test-status>
         {status}
       </p>
       <p className="sr-only" aria-live="polite" data-test-news>

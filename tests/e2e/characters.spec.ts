@@ -509,14 +509,14 @@ test("the characters controls send their requests, keep focus and name every con
   // Focus stays on the button while the test starts and stops.
   const toggle = editor.locator("[data-test-toggle]");
   const testNews = editor.locator("[data-test-news]");
-  await expect(toggle).toHaveText("Start test");
+  await expect(toggle).toHaveAccessibleName("Start test");
   await toggle.click();
-  await expect(toggle).toHaveText("Stop test");
+  await expect(toggle).toHaveAccessibleName("Stop test");
   await expect(toggle).toBeFocused();
   await expect(editor.locator("[data-test-status]")).toHaveText(/^The test runs in OBS\. \d+ s left\.$/);
   await expect(testNews).toHaveText("Test started. OBS shows sample data.");
   await toggle.press("Enter");
-  await expect(toggle).toHaveText("Start test");
+  await expect(toggle).toHaveAccessibleName("Start test");
   await expect(toggle).toBeFocused();
   await expect(testNews).toHaveText("Test stopped.");
 
@@ -527,7 +527,7 @@ test("the characters controls send their requests, keep focus and name every con
   await expect(testNews).toHaveText("Test started and the playground resumed. OBS shows sample data.");
   await expect(layer.getByRole("button", { name: "Pause" })).toBeVisible();
   await toggle.click();
-  await expect(toggle).toHaveText("Start test");
+  await expect(toggle).toHaveAccessibleName("Start test");
 
   // Remove takes the roster id of the frames. When the character leaves, focus goes to the next Remove button.
   const first: RosterEntry = frames.roster[0];
@@ -644,16 +644,16 @@ test("a test started in another tab shows here: frames with the test make the ed
   const toggle = editor.locator("[data-test-toggle]");
   const status = editor.locator("[data-test-status]");
   await expect.poll(() => sockets.length).toBe(1);
-  await expect(toggle).toHaveText("Start test");
+  await expect(toggle).toHaveAccessibleName("Start test");
   // Another tab starts the test: this tab only sees it in the frames.
   sockets[0].send(encodeFrame(testing.fullFrame()));
   await expect.poll(() => bodies).toEqual([{ op: "status" }, { op: "status" }]);
   // While the status is read, the test runs here too, without a countdown.
-  await expect(toggle).toHaveText("Stop test");
+  await expect(toggle).toHaveAccessibleName("Stop test");
   await expect(status).toHaveText("The test runs in OBS.");
   release();
   await expect(status).toHaveText(/^The test runs in OBS\. \d+ s left\.$/);
-  await expect(toggle).toHaveText("Stop test");
+  await expect(toggle).toHaveAccessibleName("Stop test");
   await close(owner);
 });
 
@@ -676,9 +676,10 @@ test("the test, pause and reset are unavailable while the saved characters layer
   await expect(toggle).toHaveAttribute("aria-disabled", "true");
   await expect(toggle).toHaveAccessibleDescription("Put Chat or Characters on stream to start the test.");
   const hint = "Turn on “Show on stream” to pause, reset, or test the characters.";
-  // A press does nothing; force skips Playwright's own check of aria-disabled.
+  // A press starts nothing and tells the reason; force skips Playwright's own check of aria-disabled.
   await toggle.click({ force: true });
   await expect(toggle).toBeFocused();
+  await expect(page.locator(".sb-toast")).toHaveText("Put Chat or Characters on stream to start the test.");
   for (const name of ["Pause", "Reset playground"]) {
     const button = layer.getByRole("button", { name });
     await expect(button).toHaveAttribute("aria-disabled", "true");
