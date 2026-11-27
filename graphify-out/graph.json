@@ -95850,7 +95850,7 @@
       "relation": "imports",
       "source": "app_components_ui_icon",
       "source_file": "app/components/ui/icon.tsx",
-      "source_location": "L72",
+      "source_location": "L76",
       "target": "app_components_ui_icon_paths_localiconname",
       "weight": 1.0
     },
@@ -95862,7 +95862,7 @@
       "relation": "imports",
       "source": "app_components_ui_icon",
       "source_file": "app/components/ui/icon.tsx",
-      "source_location": "L72",
+      "source_location": "L76",
       "target": "app_components_ui_icon_paths_localicons",
       "weight": 1.0
     },
@@ -159347,7 +159347,7 @@
       "relation": "imports_from",
       "source": "app_components_ui_icon",
       "source_file": "app/components/ui/icon.tsx",
-      "source_location": "L72",
+      "source_location": "L76",
       "target": "app_components_ui_icon_paths",
       "weight": 1.0
     },
@@ -202868,7 +202868,7 @@
       "relation": "contains",
       "source": "app_components_ui_icon",
       "source_file": "app/components/ui/icon.tsx",
-      "source_location": "L145",
+      "source_location": "L153",
       "target": "app_components_ui_icon_iconname",
       "weight": 1.0
     },
@@ -202879,7 +202879,7 @@
       "relation": "contains",
       "source": "app_components_ui_icon",
       "source_file": "app/components/ui/icon.tsx",
-      "source_location": "L146",
+      "source_location": "L154",
       "target": "app_components_ui_icon_iconsize",
       "weight": 1.0
     },
@@ -202890,7 +202890,7 @@
       "relation": "contains",
       "source": "app_components_ui_icon",
       "source_file": "app/components/ui/icon.tsx",
-      "source_location": "L150",
+      "source_location": "L158",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -202901,7 +202901,7 @@
       "relation": "contains",
       "source": "app_components_ui_icon",
       "source_file": "app/components/ui/icon.tsx",
-      "source_location": "L75",
+      "source_location": "L79",
       "target": "app_components_ui_icon_lucideicons",
       "weight": 1.0
     },
@@ -254078,7 +254078,7 @@
       "label": "IconName",
       "norm_label": "iconname",
       "source_file": "app/components/ui/icon.tsx",
-      "source_location": "L145"
+      "source_location": "L153"
     },
     {
       "_callable": true,
@@ -254090,7 +254090,7 @@
       "label": "IconSize",
       "norm_label": "iconsize",
       "source_file": "app/components/ui/icon.tsx",
-      "source_location": "L146"
+      "source_location": "L154"
     },
     {
       "_callable": true,
@@ -272299,7 +272299,7 @@
       "label": "Icon()",
       "norm_label": "icon()",
       "source_file": "app/components/ui/icon.tsx",
-      "source_location": "L150"
+      "source_location": "L158"
     },
     {
       "_callable": true,
@@ -301563,7 +301563,7 @@
       "label": "lucideIcons",
       "norm_label": "lucideicons",
       "source_file": "app/components/ui/icon.tsx",
-      "source_location": "L75"
+      "source_location": "L79"
     },
     {
       "_origin": "ast",
