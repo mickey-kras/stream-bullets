@@ -165,6 +165,8 @@ export interface ReplyAnchor {
 export interface ReplyPage {
   replies: Comment[];
   earlierReplies: number | null;
+  // All replies of the thread now, so a reader's count follows replies that others deleted.
+  replyCount: number;
 }
 
 const ANCHOR_OPERATOR: Readonly<Record<ReplyAnchor["direction"], string>> = { after: ">", before: "<", from: ">=" };
@@ -179,7 +181,8 @@ async function replyPage(
   const before = anchor?.direction === "before";
   const order = before ? "DESC" : "ASC";
   const where = anchor ? `WHERE (c.created_at, c.id) ${ANCHOR_OPERATOR[anchor.direction]} (?, ?)` : "";
-  const { results } = await env.DB.prepare(`
+  const [page, total] = await env.DB.batch([
+    env.DB.prepare(`
     WITH RECURSIVE ${threadIds}, ordered AS (
       SELECT t.id, row_number() OVER (ORDER BY c.created_at, c.id) AS n
       FROM thread t JOIN entry_comments c ON c.id=t.id WHERE t.id<>t.root
@@ -188,17 +191,22 @@ async function replyPage(
       LEFT JOIN entry_comments p ON p.id=c.parent_id LEFT JOIN user pu ON pu.id=p.author_id
     ${where}
     ORDER BY c.created_at ${order}, c.id ${order} LIMIT ?
-  `)
-    .bind(
+  `).bind(
       JSON.stringify([rootId]),
       viewerId ?? "",
       viewerId ?? "",
       ...(anchor ? [anchor.createdAt, anchor.id] : []),
       REPLY_PAGE_SIZE,
-    )
-    .all<ReplyRow & { n: number }>();
+    ),
+    env.DB.prepare(`WITH RECURSIVE ${threadIds} SELECT count(*) - 1 AS n FROM thread`).bind(JSON.stringify([rootId])),
+  ]);
+  const results = page.results as (ReplyRow & { n: number })[];
   const rows = before ? results.reverse() : results;
-  return { replies: rows.map(replyValue), earlierReplies: rows.length ? rows[0].n - 1 : null };
+  return {
+    replies: rows.map(replyValue),
+    earlierReplies: rows.length ? rows[0].n - 1 : null,
+    replyCount: (total.results[0] as { n: number } | undefined)?.n ?? 0,
+  };
 }
 
 function threadValue(row: CommentRow, window: ReplyWindow | undefined): CommentThread {

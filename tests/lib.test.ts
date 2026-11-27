@@ -27,7 +27,7 @@ import {
 } from "../app/lib/shell";
 import { eventsJsonLd, personJsonLd, postingJsonLd, siteJsonLd } from "../app/lib/structured-data";
 import { supportLabel } from "../app/lib/support";
-import { replyParent, visibleReplies, withReplies } from "../app/lib/threads";
+import { replyParent, visibleReplies, withPage, withReplies } from "../app/lib/threads";
 import { usePrefs } from "../app/lib/use-prefs";
 import { formatDate, isValidZone, parseDate } from "../app/lib/zoned";
 import type { Comment, StreamEvent } from "../app/types";
@@ -352,6 +352,34 @@ describe("comment threads", (): void => {
     const earlier = withReplies(thread, page, true);
     expect(earlier).toMatchObject({ earlierReplies: 29, replyCount: 100 });
     expect(visibleReplies(earlier, true)).toMatchObject({ earlier: 29, later: 0, unloaded: 0 });
+  });
+
+  it("takes the counts of each page from the server, also after other readers deleted replies", (): void => {
+    const replies = (from: number, to: number): Comment[] =>
+      Array.from({ length: to - from + 1 }, (_: unknown, index: number) =>
+        comment(`r${from + index}`, { createdAt: from + index }),
+      );
+    // The preview said 100 replies; reply 50 went away before the reader loaded the rest.
+    let thread = { ...comment("t"), ...window(replies(1, 2), 100) };
+    thread = withPage(thread, { replies: replies(3, 52).filter((r) => r.id !== "r50"), earlierReplies: 2, replyCount: 99 }, false);
+    thread = withPage(thread, { replies: replies(53, 100), earlierReplies: 51, replyCount: 99 }, false);
+    expect(thread).toMatchObject({ earlierReplies: 0, replyCount: 99 });
+    expect(visibleReplies(thread, true)).toMatchObject({ later: 0, unloaded: 0 });
+    // An empty page after the loaded replies ends the thread there, whatever the count said.
+    const stale = { ...comment("t"), ...window(replies(1, 2), 5) };
+    expect(withPage(stale, { replies: [], earlierReplies: null, replyCount: 5 }, false)).toMatchObject({
+      replyCount: 2,
+    });
+    // An earlier page sets the replies before the window; an empty one leaves none.
+    const linked = { ...comment("t"), ...window(replies(80, 100), 100, 79) };
+    expect(withPage(linked, { replies: replies(30, 79), earlierReplies: 29, replyCount: 100 }, true)).toMatchObject({
+      earlierReplies: 29,
+      replyCount: 100,
+    });
+    expect(withPage(linked, { replies: [], earlierReplies: null, replyCount: 21 }, true)).toMatchObject({
+      earlierReplies: 0,
+      replyCount: 21,
+    });
   });
 
   it("finds the parent a reply answers, also when the parent is not loaded", (): void => {

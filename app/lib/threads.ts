@@ -46,6 +46,29 @@ export function withReplies(thread: CommentThread, page: readonly Comment[], bef
   };
 }
 
+// A page of `GET /api/comments/:id/replies`.
+export interface ReplyPage {
+  replies: Comment[];
+  earlierReplies: number | null;
+  replyCount: number;
+}
+
+// Adds a page of replies with the counts the server sent: the replies now in the thread, and the ones before the
+// first loaded reply. An empty page shows that nothing more lies in its direction.
+export function withPage(thread: CommentThread, page: ReplyPage, before: boolean): CommentThread {
+  const next: CommentThread = withReplies(thread, page.replies, before);
+  if (page.earlierReplies === null || page.replies.length === 0) {
+    if (before) return { ...next, earlierReplies: 0, replyCount: Math.max(page.replyCount, next.replies.length) };
+    return { ...next, replyCount: next.earlierReplies + next.replies.length };
+  }
+  const loadedBefore: number = next.replies.findIndex((reply: Comment) => reply.id === page.replies[0].id);
+  return {
+    ...next,
+    earlierReplies: Math.max(0, page.earlierReplies - Math.max(0, loadedBefore)),
+    replyCount: page.replyCount,
+  };
+}
+
 // The author a reply answers; null means a removed comment. A parent that is not loaded comes from `parentAuthor`.
 export function replyParent(thread: CommentThread, reply: Comment): Pick<Comment, "author" | "removed"> | null {
   if (!reply.parentId) return null;

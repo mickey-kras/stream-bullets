@@ -489,11 +489,12 @@ describe("discussion", (): void => {
     expect(ids((await page(at("from", 60))).replies)).toEqual(range(60, 109));
     expect(await page(null)).toMatchObject({ earlierReplies: 0 });
     expect(ids((await page(null)).replies)).toEqual(range(1, 50));
-    expect(await page(at("after", 120))).toEqual({ replies: [], earlierReplies: null });
+    expect(await page(at("after", 120))).toEqual({ replies: [], earlierReplies: null, replyCount: 120 });
     // Another reader deletes the reply a page starts from: the place still works.
     await env.DB.prepare("DELETE FROM entry_comments WHERE id=?").bind(reply(52)).run();
     expect(ids((await page(at("after", 52))).replies)).toEqual(range(53, 102));
-    expect(await page(at("after", 52))).toMatchObject({ earlierReplies: 51 });
+    // Each page sends the replies now in the thread: 119 after the deletion.
+    expect(await page(at("after", 52))).toMatchObject({ earlierReplies: 51, replyCount: 119 });
 
     // A link to reply 60 brings the 10 replies before and after it, not the whole thread.
     const linked = await getCommentThread(env, reply(60), null);

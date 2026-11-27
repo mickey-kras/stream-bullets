@@ -8,7 +8,15 @@ import { useCommentTranslation } from "./comment-translation";
 import type { MentionSelection } from "./mention-input";
 import { intlLocale, t } from "../i18n";
 import { useShell } from "../lib/shell";
-import { orderReplies, orderThreads, replyCursor, replyParent, visibleReplies, withReplies } from "../lib/threads";
+import {
+  orderReplies,
+  orderThreads,
+  replyCursor,
+  replyParent,
+  visibleReplies,
+  withPage,
+  type ReplyPage,
+} from "../lib/threads";
 import type { Comment, CommentThread, SortOrder, StreamerStatus, ThreadSnapshot, Viewer } from "../types";
 import { KeyConfirm } from "./admin/key-confirm";
 import { errorMessage, needsStepUp, postJson, requestJson } from "./api";
@@ -566,12 +574,9 @@ async function fetchReplies(
   rootId: string,
   anchor: { direction: ReplyDirection; cursor: string } | null,
   signal?: AbortSignal,
-): Promise<{ replies: Comment[]; earlierReplies: number | null }> {
+): Promise<ReplyPage> {
   const query: string = anchor ? `?${anchor.direction}=${encodeURIComponent(anchor.cursor)}` : "";
-  return requestJson<{ replies: Comment[]; earlierReplies: number | null }>(
-    `/api/comments/${encodeURIComponent(rootId)}/replies${query}`,
-    { signal },
-  );
+  return requestJson<ReplyPage>(`/api/comments/${encodeURIComponent(rootId)}/replies${query}`, { signal });
 }
 
 // After a refresh, the threads whose replies the reader had loaded get the same window again.
@@ -608,7 +613,7 @@ async function withComment(
   const last: Comment | undefined = current ? orderReplies(current.replies).at(-1) : undefined;
   if (current && last && loaded.has(current.id)) {
     const page = await fetchReplies(current.id, { direction: "after", cursor: replyCursor(last) }, signal);
-    const next: CommentThread = withReplies(current, page.replies, false);
+    const next: CommentThread = withPage(current, page, false);
     if (next.replies.some((reply: Comment) => reply.id === id)) {
       loaded.set(next.id, { from: loaded.get(next.id)?.from ?? null, count: next.replies.length });
       return values.map((thread: CommentThread) => (thread.id === next.id ? next : thread));
@@ -624,16 +629,14 @@ async function repliesFrom(thread: CommentThread, window: LoadedReplies, signal:
     window.from === null ? null : { direction: "from", cursor: window.from },
     signal,
   );
-  let loaded: CommentThread = withReplies(
-    { ...thread, replies: [], earlierReplies: first.earlierReplies ?? 0 },
-    first.replies,
-    false,
-  );
-  let page: Comment[] = first.replies;
-  while (page.length > 0 && loaded.replies.length < window.count && loaded.replies.length < thread.replyCount) {
+  // Nothing is left from that place on: keep the thread as the refresh sent it.
+  if (first.replies.length === 0) return thread;
+  let loaded: CommentThread = withPage({ ...thread, replies: [], earlierReplies: 0 }, first, false);
+  let page: ReplyPage = first;
+  while (page.replies.length > 0 && loaded.replies.length < Math.min(window.count, loaded.replyCount)) {
     const last: Comment = loaded.replies.at(-1)!;
-    page = (await fetchReplies(thread.id, { direction: "after", cursor: replyCursor(last) }, signal)).replies;
-    loaded = withReplies(loaded, page, false);
+    page = await fetchReplies(thread.id, { direction: "after", cursor: replyCursor(last) }, signal);
+    loaded = withPage(loaded, page, false);
   }
   return loaded;
 }
@@ -863,9 +866,8 @@ export function Discussion({
       setThreads((current: CommentThread[]) =>
         current.map((value: CommentThread) => {
           if (value.id !== thread.id) return value;
-          let next = withReplies(value, page.replies, before);
-          // The server counts the replies before an earlier page, also when some went away since.
-          if (before && page.earlierReplies !== null) next = { ...next, earlierReplies: page.earlierReplies };
+          // The page brings the counts of the server, also when other readers deleted replies since.
+          const next = withPage(value, page, before);
           const first: Comment | undefined = orderReplies(next.replies)[0];
           loadedReplies.current.set(next.id, {
             from: next.earlierReplies === 0 || !first ? null : replyCursor(first),
