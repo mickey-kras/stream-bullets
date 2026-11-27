@@ -5,16 +5,28 @@ import { toolsPath } from "../../lib/shell";
 import { ControlApiContext } from "../overlay/control-api";
 import { StepHeading } from "../overlay/step-heading";
 
-/** One part of the Live section: a titled panel. `name` is for styles and tests. */
+/**
+ * One part of the Live section: a titled panel. `name` is for styles and tests. `action` is a control beside the
+ * title, at the end of the title line.
+ */
 export function LivePart({
   name,
   title,
+  action,
   children,
-}: Readonly<{ name: string; title: string; children: ReactNode }>): ReactNode {
+}: Readonly<{ name: string; title: string; action?: ReactNode; children: ReactNode }>): ReactNode {
   const id: string = useId();
+  const heading: ReactNode = <StepHeading id={id} title={title} />;
   return (
     <section className="ov-step tl-part" aria-labelledby={id} data-live-part={name}>
-      <StepHeading id={id} title={title} />
+      {action ? (
+        <div className="tl-part-head">
+          {heading}
+          {action}
+        </div>
+      ) : (
+        heading
+      )}
       {children}
     </section>
   );

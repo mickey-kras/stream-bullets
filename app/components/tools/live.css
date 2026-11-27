@@ -20,8 +20,32 @@
     top: calc(var(--header-height, 72px) + 12px);
   }
 }
+/* A part is a container: the layout of its buttons follows its width, on a phone and in the dock too. The limits are
+   in rem, so a larger text size gets the narrow layout at a larger width. */
+.tl-part {
+  container: live-part / inline-size;
+  --tl-action-width: 14.375rem;
+}
 .tl-part > * + * {
   margin-top: 12px;
+}
+/* The title of a part with a control at the end of its line. */
+.tl-part-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.tl-part-head .ov-step-title {
+  min-width: 0;
+  margin: 0;
+}
+.tl-part-head .icon-button {
+  flex: none;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
 }
 .tl-title {
   margin: 0;
@@ -51,6 +75,56 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+}
+/* The on-air actions of the poll fill one row in equal columns. */
+.tl-fill-row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+/* A label wraps in a long language. A word that is wider than its button breaks, so no text goes out of the button. */
+.tl-fill-row > button,
+.tl-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 44px;
+  overflow-wrap: anywhere;
+}
+/* The buttons that feature a topic and the buttons of the message banner: one width, at the end of their rows. */
+.tl-action {
+  flex: none;
+  width: var(--tl-action-width);
+}
+.tl-air-row {
+  justify-content: flex-end;
+}
+.tl-air-row > .tl-state {
+  margin-inline-end: auto;
+}
+@container live-part (width < 30rem) {
+  .tl-action {
+    width: 100%;
+  }
+}
+/* A part of the width of a phone: the row stays. The icon is above the label, so the longest word of a label in the
+   11 languages has room in a column. */
+@container live-part (21.5rem <= width < 30rem) {
+  .tl-fill-row > button {
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 4px;
+    line-height: 1.25;
+  }
+}
+/* A narrower part, as in the dock or with a large text size: one column. */
+@container live-part (width < 21.5rem) {
+  .tl-fill-row {
+    grid-auto-flow: row;
+  }
 }
 .tl-note {
   margin-bottom: 0;
@@ -97,19 +171,16 @@
 }
 .tl-list {
   display: grid;
-  gap: 8px;
 }
+/* A line divides the rows. A row has no box, so its button ends at the edge of the part, as the button of the message
+   banner does. */
 .tl-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 12px;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-control);
-}
-.tl-row[data-on-air] {
-  border-color: var(--live);
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
 }
 .tl-row-text {
   display: grid;

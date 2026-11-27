@@ -1376,6 +1376,7 @@
   "tools.live.obsUnknown": "实时更新连接后，这里会显示 OBS 的状态。",
   "tools.live.openChannels": "打开频道",
   "tools.live.openOverlay": "打开叠加层",
+  "tools.live.editOverlay": "编辑叠加层",
   "tools.live.preview": "OBS 显示的内容",
   "tools.live.previewNote": "更改会立即同步到 OBS。",
   "tools.live.previewEmpty": "直播中没有显示任何图层。",

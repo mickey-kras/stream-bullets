@@ -1376,6 +1376,7 @@
   "tools.live.obsUnknown": "ライブ更新が接続されると、OBS の状態が表示されます。",
   "tools.live.openChannels": "チャンネルを開く",
   "tools.live.openOverlay": "オーバーレイを開く",
+  "tools.live.editOverlay": "オーバーレイを編集",
   "tools.live.preview": "OBS の表示内容",
   "tools.live.previewNote": "変更はすぐに OBS に反映されます。",
   "tools.live.previewEmpty": "配信に表示中のレイヤーはありません。",

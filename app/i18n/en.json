@@ -1458,6 +1458,7 @@
   "tools.live.chat.screenOff": "This browser cannot keep the screen on. Turn off the screen lock of your device while you stream.",
   "tools.live.chat.smaller": "Smaller text",
   "tools.live.chat.unavailable": "Chat is not available right now.",
+  "tools.live.editOverlay": "Edit the overlay",
   "tools.live.message": "Message banner",
   "tools.live.message.put": "Put on stream",
   "tools.live.message.update": "Update on stream",

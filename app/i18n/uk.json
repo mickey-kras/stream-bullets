@@ -1436,6 +1436,7 @@
   "tools.live.obsUnknown": "Стан OBS з’явиться, коли підключаться оновлення наживо.",
   "tools.live.openChannels": "Відкрити «Канали»",
   "tools.live.openOverlay": "Відкрити «Оверлей»",
+  "tools.live.editOverlay": "Редагувати оверлей",
   "tools.live.preview": "Що показує OBS",
   "tools.live.previewNote": "Зміни потрапляють в OBS одразу.",
   "tools.live.previewEmpty": "На стримі немає жодного шару.",

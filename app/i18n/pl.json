@@ -1436,6 +1436,7 @@
   "tools.live.obsUnknown": "Stan OBS pojawi się, gdy połączą się aktualizacje na żywo.",
   "tools.live.openChannels": "Otwórz Kanały",
   "tools.live.openOverlay": "Otwórz Nakładkę",
+  "tools.live.editOverlay": "Edytuj nakładkę",
   "tools.live.preview": "Co pokazuje OBS",
   "tools.live.previewNote": "Zmiany trafiają do OBS od razu.",
   "tools.live.previewEmpty": "Żadna warstwa nie jest na streamie.",
