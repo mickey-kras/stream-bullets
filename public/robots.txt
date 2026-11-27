@@ -5,6 +5,7 @@
 # Respect the rate limits. A summary for language models: https://streambullets.com/llms.txt
 # The full policy: https://streambullets.com/ai
 
+# Crawl public dialog URLs so crawlers can read their canonical links.
 User-agent: *
 Allow: /
 Disallow: /api/
@@ -12,6 +13,5 @@ Disallow: /admin
 Disallow: /tools
 Disallow: /overlay-control
 Disallow: /*/overlay
-Disallow: /*?dialog=
 
 Sitemap: https://streambullets.com/sitemap.xml

@@ -11,7 +11,9 @@ test("public pages emit canonical URLs in server HTML", async ({ request }) => {
   expect(sitemap.status()).toBe(200);
   expect(sitemap.headers()["content-type"]).toContain("application/xml");
   expect(await sitemap.text()).toContain(`<loc>${origin}/@feature_host</loc>`);
-  expect(await (await request.get("/robots.txt")).text()).toContain("Sitemap: https://streambullets.com/sitemap.xml");
+  const robots: string = await (await request.get("/robots.txt")).text();
+  expect(robots).toContain("Sitemap: https://streambullets.com/sitemap.xml");
+  expect(robots).not.toMatch(/^Disallow:.*dialog=/mu);
 });
 
 test("the built Worker ships the notices of its dependencies", async ({ request }) => {
