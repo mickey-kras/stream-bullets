@@ -231,7 +231,7 @@ function drawWorld(
   drawProps(view, theme, at);
   drawLandmarks(ctx, view, theme, at, now, reduced, blink);
   drawBlocks(ctx, view, theme, atlas.terrain);
-  drawFlags(ctx, view, theme);
+  drawFlags(ctx, view, theme, atlas, now, reduced);
 }
 
 /** One prop in the middle of each run of equal tiles, unless a hole is there. */
@@ -299,18 +299,13 @@ function drawCharacters(
     if (!sequence) continue;
     const column: number = reduced ? (sequence.still ?? sequence.frames[0]) : frameAt(sequence, c.t);
     const rect: Rect = [column * cell, rows.indexOf(sequence.row) * cell, cell, cell];
-    const { danceTurnTicks, cheerLift, cheerTicks } = theme.builds;
-    // A dance turns around in time, and a cheer jumps on the spot. The atlas has no pictures for them yet.
-    const turned: boolean = !reduced && c.state === "dance" && Math.floor(c.t / danceTurnTicks) % 2 === 1;
-    const left: boolean = c.dir < 0 !== turned;
-    const lift: number =
-      !reduced && c.state === "cheer" ? Math.abs(Math.sin((c.t / cheerTicks) * Math.PI)) * cheerLift : 0;
+    const left: boolean = c.dir < 0;
     picture(
       ctx,
       atlas.sheets.get(c.platform),
       rect,
       snap(c.x) - (left ? cell - anchor.x : anchor.x),
-      snap(c.y - lift) - anchor.y,
+      snap(c.y) - anchor.y,
       left,
     );
   }
@@ -885,9 +880,9 @@ export function draw(
   ctx.imageSmoothingEnabled = false;
   ctx.setTransform(PIXEL_SCALE, 0, 0, PIXEL_SCALE, 0, top);
   drawWorld(ctx, view, theme, atlas, now, options.reduced);
-  drawRopes(ctx, view, theme, options.reduced);
+  drawRopes(ctx, view, theme, atlas, options.reduced);
   drawCharacters(ctx, view, theme, atlas, options.reduced);
-  drawGear(ctx, view, theme, now);
+  drawGear(ctx, view, theme, atlas, now, options.reduced);
   drawParticles(ctx, memory);
   drawMarks(ctx, view, theme);
   const badges = badgesOf(ctx, view, theme, options.badges);
