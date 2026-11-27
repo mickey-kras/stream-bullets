@@ -1,11 +1,18 @@
 import { DURATION } from "../../../lib/playground/constants";
-import { PIXEL_SCALE, type PlaygroundTheme, type Rect, type TerrainPicture } from "../wasteland/playground-theme";
-import { helmetColor } from "./sprites";
+import { TICK_HZ } from "../../../lib/playground/constants";
+import {
+  PIXEL_SCALE,
+  type PlaygroundTheme,
+  type Point,
+  type Rect,
+  type TerrainPicture,
+} from "../wasteland/playground-theme";
+import type { Atlas } from "./sprites";
 import type { BlockView, CharacterView, PlaygroundView, RopeView } from "./view";
 
 /**
- * The drawing of what the viewers build: blocks, stairs, planks, flags, ropes, the crown and the jetpack. The shared
- * picture helpers are here too. Everything draws in world pixels.
+ * The drawing of what the viewers build and carry: blocks, stairs, planks, flags, ropes, the crown and the flame of
+ * a jetpack. The shared picture helpers are here too. Everything draws in world pixels.
  */
 
 export function snap(value: number): number {
@@ -32,32 +39,21 @@ export function picture(
   ctx.restore();
 }
 
-/** One tread of the step picture (3 px, without its leg) with its left edge at x, turned for a stair to the left. */
-function tread(
-  ctx: CanvasRenderingContext2D,
-  theme: PlaygroundTheme,
-  terrain: HTMLImageElement,
-  x: number,
-  top: number,
-  dir: 1 | -1,
-  leg: number,
-): void {
-  const [sx, sy, sw] = theme.terrain.rects.step;
-  ctx.save();
-  ctx.translate(dir > 0 ? x : x + sw, 0);
-  ctx.scale(dir, 1);
-  ctx.drawImage(terrain, sx, sy, sw, 3, 0, top, sw, 3);
-  if (leg > 0) ctx.drawImage(terrain, sx, sy + 3, sw, 1, 0, top + 3, sw, leg);
-  ctx.restore();
-}
-
 /** The picture of a dirt block: one of the dirt tiles by its cell, or a cracked tile. */
 function dirtPicture(block: BlockView): TerrainPicture {
   if (block.stage === 0) return (["dirt0", "dirt1", "dirt2"] as const)[(block.c + block.r) % 3];
   return block.stage === 1 ? "crack1" : "crack2";
 }
 
-/** The builds: dirt blocks with the ground pictures, planks and stairs with the step picture. */
+/** The picture of a plank: an end cap where the bridge ends in the air, the middle piece beside a block. */
+function plankPicture(block: BlockView, taken: ReadonlySet<string>): TerrainPicture {
+  const left: boolean = taken.has(`${block.c - 1},${block.r}`);
+  const right: boolean = taken.has(`${block.c + 1},${block.r}`);
+  if (left === right) return "plankM";
+  return left ? "plankR" : "plankL";
+}
+
+/** The builds: dirt blocks with the ground pictures, planks at the top of their cell, and stairs. */
 export function drawBlocks(
   ctx: CanvasRenderingContext2D,
   view: PlaygroundView,
@@ -65,31 +61,34 @@ export function drawBlocks(
   terrain: HTMLImageElement,
 ): void {
   const { rects, tile } = theme.terrain;
-  const sw: number = rects.step[2];
-  const { stairTreads, plankTreads } = theme.builds;
+  const taken = new Set<string>(view.blocks.map((block: BlockView): string => `${block.c},${block.r}`));
   for (const block of view.blocks) {
     const x: number = block.c * tile;
     const y: number = view.world.ground - (block.r + 1) * tile;
     if (block.kind === "dirt") picture(ctx, terrain, rects[dirtPicture(block)], x, y);
-    else if (block.kind === "plank") for (const dx of plankTreads) tread(ctx, theme, terrain, x + dx, y, 1, 0);
-    else {
-      stairTreads.forEach((dx: number, i: number): void => {
-        const rise: number = 4 * (i + 1);
-        tread(ctx, theme, terrain, block.dir > 0 ? x + dx : x + tile - sw - dx, y + tile - rise, block.dir, rise - 3);
-      });
-    }
+    else if (block.kind === "plank") picture(ctx, terrain, rects[plankPicture(block, taken)], x, y);
+    else picture(ctx, terrain, rects.stair, x, y, block.dir < 0);
   }
 }
 
-/** The flags of the viewers: a pole and a pennant in the helmet colour of the owner's platform. */
-export function drawFlags(ctx: CanvasRenderingContext2D, view: PlaygroundView, theme: PlaygroundTheme): void {
+/** The frame of a loop at `now` (performance.now()): each frame shows for `ticks` rules ticks. */
+function loopFrame(now: number, ticks: number, count: number, reduced: boolean): number {
+  return reduced ? 0 : Math.floor((now * TICK_HZ) / (1000 * ticks)) % count;
+}
+
+/** The flags of the viewers: the cloth has the helmet colour of the owner's platform. The pole stands on flag.x + 4. */
+export function drawFlags(
+  ctx: CanvasRenderingContext2D,
+  view: PlaygroundView,
+  theme: PlaygroundTheme,
+  atlas: Atlas,
+  now: number,
+  reduced: boolean,
+): void {
+  const { frames, ticksPerFrame } = theme.builds.viewerFlag;
+  const frame: Rect = frames[loopFrame(now, ticksPerFrame, frames.length, reduced)];
   for (const flag of view.flags) {
-    const x: number = Math.round(flag.x) + 4;
-    const y: number = Math.round(flag.y);
-    ctx.fillStyle = theme.builds.pole;
-    ctx.fillRect(x, y - 15, 1, 15);
-    ctx.fillStyle = helmetColor(theme, flag.platform);
-    ctx.fillRect(x + 1, y - 15, 7, 5);
+    picture(ctx, atlas.flags.get(flag.platform), frame, Math.round(flag.x) + 4, Math.round(flag.y) - frame[3]);
   }
 }
 
@@ -104,17 +103,23 @@ export function drawRopes(
   ctx: CanvasRenderingContext2D,
   view: PlaygroundView,
   theme: PlaygroundTheme,
+  atlas: Atlas,
   reduced: boolean,
 ): void {
+  const { builds } = theme;
+  const hook: Rect = theme.terrain.rects.hook;
   for (const rope of view.ropes) {
     const c: CharacterView | undefined = view.characters.find((o: CharacterView): boolean => o.id === rope.id);
     if (!c) continue;
     const share: number = reduced ? 1 : ropeShare(rope, c);
-    const from = { x: snap(c.x) + c.dir * 4, y: snap(c.y) - 20 };
+    const [dx, dy]: Point = c.state === "zip" ? builds.ropeFrom.zip : builds.ropeFrom.shoot;
+    const from = { x: snap(c.x) + c.dir * dx, y: snap(c.y) + dy };
+    // At the end of the ride the hand is above the hook: the rope is then behind the character.
+    if (c.state === "zip" && from.y <= rope.y) continue;
     const to = { x: from.x + (rope.x - from.x) * share, y: from.y + (rope.y - from.y) * share };
     for (const [color, width] of [
-      [theme.builds.ropeInk, 2],
-      [theme.builds.rope, 1],
+      [builds.ropeInk, 2],
+      [builds.rope, 1],
     ] as const) {
       ctx.strokeStyle = color;
       ctx.lineWidth = width;
@@ -123,34 +128,27 @@ export function drawRopes(
       ctx.lineTo(to.x, to.y);
       ctx.stroke();
     }
-    ctx.fillStyle = theme.builds.hook;
-    ctx.fillRect(Math.round(to.x) - 1, Math.round(to.y) - 1, 3, 3);
+    picture(ctx, atlas.terrain, hook, Math.round(to.x) - 2, Math.round(to.y) - 2, c.dir < 0);
   }
 }
 
-/** The crown over the head of the highest character, and the pack and flame of a jetpack. */
+/** The crown over the head of the highest character, and the flame under the pack of a jetpack. */
 export function drawGear(
   ctx: CanvasRenderingContext2D,
   view: PlaygroundView,
   theme: PlaygroundTheme,
+  atlas: Atlas,
   now: number,
+  reduced: boolean,
 ): void {
-  const { builds } = theme;
+  const { rects } = theme.terrain;
+  const { flame, crown } = theme.builds;
+  const burn: Rect = rects[flame.pictures[loopFrame(now, 2, flame.pictures.length, reduced)]];
   for (const c of view.characters) {
     const x: number = Math.round(c.x);
     const y: number = Math.round(c.y);
-    if (c.state === "jet") {
-      const back: number = x - c.dir * 7;
-      ctx.fillStyle = builds.pack;
-      ctx.fillRect(back - 2, y - 20, 4, 9);
-      ctx.fillStyle = builds.flame[Math.floor(now / theme.blinkMs) % builds.flame.length];
-      ctx.fillRect(back - 1, y - 11, 2, 5);
-    }
+    if (c.state === "jet") picture(ctx, atlas.terrain, burn, x + c.dir * flame.at[0] - burn[2] / 2, y + flame.at[1]);
     if (c.id !== view.crown || !theme.sequences[c.state]) continue;
-    ctx.fillStyle = builds.crownInk;
-    ctx.fillRect(x - 5, y - 35, 10, 5);
-    ctx.fillStyle = builds.crown;
-    ctx.fillRect(x - 4, y - 32, 8, 1);
-    for (const dx of [-4, -1, 0, 3]) ctx.fillRect(x + dx, y - 34, 1, 2);
+    picture(ctx, atlas.terrain, rects.crown, x + crown[0] - rects.crown[2] / 2, y + crown[1] - rects.crown[3]);
   }
 }
