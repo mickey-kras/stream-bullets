@@ -1163,6 +1163,35 @@ describe("the goal", (): void => {
     expect(readLayers).toHaveBeenCalledTimes(3);
   });
 
+  it("sets the alarm to the next read of the layers after the goal counted, also with no page", async (): Promise<void> => {
+    const { host, schedule, sockets } = standalone(withGoal("follows"));
+    sockets.length = 0;
+    await host.layersChanged();
+    await host.wake();
+    // No event used the copy since the read: no alarm.
+    expect(schedule).not.toHaveBeenCalled();
+    vi.setSystemTime(T0 + 1000);
+    host.receive(support("follow", "f1"));
+    await host.wake();
+    expect(schedule.mock.calls).toEqual([[T0 + LAYER_CHECK_MS]]);
+    vi.setSystemTime(T0 + LAYER_CHECK_MS);
+    schedule.mockClear();
+    await host.alarm();
+    // The read is new, and no event used it.
+    expect(schedule).not.toHaveBeenCalled();
+  });
+
+  it("keeps the IDs of the newest DELIVERIES_KEPT support events when repeated IDs come", (): void => {
+    const sql = new RoomState({ toString: (): string => "repeats" }).storage.sql as unknown as SqlStorage;
+    ALERTS.create(sql);
+    for (let index = 0; index < DELIVERIES_KEPT; index++) ALERTS.first(sql, `twitch:${index}`, DELIVERIES_KEPT);
+    for (let index = 0; index < DELIVERIES_KEPT; index++)
+      expect(ALERTS.first(sql, `twitch:${index}`, DELIVERIES_KEPT)).toBe(false);
+    expect(ALERTS.first(sql, "twitch:new", DELIVERIES_KEPT)).toBe(true);
+    expect(sql.exec<{ n: number }>("SELECT count(*) AS n FROM alert_counted").toArray()[0].n).toBe(DELIVERIES_KEPT);
+    expect(ALERTS.first(sql, "twitch:1", DELIVERIES_KEPT)).toBe(false);
+  });
+
   it("keeps the IDs of the newest DELIVERIES_KEPT support events", (): void => {
     const sql = new RoomState({ toString: (): string => "ids" }).storage.sql as unknown as SqlStorage;
     ALERTS.create(sql);

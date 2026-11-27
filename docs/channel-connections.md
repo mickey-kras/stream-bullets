@@ -310,6 +310,8 @@ Thus an event that wakes the object reads no database. The host reads the saved 
 - Before each test, each replay, and each `goalReset`.
 - When a socket opens and the copy is older than 60 seconds.
 - When the alarm runs and the copy is older than 60 seconds, while a page listens or the goal counts.
+- 60 seconds after the last read, when an event used the copy since the read. The host sets the alarm for this read.
+  Thus a change notice that did not arrive changes the alerts and the goal for at most 60 seconds.
 
 A message to a socket never has a platform user ID. A view has the display name, and `null` for an anonymous supporter.
 The user ID of a supporter is only in the line, for the reaction of the character.
@@ -676,7 +678,7 @@ The test deployment reads no platform. It uses the synthetic streams of `testStr
 | Alert on stream | One alert at a time, for 6 seconds |
 | Line of alerts | At most 100 alerts that wait: the alerts of 10 minutes. The object drops a new alert while the line is full. |
 | Replay of an alert | Only for a support event in the support snapshot: the newest 50, for at most 10 minutes |
-| Saved layers in the alert host | The host reads them again at the first alarm or new socket after 60 seconds, while a page listens or the goal counts |
+| Saved layers in the alert host | The host reads them again at the first alarm or new socket after 60 seconds, while a page listens or the goal counts. It also reads them 60 seconds after a read that an event used |
 | Support event IDs for the goal and the alerts | The newest 2,000, with no time limit |
 | People of a goal for chatters | At most 100,000. The count stops there. |
 | Delivery IDs, message IDs, ban keys, and support event IDs for deduplication | 15 minutes, at most 97,000 IDs |

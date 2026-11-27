@@ -212,6 +212,10 @@ export class AlertHost {
   private goal: StoredGoal | null = null;
   /** When this instance of the object read the layers. 0: not yet, so the copy from storage can be old. */
   private configAt = 0;
+  /** When the host last tried to read the layers, with or without success. */
+  private triedAt = 0;
+  /** When the host last used its copy of the layers for an event: an alert or a count of the goal. */
+  private usedAt = 0;
   /** The state changed since the sockets got it. */
   private unsent = false;
   private refreshing: Promise<boolean> | null = null;
@@ -258,6 +262,8 @@ export class AlertHost {
     this.config = null;
     this.goal = null;
     this.configAt = 0;
+    this.triedAt = 0;
+    this.usedAt = 0;
     this.unsent = false;
     ALERTS.create(this.options.sql);
   }
@@ -271,6 +277,7 @@ export class AlertHost {
     const now: number = Date.now();
     if (event.kind === "chat") this.chatted(event);
     else if (isSupport(event) && !event.replay && ALERTS.first(this.options.sql, event.id, DELIVERIES_KEPT)) {
+      if (this.config !== null) this.usedAt = now;
       this.count(event);
       this.live(event, now);
     }
@@ -311,11 +318,12 @@ export class AlertHost {
 
   /**
    * The object's alarm. It reads the layers again when the copy is old and the host uses it: a page listens, the
-   * goal counts, or the host has no copy. Thus a missed change does not stay. Then it ends the alert on stream when
+   * goal counts, an event used the copy, or the host has no copy. Thus a missed change does not stay. Then it ends the alert on stream when
    * its time is over, and starts the next one.
    */
   async alarm(): Promise<void> {
-    const used: boolean = this.options.sockets().length > 0 || this.config === null || this.counts() !== null;
+    const used: boolean =
+      this.options.sockets().length > 0 || this.config === null || this.counts() !== null || this.checks();
     if (used && this.old(Date.now())) await this.refresh();
     const now: number = Date.now();
     // No page listens: the alerts have nobody to play for, and none of them plays later.
@@ -325,9 +333,20 @@ export class AlertHost {
     await this.wake();
   }
 
-  /** Sets the object's alarm to the end of the alert on stream. */
+  /**
+   * Sets the object's alarm to the end of the alert on stream, and to the next read of the layers while the host
+   * uses its copy. Thus a missed layer change stays at most LAYER_CHECK_MS, also when no alert plays.
+   */
   async wake(): Promise<void> {
-    if (this.line.current !== null) await this.options.schedule(this.line.current.endsAt);
+    const ends: number = this.line.current?.endsAt ?? Infinity;
+    const check: number = this.checks() ? this.triedAt + LAYER_CHECK_MS : Infinity;
+    const at: number = Math.min(ends, check);
+    if (at !== Infinity) await this.options.schedule(at);
+  }
+
+  /** The host used its copy of the layers for an event after the last read. */
+  private checks(): boolean {
+    return this.usedAt > this.configAt;
   }
 
   /** The owner disconnected a platform: its alerts leave the line, as its support events leave the snapshot. */
@@ -415,6 +434,7 @@ export class AlertHost {
   private progress(goal: StoredGoal, next: GoalProgress): void {
     if (next === goal.progress) return;
     this.goal = { ...goal, progress: next };
+    this.usedAt = Date.now();
     ALERTS.write(this.options.sql, "goal", this.goal);
     this.unsent = true;
   }
@@ -580,6 +600,7 @@ export class AlertHost {
         console.error("alerts_config_failed", { cause: cause(error) });
         ok = false;
       }
+      this.triedAt = Date.now();
     } while (this.stale);
     return ok;
   }
@@ -595,7 +616,7 @@ export class AlertHost {
     };
     const counted: StoredGoal | null = this.counting();
     this.configAt = Date.now();
-    // An unchanged copy writes nothing: the alarm reads the layers every LAYER_CHECK_MS while a page listens.
+    // An unchanged copy writes nothing: the alarm reads the layers every LAYER_CHECK_MS while the host uses them.
     if (JSON.stringify(config) !== JSON.stringify(this.config)) ALERTS.write(this.options.sql, "config", config);
     this.config = config;
     // Off stream, the alerts stop: no page shows them.

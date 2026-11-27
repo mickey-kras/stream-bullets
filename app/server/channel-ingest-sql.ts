@@ -185,7 +185,11 @@ export const ALERTS = {
       .exec<{ seq: number }>("INSERT OR IGNORE INTO alert_counted (id) VALUES (?) RETURNING seq", id)
       .toArray();
     if (added.length === 0) return false;
-    sql.exec("DELETE FROM alert_counted WHERE seq <= ?", added[0].seq - kept);
+    // An ignored insert also uses a sequence number, so the newest rows decide what stays, not the numbers.
+    sql.exec(
+      "DELETE FROM alert_counted WHERE seq <= (SELECT seq FROM alert_counted ORDER BY seq DESC LIMIT 1 OFFSET ?)",
+      kept,
+    );
     return true;
   },
   /** Adds a person to the people of the goal. False: the goal has the person. */

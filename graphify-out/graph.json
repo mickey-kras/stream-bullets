@@ -42837,7 +42837,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_add",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L469",
+      "source_location": "L489",
       "target": "app_lib_alerts_lineadd",
       "weight": 1.0
     },
@@ -42849,7 +42849,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_add",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L471",
+      "source_location": "L491",
       "target": "app_server_alert_host_alerthost_take",
       "weight": 1.0
     },
@@ -42861,7 +42861,19 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_alarm",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L318",
+      "source_location": "L326",
+      "target": "app_server_alert_host_alerthost_checks",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_alert_host_alerthost_alarm",
+      "source_file": "app/server/alert-host.ts",
+      "source_location": "L326",
       "target": "app_server_alert_host_alerthost_counts",
       "weight": 1.0
     },
@@ -42873,7 +42885,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_alarm",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L319",
+      "source_location": "L327",
       "target": "app_server_alert_host_alerthost_old",
       "weight": 1.0
     },
@@ -42885,7 +42897,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_alarm",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L319",
+      "source_location": "L327",
       "target": "app_server_alert_host_alerthost_refresh",
       "weight": 1.0
     },
@@ -42897,7 +42909,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_alarm",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L322",
+      "source_location": "L330",
       "target": "app_server_alert_host_alerthost_clear",
       "weight": 1.0
     },
@@ -42909,7 +42921,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_alarm",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L323",
+      "source_location": "L331",
       "target": "app_lib_alerts_lineadvance",
       "weight": 1.0
     },
@@ -42921,7 +42933,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_alarm",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L323",
+      "source_location": "L331",
       "target": "app_server_alert_host_alerthost_take",
       "weight": 1.0
     },
@@ -42933,7 +42945,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_alarm",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L324",
+      "source_location": "L332",
       "target": "app_server_alert_host_alerthost_flush",
       "weight": 1.0
     },
@@ -42945,7 +42957,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_alarm",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L325",
+      "source_location": "L333",
       "target": "app_server_alert_host_alerthost_wake",
       "weight": 1.0
     },
@@ -42957,7 +42969,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_apply",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L591",
+      "source_location": "L612",
       "target": "app_lib_overlay_layers_onanyoutput",
       "weight": 1.0
     },
@@ -42969,7 +42981,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_apply",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L596",
+      "source_location": "L617",
       "target": "app_server_alert_host_alerthost_counting",
       "weight": 1.0
     },
@@ -42981,7 +42993,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_apply",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L602",
+      "source_location": "L623",
       "target": "app_server_alert_host_alerthost_clear",
       "weight": 1.0
     },
@@ -42993,7 +43005,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_apply",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L604",
+      "source_location": "L625",
       "target": "app_server_alert_host_alerthost_startgoal",
       "weight": 1.0
     },
@@ -43005,7 +43017,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_chatted",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L407",
+      "source_location": "L426",
       "target": "app_server_alert_host_alerthost_counting",
       "weight": 1.0
     },
@@ -43017,7 +43029,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_chatted",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L411",
+      "source_location": "L430",
       "target": "app_server_alert_host_personkey",
       "weight": 1.0
     },
@@ -43029,7 +43041,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_chatted",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L412",
+      "source_location": "L431",
       "target": "app_server_alert_host_alerthost_progress",
       "weight": 1.0
     },
@@ -43041,7 +43053,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_clear",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L484",
+      "source_location": "L504",
       "target": "app_server_alert_host_alerthost_setline",
       "weight": 1.0
     },
@@ -43053,7 +43065,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_control",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L350",
+      "source_location": "L369",
       "target": "app_lib_alerts_lineskip",
       "weight": 1.0
     },
@@ -43065,7 +43077,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_control",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L350",
+      "source_location": "L369",
       "target": "app_server_alert_host_alerthost_take",
       "weight": 1.0
     },
@@ -43077,7 +43089,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_control",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L353",
+      "source_location": "L372",
       "target": "app_server_alert_host_alerthost_mute",
       "weight": 1.0
     },
@@ -43089,7 +43101,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_control",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L356",
+      "source_location": "L375",
       "target": "app_server_alert_host_alerthost_counts",
       "weight": 1.0
     },
@@ -43101,7 +43113,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_control",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L358",
+      "source_location": "L377",
       "target": "app_server_alert_host_alerthost_startgoal",
       "weight": 1.0
     },
@@ -43113,7 +43125,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_control",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L363",
+      "source_location": "L382",
       "target": "app_lib_alerts_testsupport",
       "weight": 1.0
     },
@@ -43125,7 +43137,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_control",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L363",
+      "source_location": "L382",
       "target": "app_server_alert_host_alerthost_play",
       "weight": 1.0
     },
@@ -43137,7 +43149,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_count",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L398",
+      "source_location": "L417",
       "target": "app_server_alert_host_alerthost_counting",
       "weight": 1.0
     },
@@ -43149,7 +43161,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_count",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L399",
+      "source_location": "L418",
       "target": "app_lib_goals_countsupport",
       "weight": 1.0
     },
@@ -43161,7 +43173,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_count",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L399",
+      "source_location": "L418",
       "target": "app_server_alert_host_alerthost_progress",
       "weight": 1.0
     },
@@ -43173,7 +43185,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_counting",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L393",
+      "source_location": "L412",
       "target": "app_server_alert_host_alerthost_counts",
       "weight": 1.0
     },
@@ -43185,7 +43197,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_dropplatform",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L341",
+      "source_location": "L360",
       "target": "app_lib_alerts_lineadvance",
       "weight": 1.0
     },
@@ -43197,7 +43209,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_dropplatform",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L341",
+      "source_location": "L360",
       "target": "app_server_alert_host_alerthost_take",
       "weight": 1.0
     },
@@ -43209,7 +43221,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_dropplatform",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L342",
+      "source_location": "L361",
       "target": "app_server_alert_host_alerthost_flush",
       "weight": 1.0
     },
@@ -43221,7 +43233,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_flush",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L538",
+      "source_location": "L558",
       "target": "app_server_alert_host_alerthost_reply",
       "weight": 1.0
     },
@@ -43233,7 +43245,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_flush",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L538",
+      "source_location": "L558",
       "target": "app_server_alert_host_alerthost_send",
       "weight": 1.0
     },
@@ -43245,7 +43257,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_layerschanged",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L292",
+      "source_location": "L299",
       "target": "app_server_alert_host_alerthost_refresh",
       "weight": 1.0
     },
@@ -43257,7 +43269,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_layerschanged",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L293",
+      "source_location": "L300",
       "target": "app_server_alert_host_alerthost_flush",
       "weight": 1.0
     },
@@ -43269,7 +43281,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_live",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L380",
+      "source_location": "L399",
       "target": "app_lib_activity_islivemessage",
       "weight": 1.0
     },
@@ -43281,7 +43293,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_live",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L381",
+      "source_location": "L400",
       "target": "app_lib_alerts_alertfor",
       "weight": 1.0
     },
@@ -43293,7 +43305,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_live",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L381",
+      "source_location": "L400",
       "target": "app_server_alert_host_shownevent",
       "weight": 1.0
     },
@@ -43305,7 +43317,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_live",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L383",
+      "source_location": "L402",
       "target": "app_server_alert_host_alerthost_add",
       "weight": 1.0
     },
@@ -43317,7 +43329,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_load",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L250",
+      "source_location": "L254",
       "target": "app_server_alert_host_alerthost_save",
       "weight": 1.0
     },
@@ -43329,7 +43341,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_mute",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L438",
+      "source_location": "L458",
       "target": "app_server_alert_host_alerthost_clear",
       "weight": 1.0
     },
@@ -43341,7 +43353,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_mute",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L439",
+      "source_location": "L459",
       "target": "app_server_alert_host_alerthost_save",
       "weight": 1.0
     },
@@ -43353,7 +43365,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_opened",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L282",
+      "source_location": "L289",
       "target": "app_server_alert_host_alerthost_old",
       "weight": 1.0
     },
@@ -43365,7 +43377,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_opened",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L282",
+      "source_location": "L289",
       "target": "app_server_alert_host_alerthost_refresh",
       "weight": 1.0
     },
@@ -43377,7 +43389,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_opened",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L287",
+      "source_location": "L294",
       "target": "app_server_alert_host_alerthost_reply",
       "weight": 1.0
     },
@@ -43389,7 +43401,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_opened",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L287",
+      "source_location": "L294",
       "target": "app_server_alert_host_alerthost_send",
       "weight": 1.0
     },
@@ -43401,7 +43413,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_play",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L459",
+      "source_location": "L479",
       "target": "app_lib_alerts_alertfor",
       "weight": 1.0
     },
@@ -43413,7 +43425,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_play",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L459",
+      "source_location": "L479",
       "target": "app_server_alert_host_shownevent",
       "weight": 1.0
     },
@@ -43425,7 +43437,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_play",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L461",
+      "source_location": "L481",
       "target": "app_server_alert_host_alerthost_add",
       "weight": 1.0
     },
@@ -43437,7 +43449,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_play",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L463",
+      "source_location": "L483",
       "target": "app_server_alert_host_alerthost_save",
       "weight": 1.0
     },
@@ -43449,7 +43461,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_read",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L577",
+      "source_location": "L597",
       "target": "app_server_alert_host_alerthost_apply",
       "weight": 1.0
     },
@@ -43461,7 +43473,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_read",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L580",
+      "source_location": "L600",
       "target": "app_server_alert_host_cause",
       "weight": 1.0
     },
@@ -43473,7 +43485,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_receive",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L272",
+      "source_location": "L278",
       "target": "app_server_alert_host_alerthost_chatted",
       "weight": 1.0
     },
@@ -43485,7 +43497,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_receive",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L273",
+      "source_location": "L279",
       "target": "app_lib_activity_issupport",
       "weight": 1.0
     },
@@ -43497,7 +43509,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_receive",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L274",
+      "source_location": "L281",
       "target": "app_server_alert_host_alerthost_count",
       "weight": 1.0
     },
@@ -43509,7 +43521,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_receive",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L275",
+      "source_location": "L282",
       "target": "app_server_alert_host_alerthost_live",
       "weight": 1.0
     },
@@ -43521,7 +43533,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_receive",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L277",
+      "source_location": "L284",
       "target": "app_server_alert_host_alerthost_flush",
       "weight": 1.0
     },
@@ -43533,7 +43545,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_refresh",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L566",
+      "source_location": "L586",
       "target": "app_server_alert_host_alerthost_read",
       "weight": 1.0
     },
@@ -43545,7 +43557,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_reply",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L530",
+      "source_location": "L550",
       "target": "app_server_alert_host_alerthost_counting",
       "weight": 1.0
     },
@@ -43557,7 +43569,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_request",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L304",
+      "source_location": "L311",
       "target": "app_server_alert_host_alerthost_refresh",
       "weight": 1.0
     },
@@ -43569,7 +43581,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_request",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L304",
+      "source_location": "L311",
       "target": "app_server_alert_host_refuse",
       "weight": 1.0
     },
@@ -43581,7 +43593,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_request",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L306",
+      "source_location": "L313",
       "target": "app_server_alert_host_alerthost_control",
       "weight": 1.0
     },
@@ -43593,7 +43605,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_request",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L307",
+      "source_location": "L314",
       "target": "app_server_alert_host_alerthost_flush",
       "weight": 1.0
     },
@@ -43605,7 +43617,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_request",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L308",
+      "source_location": "L315",
       "target": "app_server_alert_host_alerthost_wake",
       "weight": 1.0
     },
@@ -43617,7 +43629,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_request",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L309",
+      "source_location": "L316",
       "target": "app_server_alert_host_alerthost_reply",
       "weight": 1.0
     },
@@ -43629,7 +43641,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_setline",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L497",
+      "source_location": "L517",
       "target": "app_server_alert_host_alerthost_save",
       "weight": 1.0
     },
@@ -43641,7 +43653,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_start",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L514",
+      "source_location": "L534",
       "target": "app_lib_alerts_alertshownon",
       "weight": 1.0
     },
@@ -43653,7 +43665,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_start",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L519",
+      "source_location": "L539",
       "target": "app_server_alert_host_alerthost_send",
       "weight": 1.0
     },
@@ -43665,7 +43677,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_take",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L478",
+      "source_location": "L498",
       "target": "app_server_alert_host_alerthost_setline",
       "weight": 1.0
     },
@@ -43677,8 +43689,20 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_take",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L479",
+      "source_location": "L499",
       "target": "app_server_alert_host_alerthost_start",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_alert_host_alerthost_wake",
+      "source_file": "app/server/alert-host.ts",
+      "source_location": "L342",
+      "target": "app_server_alert_host_alerthost_checks",
       "weight": 1.0
     },
     {
@@ -193772,7 +193796,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_add",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L468",
+      "source_location": "L488",
       "target": "app_lib_alerts_pendingalert",
       "weight": 1.0
     },
@@ -193784,7 +193808,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_apply",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L587",
+      "source_location": "L608",
       "target": "app_lib_overlay_layers_overlaylayers",
       "weight": 1.0
     },
@@ -193796,7 +193820,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_chatted",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L406",
+      "source_location": "L425",
       "target": "app_lib_activity_activitychat",
       "weight": 1.0
     },
@@ -193808,7 +193832,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_control",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L345",
+      "source_location": "L364",
       "target": "app_lib_alert_control_alertcontrol",
       "weight": 1.0
     },
@@ -193820,7 +193844,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_count",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L397",
+      "source_location": "L416",
       "target": "app_lib_activity_activitysupport",
       "weight": 1.0
     },
@@ -193832,7 +193856,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_dropplatform",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L334",
+      "source_location": "L353",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -193844,7 +193868,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_live",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L376",
+      "source_location": "L395",
       "target": "app_lib_activity_activitysupport",
       "weight": 1.0
     },
@@ -193856,7 +193880,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_play",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L447",
+      "source_location": "L467",
       "target": "app_lib_activity_activitysupport",
       "weight": 1.0
     },
@@ -193868,7 +193892,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_progress",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L415",
+      "source_location": "L434",
       "target": "app_lib_goals_goalprogress",
       "weight": 1.0
     },
@@ -193880,7 +193904,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_receive",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L270",
+      "source_location": "L276",
       "target": "app_lib_activity_activityevent",
       "weight": 1.0
     },
@@ -193892,7 +193916,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_send",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L541",
+      "source_location": "L561",
       "target": "app_lib_alerts_alertsmessage",
       "weight": 1.0
     },
@@ -193904,7 +193928,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_setline",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L488",
+      "source_location": "L508",
       "target": "app_lib_alerts_alertline",
       "weight": 1.0
     },
@@ -193916,7 +193940,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_start",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L509",
+      "source_location": "L529",
       "target": "app_lib_alerts_startedalert",
       "weight": 1.0
     },
@@ -193928,7 +193952,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_startgoal",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L423",
+      "source_location": "L443",
       "target": "app_lib_goals_goalcount",
       "weight": 1.0
     },
@@ -193940,7 +193964,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_take",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L476",
+      "source_location": "L496",
       "target": "app_lib_alerts_linestep",
       "weight": 1.0
     },
@@ -195888,7 +195912,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_control",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L345",
+      "source_location": "L364",
       "target": "app_lib_alert_control_alertrefusal",
       "weight": 1.0
     },
@@ -195900,7 +195924,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_counts",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L387",
+      "source_location": "L406",
       "target": "app_lib_goals_goalcount",
       "weight": 1.0
     },
@@ -195912,7 +195936,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_play",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L447",
+      "source_location": "L467",
       "target": "app_lib_alert_control_alertrefusal",
       "weight": 1.0
     },
@@ -195924,7 +195948,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_reply",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L523",
+      "source_location": "L543",
       "target": "app_lib_alert_control_alertsreply",
       "weight": 1.0
     },
@@ -225438,7 +225462,7 @@
       "relation": "contains",
       "source": "app_server_channel_ingest_sql",
       "source_file": "app/server/channel-ingest-sql.ts",
-      "source_location": "L206",
+      "source_location": "L210",
       "target": "app_server_channel_ingest_sql_nextexpiry",
       "weight": 1.0
     },
@@ -237934,7 +237958,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1017",
+      "source_location": "L1019",
       "target": "docs_channel_connections_logs_and_alerts",
       "weight": 1.0
     },
@@ -237945,7 +237969,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1048",
+      "source_location": "L1050",
       "target": "docs_channel_connections_overlay_key",
       "weight": 1.0
     },
@@ -237956,7 +237980,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1063",
+      "source_location": "L1065",
       "target": "docs_channel_connections_setup",
       "weight": 1.0
     },
@@ -237967,7 +237991,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1091",
+      "source_location": "L1093",
       "target": "docs_channel_connections_runbook",
       "weight": 1.0
     },
@@ -237978,7 +238002,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1116",
+      "source_location": "L1118",
       "target": "docs_channel_connections_turn_the_feature_off",
       "weight": 1.0
     },
@@ -237989,7 +238013,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1154",
+      "source_location": "L1156",
       "target": "docs_channel_connections_rollback",
       "weight": 1.0
     },
@@ -238000,7 +238024,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1165",
+      "source_location": "L1167",
       "target": "docs_channel_connections_threat_model",
       "weight": 1.0
     },
@@ -238022,7 +238046,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1230",
+      "source_location": "L1232",
       "target": "docs_channel_connections_stored_youtube_data",
       "weight": 1.0
     },
@@ -238033,7 +238057,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1269",
+      "source_location": "L1271",
       "target": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
       "weight": 1.0
     },
@@ -238044,7 +238068,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1386",
+      "source_location": "L1388",
       "target": "docs_channel_connections_facts_not_checked",
       "weight": 1.0
     },
@@ -238055,7 +238079,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L470",
+      "source_location": "L472",
       "target": "docs_channel_connections_channel_health_in_streamer_tools",
       "weight": 1.0
     },
@@ -238077,7 +238101,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L534",
+      "source_location": "L536",
       "target": "docs_channel_connections_capability_matrix",
       "weight": 1.0
     },
@@ -238088,7 +238112,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L556",
+      "source_location": "L558",
       "target": "docs_channel_connections_permissions",
       "weight": 1.0
     },
@@ -238099,7 +238123,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L595",
+      "source_location": "L597",
       "target": "docs_channel_connections_scheduled_streams",
       "weight": 1.0
     },
@@ -238110,7 +238134,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L662",
+      "source_location": "L664",
       "target": "docs_channel_connections_limits_and_retention",
       "weight": 1.0
     },
@@ -238121,7 +238145,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L819",
+      "source_location": "L821",
       "target": "docs_channel_connections_token_encryption_and_rotation",
       "weight": 1.0
     },
@@ -238132,7 +238156,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L873",
+      "source_location": "L875",
       "target": "docs_channel_connections_disconnect",
       "weight": 1.0
     },
@@ -238143,7 +238167,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1001",
+      "source_location": "L1003",
       "target": "docs_channel_connections_callback_failures",
       "weight": 1.0
     },
@@ -238154,7 +238178,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L899",
+      "source_location": "L901",
       "target": "docs_channel_connections_provider_subscriptions",
       "weight": 1.0
     },
@@ -238165,7 +238189,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L917",
+      "source_location": "L919",
       "target": "docs_channel_connections_subscription_repair",
       "weight": 1.0
     },
@@ -238176,7 +238200,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L969",
+      "source_location": "L971",
       "target": "docs_channel_connections_refused_webhooks",
       "weight": 1.0
     },
@@ -238187,7 +238211,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L993",
+      "source_location": "L995",
       "target": "docs_channel_connections_account_deletion",
       "weight": 1.0
     },
@@ -238231,7 +238255,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_event_contract",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L317",
+      "source_location": "L319",
       "target": "docs_channel_connections_support_events_of_each_provider",
       "weight": 1.0
     },
@@ -238242,7 +238266,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_event_contract",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L430",
+      "source_location": "L432",
       "target": "docs_channel_connections_native_polls_predictions_and_rewards",
       "weight": 1.0
     },
@@ -238253,7 +238277,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_event_contract",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L445",
+      "source_location": "L447",
       "target": "docs_channel_connections_rules_for_consumers",
       "weight": 1.0
     },
@@ -238264,7 +238288,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_event_contract",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L456",
+      "source_location": "L458",
       "target": "docs_channel_connections_overlay_chat",
       "weight": 1.0
     },
@@ -238275,7 +238299,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_event_contract",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L462",
+      "source_location": "L464",
       "target": "docs_channel_connections_interactive_characters",
       "weight": 1.0
     },
@@ -238286,7 +238310,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_limits_and_retention",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L765",
+      "source_location": "L767",
       "target": "docs_channel_connections_youtube_quota",
       "weight": 1.0
     },
@@ -238297,7 +238321,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1283",
+      "source_location": "L1285",
       "target": "docs_channel_connections_instagram",
       "weight": 1.0
     },
@@ -238308,7 +238332,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1321",
+      "source_location": "L1323",
       "target": "docs_channel_connections_facebook_live",
       "weight": 1.0
     },
@@ -238319,7 +238343,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1357",
+      "source_location": "L1359",
       "target": "docs_channel_connections_tiktok",
       "weight": 1.0
     },
@@ -238330,7 +238354,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1378",
+      "source_location": "L1380",
       "target": "docs_channel_connections_decisions_for_the_owner",
       "weight": 1.0
     },
@@ -238341,7 +238365,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1167",
+      "source_location": "L1169",
       "target": "docs_channel_connections_assets",
       "weight": 1.0
     },
@@ -238352,7 +238376,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1175",
+      "source_location": "L1177",
       "target": "docs_channel_connections_actors",
       "weight": 1.0
     },
@@ -238363,7 +238387,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1183",
+      "source_location": "L1185",
       "target": "docs_channel_connections_threats_and_mitigations",
       "weight": 1.0
     },
@@ -238374,7 +238398,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1212",
+      "source_location": "L1214",
       "target": "docs_channel_connections_residual_risks",
       "weight": 1.0
     },
@@ -238385,7 +238409,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_token_encryption_and_rotation",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L862",
+      "source_location": "L864",
       "target": "docs_channel_connections_refresh",
       "weight": 1.0
     },
@@ -253938,7 +253962,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L221",
+      "source_location": "L225",
       "target": "app_server_alert_host_alerthost_constructor",
       "weight": 1.0
     },
@@ -253949,7 +253973,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L227",
+      "source_location": "L231",
       "target": "app_server_alert_host_alerthost_load",
       "weight": 1.0
     },
@@ -253960,7 +253984,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L254",
+      "source_location": "L258",
       "target": "app_server_alert_host_alerthost_wipe",
       "weight": 1.0
     },
@@ -253971,7 +253995,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L270",
+      "source_location": "L276",
       "target": "app_server_alert_host_alerthost_receive",
       "weight": 1.0
     },
@@ -253982,7 +254006,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L281",
+      "source_location": "L288",
       "target": "app_server_alert_host_alerthost_opened",
       "weight": 1.0
     },
@@ -253993,7 +254017,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L291",
+      "source_location": "L298",
       "target": "app_server_alert_host_alerthost_layerschanged",
       "weight": 1.0
     },
@@ -254004,7 +254028,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L297",
+      "source_location": "L304",
       "target": "app_server_alert_host_alerthost_request",
       "weight": 1.0
     },
@@ -254015,7 +254039,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L317",
+      "source_location": "L324",
       "target": "app_server_alert_host_alerthost_alarm",
       "weight": 1.0
     },
@@ -254026,7 +254050,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L329",
+      "source_location": "L340",
       "target": "app_server_alert_host_alerthost_wake",
       "weight": 1.0
     },
@@ -254037,7 +254061,18 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L334",
+      "source_location": "L348",
+      "target": "app_server_alert_host_alerthost_checks",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "app_server_alert_host_alerthost",
+      "source_file": "app/server/alert-host.ts",
+      "source_location": "L353",
       "target": "app_server_alert_host_alerthost_dropplatform",
       "weight": 1.0
     },
@@ -254048,7 +254083,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L345",
+      "source_location": "L364",
       "target": "app_server_alert_host_alerthost_control",
       "weight": 1.0
     },
@@ -254059,7 +254094,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L376",
+      "source_location": "L395",
       "target": "app_server_alert_host_alerthost_live",
       "weight": 1.0
     },
@@ -254070,7 +254105,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L387",
+      "source_location": "L406",
       "target": "app_server_alert_host_alerthost_counts",
       "weight": 1.0
     },
@@ -254081,7 +254116,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L392",
+      "source_location": "L411",
       "target": "app_server_alert_host_alerthost_counting",
       "weight": 1.0
     },
@@ -254092,7 +254127,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L397",
+      "source_location": "L416",
       "target": "app_server_alert_host_alerthost_count",
       "weight": 1.0
     },
@@ -254103,7 +254138,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L406",
+      "source_location": "L425",
       "target": "app_server_alert_host_alerthost_chatted",
       "weight": 1.0
     },
@@ -254114,7 +254149,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L415",
+      "source_location": "L434",
       "target": "app_server_alert_host_alerthost_progress",
       "weight": 1.0
     },
@@ -254125,7 +254160,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L423",
+      "source_location": "L443",
       "target": "app_server_alert_host_alerthost_startgoal",
       "weight": 1.0
     },
@@ -254136,7 +254171,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L434",
+      "source_location": "L454",
       "target": "app_server_alert_host_alerthost_mute",
       "weight": 1.0
     },
@@ -254147,7 +254182,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L447",
+      "source_location": "L467",
       "target": "app_server_alert_host_alerthost_play",
       "weight": 1.0
     },
@@ -254158,7 +254193,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L468",
+      "source_location": "L488",
       "target": "app_server_alert_host_alerthost_add",
       "weight": 1.0
     },
@@ -254169,7 +254204,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L476",
+      "source_location": "L496",
       "target": "app_server_alert_host_alerthost_take",
       "weight": 1.0
     },
@@ -254180,7 +254215,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L483",
+      "source_location": "L503",
       "target": "app_server_alert_host_alerthost_clear",
       "weight": 1.0
     },
@@ -254191,7 +254226,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L488",
+      "source_location": "L508",
       "target": "app_server_alert_host_alerthost_setline",
       "weight": 1.0
     },
@@ -254202,7 +254237,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L500",
+      "source_location": "L520",
       "target": "app_server_alert_host_alerthost_save",
       "weight": 1.0
     },
@@ -254213,7 +254248,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L509",
+      "source_location": "L529",
       "target": "app_server_alert_host_alerthost_start",
       "weight": 1.0
     },
@@ -254224,7 +254259,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L523",
+      "source_location": "L543",
       "target": "app_server_alert_host_alerthost_reply",
       "weight": 1.0
     },
@@ -254235,7 +254270,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L535",
+      "source_location": "L555",
       "target": "app_server_alert_host_alerthost_flush",
       "weight": 1.0
     },
@@ -254246,7 +254281,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L541",
+      "source_location": "L561",
       "target": "app_server_alert_host_alerthost_send",
       "weight": 1.0
     },
@@ -254257,7 +254292,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L553",
+      "source_location": "L573",
       "target": "app_server_alert_host_alerthost_old",
       "weight": 1.0
     },
@@ -254268,7 +254303,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L561",
+      "source_location": "L581",
       "target": "app_server_alert_host_alerthost_refresh",
       "weight": 1.0
     },
@@ -254279,7 +254314,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L572",
+      "source_location": "L592",
       "target": "app_server_alert_host_alerthost_read",
       "weight": 1.0
     },
@@ -254290,7 +254325,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L587",
+      "source_location": "L608",
       "target": "app_server_alert_host_alerthost_apply",
       "weight": 1.0
     },
@@ -257282,7 +257317,7 @@
       "relation": "references",
       "source": "docs_channel_connections",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L335",
+      "source_location": "L337",
       "target": "docs_streamer_tools",
       "weight": 1.0
     },
@@ -257293,7 +257328,7 @@
       "relation": "references",
       "source": "docs_channel_connections",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L789",
+      "source_location": "L791",
       "target": "docs_live_room_capacity",
       "weight": 1.0
     },
@@ -258251,7 +258286,7 @@
       "relation": "indirect_call",
       "source": "app_server_alert_host_alerthost_setline",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L490",
+      "source_location": "L510",
       "target": "app_server_alert_host_alertid",
       "weight": 1.0
     },
@@ -262259,7 +262294,7 @@
       "relation": "references",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L878",
+      "source_location": "L880",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -262271,7 +262306,7 @@
       "relation": "references",
       "source": "docs_channel_connections_interactive_characters",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L465",
+      "source_location": "L467",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -262283,7 +262318,7 @@
       "relation": "references",
       "source": "docs_channel_connections_refresh",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L864",
+      "source_location": "L866",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -262295,7 +262330,7 @@
       "relation": "references",
       "source": "docs_channel_connections_rollback",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1156",
+      "source_location": "L1158",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -262307,7 +262342,7 @@
       "relation": "references",
       "source": "docs_channel_connections_scheduled_streams",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L606",
+      "source_location": "L608",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -262319,7 +262354,7 @@
       "relation": "references",
       "source": "docs_channel_connections_setup",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1082",
+      "source_location": "L1084",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -262343,7 +262378,7 @@
       "relation": "references",
       "source": "docs_channel_connections_support_events_of_each_provider",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L340",
+      "source_location": "L342",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -262355,7 +262390,7 @@
       "relation": "references",
       "source": "docs_channel_connections_threats_and_mitigations",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1195",
+      "source_location": "L1197",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -262643,7 +262678,7 @@
       "relation": "references",
       "source": "docs_channel_connections_channel_health_in_streamer_tools",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L517",
+      "source_location": "L519",
       "target": "app_lib_channel_health_channelcardstate_48192f75b106",
       "weight": 1.0
     },
@@ -262655,7 +262690,7 @@
       "relation": "references",
       "source": "docs_channel_connections_channel_health_in_streamer_tools",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L518",
+      "source_location": "L520",
       "target": "app_lib_channel_health_channelhealth_40cffcc64880",
       "weight": 1.0
     },
@@ -262739,7 +262774,7 @@
       "relation": "references",
       "source": "docs_channel_connections_scheduled_streams",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L660",
+      "source_location": "L662",
       "target": "app_server_schedule_import_server_teststreams",
       "weight": 1.0
     },
@@ -292166,7 +292201,7 @@
       "label": ".add()",
       "norm_label": ".add()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L468"
+      "source_location": "L488"
     },
     {
       "_callable": true,
@@ -292177,7 +292212,7 @@
       "label": ".alarm()",
       "norm_label": ".alarm()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L317"
+      "source_location": "L324"
     },
     {
       "_callable": true,
@@ -292188,7 +292223,7 @@
       "label": ".apply()",
       "norm_label": ".apply()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L587"
+      "source_location": "L608"
     },
     {
       "_callable": true,
@@ -292199,7 +292234,18 @@
       "label": ".chatted()",
       "norm_label": ".chatted()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L406"
+      "source_location": "L425"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_alert_host_alerthost_checks",
+      "label": ".checks()",
+      "norm_label": ".checks()",
+      "source_file": "app/server/alert-host.ts",
+      "source_location": "L348"
     },
     {
       "_callable": true,
@@ -292210,7 +292256,7 @@
       "label": ".clear()",
       "norm_label": ".clear()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L483"
+      "source_location": "L503"
     },
     {
       "_callable": true,
@@ -292221,7 +292267,7 @@
       "label": ".constructor()",
       "norm_label": ".constructor()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L221"
+      "source_location": "L225"
     },
     {
       "_callable": true,
@@ -292232,7 +292278,7 @@
       "label": ".control()",
       "norm_label": ".control()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L345"
+      "source_location": "L364"
     },
     {
       "_callable": true,
@@ -292243,7 +292289,7 @@
       "label": ".count()",
       "norm_label": ".count()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L397"
+      "source_location": "L416"
     },
     {
       "_callable": true,
@@ -292254,7 +292300,7 @@
       "label": ".counting()",
       "norm_label": ".counting()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L392"
+      "source_location": "L411"
     },
     {
       "_callable": true,
@@ -292265,7 +292311,7 @@
       "label": ".counts()",
       "norm_label": ".counts()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L387"
+      "source_location": "L406"
     },
     {
       "_callable": true,
@@ -292276,7 +292322,7 @@
       "label": ".dropPlatform()",
       "norm_label": ".dropplatform()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L334"
+      "source_location": "L353"
     },
     {
       "_callable": true,
@@ -292287,7 +292333,7 @@
       "label": ".flush()",
       "norm_label": ".flush()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L535"
+      "source_location": "L555"
     },
     {
       "_callable": true,
@@ -292298,7 +292344,7 @@
       "label": ".layersChanged()",
       "norm_label": ".layerschanged()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L291"
+      "source_location": "L298"
     },
     {
       "_callable": true,
@@ -292309,7 +292355,7 @@
       "label": ".live()",
       "norm_label": ".live()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L376"
+      "source_location": "L395"
     },
     {
       "_callable": true,
@@ -292320,7 +292366,7 @@
       "label": ".load()",
       "norm_label": ".load()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L227"
+      "source_location": "L231"
     },
     {
       "_callable": true,
@@ -292331,7 +292377,7 @@
       "label": ".mute()",
       "norm_label": ".mute()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L434"
+      "source_location": "L454"
     },
     {
       "_callable": true,
@@ -292342,7 +292388,7 @@
       "label": ".old()",
       "norm_label": ".old()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L553"
+      "source_location": "L573"
     },
     {
       "_callable": true,
@@ -292353,7 +292399,7 @@
       "label": ".opened()",
       "norm_label": ".opened()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L281"
+      "source_location": "L288"
     },
     {
       "_callable": true,
@@ -292364,7 +292410,7 @@
       "label": ".play()",
       "norm_label": ".play()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L447"
+      "source_location": "L467"
     },
     {
       "_callable": true,
@@ -292375,7 +292421,7 @@
       "label": ".progress()",
       "norm_label": ".progress()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L415"
+      "source_location": "L434"
     },
     {
       "_callable": true,
@@ -292386,7 +292432,7 @@
       "label": ".read()",
       "norm_label": ".read()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L572"
+      "source_location": "L592"
     },
     {
       "_callable": true,
@@ -292397,7 +292443,7 @@
       "label": ".receive()",
       "norm_label": ".receive()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L270"
+      "source_location": "L276"
     },
     {
       "_callable": true,
@@ -292408,7 +292454,7 @@
       "label": ".refresh()",
       "norm_label": ".refresh()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L561"
+      "source_location": "L581"
     },
     {
       "_callable": true,
@@ -292419,7 +292465,7 @@
       "label": ".reply()",
       "norm_label": ".reply()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L523"
+      "source_location": "L543"
     },
     {
       "_callable": true,
@@ -292430,7 +292476,7 @@
       "label": ".request()",
       "norm_label": ".request()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L297"
+      "source_location": "L304"
     },
     {
       "_callable": true,
@@ -292441,7 +292487,7 @@
       "label": ".save()",
       "norm_label": ".save()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L500"
+      "source_location": "L520"
     },
     {
       "_callable": true,
@@ -292456,14 +292502,14 @@
             "callee": "send",
             "file": "app/server/alert-host.ts",
             "lang": "typescript",
-            "line": "L545",
+            "line": "L565",
             "receiver_type": "WebSocket"
           }
         ]
       },
       "norm_label": ".send()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L541"
+      "source_location": "L561"
     },
     {
       "_callable": true,
@@ -292474,7 +292520,7 @@
       "label": ".setLine()",
       "norm_label": ".setline()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L488"
+      "source_location": "L508"
     },
     {
       "_callable": true,
@@ -292485,7 +292531,7 @@
       "label": ".start()",
       "norm_label": ".start()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L509"
+      "source_location": "L529"
     },
     {
       "_callable": true,
@@ -292496,7 +292542,7 @@
       "label": ".startGoal()",
       "norm_label": ".startgoal()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L423"
+      "source_location": "L443"
     },
     {
       "_callable": true,
@@ -292507,7 +292553,7 @@
       "label": ".take()",
       "norm_label": ".take()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L476"
+      "source_location": "L496"
     },
     {
       "_callable": true,
@@ -292518,7 +292564,7 @@
       "label": ".wake()",
       "norm_label": ".wake()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L329"
+      "source_location": "L340"
     },
     {
       "_callable": true,
@@ -292529,7 +292575,7 @@
       "label": ".wipe()",
       "norm_label": ".wipe()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L254"
+      "source_location": "L258"
     },
     {
       "_callable": true,
@@ -293812,14 +293858,14 @@
             "callee": "exec",
             "file": "app/server/channel-ingest-sql.ts",
             "lang": "typescript",
-            "line": "L207",
+            "line": "L211",
             "receiver_type": "SqlStorage"
           }
         ]
       },
       "norm_label": "nextexpiry()",
       "source_file": "app/server/channel-ingest-sql.ts",
-      "source_location": "L206"
+      "source_location": "L210"
     },
     {
       "_callable": true,
@@ -330076,7 +330122,7 @@
       "node_kind": "heading",
       "norm_label": "account deletion",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L993"
+      "source_location": "L995"
     },
     {
       "_origin": "ast",
@@ -330087,7 +330133,7 @@
       "node_kind": "heading",
       "norm_label": "actors",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1175"
+      "source_location": "L1177"
     },
     {
       "_origin": "ast",
@@ -330120,7 +330166,7 @@
       "node_kind": "heading",
       "norm_label": "assets",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1167"
+      "source_location": "L1169"
     },
     {
       "_origin": "ast",
@@ -330131,7 +330177,7 @@
       "node_kind": "heading",
       "norm_label": "callback failures",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1001"
+      "source_location": "L1003"
     },
     {
       "_origin": "ast",
@@ -330142,7 +330188,7 @@
       "node_kind": "heading",
       "norm_label": "capability matrix",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L534"
+      "source_location": "L536"
     },
     {
       "_origin": "ast",
@@ -330164,7 +330210,7 @@
       "node_kind": "heading",
       "norm_label": "channel health in streamer tools",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L470"
+      "source_location": "L472"
     },
     {
       "_origin": "ast",
@@ -330186,7 +330232,7 @@
       "node_kind": "heading",
       "norm_label": "decisions for the owner",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1378"
+      "source_location": "L1380"
     },
     {
       "_origin": "ast",
@@ -330197,7 +330243,7 @@
       "node_kind": "heading",
       "norm_label": "disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L873"
+      "source_location": "L875"
     },
     {
       "_origin": "ast",
@@ -330219,7 +330265,7 @@
       "node_kind": "heading",
       "norm_label": "facebook live",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1321"
+      "source_location": "L1323"
     },
     {
       "_origin": "ast",
@@ -330230,7 +330276,7 @@
       "node_kind": "heading",
       "norm_label": "facts not checked",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1386"
+      "source_location": "L1388"
     },
     {
       "_origin": "ast",
@@ -330241,7 +330287,7 @@
       "node_kind": "heading",
       "norm_label": "instagram",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1283"
+      "source_location": "L1285"
     },
     {
       "_origin": "ast",
@@ -330252,7 +330298,7 @@
       "node_kind": "heading",
       "norm_label": "interactive characters",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L462"
+      "source_location": "L464"
     },
     {
       "_origin": "ast",
@@ -330263,7 +330309,7 @@
       "node_kind": "heading",
       "norm_label": "limits and retention",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L662"
+      "source_location": "L664"
     },
     {
       "_origin": "ast",
@@ -330274,7 +330320,7 @@
       "node_kind": "heading",
       "norm_label": "logs and alerts",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1017"
+      "source_location": "L1019"
     },
     {
       "_origin": "ast",
@@ -330285,7 +330331,7 @@
       "node_kind": "heading",
       "norm_label": "native polls, predictions, and rewards",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L430"
+      "source_location": "L432"
     },
     {
       "_origin": "ast",
@@ -330296,7 +330342,7 @@
       "node_kind": "heading",
       "norm_label": "overlay chat",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L456"
+      "source_location": "L458"
     },
     {
       "_origin": "ast",
@@ -330307,7 +330353,7 @@
       "node_kind": "heading",
       "norm_label": "overlay key",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1048"
+      "source_location": "L1050"
     },
     {
       "_origin": "ast",
@@ -330318,7 +330364,7 @@
       "node_kind": "heading",
       "norm_label": "permissions",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L556"
+      "source_location": "L558"
     },
     {
       "_origin": "ast",
@@ -330329,7 +330375,7 @@
       "node_kind": "heading",
       "norm_label": "provider subscriptions",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L899"
+      "source_location": "L901"
     },
     {
       "_origin": "ast",
@@ -330340,7 +330386,7 @@
       "node_kind": "heading",
       "norm_label": "refresh",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L862"
+      "source_location": "L864"
     },
     {
       "_origin": "ast",
@@ -330351,7 +330397,7 @@
       "node_kind": "heading",
       "norm_label": "refused webhooks",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L969"
+      "source_location": "L971"
     },
     {
       "_origin": "ast",
@@ -330362,7 +330408,7 @@
       "node_kind": "heading",
       "norm_label": "research for instagram, facebook live, and tiktok",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1269"
+      "source_location": "L1271"
     },
     {
       "_origin": "ast",
@@ -330373,7 +330419,7 @@
       "node_kind": "heading",
       "norm_label": "residual risks",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1212"
+      "source_location": "L1214"
     },
     {
       "_origin": "ast",
@@ -330384,7 +330430,7 @@
       "node_kind": "heading",
       "norm_label": "rollback",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1154"
+      "source_location": "L1156"
     },
     {
       "_origin": "ast",
@@ -330395,7 +330441,7 @@
       "node_kind": "heading",
       "norm_label": "rules for consumers",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L445"
+      "source_location": "L447"
     },
     {
       "_origin": "ast",
@@ -330406,7 +330452,7 @@
       "node_kind": "heading",
       "norm_label": "runbook",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1091"
+      "source_location": "L1093"
     },
     {
       "_origin": "ast",
@@ -330417,7 +330463,7 @@
       "node_kind": "heading",
       "norm_label": "scheduled streams",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L595"
+      "source_location": "L597"
     },
     {
       "_origin": "ast",
@@ -330428,7 +330474,7 @@
       "node_kind": "heading",
       "norm_label": "setup",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1063"
+      "source_location": "L1065"
     },
     {
       "_origin": "ast",
@@ -330439,7 +330485,7 @@
       "node_kind": "heading",
       "norm_label": "stored youtube data",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1230"
+      "source_location": "L1232"
     },
     {
       "_origin": "ast",
@@ -330450,7 +330496,7 @@
       "node_kind": "heading",
       "norm_label": "subscription repair",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L917"
+      "source_location": "L919"
     },
     {
       "_origin": "ast",
@@ -330472,7 +330518,7 @@
       "node_kind": "heading",
       "norm_label": "support events of each provider",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L317"
+      "source_location": "L319"
     },
     {
       "_origin": "ast",
@@ -330483,7 +330529,7 @@
       "node_kind": "heading",
       "norm_label": "threat model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1165"
+      "source_location": "L1167"
     },
     {
       "_origin": "ast",
@@ -330494,7 +330540,7 @@
       "node_kind": "heading",
       "norm_label": "threats and mitigations",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1183"
+      "source_location": "L1185"
     },
     {
       "_origin": "ast",
@@ -330505,7 +330551,7 @@
       "node_kind": "heading",
       "norm_label": "tiktok",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1357"
+      "source_location": "L1359"
     },
     {
       "_origin": "ast",
@@ -330516,7 +330562,7 @@
       "node_kind": "heading",
       "norm_label": "token encryption and rotation",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L819"
+      "source_location": "L821"
     },
     {
       "_origin": "ast",
@@ -330527,7 +330573,7 @@
       "node_kind": "heading",
       "norm_label": "turn the feature off",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1116"
+      "source_location": "L1118"
     },
     {
       "_origin": "ast",
@@ -330538,7 +330584,7 @@
       "node_kind": "heading",
       "norm_label": "youtube quota",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L765"
+      "source_location": "L767"
     },
     {
       "_origin": "ast",
