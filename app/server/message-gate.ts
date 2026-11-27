@@ -32,4 +32,16 @@ export class MessageGate {
     this.buckets.set(userId, { tokens: admitted ? tokens - 1 : tokens, at: now });
     return admitted;
   }
+
+  // Forgets the budgets of accounts without a socket that are full again (one second refills any budget). A partial
+  // budget stays, so a reconnect cannot reset it.
+  prune(connected: ReadonlySet<string | null>, now: number): void {
+    for (const [userId, bucket] of this.buckets)
+      if (!connected.has(userId) && now - bucket.at >= 1_000) this.buckets.delete(userId);
+  }
+
+  // The accounts with a budget in memory.
+  get accounts(): number {
+    return this.buckets.size;
+  }
 }

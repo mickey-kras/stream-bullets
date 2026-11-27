@@ -53853,7 +53853,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_expireconnections",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L949",
+      "source_location": "L950",
       "target": "app_server_poll_room_pollroom_pruneconnectioncaches",
       "weight": 1.0
     },
@@ -53865,7 +53865,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_expireconnections",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L950",
+      "source_location": "L951",
       "target": "app_server_poll_room_pollroom_activesockets",
       "weight": 1.0
     },
@@ -53877,7 +53877,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_expireconnections",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L951",
+      "source_location": "L952",
       "target": "app_server_room_connections_leaseof",
       "weight": 1.0
     },
@@ -53889,7 +53889,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_expireconnections",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L955",
+      "source_location": "L956",
       "target": "app_server_poll_room_pollroom_send",
       "weight": 1.0
     },
@@ -53901,7 +53901,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_expireconnections",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L960",
+      "source_location": "L961",
       "target": "app_server_poll_room_pollroom_overlaysourceschanged",
       "weight": 1.0
     },
@@ -53913,7 +53913,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_expireconnections",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L960",
+      "source_location": "L961",
       "target": "app_server_room_connections_outputof",
       "weight": 1.0
     },
@@ -54837,7 +54837,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_scheduleresync",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L965",
+      "source_location": "L966",
       "target": "app_server_poll_room_pollroom_activesockets",
       "weight": 1.0
     },
@@ -54849,7 +54849,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_scheduleresync",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L968",
+      "source_location": "L969",
       "target": "app_server_room_connections_leaseof",
       "weight": 1.0
     },
@@ -136804,6 +136804,30 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports",
+      "source": "tests_message_gate_test",
+      "source_file": "tests/message-gate.test.ts",
+      "source_location": "L2",
+      "target": "app_server_message_gate_max_pending_messages",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_message_gate_test",
+      "source_file": "tests/message-gate.test.ts",
+      "source_location": "L2",
+      "target": "app_server_message_gate_messagegate",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
       "source": "tests_migrations_test",
       "source_file": "tests/migrations.test.ts",
       "source_location": "L2",
@@ -180252,6 +180276,30 @@
       "source_file": "tests/mention-selection.test.ts",
       "source_location": "L3",
       "target": "app_lib_discussion_draft",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_message_gate_test",
+      "source_file": "tests/message-gate.test.ts",
+      "source_location": "L1",
+      "target": "ref_vitest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_message_gate_test",
+      "source_file": "tests/message-gate.test.ts",
+      "source_location": "L2",
+      "target": "app_server_message_gate",
       "weight": 1.0
     },
     {
@@ -244286,6 +244334,28 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "method",
+      "source": "app_server_message_gate_messagegate",
+      "source_file": "app/server/message-gate.ts",
+      "source_location": "L38",
+      "target": "app_server_message_gate_messagegate_prune",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "app_server_message_gate_messagegate",
+      "source_file": "app/server/message-gate.ts",
+      "source_location": "L44",
+      "target": "app_server_message_gate_messagegate_accounts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
       "source": "app_server_playground_host_playgroundclock",
       "source_file": "app/server/playground-host.ts",
       "source_location": "L42",
@@ -245201,7 +245271,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L947",
+      "source_location": "L948",
       "target": "app_server_poll_room_pollroom_expireconnections",
       "weight": 1.0
     },
@@ -245212,7 +245282,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L964",
+      "source_location": "L965",
       "target": "app_server_poll_room_pollroom_scheduleresync",
       "weight": 1.0
     },
@@ -249550,6 +249620,18 @@
       "source_file": "app/server/poll-room.ts",
       "source_location": "L376",
       "target": "app_server_room_connections_overlaysources_touch",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_poll_room_pollroom_pruneconnectioncaches",
+      "source_file": "app/server/poll-room.ts",
+      "source_location": "L944",
+      "target": "app_server_message_gate_messagegate_prune",
       "weight": 1.0
     },
     {
@@ -284387,6 +284469,17 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_server_message_gate_messagegate_accounts",
+      "label": ".accounts()",
+      "norm_label": ".accounts()",
+      "source_file": "app/server/message-gate.ts",
+      "source_location": "L44"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_server_message_gate_messagegate_admit",
       "label": ".admit()",
       "norm_label": ".admit()",
@@ -284414,6 +284507,17 @@
       "norm_label": ".leave()",
       "source_file": "app/server/message-gate.ts",
       "source_location": "L22"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_message_gate_messagegate_prune",
+      "label": ".prune()",
+      "norm_label": ".prune()",
+      "source_file": "app/server/message-gate.ts",
+      "source_location": "L38"
     },
     {
       "_callable": true,
@@ -285711,14 +285815,14 @@
             "callee": "close",
             "file": "app/server/poll-room.ts",
             "lang": "typescript",
-            "line": "L957",
+            "line": "L958",
             "receiver_type": "WebSocket"
           }
         ]
       },
       "norm_label": ".expireconnections()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L947"
+      "source_location": "L948"
     },
     {
       "_callable": true,
@@ -286026,7 +286130,7 @@
       "label": ".scheduleResync()",
       "norm_label": ".scheduleresync()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L964"
+      "source_location": "L965"
     },
     {
       "_callable": true,
@@ -313970,6 +314074,16 @@
       "norm_label": "selection",
       "source_file": "tests/mention-selection.test.ts",
       "source_location": "L5"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_message_gate_test",
+      "label": "message-gate.test.ts",
+      "norm_label": "message-gate.test.ts",
+      "source_file": "tests/message-gate.test.ts",
+      "source_location": "L1"
     },
     {
       "_origin": "ast",

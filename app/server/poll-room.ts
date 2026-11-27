@@ -941,6 +941,7 @@ export class PollRoom extends DurableObject<AppEnv> {
     const signedIn = new Set(this.activeSockets().map((socket: WebSocket): string | null => leaseOf(socket).userId));
     for (const [userId, bucket] of this.buckets)
       if (!signedIn.has(userId) && now - bucket.at >= 1_000) this.buckets.delete(userId);
+    this.messages.prune(signedIn, now);
   }
 
   // Closes sockets whose lease ran out, and sockets that have not pinged for IDLE_TIMEOUT_MS.
