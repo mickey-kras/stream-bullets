@@ -58,7 +58,7 @@ export function channelHealth(channel: ChannelView): ChannelHealth {
  * The status codes of a problem that ends without the owner: the YouTube quota resets, and the feed checks refused
  * webhooks again. The message of each other problem asks the owner to reconnect.
  */
-const ENDS_WITHOUT_OWNER: readonly string[] = ["quota_exhausted", "webhooks_rejected"];
+const ENDS_WITHOUT_OWNER: ReadonlySet<string> = new Set<string>(["quota_exhausted", "webhooks_rejected"]);
 
 /**
  * What the status icon of a channel card shows. `repairing` is a problem that ends without the owner. `problem`
@@ -74,7 +74,7 @@ export function channelCardState(channel: ChannelView): ChannelCardState | null 
   if (channel.connection === null || health === "none" || health === "unavailable") return null;
   if (health === "attention") {
     const { status, code } = channel.connection;
-    return status === "error" && code !== null && ENDS_WITHOUT_OWNER.includes(code) ? "repairing" : "problem";
+    return status === "error" && code !== null && ENDS_WITHOUT_OWNER.has(code) ? "repairing" : "problem";
   }
   return channel.support ? "healthy" : "support_missing";
 }
