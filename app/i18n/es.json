@@ -1536,6 +1536,7 @@
   "tools.live.support.superChat": "Super Chat: {amount}",
   "tools.live.support.superSticker": "Super Sticker: {amount}",
   "tools.live.support.tip": "propina: {amount}",
+  "tools.live.support.topic": "tema en el stream",
   "commands.title": "Comandos de personajes",
   "commands.eyebrow": "Zona de juego",
   "commands.lead": "Escribe un comando en el chat del directo para mover tu personaje y construir. Cada demostración muestra lo que hace el comando.",

@@ -1528,6 +1528,7 @@
   "tools.live.support.superChat": "Super Chat: {amount}",
   "tools.live.support.superSticker": "Super Sticker: {amount}",
   "tools.live.support.tip": "tip: {amount}",
+  "tools.live.support.topic": "topic on stream",
   "tools.live.takeOff": "Take off air",
   "tools.live.topics": "Topics from your viewers",
   "tools.live.topics.by": "From {author}",

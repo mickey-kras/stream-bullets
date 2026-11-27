@@ -1508,6 +1508,7 @@
   "tools.live.support.superChat": "超级留言：{amount}",
   "tools.live.support.superSticker": "超级贴纸：{amount}",
   "tools.live.support.tip": "打赏：{amount}",
+  "tools.live.support.topic": "话题已在直播中展示",
   "commands.title": "角色指令",
   "commands.eyebrow": "游乐场",
   "commands.lead": "在直播聊天中输入指令,可以移动你的角色并建造。每个演示展示该指令的效果。",

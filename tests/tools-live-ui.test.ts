@@ -499,6 +499,8 @@ describe("support events in the chat", (): void => {
     expect(line("bits", { amount: 1 })).toBe("1 Bit");
     expect(line("kicks", { amount: 50 })).toBe("50 KICKs");
     expect(line("reactions", { amount: 3 })).toBe("3 reactions");
+    // The credit of a topic has no amount: the text of the row is the title of the topic.
+    expect(line("topic", { amount: null, platform: "direct" })).toBe("topic on stream");
   });
 
   it("shows money in its currency, from micros", (): void => {

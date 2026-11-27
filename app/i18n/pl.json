@@ -1592,6 +1592,7 @@
   "tools.live.support.superChat": "Superczat: {amount}",
   "tools.live.support.superSticker": "Supernaklejka: {amount}",
   "tools.live.support.tip": "napiwek: {amount}",
+  "tools.live.support.topic": "temat na streamie",
   "commands.title": "Komendy postaci",
   "commands.eyebrow": "Plac zabaw",
   "commands.lead": "Wpisz komendę na czacie transmisji, aby poruszać swoją postacią i budować. Każde demo pokazuje, co robi komenda.",

@@ -1508,6 +1508,7 @@
   "tools.live.support.superChat": "Super Chat：{amount}",
   "tools.live.support.superSticker": "Super Sticker：{amount}",
   "tools.live.support.tip": "チップ：{amount}",
+  "tools.live.support.topic": "トピックを配信で紹介",
   "commands.title": "キャラクターのコマンド",
   "commands.eyebrow": "プレイグラウンド",
   "commands.lead": "配信のチャットにコマンドを入力すると、自分のキャラクターを動かしたり建てたりできます。各デモはコマンドの動きを示します。",

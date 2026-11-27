@@ -44,6 +44,8 @@ export function supportLine(row: LiveSupportRow): string {
       return t("tools.live.support.superSticker", { amount: money(row) });
     case "tip":
       return t("tools.live.support.tip", { amount: money(row) });
+    case "topic":
+      return t("tools.live.support.topic");
   }
 }
 

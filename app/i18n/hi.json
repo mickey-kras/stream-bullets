@@ -1536,6 +1536,7 @@
   "tools.live.support.superChat": "Super Chat: {amount}",
   "tools.live.support.superSticker": "Super Sticker: {amount}",
   "tools.live.support.tip": "टिप: {amount}",
+  "tools.live.support.topic": "विषय स्ट्रीम पर",
   "commands.title": "किरदारों के कमांड",
   "commands.eyebrow": "प्लेग्राउंड",
   "commands.lead": "अपने किरदार को चलाने और निर्माण करने के लिए स्ट्रीम की चैट में कमांड लिखें। हर डेमो दिखाता है कि कमांड क्या करता है।",

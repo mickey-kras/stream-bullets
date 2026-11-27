@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { ActivitySupport, ActivityPlatform, SupportKind } from "../lib/activity";
-import { cleanText, id, name } from "./channel-normalize";
+import { cleanText, id, name, parseTime } from "./channel-normalize";
 import type { YoutubeMessage } from "./channel-providers.server";
 
 /**
@@ -24,10 +24,19 @@ function support(
   kind: SupportKind,
   deliveryId: string,
   receivedAt: number,
-  detail: { sender: Sender; anonymous?: boolean; amount?: number; currency?: string; text?: string | null },
+  detail: {
+    sender: Sender;
+    anonymous?: boolean;
+    amount?: number;
+    currency?: string;
+    text?: string | null;
+    sentAt?: number | null;
+  },
 ): ActivitySupport {
   const anonymous: boolean = detail.anonymous === true;
   const text: string = cleanText(detail.text ?? "");
+  // A time before 1970 is no time of an event: the contract takes no time below zero.
+  const sentAt: number | null = detail.sentAt ?? null;
   return {
     kind,
     id: `${platform}:${deliveryId}`,
@@ -38,6 +47,7 @@ function support(
     amount: detail.amount ?? null,
     currency: detail.currency ?? null,
     ...(text ? { text } : {}),
+    ...(sentAt !== null && sentAt >= 0 ? { sentAt } : {}),
     receivedAt,
     replay: false,
   };
@@ -300,6 +310,7 @@ function youtubeDetail(snippet: YoutubeSnippet): SupportRead | null {
 /**
  * The support events of one page of YouTube live chat messages. The delivery ID is the ID of the message: YouTube
  * gives a message one ID, and a page that comes again has the same IDs. YouTube has no anonymous support in chat.
+ * `sentAt` is the `publishedAt` of the message: the first page after a connect can hold old messages.
  */
 export function youtubeSupport(items: readonly YoutubeMessage[], receivedAt: number): ActivitySupport[] {
   const events: ActivitySupport[] = [];
@@ -312,7 +323,8 @@ export function youtubeSupport(items: readonly YoutubeMessage[], receivedAt: num
     if (money && !(count.safeParse(detail.amount).success && currency.safeParse(detail.currency).success)) continue;
     const { kind, ...rest } = detail;
     const sender: Sender = { id: author.channelId, displayName: cleanText(author.displayName, 100) };
-    events.push(support("youtube", kind, item.id, receivedAt, { ...rest, sender }));
+    const sentAt: number | null = parseTime(item.snippet.publishedAt);
+    events.push(support("youtube", kind, item.id, receivedAt, { ...rest, sender, sentAt }));
   }
   return events;
 }

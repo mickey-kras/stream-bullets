@@ -1536,6 +1536,7 @@
   "tools.live.support.superChat": "Super Chat: {amount}",
   "tools.live.support.superSticker": "Super Sticker: {amount}",
   "tools.live.support.tip": "Trinkgeld: {amount}",
+  "tools.live.support.topic": "Thema im Stream",
   "commands.title": "Befehle für Figuren",
   "commands.eyebrow": "Spielfeld",
   "commands.lead": "Schreib einen Befehl in den Stream-Chat, um deine Figur zu bewegen und zu bauen. Jede Demo zeigt, was der Befehl macht.",

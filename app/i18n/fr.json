@@ -1536,6 +1536,7 @@
   "tools.live.support.superChat": "Super Chat : {amount}",
   "tools.live.support.superSticker": "Super Sticker : {amount}",
   "tools.live.support.tip": "pourboire : {amount}",
+  "tools.live.support.topic": "sujet à l’antenne",
   "commands.title": "Commandes des personnages",
   "commands.eyebrow": "Terrain de jeu",
   "commands.lead": "Écrivez une commande dans le chat du stream pour déplacer votre personnage et construire. Chaque démo montre ce que fait la commande.",

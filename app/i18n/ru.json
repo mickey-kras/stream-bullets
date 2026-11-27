@@ -1592,6 +1592,7 @@
   "tools.live.support.superChat": "Суперчат: {amount}",
   "tools.live.support.superSticker": "Суперстикер: {amount}",
   "tools.live.support.tip": "чаевые: {amount}",
+  "tools.live.support.topic": "тема на стриме",
   "commands.title": "Команды персонажей",
   "commands.eyebrow": "Площадка",
   "commands.lead": "Напишите команду в чате стрима, чтобы двигать своего персонажа и строить. Каждое демо показывает, что делает команда.",
