@@ -120,7 +120,7 @@ for (const locale of LOCALES) {
     });
     await context.addCookies([{ name: "sb_locale", value: locale, domain: "localhost", path: "/" }]);
     test.setTimeout(90_000);
-    for (const route of ["/", "/streamers", "/@streambullets", "/privacy", "/terms", "/ai"]) {
+    for (const route of ["/", "/streamers", "/@streambullets", "/privacy", "/terms", "/ai", "/commands"]) {
       const response = await page.goto(route);
       expect(response?.ok(), `${route}: ${response?.status()}`).toBe(true);
       await expect(page.locator("main")).toBeVisible();
