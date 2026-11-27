@@ -7,7 +7,7 @@ Only the owner of the page can open it.
 | --- | --- | --- |
 | **Live** | `/tools` or `/tools?view=live` | Run the stream. |
 | **Overlay** | `/tools?view=overlay` | Build the overlay and add it to OBS. See [overlay composition](overlay-composition.md). |
-| **Channels** | `/tools?view=channels` | Connect the channels, and turn their support events on or off. See [channel connections](channel-connections.md). |
+| **Channels** | `/tools?view=channels` | Connect the channels. Each connected channel reads its support events: the section has no switch for them. See [channel connections](channel-connections.md). |
 
 The page opens the **Live** section. The old address `/overlay-control` opens the **Overlay** section.
 
@@ -140,7 +140,7 @@ The state of the banner, on air or off air, is at the start of the row of the bu
 The part shows the merged chat of the connected channels. It keeps the newest 500 rows.
 The list follows the newest row.
 
-The list also shows the support events of each channel that has its switch on in **Channels**.
+The list also shows the support events of each connected channel that reads them.
 See [Support events](#support-events).
 
 - A scroll up pauses the list. **Pause chat** also pauses it.

@@ -84,7 +84,7 @@ export const TWITCH_SCOPES = [
   "moderator:read:vips",
 ];
 
-/** The scopes that Twitch asks for when the streamer turns support events on. */
+/** The scopes of support events. The server asks Twitch for them at each connect and reconnect. */
 export const TWITCH_SUPPORT_SCOPES = ["moderator:read:followers", "channel:read:subscriptions", "bits:read"];
 
 /** The Twitch subscription types and Kick events that only support events need. */
@@ -187,7 +187,8 @@ export function fakeProviders(): { fake: FakeProviders; fetch: ProviderFetch } {
         return json({ error: "invalid_grant" }, 400);
       if (refreshing) fake.refreshes += 1;
       const requested: Record<typeof platform, string[]> = {
-        twitch: TWITCH_SCOPES,
+        // Twitch gives each scope that the authorization URL asks for: the scopes of chat and of support events.
+        twitch: [...TWITCH_SCOPES, ...TWITCH_SUPPORT_SCOPES],
         youtube: ["https://www.googleapis.com/auth/youtube.readonly"],
         kick: ["user:read", "channel:read", "events:subscribe"],
       };

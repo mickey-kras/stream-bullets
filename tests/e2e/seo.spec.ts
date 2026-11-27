@@ -2,7 +2,7 @@ import { expect, test } from "./coverage";
 import { origin } from "./fixtures";
 
 test("public pages emit canonical URLs in server HTML", async ({ request }) => {
-  for (const path of ["/", "/streamers", "/privacy", "/terms", "/ai", "/@feature_host"]) {
+  for (const path of ["/", "/streamers", "/privacy", "/terms", "/ai", "/commands", "/@feature_host"]) {
     const response = await request.get(`${path}?dialog=login&then=vote&utm_source=test`);
     expect(response.status()).toBe(200);
     expect(await response.text()).toContain(`rel="canonical" href="${origin}${path}"`);

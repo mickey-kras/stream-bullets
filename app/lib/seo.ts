@@ -1,7 +1,7 @@
 import type { MetaDescriptor } from "react-router";
 import { shellFromMatches } from "./shell";
 
-export const PUBLIC_PAGE_PATHS: readonly string[] = ["/", "/streamers", "/privacy", "/terms", "/ai"];
+export const PUBLIC_PAGE_PATHS: readonly string[] = ["/", "/streamers", "/privacy", "/terms", "/ai", "/commands"];
 
 // Use configured origin and resolved identity; omit UI query parameters.
 export function canonicalMeta(matches: Parameters<typeof shellFromMatches>[0], path: string): MetaDescriptor[] {
