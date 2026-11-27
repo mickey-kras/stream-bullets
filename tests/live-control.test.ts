@@ -213,6 +213,21 @@ describe("stored overlay and battle values", (): void => {
     expect(overlayValue({ ...row, layers: '{"v":2}' }).layers).toEqual(DEFAULT_LAYERS);
   });
 
+  it("reads the chat commands setting of a stored row as it is, and a row without it as on", (): void => {
+    const stored = (chat: Record<string, unknown>): string => JSON.stringify({ ...JSON.parse(row.layers), chat });
+    expect(overlayValue({ ...row, layers: stored({ enabled: true }) }).layers.chat).toEqual({
+      enabled: true,
+      hideCommands: true,
+      backgroundOpacity: 100,
+    });
+    for (const hideCommands of [true, false]) {
+      const state = overlayValue({ ...row, layers: stored({ enabled: true, hideCommands }) });
+      expect(state.layers.chat.hideCommands).toBe(hideCommands);
+      // The overlay and the pages of the owner get the same value from the live room.
+      expect(overlayPublic(state).layers.chat.hideCommands).toBe(hideCommands);
+    }
+  });
+
   it("converts a row from before the overlay studio: the old source on air becomes a layer", (): void => {
     const old: OverlayRow = { ...row, layers: '{"chat":{"enabled":true}}' };
     expect(legacyLayersText(old.layers)).toBe(true);
@@ -1140,6 +1155,9 @@ describe("overlay control", (): void => {
         { content: { enabled: false } },
         { orientation: "square" },
         { chat: { enabled: "yes" } },
+        { chat: { hideCommands: "true" } },
+        { chat: { hideCommands: 1 } },
+        { chat: { hideCommands: null } },
         { chat: { backgroundOpacity: 3 } },
         { chat: { backgroundOpacity: "50" } },
         { layers: { chat: { enabled: true } } },

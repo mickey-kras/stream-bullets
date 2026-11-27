@@ -59,6 +59,10 @@ export type LayerCells = Record<GridLayer, CellRect | null>;
 
 export interface ChatLayer {
   enabled: boolean;
+  /**
+   * The chat does not show chat commands (`isChatCommand`). It applies to the chat layer and to the chat log of the
+   * owner: Live, the full-screen chat and the OBS dock. The commands still run.
+   */
   hideCommands: boolean;
   /** Percent of the card background that shows behind each message (CHAT_BACKGROUND). */
   backgroundOpacity: number;
