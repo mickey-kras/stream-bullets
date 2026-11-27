@@ -440,7 +440,8 @@ export class PlaygroundHost {
     const now = this.clock.now();
     if (this.sim) {
       const sim = this.sim;
-      const shape = (): string => `${sim.world.cellsW} ${sim.world.cellsH} ${sim.timeoutTicks} ${sim.visibleMax}`;
+      const shape = (): string =>
+        `${sim.world.cellsW} ${sim.world.cellsH} ${sim.timeoutTicks} ${sim.visibleMax} ${sim.pushEnabled}`;
       const before: string = shape();
       if (!this.ticking) this.skipTo(now);
       sim.resize(cell.w, cell.h);

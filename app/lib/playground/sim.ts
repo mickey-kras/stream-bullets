@@ -153,7 +153,7 @@ export class PlaygroundSim implements SimHost {
   /** Restricted participants by `platform:userId`: the tick at which the restriction ends. */
   readonly restrictions = new Map<string, number>();
   private active = false;
-  private pushEnabled = true;
+  private pushOn = true;
   private nextId = 1;
   private timeoutSeconds: number = CHARACTERS_TIMEOUT.default;
   private maxVisible: number = CHARACTERS_MAX.default;
@@ -201,9 +201,14 @@ export class PlaygroundSim implements SimHost {
     this.maxVisible = Math.min(CHARACTERS_MAX.max, Math.max(CHARACTERS_MAX.min, Math.round(count)));
   }
 
+  /** The owner setting for `!push`. */
+  get pushEnabled(): boolean {
+    return this.pushOn;
+  }
+
   /** Applies the owner setting immediately, including queued and unfinished pushes. */
   setPushEnabled(enabled: boolean): void {
-    this.pushEnabled = enabled;
+    this.pushOn = enabled;
     if (enabled) return;
     for (const p of this.participants.values()) {
       if (p.pending?.name === "push") p.pending = null;
@@ -271,7 +276,7 @@ export class PlaygroundSim implements SimHost {
   }
 
   private queueCommand(p: Participant, call: CommandCall, key: string): void {
-    if (call.name === "push" && !this.pushEnabled) return;
+    if (call.name === "push" && !this.pushOn) return;
     const movement: boolean = call.name === "left" || call.name === "right" || call.name === "look";
     const last: number = movement ? p.lastMovement : p.lastCommand;
     if (this.clock - last < (movement ? MOVEMENT_COOLDOWN_TICKS : COMMAND_COOLDOWN_TICKS)) return;
@@ -602,7 +607,7 @@ export class PlaygroundSim implements SimHost {
 
   /** Starts a command action. The caller makes sure the character is walking or standing inside the walking limits. */
   perform(p: Participant, command: Command, key = "", n = 0, side: Side = 0): void {
-    if (command === "push" && !this.pushEnabled) return;
+    if (command === "push" && !this.pushOn) return;
     const words: string[] = [`!${command}`];
     if (side !== 0) words.push(side < 0 ? "left" : "right");
     if (n > 0) words.push(String(n));
@@ -901,7 +906,7 @@ export class PlaygroundSim implements SimHost {
       testEndsAt: this.testEndsAt,
       timeoutSeconds: this.timeoutSeconds,
       visibleMax: this.maxVisible,
-      pushEnabled: this.pushEnabled,
+      pushEnabled: this.pushOn,
       cell: CELL_LOGICAL,
       cellsW: this.world.cellsW,
       cellsH: this.world.cellsH,
@@ -942,7 +947,7 @@ export class PlaygroundSim implements SimHost {
       visibleMax: data.visibleMax,
     });
     restoreTerrain(sim.world, sim.terrain, data);
-    sim.pushEnabled = data.pushEnabled;
+    sim.pushOn = data.pushEnabled;
     Object.assign(sim, {
       clock: data.clock,
       rotation: data.rotation,

@@ -812,6 +812,20 @@ describe("controls", (): void => {
     expect((state().storage.values.get(PLAYGROUND_KEY) as { sim: string }).sim).not.toContain('"u1"');
   });
 
+  it("saves a changed !push setting while paused, so an eviction keeps it", async (): Promise<void> => {
+    await listen();
+    await deliver([chat("m1", "u1", "hello")]);
+    advance(FRAME_MS);
+    await control({ op: "pause" });
+    await fireAlarm();
+    const saved = (): string => (state().storage.values.get(PLAYGROUND_KEY) as { sim: string }).sim;
+    expect(saved()).toContain('"pushEnabled":true');
+    await setLayers({ ...ON, characters: { ...ON.characters, pushEnabled: false } });
+    await post("playground-config");
+    await fireAlarm();
+    expect(saved()).toContain('"pushEnabled":false');
+  });
+
   it("starts a test while the layer is saved on but stands until a socket listens", async (): Promise<void> => {
     expect((await control({ op: "test" })).status).toBe(200);
     expect(vi.getTimerCount()).toBe(0);
