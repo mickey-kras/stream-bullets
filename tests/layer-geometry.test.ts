@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { ALERT_RULES, DEFAULT_RULES, type AlertRule, type AlertRules } from "../app/lib/alerts";
 import {
   RESIZE_HANDLES,
   diffLayers,
@@ -125,6 +126,15 @@ describe("field-level patches", () => {
       chat: { enabled: false, hideCommands: false, backgroundOpacity: 40 },
       characters: { enabled: true, timeout: 90, max: 12 },
       camera: { enabled: true },
+      alerts: {
+        enabled: true,
+        rules: {
+          ...DEFAULT_RULES,
+          follow: { ...DEFAULT_RULES.follow, banner: true },
+          bits: { ...DEFAULT_RULES.bits, min: 250, chat: false },
+        },
+      },
+      goal: { enabled: true, title: "New subscribers", counts: "follows", target: 100 },
       items: before.items,
       cells: {
         horizontal: { ...before.cells.horizontal, chat: cell, poll: { c: 10, r: 0, w: 8, h: 4 } },
@@ -137,6 +147,8 @@ describe("field-level patches", () => {
       chat: { enabled: false, hideCommands: false, backgroundOpacity: 40 },
       characters: { enabled: true, timeout: 90, max: 12 },
       camera: { enabled: true },
+      alerts: { enabled: true, rules: { follow: { banner: true }, bits: { min: 250, chat: false } } },
+      goal: { enabled: true, title: "New subscribers", counts: "follows", target: 100 },
       twitchOnly: { vertical: true },
       cells: { horizontal: { chat: cell, poll: { c: 10, r: 0, w: 8, h: 4 } } },
     });
@@ -551,6 +563,11 @@ describe("layers on and off the grid", () => {
     }
     expect(diffLayers(LAID, withEnabled(LAID, "characters", true))).toEqual({ characters: { enabled: true } });
     expect(diffLayers(LAID, withEnabled(LAID, "support", false))).toEqual({ items: { support: { enabled: false } } });
+    expect(diffLayers(LAID, withEnabled(LAID, "alerts", true))).toEqual({ alerts: { enabled: true } });
+    expect(diffLayers(LAID, withEnabled(LAID, "goal", true))).toEqual({ goal: { enabled: true } });
+    // The other settings of the layer stay.
+    expect(withEnabled(LAID, "alerts", true).alerts.rules).toBe(LAID.alerts.rules);
+    expect(withEnabled(LAID, "goal", true).goal).toEqual({ ...LAID.goal, enabled: true });
   });
 
   it("replaces some settings of a content layer and keeps the others", () => {
@@ -601,5 +618,99 @@ describe("content layer patches", () => {
     expect(action).toEqual({ action: "layers", write, ...patch });
     expect(action.items?.topic).not.toBe(patch.items?.topic);
     expect(action.cells?.horizontal?.topic).not.toBe(cell);
+  });
+});
+
+describe("alerts and goal patches", () => {
+  /** LAID with one rule changed. */
+  function withRule(layers: OverlayLayers, rule: "bits" | "follow", change: Partial<AlertRule>): OverlayLayers {
+    const rules: AlertRules = { ...layers.alerts.rules, [rule]: { ...layers.alerts.rules[rule], ...change } };
+    return { ...layers, alerts: { ...layers.alerts, rules } };
+  }
+
+  it("diffs each field of each rule and each field of the goal as one field", () => {
+    expect(diffLayers(LAID, withRule(LAID, "bits", { min: 250 }))).toEqual({
+      alerts: { rules: { bits: { min: 250 } } },
+    });
+    const two: OverlayLayers = withRule(withRule(LAID, "bits", { chat: false }), "follow", { banner: true });
+    expect(diffLayers(LAID, two)).toEqual({ alerts: { rules: { bits: { chat: false }, follow: { banner: true } } } });
+    // Back to the value before: the patch names the field again.
+    expect(diffLayers(two, LAID)).toEqual({ alerts: { rules: { bits: { chat: true }, follow: { banner: false } } } });
+    expect(diffLayers(two, two)).toEqual({});
+    const goal: OverlayLayers = { ...LAID, goal: { ...LAID.goal, title: "New subscribers", target: 100 } };
+    expect(diffLayers(LAID, goal)).toEqual({ goal: { title: "New subscribers", target: 100 } });
+    expect(diffLayers(goal, { ...goal, goal: { ...goal.goal, counts: "bits" } })).toEqual({ goal: { counts: "bits" } });
+    // An empty title is a change.
+    expect(diffLayers(goal, { ...goal, goal: { ...goal.goal, title: "" } })).toEqual({ goal: { title: "" } });
+    // The cells of the two layers are fields of the grid.
+    const placed: OverlayLayers = withCell(LAID, "horizontal", "goal", { c: 24, r: 0, w: 8, h: 2 });
+    expect(diffLayers(LAID, placed)).toEqual({ cells: { horizontal: { goal: { c: 24, r: 0, w: 8, h: 2 } } } });
+  });
+
+  it("merges patches with the newer field winning, for each rule", () => {
+    expect(
+      mergePatches(
+        { alerts: { enabled: true, rules: { bits: { min: 250, chat: false }, raid: { min: 10 } } } },
+        { alerts: { rules: { bits: { min: 300 }, follow: { banner: true } } } },
+      ),
+    ).toEqual({
+      alerts: {
+        enabled: true,
+        rules: { bits: { min: 300, chat: false }, raid: { min: 10 }, follow: { banner: true } },
+      },
+    });
+    expect(mergePatches({ alerts: { enabled: true } }, { alerts: { enabled: false } })).toEqual({
+      alerts: { enabled: false },
+    });
+    expect(mergePatches({ alerts: { rules: { bits: { min: 5 } } } }, {})).toEqual({
+      alerts: { rules: { bits: { min: 5 } } },
+    });
+    expect(
+      mergePatches({ goal: { title: "New", target: 50 } }, { goal: { title: "New subscribers", counts: "follows" } }),
+    ).toEqual({ goal: { title: "New subscribers", target: 50, counts: "follows" } });
+    expect(mergePatches({ goal: { title: "New" } }, { goal: { title: "" } })).toEqual({ goal: { title: "" } });
+    expect(isEmptyPatch({ alerts: {}, goal: {} })).toBe(true);
+    expect(isEmptyPatch({ alerts: { rules: {} } })).toBe(true);
+    expect(isEmptyPatch({ alerts: { rules: { bits: {} } } })).toBe(true);
+    expect(isEmptyPatch({ alerts: { rules: { bits: { chat: true } } } })).toBe(false);
+    expect(isEmptyPatch({ alerts: { enabled: false } })).toBe(false);
+    expect(isEmptyPatch({ goal: { title: "" } })).toBe(false);
+  });
+
+  it("drops the sent fields that still hold the sent value and keeps later edits", () => {
+    const sent: LayersPatch = {
+      alerts: { enabled: true, rules: { bits: { min: 250, chat: false }, follow: { banner: true } } },
+      goal: { enabled: true, title: "New", counts: "bits", target: 50 },
+    };
+    expect(withoutSent(sent, sent)).toEqual({});
+    // The owner typed more of the title and changed one rule while the request ran.
+    const later: LayersPatch = {
+      alerts: { enabled: true, rules: { bits: { min: 300, chat: false }, follow: { banner: true }, raid: { min: 9 } } },
+      goal: { enabled: true, title: "New subscribers", counts: "bits", target: 50 },
+    };
+    expect(withoutSent(later, sent)).toEqual({
+      alerts: { rules: { bits: { min: 300 }, raid: { min: 9 } } },
+      goal: { title: "New subscribers" },
+    });
+    expect(withoutSent({ alerts: { enabled: false } }, sent)).toEqual({ alerts: { enabled: false } });
+    expect(withoutSent({ goal: { target: 50 } }, {})).toEqual({ goal: { target: 50 } });
+    expect(withoutSent({}, sent)).toEqual({});
+    // The draft itself does not change.
+    expect(later.alerts?.rules?.follow).toEqual({ banner: true });
+    expect(later.goal?.target).toBe(50);
+  });
+
+  it("builds a request with only the changed fields, each rule copied", () => {
+    const patch: LayersPatch = { alerts: { rules: { bits: { min: 250 } } }, goal: { target: 100 } };
+    const action = layersAction(patch, write);
+    expect(action).toEqual({ action: "layers", write, ...patch });
+    expect(action.alerts?.rules?.bits).not.toBe(patch.alerts?.rules?.bits);
+    expect(action.goal).not.toBe(patch.goal);
+    // Each rule can be in a patch.
+    for (const rule of ALERT_RULES)
+      expect(layersAction({ alerts: { rules: { [rule]: { banner: false } } } }, write).alerts?.rules?.[rule]).toEqual({
+        banner: false,
+      });
+    expect(DEFAULT_RULES.bits.min).toBe(100);
   });
 });

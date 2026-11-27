@@ -21,7 +21,8 @@ import { initialLiveChat, liveChatReducer, type LiveChatState } from "../app/lib
 
 /** A valid event of `kind`, with the amount and the currency that the kind needs. */
 function support(kind: SupportKind, change: Partial<ActivitySupport> = {}): ActivitySupport {
-  const platform: SupportSource = change.platform ?? (kind === "tip" ? "direct" : "twitch");
+  const direct: boolean = kind === "tip" || kind === "topic";
+  const platform: SupportSource = change.platform ?? (direct ? "direct" : "twitch");
   const deliveryId: string = change.deliveryId ?? `d-${kind}`;
   return {
     kind,
@@ -30,7 +31,7 @@ function support(kind: SupportKind, change: Partial<ActivitySupport> = {}): Acti
     deliveryId,
     sender: { id: "u1", displayName: "Tess" },
     anonymous: false,
-    amount: kind === "follow" ? null : 5,
+    amount: kind === "follow" || kind === "topic" ? null : 5,
     currency: MONEY_KINDS.has(kind) ? "EUR" : null,
     receivedAt: 1000,
     replay: false,
@@ -42,7 +43,7 @@ const parsed = (event: unknown): ActivityMessage | null =>
   parseActivityMessage(JSON.stringify({ type: "event", event }));
 
 describe("the format of a support event", (): void => {
-  it("has the eleven kinds of the issue, and three of them are money", (): void => {
+  it("has the eleven kinds of the first issue and the topic credit, and three of them are money", (): void => {
     expect([...SUPPORT_KINDS]).toEqual([
       "follow",
       "subscription",
@@ -55,6 +56,7 @@ describe("the format of a support event", (): void => {
       "kicks",
       "tip",
       "reactions",
+      "topic",
     ]);
     expect([...MONEY_KINDS]).toEqual(["super_chat", "super_sticker", "tip"]);
   });
@@ -73,6 +75,22 @@ describe("the format of a support event", (): void => {
     expect(parsed(support("bits", { replay: true }))).not.toBeNull();
   });
 
+  it("has the credit of a topic as a direct event without an amount, with the title as its text", (): void => {
+    const credit: ActivitySupport = support("topic", { deliveryId: "topic:e1:7", text: "Which boss first?" });
+    expect(credit).toMatchObject({ id: "direct:topic:e1:7", platform: "direct", amount: null, currency: null });
+    expect(parsed(credit)).toEqual({ type: "event", event: credit });
+    // It is not money and it has no count.
+    expect(supportTotals([credit])).toEqual({ events: { topic: 1 }, amounts: {}, money: {} });
+  });
+
+  it("keeps the time of the platform when the event has one", (): void => {
+    const timed: ActivitySupport = support("super_chat", { platform: "youtube", currency: "EUR", sentAt: 400 });
+    expect(parsed(timed)).toEqual({ type: "event", event: timed });
+    expect(parsed(support("bits"))).toEqual({ type: "event", event: support("bits") });
+    for (const sentAt of [-1, 1.5, "400", null])
+      expect(parsed({ ...support("bits"), sentAt }), String(sentAt)).toBeNull();
+  });
+
   it("refuses an event that is not correct for its kind", (): void => {
     const wrong: [string, unknown][] = [
       ["a follow with an amount", support("follow", { amount: 1 })],
@@ -86,6 +104,9 @@ describe("the format of a support event", (): void => {
       ["a direct follow", support("follow", { platform: "direct" })],
       ["a tip from a platform", support("tip", { platform: "twitch" })],
       ["a Super Chat that is direct", support("super_chat", { platform: "direct" })],
+      ["a topic credit from a platform", support("topic", { platform: "twitch" })],
+      ["a topic credit with an amount", support("topic", { amount: 1 })],
+      ["a topic credit with a currency", support("topic", { currency: "EUR" })],
       ["an anonymous event with a sender", support("gift", { anonymous: true })],
       ["an ID that is not the platform and the delivery ID", { ...support("bits"), id: "twitch:other" }],
       ["no delivery ID", { ...support("bits"), deliveryId: "" }],
@@ -128,11 +149,12 @@ describe("a consumer and the kinds that it does not know", (): void => {
     expect(live.rows).toMatchObject([{ kind: "support", event: "bits", seq: 1 }]);
   });
 
-  it("does not show a direct tip or the support of a different platform in an output for Twitch only", (): void => {
+  it("does not show a direct event or the support of a different platform in an output for Twitch only", (): void => {
     const twitch: ActivityMessage = { type: "event", event: support("bits") };
     expect(messageForPlatform(twitch, "twitch")).toBe(twitch);
     for (const event of [
       support("tip"),
+      support("topic"),
       support("super_chat", { platform: "youtube" }),
       support("kicks", { platform: "kick" }),
     ])

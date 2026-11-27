@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
+import { ALERT_MIN, ALERT_RULES, DEFAULT_RULES, type AlertRule, type AlertRules } from "../app/lib/alerts";
+import { GOAL_COUNTS, GOAL_TARGET, GOAL_TITLE_LENGTH } from "../app/lib/goals";
 import {
   CELL_PX,
   CHARACTERS_MAX,
@@ -22,6 +24,7 @@ import {
   emptyCells,
   forOutput,
   frameSize,
+  isContentLayer,
   layerEnabled,
   layerPixels,
   layersPatchSchema,
@@ -38,6 +41,7 @@ import {
   type CellRect,
   type ContentItem,
   type ContentLayer,
+  type GoalLayer,
   type LayerCells,
   type OverlayLayers,
 } from "../app/lib/overlay-layers";
@@ -99,12 +103,16 @@ describe("grid and defaults", (): void => {
       card: least,
       support: least,
       camera: { w: 6, h: 4 },
+      alerts: { w: 8, h: 3 },
+      goal: { w: 8, h: 2 },
     });
   });
 
-  it("has one grid layer for each content source, after the chat and the characters, and the camera frame last", (): void => {
+  it("has one grid layer for each content source, after the chat and the characters, and each newer layer at the end", (): void => {
     expect(CONTENT_LAYERS).toEqual(["poll", "topic", "next", "message", "card", "support"]);
-    expect(GRID_LAYERS).toEqual(["chat", "characters", ...CONTENT_LAYERS, "camera"]);
+    // A stored layout resolves an overlap in this order: a newer layer never takes the cell of an older layer.
+    expect(GRID_LAYERS).toEqual(["chat", "characters", ...CONTENT_LAYERS, "camera", "alerts", "goal"]);
+    expect(GRID_LAYERS.filter(isContentLayer)).toEqual([...CONTENT_LAYERS]);
     expect(LAYER_BACKGROUND).toEqual({ min: 0, max: 100, step: 5, default: 100 });
     expect(CHAT_BACKGROUND).toBe(LAYER_BACKGROUND);
   });
@@ -116,10 +124,12 @@ describe("grid and defaults", (): void => {
       chat: { enabled: false, hideCommands: true, backgroundOpacity: 100 },
       characters: { enabled: false, timeout: 60, max: 40 },
       camera: { enabled: false },
+      alerts: { enabled: false, rules: DEFAULT_RULES },
+      goal: { enabled: false, title: "", counts: "subs", target: 25 },
       items: defaultItems,
       cells: {
-        horizontal: { ...none, support: null, camera: null },
-        vertical: { ...none, support: null, camera: null },
+        horizontal: { ...none, support: null, camera: null, alerts: null, goal: null },
+        vertical: { ...none, support: null, camera: null, alerts: null, goal: null },
       },
       twitchOnly: { horizontal: false, vertical: false },
     });
@@ -268,6 +278,8 @@ describe("stored layers", (): void => {
       chat: { enabled: true, hideCommands: false, backgroundOpacity: 35 },
       characters: { enabled: true, timeout: 60, max: 40 },
       camera: { enabled: true },
+      alerts: { enabled: true, rules: { ...DEFAULT_RULES, bits: { ...DEFAULT_RULES.bits, min: 250, chat: false } } },
+      goal: { enabled: true, title: "New subscribers", counts: "follows", target: 100 },
       items: {
         ...defaultItems,
         poll: { enabled: false, ref: "p1", backgroundOpacity: 0, qr: false },
@@ -282,7 +294,13 @@ describe("stored layers", (): void => {
           support: { c: 0, r: 8, w: 20, h: 6 },
           camera: { c: 1, r: 1, w: 11, h: 7 },
         },
-        vertical: { ...emptyCells(), characters: { c: 0, r: 28, w: 18, h: 4 }, message: { c: 0, r: 8, w: 18, h: 4 } },
+        vertical: {
+          ...emptyCells(),
+          characters: { c: 0, r: 28, w: 18, h: 4 },
+          message: { c: 0, r: 8, w: 18, h: 4 },
+          alerts: { c: 0, r: 0, w: 18, h: 3 },
+          goal: { c: 0, r: 3, w: 18, h: 2 },
+        },
       },
       twitchOnly: { horizontal: true, vertical: false },
     };
@@ -432,7 +450,8 @@ describe("stored layers", (): void => {
 
   it("stays short enough for the 4000-character column limit with every layer set", (): void => {
     expect(STORED_LAYERS_LENGTH).toBe(4000);
-    // Each layer on the grid of both orientations, with the longest ref and no setting at its default.
+    // Each layer on the grid of both orientations, with the longest ref, the longest title and no setting at its
+    // default.
     const ref = "x".repeat(64);
     const cell: CellRect = { c: 20, r: 20, w: 32, h: 32 };
     const cells: LayerCells = {
@@ -445,13 +464,37 @@ describe("stored layers", (): void => {
       card: cell,
       support: cell,
       camera: cell,
+      alerts: cell,
+      goal: cell,
     };
     const changed: ContentItem = { enabled: false, ref: null, backgroundOpacity: 55, qr: true };
+    // Each field of each rule is not its default, with the longest amount.
+    const rule = (usual: AlertRule): AlertRule => ({
+      min: ALERT_MIN.max,
+      banner: !usual.banner,
+      chat: false,
+      character: false,
+    });
+    const rules: AlertRules = {
+      follow: rule(DEFAULT_RULES.follow),
+      subscription: rule(DEFAULT_RULES.subscription),
+      gift: rule(DEFAULT_RULES.gift),
+      bits: rule(DEFAULT_RULES.bits),
+      paid: rule(DEFAULT_RULES.paid),
+      raid: rule(DEFAULT_RULES.raid),
+      topic: rule(DEFAULT_RULES.topic),
+    };
+    // A character that is half of a pair is the longest in JSON text: six characters for one.
+    const title: string = "\ud800".repeat(GOAL_TITLE_LENGTH);
+    expect(JSON.stringify(title)).toHaveLength(GOAL_TITLE_LENGTH * 6 + 2);
+    expect(layersPatchSchema.safeParse({ goal: { title } }).success).toBe(true);
     const full: OverlayLayers = {
       orientation: "horizontal",
       chat: { enabled: false, hideCommands: false, backgroundOpacity: 100 },
       characters: { enabled: false, timeout: 600, max: 5 },
       camera: { enabled: true },
+      alerts: { enabled: true, rules },
+      goal: { enabled: true, title, counts: "chatters", target: GOAL_TARGET.max },
       items: {
         poll: { ...changed, ref, qr: false },
         topic: { ...changed, ref },
@@ -463,8 +506,11 @@ describe("stored layers", (): void => {
       cells: { horizontal: cells, vertical: cells },
       twitchOnly: { horizontal: true, vertical: true },
     };
-    expect(storedLayersText(full).length).toBeGreaterThan(1000);
-    expect(storedLayersText(full).length).toBeLessThan(STORED_LAYERS_LENGTH / 2);
+    // The text is longer than a text that the API can store: its cells are over each other, and each rule has an
+    // amount. It still leaves one quarter of the limit free.
+    const text: string = storedLayersText(full);
+    expect(text.length).toBeGreaterThan(2000);
+    expect(text.length).toBeLessThan((STORED_LAYERS_LENGTH * 3) / 4);
   });
 
   it("stores the version, and leaves out what the read fills in", (): void => {
@@ -629,6 +675,331 @@ describe("camera frame", (): void => {
     expect(next.cells.horizontal.camera).not.toBe(frame);
     expect(mergeLayers(next, {}).camera).toEqual({ enabled: true });
     expect(mergeLayers(next, { cells: { horizontal: { camera: null } } }).cells.horizontal.camera).toBeNull();
+  });
+});
+
+describe("alerts layer", (): void => {
+  // Free cells of LAID: right of the chat, above the characters.
+  const bannerCell: CellRect = { c: 10, r: 0, w: 16, h: 3 };
+  const rulesOf = (value: unknown): AlertRules => storedLayersSchema.parse({ alerts: value }).alerts.rules;
+
+  it("is a grid layer with its own switch and the default rules, off until the owner puts it on the grid", (): void => {
+    expect(DEFAULT_LAYERS.alerts).toEqual({ enabled: false, rules: DEFAULT_RULES });
+    expect(DEFAULT_LAYERS.alerts.rules).not.toBe(DEFAULT_RULES);
+    expect(layerEnabled(DEFAULT_LAYERS, "alerts")).toBe(false);
+    expect(isContentLayer("alerts")).toBe(false);
+    const placed: OverlayLayers = withCells({ alerts: bannerCell });
+    expect(onStream(placed, "alerts")).toBe(false);
+    const on: OverlayLayers = { ...placed, alerts: { ...placed.alerts, enabled: true } };
+    expect(onStream(on, "alerts")).toBe(true);
+    expect(onAnyOutput({ ...on, orientation: "vertical" }, "alerts")).toBe(true);
+    expect(onStream({ ...on, orientation: "vertical" }, "alerts")).toBe(false);
+    expect(layerPixels(on, "alerts")).toEqual({ x: 600, y: 0, w: 960, h: 180 });
+    // The alerts are not a content layer: they have no source.
+    expect(contentSources(on)).toEqual([]);
+  });
+
+  it("has a smallest size of 8 x 3 cells and keeps other layers out of its cells", (): void => {
+    expect(cellFits("horizontal", "alerts", { c: 24, r: 15, w: 8, h: 3 })).toBe(true);
+    expect(cellFits("horizontal", "alerts", { c: 0, r: 0, w: 7, h: 3 })).toBe(false);
+    expect(cellFits("horizontal", "alerts", { c: 0, r: 0, w: 8, h: 2 })).toBe(false);
+    expect(cellFits("vertical", "alerts", { c: 0, r: 0, w: 18, h: 3 })).toBe(true);
+    expect(overlappingPair({ ...emptyCells(), poll: pollCell, alerts: { c: 14, r: 2, w: 8, h: 3 } })).toEqual([
+      "poll",
+      "alerts",
+    ]);
+    expect(overlappingPair({ ...emptyCells(), alerts: bannerCell, goal: { c: 20, r: 2, w: 8, h: 2 } })).toEqual([
+      "alerts",
+      "goal",
+    ]);
+    expect(overlappingPair({ ...emptyCells(), alerts: bannerCell, goal: { c: 24, r: 3, w: 8, h: 2 } })).toBeNull();
+  });
+
+  it("takes the switch, the cell and each field of each rule in a patch", (): void => {
+    const patch = {
+      alerts: {
+        enabled: true,
+        rules: {
+          follow: { banner: true, chat: false, character: false },
+          gift: { min: 5 },
+          bits: { min: ALERT_MIN.max, banner: false },
+          raid: { min: ALERT_MIN.min },
+          paid: {},
+        },
+      },
+      cells: { horizontal: { alerts: bannerCell }, vertical: { alerts: null } },
+    };
+    expect(layersPatchSchema.parse(patch)).toEqual(patch);
+    expect(layersPatchSchema.parse({ alerts: {} })).toEqual({ alerts: {} });
+    expect(layersPatchSchema.parse({ alerts: { rules: {} } })).toEqual({ alerts: { rules: {} } });
+    for (const rule of ALERT_RULES)
+      expect(layersPatchSchema.safeParse({ alerts: { rules: { [rule]: { banner: false } } } }).success, rule).toBe(
+        true,
+      );
+  });
+
+  it.each([
+    ["a switch that is not a boolean", { alerts: { enabled: "yes" } }],
+    ["an unknown field of the layer", { alerts: { volume: 3 } }],
+    ["an unknown rule", { alerts: { rules: { tip: { banner: true } } } }],
+    ["an unknown field of a rule", { alerts: { rules: { bits: { sound: true } } } }],
+    ["a rule switch that is not a boolean", { alerts: { rules: { bits: { chat: 1 } } } }],
+    ["a null rule", { alerts: { rules: { bits: null } } }],
+    ["an amount of zero", { alerts: { rules: { bits: { min: 0 } } } }],
+    ["an amount above the limit", { alerts: { rules: { raid: { min: 1_000_001 } } } }],
+    ["an amount that is not a whole number", { alerts: { rules: { gift: { min: 2.5 } } } }],
+    ["an amount as text", { alerts: { rules: { bits: { min: "100" } } } }],
+    ["an amount on the follow rule", { alerts: { rules: { follow: { min: 5 } } } }],
+    ["an amount on the subscription rule", { alerts: { rules: { subscription: { min: 1 } } } }],
+    ["an amount on the Super Chat rule", { alerts: { rules: { paid: { min: 5 } } } }],
+    ["an amount on the topic rule", { alerts: { rules: { topic: { min: 2 } } } }],
+    ["an alerts cell below the minimum", { cells: { horizontal: { alerts: { c: 0, r: 0, w: 8, h: 2 } } } }],
+    ["an alerts cell outside the grid", { cells: { vertical: { alerts: { c: 12, r: 0, w: 8, h: 3 } } } }],
+    [
+      "an alerts cell over the goal cell",
+      { cells: { horizontal: { alerts: bannerCell, goal: { c: 20, r: 2, w: 8, h: 2 } } } },
+    ],
+  ])("refuses %s", (_name: string, patch: Record<string, unknown>): void => {
+    expect(layersPatchSchema.safeParse(patch).success).toBe(false);
+  });
+
+  it("merges one field of one rule and keeps each other field", (): void => {
+    const next: OverlayLayers = mergeLayers(LAID, {
+      alerts: { enabled: true, rules: { bits: { min: 250 }, follow: { banner: true } } },
+      cells: { horizontal: { alerts: bannerCell } },
+    });
+    expect(next.alerts).toEqual({
+      enabled: true,
+      rules: {
+        ...DEFAULT_RULES,
+        bits: { min: 250, banner: true, chat: true, character: true },
+        follow: { min: 1, banner: true, chat: true, character: true },
+      },
+    });
+    expect(next.cells.horizontal.alerts).toEqual(bannerCell);
+    expect(next.cells.horizontal.alerts).not.toBe(bannerCell);
+    // A patch without the alerts keeps them, as new objects.
+    const kept: OverlayLayers = mergeLayers(next, { chat: { enabled: true } });
+    expect(kept.alerts).toEqual(next.alerts);
+    expect(kept.alerts.rules.bits).not.toBe(next.alerts.rules.bits);
+    expect(mergeLayers(next, { alerts: { rules: { bits: { chat: false } } } }).alerts.rules.bits).toEqual({
+      min: 250,
+      banner: true,
+      chat: false,
+      character: true,
+    });
+    expect(mergeLayers(next, { alerts: { enabled: false } }).alerts).toEqual({ ...next.alerts, enabled: false });
+    expect(mergeLayers(next, { cells: { horizontal: { alerts: null } } }).cells.horizontal.alerts).toBeNull();
+    expect(DEFAULT_LAYERS.alerts.rules).toEqual(DEFAULT_RULES);
+  });
+
+  it("stores only the fields that are not a default, and reads them again", (): void => {
+    expect(storedLayersText(DEFAULT_LAYERS)).not.toContain("alerts");
+    // A cell alone stores no setting.
+    const placed: OverlayLayers = withCells({ alerts: bannerCell });
+    expect(stored(placed)).not.toHaveProperty("alerts");
+    expect(stored(placed)).toMatchObject({ cells: { horizontal: { alerts: bannerCell } } });
+    expect(storedLayersSchema.parse(stored(placed))).toEqual(placed);
+    const on: OverlayLayers = mergeLayers(placed, { alerts: { enabled: true } });
+    expect(stored(on)).toMatchObject({ alerts: { enabled: true } });
+    expect(stored(on)).not.toHaveProperty("alerts.rules");
+    const changed: OverlayLayers = mergeLayers(placed, {
+      alerts: { rules: { bits: { min: 250 }, follow: { banner: true, character: false } } },
+    });
+    expect((stored(changed) as { alerts: unknown }).alerts).toEqual({
+      rules: { bits: { min: 250 }, follow: { banner: true, character: false } },
+    });
+    expect(storedLayersSchema.parse(stored(changed))).toEqual(changed);
+    expect(storedLayersSchema.parse(stored(on))).toEqual(on);
+    // Back at the defaults: nothing is stored.
+    const usual: OverlayLayers = mergeLayers(changed, {
+      alerts: { rules: { bits: { min: 100 }, follow: { banner: false, character: true } } },
+    });
+    expect(stored(usual)).not.toHaveProperty("alerts");
+  });
+
+  it("reads a missing or incorrect stored value as the defaults and keeps the correct fields", (): void => {
+    for (const value of [undefined, null, "on", 7, [], {}, { rules: "all" }, { rules: [] }])
+      expect(storedLayersSchema.parse({ alerts: value }).alerts, JSON.stringify(value)).toEqual(DEFAULT_LAYERS.alerts);
+    expect(storedLayersSchema.parse({ alerts: { enabled: "yes", volume: 3 } }).alerts).toEqual(DEFAULT_LAYERS.alerts);
+    expect(storedLayersSchema.parse({ alerts: { enabled: true, rules: 5 } }).alerts).toEqual({
+      enabled: true,
+      rules: DEFAULT_RULES,
+    });
+    expect(
+      rulesOf({
+        rules: {
+          bits: { min: 250, banner: "no", chat: false, sound: true },
+          raid: { min: 0 },
+          gift: { min: 2.5, character: false },
+          follow: "off",
+          tip: { banner: true },
+        },
+      }),
+    ).toEqual({
+      ...DEFAULT_RULES,
+      bits: { min: 250, banner: true, chat: false, character: true },
+      gift: { ...DEFAULT_RULES.gift, character: false },
+    });
+    // A rule without an amount always reads the amount 1.
+    for (const rule of ["follow", "subscription", "paid", "topic"] as const)
+      expect(rulesOf({ rules: { [rule]: { min: 50, chat: false } } })[rule], rule).toEqual({
+        ...DEFAULT_RULES[rule],
+        chat: false,
+      });
+    for (const min of [0, 1_000_001, "100", null]) expect(rulesOf({ rules: { bits: { min } } }).bits.min).toBe(100);
+    expect(rulesOf({ rules: { bits: { min: 1_000_000 } } }).bits.min).toBe(1_000_000);
+  });
+
+  it("returns fresh rules, so editing one result never changes the defaults", (): void => {
+    for (const value of [{}, null, { alerts: { rules: { bits: "x" } } }, { alerts: { rules: 5 } }]) {
+      const layers: OverlayLayers = storedLayersSchema.parse(value);
+      layers.alerts.enabled = true;
+      layers.alerts.rules.bits.min = 5;
+      layers.alerts.rules.follow.banner = true;
+    }
+    expect(DEFAULT_RULES.bits.min).toBe(100);
+    expect(DEFAULT_LAYERS.alerts).toEqual({ enabled: false, rules: DEFAULT_RULES });
+    expect(storedLayersSchema.parse({})).toEqual(DEFAULT_LAYERS);
+  });
+
+  it("reads an alerts cell that is invalid, or over an earlier layer, as no cell", (): void => {
+    const read = (cells: Record<string, unknown>): LayerCells =>
+      storedLayersSchema.parse({ cells: { horizontal: cells } }).cells.horizontal;
+    expect(read({ alerts: bannerCell }).alerts).toEqual(bannerCell);
+    expect(read({ alerts: { c: 0, r: 0, w: 8, h: 2 } }).alerts).toBeNull();
+    // Each layer from before the alerts is earlier in the order, so it keeps its cell.
+    expect(read({ camera: { c: 12, r: 1, w: 6, h: 4 }, alerts: bannerCell })).toEqual({
+      ...emptyCells(),
+      camera: { c: 12, r: 1, w: 6, h: 4 },
+    });
+    // The alerts are before the goal.
+    expect(read({ goal: { c: 20, r: 2, w: 8, h: 2 }, alerts: bannerCell })).toEqual({
+      ...emptyCells(),
+      alerts: bannerCell,
+    });
+  });
+});
+
+describe("goal layer", (): void => {
+  const goalCell: CellRect = { c: 24, r: 0, w: 8, h: 2 };
+  const goalOf = (value: unknown): GoalLayer => storedLayersSchema.parse({ goal: value }).goal;
+
+  it("is a grid layer with its own switch, off until the owner puts it on the grid", (): void => {
+    expect(DEFAULT_LAYERS.goal).toEqual({ enabled: false, title: "", counts: "subs", target: 25 });
+    expect(GOAL_TARGET.default).toBe(25);
+    expect(layerEnabled(DEFAULT_LAYERS, "goal")).toBe(false);
+    expect(isContentLayer("goal")).toBe(false);
+    const placed: OverlayLayers = withCells({ goal: goalCell });
+    expect(onStream(placed, "goal")).toBe(false);
+    const on: OverlayLayers = { ...placed, goal: { ...placed.goal, enabled: true } };
+    expect(onStream(on, "goal")).toBe(true);
+    expect(layerPixels(on, "goal")).toEqual({ x: 1440, y: 0, w: 480, h: 120 });
+    expect(contentSources(on)).toEqual([]);
+  });
+
+  it("has a smallest size of 8 x 2 cells", (): void => {
+    expect(cellFits("horizontal", "goal", { c: 24, r: 16, w: 8, h: 2 })).toBe(true);
+    expect(cellFits("horizontal", "goal", { c: 0, r: 0, w: 7, h: 2 })).toBe(false);
+    expect(cellFits("horizontal", "goal", { c: 0, r: 0, w: 8, h: 1 })).toBe(false);
+    expect(cellFits("vertical", "goal", { c: 0, r: 3, w: 18, h: 2 })).toBe(true);
+    expect(cellFits("vertical", "goal", { c: 11, r: 0, w: 8, h: 2 })).toBe(false);
+  });
+
+  it("takes the switch, the title, the count, the target and the cell in a patch", (): void => {
+    const patch = {
+      goal: { enabled: true, title: "New subscribers", counts: "bits", target: 5000 },
+      cells: { horizontal: { goal: goalCell }, vertical: { goal: null } },
+    };
+    expect(layersPatchSchema.parse(patch)).toEqual(patch);
+    expect(layersPatchSchema.parse({ goal: {} })).toEqual({ goal: {} });
+    for (const counts of GOAL_COUNTS) expect(layersPatchSchema.safeParse({ goal: { counts } }).success).toBe(true);
+    for (const target of [GOAL_TARGET.min, GOAL_TARGET.max])
+      expect(layersPatchSchema.safeParse({ goal: { target } }).success).toBe(true);
+    // The title can be empty, and it keeps its spaces: the editor saves while the owner types.
+    for (const title of ["", "Road to 100 ", "x".repeat(GOAL_TITLE_LENGTH), "Цель: 25 подписок 🎯"])
+      expect(layersPatchSchema.parse({ goal: { title } })).toEqual({ goal: { title } });
+  });
+
+  it.each([
+    ["a switch that is not a boolean", { goal: { enabled: 1 } }],
+    ["an unknown field", { goal: { value: 17 } }],
+    ["an unknown count", { goal: { counts: "likes" } }],
+    ["a target of zero", { goal: { target: 0 } }],
+    ["a target above the limit", { goal: { target: 10_000_001 } }],
+    ["a target that is not a whole number", { goal: { target: 2.5 } }],
+    ["a target as text", { goal: { target: "25" } }],
+    ["a title above 60 characters", { goal: { title: "x".repeat(61) } }],
+    ["a title of two lines", { goal: { title: "New\nsubscribers" } }],
+    ["a title with a control character", { goal: { title: "New\u0007" } }],
+    ["a title that is not text", { goal: { title: 5 } }],
+    ["a null title", { goal: { title: null } }],
+    ["a goal cell below the minimum", { cells: { horizontal: { goal: { c: 0, r: 0, w: 8, h: 1 } } } }],
+    ["a goal cell outside the grid", { cells: { horizontal: { goal: { c: 26, r: 0, w: 8, h: 2 } } } }],
+  ])("refuses %s", (_name: string, patch: Record<string, unknown>): void => {
+    expect(layersPatchSchema.safeParse(patch).success).toBe(false);
+  });
+
+  it("merges each field alone and keeps the fields that a patch does not name", (): void => {
+    const next: OverlayLayers = mergeLayers(LAID, {
+      goal: { enabled: true, title: "New subscribers" },
+      cells: { horizontal: { goal: goalCell } },
+    });
+    expect(next.goal).toEqual({ enabled: true, title: "New subscribers", counts: "subs", target: 25 });
+    expect(mergeLayers(next, { goal: { target: 100 } }).goal).toEqual({ ...next.goal, target: 100 });
+    expect(mergeLayers(next, { goal: { counts: "follows" } }).goal).toEqual({ ...next.goal, counts: "follows" });
+    // An empty title is a value: it replaces the title.
+    expect(mergeLayers(next, { goal: { title: "" } }).goal.title).toBe("");
+    expect(mergeLayers(next, { goal: { enabled: false } }).goal).toEqual({ ...next.goal, enabled: false });
+    expect(mergeLayers(next, {}).goal).toEqual(next.goal);
+    expect(DEFAULT_LAYERS.goal.title).toBe("");
+  });
+
+  it("stores only the fields that are not a default, and reads them again", (): void => {
+    expect(storedLayersText(DEFAULT_LAYERS)).not.toContain("goal");
+    const placed: OverlayLayers = withCells({ goal: goalCell });
+    expect(stored(placed)).not.toHaveProperty("goal");
+    expect(stored(placed)).toMatchObject({ cells: { horizontal: { goal: goalCell } } });
+    const titled: OverlayLayers = mergeLayers(placed, { goal: { title: "New subscribers", target: 100 } });
+    expect((stored(titled) as { goal: unknown }).goal).toEqual({ title: "New subscribers", target: 100 });
+    expect(storedLayersSchema.parse(stored(titled))).toEqual(titled);
+    const all: OverlayLayers = mergeLayers(titled, { goal: { enabled: true, counts: "kicks" } });
+    expect((stored(all) as { goal: unknown }).goal).toEqual({
+      enabled: true,
+      title: "New subscribers",
+      counts: "kicks",
+      target: 100,
+    });
+    expect(storedLayersSchema.parse(stored(all))).toEqual(all);
+    const usual: OverlayLayers = mergeLayers(all, { goal: { enabled: false, title: "", counts: "subs", target: 25 } });
+    expect(stored(usual)).not.toHaveProperty("goal");
+  });
+
+  it("reads a missing or incorrect stored value as the defaults and keeps the correct fields", (): void => {
+    for (const value of [undefined, null, "on", 7, [], {}])
+      expect(goalOf(value), JSON.stringify(value)).toEqual(DEFAULT_LAYERS.goal);
+    expect(goalOf({ enabled: true, title: "Bits", counts: "bits", target: 5000, value: 17 })).toEqual({
+      enabled: true,
+      title: "Bits",
+      counts: "bits",
+      target: 5000,
+    });
+    expect(goalOf({ enabled: "yes", title: "x".repeat(61), counts: "likes", target: 0 })).toEqual(DEFAULT_LAYERS.goal);
+    expect(goalOf({ title: "two\nlines", target: 100 })).toEqual({ ...DEFAULT_LAYERS.goal, target: 100 });
+    for (const target of [0, 10_000_001, 2.5, "25", null]) expect(goalOf({ target }).target).toBe(25);
+    // Each result is a new object.
+    goalOf(null).title = "changed";
+    goalOf({}).target = 5;
+    expect(DEFAULT_LAYERS.goal).toEqual({ enabled: false, title: "", counts: "subs", target: 25 });
+  });
+
+  it("reads a goal cell that is invalid, or over an earlier layer, as no cell", (): void => {
+    const read = (cells: Record<string, unknown>): CellRect | null =>
+      storedLayersSchema.parse({ cells: { horizontal: cells } }).cells.horizontal.goal;
+    expect(read({ goal: goalCell })).toEqual(goalCell);
+    expect(read({ goal: { c: 0, r: 0, w: 8, h: 1 } })).toBeNull();
+    expect(read({ chat: chatCell, goal: goalCell })).toBeNull();
+    expect(read({ goal: "top" })).toBeNull();
   });
 });
 
