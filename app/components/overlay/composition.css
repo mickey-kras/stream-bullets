@@ -27,7 +27,7 @@
 .ov-step .ov-url {
   margin-top: 0;
 }
-/* The Channels section: the status line opens the channel panel. */
+/* A disclosure with a gold summary line: the guides of the overlay links. */
 .ch-details > summary {
   width: fit-content;
   max-width: 100%;

@@ -948,6 +948,10 @@ export const channelConnections = sqliteTable(
     dataReadAt: integer("data_read_at").notNull().default(0),
     /** When the last event arrived, written at most each 30 seconds. */
     lastEventAt: integer("last_event_at"),
+    /**
+     * The connection reads support events. Each connect sets it when the authorization has the scopes for them.
+     * The ingest object clears it when the provider refuses their subscriptions (docs/channel-connections.md).
+     */
     supportEvents: integer("support_events", { mode: "boolean" }).notNull().default(false),
   },
   (table) => [

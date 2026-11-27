@@ -2,7 +2,7 @@
 
 A streamer can connect one Twitch, one YouTube, and one Kick channel to a StreamBullets page.
 The connected channels supply one activity feed with chat and moderation events.
-The feed also has support events, such as follows and subscriptions, when the streamer turns them on.
+The feed also has the support events of each connected channel, such as follows and subscriptions.
 Overlay consumers, such as merged chat and interactive characters, read this feed.
 All consumers use the same connection and the same ingestion. Each page has its own feed.
 
@@ -22,7 +22,7 @@ They never read or change the `account` table of Better Auth or the linked login
 9. For YouTube, the `ChannelIngest` object reads the live chat with a poll while a consumer listens.
 10. Consumers connect to `/api/activity/:handle` with a WebSocket. They get a snapshot first. Live events come next.
 
-Connect, reconnect, disconnect, and a change of the support events need a sign-in from the last 10 minutes.
+Connect, reconnect, and disconnect need a sign-in from the last 10 minutes.
 With an older session, the card of the platform shows a prompt. It names the platform and the sign-in provider of the account.
 The sign-in sends no age confirmation and no display name. The server reads them only when it creates an account.
 
@@ -31,7 +31,6 @@ After the sign-in, the page reads this value once and removes it. A value older 
 
 The value also holds the handle of the page. A value for a different page does nothing.
 A connect then continues to the platform without a second click. For a disconnect, its button gets focus.
-For a change of the support events, the switch gets focus.
 
 The address never carries this value. Thus a link from another site cannot start a connect.
 
@@ -152,51 +151,55 @@ This section is the format only. See [Support events of each provider](#support-
 ### Support events of each provider
 
 `app/server/channel-support.ts` turns the provider events below into support events.
-The feed sends them only when the streamer turns support events on for the channel.
-Each connection has its own switch (`support_events`). A new connection has the switch off.
+Each connected channel reads its support events. Alerts and goals use them.
+The owner cannot turn the support events on or off. There is no switch and no API route for them.
 
-`POST /api/channels/:platform/support` changes the switch. See [API reference](api.md#channel-connections).
+The `support_events` field of a connection tells whether the connection reads support events.
+Each connect and each reconnect set the field:
 
-The card of each connected channel in **Streamer tools** has the switch (`app/components/channels/support-switch.tsx`).
-The card tells which events the platform has. A platform without a connection has no switch.
+- The server asks the provider for the scopes of chat and for the scopes of the support events.
+- The provider gives the scopes of the authorization. The server stores them in the `scopes` field of the connection.
+- The field is on when the authorization has each scope that the support events need.
+- Twitch needs three scopes: `moderator:read:followers`, `channel:read:subscriptions`, and `bits:read`.
+- YouTube and Kick need no scope for the support events. Thus each new YouTube and Kick connection has the field on.
 
-- While the Twitch switch is off, the card names the three permissions in plain words: read followers, read subscribers, and read Bits.
-  It also tells that the Twitch page opens when Twitch does not have them.
-- The cards of YouTube and Kick name no permission.
-- When the answer has a `url`, the browser goes to that address.
-- When the answer has no `url`, the switch shows the `support` value of the answer.
-  If the streamer turned the switch on and `support` is false, the card shows the `support_denied` text.
-- The switch takes no change while a change of a channel runs.
-- A failed change shows its cause, as a failed connect does.
+The closed notes of each card in **Streamer tools** list the support events of the platform.
+For Twitch, the notes also name the three permissions in plain words.
 
 **Live** and the dock show the support events in the chat list. See [Chat](streamer-tools.md#chat).
 The overlay chat shows no support event. Alerts on stream are a different feature.
 
-The switch does these things when the streamer turns it on:
+A connection with the field on does these things:
 
-- Twitch: the support events need three new scopes. A connection without them gets the address of the Twitch permission page.
-  The streamer approves the scopes there, and the callback turns the switch on.
-  A connection that has the scopes gets the switch on immediately.
-- YouTube and Kick: the switch needs no new permission and no visit to the provider.
-- The `ChannelIngest` object makes the Twitch and Kick subscriptions of the support events. It keeps the chat subscriptions.
+- The `ChannelIngest` object makes the Twitch and Kick subscriptions of the support events. It makes the chat subscriptions first.
 - For YouTube, the object reads the support events from each chat page that it reads for chat.
 
-When the streamer turns the switch off, the object deletes the subscriptions of the support events. The chat subscriptions stay.
-
-While the switch is off, the object drops each support event. It does not store the event, and it does not keep the ID.
-The chat events of the same delivery continue.
+A connection with the field off reads chat only. The object drops each support event of that connection.
+It does not store the event, and it does not keep the ID. The chat events of the same delivery continue.
 
 A refusal of the provider never stops chat:
 
-- Twitch does not give the three scopes: the callback connects the channel for chat and answers `support_denied`. The switch stays off.
-- Twitch answers 403 for a subscription of a support event: the object turns the switch off.
-- Kick answers 401 or 403 for the support events, or makes no subscription for one of them: the object turns the switch off.
+- Twitch does not give the three scopes: the callback connects the channel for chat and answers `support_denied`. The field is off.
+- Twitch answers 403 for a subscription of a support event: the object sets the field to off.
+- Kick answers 401 or 403 for the support events, or makes no subscription for one of them: the object sets the field to off.
 - In each case the connection stays `active`, and the chat subscriptions stay.
-- For a refused subscription, the object writes the `channel_support_refused` log.
-  A callback and a change of the switch then show the switch as off (`support_denied`, or `support: false`).
+- For a refused subscription, the object writes the `channel_support_refused` log. The callback then answers `support_denied`.
 - The next subscription check deletes a subscription of a support event that stays at the provider.
+- The next reconnect asks for the scopes and makes the subscriptions again.
 
-A reconnect keeps the switch. For Twitch, a reconnect of a channel with the switch on asks for the three scopes again.
+Migration `0051_channel_support_always` sets the field for each connection from before this change:
+
+- A YouTube or Kick connection gets the field on. The next subscription check makes the Kick subscriptions of the support events.
+- A Twitch connection gets the field on only when its stored scopes have the three scopes.
+  The next subscription check then makes its subscriptions of the support events.
+- A Twitch connection without the three scopes keeps the field off. Its chat continues, and no check asks Twitch for the support events.
+
+The `ChannelIngest` object keeps a connection in memory for 30 seconds. Thus it uses the new value of the field 30 seconds after the migration, at the latest.
+
+The card of a connection with the field off shows the `rejected` status icon.
+For Twitch, the tooltip tells the owner to reconnect one time. Alerts and goals can then read follows, subscriptions, and Bits.
+This state is not a health problem. It causes no toast and no announcement, and **Live** shows the channel as connected.
+See [Channel health in Streamer tools](#channel-health-in-streamer-tools).
 
 The tables give, for each provider event: the kind, the amount, the person that the event names, and the permission.
 The facts are from the provider documentation of 2026-11-26.
@@ -217,7 +220,7 @@ Twitch sends each event as an EventSub notification:
 - A cheer also sends `channel.bits.use`. The server reads `channel.cheer` only, so Bits count one time.
 - Twitch does not send `channel.subscribe` for a renewal. A renewal shows only when the subscriber sends a message with it.
 - The delivery ID is the header `Twitch-Eventsub-Message-Id`. Twitch sends a notification again with the same ID.
-- The scopes are optional. The server asks for them only when the streamer turns support events on. `channel.raid` needs no scope.
+- The scopes are optional: a connection without them reads chat only. The server asks for them at each connect and reconnect. `channel.raid` needs no scope.
 - The condition of `channel.raid` names the channel in `to_broadcaster_user_id`. Each other type names it in `broadcaster_user_id`.
 - The server makes the chat subscriptions first. Thus a refused support subscription leaves chat as it is.
 
@@ -309,23 +312,49 @@ The read uses no account quota and no address limit. A failed read keeps the las
 After 3 failed reads in a row, the panel shows a short line. The next successful read removes the line.
 A failed read causes no toast.
 
-Each card has a status mark with an icon and text:
+The cards of the platforms always show. The section has no disclosure around them.
+The heading of the section has the ID `channels-title`. The links with the text **Connect channels** in the **Overlay** section go to it.
 
-| Mark | Condition |
-| --- | --- |
-| **Healthy** | The connection has the status `active`. |
-| **Needs attention** | The connection has a different status. The card shows the problem and the fix. |
-| **Not connected** | The platform has no connection. |
+The cards are in one row and have the same height. On a narrow screen the row wraps. A phone shows one column.
 
-A connection of a platform that the site does not offer gets no mark.
-The card also shows the age of the last chat event, for example "Last chat event 2 minutes ago".
-The age changes at most one time in 15 seconds. The `title` attribute of the text holds the absolute time.
-The status line of the step uses the same list.
+A connected card has three lines:
 
-When the list shows a change, the page tells the owner one time:
+1. The platform pill is at the left. The status icon and the account name are at the right.
+2. **Reconnect** and **Disconnect** fill the line in two equal columns. They look the same on each card.
+   The accessible name of each button also has the name of the platform: **Reconnect Twitch**, for example.
+3. A closed `details` element at the bottom of the card gives the data that the feed reads and the limits.
 
-- A healthy platform gets a problem: the panel opens. A toast and the live region name the platform and the problem.
-- A platform works again: a toast and the live region say that its chat is back. The panel stays open.
+A card without a connection has the platform pill and the **Connect** button on one line. The closed `details` element is below them.
+The `details` element of a YouTube card without a connection also has the sentence about the YouTube Terms of Service.
+A card of a platform that the site does not offer says so. It has no **Connect** button and no `details` element.
+
+The status of a connected card is an icon. The card shows no line of text for it.
+The icon has a tooltip (`title`). Text that only a screen reader reads gives the same words.
+
+The quality gate refuses `role="img"` on an element that is not an `img` element. Thus the icon does not use that role.
+The table gives the icons and their words:
+
+| Icon | Condition | Words |
+| --- | --- | --- |
+| `success` | The status is `active`, and the connection reads support events. | "Healthy" and the age of the last chat event |
+| `sync` | The connection has the `error` status with the code `quota_exhausted` or `webhooks_rejected`. This problem ends without the owner. | The problem |
+| `rejected` | The connection has a different problem. The owner must reconnect. | The problem and the fix |
+| `rejected` | The status is `active`, and the connection reads no support events. | The words that ask the owner to reconnect one time |
+
+The `sync` icon turns. It does not turn when the system or the display settings of the site ask for reduced motion.
+A card without a connection has no icon. A connection of a platform that the site does not offer has no icon.
+
+The tooltip of a healthy card gives the age of the last chat event, for example "Healthy. Last chat event 2 minutes ago."
+The age changes at most one time in 15 seconds. It shows after the page has the clock of the browser.
+
+`channelCardState` in `app/lib/channel-health.ts` gives the icon of a card.
+`channelHealth` in the same file gives the health for the messages of the page and for **Live**.
+A connection that reads no support events is healthy for `channelHealth`. Only its card shows that state.
+
+When the list shows a change of health, the page tells the owner one time:
+
+- A healthy platform gets a problem: a toast and the live region name the platform and the problem.
+- A platform works again: a toast and the live region say that its chat is back.
 
 The first list causes no message. An unchanged state causes no message.
 The `quota_exhausted` status causes one message, at its start. The card shows this status until the next quota day.
@@ -350,8 +379,8 @@ See [Settings of the selected layer](overlay-composition.md#settings-of-the-sele
 | Source time | Message timestamp header | `publishedAt` | `created_at` |
 
 The constant `PLATFORM_CAPABILITIES` in `app/lib/activity.ts` holds this matrix.
-Each card in the controls shows one sentence: when chat starts for that platform.
-A closed details part of each card lists the data that the feed reads, the limits, and the gaps.
+A closed `details` element at the bottom of each card tells when chat starts for that platform.
+It also lists the data that the feed reads for chat and for alerts and goals, the limits, and the gaps.
 
 Note 1: the YouTube documentation lists the `tombstone` type but does not describe it in detail.
 The feed treats a `tombstone` item as a deletion of the message with the same ID.
@@ -375,7 +404,7 @@ The feed uses these provider subscriptions:
 
 The callback refuses an authorization that gives fewer scopes than the list above.
 
-Support events have optional scopes. The server asks for them only when the streamer turns support events on:
+Support events have optional scopes. The server asks for them at each connect and each reconnect:
 
 | Platform | Optional scopes | Notes |
 | --- | --- | --- |
@@ -384,10 +413,13 @@ Support events have optional scopes. The server asks for them only when the stre
 | Kick | None | The Kick documentation names only `events:subscribe` for webhook events. |
 
 The rule of the callback does not change for the optional scopes. An authorization without them connects the channel for chat.
-The result is then `support_denied`, and the support events stay off.
-`GET /api/channels` names the optional scopes of each platform (`supportScopes`). It never names the scopes that a connection has.
+The result is then `support_denied`, and the connection reads no support events.
 
-With support events on, the feed also uses these provider subscriptions:
+The server stores the scopes of each authorization in the `scopes` field of the connection.
+The callback compares them with the optional scopes and sets the `support_events` field.
+`GET /api/channels` gives only the `support` value. It never names the scopes that a connection has.
+
+For a connection that reads support events, the feed also uses these provider subscriptions:
 
 - Twitch: `channel.follow` (version 2), and `channel.subscribe`, `channel.subscription.gift`, `channel.subscription.message`, `channel.cheer`, and `channel.raid` (version 1).
 - Kick: `channel.followed`, `channel.subscription.new`, `channel.subscription.renewal`, `channel.subscription.gifts`, and `kicks.gifted` (version 1).
@@ -511,7 +543,7 @@ The object always finds a provider retry inside the 10-minute window.
 
 A support event has no moderation. Thus the support snapshot needs no boundary such as `since`.
 A disconnect removes the support events of its platform from the snapshot.
-The object keeps no ID of a support event that it dropped while the switch was off.
+The object keeps no ID of a support event that it dropped for a connection that reads no support events.
 
 The object also keeps the IDs of moderation deliveries. A repeated clear or ban is not harmless: it can remove
 chat that arrived after the first one. Deleted message IDs have their own table with the same count limit. The
@@ -571,8 +603,8 @@ YouTube can ask for a longer interval with `pollingIntervalMillis`. Then a page 
 The [load model](live-room-capacity.md#load-model) compares this quota with one million registered streamers.
 
 Support events use no quota. The object reads them from each chat page that it reads for chat.
-It makes the same calls with support events on and off.
-With support events on, the first page after a connect can hold support events from before the consumer connected.
+It makes the same calls for a connection that reads support events and for a connection that does not.
+For a connection that reads them, the first page after a connect can hold support events from before the consumer connected.
 The object sends each of them one time, as a live event with `replay: false`.
 
 The floor is 20 seconds after a page without items. It is 10 seconds again after a page with items.
@@ -689,9 +721,9 @@ If Twitch answers that a subscription exists (409), the object adopts the IDs of
 If a type stays without a subscription for this callback, the connect fails with `subscribe_failed`. This occurs
 when another deployment holds the subscription, or when the object cannot read the list.
 
-With support events on, a connect also makes the subscriptions of the support events, after the chat subscriptions.
+For a connection that reads support events, a connect also makes the subscriptions of the support events, after the chat subscriptions.
 A Twitch `channel.raid` subscription names the channel in `to_broadcaster_user_id`. The list filter and the webhook accept this field.
-If the provider refuses a subscription of a support event, the connect does not fail. The object turns support events off for the connection.
+If the provider refuses a subscription of a support event, the connect does not fail. The object sets `support_events` to off for the connection.
 See [Support events of each provider](#support-events-of-each-provider).
 
 ### Subscription repair
@@ -701,9 +733,8 @@ the channel. It deletes each subscription that the provider reports as ended. It
 has no enabled or pending subscription. It never changes an enabled or pending subscription of a required type.
 Thus a check of a healthy channel changes nothing.
 
-The required types follow the switch of the connection. With support events on, a check also requires the types of the support events.
-With support events off, a check deletes each subscription of a support event. It keeps the chat subscriptions.
-When the streamer changes the switch, the API asks the object for a check immediately. This check does not wait for the 10 minutes.
+The required types follow the `support_events` field of the connection. With the field on, a check also requires the types of the support events.
+With the field off, a check deletes each subscription of a support event. It keeps the chat subscriptions.
 
 Twitch reports a status for each subscription. `enabled` is healthy. `webhook_callback_verification_pending`
 waits for the callback check. Every other status means that the subscription ended. The Twitch check uses only
@@ -729,7 +760,7 @@ becomes `active`. If the provider refuses a missing type, the connection gets `e
 An `error` that already has a code keeps that code. A list that the object cannot read changes no status.
 
 A refused Kick refresh sets `needs_reauth`. A Twitch 403 for a new chat subscription also sets `needs_reauth`.
-A refusal for a subscription of a support event sets no status. The check turns support events off for the connection.
+A refusal for a subscription of a support event sets no status. The check sets `support_events` to off for the connection.
 
 A failed check runs again with backoff, from 1 second up to 5 minutes, with jitter. Without a consumer, the
 object stops at the longest backoff. The hourly job then tries the channel again.
@@ -820,8 +851,7 @@ The logs hold only fixed codes, platforms, and counts. They never hold an ID, a 
 | `channel_status_changed` | A connection is not active, with its code | Look at the `authorization_revoked` counts each day |
 | `channel_connect_failed` | The object cannot make the subscriptions | Alert when it repeats |
 | `channel_ingest_dropped` | The object dropped chat, moderation, or support events over the admission limit (`chat`, `moderation`, `support`) | Information only |
-| `channel_support_refused` | A provider refused a subscription of a support event (`platform`). The object turned support events off for the connection. Chat continues. | Alert when it repeats for many channels: a changed permission of the provider. |
-| `channel_support_failed` | The API cannot reach the object after a change of the switch. The log holds the error class. The next subscription check applies the change. | Alert when it repeats |
+| `channel_support_refused` | A provider refused a subscription of a support event (`platform`). The object set `support_events` to off for the connection. Chat continues, and the card asks the owner to reconnect. | Alert when it repeats for many channels: a changed permission of the provider. |
 | `channel_callback_failed`, `channel_connect_cleanup_failed`, `channel_disconnect_failed`, `channel_cleanup_failed` | A step failed. The log holds the error class. | Alert when it repeats |
 | `activity_notify_failed` | A key or suspension notice did not reach the object | Alert when it repeats |
 | `schedule_read_failed` | A schedule read of a platform failed (`platform`). The read changes nothing. The log holds the error class. | Alert when it repeats for a day |
@@ -1006,7 +1036,7 @@ The D1 migrations `0027` and `0028` only add tables and a column. An older Worke
 - Kick signs the webhooks of all apps with one key. Thus a person with a different Kick app can send a signed copy of a real Kick support event.
   The ID of a Kick support event is from its content, so the copy makes the same event and counts one time.
   A Kick support event without `created_at` has only its message ID. A copy of such an event makes a second support event.
-  The copy cannot change the content of the event, and it counts only while the streamer has support events on.
+  The copy cannot change the content of the event, and it counts only for a connection that reads support events.
 - This design reduces risk. It does not make the feature fully secure.
 
 ## Stored YouTube data
