@@ -152,8 +152,8 @@
  },
  "lastChange": {
   "by": "Claude",
-  "at": "2026-11-24T08:50:00Z",
+  "at": "2026-11-27T08:20:00Z",
   "via": "Claude Code",
-  "note": "Synced with production: app CSS, app markup in every part, new screenshots, website and OBS kits rebuilt."
+  "note": "Synced with the repository: Streamer tools in the app parts, the 60-pixel grid, the camera frame, four new icons, and the approved Streamer tools design."
  }
 }

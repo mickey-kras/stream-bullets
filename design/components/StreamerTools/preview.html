@@ -1,0 +1,161 @@
+<!-- @dsCard group="UI kits" height=800 width=1200 subtitle="The approved patterns of Streamer tools: section icons, icon buttons, channel cards, equal button rows, activity rows" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+<style>
+body{padding:24px;margin:0;color:var(--cream);font-family:var(--body)}
+.kit{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;align-items:start}
+.kit h2{margin:0 0 12px;font:600 .75rem/1.2 var(--body);letter-spacing:1px;text-transform:uppercase;color:var(--gold)}
+.kit section{min-width:0}
+.wide{grid-column:1 / -1}
+.two-wide{grid-column:span 2}
+.tall{grid-row:span 2}
+.panel{display:flex;flex-direction:column;gap:12px;padding:20px;border:1px solid var(--line);border-radius:var(--radius-panel);background:var(--card)}
+.meta{font-size:.875rem;color:var(--muted)}
+/* Phone: four icon tabs of equal width. The open tab has the gold fill. */
+.section-tabs{display:flex;max-width:390px;border:1px solid var(--line);background:var(--ink)}
+.section-tabs a{flex:1 1 0;min-height:48px;display:flex;align-items:center;justify-content:center;color:var(--cream)}
+.section-tabs a[aria-current]{background:linear-gradient(110deg,var(--gold-hi),var(--gold-lo));color:var(--on-gold)}
+/* Overlay toolbar: icon buttons at the right. */
+.toolbar{display:flex;align-items:center;gap:8px}
+.toolbar .tools{display:flex;gap:8px;margin-left:auto}
+/* Channel card. */
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border:1px solid var(--btn-border);border-radius:999px;font-weight:600}
+.who{display:inline-flex;align-items:center;gap:6px;min-width:0;font-weight:600}
+.state{display:inline-flex;flex:none;cursor:help}
+.state-ok{color:var(--gold)}
+.state-bad{color:var(--status-live)}
+.turn{animation:turn 1.4s linear infinite;transform-origin:center}
+@keyframes turn{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.turn{animation:none}}
+.panel details{margin-top:auto;border-top:1px solid var(--line)}
+.panel summary{padding:12px 0 0;cursor:pointer;font-weight:600}
+/* Buttons that are together have the same width. */
+.fill-row{display:grid;gap:8px}
+.fill-row.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.fill-row.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.fill-row button,.slot button{width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.slot{flex:none;width:92px}
+/* Activity: the title is beside the button, and the details line uses the full width. */
+.event{display:grid;grid-template-columns:auto minmax(0,1fr) auto;column-gap:12px;row-gap:2px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.event > svg{color:var(--gold)}
+.event .title{font-weight:600;min-width:0}
+.event .meta{grid-column:2 / -1}
+.event.now{grid-template-columns:minmax(0,1fr) auto;margin:0 -14px;padding:10px 12px;border:2px solid var(--gold);border-radius:var(--radius-control)}
+.event.now .meta{grid-column:1 / -1}
+</style>
+</head><body>
+<div id="root"></div>
+<script type="text/babel">
+const { Button, Icon, IconButton, Tabs } = window.StreamBulletsDesignSystem_e1d9fa;
+
+const State = ({ kind, icon, label }) => (
+  <span className={`state state-${kind}`} role="img" aria-label={label} title={label}>
+    <Icon name={icon} size={20} className={kind === "busy" ? "turn" : ""} />
+  </span>
+);
+
+const Channel = ({ platform, name, account, state, read }) => (
+  <article className="panel">
+    <div className="card-head">
+      <span className="pill"><Icon name={platform} />{name}</span>
+      <span className="who">{state}<span>{account}</span></span>
+    </div>
+    <div className="fill-row two">
+      <Button icon="refresh" aria-label={`Reconnect ${name}`}>Reconnect</Button>
+      <Button variant="danger" icon="close" aria-label={`Disconnect ${name}`}>Disconnect</Button>
+    </div>
+    <details><summary>What is read and the limits</summary><p className="meta">{read}</p></details>
+  </article>
+);
+
+const sections = [["Live", "live"], ["Overlay", "layers"], ["Channels", "channels"], ["Reports", "reports"]];
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <div className="kit">
+    <section>
+      <h2>Section tabs on a phone</h2>
+      <nav className="section-tabs" aria-label="Streamer tools sections">
+        {sections.map(([label, icon], index) => (
+          <a key={label} href={`#${icon}`} aria-label={label} title={label} aria-current={index === 0 ? "page" : undefined}>
+            <Icon name={icon} size={24} />
+          </a>
+        ))}
+      </nav>
+    </section>
+    <section className="two-wide">
+      <h2>Overlay toolbar</h2>
+      <div className="toolbar">
+        <Tabs label="Output" items={[{ value: "h", label: "Horizontal" }, { value: "v", label: "Vertical" }]} />
+        <span className="tools">
+          <IconButton label="Save as a new layout" icon="save" />
+          <IconButton label="Reset to the preset" icon="reset" />
+          <IconButton label="Start test" icon="play" />
+        </span>
+      </div>
+    </section>
+    <section className="wide">
+      <h2>Channel cards</h2>
+      <div className="cards">
+        <Channel platform="twitch" name="Twitch" account="sunny_live"
+          state={<State kind="ok" icon="success" label="Healthy. Last chat event 2 minutes ago." />}
+          read="Chat and moderation, and for alerts and goals: follows, subscriptions, gifts, Bits, and raids." />
+        <Channel platform="youtube" name="YouTube" account="Sunny Plays"
+          state={<State kind="bad" icon="rejected" label="YouTube needs a new sign-in. Select Reconnect." />}
+          read="Live chat while you are live, and for alerts and goals: Super Chats, Super Stickers, and memberships." />
+        <Channel platform="kick" name="Kick" account="sunny"
+          state={<State kind="busy" icon="sync" label="Reconnecting. Chat resumes on its own." />}
+          read="Chat and bans, and for alerts and goals: follows, subscriptions, gifts, and KICKs." />
+      </div>
+    </section>
+    <section className="two-wide">
+      <h2>Poll actions</h2>
+      <div className="fill-row three">
+        <Button icon="eye">Reveal results</Button>
+        <Button icon="lock">Close voting</Button>
+        <Button icon="eye-off">Take off air</Button>
+      </div>
+    </section>
+    <section className="tall">
+      <h2>Activity</h2>
+      <div className="panel">
+        <div className="event now">
+          <span className="title">On stream now: LanternFox gave 5 subscriptions</span>
+          <span className="slot"><Button variant="small" icon="chevron-right">Skip</Button></span>
+          <span className="meta">4 s left · 2 alerts wait</span>
+        </div>
+        <div>
+          <div className="event">
+            <Icon name="gift" />
+            <span className="title">LanternFox gifted 5 subs</span>
+            <span className="slot"><Button variant="small" icon="refresh">Replay</Button></span>
+            <span className="meta">Twitch · 6 minutes ago · counted for the goal</span>
+          </div>
+          <div className="event">
+            <Icon name="star" />
+            <span className="title">Mira Okafor became a member</span>
+            <span className="slot"><Button variant="small" icon="refresh">Replay</Button></span>
+            <span className="meta">YouTube · 9 minutes ago</span>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section>
+      <h2>Not connected</h2>
+      <article className="panel">
+        <div className="card-head">
+          <span className="pill"><Icon name="tiktok" />TikTok</span>
+          <Button variant="small" icon="link">Connect</Button>
+        </div>
+      </article>
+    </section>
+    <section>
+      <h2>Edit the overlay from Live</h2>
+      <IconButton label="Edit the overlay" icon="pencil" />
+    </section>
+  </div>
+);
+</script>
+</body></html>

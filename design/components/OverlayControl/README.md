@@ -2,8 +2,10 @@
 
 Streamer tools is the page where a streamer runs the stream, at `/tools`.
 Tools is a tab of the streamer header. Only the page owner sees it.
-The page has the sections Overlay and Channels. The old address `/overlay-control` redirects to the page.
+The page has the sections Live, Overlay, and Channels. The old address `/overlay-control` redirects to the page.
 The two images are screenshots of the Overlay section of the real app with test data.
+
+For the approved design of all the sections, see `StreamerTools`.
 
 ## Sections
 
