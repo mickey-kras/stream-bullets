@@ -1,31 +1,15 @@
 import { useId, useState, type ReactNode } from "react";
 import { intlLocale, t, tn, type MessageId } from "../../i18n";
 import { relativeAge } from "../../lib/channel-health";
-import {
-  forOutput,
-  frameSize,
-  layerPixels,
-  layerUrl,
-  ORIENTATIONS,
-  type Orientation,
-  type OverlayLayer,
-  type OverlayLayers,
-} from "../../lib/overlay-layers";
+import { frameSize, ORIENTATIONS, type Orientation, type OverlayLayers } from "../../lib/overlay-layers";
 import { errorMessage, postJson } from "../api";
 import { outputSources, type OverlaySources, type SourceState } from "../live";
 import { Dialog, DialogActions } from "../ui/dialog";
-import { Icon } from "../ui/icon";
+import { Icon, type IconName } from "../ui/icon";
 import { useToast } from "../ui/toast";
 import { CopyField } from "./copy-field";
 import { DockLink } from "./dock-link";
-import { CHARACTERS_READY } from "./overlay-composition";
-
-// Per-layer OBS sources. Characters arrive with the playground (#664): until then the row only says so.
-const LAYER_LINKS: readonly (readonly [OverlayLayer, MessageId])[] = [
-  ["chat", "overlay.layer.chat"],
-  ["content", "overlay.layer.content"],
-  ["characters", "overlay.layer.characters"],
-];
+import { StepHeading } from "./step-heading";
 
 const OUTPUT_NAMES: Readonly<Record<Orientation, MessageId>> = {
   horizontal: "overlay.output.horizontal",
@@ -40,9 +24,50 @@ export function sourcesText(sources: SourceState, now: number): string {
   return age === null ? t("overlay.sources.goneNow") : t("overlay.sources.gone", { age });
 }
 
+/** The private link of one output, as this page knows it. */
+export interface OutputKey {
+  /** The output has a link. */
+  made: boolean;
+  /** The link, after the server gave it to this page. Null: the page did not ask for it yet, or cannot get it. */
+  url: string | null;
+  /** False after the server said that it has no copy of the key: it cannot give the link again. */
+  kept: boolean;
+}
+
+/** True when "Show links" can show the link of this output: it makes a missing link, or reads or has the link. */
+function showable(key: OutputKey): boolean {
+  return !key.made || key.kept || key.url !== null;
+}
+
+type OutputKeys = Readonly<Record<Orientation, OutputKey>>;
+
+/** What a request for the link of one output changed. Null: the request failed, and the link stays as it was. */
+type KeyChange = Partial<OutputKey> | null;
+
+/** Asks the server about the link of one output. `key` is the link as the page knows it. */
+type KeyRequest = (output: Orientation, key: OutputKey) => Promise<KeyChange>;
+
+/** The links at the start: the page knows only which outputs have one. */
+function startKeys(hasKey: Readonly<Record<Orientation, boolean>>): OutputKeys {
+  return {
+    horizontal: { made: hasKey.horizontal, url: null, kept: true },
+    vertical: { made: hasKey.vertical, url: null, kept: true },
+  };
+}
+
 /**
- * The private links for OBS: one for the horizontal output and one for the vertical output. The two outputs are on
- * stream at the same time, and a streamer can use one link or the two.
+ * Step 2 of the Overlay section: the private links for OBS, one for the horizontal output and one for the vertical
+ * output. The two outputs are on stream at the same time, and a streamer can use one link or the two.
+ *
+ * The two buttons in the title row act on the two outputs together. The first shows the links, and makes the link of
+ * an output that has none: a new link replaces nothing. The same button hides the links again. It never takes the
+ * `disabled` attribute, so it keeps the focus during its requests, and it ignores a press until they end. The second
+ * button makes new links, after a confirmation, because that stops the old links. The server has one request for
+ * each output, so a request that fails leaves the link of that output as it was and tells the reason.
+ *
+ * A hidden link stays in the memory of the page, not in the document. Thus "Show links" asks the server one time
+ * for each link: the server counts these requests against a quota of 6 each minute. A deployment that does not keep
+ * the keys can also show a link again until the page loads again.
  */
 export function OverlayLink({
   hasKey,
@@ -57,7 +82,7 @@ export function OverlayLink({
   hasKey: Readonly<Record<Orientation, boolean>>;
   /** True when the page has a link for the OBS dock. */
   hasDock: boolean;
-  /** The newest saved or live layers, for the source sizes and the Twitch switches. */
+  /** The newest saved or live layers, for the Twitch switches. */
   layers: OverlayLayers;
   /** The connected OBS sources. Null while the live room did not tell. */
   sources: OverlaySources | null;
@@ -68,26 +93,196 @@ export function OverlayLink({
   /** Saves whether one output shows chat and characters from Twitch only. */
   onTwitchOnly: (output: Orientation, on: boolean) => void;
 }>): ReactNode {
+  const toast = useToast();
+  const titleId: string = useId();
+  const [keys, setKeys] = useState<OutputKeys>(() => startKeys(hasKey));
+  // True while the owner wants to see the links.
+  const [visible, setVisible] = useState<boolean>(false);
+  const [confirming, setConfirming] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const anyMade: boolean = ORIENTATIONS.some((output: Orientation): boolean => keys[output].made);
+  const shown: boolean = visible && ORIENTATIONS.some((output: Orientation): boolean => keys[output].url !== null);
+  // False when each output has a link that the server cannot give again: only new links can show then.
+  const canShow: boolean = ORIENTATIONS.some((output: Orientation): boolean => showable(keys[output]));
+
+  /** Makes a new link for one output. The old link of that output stops. */
+  async function make(output: Orientation): Promise<KeyChange> {
+    try {
+      const result = await postJson<{ url: string }>("/api/overlay/key", { output });
+      return { made: true, url: result.url, kept: true };
+    } catch (error: unknown) {
+      toast(errorMessage(error), { tone: "error" });
+      return null;
+    }
+  }
+
+  /** Reads the link of one output again. The server answers null when it has no copy of the key. */
+  async function read(output: Orientation): Promise<KeyChange> {
+    try {
+      const result = await postJson<{ url: string | null }>("/api/overlay/key/show", { output });
+      return result.url === null ? { kept: false } : { url: result.url };
+    } catch (error: unknown) {
+      toast(errorMessage(error), { tone: "error" });
+      return null;
+    }
+  }
+
+  /** Runs one request for each output, keeps what changed, and gives the number of requests that worked. */
+  async function forEachOutput(request: KeyRequest): Promise<number> {
+    setLoading(true);
+    const [horizontal, vertical]: [KeyChange, KeyChange] = await Promise.all([
+      request("horizontal", keys.horizontal),
+      request("vertical", keys.vertical),
+    ]);
+    setKeys(
+      (current: OutputKeys): OutputKeys => ({
+        horizontal: { ...current.horizontal, ...horizontal },
+        vertical: { ...current.vertical, ...vertical },
+      }),
+    );
+    setLoading(false);
+    return [horizontal, vertical].filter((change: KeyChange): boolean => change !== null).length;
+  }
+
+  /** Shows the link of each output. An output without a link gets one. */
+  async function show(): Promise<void> {
+    const done: number = await forEachOutput((output: Orientation, key: OutputKey): Promise<KeyChange> => {
+      if (!key.made) return make(output);
+      // A link that the page has, or that the server cannot give again, needs no request.
+      return key.url === null && key.kept ? read(output) : Promise.resolve({});
+    });
+    setVisible(true);
+    if (!anyMade && done > 0) toast(t("overlay.keyMade"));
+  }
+
+  /** The first button: hides the links that show, or shows them. It ignores a press during its requests. */
+  function toggleLinks(): void {
+    if (loading) return;
+    if (shown) setVisible(false);
+    else void show();
+  }
+
+  /** Makes a new link for each output. The dialog stays open when no request worked, so the owner can try again. */
+  async function regenerate(): Promise<void> {
+    const done: number = await forEachOutput((output: Orientation): Promise<KeyChange> => make(output));
+    if (done === 0) return;
+    setVisible(true);
+    setConfirming(false);
+    toast(t("overlay.keyMade"));
+  }
+
+  // The first button: it hides the links that show, shows the links of the page, or makes the first links.
+  let toggle: { text: MessageId; icon: IconName } = { text: "overlay.keyCreate", icon: "key" };
+  if (shown) toggle = { text: "overlay.keyHide", icon: "eye-off" };
+  else if (anyMade) toggle = { text: "overlay.keyShow", icon: "eye" };
   return (
-    <div className="ov-url">
-      <p>
-        <strong>{t("overlay.url")}</strong>
-      </p>
-      <p className="muted">{t("overlay.keyNone")}</p>
-      {ORIENTATIONS.map((output: Orientation) => (
-        <OutputLink
-          key={output}
-          output={output}
-          hasKey={hasKey[output]}
-          layers={forOutput(layers, output)}
-          sources={sources && outputSources(sources, output)}
-          now={now}
-        />
-      ))}
-      <ObsGuide />
-      <DockLink hasKey={hasDock} />
-      <TwitchOnly layers={layers} busy={busy} onChange={onTwitchOnly} />
-    </div>
+    <section className="ov-step" aria-labelledby={titleId} data-step="obs">
+      <div className="ov-step-head">
+        <StepHeading step={2} id={titleId} title={t("overlay.step.obs")} />
+        <div className="ov-step-tools" data-ov-link-tools>
+          {/* One button for show and hide: it keeps the focus when its action changes. */}
+          {(shown || canShow) && (
+            <button
+              type="button"
+              className={shown ? undefined : "gold"}
+              aria-disabled={loading}
+              onClick={toggleLinks}
+              data-ov-links={shown ? "shown" : "hidden"}
+            >
+              <Icon name={toggle.icon} size={18} />
+              {t(toggle.text)}
+            </button>
+          )}
+          {anyMade && (
+            <button type="button" disabled={loading} onClick={() => setConfirming(true)} data-ov-regenerate>
+              <Icon name="refresh" size={18} />
+              {t("overlay.keyRegenerate")}
+            </button>
+          )}
+        </div>
+      </div>
+      <div className="ov-url">
+        <p className="muted">{t("overlay.keyNone")}</p>
+        <div className="ov-url-outputs">
+          {ORIENTATIONS.map((output: Orientation) => (
+            <OutputCard
+              key={output}
+              output={output}
+              link={keys[output]}
+              visible={visible}
+              sources={sources && outputSources(sources, output)}
+              now={now}
+            />
+          ))}
+        </div>
+        {shown && (
+          <p className="muted" data-ov-private>
+            {t("overlay.keyPrivate")}
+          </p>
+        )}
+        <ObsGuide />
+        <DockLink hasKey={hasDock} />
+        <TwitchOnly layers={layers} busy={busy} onChange={onTwitchOnly} />
+      </div>
+      <Dialog
+        open={confirming}
+        onOpenChange={setConfirming}
+        title={t("overlay.keyConfirmTitle")}
+        description={t("overlay.keyConfirmBody")}
+        actions={
+          <DialogActions>
+            <button type="button" className="danger" disabled={loading} onClick={() => void regenerate()}>
+              {t("overlay.keyRegenerate")}
+            </button>
+          </DialogActions>
+        }
+      />
+    </section>
+  );
+}
+
+/**
+ * The card of one output: its name, the state of its link in OBS, the link with a copy button while the links show
+ * (`visible`), and the size of its browser source. The card is a region with the name of the output.
+ */
+export function OutputCard({
+  output,
+  link,
+  visible,
+  sources,
+  now,
+}: Readonly<{
+  output: Orientation;
+  link: OutputKey;
+  /** True while the owner wants to see the links. */
+  visible: boolean;
+  sources: SourceState | null;
+  now: number;
+}>): ReactNode {
+  const nameId: string = useId();
+  const name: string = t(OUTPUT_NAMES[output]);
+  const url: string | null = visible ? link.url : null;
+  return (
+    <section className="ov-url-output" aria-labelledby={nameId} data-ov-output={output}>
+      <h3 className="ov-url-name" id={nameId}>
+        {name}
+      </h3>
+      {link.made && sources && (
+        <p className="ov-obs-status" data-ov-sources={sources.count}>
+          <Icon name={sources.count > 0 ? "wifi" : "wifi-off"} size={18} />
+          <span>{sourcesText(sources, now)}</span>
+        </p>
+      )}
+      {url !== null && (
+        <CopyField value={url} label={`${t("overlay.url")}: ${name}`} copyLabel={`${t("overlay.copyUrl")}: ${name}`} />
+      )}
+      {!showable(link) && (
+        <p className="muted" data-ov-not-kept>
+          {t("overlay.keyNotKept")}
+        </p>
+      )}
+      <p className="muted">{t("overlay.obsHelp", frameSize(output))}</p>
+    </section>
   );
 }
 
@@ -197,148 +392,5 @@ function TwitchOnly({
         </label>
       ))}
     </details>
-  );
-}
-
-// The private URL of one output shows after its owner makes it or asks to see it again. Confirm regeneration
-// because it revokes the old link of that output. The link of the other output stays.
-function OutputLink({
-  output,
-  hasKey,
-  layers,
-  sources,
-  now,
-}: Readonly<{
-  output: Orientation;
-  hasKey: boolean;
-  /** The layers as this output shows them. */
-  layers: OverlayLayers;
-  sources: SourceState | null;
-  now: number;
-}>): ReactNode {
-  const toast = useToast();
-  const [url, setUrl] = useState<string | null>(null);
-  const [made, setMade] = useState<boolean>(hasKey);
-  const [confirming, setConfirming] = useState<boolean>(false);
-  const [busy, setBusy] = useState<boolean>(false);
-  // False after the server said that it has no copy of the key.
-  const [kept, setKept] = useState<boolean>(true);
-  const sizeId: string = useId();
-
-  async function regenerate(): Promise<void> {
-    setBusy(true);
-    try {
-      const result = await postJson<{ url: string }>("/api/overlay/key", { output });
-      setUrl(result.url);
-      setMade(true);
-      setKept(true);
-      setConfirming(false);
-      toast(t("overlay.keyMade"));
-    } catch (error: unknown) {
-      toast(errorMessage(error), { tone: "error" });
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function show(): Promise<void> {
-    setBusy(true);
-    try {
-      const result = await postJson<{ url: string | null }>("/api/overlay/key/show", { output });
-      if (result.url === null) setKept(false);
-      else setUrl(result.url);
-    } catch (error: unknown) {
-      toast(errorMessage(error), { tone: "error" });
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  let hint: string | null = null;
-  if (url) hint = t("overlay.keyOnce");
-  else if (made) hint = t(kept ? "overlay.keyHidden" : "overlay.keyNotKept");
-  const name: string = t(OUTPUT_NAMES[output]);
-  const size = frameSize(output);
-  return (
-    <section className="ov-url-output" aria-labelledby={`${sizeId}-name`} data-ov-output={output}>
-      <p id={`${sizeId}-name`}>
-        <strong>{name}</strong>
-      </p>
-      {url && (
-        <>
-          <p className="muted ov-url-caption">{t("overlay.layer.composition")}</p>
-          <CopyField
-            value={url}
-            label={`${t("overlay.url")}: ${name}`}
-            copyLabel={`${t("overlay.copyUrl")}: ${name}`}
-            layer={null}
-          />
-        </>
-      )}
-      {made && sources && (
-        <p className="ov-obs-status" data-ov-sources={sources.count}>
-          <Icon name={sources.count > 0 ? "wifi" : "wifi-off"} size={18} />
-          <span>{sourcesText(sources, now)}</span>
-        </p>
-      )}
-      {hint && <p className="muted">{hint}</p>}
-      <p className="muted">{t("overlay.obsHelp", size)}</p>
-      {url ? (
-        <div className="ov-url-layers" data-ov-layer-urls>
-          <p>
-            <strong>{t("overlay.layerUrls")}</strong>
-          </p>
-          <p className="muted">{t("overlay.layerUrlsHelp")}</p>
-          {LAYER_LINKS.map(([layer, label]) => {
-            if (layer === "characters" && !CHARACTERS_READY) return null;
-            // The size in this output: the frame for the content layers, else the cell of the layer.
-            const layerSize: { w: number; h: number } | null = layer === "content" ? size : layerPixels(layers, layer);
-            const sizeLine: string | undefined = layerSize ? `${sizeId}-${layer}` : undefined;
-            return (
-              <div key={layer} className="ov-url-layer" data-ov-layer-row={layer}>
-                <p className="muted ov-url-caption">{t(label)}</p>
-                {layerSize && (
-                  <p className="muted ov-url-size" id={sizeLine} data-ov-layer-size={layer}>
-                    {t("overlay.layer.size", { w: layerSize.w, h: layerSize.h })}
-                  </p>
-                )}
-                <CopyField
-                  value={layerUrl(url, layer)}
-                  label={`${t(label)}: ${name}`}
-                  copyLabel={`${t("overlay.copyLayerUrl", { layer: t(label) })}: ${name}`}
-                  layer={layer}
-                  describedBy={sizeLine}
-                />
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <p className="muted">{t("overlay.layerHelp")}</p>
-      )}
-      <p className="ov-url-actions">
-        {made && !url && kept && (
-          <button type="button" className="gold" disabled={busy} onClick={() => void show()}>
-            {t("overlay.keyShow")}
-          </button>
-        )}
-        <button type="button" disabled={busy} onClick={() => (made ? setConfirming(true) : void regenerate())}>
-          {t(made ? "overlay.keyRegenerate" : "overlay.keyCreate")}
-        </button>
-      </p>
-      <Dialog
-        open={confirming}
-        onOpenChange={setConfirming}
-        title={t("overlay.keyConfirmTitle")}
-        description={`${t("overlay.keyConfirmBody")} ${t("overlay.keyConfirmOther")}`}
-        actions={
-          <DialogActions>
-            <button type="button" className="danger" disabled={busy} onClick={() => void regenerate()}>
-              {t("overlay.keyRegenerate")}
-            </button>
-          </DialogActions>
-        }
-      />
-    </section>
   );
 }

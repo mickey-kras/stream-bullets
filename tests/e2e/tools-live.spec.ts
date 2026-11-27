@@ -668,11 +668,8 @@ test("the OBS dock runs the live controls with its own link in a narrow panel, a
   // A key that is not the dock key opens nothing: a wrong key, and the key of an overlay link.
   expect((await dock.request.get(`/@feature_host/dock?key=${"A".repeat(43)}`)).status()).toBe(404);
   expect((await dock.request.get("/@feature_host/dock")).status()).toBe(404);
-  await tools
-    .getByRole("region", { name: "Horizontal output" })
-    .getByRole("button", { name: "Create overlay link" })
-    .click();
-  const overlayField = tools.locator("[data-ov-url]");
+  await tools.getByRole("region", { name: "2 Add to OBS" }).getByRole("button", { name: "Create links" }).click();
+  const overlayField = tools.getByRole("region", { name: "Horizontal output" }).locator("[data-ov-url]");
   await expect(overlayField).toHaveValue(/\?key=[\w-]{43}$/);
   const overlayKey: string = new URL(await overlayField.inputValue()).searchParams.get("key") ?? "";
   expect((await dock.request.get(`/@feature_host/dock?key=${overlayKey}`)).status()).toBe(404);

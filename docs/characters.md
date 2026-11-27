@@ -431,7 +431,7 @@ The art ships under the project license.
    https://<origin>/@<handle>/overlay?key=<key>&layer=characters
    ```
 
-3. Give the source the size of the characters cell. The **Overlay** section shows it under **Layer URLs**.
+3. Give the source the size of the characters cell. The label of the layer on the grid of the **Overlay** section shows it.
    A cell across the bottom of the horizontal frame is 1920 × 240. A cell of the full frame is 1920 × 1080.
 4. Keep the background of the source transparent.
 5. Select **Start test** to see the playground in OBS before you go live.

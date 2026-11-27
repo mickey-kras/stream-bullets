@@ -2,7 +2,7 @@ import { newPage, close, test, expect, type Page } from "./coverage";
 import { runSql } from "./fixtures";
 import { signedIn } from "./live-helpers";
 import { clientIp } from "./client-ips";
-import { cellPixels, emptyCells, type LayersPatch, type OverlayLayers } from "../../app/lib/overlay-layers";
+import { emptyCells, type LayersPatch, type OverlayLayers } from "../../app/lib/overlay-layers";
 import { SAMPLE_INTERVAL_MS } from "../../app/components/overlay/use-chat";
 import {
   CHARACTERS_CELL,
@@ -14,6 +14,7 @@ import {
   gridCells,
   layersSql,
   noKeysSql,
+  noLinkQuotaSql,
   placeLayer,
   resetLayers,
   saved,
@@ -76,29 +77,36 @@ test("the owner places layers on the grid by mouse and keyboard, and the layout 
   // The button covers the frame. It stays transparent under the pointer, so the grid and the layers stay in view.
   await grid.hover();
   await expect(grid).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
-  // No layer is on the grid: the palette offers each layer, and no layer is selected.
+  // No layer is on the grid: the palette offers each layer in its group, and no layer is selected.
   const palette = editor.getByRole("group", { name: "Layers · one of each" });
   await expect(frame.locator("[data-grid-box]")).toHaveCount(0);
   await expect(frame.locator(".ov-layer")).toHaveCount(0);
-  await expect(palette.getByRole("button")).toHaveText([
+  await expect(palette.locator("summary")).toHaveText(["Picture · 3", "Content · 6"]);
+  await expect(palette.locator("[data-comp-layer]")).toHaveText([
     "+ Chat",
     "+ Characters",
+    "+ Camera frame",
     "+ Poll",
     "+ Topic",
     "+ Up next",
     "+ Message banner",
     "+ Community card",
     "+ Support banner",
-    "+ Camera frame",
   ]);
   const panel = settings(editor);
   await expect(panel).toHaveAttribute("data-comp-props", "");
   await expect(panel).toContainText("Select a layer on the grid to change it.");
   expect((await storedLayers(page)).chat.enabled).toBe(false);
-  await expect(editor.locator("[data-comp-frame-size]")).toHaveText(
+  // The text about the chips does not show. A screen reader reads it as the description of each chip.
+  await expect(palette.locator("[data-comp-palette-hint]")).toBeHidden();
+  await expect(chip(editor, "chat")).toHaveAccessibleDescription(PALETTE_HINT);
+  // The help for the grid is closed. It has the size of the OBS source of this output.
+  const help = editor.locator("[data-comp-help]");
+  await expect(help).toHaveJSProperty("open", false);
+  await expect(help.locator("[data-comp-frame-size]")).toBeHidden();
+  await expect(help.locator("[data-comp-frame-size]")).toHaveText(
     "Set the OBS browser source to 1920 × 1080 for this orientation.",
   );
-  await expect(chip(editor, "chat")).toHaveAccessibleDescription(PALETTE_HINT);
 
   // Keep the whole preview clear of the sticky header and footer.
   await frame.evaluate((element: Element) => element.scrollIntoView({ block: "center" }));
@@ -240,7 +248,7 @@ test("the owner places layers on the grid by mouse and keyboard, and the layout 
 
   // The vertical orientation has its own layout and frame. The horizontal layout stays.
   save = saved(page);
-  await editor.getByRole("button", { name: "Vertical 18 × 32" }).click();
+  await editor.getByRole("button", { name: "Vertical", exact: true }).click();
   await save;
   await expect(frame).toHaveAttribute("data-orientation", "vertical");
   const tall = gridButton(editor, "Layout grid, 18 columns by 32 rows");
@@ -270,7 +278,7 @@ test("the owner places layers on the grid by mouse and keyboard, and the layout 
   await expect(panel.getByRole("checkbox", { name: "Show on stream" })).toBeChecked();
   await expect(panel.getByRole("checkbox", { name: "Hide chat commands (!jump)" })).not.toBeChecked();
   save = saved(page);
-  await editor.getByRole("button", { name: "Horizontal 32 × 18" }).click();
+  await editor.getByRole("button", { name: "Horizontal", exact: true }).click();
   await save;
   const layers: OverlayLayers = await storedLayers(page);
   expect(layers.orientation).toBe("horizontal");
@@ -295,7 +303,7 @@ test("a new orientation ends a drag and keeps the keyboard cursor inside its gri
   await expect(editor.locator("[data-comp-orientation-note]")).toHaveText(
     "Choose the output to edit. Each output has its own layout and its own OBS link. Both outputs are on stream at the same time.",
   );
-  await expect(editor.getByRole("button", { name: "Vertical 18 × 32" })).toHaveAccessibleDescription(
+  await expect(editor.getByRole("button", { name: "Vertical", exact: true })).toHaveAccessibleDescription(
     "Choose the output to edit. Each output has its own layout and its own OBS link. Both outputs are on stream at the same time.",
   );
   const bodies: unknown[] = [];
@@ -315,7 +323,7 @@ test("a new orientation ends a drag and keeps the keyboard cursor inside its gri
   await expect(frame.locator("[data-grid-preview]")).toHaveCount(1);
   // Leaving the grid ends the move.
   const save = saved(page);
-  await editor.getByRole("button", { name: "Vertical 18 × 32" }).click();
+  await editor.getByRole("button", { name: "Vertical", exact: true }).click();
   await save;
   await expect(status).toHaveText("Cancelled.");
   await expect(frame.locator("[data-grid-preview]")).toHaveCount(0);
@@ -404,12 +412,19 @@ test("one test button starts and stops the test from the toolbar and shows the t
     if (request.method() === "POST" && new URL(request.url()).pathname === "/api/overlay")
       bodies.push(request.postDataJSON());
   });
-  // The test needs the chat or the characters on stream. The button stays focusable and ignores a press until then.
-  await expect(toggle).toHaveText("Start test");
+  // The button shows an icon only: its name is also its tooltip, and the tooltip gives the reason too.
+  await expect(toggle).toHaveText("");
+  await expect(toggle).toHaveAccessibleName("Start test");
+  await expect(toggle).toHaveAttribute("title", "Start test\nPut Chat or Characters on stream to start the test.");
+  // The test needs the chat or the characters on stream. Until then the button stays focusable, starts nothing,
+  // and a press tells the reason. The reason is the description of the button, and it does not show.
   await expect(toggle).toHaveAttribute("aria-disabled", "true");
   await expect(status).toHaveText("Put Chat or Characters on stream to start the test.");
+  await expect(status).toHaveClass("sr-only");
+  await expect(toggle).toHaveAccessibleDescription("Put Chat or Characters on stream to start the test.");
   // Force: Playwright waits for an aria-disabled button to become enabled.
   await toggle.click({ force: true });
+  await expect(page.locator(".sb-toast")).toHaveText("Put Chat or Characters on stream to start the test.");
   // The server checks the saved layers, so the test stays unavailable until the layer save lands.
   let releaseLayer: (() => void) | undefined;
   await page.route("**/api/overlay", async (route) => {
@@ -456,26 +471,33 @@ test("one test button starts and stops the test from the toolbar and shows the t
   await page.unroute("**/api/overlay");
   release?.();
   await save;
-  await expect(toggle).toHaveText("Stop test");
+  // A test that runs: the same button stops it. It has the stop icon in the pressed colors, and the time left shows.
+  await expect(toggle).toHaveAccessibleName("Stop test");
+  await expect(toggle).toHaveAttribute("title", "Stop test");
+  await expect(toggle).toHaveAttribute("data-running", "true");
+  await expect(toggle.locator("svg")).toHaveClass(/icon-stop/);
   await expect(toggle).toBeFocused();
   await expect(news).toHaveText("Test started. OBS shows sample data.");
   await expect(status).toHaveText(/^The test runs in OBS\. (60|59|58) s left\.$/);
+  await expect(status).not.toHaveClass(/sr-only/);
   save = saved(page);
   await page.keyboard.press("Enter");
   await expect(toggle).toBeFocused();
   await save;
-  await expect(toggle).toHaveText("Start test");
+  await expect(toggle).toHaveAccessibleName("Start test");
+  await expect(toggle).not.toHaveAttribute("data-running");
+  await expect(toggle.locator("svg")).toHaveClass(/icon-play/);
   await expect(toggle).toBeFocused();
   await expect(news).toHaveText("Test stopped.");
   // Taking the chat off stream ends a running test: the server clears the end time.
   save = saved(page);
   await page.keyboard.press("Enter");
   await save;
-  await expect(toggle).toHaveText("Stop test");
+  await expect(toggle).toHaveAccessibleName("Stop test");
   save = saved(page);
   await settings(editor).getByRole("checkbox", { name: "Show on stream" }).uncheck();
   await save;
-  await expect(toggle).toHaveText("Start test");
+  await expect(toggle).toHaveAccessibleName("Start test");
   await expect(toggle).toHaveAttribute("aria-disabled", "true");
   await expect(news).toHaveText("Test ended.");
   expect((await storedLayers(page)).chat.enabled).toBe(false);
@@ -638,52 +660,99 @@ test("the message background slider changes the chat cards in the preview and th
   await close(owner);
 });
 
-test("a new overlay link lists one URL per layer", async ({ browser }) => {
-  // The chat and the characters have a cell. They can be off stream: a layer URL shows the size of the cell.
+test("the link buttons of step 2 show and hide one link for each output, and no link for a layer", async ({
+  browser,
+}) => {
   await runSql("composition-editor-link", [
+    noKeysSql,
+    noLinkQuotaSql,
     layersSql({ cells: { horizontal: { chat: CHAT_CELL, characters: CHARACTERS_CELL } } }),
   ]);
   const owner = await signedIn(browser, "featureowner", OWNER_IP);
-  const page = await newPage(owner);
-  await page.goto("/tools?view=overlay");
-  await expect(page.locator("[data-ov-layer-urls]")).toHaveCount(0);
-  // Each output has its own link. This spec uses the horizontal one.
-  const link = page.getByRole("region", { name: "Horizontal output" });
-  await link.getByRole("button", { name: /^(Create overlay link|Regenerate link)$/ }).click();
-  // An existing link asks for confirmation first.
-  const confirm = page.getByRole("dialog", { name: "Regenerate the overlay link?" });
-  await expect(confirm.or(link.locator("[data-ov-url]"))).toBeVisible();
-  if (await confirm.isVisible()) await confirm.getByRole("button", { name: "Regenerate link" }).click();
-  const url: string = await link.locator("[data-ov-url]").inputValue();
-  expect(url).toMatch(/\/@feature_host\/overlay\?key=/);
-  await expect(link).toContainText("Add a Browser source in OBS: width 1920, height 1080.");
-  await expect(page.getByRole("region", { name: "Vertical output" })).toContainText(
-    "Add a Browser source in OBS: width 1080, height 1920.",
-  );
-  for (const layer of ["chat", "characters", "content"])
-    await expect(page.locator(`[data-ov-layer-url="${layer}"]`)).toHaveValue(`${url}&layer=${layer}`);
-  // Each layer URL names the source size: the cell of the layer, and the whole frame for the content layers.
-  const { w, h } = cellPixels(CHAT_CELL);
-  await expect(page.locator('[data-ov-layer-size="chat"]')).toHaveText(`Source size: ${w} × ${h}`);
-  await expect(page.locator('[data-ov-layer-url="chat"]')).toHaveAccessibleDescription(`Source size: ${w} × ${h}`);
-  const characters = cellPixels(CHARACTERS_CELL);
-  await expect(page.locator('[data-ov-layer-size="characters"]')).toHaveText(
-    `Source size: ${characters.w} × ${characters.h}`,
-  );
-  await expect(page.locator('[data-ov-layer-size="content"]')).toHaveText("Source size: 1920 × 1080");
-  // A layer that is off the grid has no cell and names no size.
-  const removed = saved(page);
-  await page.locator('[data-comp-layer="chat"]').click();
-  await page.getByRole("button", { name: "Remove from grid" }).click();
-  await removed;
-  await expect(page.locator('[data-ov-layer-size="chat"]')).toHaveCount(0);
-  await expect(page.locator('[data-ov-layer-url="chat"]')).toHaveValue(`${url}&layer=chat`);
-  await page.reload();
-  await expect(page.locator(".ov-url")).toContainText("&layer=chat");
-  await expect(page.locator("[data-ov-layer-url]")).toHaveCount(0);
-  await close(owner);
-  // Other specs start without an overlay key.
-  await runSql("composition-editor-key", [noKeysSql]);
+  try {
+    const page = await newPage(owner);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/tools?view=overlay");
+    const step = page.getByRole("region", { name: "2 Add to OBS" });
+    const wide = step.getByRole("region", { name: "Horizontal output" });
+    const high = step.getByRole("region", { name: "Vertical output" });
+    const fields = step.locator("[data-ov-url]");
+    // Without a link: each card has the name and the source size of its output, and no link and no button.
+    await expect(fields).toHaveCount(0);
+    await expect(step.locator("[data-ov-private]")).toHaveCount(0);
+    await expect(wide).toContainText("Add a Browser source in OBS: width 1920, height 1080.");
+    await expect(high).toContainText("Add a Browser source in OBS: width 1080, height 1920.");
+    await expect(wide.getByRole("button")).toHaveCount(0);
+    await expect(step).not.toContainText("hidden");
+    // The button is in the title row of the step, at the right of the title.
+    const tools = step.locator("[data-ov-link-tools]");
+    await expect(tools.getByRole("button")).toHaveText(["Create links"]);
+    const title = await step.getByRole("heading", { level: 2 }).boundingBox();
+    const create = await tools.getByRole("button", { name: "Create links" }).boundingBox();
+    if (!title || !create) throw new Error("The title row has no box.");
+    expect(create.x).toBeGreaterThan(title.x + title.width);
+    expect(create.y).toBeLessThan(title.y + title.height);
+    expect(create.y + create.height).toBeGreaterThan(title.y);
+
+    // One press makes the link of each output and shows it in the card of that output.
+    await tools.getByRole("button", { name: "Create links" }).click();
+    await expect(fields).toHaveCount(2);
+    await expect(wide.locator("[data-ov-url]")).toHaveValue(/\/@feature_host\/overlay\?key=[\w-]{43}$/);
+    await expect(high.locator("[data-ov-url]")).toHaveValue(/\/@feature_host\/overlay\?key=[\w-]{43}$/);
+    const url: string = await wide.locator("[data-ov-url]").inputValue();
+    expect(await high.locator("[data-ov-url]").inputValue()).not.toBe(url);
+    await expect(wide.getByRole("button", { name: "Copy overlay URL: Horizontal output" })).toBeVisible();
+    await expect(high.getByRole("button", { name: "Copy overlay URL: Vertical output" })).toBeVisible();
+    // The line about privacy shows only with the links.
+    await expect(step.locator("[data-ov-private]")).toHaveText(
+      "Keep the links private: anyone with a link takes your overlay’s place.",
+    );
+    // The page shows no link for a layer.
+    await expect(step.locator("input[readonly]")).toHaveCount(2);
+    await expect(step).not.toContainText("layer=");
+    await expect(page.locator("[data-ov-layer-urls], [data-ov-layer-url]")).toHaveCount(0);
+
+    // The same button hides the links and keeps the focus. A second button makes new links.
+    const toggle = tools.locator("[data-ov-links]");
+    await expect(tools.getByRole("button")).toHaveText(["Hide links", "Regenerate links"]);
+    await expect(toggle).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(fields).toHaveCount(0);
+    await expect(step.locator("[data-ov-private]")).toHaveCount(0);
+    await expect(tools.getByRole("button")).toHaveText(["Show links", "Regenerate links"]);
+    await expect(toggle).toBeFocused();
+    await expect(step).not.toContainText("hidden");
+    // The same links show again, without a new request, and also after a load of the page.
+    let reads: number = 0;
+    page.on("request", (request) => {
+      if (new URL(request.url()).pathname.startsWith("/api/overlay/key")) reads += 1;
+    });
+    await page.keyboard.press("Enter");
+    await expect(wide.locator("[data-ov-url]")).toHaveValue(url);
+    expect(reads).toBe(0);
+    await page.reload();
+    await expect(fields).toHaveCount(0);
+    await tools.getByRole("button", { name: "Show links" }).click();
+    await expect(wide.locator("[data-ov-url]")).toHaveValue(url);
+    await expect(fields).toHaveCount(2);
+    // One request for each output.
+    expect(reads).toBe(2);
+
+    // An OBS source from before this page has a link with the layer parameter. It continues to show its part alone.
+    const obs = await newPage(browser, { viewport: { width: 600, height: 840 } });
+    await obs.goto(`${url}&layer=chat`);
+    await expect(obs.locator('.ov-composition[data-overlay-only="chat"]')).toBeAttached();
+    await obs.goto(`${url}&layer=content`);
+    await expect(obs.locator('.ov-composition[data-overlay-only="content"]')).toBeAttached();
+    await obs.goto(url);
+    await expect(obs.locator(".ov-composition")).toBeAttached();
+    await expect(obs.locator(".ov-composition")).not.toHaveAttribute("data-overlay-only");
+    await close(obs);
+  } finally {
+    await close(owner);
+    // Other specs start without an overlay key.
+    await runSql("composition-editor-key", [noKeysSql]);
+  }
 });
 
 /** Lets the page run one real task: a MessageChannel message is not a timer, so the fake clock does not hold it. */

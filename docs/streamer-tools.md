@@ -172,6 +172,23 @@ A new message fades in. The Motion setting of the site and of the system stop th
 The full-screen chat shows support events as the chat part does. See [Support events](#support-events).
 Alerts on stream are not in this section yet.
 
+## Overlay
+
+The **Overlay** section has two steps. See [the editor](overlay-composition.md#editor) for each part.
+
+1. **Build your overlay** is the overlay studio.
+   - The toolbar is one line: the **Horizontal** and **Vertical** tabs, the list **Layout**, and three icon buttons at its right edge.
+     The buttons are **Save as a new layout**, **Reset to the preset**, and **Start test**. Each button has a tooltip.
+   - The layer list has the groups **Picture** and **Content**. Each group starts open, and you can close it.
+   - The settings of the selected layer are below the grid of the horizontal output.
+     They are beside the grid of the vertical output. On a phone, they are below the grid.
+   - The help **How the grid works** stays closed until you open it.
+2. **Add to OBS** has the links for OBS.
+   - The title row has the buttons **Show links** and **Regenerate links** at its right edge.
+   - One card for each output shows its name, its state in OBS, and the size of its browser source.
+     While the links show, the card also shows the link and a button that copies it.
+   - The step does not show a link for each layer. See [URLs](overlay-composition.md#urls).
+
 ## OBS dock
 
 The OBS dock is a small page with the live controls, for a custom browser dock in OBS.
