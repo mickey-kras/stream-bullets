@@ -19,6 +19,13 @@ export const CHARACTER_ROWS = [
   "fall",
   "explosion",
   "respawn",
+  "dance",
+  "cheer",
+  "shoot",
+  "zip",
+  "climb",
+  "jet",
+  "push",
 ] as const;
 export type CharacterRow = (typeof CHARACTER_ROWS)[number];
 
