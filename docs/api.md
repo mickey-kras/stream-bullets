@@ -195,6 +195,7 @@ English also shows `error` for `step_up_required` and `other_key_required`.
   `items` holds `{enabled, ref, backgroundOpacity, qr}` for each content layer.
   Missing, unknown, or incorrect stored fields take the defaults. Reads never fail because of a stored `layers` value.
   No layer has a cell by default. Chat and characters are off by default, `hideCommands` is on, and `backgroundOpacity` is 100.
+  `hideCommands` applies to the chat layer and to the chat of the owner in **Live** and in the OBS dock.
   The defaults of a content layer are `enabled: true`, `ref: null`, and `backgroundOpacity: 100`. `poll` has `qr: true`. The other content layers have `qr: false`.
 - With the `poll` parameter, the overlay page shows that poll in the poll layer, and no other content layer.
   A poll ID that the page does not have returns `404`.

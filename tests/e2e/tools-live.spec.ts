@@ -414,6 +414,107 @@ test("the chat pauses on a scroll up, counts new messages, filters platforms and
   await close(owner);
 });
 
+/** A chat message with `text`, from this moment: the overlay chat shows a message for two minutes. */
+function said(n: number, text: string): Record<string, unknown> {
+  return { ...chat(n, "twitch"), text, fragments: [{ type: "text", text }], receivedAt: Date.now() };
+}
+
+test("hide chat commands applies to the Live chat, the preview, the full-screen chat and the dock, as to the overlay", async ({
+  browser,
+}) => {
+  // The chat layer is on stream, so the preview of Live shows the overlay chat. The option is on, as by default.
+  await runSql("tools-live-commands", [
+    layersSql({ chat: { enabled: true }, cells: { horizontal: { chat: CHAT_CELL, poll: POLL_CELL } } }),
+    noDockKey,
+  ]);
+  const owner = await signedIn(browser, "featureowner", CHAT_IP);
+  const page = await newPage(owner);
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  // A command for a character, one with a full-width mark and arguments, a command of a different bot, and a
+  // message that is not a command.
+  const first: Record<string, unknown>[] = [
+    said(1, "hello all"),
+    said(2, "!jump"),
+    said(3, "！HOOK 3 left"),
+    said(4, "!discord"),
+    said(5, "hello!"),
+  ];
+  const all: string[] = ["hello all", "!jump", "！HOOK 3 left", "!discord", "hello!"];
+  const sockets: WebSocketRoute[] = [];
+  await page.routeWebSocket("**/api/activity/**", (socket: WebSocketRoute) => {
+    sockets.push(socket);
+    socket.send(JSON.stringify({ type: "snapshot", events: first, replay: true }));
+  });
+  const send = (event: Record<string, unknown>): void => sockets[0].send(JSON.stringify({ type: "event", event }));
+  await page.goto("/tools?view=live");
+  const part = page.locator('[data-live-part="chat"]');
+  const log = part.getByRole("log", { name: "Chat" });
+  const texts = (list: Locator): Promise<string[]> => list.locator("[data-chat-row] .tl-chat-text").allTextContents();
+  const preview = page.locator(".tl-preview [data-overlay-chat]");
+  const onStream = (): Promise<string[]> => preview.locator("li.wl-item:not([data-gone]) .wl-msg").allTextContents();
+  // On by default: no view shows a command, and no row stays for one.
+  await expect.poll(() => texts(log)).toEqual(["hello all", "hello!"]);
+  await expect.poll(onStream).toEqual(["hello all", "hello!"]);
+  await expect(log.locator("[data-chat-row]")).toHaveCount(2);
+
+  // The dock has its own link and its own socket.
+  const made = await owner.request.post("/api/dock/key", { data: {} });
+  expect(made.status()).toBe(200);
+  const dock = await newPage(browser, {
+    viewport: { width: 300, height: 720 },
+    extraHTTPHeaders: { "CF-Connecting-IP": `192.0.2.${DOCK_IP}` },
+  });
+  await dock.routeWebSocket("**/api/activity/**", (socket: WebSocketRoute) => {
+    socket.send(JSON.stringify({ type: "snapshot", events: first, replay: true }));
+  });
+  await dock.goto(((await made.json()) as { url: string }).url);
+  const dockLog = dock.locator('[data-live-part="chat"]').getByRole("log", { name: "Chat" });
+  await expect.poll(() => texts(dockLog)).toEqual(["hello all", "hello!"]);
+  // Mark the documents: a reload would drop the mark.
+  for (const open of [page, dock])
+    await open.evaluate(() => document.documentElement.setAttribute("data-e2e-loaded", "1"));
+
+  // A new command gets no row and does not count for a paused chat. A message that is not a command shows and counts.
+  await part.getByRole("button", { name: "Pause chat" }).click();
+  await expect(part.locator("[data-chat-paused]")).toHaveText("Chat paused. New messages: 0");
+  send(said(6, "!wave"));
+  send(said(7, "!lurk"));
+  send(said(8, "! hello"));
+  await expect(part.locator("[data-chat-paused]")).toHaveText("Chat paused. New messages: 1");
+  await expect.poll(onStream).toEqual(["hello all", "hello!", "! hello"]);
+  await part.getByRole("button", { name: "Jump to latest" }).click();
+  await expect.poll(() => texts(log)).toEqual(["hello all", "hello!", "! hello"]);
+
+  // The full-screen chat shows the same rows.
+  await part.getByRole("button", { name: "Open chat full screen" }).click();
+  const view = page.getByRole("dialog", { name: "Chat, full screen" });
+  await expect.poll(() => texts(view.getByRole("log", { name: "Chat" }))).toEqual(["hello all", "hello!", "! hello"]);
+  await view.getByRole("button", { name: "Exit" }).click();
+  await expect(view).toHaveCount(0);
+
+  // The owner clears the option in a different tab: the log shows the commands in their places, without a reload.
+  const show = await owner.request.post("/api/overlay", { data: { action: "layers", chat: { hideCommands: false } } });
+  expect(show.status()).toBe(200);
+  await expect.poll(() => texts(log)).toEqual([...all, "!wave", "!lurk", "! hello"]);
+  await expect.poll(() => texts(dockLog)).toEqual(all);
+  // The chat layer does not bring a hidden command back. It shows the commands that come from now on.
+  send(said(9, "!dance"));
+  await expect.poll(onStream).toEqual(["hello all", "hello!", "! hello", "!dance"]);
+  await expect.poll(() => texts(log)).toEqual([...all, "!wave", "!lurk", "! hello", "!dance"]);
+
+  // The owner selects the option again: the commands go from each view.
+  const hide = await owner.request.post("/api/overlay", { data: { action: "layers", chat: { hideCommands: true } } });
+  expect(hide.status()).toBe(200);
+  await expect.poll(() => texts(log)).toEqual(["hello all", "hello!", "! hello"]);
+  await expect.poll(() => texts(dockLog)).toEqual(["hello all", "hello!"]);
+  await expect.poll(onStream).toEqual(["hello all", "hello!", "! hello"]);
+  // No page loaded again, and Live kept its one socket.
+  for (const open of [page, dock]) await expect(open.locator("html")).toHaveAttribute("data-e2e-loaded", "1");
+  expect(sockets).toHaveLength(1);
+  await Promise.all([close(owner), close(dock)]);
+  await runSql("tools-live-commands-restore", [noDockKey]);
+});
+
 test("the preview shows the recent chat when the chat layer goes on stream from a different tab", async ({
   browser,
 }) => {

@@ -907,7 +907,7 @@
   "overlay.comp.chatSourceLink": "Kanäle verbinden",
   "overlay.comp.failed": "Layout nicht gespeichert: {error}",
   "overlay.comp.hideCommands": "Chat-Befehle ausblenden (!jump)",
-  "overlay.comp.hideCommandsHint": "Nachrichten, die mit ! beginnen, erscheinen nicht im Stream.",
+  "overlay.comp.hideCommandsHint": "Nachrichten, die mit ! beginnen, erscheinen nicht im Chat im Stream, in Live und im OBS-Dock. Die Figuren bewegen sich weiterhin.",
   "overlay.comp.leaveFailed": "Deine letzte Layout-Änderung wurde nicht gespeichert. Nimm die Änderung erneut vor. Grund: {error}",
   "overlay.comp.liveNote": "Änderungen gehen sofort live",
   "overlay.comp.preview": "Vorschau der Komposition",

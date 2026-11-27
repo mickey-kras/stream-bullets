@@ -141,6 +141,8 @@ Each demo runs the rules of the playground in the browser (`app/components/comma
 With reduced motion, the demos stand still.
 
 - A command controls only the character of its sender. Blocks and holes affect all characters.
+- By default, the chat on stream, the chat of **Live**, and the chat of the OBS dock do not show a command message.
+  A hidden command still works. See [Commands](overlay-composition.md#commands).
 - A side on a build command turns the character first: `!block left`.
 - Only live chat runs a command. A message from a snapshot or a late provider retry never runs a command.
   See [Channel connections and activity](channel-connections.md#event-contract).

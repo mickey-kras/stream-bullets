@@ -271,6 +271,23 @@ describe("characters sockets", (): void => {
     expect(first.ofType("event")).toHaveLength(2);
   });
 
+  it("run a command with the chat set to hide chat commands, and still send its message", async (): Promise<void> => {
+    // The chat layer is on stream with its default: the chat views hide each command.
+    const hiding: OverlayLayers = { ...ON, chat: { ...ON.chat, enabled: true } };
+    expect(hiding.chat.hideCommands).toBe(true);
+    await setLayers(hiding);
+    const socket = await listen();
+    await deliver([chat("m1", "u1", "hello")]);
+    advance(FRAME_MS * 10);
+    await deliver([chat("m2", "u1", "！JUMP")]);
+    advance(FRAME_MS * 30);
+    const id = roster(socket)[0].id;
+    expect(frames(socket).some((frame) => frame.chars.some((char) => char[0] === id && char[3] === JUMP))).toBe(true);
+    // The setting is for the chat views only: the server sends each message, and the views leave the command out.
+    const events = socket.ofType<{ event: ActivityChat }>("event").map((message) => message.event.text);
+    expect(events).toEqual(["hello", "！JUMP"]);
+  });
+
   it("never send playground frames to a chat-only socket, and run nothing for it", async (): Promise<void> => {
     const socket = await listen({ characters: false });
     await deliver([chat("m1", "u1", "!jump")]);

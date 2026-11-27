@@ -839,6 +839,17 @@ To show commands, clear **Hide chat commands (!jump)** in the settings of the ch
 When you select the option again, the chat also hides the command rows that are on the screen.
 The chat never runs a command. It only shows or hides the message.
 
+The option applies to each view of the merged chat:
+
+- The chat layer in the two outputs, and in each preview of the composition
+- The chat of **Live**, the full-screen chat, and the chat of the OBS dock. See [Chat](streamer-tools.md#chat).
+
+The server sends each message to each page, and the page shows no row for a hidden command.
+Thus a hidden command never shows, also not for a moment, and it leaves no empty row.
+A hidden command for a character still moves the character and still counts for the score of the viewer.
+The option does not change moderation: a removed message stays removed.
+OBS and the other open pages of the owner get a change of the option at once, without a reload.
+
 ### Reconnection
 
 The page keeps one activity socket. It connects again after each failure, with backoff and jitter.

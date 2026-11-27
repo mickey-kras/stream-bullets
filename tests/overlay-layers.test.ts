@@ -394,6 +394,23 @@ describe("stored layers", (): void => {
     ).toEqual(DEFAULT_LAYERS);
   });
 
+  it("reads a missing or incorrect chat commands setting as on, and keeps a stored value", (): void => {
+    const read = (chat: Record<string, unknown>): unknown => storedLayersSchema.parse({ chat }).chat;
+    const on = { enabled: true, hideCommands: true, backgroundOpacity: 40 };
+    expect(DEFAULT_LAYERS.chat.hideCommands).toBe(true);
+    // The setting also applies to the chat of the owner now (issue #1115). The stored value reads as before.
+    expect(read({ enabled: true, backgroundOpacity: 40 })).toEqual(on);
+    for (const hideCommands of ["false", "no", 0, 1, null, [], {}])
+      expect(read({ ...on, hideCommands }), JSON.stringify(hideCommands)).toEqual(on);
+    expect(read(on)).toEqual(on);
+    expect(read({ ...on, hideCommands: false })).toEqual({ ...on, hideCommands: false });
+    for (const hideCommands of [true, false]) {
+      const layers: OverlayLayers = mergeLayers(DEFAULT_LAYERS, { chat: { hideCommands } });
+      expect(storedLayersText(layers)).toContain(`"hideCommands":${String(hideCommands)}`);
+      expect(storedLayersSchema.parse(JSON.parse(storedLayersText(layers))).chat.hideCommands).toBe(hideCommands);
+    }
+  });
+
   it("reads a missing or incorrect message background as the default and keeps the other chat fields", (): void => {
     const read = (chat: Record<string, unknown>): unknown => storedLayersSchema.parse({ chat }).chat;
     const old = { enabled: true, hideCommands: false };
@@ -769,6 +786,9 @@ describe("layer patches", (): void => {
       { cells: { horizontal: { chat: { c: 0, r: 0, w: 8, h: 8 }, characters: { c: 0, r: 6, w: 12, h: 4 } } } },
     ],
     ["a null value", { chat: { enabled: null } }],
+    ["a chat commands switch as text", { chat: { hideCommands: "true" } }],
+    ["a chat commands switch as a number", { chat: { hideCommands: 1 } }],
+    ["a null chat commands switch", { chat: { hideCommands: null } }],
     ["a message background that is not a step of 5", { chat: { backgroundOpacity: 3 } }],
     ["a negative message background", { chat: { backgroundOpacity: -5 } }],
     ["a message background above 100", { chat: { backgroundOpacity: 105 } }],

@@ -935,7 +935,7 @@
   "overlay.comp.chatSourceLink": "Подключить каналы",
   "overlay.comp.failed": "Макет не сохранён: {error}",
   "overlay.comp.hideCommands": "Скрывать команды чата (!jump)",
-  "overlay.comp.hideCommandsHint": "Сообщения, которые начинаются с !, не показываются на стриме.",
+  "overlay.comp.hideCommandsHint": "Сообщения, которые начинаются с !, не показываются в чате на стриме, в разделе «Эфир» и в доке OBS. Персонажи по-прежнему двигаются.",
   "overlay.comp.leaveFailed": "Последнее изменение макета не сохранено. Внесите изменение снова. Причина: {error}",
   "overlay.comp.liveNote": "Изменения сразу выходят в эфир",
   "overlay.comp.preview": "Предпросмотр композиции",
