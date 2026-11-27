@@ -1,4 +1,4 @@
-import type { CharacterRow, CharacterState } from "../characters/view";
+import { CHARACTER_ROWS, type CharacterRow, type CharacterState } from "../characters/view";
 
 /**
  * The wasteland pictures of the character playground: atlas files, picture positions, frame timing, colours and
@@ -8,6 +8,8 @@ import type { CharacterRow, CharacterState } from "../characters/view";
 
 /** A rectangle in an atlas: x, y, width, height in atlas pixels. */
 export type Rect = readonly [number, number, number, number];
+/** An offset in world px: x to the front of the character, y down. */
+export type Point = readonly [number, number];
 
 /** How a state animates: frame columns of one row, shown for `ticksPerFrame` ticks each. */
 export interface Sequence {
@@ -56,25 +58,26 @@ export interface PlaygroundTheme {
     exitLamp: { rect: Rect; color: string };
   };
   flag: { dx: number; dy: number; ticksPerFrame: number };
-  /** The pixels that the renderer draws without a picture: the rope, the hook, the crown, the pole of a viewer flag and the flame of a jetpack. */
+  /** What the viewers build and carry. Offsets are from the feet of a character that faces right, in world px. */
   builds: {
+    /** The rope is a drawn line. It starts at the gun while the character shoots, and at the hand on the ride. */
     rope: string;
     ropeInk: string;
-    hook: string;
-    crown: string;
-    crownInk: string;
-    pole: string;
-    flame: readonly string[];
-    pack: string;
-    /** A dancing character turns around after this many ticks. */
-    danceTurnTicks: number;
-    /** A cheering character jumps this many world px, one jump in this many ticks. */
-    cheerLift: number;
-    cheerTicks: number;
-    /** The left edge of each of the four treads of a stair in its cell, for a stair that rises to the right. */
+    ropeFrom: { shoot: Point; zip: Point };
+    /** The flame frames under the pack of a jetpack, by their top centre. */
+    flame: { pictures: readonly TerrainPicture[]; at: Point };
+    /** The bottom centre of the crown. */
+    crown: Point;
+    /**
+     * The flags of the viewers: a strip of frames in the terrain atlas and the mask of their cloth, which gets the
+     * platform colour. Each frame rectangle is in the strip, with the pole at its left edge.
+     */
+    viewerFlag: { strip: Rect; mask: Rect; frames: readonly Rect[]; ticksPerFrame: number };
+    /**
+     * The left edge of each of the four treads of a stair in its cell, for a stair that rises to the right. The
+     * treads follow the steps of the rules (stairRise in terrain.ts), so a character stands on what it sees.
+     */
     stairTreads: readonly number[];
-    /** The left edge of each tread picture of a plank in its cell. */
-    plankTreads: readonly number[];
   };
   joinSign: { dx: number; dy: number };
   exitSign: { dx: number; dy: number };
@@ -111,6 +114,14 @@ export interface PlaygroundTheme {
 
 export type TerrainPicture =
   | "antenna"
+  | "crown"
+  | "flame0"
+  | "flame1"
+  | "flame2"
+  | "hook"
+  | "plankL"
+  | "plankM"
+  | "plankR"
   | "barrel"
   | "crack1"
   | "crack2"
@@ -152,16 +163,16 @@ const LOOP4 = [0, 1, 2, 3] as const;
 export const WASTELAND_PLAYGROUND: PlaygroundTheme = {
   courier: {
     // The query is the first 8 hex digits of the SHA-256 of the file, so a new file is never served from cache.
-    url: "/assets/overlay/wasteland-courier.png?v=e557468b",
+    url: "/assets/overlay/wasteland-courier.png?v=bf88939a",
     cell: 32,
     regions: { base: 0, helmet: 128, scarf: 256 },
     regionWidth: 128,
-    regionHeight: 400,
-    rows: ["idle", "walk", "entrance", "exit", "turn", "jump", "dig", "build", "wave", "fall", "explosion", "respawn"],
+    regionHeight: 624,
+    rows: CHARACTER_ROWS,
     // The boots of every standing frame end on cell row 29; x 16 is the mirror axis.
     anchor: { x: 16, y: 30 },
-    helmet: [0, 384, 8, 5],
-    boot: [8, 384, 6, 5],
+    helmet: [0, 608, 8, 5],
+    boot: [8, 608, 6, 5],
   },
   helmetColors: {
     youtube: "#E5322D",
@@ -177,14 +188,17 @@ export const WASTELAND_PLAYGROUND: PlaygroundTheme = {
     goto: { row: "walk", frames: LOOP4, ticksPerFrame: 4, loopFrom: 0 },
     step: { row: "walk", frames: LOOP4, ticksPerFrame: 4, loopFrom: 0 },
     hold: { row: "idle", frames: LOOP4, ticksPerFrame: 5, loopFrom: 0 },
-    // The atlas has no pictures for these actions yet: they use the jump, wave and build rows.
-    climb: { row: "jump", frames: [1], ticksPerFrame: 1 },
-    zip: { row: "jump", frames: [1], ticksPerFrame: 1 },
-    jet: { row: "jump", frames: [1], ticksPerFrame: 1 },
-    shoot: { row: "wave", frames: [1], ticksPerFrame: 1 },
-    dance: { row: "wave", frames: LOOP4, ticksPerFrame: 6, loopFrom: 0 },
-    cheer: { row: "jump", frames: [0, 1, 1, 2], ticksPerFrame: 4, loopFrom: 0 },
-    push: { row: "build", frames: LOOP4, ticksPerFrame: 2 },
+    // Reach, pull, cross the ledge, stand.
+    climb: { row: "climb", frames: LOOP4, ticksPerFrame: 3 },
+    // Hang, then pull and lift the knees until the top.
+    zip: { row: "zip", frames: LOOP4, ticksPerFrame: 4, loopFrom: 1 },
+    // Launch, then hover and lean in turn.
+    jet: { row: "jet", frames: [0, 1, 2], ticksPerFrame: 4, loopFrom: 1 },
+    // Hold, aim, fire. After a miss (16 ticks) the gun comes down.
+    shoot: { row: "shoot", frames: [0, 1, 2, 2, 3], ticksPerFrame: 3 },
+    dance: { row: "dance", frames: LOOP4, ticksPerFrame: 6, loopFrom: 0 },
+    cheer: { row: "cheer", frames: LOOP4, ticksPerFrame: 6, loopFrom: 0 },
+    push: { row: "push", frames: LOOP4, ticksPerFrame: 2 },
     turn: { row: "turn", frames: LOOP4, ticksPerFrame: 4 },
     idle: { row: "idle", frames: LOOP4, ticksPerFrame: 5, loopFrom: 0 },
     exit: { row: "exit", frames: LOOP4, ticksPerFrame: 5, loopFrom: 0 },
@@ -208,10 +222,18 @@ export const WASTELAND_PLAYGROUND: PlaygroundTheme = {
     gone: null,
   },
   terrain: {
-    url: "/assets/overlay/wasteland-terrain.png?v=47707352",
+    url: "/assets/overlay/wasteland-terrain.png?v=526ce68a",
     tile: 16,
     rects: {
       antenna: [186, 59, 13, 22],
+      crown: [3, 147, 10, 7],
+      flame0: [21, 122, 6, 8],
+      flame1: [37, 122, 6, 8],
+      flame2: [53, 122, 6, 8],
+      hook: [5, 133, 5, 5],
+      plankL: [0, 106, 16, 6],
+      plankM: [16, 106, 16, 6],
+      plankR: [32, 106, 16, 6],
       barrel: [116, 84, 12, 15],
       crack1: [200, 59, 16, 16],
       crack2: [217, 59, 16, 16],
@@ -258,17 +280,21 @@ export const WASTELAND_PLAYGROUND: PlaygroundTheme = {
   builds: {
     rope: "#E7D7A8",
     ropeInk: "#1D1712",
-    hook: "#BCC8C4",
-    crown: "#EDBD53",
-    crownInk: "#1D1712",
-    pole: "#1D1712",
-    flame: ["#FFD36B", "#FF8A3C"],
-    pack: "#5C6B70",
-    danceTurnTicks: 12,
-    cheerLift: 7,
-    cheerTicks: 12,
+    ropeFrom: { shoot: [10, -19], zip: [4, -28] },
+    flame: { pictures: ["flame0", "flame1", "flame2"], at: [-10, -12] },
+    crown: [0, -30],
+    viewerFlag: {
+      strip: [0, 154, 64, 16],
+      mask: [64, 154, 64, 16],
+      frames: [
+        [3, 0, 10, 16],
+        [19, 0, 10, 16],
+        [35, 0, 10, 16],
+        [51, 0, 10, 16],
+      ],
+      ticksPerFrame: 7,
+    },
     stairTreads: [0, 3, 5, 9],
-    plankTreads: [0, 5, 9],
   },
   joinSign: { dx: 38, dy: -24 },
   exitSign: { dx: -76, dy: -24 },

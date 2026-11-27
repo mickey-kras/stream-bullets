@@ -116,10 +116,10 @@ async function replyWindows(
   viewerId: string | null,
   focus: string | null = null,
 ): Promise<Map<string, ReplyWindow>> {
+  if (rootIds.length === 0) return new Map<string, ReplyWindow>();
   const windows = new Map<string, ReplyWindow>(
     rootIds.map((id: string): [string, ReplyWindow] => [id, { replies: [], replyCount: 0, earlierReplies: 0 }]),
   );
-  if (rootIds.length === 0) return windows;
   const { results } = await env.DB.prepare(`
     WITH RECURSIVE ${threadIds}, ordered AS (
       SELECT t.root, t.id, row_number() OVER (PARTITION BY t.root ORDER BY c.created_at, c.id) AS n,
