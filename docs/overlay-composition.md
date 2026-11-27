@@ -20,6 +20,7 @@ The code is in these files:
 | Activity socket client | `app/lib/activity-socket.ts`, `app/components/overlay/activity-feed.tsx` |
 | Chat rows and the composition | `app/components/overlay/chat-layer.tsx`, `app/components/overlay/overlay-composition.tsx` |
 | Content of a layer and its QR code | `app/components/overlay/overlay-stage.tsx`, `app/components/overlay/qr-code.tsx` |
+| Alerts layer and goal layer | `app/components/overlay/alerts-layer.tsx`, `goal-layer.tsx`, `use-alerts.ts`, `app/lib/alert-feed.ts` |
 | Chat appearance and motion | `app/components/overlay/wasteland/`, `app/components/overlay/use-row-motion.ts` |
 | Editor | `app/components/overlay/composition-editor.tsx`, `layout-grid.tsx`, `layer-palette.tsx`, `use-layer-draft.ts` |
 | Layout list and its buttons | `app/components/overlay/layout-picker.tsx` |
@@ -30,7 +31,7 @@ The code is in these files:
 
 ## Layers
 
-The composition has nine layers. Each layer can be on the grid one time.
+The composition has eleven layers. Each layer can be on the grid one time.
 
 | Layer | Name in the editor | What it shows |
 | --- | --- | --- |
@@ -43,17 +44,19 @@ The composition has nine layers. Each layer can be on the grid one time.
 | `card` | Community card | The first Community card, or a card that the owner picks |
 | `support` | Support banner | The first support link |
 | `camera` | Camera frame | A frame with a clear window for the camera source in OBS. See [Camera frame](#camera-frame). |
+| `alerts` | Alerts | The banner of the alert on stream. See [Alerts layer](#alerts-layer). |
+| `goal` | Goal | A title, a count, and a bar. See [Goal layer](#goal-layer). |
 
 `poll`, `topic`, `next`, `message`, `card`, and `support` are the content layers.
 
-The grid also has the `alerts` layer and the `goal` layer. The API saves their cells and their settings.
-The overlay does not show these two layers in this version, and the editor does not offer them.
+The editor does not offer the `alerts` layer and the `goal` layer in this version.
+The API saves their cells and their settings, and the overlay shows them.
 See [Overlay layers](api.md#overlay-layers).
 
 A layer is on stream in an output when it has a cell in the orientation of that output and its `enabled` setting is on.
 See [Outputs](#outputs).
 In the editor, the `enabled` setting is **Show on stream**.
-The characters are at the bottom, then the content layers and the camera frame, and the chat is on top.
+The characters are at the bottom, then the content layers, the camera frame, the alerts, and the goal, and the chat is on top.
 Layers cannot overlap, so this sequence shows only at shared edges.
 
 No layer is on the grid by default. The chat layer and the characters layer are off by default.
@@ -112,13 +115,14 @@ With the switch on, the output shows only what comes from Twitch:
 
 - The chat layer shows Twitch messages. This includes the sample chat of a test.
 - The characters layer shows the characters of Twitch viewers. The playground on the server does not change.
+- The alerts layer shows the banner of an alert from Twitch, and of a topic credit. The chat marks the same alerts.
 - Each other event of the activity feed that is not from Twitch does not show.
 
 A change of the switch during a stream applies at once.
 The Twitch messages on screen stay. The messages of the other platforms go, and they do not come back.
 When the switch goes off again, the other platforms show from their next message.
 
-Polls, topics, the message banner, and the other content layers do not change.
+Polls, topics, the message banner, the other content layers, and the goal layer do not change.
 The **Live** section and the full-screen chat always show each platform.
 A preview shows what its output shows, thus a preview of an output with the switch on shows Twitch only.
 
@@ -138,6 +142,8 @@ An OBS source that connected before the two outputs connects again one time when
 | `characters` | 12 × 4 | 720 × 240 |
 | Each content layer | 8 × 4 | 480 × 240 |
 | `camera` | 6 × 4 | 360 × 240 |
+| `alerts` | 8 × 3 | 480 × 180 |
+| `goal` | 8 × 2 | 480 × 120 |
 
 The characters cell sets the size of the playground world: each cell is 20 × 20 world pixels.
 A wide cell gives a long ground. A tall cell gives more sky above the ground.
@@ -233,6 +239,68 @@ The label of the layer on the grid gives the size of the cell in design pixels.
 In the editor, the window shows the text **Your OBS camera shows here**. The overlay page never shows this text.
 The camera frame has no `ref`, no background setting, and no QR code.
 The frame is a part of the content source (`layer=content`).
+
+### Alerts layer
+
+The alerts layer shows a banner for the alert on stream. One alert shows at a time, for 6 seconds.
+Between alerts, the cell of the layer is empty.
+
+The banner has these parts:
+
+- An icon for the kind of the alert.
+- One line with the name of the supporter and the event, with its amount.
+  An example is **LanternFox gave 5 subscriptions**.
+- One line with the name of the platform and the words **Thank you**. A topic credit has no platform name.
+
+These rules apply to the banner:
+
+- The banner never shows the text that the supporter sent. That text stays in chat and in **Streamer tools**.
+- An anonymous alert shows the word **Anonymous**. It shows no name.
+- A test alert has a small **TEST** tag. A replay looks the same as a live alert.
+- The name is text. A long name continues on the next line, and the banner shows the full name.
+- The banner is as high as its cell. If its text is higher than the cell, the banner becomes smaller until it fits.
+- The minimum size of the layer is 8 × 3 cells. A cell of 16 × 3 cells shows a short line on one line.
+
+The server sends the alert with its start time and its end time. See [Alerts and the goal](channel-connections.md#alerts-and-the-goal).
+
+- The two outputs get the same state. Thus the two outputs show one alert together.
+- Each page ends the banner with its own timer at the end time. A late server message never keeps a banner on stream.
+- A page that connects during an alert shows the banner only for the time that remains.
+- A page never shows a banner for longer than the time of the alert, also when its clock is wrong.
+- The banner comes in for 0.2 seconds and fades for 0.3 seconds before its end.
+  With reduced motion, it appears and goes without a transition. The Motion setting of the site and the system setting apply.
+
+A rule of the alerts layer can also mark the alert in chat. The chat layer then shows one highlight row for the alert.
+
+- The row has the same information as the banner. It never shows the text of the supporter.
+- The row enters in the sequence of the chat rows, with the same motion, and it stays as long as a chat message.
+- Each play of an alert gets one row.
+- A moderation event does not remove the row. The row has no user ID.
+
+In the editor preview, the alerts layer shows a sample banner. The sample is not an alert of the page.
+The alerts layer is a part of the content source (`layer=content`).
+
+### Goal layer
+
+The goal layer shows the title of the goal, the count, and a bar. An example is **New subscribers · 17 of 25**.
+
+- The layer shows whenever it is on stream, also before the first event.
+- The count is 0 until the server sends a count. The bar is then empty.
+- A count above the target shows the real number. The bar is then full, and it does not become longer.
+- A goal without a title shows the count and the bar only.
+- The numbers use the format of the language of the page.
+- The minimum size of the layer is 8 × 2 cells. If the title is too long for the cell, the content becomes smaller until it fits.
+- Each output shows the goal. The switch **Show Twitch chat only** does not change it, because the goal counts each platform.
+
+In the editor preview, the goal layer shows the count 0.
+The goal layer is a part of the content source (`layer=content`).
+
+### Sources from before the alerts and the goal
+
+An overlay page that OBS loaded before the release of these two layers does not show them.
+That page ignores the alert messages of the server.
+Load each OBS source again one time after the release.
+To do this, open the properties of the browser source in OBS and select `Refresh cache of current page`.
 
 ### Canvas
 
@@ -421,7 +489,8 @@ A chat source or a characters source keeps the aspect ratio of its cell and uses
 It aligns the layer with the bottom-right corner of the viewport. Thus the newest chat rows are always visible.
 The free space stays transparent, at the left or at the top.
 
-A content source (`layer=content`) shows all the content layers and the camera frame on stream, without the chat and the characters.
+A content source (`layer=content`) shows the content layers, the camera frame, the alerts, and the goal on stream.
+It does not show the chat and the characters.
 Each of these layers stays at its cell in the canvas of the output, as in the composition.
 Thus a content source has the frame size, not the size of one layer.
 
@@ -850,7 +919,7 @@ The chat never runs a command. It only shows or hides the message.
 
 The page keeps one activity socket. It connects again after each failure, with backoff and jitter.
 The first wait is 1 second. The wait doubles after each failure, up to 60 seconds.
-When the socket opens, the server sends a snapshot of recent chat.
+When the socket opens, the server sends a snapshot of recent chat. Then it sends the state of the alerts and the goal.
 
 The snapshot is the truth for its time window. The chat removes rows that are missing from it.
 Rows from a snapshot never animate. Rows on screen stay and do not animate again.
@@ -870,13 +939,14 @@ The server polls YouTube chat only while at least one activity socket of the pag
 Each open activity socket keeps the poll alive, and each poll costs YouTube quota.
 Thus close the overlay sources that you do not use.
 
-- The page opens an activity socket only when it shows a chat layer or a characters layer that is on stream.
-  Take both layers off stream to close it.
+- The page opens an activity socket only for these layers: the chat, the characters, the alerts, and the goal.
+  One of them must be on stream in the output of the page. Take these layers off stream to close the socket.
 - A page that shows the characters layer asks its socket for the playground frames (`characters=1`).
   Chat and characters then share that one socket.
 - The editor preview opens an activity socket only while the characters layer is on stream. The chat preview shows sample messages.
 - Each browser source opens its own sockets. A chat, characters, or content source uses one live-room socket.
   A chat source and a characters source also use one activity socket each.
+  A content source uses one activity socket while it shows the alerts layer or the goal layer.
 - A page can have at most 20 activity sockets (`MAX_SOCKETS`).
 - Valid-key overlays and the owner share 10 owner seats in the live room. See [Live-room seats](#live-room-seats).
 

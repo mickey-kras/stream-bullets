@@ -110,7 +110,8 @@ export default function Overlay(): ReactNode {
   // Fetch missing content when a content layer changes.
   useLiveRevalidation(status, overlay.revision, revalidator.revalidate, content);
   // The activity socket is open only while a rendered layer needs it, so hiding the chat closes it. One socket carries
-  // chat and, while the characters layer shows, the playground frames: the playground runs only while one listens.
+  // chat, the alerts and the goal, and, while the characters layer shows, the playground frames: the playground runs
+  // only while one listens.
   const layers: OverlayLayers = shownLayers(overlay.layers, loaded.override, loaded.output);
   const feedOn: boolean = known && usesActivityFeed(layers, only);
   const feed = useActivityFeed(loaded.handle, key, feedOn, { characters: usesCharacters(layers, only) });

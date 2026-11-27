@@ -7,8 +7,10 @@ import {
   type ActivityPlatform,
   type ActivitySupport,
 } from "../app/lib/activity";
+import type { AlertView } from "../app/lib/alerts";
 import {
   CHAT_LIMITS,
+  MAX_MARKED_IDS,
   MAX_REMOVED_IDS,
   SAMPLE_CHAT,
   chatReducer,
@@ -18,9 +20,11 @@ import {
   isChatCommand,
   nextWakeAt,
   safeEmoteUrl,
+  type AlertRow,
   type ChatOptions,
   type ChatRow,
   type ChatState,
+  type MessageRow,
 } from "../app/lib/chat-feed";
 
 const T0 = 1_800_000_000_000;
@@ -82,8 +86,14 @@ function ids(rows: readonly ChatRow[]): string[] {
   return rows.map((row: ChatRow): string => row.id);
 }
 
+/** The row as the row of a chat message. The mark of an alert is not one. */
+function message(row: ChatRow): MessageRow {
+  if (row.alert !== undefined) throw new Error(`Row ${row.id} is the mark of an alert.`);
+  return row;
+}
+
 function textOf(row: ChatRow): string {
-  return row.fragments.map((fragment) => (fragment.type === "text" ? fragment.text : `[${fragment.name}]`)).join("");
+  return message(row).fragments.map((fragment) => (fragment.type === "text" ? fragment.text : `[${fragment.name}]`)).join("");
 }
 
 describe("isChatCommand", () => {
@@ -198,12 +208,12 @@ describe("displayFragments", () => {
 
 describe("chatReducer: live events", () => {
   it("shows a lone message at once with an enter animation, then settles", () => {
-    const message = chat({ user: { id: "u9", displayName: "Nine" }, badges: [{ id: "a", label: "A" }, { id: "b", label: "B" }, { id: "c", label: "C" }] });
-    let state = send(initialChatState(), event(message), 1000);
+    const sent = chat({ user: { id: "u9", displayName: "Nine" }, badges: [{ id: "a", label: "A" }, { id: "b", label: "B" }, { id: "c", label: "C" }] });
+    let state = send(initialChatState(), event(sent), 1000);
     expect(state.pending).toEqual([]);
     expect(state.rows).toHaveLength(1);
-    const row = state.rows[0];
-    expect(row).toMatchObject({ id: message.id, name: "Nine", userId: "u9", phase: "entering", animate: true, shownAt: 1000, phaseAt: 1000 });
+    const row = message(state.rows[0]);
+    expect(row).toMatchObject({ id: sent.id, name: "Nine", userId: "u9", phase: "entering", animate: true, shownAt: 1000, phaseAt: 1000 });
     expect(row.badges).toEqual([{ id: "a", label: "A" }, { id: "b", label: "B" }]);
     expect(nextWakeAt(state, options)).toBe(1000 + CHAT_LIMITS.enterMs);
     expect(tick(state, 1000 + CHAT_LIMITS.enterMs - 1, options)).toBe(state);
@@ -215,7 +225,7 @@ describe("chatReducer: live events", () => {
   it("falls back to the login, then to an empty name", () => {
     let state = send(initialChatState(), event(chat({ user: { id: "x", login: "log", displayName: "" } })), 0);
     state = send(state, event(chat({ user: { id: "y", displayName: "" } })), 1000);
-    expect(state.rows.map((row) => row.name)).toEqual(["log", ""]);
+    expect(state.rows.map((row) => message(row).name)).toEqual(["log", ""]);
   });
 
   it("keeps arrival order even when sentAt says otherwise", () => {
@@ -263,7 +273,7 @@ describe("chatReducer: live events", () => {
     expect(send(initialChatState(), event(command), 0).rows).toEqual([]);
     const shown = send(initialChatState(), event(command), 0, showAll);
     expect(textOf(shown.rows[0])).toBe("!jump");
-    expect(shown.rows[0].command).toBe(true);
+    expect(message(shown.rows[0]).command).toBe(true);
   });
 
   it("removes shown and queued commands when hideCommands turns on", () => {
@@ -666,7 +676,7 @@ describe("unsafe input", () => {
     const html = '<img src=x onerror="alert(1)"><b>hi</b>';
     const state = send(initialChatState(), event(chat({ text: html, user: { id: "h", displayName: "<script>x</script>" } })), 0);
     expect(textOf(state.rows[0])).toBe(html);
-    expect(state.rows[0].name).toBe("<script>x</script>");
+    expect(message(state.rows[0]).name).toBe("<script>x</script>");
   });
 
   it("relies on the parser to refuse disallowed emote hosts and oversized messages", () => {
@@ -680,7 +690,7 @@ describe("unsafe input", () => {
   it("cuts long messages to the display limit", () => {
     const text = "a".repeat(250);
     const state = send(initialChatState(), event(chat({ text })), 0);
-    expect(state.rows[0].truncated).toBe(true);
+    expect(message(state.rows[0]).truncated).toBe(true);
     expect(textOf(state.rows[0])).toHaveLength(CHAT_LIMITS.maxDisplayChars);
   });
 });
@@ -721,7 +731,7 @@ describe("SAMPLE_CHAT", () => {
 });
 
 describe("support events and the overlay chat", (): void => {
-  // Alerts on stream are another feature (issue #1043): the overlay chat shows chat only.
+  // A support event makes no row. The mark of an alert comes from the alert messages (issue #1043): see below.
   const cheer: ActivitySupport = {
     kind: "bits",
     id: "twitch:d1",
@@ -751,5 +761,127 @@ describe("support events and the overlay chat", (): void => {
     const state: ChatState = send(initialChatState(), snapshot([{ ...cheer, replay: true }, message, follow]), T0);
     expect(state.rows.map((row: ChatRow): string => row.id)).toEqual([message.id]);
     expect(send(initialChatState(), snapshot([{ ...cheer, replay: true }, follow]), T0).rows).toHaveLength(0);
+  });
+});
+
+describe("the mark of an alert in chat", (): void => {
+  const view = (override: Partial<AlertView> = {}): AlertView => ({
+    id: "twitch:d1",
+    origin: "live",
+    kind: "gift",
+    platform: "twitch",
+    name: "LanternFox",
+    anonymous: false,
+    amount: 5,
+    currency: null,
+    text: "A message of the supporter",
+    banner: true,
+    chat: true,
+    startsAt: T0,
+    endsAt: T0 + 6000,
+    ...override,
+  });
+  const mark = (state: ChatState, alert: AlertView, now: number, opts: ChatOptions = options): ChatState =>
+    chatReducer(state, { type: "alert", alert, now }, opts);
+  const marks = (state: ChatState): AlertRow[] =>
+    state.rows.filter((row: ChatRow): row is AlertRow => row.alert !== undefined);
+
+  it("is one row in the flow of the chat, with the motion of a new message and no text of the supporter", (): void => {
+    const first: ChatState = send(initialChatState(), event(chat()), 1000);
+    const state: ChatState = mark(first, view(), 2000);
+    expect(state.rows).toHaveLength(2);
+    const [row] = marks(state);
+    expect(row).toMatchObject({ id: "alert:twitch:d1", seq: 2, phase: "entering", animate: true, shownAt: 2000 });
+    expect(row.receivedAt).toBe(T0);
+    expect(row.alert).toEqual({
+      id: "twitch:d1",
+      origin: "live",
+      kind: "gift",
+      platform: "twitch",
+      name: "LanternFox",
+      anonymous: false,
+      amount: 5,
+      currency: null,
+    });
+    expect(JSON.stringify(state)).not.toContain("A message of the supporter");
+    // It settles and leaves after the lifetime of a row, as a message does.
+    const settled: ChatState = tick(state, 2000 + CHAT_LIMITS.enterMs);
+    expect(marks(settled)[0].phase).toBe("shown");
+    expect(runUntil(state, 2000 + CHAT_LIMITS.lifetimeMs + CHAT_LIMITS.leaveMs).rows).toEqual([]);
+  });
+
+  it("waits in the queue behind the messages before it, and a full queue drops the oldest row", (): void => {
+    let state: ChatState = send(initialChatState(), event(chat()), 0);
+    state = mark(state, view(), 10);
+    expect(state.rows).toHaveLength(1);
+    expect(state.pending.map((row: ChatRow): string => row.id)).toEqual(["alert:twitch:d1"]);
+    state = tick(state, CHAT_LIMITS.enterIntervalMs);
+    expect(marks(state)).toHaveLength(1);
+    const limits: ChatOptions = { hideCommands: true, limits: { maxPending: 1 } };
+    let full: ChatState = send(initialChatState(), event(chat()), 0, limits);
+    full = mark(full, view({ id: "twitch:d2" }), 1, limits);
+    full = mark(full, view({ id: "twitch:d3" }), 2, limits);
+    expect(full.pending.map((row: ChatRow): string => row.id)).toEqual(["alert:twitch:d3"]);
+  });
+
+  it("marks an alert ID one time, also after its row left, and remembers a limited number of IDs", (): void => {
+    const state: ChatState = mark(initialChatState(), view(), 0);
+    expect(mark(state, view(), 100)).toBe(state);
+    // The state of the alerts comes again after the row left: no second row.
+    const gone: ChatState = runUntil(state, CHAT_LIMITS.lifetimeMs + CHAT_LIMITS.leaveMs);
+    expect(gone.rows).toEqual([]);
+    expect(mark(gone, view(), CHAT_LIMITS.lifetimeMs + 1000)).toBe(gone);
+    // A replay is a new play with its own ID.
+    expect(marks(mark(gone, view({ id: "twitch:d1~r1", origin: "replay" }), 200_000))).toHaveLength(1);
+    let many: ChatState = initialChatState();
+    for (let i = 0; i <= MAX_MARKED_IDS; i += 1) many = mark(many, view({ id: `twitch:n${i}` }), i * 1000);
+    expect(many.marked).toHaveLength(MAX_MARKED_IDS);
+    expect(many.marked[0]).toBe("twitch:n1");
+    expect(many.marked.at(-1)).toBe(`twitch:n${MAX_MARKED_IDS}`);
+    expect(initialChatState().marked).toEqual([]);
+    expect(chatReducer(many, { type: "reset" }, options).marked).toEqual([]);
+  });
+
+  it("stays through moderation of chat, a snapshot, and the command filter", (): void => {
+    const talk: ActivityChat = chat({ user: { id: "u1", displayName: "LanternFox" } });
+    let state: ChatState = send(initialChatState(), event(talk), 0, showAll);
+    state = mark(state, view(), 1000, showAll);
+    const ban: ActivityEvent = { kind: "ban", platform: "twitch", userId: "u1", until: null, receivedAt: T0 };
+    const banned: ChatState = send(state, event(ban), 2000, showAll);
+    expect(message(banned.rows[0]).phase).toBe("removed");
+    expect(marks(banned)[0].phase).toBe("shown");
+    const cleared: ChatState = send(state, event({ kind: "clear", platform: "twitch", receivedAt: T0 }), 2000, showAll);
+    expect(message(cleared.rows[0]).phase).toBe("leaving");
+    expect(marks(cleared)[0].phase).toBe("shown");
+    // A delete with the ID of the mark names a chat message, not the mark.
+    const sameId: ActivityEvent = { kind: "delete", platform: "twitch", messageId: "d1", receivedAt: T0 };
+    expect(marks(send(state, event(sameId), 2000, showAll))[0].phase).toBe("shown");
+    // A snapshot of a reconnect has chat only: the mark stays, and a waiting mark shows.
+    const after: ChatState = send(state, snapshot([]), 3000, showAll);
+    expect(after.rows.map((row: ChatRow): string => row.id)).toEqual(["alert:twitch:d1"]);
+    const waiting: ChatState = mark(send(initialChatState(), event(chat()), 0), view({ id: "twitch:w" }), 1);
+    expect(waiting.pending).toHaveLength(1);
+    expect(marks(send(waiting, snapshot([]), 2))).toHaveLength(1);
+    // The time of the alert is not a chat time: a snapshot still adds the chat from before the alert.
+    const late: ActivityChat = chat({ receivedAt: T0 - 5000 });
+    const onlyMark: ChatState = tick(mark(initialChatState(), view(), 0, showAll), CHAT_LIMITS.enterMs, showAll);
+    expect(send(onlyMark, snapshot([late]), CHAT_LIMITS.enterMs + 1, showAll, T0).rows).toHaveLength(2);
+    // The command filter removes commands only.
+    const filtered: ChatState = chatReducer(state, { type: "filter", hideCommands: true, now: 4000 }, options);
+    expect(marks(filtered)[0].phase).not.toBe("leaving");
+  });
+
+  it("follows the rule of its alert on an output that changes to one platform", (): void => {
+    let state: ChatState = mark(initialChatState(), view({ id: "youtube:s1", kind: "super_chat", platform: "youtube", amount: 5_000_000, currency: "USD" }), 0);
+    state = mark(state, view({ id: "direct:t1", kind: "topic", platform: "direct", amount: null }), 1000);
+    state = mark(state, view({ id: "twitch:g1" }), 2000);
+    state = tick(state, 3000);
+    expect(marks(state)).toHaveLength(3);
+    const only: ChatState = chatReducer(state, { type: "platform", platform: "twitch", now: 4000 }, options);
+    expect(marks(only).map((row: AlertRow): [string, string] => [row.alert.platform, row.phase])).toEqual([
+      ["youtube", "leaving"],
+      ["direct", "shown"],
+      ["twitch", "shown"],
+    ]);
   });
 });
