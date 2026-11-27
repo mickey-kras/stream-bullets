@@ -106,8 +106,9 @@ export class ChannelSubscriptions {
   }
 
   /**
-   * The provider refused a subscription that only support events need: the support events of the connection go
-   * off. The subscriptions of chat and the status stay as they are, and the next check deletes what is left.
+   * The provider refused a subscription that only support events need: the connection reads no support events
+   * until its owner reconnects it. The subscriptions of chat and the status stay as they are, and the next check
+   * deletes what is left.
    */
   private async supportRefused(platform: ActivityPlatform, connection: Connection): Promise<void> {
     await this.host.env.DB.prepare("UPDATE channel_connections SET support_events=0 WHERE id=?")
@@ -354,18 +355,11 @@ export class ChannelSubscriptions {
     return soonest;
   }
 
-  /**
-   * The hourly job asks for a check. One that ran or is scheduled inside the interval stands: `recent`. With
-   * `force`, the check runs now: the streamer changed the support events, so their subscriptions must come or go.
-   */
-  async requested(
-    platform: ActivityPlatform,
-    now: number,
-    force: boolean = false,
-  ): Promise<{ result: ReconcileResult | "recent" }> {
+  /** The hourly job asks for a check. One that ran or is scheduled inside the interval stands: `recent`. */
+  async requested(platform: ActivityPlatform, now: number): Promise<{ result: ReconcileResult | "recent" }> {
     if (!REPAIRABLE.includes(platform) || channelsOff(this.host.env)) return { result: "skipped" };
     const state = await this.state(platform);
-    if (!force && now < state.nextAt) return { result: "recent" };
+    if (now < state.nextAt) return { result: "recent" };
     const connection = await this.host.connection(platform);
     if (!this.checkable(platform, connection)) return { result: "skipped" };
     const result = await this.reconcile(platform, connection);

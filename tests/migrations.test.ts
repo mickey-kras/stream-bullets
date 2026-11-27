@@ -266,7 +266,7 @@ beforeAll(async (): Promise<void> => {
 afterAll(async (): Promise<void> => database.dispose());
 
 describe("migrations 0006 onwards", (): void => {
-  it("covers 0006 to 0050", (): void => {
+  it("covers 0006 to 0051", (): void => {
     expect(applied.map((file: string): string => file.slice(0, 4))).toEqual([
       "0006",
       "0007",
@@ -313,8 +313,93 @@ describe("migrations 0006 onwards", (): void => {
       "0048",
       "0049",
       "0050",
+      "0051",
     ]);
   });
+
+  it("turns the support events on for each old connection that can read them (0051), and keeps the rows and tokens", async (): Promise<void> => {
+    // A database of its own: the connections must exist before the migration runs.
+    const own: TestDatabase = await createTestDatabase({ migrate: false });
+    try {
+      const files: string[] = await migrationFiles();
+      await applyMigrations(
+        own.db,
+        files.filter((file: string): boolean => file < "0051"),
+      );
+      const chat: string = "user:read:chat user:bot channel:bot";
+      const support: string = "moderator:read:followers channel:read:subscriptions bits:read";
+      // Each row: the page, the platform, the scopes and the switch of before.
+      const rows: [string, string, string, number][] = [
+        // A Twitch channel from before the support events: no scope for them.
+        ["a", "twitch", chat, 0],
+        // The streamer gave the scopes and then turned the switch off, in each order of the scopes.
+        ["b", "twitch", `${chat} ${support}`, 0],
+        ["c", "twitch", `bits:read ${chat} channel:read:subscriptions moderator:read:followers`, 0],
+        // Two of the three scopes, and a longer scope that only ends like one of them, are not enough.
+        ["d", "twitch", `${chat} moderator:read:followers bits:read`, 0],
+        ["e", "twitch", `${chat} moderator:read:followers channel:read:subscriptions extra:bits:read`, 0],
+        ["f", "twitch", `${chat} ${support}`, 1],
+        // YouTube and Kick need no scope for the support events.
+        ["a", "youtube", "https://www.googleapis.com/auth/youtube.readonly", 0],
+        ["a", "kick", "user:read channel:read events:subscribe", 0],
+        ["b", "kick", "user:read channel:read events:subscribe", 1],
+        ["b", "youtube", "", 0],
+      ];
+      const pages: string = JSON.stringify(["a", "b", "c", "d", "e", "f"]);
+      await own.db.batch([
+        own.db
+          .prepare(
+            `INSERT INTO user (id,name,email,email_verified,created_at,updated_at)
+              SELECT value, 'Host', value||'@example.test', 1, 1, 1 FROM json_each(?)`,
+          )
+          .bind(pages),
+        own.db
+          .prepare("INSERT INTO streamers (id,owner_id,handle,name) SELECT value, value, 'page_'||value, 'Host' FROM json_each(?)")
+          .bind(pages),
+        ...rows.map(([page, platform, scopes, on]: [string, string, string, number]): D1PreparedStatement =>
+          own.db
+            .prepare(
+              `INSERT INTO channel_connections
+                (id,streamer_id,platform,external_id,display_name,scopes,status,created_at,updated_at,support_events)
+                VALUES (?1,?2,?3,?1,'Host',?4,'active',1,7,?5)`,
+            )
+            .bind(`${page}-${platform}`, page, platform, scopes, on),
+        ),
+        own.db.prepare(
+          `INSERT INTO channel_tokens (connection_id,key_id,access_token,updated_at)
+            SELECT id, 'k1', 'sealed-'||id, 1 FROM channel_connections`,
+        ),
+      ]);
+      await applyMigrations(
+        own.db,
+        files.filter((file: string): boolean => file >= "0051"),
+      );
+      const after = await own.db
+        .prepare("SELECT id, support_events, scopes, status, updated_at FROM channel_connections ORDER BY id")
+        .all<{ id: string; support_events: number; scopes: string; status: string; updated_at: number }>();
+      expect(after.results.map((row): [string, number] => [row.id, row.support_events])).toEqual([
+        ["a-kick", 1],
+        ["a-twitch", 0],
+        ["a-youtube", 1],
+        ["b-kick", 1],
+        ["b-twitch", 1],
+        ["b-youtube", 1],
+        ["c-twitch", 1],
+        ["d-twitch", 0],
+        ["e-twitch", 0],
+        ["f-twitch", 1],
+      ]);
+      // Nothing else of a row changes: the old Twitch channel keeps its chat, and the status clock stands.
+      expect(after.results.every((row): boolean => row.status === "active" && row.updated_at === 7)).toBe(true);
+      expect(after.results.map((row): string => row.scopes).sort()).toEqual(rows.map((row): string => row[2]).sort());
+      const tokens = await own.db.prepare("SELECT connection_id, access_token FROM channel_tokens ORDER BY connection_id").all();
+      expect(tokens.results).toEqual(
+        after.results.map((row): Record<string, string> => ({ connection_id: row.id, access_token: `sealed-${row.id}` })),
+      );
+    } finally {
+      await own.dispose();
+    }
+  }, 60_000);
 
   it("adds the support events switch (0049) in place: an old connection keeps its tokens and has the switch off", async (): Promise<void> => {
     // A database of its own: the connection and its tokens must exist before the migration runs.

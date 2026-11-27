@@ -14,7 +14,7 @@ export function banKey(event: Extract<ActivityEvent, { kind: "ban" }>): string {
   return `ban:${event.platform}:${event.userId}:${event.until ?? "perm"}:${event.bannedAt ?? ""}`;
 }
 
-/** `events` without the support events: while the streamer has them off, the object stores and sends none. */
+/** `events` without the support events: a connection that does not read them stores and sends none. */
 export function withoutSupport(events: readonly ActivityEvent[]): ActivityEvent[] {
   return events.filter((event: ActivityEvent): boolean => !isSupport(event));
 }

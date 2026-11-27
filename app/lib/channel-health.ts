@@ -14,10 +14,11 @@ export interface ChannelView {
     lastEventAt: number | null;
     updatedAt: number;
   } | null;
-  /** Whether the connection reads support events. */
+  /**
+   * Whether the connection reads support events. False without a connection, for a connection whose authorization
+   * has no permission for them, and after the provider refused them.
+   */
   support: boolean;
-  /** The permissions that the provider asks for when the streamer turns support events on. */
-  supportScopes: string[];
 }
 
 /** The body of GET /api/channels. Fields that the panel does not read are dropped. */
@@ -37,20 +38,8 @@ export const channelsResponseSchema: z.ZodType<{ channels: ChannelView[] }> = z.
         })
         .nullable(),
       support: z.boolean(),
-      supportScopes: z.array(z.string().max(200)).max(20),
     }),
   ),
-});
-
-/** The body of POST /api/channels/:platform/support. `url` is the provider page that gives the new permissions. */
-export interface SupportAnswer {
-  url: string | null;
-  support: boolean;
-}
-
-export const supportAnswerSchema: z.ZodType<SupportAnswer> = z.object({
-  url: z.string().min(1).max(2000).nullable(),
-  support: z.boolean(),
 });
 
 /**
@@ -63,6 +52,31 @@ export function channelHealth(channel: ChannelView): ChannelHealth {
   if (channel.connection === null) return "none";
   if (!channel.available) return "unavailable";
   return channel.connection.status === "active" ? "healthy" : "attention";
+}
+
+/**
+ * The status codes of a problem that ends without the owner: the YouTube quota resets, and the feed checks refused
+ * webhooks again. The message of each other problem asks the owner to reconnect.
+ */
+const ENDS_WITHOUT_OWNER: readonly string[] = ["quota_exhausted", "webhooks_rejected"];
+
+/**
+ * What the status icon of a channel card shows. `repairing` is a problem that ends without the owner. `problem`
+ * needs the owner. `support_missing` is a connection that delivers chat and reads no support events: the owner
+ * reconnects it one time. It is a state of the card only. It is not a health problem (`channelHealth`), so the
+ * page tells no news about it and the Live section shows the channel as connected.
+ */
+export type ChannelCardState = "healthy" | "repairing" | "problem" | "support_missing";
+
+/** The state of the status icon, or null for a card without one: no connection, or a platform that is not offered. */
+export function channelCardState(channel: ChannelView): ChannelCardState | null {
+  const health: ChannelHealth = channelHealth(channel);
+  if (channel.connection === null || health === "none" || health === "unavailable") return null;
+  if (health === "attention") {
+    const { status, code } = channel.connection;
+    return status === "error" && code !== null && ENDS_WITHOUT_OWNER.includes(code) ? "repairing" : "problem";
+  }
+  return channel.support ? "healthy" : "support_missing";
 }
 
 /** True when at least one connected platform delivers chat. */

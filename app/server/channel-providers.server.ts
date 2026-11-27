@@ -78,7 +78,7 @@ export const PROVIDERS: Readonly<Record<ActivityPlatform, Provider>> = {
   },
 };
 
-/** The scopes that only support events need. The server asks for them when the streamer turns support events on. */
+/** The scopes that only support events need. Each connect asks for them: without them a connection reads chat only. */
 export const SUPPORT_SCOPES: Readonly<Record<ActivityPlatform, readonly string[]>> = {
   twitch: ["moderator:read:followers", "channel:read:subscriptions", "bits:read"],
   youtube: [],
@@ -111,10 +111,10 @@ export function configuredPlatform(env: AppEnv, platform: ActivityPlatform): boo
 export function authorizationUrl(
   env: AppEnv,
   platform: ActivityPlatform,
-  input: { state: string; redirectUri: string; codeChallenge: string; support: boolean },
+  input: { state: string; redirectUri: string; codeChallenge: string },
 ): string {
   const provider = PROVIDERS[platform];
-  const scopes: readonly string[] = input.support ? [...provider.scopes, ...SUPPORT_SCOPES[platform]] : provider.scopes;
+  const scopes: readonly string[] = [...provider.scopes, ...SUPPORT_SCOPES[platform]];
   const url = new URL(provider.authorizeUrl);
   url.search = new URLSearchParams({
     client_id: providerClient(env, platform).id,
@@ -524,7 +524,7 @@ const CHAT_ONLY: SubscribeScope = { only: null, support: false };
  * broadcaster's own token. YouTube has no push API: the ingest object polls its live chat instead.
  *
  * The types of chat are made first. A refusal of a type that only support events need throws nothing: the result
- * has `refused`, and the caller turns the support events of the connection off.
+ * has `refused`, and the caller clears `support_events` of the connection.
  */
 export async function subscribe(
   env: AppEnv,

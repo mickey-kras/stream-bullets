@@ -97,10 +97,9 @@ English also shows `error` for `step_up_required` and `other_key_required`.
 
 | Endpoint | Body | Response |
 |---|---|---|
-| `GET /api/channels` | none | `{channels: [{platform, available, connection, capabilities, support, supportScopes}]}` for the owner's page. `connection` is null or `{displayName, status, code, connectedAt, lastEventAt, updatedAt}`. `updatedAt` is when the status or its code last changed. `support` is true when the connection reads support events. `supportScopes` lists the permissions that the provider asks for when the streamer turns support events on. It never holds tokens or the scopes that a connection has. |
-| `POST /api/channels/:platform/connect` | `{}` | `{authorizeUrl}`. The browser then goes to the provider. |
-| `POST /api/channels/:platform/reconnect` | `{}` | `{authorizeUrl}`. The connection row stays, and so does its choice for support events. |
-| `POST /api/channels/:platform/support` | `{on: boolean}` | `{url, support}`. It turns the support events of the connection on or off. `url` is null when the change is complete. Then `support` is the new state. It stays false when the provider refuses the subscriptions of the support events. With `on: true` for a Twitch connection without the support scopes, `url` is the address of the provider and `support` is false. The browser then goes to the provider, and the callback turns the support events on. `404` when the page has no connection for the platform. |
+| `GET /api/channels` | none | `{channels: [{platform, available, connection, capabilities, support}]}` for the owner's page. `connection` is null or `{displayName, status, code, connectedAt, lastEventAt, updatedAt}`. `updatedAt` is when the status or its code last changed. `support` is true when the connection reads support events. It is false without a connection, without the scopes for the support events, and after the provider refused them. The answer never holds tokens or the scopes that a connection has. |
+| `POST /api/channels/:platform/connect` | `{}` | `{authorizeUrl}`. The browser then goes to the provider. The address asks for the scopes of chat and of support events: for Twitch, three more scopes. |
+| `POST /api/channels/:platform/reconnect` | `{}` | `{authorizeUrl}`. The connection row stays. The address asks for the same scopes as a connect. |
 | `DELETE /api/channels/:platform` | none, or `{}` | `{revoked}`: true when the provider confirmed the revoke. `404` when the page has no connection for the platform. `409` (`channel_conflict`) when the row changed during the disconnect. A reconnect replaced it, or another disconnect or the expiry job removed it. |
 | `GET /channels/callback/:platform` | provider query | A redirect to `/tools?view=channels&channel=<platform>&result=<code>`. |
 | `GET /api/activity/:handle` | WebSocket upgrade, optional `key`, optional `characters=1` | The activity feed. Only the current overlay key or the signed-in owner can connect. With `characters=1` the socket also gets the character playground frames. `400` for another `characters` value or another parameter. `426` without a WebSocket upgrade, `403` without a key or owner session. A wrong or revoked key gets a socket that the server closes at once with the code `4403`. `404` for a missing or suspended page, `503` while the `CHANNELS_OFF` secret exists. |
@@ -109,12 +108,13 @@ English also shows `error` for `step_up_required` and `other_key_required`.
 - `:platform` is `twitch`, `youtube` or `kick`.
 - The writes need a session from the last 10 minutes. Otherwise they answer `403` with the code
   `reauth_required`. They count against the content quota of 6 changes each minute.
-- A connect and a change of the support events answer `423` for a frozen or suspended page. A disconnect works on a frozen page too.
+- A connect and a reconnect answer `423` for a frozen or suspended page. A disconnect works on a frozen page too.
 - A platform without credentials answers `503` with the code `platform_unavailable`.
 - The callback result is `connected`, `denied`, `state_invalid`, `session_mismatch`, `channel_taken`,
   `disconnect_first`, `scope_missing`, `support_denied` or `failed`.
 - `support_denied` means that the channel reads chat. The provider did not give the permissions for
-  support events, so they stay off.
+  support events, or it refused their subscriptions. A reconnect tries again.
+- No route turns support events on or off. Each connected channel reads them.
 - See [Channel connections and activity](channel-connections.md) for the event contract and the limits.
 
 ## Overlay layers

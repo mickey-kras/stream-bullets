@@ -602,45 +602,53 @@ describe("ChannelIngest support events", (): void => {
     return { events: parsed.events, since: parsed.since };
   }
 
-  /** The streamer changes the switch: the API writes the choice and tells the object. */
-  async function setSupport(platform: string, on: boolean): Promise<void> {
-    await env.DB.prepare("UPDATE channel_connections SET support_events=? WHERE platform=?").bind(on ? 1 : 0, platform).run();
-    expect((await post("support", platform)).status).toBe(200);
+  /**
+   * The owner reconnects the channel: the callback writes whether the new authorization has the scopes of support
+   * events (`reads`) and tells the object.
+   */
+  async function reconnect(platform: string, reads: boolean): Promise<void> {
+    await env.DB.prepare("UPDATE channel_connections SET support_events=? WHERE platform=?").bind(reads ? 1 : 0, platform).run();
+    expect(await (await post("connect", platform)).json()).toEqual({ status: "active", code: null });
   }
 
   function stored(): string[] {
     return state().storage.sql.exec<{ id: string }>("SELECT id FROM support ORDER BY seq").toArray().map((row) => row.id);
   }
 
-  it("accepts a support event only while the streamer has support events on, and the chat of the delivery goes on", async (): Promise<void> => {
+  it("accepts a support event only for a connection that reads support events, and the chat of the delivery goes on", async (): Promise<void> => {
+    // A Twitch channel from before the support events: its authorization has no scopes for them.
     await addConnection("twitch");
     vi.spyOn(console, "warn").mockImplementation((): void => undefined);
     const socket = await listen();
+    // A reconnect also sends the status of the channel: this test reads the chat and the support events.
+    const received = (): ActivityEvent[] => sent(socket).filter((event) => event.kind !== "status");
     await deliver("d1", [chat("m1"), follow("f1")]);
-    expect(sent(socket).map((event) => event.kind)).toEqual(["chat"]);
+    expect(received().map((event) => event.kind)).toEqual(["chat"]);
     // A dropped event leaves nothing: no stored event and no id.
     expect(stored()).toEqual([]);
     expect(state().storage.sql.exec("SELECT key FROM seen WHERE key LIKE 'support:%'").toArray()).toEqual([]);
     // A delivery with nothing but a dropped support event is not remembered either.
     await deliver("d2", [follow("f2")]);
     expect(state().storage.sql.exec("SELECT key FROM seen WHERE key = 'delivery:twitch:d2'").toArray()).toEqual([]);
-    await setSupport("twitch", true);
+    // The owner reconnects one time and gives the scopes.
+    await reconnect("twitch", true);
     await deliver("d3", [chat("m3"), follow("f3")]);
-    expect(sent(socket).map((event) => [event.kind, "id" in event ? event.id : ""])).toEqual([
+    expect(received().map((event) => [event.kind, "id" in event ? event.id : ""])).toEqual([
       ["chat", "twitch:m1"],
       ["chat", "twitch:m3"],
       ["follow", "twitch:f3"],
     ]);
-    expect(sent(socket)[2]).toMatchObject({ deliveryId: "f3", platform: "twitch", amount: null, replay: false });
+    expect(received()[2]).toMatchObject({ deliveryId: "f3", platform: "twitch", amount: null, replay: false });
     expect(stored()).toEqual(["twitch:f3"]);
-    await setSupport("twitch", false);
+    // A reconnect without the scopes: chat goes on, and the support events stop.
+    await reconnect("twitch", false);
     await deliver("d4", [follow("f4"), chat("m4")]);
-    expect(sent(socket).map((event) => event.kind)).toEqual(["chat", "chat", "follow", "chat"]);
+    expect(received().map((event) => event.kind)).toEqual(["chat", "chat", "follow", "chat"]);
     // A direct tip and an event of another platform never come in a provider delivery.
-    await setSupport("twitch", true);
+    await reconnect("twitch", true);
     const tip = { ...cheer("t1", 5_000_000), kind: "tip", platform: "direct", id: "direct:t1", currency: "USD" } as ActivityEvent;
     await deliver("d5", [tip, follow("f5", "kick")]);
-    expect(sent(socket)).toHaveLength(4);
+    expect(received()).toHaveLength(4);
   });
 
   it("counts a support event one time, however often the delivery or the event comes again", async (): Promise<void> => {
@@ -2037,7 +2045,7 @@ describe("ChannelIngest YouTube polling", (): void => {
     expect(state().storage.alarm).toBeNull();
   });
 
-  it("reads YouTube support events from the chat page only while the switch is on, with the same requests and quota", async (): Promise<void> => {
+  it("reads YouTube support events from the chat page only for a connection that reads them, with the same requests and quota", async (): Promise<void> => {
     /** One run of a new object: the broadcast check, the page of the fixture, and the same page again. */
     async function run(support: boolean): Promise<{ events: ActivityEvent[]; calls: string[]; units: unknown; replays: ActivityEvent[] }> {
       await env.DB.batch([env.DB.prepare("DELETE FROM channel_connections"), env.DB.prepare("DELETE FROM app_rate_limits")]);
@@ -2079,40 +2087,6 @@ describe("ChannelIngest YouTube polling", (): void => {
     expect(on.units).toBe(12);
     expect(off.replays.filter(isSupport)).toEqual([]);
     expect(on.replays.filter(isSupport).map((event) => [event.id, event.replay])).toEqual(support.map((event) => [event.id, true]));
-  });
-
-  it("uses the support choice of now for a YouTube page that came while the streamer changed the switch", async (): Promise<void> => {
-    await addConnection("youtube", { support: true });
-    const socket = await listen();
-    await poll();
-    const real = globalThis.fetch;
-    /** The next page of chat comes while the streamer sets the switch to `on`. */
-    async function pageDuringChange(on: boolean): Promise<void> {
-      let changed = false;
-      vi.stubGlobal("fetch", async (input: string, init?: RequestInit): Promise<Response> => {
-        const response = await real(input, init);
-        if (!changed && new URL(input).pathname.endsWith("/liveChat/messages")) {
-          changed = true;
-          // The API writes the choice and tells the object.
-          await env.DB.prepare("UPDATE channel_connections SET support_events=? WHERE platform='youtube'").bind(on ? 1 : 0).run();
-          await post("support", "youtube");
-        }
-        return response;
-      });
-      fake.chatPages = [{ items: youtubeFixture.items, nextPageToken: on ? "p2" : "p1", pollingIntervalMillis: 100 }];
-      await poll();
-      vi.stubGlobal("fetch", real);
-    }
-    const kinds = (): string[] => socket.ofType<{ event: ActivityEvent }>("event").map((message) => message.event.kind);
-    const stored = (): unknown[] => state().storage.sql.exec("SELECT id FROM support").toArray();
-    // Off during the page: the page gives its chat, and no support event is stored or sent.
-    await pageDuringChange(false);
-    expect(kinds()).toEqual(["chat"]);
-    expect(stored()).toEqual([]);
-    // On during the page: the support events of that page are not lost.
-    await pageDuringChange(true);
-    expect(kinds()).toEqual(["chat", "super_chat", "super_sticker", "membership", "membership", "gift"]);
-    expect(stored()).toHaveLength(5);
   });
 
   it("starts polling on connect and keeps a pending wait across a reconnect", async (): Promise<void> => {
