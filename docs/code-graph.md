@@ -34,10 +34,10 @@ git merge origin/main
 
 ## Checks
 
-CI rebuilds the graph and rejects differences. Run the same check locally:
+CI rebuilds the graph and rejects differences. Run the same check locally with the interpreter of the clone setup:
 
 ```sh
-python .github/graphify/snapshot.py --check
+"$(git config graphify.python)" .github/graphify/snapshot.py --check
 ```
 
 For a controlled commit without the hook, set `GRAPHIFY_SKIP_HOOK=1`.
@@ -59,10 +59,10 @@ It adds headings, document links, and code-symbol references without model infer
 Excluded: assets, translations, dependencies, build output, SQL migrations, CI tools, and documents under `generated`, `archive`, or `changelog`.
 The TypeScript schema defines the database structure.
 
-Use focused queries:
+Use focused queries. The setup does not activate its virtual environment, so call its `graphify`:
 
 ```sh
-graphify query 'How are images uploaded?' --graph graphify-out/graph.json --budget 2000
+~/.local/share/stream-bullets-graphify/bin/graphify query 'How are images uploaded?' --graph graphify-out/graph.json --budget 2000
 ```
 
 Check the source when graph edges are absent or unclear. Graphs do not prove behavior.

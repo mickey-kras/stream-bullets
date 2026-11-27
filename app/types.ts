@@ -235,6 +235,9 @@ export interface Comment {
   translation?: { text: string; mentions: CommentMention[]; from?: Locale } | null;
   // The "Answered" mark of the page owner; absent when the comment has none.
   answer?: CommentAnswer;
+  // A reply of a thread: the name of the author of its parent, empty when the parent was removed. The parent may
+  // not be among the loaded replies.
+  parentAuthor?: string;
 }
 
 export interface CommentAnswer {
@@ -256,8 +259,12 @@ export interface AnsweredStream {
 }
 
 // Top-level comment with replies flattened oldest first (`?view=thread`).
+// A root comment with a window of its replies, oldest first: `earlierReplies` older ones come before `replies`, and
+// the rest of `replyCount` after them. `GET /api/comments/:id/replies` loads more.
 export interface CommentThread extends Comment {
   replies: Comment[];
+  replyCount: number;
+  earlierReplies: number;
 }
 
 export interface BoardSnapshot {
@@ -430,8 +437,10 @@ export interface StreamEvent {
   // first). Null: none.
   category: { name: string; cover: string | null } | null;
   image: StreamImage | null;
-  // Last change; shared by download and feed DTSTAMP/SEQUENCE.
+  // Last change: the DTSTAMP of the download and the feed.
   updatedAt: number;
+  // iCalendar SEQUENCE: each update raises it by one.
+  sequence: number;
   // The text in the language of the reader. Null: no translation is necessary. Absent: not translated yet.
   translation?: { title: string; notes: string } | null;
 }

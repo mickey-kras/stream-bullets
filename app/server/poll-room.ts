@@ -17,6 +17,8 @@ import { LIVE_POLLS_SQL, livePolls, optionsFromJson, overlaySnapshot, type PollR
 import { OVERLAY_COLUMNS, overlayPublic, overlayValue, type OverlayRow } from "./overlay-state";
 import { validateTestEnvironment } from "./test-environment-config";
 import { detached } from "../lib/detached";
+import { MessageGate } from "./message-gate";
+import type { BattleRow, JournalRow, TapRow } from "./mash-sql";
 import { ENTRY_ID, tapMessage, type TapMessage } from "./tap-message";
 import {
   leaseOf,
@@ -92,18 +94,6 @@ interface Battle {
   lastFlush: number;
 }
 
-type BattleRow = {
-  duration_s: number;
-  phase: MashPhase;
-  starts_at: number | null;
-  ends_at: number | null;
-  options: string;
-  status: string;
-};
-
-type TapRow = { user_id: string; side: number; taps: number; assisted_taps: number };
-type JournalRow = { user_id: string; side: number; taps: number; assisted: number };
-
 // Coalesce burst refreshes before reading D1.
 const REFRESH_COALESCE_MS = 250;
 
@@ -122,6 +112,7 @@ export class PollRoom extends DurableObject<AppEnv> {
   private readonly notLive = new Map<string, number>();
   // One bucket per account, shared by all of its sockets.
   private readonly buckets = new Map<string, TokenBucket>();
+  private readonly messages = new MessageGate();
   private ticker: ReturnType<typeof setInterval> | undefined;
   // Requests awaiting a refresh started after their arrival.
   private readonly refreshWaiters: { resolve: () => void; reject: (error: unknown) => void }[] = [];
@@ -397,11 +388,13 @@ export class PollRoom extends DurableObject<AppEnv> {
   }
 
   async webSocketMessage(socket: WebSocket, message: string | ArrayBuffer): Promise<void> {
+    if (!this.messages.enter()) return;
     const pending: Promise<void> = this.handleWebSocketMessage(socket, message);
     this.pendingHandlers.add(pending);
     try {
       await pending;
     } finally {
+      this.messages.leave();
       this.pendingHandlers.delete(pending);
     }
   }
@@ -464,6 +457,8 @@ export class PollRoom extends DurableObject<AppEnv> {
     const lease = leaseOf(socket);
     if (!lease.userId) return { type: "mash-denied", id: message.id, reason: "sign-in" };
     const userId = lease.userId;
+    // Before the battle and side lookups: a message over the budget costs no D1 read and gets no answer.
+    if (!this.messages.admit(userId, Date.now())) return null;
     const battle = await this.battleFor(message.id);
     if (!battle || !battle.writable || battle.finishing || mashPhaseAt(battle, Date.now()) !== "live")
       return { type: "mash-denied", id: message.id, reason: "closed" };
@@ -946,6 +941,7 @@ export class PollRoom extends DurableObject<AppEnv> {
     const signedIn = new Set(this.activeSockets().map((socket: WebSocket): string | null => leaseOf(socket).userId));
     for (const [userId, bucket] of this.buckets)
       if (!signedIn.has(userId) && now - bucket.at >= 1_000) this.buckets.delete(userId);
+    this.messages.prune(signedIn, now);
   }
 
   // Closes sockets whose lease ran out, and sockets that have not pinged for IDLE_TIMEOUT_MS.

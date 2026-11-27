@@ -457,6 +457,25 @@ describe("one entry for one stream", (): void => {
     expect((await events()).map((event: StreamEvent) => event.title)).toEqual(["My title"]);
   });
 
+  it("keeps a stream that the owner cancelled when its last source leaves and when it comes back", async (): Promise<void> => {
+    fake.twitchSchedule = [schedule([segment("s1", "Show", now + 2 * day)])];
+    await importPageSchedule(env, page, now);
+    const [first] = await events();
+    await patchEvent(env, "owner", first.id, { action: "cancel" });
+    // The cancellation is owner content: the entry no longer belongs to the import.
+    expect(await imported(first.id)).toBe(0);
+    // The final source leaves the platform: the entry and its cancellation stay.
+    fake.twitchSchedule = [schedule([])];
+    await importPageSchedule(env, page, now + 60_000);
+    expect((await events()).map((event: StreamEvent) => [event.id, event.status])).toEqual([[first.id, "cancelled"]]);
+    // The stream comes back on the platform: it links to the cancelled entry and adds no second one.
+    fake.twitchSchedule = [schedule([segment("s1", "Show again", now + 2 * day)])];
+    await importPageSchedule(env, page, now + 120_000);
+    expect((await events()).map((event: StreamEvent) => [event.id, event.status, event.title])).toEqual([
+      [first.id, "cancelled", "Show"],
+    ]);
+  });
+
   it("removes a cancelled stream, keeps one that starts within the hour, and does not add a deleted one again", async (): Promise<void> => {
     fake.twitchSchedule = [
       schedule([

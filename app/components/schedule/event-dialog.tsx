@@ -28,6 +28,7 @@ export function downloadEvent(event: StreamEvent, name: string, pageUrl: string)
         url: event.url,
         cancelled: event.status === "cancelled",
         updatedAt: event.updatedAt,
+        sequence: event.sequence,
       },
     ],
     { pageUrl },

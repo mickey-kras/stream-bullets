@@ -35,6 +35,13 @@ UPDATE `stream_event_sources`
 SET `event_id` = (SELECT m.`keeper` FROM `merge_0044` m WHERE m.`dup` = `stream_event_sources`.`event_id`)
 WHERE `event_id` IN (SELECT `dup` FROM `merge_0044`);
 --> statement-breakpoint
+-- An answered mark follows the stream of its entry: the keeper, before ON DELETE SET NULL detaches it. A database
+-- that ran this migration before this statement has detached marks; the map is gone, so only a copy from before the
+-- migration can show their stream.
+UPDATE `comment_answers`
+SET `event_id` = (SELECT m.`keeper` FROM `merge_0044` m WHERE m.`dup` = `comment_answers`.`event_id`)
+WHERE `event_id` IN (SELECT `dup` FROM `merge_0044`);
+--> statement-breakpoint
 DELETE FROM `stream_events` WHERE `id` IN (SELECT `dup` FROM `merge_0044`);
 --> statement-breakpoint
 DROP TABLE `merge_0044`;

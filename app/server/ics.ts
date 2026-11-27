@@ -9,6 +9,8 @@ export interface IcsEvent {
   url: string;
   cancelled: boolean;
   updatedAt: number;
+  // `stream_events.sequence`: each update of the stream raises it by one.
+  sequence: number;
 }
 
 export const ICS_UID_DOMAIN = "streambullets.com";
@@ -26,15 +28,6 @@ export function escapeText(value: string): string {
 // Strip controls from non-TEXT values; CR/LF could inject calendar properties.
 export function plainValue(value: string): string {
   return value.replaceAll(/\p{Cc}/gu, "");
-}
-
-// Count SEQUENCE seconds from this epoch to fit a 32-bit integer for decades.
-export const SEQUENCE_EPOCH = Date.UTC(2026, 0, 1);
-
-// RFC 5545 3.8.7.4 revision from `updated_at`. Updates/cancellations must increase it or clients may ignore
-// them.
-export function icsSequence(updatedAt: number): number {
-  return Math.max(0, Math.floor((updatedAt - SEQUENCE_EPOCH) / 1000));
 }
 
 const encoder = new TextEncoder();
@@ -91,7 +84,8 @@ export function buildCalendar(
       "BEGIN:VEVENT",
       `UID:${plainValue(event.id)}@${ICS_UID_DOMAIN}`,
       `DTSTAMP:${icsTime(Math.min(event.updatedAt || now, now))}`,
-      `SEQUENCE:${icsSequence(event.updatedAt)}`,
+      // RFC 5545 3.8.7.4: an update or a cancellation must raise it, or a client can ignore the change.
+      `SEQUENCE:${event.sequence}`,
       `DTSTART:${icsTime(event.startsAt)}`,
       `DTEND:${icsTime(event.startsAt + event.durationMin * 60_000)}`,
       `SUMMARY:${escapeText(event.title)}`,

@@ -33,6 +33,7 @@ export * from "./auth-schema";
 export * from "./comment-revisions-schema";
 export * from "./comment-answers-schema";
 export * from "./stream-sources-schema";
+export * from "./image-schema";
 
 // Keep SQLite CHECK values aligned with the TypeScript enum.
 function enumCheck(name: string, column: AnySQLiteColumn, values: readonly (string | number)[]) {
@@ -587,6 +588,8 @@ export const streamEvents = sqliteTable(
     imported: integer("imported", { mode: "boolean" }).notNull().default(false),
     createdAt: integer("created_at").notNull(),
     updatedAt: integer("updated_at").notNull(),
+    // The iCalendar SEQUENCE (RFC 5545 3.8.7.4): each update adds one, so two changes in one second still differ.
+    sequence: integer("sequence").notNull().default(0),
   },
   (table) => [
     index("stream_events_schedule_idx").on(table.streamerId, table.startsAt),
@@ -892,21 +895,6 @@ export const aiInterestDaily = sqliteTable(
   (table) => [
     check("ai_interest_daily_day_check", sql`${table.day} GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'`),
     check("ai_interest_daily_count_check", sql`${table.up} >= 0 AND ${table.down} >= 0`),
-  ],
-);
-
-export const imageVersions = sqliteTable(
-  "image_versions",
-  {
-    ownerId: text("owner_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-    kind: text("kind").notNull(),
-    version: text("version").notNull(),
-  },
-  (table) => [
-    primaryKey({ columns: [table.ownerId, table.kind] }),
-    check("image_versions_kind_check", sql`${table.kind} IN ('avatar', 'background', 'logo')`),
   ],
 );
 

@@ -32,12 +32,15 @@ export function useNarrow(): boolean {
   );
 }
 
-export const platformLabel: Record<StreamPlatform, string> = {
+// Brand names stay as they are; "Other" is read in the language of the reader each time.
+export const platformLabel: Readonly<Record<StreamPlatform, string>> = {
   twitch: "Twitch",
   youtube: "YouTube",
   kick: "Kick",
   tiktok: "TikTok",
-  other: "Other",
+  get other(): string {
+    return t("schedule.platform.other");
+  },
 };
 
 // Each platform of the stream, the owner's own first.

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { MASH_PHASES } from "../../db/enums";
-import type { MashState } from "../types";
+import type { MashPhase, MashState } from "../types";
 
 // Exclude finished Mash Battles from Auto: entries retain NULL `ends_at` and `revealed=0`, so inspect
 // `entry_mash`. Setup/countdown/live count as open; `now` is SQL milliseconds. `entry` is the entries alias.
@@ -42,3 +42,16 @@ export function mashValue(raw: string | null | undefined, sides: number): MashSt
   );
   return { ...parsed, totals };
 }
+
+// Rows that the live room reads for a battle, its stored taps and its tap journal.
+export type BattleRow = {
+  duration_s: number;
+  phase: MashPhase;
+  starts_at: number | null;
+  ends_at: number | null;
+  options: string;
+  status: string;
+};
+
+export type TapRow = { user_id: string; side: number; taps: number; assisted_taps: number };
+export type JournalRow = { user_id: string; side: number; taps: number; assisted: number };

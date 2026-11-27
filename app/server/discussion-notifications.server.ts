@@ -230,3 +230,33 @@ export async function markNotification(env: AppEnv, viewerId: string, id: string
     .run();
   if (!result.meta.changes) throw new HttpError(404, "Notification not found.");
 }
+
+// The account's notification settings and its own inbox for the account export: which comment, when, and whether it
+// was read. The text and the author of the comment are other people's data.
+export interface NotificationExport {
+  preferences: { replies: boolean; mentions: boolean };
+  items: { id: string; kind: "reply" | "mention"; commentId: string; createdAt: string; read: boolean }[];
+}
+
+export async function exportNotifications(env: AppEnv, userId: string): Promise<NotificationExport> {
+  const [preferences, items] = await env.DB.batch([
+    env.DB.prepare("SELECT replies,mentions FROM notification_preferences WHERE user_id=?").bind(userId),
+    env.DB.prepare(
+      "SELECT id,kind,comment_id,created_at,read FROM notifications WHERE user_id=? ORDER BY created_at,id",
+    ).bind(userId),
+  ]);
+  const saved = preferences.results[0] as { replies: number; mentions: number } | undefined;
+  return {
+    // Without a stored row both kinds are on.
+    preferences: { replies: (saved?.replies ?? 1) === 1, mentions: (saved?.mentions ?? 1) === 1 },
+    items: (
+      items.results as { id: string; kind: "reply" | "mention"; comment_id: string; created_at: number; read: number }[]
+    ).map((row) => ({
+      id: row.id,
+      kind: row.kind,
+      commentId: row.comment_id,
+      createdAt: new Date(row.created_at).toISOString(),
+      read: row.read === 1,
+    })),
+  };
+}

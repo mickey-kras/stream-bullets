@@ -143,7 +143,7 @@ export function Station({ onSign }: Readonly<{ onSign?: (index: number) => void 
               strokeLinecap="round"
             />
           </svg>
-          Tilt to look around
+          {t("landing.tilt")}
         </button>
       )}
       {status === "unavailable" && (
