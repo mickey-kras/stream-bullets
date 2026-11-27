@@ -1400,6 +1400,7 @@
   "tools.live.obsUnknown": "L’état d’OBS s’affiche quand les mises à jour en direct sont connectées.",
   "tools.live.openChannels": "Ouvrir Chaînes",
   "tools.live.openOverlay": "Ouvrir Overlay",
+  "tools.live.editOverlay": "Modifier l’overlay",
   "tools.live.preview": "Ce qu’OBS affiche",
   "tools.live.previewNote": "Les changements arrivent dans OBS tout de suite.",
   "tools.live.previewEmpty": "Aucun calque n’est en direct.",

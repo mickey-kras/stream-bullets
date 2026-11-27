@@ -39,6 +39,8 @@ html, body { min-width: 320px; }
   body { --frame-band: 34px; --frame-band-rag: 10px; --frame-pad-x: 10px; }
 }
 .icon-button { display: inline-grid; place-items: center; width: var(--control-size); height: var(--control-size); min-height: var(--control-size); padding: 0; border: 1px solid var(--input-border); border-radius: var(--radius-control); background: var(--c-122b31); }
+/* An icon button that is a link (IconLink) reacts to the pointer as a button does. */
+a.icon-button:hover { border-color: var(--gold); background-color: var(--btn-hover); }
 @media (max-width:43.75em) {
   .icon-button { width: 44px; height: 44px; }
 }

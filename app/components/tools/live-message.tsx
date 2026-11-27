@@ -9,7 +9,8 @@ import { LivePart, NotOnGrid, placed } from "./live-part";
 
 /**
  * The message banner: its text, its style, and its place on air. The button saves the text and puts the banner on
- * stream in one step. The text is a draft until then: viewers do not get it.
+ * stream in one step. The text is a draft until then: viewers do not get it. The button is at the end of its row, at
+ * the width of the buttons that feature a topic.
  */
 export function LiveMessage({
   state,
@@ -63,28 +64,28 @@ export function LiveMessage({
           </div>
         </fieldset>
         {placed(layers, "message") ? (
-          <div className="tl-actions">
+          <div className="tl-actions tl-air-row">
             <span className="tl-state" data-on-air={onAir || undefined}>
               {t(onAir ? "tools.live.onAir" : "tools.live.offAir")}
             </span>
             <button
               type="submit"
-              className="small-button"
+              className="tl-action"
               disabled={busy || text.trim() === "" || (onAir && !changed)}
               data-live-message-show
             >
-              <Icon name="megaphone" size={16} />
+              <Icon name="megaphone" size={18} />
               {t(onAir ? "tools.live.message.update" : "tools.live.message.put")}
             </button>
             {onAir && (
               <button
                 type="button"
-                className="small-button"
+                className="tl-action"
                 disabled={busy}
                 data-live-message-off
                 onClick={() => void send({ action: "layers", items: { message: { enabled: false } } })}
               >
-                <Icon name="stop" size={16} />
+                <Icon name="stop" size={18} />
                 {t("tools.live.takeOff")}
               </button>
             )}

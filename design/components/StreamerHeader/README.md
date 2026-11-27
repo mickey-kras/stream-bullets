@@ -8,6 +8,8 @@ The owner of the page also gets the **Tools** tab. It opens Streamer tools. Set 
 On phones, the tabs move to a second row and show only icons.
 
 Set `live` to show the live pill. A `ticker` text adds the on-air strip below the header.
+On phones, the live pill is below the name of the streamer. The header does not become higher.
+
 Each link has an `href`. By default, the paths come from `handle`. Use `hrefFor` to change them.
 `HeaderSuggestButton` is the gold action of the official StreamBullets page.
 
