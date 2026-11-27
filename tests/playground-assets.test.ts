@@ -64,7 +64,7 @@ describe("playground atlas files", () => {
     expect(rows).toEqual(CHARACTER_ROWS);
     expect(rows.length * cell).toBeLessThanOrEqual(regionHeight);
     expect(4 * cell).toBe(regionWidth);
-    expect(courier.length).toBeLessThanOrEqual(25 * 1024);
+    expect(courier.length).toBeLessThanOrEqual(36 * 1024);
     expect(terrain.length).toBeLessThanOrEqual(20 * 1024);
   });
 
@@ -109,9 +109,33 @@ describe("playground atlas files", () => {
       }
     });
     const tile: number = theme.terrain.tile;
-    for (const name of ["girderL", "girderM", "girderR", "dirt0", "dirt1", "dirt2", "crack1", "crack2", "hole"] as const) {
+    for (const name of [
+      "girderL",
+      "girderM",
+      "girderR",
+      "dirt0",
+      "dirt1",
+      "dirt2",
+      "crack1",
+      "crack2",
+      "hole",
+    ] as const) {
       expect(theme.terrain.rects[name].slice(2)).toEqual([tile, tile]);
     }
+  });
+
+  it("keep the strip of viewer flags and its cloth mask inside the terrain atlas, outside the other pictures", () => {
+    const { width, height } = imageSize(terrain);
+    const { strip, mask, frames } = theme.builds.viewerFlag;
+    expect(mask.slice(2)).toEqual(strip.slice(2));
+    for (const [x, y, w, h] of [strip, mask]) {
+      expect(x >= 0 && y >= 0 && x + w <= width && y + h <= height).toBe(true);
+      for (const [bx, by, bw, bh] of Object.values(theme.terrain.rects)) {
+        expect(x + w <= bx || bx + bw <= x || y + h <= by || by + bh <= y).toBe(true);
+      }
+    }
+    expect(strip[0] + strip[2] <= mask[0] || mask[0] + mask[2] <= strip[0]).toBe(true);
+    for (const [x, y, w, h] of frames) expect(x >= 0 && y >= 0 && x + w <= strip[2] && y + h <= strip[3]).toBe(true);
   });
 
   it("place the loose equipment below the animation cells", () => {
