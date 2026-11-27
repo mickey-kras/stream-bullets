@@ -13,6 +13,7 @@ export default [
   route("privacy", "routes/privacy.tsx"),
   route("terms", "routes/terms.tsx"),
   route("ai", "routes/ai.tsx"),
+  route("commands", "routes/commands.tsx"),
   route("api/auth/*", "routes/auth.ts"),
   route("api/*", "routes/api.ts"),
   // Prevent ":handle/overlay" from matching /api/overlay.

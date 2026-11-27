@@ -38,6 +38,7 @@ import * as legacyControlRoute from "../app/routes/overlay-control";
 import * as directoryRoute from "../app/routes/streamers";
 import * as signInRoute from "../app/routes/sign-in";
 import * as aiRoute from "../app/routes/ai";
+import * as commandsRoute from "../app/routes/commands";
 import * as rootRoute from "../app/root";
 import * as homeRoute from "../app/routes/home";
 import * as privacyRoute from "../app/routes/privacy";
@@ -1016,6 +1017,7 @@ describe("public route metadata", (): void => {
       [homeRoute.meta, "/"],
       [directoryRoute.meta, "/streamers"],
       [aiRoute.meta, "/ai"],
+      [commandsRoute.meta, "/commands"],
       [privacyRoute.meta, "/privacy"],
       [termsRoute.meta, "/terms"],
     ] as const) {
