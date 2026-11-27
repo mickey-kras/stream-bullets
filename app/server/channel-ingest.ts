@@ -37,6 +37,7 @@ import { sampleChatAt } from "../lib/chat-feed";
 import { validateTestEnvironment } from "./test-environment-config";
 import { EVENTS, ID_SQL, SUPPORT, nextExpiry, type IdTable } from "./channel-ingest-sql";
 import { type PlaygroundHost, playgroundOf } from "./playground-host";
+import { type AlertHost, alertsOf } from "./alert-host";
 import { detached } from "../lib/detached";
 import { keyRevokes, keyTags, outputInBody, socketKey, type SocketKey } from "./room-connections";
 import { NEW_YOUTUBE_STATE, type Connection, type YoutubeState } from "./channel-ingest-state";
@@ -91,6 +92,7 @@ const ROUTES: Readonly<Record<string, "GET" | "POST">> = {
   "/reconcile": "POST",
   "/playground": "POST",
   "/playground-config": "POST",
+  "/alerts": "POST",
   "/test-chat": "POST",
   "/upcoming": "POST",
 };
@@ -123,10 +125,12 @@ export class ChannelIngest extends DurableObject<AppEnv> {
   /** Counts overlay key changes, so a subscribe with the old key that raced the change is refused. */
   private overlayKeys = 0;
   private readonly playground: PlaygroundHost;
+  private readonly alerts: AlertHost;
 
   constructor(ctx: DurableObjectState, env: AppEnv) {
     super(ctx, env);
     this.playground = playgroundOf(ctx, env, () => this.streamerId, this.scheduleAlarm.bind(this));
+    this.alerts = alertsOf(ctx, env, () => this.streamerId, this.scheduleAlarm.bind(this), this.playground);
     this.subscriptions = new ChannelSubscriptions({
       env,
       storage: ctx.storage,
@@ -144,6 +148,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
       ctx.blockConcurrencyWhile(async (): Promise<void> => {
         this.streamerId = await ctx.storage.get<string>("streamerId");
         this.createTables();
+        this.alerts.load();
         await this.playground.load();
       }),
     );
@@ -186,6 +191,8 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (url.pathname === "/page-status") return this.pageStatusChanged();
     if (url.pathname === "/close") return this.closeAll();
     if (url.pathname === "/refresh") return Response.json(await this.refreshRequested());
+    if (url.pathname === "/alerts") return this.alerts.request(request);
+    if (url.pathname === "/playground-config") await this.alerts.layersChanged();
     if (url.pathname.startsWith("/playground")) return this.playground.request(url.pathname, request);
     return this.platformRequest(url.pathname, platform, request);
   }
@@ -231,6 +238,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     const characters = new URL(request.url).searchParams.get("characters") === "1";
     this.ctx.acceptWebSocket(server, characters ? [...tags, "characters"] : tags);
     this.send(server, this.snapshot(Date.now()));
+    await this.alerts.opened(server);
     if (characters) await this.playground.open(server);
     await this.listeningStarted(first, Date.now());
     return new Response(null, { status: 101, webSocket: client });
@@ -290,6 +298,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     this.healthAt.clear();
     this.admissions.reset();
     this.createTables();
+    this.alerts.wipe();
     return new Response(null, { status: 204 });
   }
 
@@ -339,6 +348,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     const message = JSON.stringify({ type: "event", event });
     for (const socket of this.ctx.getWebSockets("activity")) this.send(socket, message);
     this.playground.receive(event);
+    this.alerts.receive(event);
   }
 
   // Ingestion -----------------------------------------------------------------------------------------------------
@@ -425,6 +435,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     this.ingest(admitted, now);
     // The alarm expires stored messages and ids on time, also when no further delivery comes.
     await this.scheduleAlarm(Math.min(now + SNAPSHOT_MAX_AGE_MS + 1, this.playground.wakeAt() ?? Infinity));
+    await this.alerts.wake();
     await this.accepted(platform, connection, now);
     return new Response(null, { status: 204 });
   }
@@ -727,6 +738,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     await this.ctx.storage.delete(`repair:${platform}`);
     EVENTS.dropPlatform(this.ctx.storage.sql, platform);
     SUPPORT.dropPlatform(this.ctx.storage.sql, platform);
+    this.alerts.dropPlatform(platform);
     this.broadcast({ kind: "status", platform, status: "disconnected" });
     return { revoked, unsubscribed };
   }
@@ -781,6 +793,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (wait !== null) await this.ctx.storage.setAlarm(cleanup === null ? now + wait : Math.min(cleanup, now + wait));
     // The playground restarts after an eviction and sets its watchdog, or saves a pending checkpoint.
     await this.playground.alarm();
+    await this.alerts.alarm();
   }
 
   /** One YouTube poll, when one is due. Returns the wait before the next one, or null for none. */

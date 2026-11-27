@@ -1,7 +1,9 @@
 import { z } from "zod";
 import type { AppEnv } from "../../env";
 import type { Streamer } from "../../types";
+import { alertControlSchema } from "../../lib/alert-control";
 import { isStreamerListed } from "../access.server";
+import { controlAlerts } from "../alert-control.server";
 import { consumeMutationQuota, getOwnStreamer, getStreamer, mutateEntry } from "../data.server";
 import { dockKeyMatches, regenerateDockKey } from "../dock-key.server";
 import { HttpError, getOrigin, json, readJson } from "../http.server";
@@ -74,6 +76,14 @@ export const dockRoutes: ApiRoute[] = [
     const { overlay, changed } = await updateOverlay(env, streamer.ownerId, streamer.id, action);
     if (changed) notifyOverlay(env, streamer.id);
     return json({ overlay });
+  }),
+  // POST /api/dock/:handle/alerts {op: status|test|mute|skip|replay, kind?, on?, id?} → {at, muted, current,
+  // waiting, goal}: a control of the alerts from the dock, with the dock key in the header. The dock acts for the
+  // owner: a test and a replay use the write quota of the owner.
+  openWrite("POST", /dock\/([a-z0-9_]{3,30})\/alerts/, async ({ request, env, match }) => {
+    const streamer: Streamer = await dockPage(env, match[1], request);
+    const control = await readJson(request, alertControlSchema);
+    return json(await controlAlerts(env, streamer.id, streamer.ownerId, control));
   }),
   // POST /api/dock/:handle/poll {id} → {id}: closes the voting of a poll of the page.
   openWrite("POST", /dock\/([a-z0-9_]{3,30})\/poll/, async ({ request, env, match }) => {

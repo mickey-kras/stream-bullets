@@ -238,7 +238,12 @@ describe("characters sockets", (): void => {
   it("start the playground: the snapshot, a full frame, then a tick frame every 100 ms", async (): Promise<void> => {
     const socket = await listen();
     expect(state().tagsOf(socket)).toEqual(["activity", "owner", "characters"]);
-    expect(socket.messages<{ type: string }>().map((message) => message.type)).toEqual(["snapshot", "playground"]);
+    // The state of the alerts comes after the snapshot, before the first frame.
+    expect(socket.messages<{ type: string }>().map((message) => message.type)).toEqual([
+      "snapshot",
+      "alerts",
+      "playground",
+    ]);
     const [full] = frames(socket);
     expect(full).toMatchObject({ full: true, tick: 0, chars: [], roster: [], mode: { paused: false, test: false } });
     // The characters cell is 32 x 4: a world of 640 x 80 logical px.
@@ -293,7 +298,7 @@ describe("characters sockets", (): void => {
     await deliver([chat("m1", "u1", "!jump")]);
     advance(FRAME_MS * 5);
     expect(state().tagsOf(socket)).toEqual(["activity", "owner"]);
-    expect(socket.messages<{ type: string }>().map((message) => message.type)).toEqual(["snapshot", "event"]);
+    expect(socket.messages<{ type: string }>().map((message) => message.type)).toEqual(["snapshot", "alerts", "event"]);
     expect(frames(socket)).toEqual([]);
     expect(vi.getTimerCount()).toBe(0);
     expect(state().storage.values.has(PLAYGROUND_KEY)).toBe(false);
@@ -834,7 +839,8 @@ describe("configuration", (): void => {
     await setLayers(narrow);
     queries.length = 0;
     expect((await post("playground-config")).status).toBe(204);
-    expect(queries).toEqual(["SELECT layers FROM overlay_state WHERE streamer_id=?"]);
+    // One read for the playground, and one for the alert host, which keeps its own copy of the rules.
+    expect(queries).toEqual(Array.from({ length: 2 }, () => "SELECT layers FROM overlay_state WHERE streamer_id=?"));
     advance(FRAME_MS);
     const resized = frames(socket).at(-1);
     expect(resized?.terrain).toMatchObject({ w: 320, h: 80 });
@@ -875,10 +881,12 @@ describe("configuration", (): void => {
     expect(vi.getTimerCount()).toBe(0);
   });
 
-  it("does not read the layers while no characters socket listens", async (): Promise<void> => {
+  it("does not read the layers for the playground while no characters socket listens", async (): Promise<void> => {
     const queries = watchQueries();
     expect((await post("playground-config")).status).toBe(204);
-    expect(queries).toEqual([]);
+    // Only the alert host reads: it keeps a copy of the alert rules, also while no page listens.
+    expect(queries).toEqual(["SELECT layers FROM overlay_state WHERE streamer_id=?"]);
+    expect(state().storage.values.has(PLAYGROUND_KEY)).toBe(false);
   });
 
   it("reads once more when the layers change during a read", async (): Promise<void> => {
@@ -893,7 +901,8 @@ describe("configuration", (): void => {
     await setLayers(narrow);
     const second: Promise<Response> = post("playground-config");
     await Promise.all([first, second]);
-    expect(queries.filter((sql: string) => sql.startsWith("SELECT layers"))).toHaveLength(2);
+    // Two reads for the playground, and two for the alert host: each of them reads once more.
+    expect(queries.filter((sql: string) => sql.startsWith("SELECT layers"))).toHaveLength(4);
     const socket = await listen();
     expect(frames(socket)[0].terrain).toMatchObject({ w: 320 });
   });
