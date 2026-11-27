@@ -512,7 +512,7 @@ describe("support events", (): void => {
   const twitchPayloads: Record<string, Record<string, unknown>> = twitchFixture.events;
   const kickPayloads: Record<string, Record<string, unknown>> = kickFixture.events;
 
-  /** The streamer turned support events on for each channel of the page. */
+  /** Each channel of the page reads support events, as after a connect with their scopes. */
   async function supportOn(): Promise<void> {
     await env.DB.prepare("UPDATE channel_connections SET support_events=1").run();
   }
@@ -595,7 +595,7 @@ describe("support events", (): void => {
     expect(await status(twitchWebhook(await twitchRequest(empty), env))).toBe(400);
   });
 
-  it("makes no Twitch support event while the streamer has support events off, and chat still flows", async (): Promise<void> => {
+  it("makes no Twitch support event for a connection that does not read them, and chat still flows", async (): Promise<void> => {
     const socket = await listen();
     const cheer = twitchNotification("channel.cheer", twitchPayloads["channel.cheer"]);
     expect((await twitchWebhook(await twitchRequest(cheer, { id: "cheer-1" }), env)).status).toBe(204);
@@ -603,7 +603,7 @@ describe("support events", (): void => {
     const chat = twitchNotification("channel.chat.message", twitchChat);
     expect((await twitchWebhook(await twitchRequest(chat), env)).status).toBe(204);
     expect(sent(socket).map((event) => event.kind)).toEqual(["chat"]);
-    // Nothing of the support event is kept: it does not come back when the streamer turns the switch on later.
+    // Nothing of the support event is kept: it does not come back when the owner reconnects the channel later.
     const sql = ingest.entry(page).state.storage.sql;
     expect(sql.exec("SELECT key FROM seen WHERE key LIKE 'support:%' OR key LIKE '%cheer-1'").toArray()).toEqual([]);
     expect(sql.exec("SELECT id FROM support").toArray()).toEqual([]);

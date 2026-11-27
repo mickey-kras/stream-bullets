@@ -2,7 +2,8 @@ import { createElement, type RefObject } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createRoutesStub } from "react-router";
 import { describe, expect, it } from "vitest";
-import { ChannelPanel, type ChannelView } from "../app/components/channels/channel-panel";
+import type { ChannelView } from "../app/components/channels/channel-panel";
+import { ChannelsStep } from "../app/components/channels/channels-step";
 import { ChatDeliveryContext } from "../app/components/channels/use-live-channels";
 import type { CharactersControl } from "../app/components/overlay/characters-controls";
 import { ChatLayer, chatStyle, shortName } from "../app/components/overlay/chat-layer";
@@ -1475,183 +1476,266 @@ describe("layers in the composition", () => {
 });
 
 describe("the channel cards", (): void => {
+  type Connection = NonNullable<ChannelView["connection"]>;
+  const active: Connection = {
+    displayName: "Host",
+    status: "active",
+    code: null,
+    connectedAt: 1,
+    lastEventAt: null,
+    updatedAt: 1,
+  };
   const offered: ChannelView[] = [
-    { platform: "twitch", available: true, connection: null, support: false, supportScopes: [] },
-    { platform: "youtube", available: true, connection: null, support: false, supportScopes: [] },
-    { platform: "kick", available: true, connection: null, support: false, supportScopes: [] },
+    { platform: "twitch", available: true, connection: null, support: false },
+    { platform: "youtube", available: true, connection: null, support: false },
+    { platform: "kick", available: true, connection: null, support: false },
   ];
-  function cards(channels: ChannelView[]): string[] {
+  /** A connected channel that reads support events, as after a connect of today. */
+  function connected(platform: ChannelView["platform"], more: Partial<Connection> = {}): ChannelView {
+    return { platform, available: true, connection: { ...active, ...more }, support: true };
+  }
+  function section(channels: ChannelView[], stale: boolean = false): string {
     const Stub = createRoutesStub([
       {
         path: "/tools",
         Component: () =>
-          createElement(ChannelPanel, { channels, providers: ["google"], signInProvider: "google", result: null }),
+          createElement(ChannelsStep, { channels, stale, providers: ["google"], signInProvider: "google", result: null }),
       },
     ]);
-    const markup: string = renderToStaticMarkup(createElement(Stub, { initialEntries: ["/tools"] }));
-    return markup.split('<li class="ch-item"').slice(1);
+    return renderToStaticMarkup(createElement(Stub, { initialEntries: ["/tools"] }));
+  }
+  function cards(channels: ChannelView[]): string[] {
+    return section(channels).split('<li class="ch-item"').slice(1);
+  }
+  /** The parts of a card in the order of the markup. */
+  function parts(card: string): string[] {
+    return [...card.matchAll(/class="(ch-[a-z]+)[" ]/g)].map((match: RegExpMatchArray): string => match[1]);
+  }
+  /** The status icon of a card: its state, its icon, whether it turns, and its words. */
+  function status(card: string): { state: string; icon: string; turns: boolean; words: string } | null {
+    const found: RegExpExecArray | null =
+      /<span class="ch-state" data-state="([a-z_]+)" title="([^"]*)"><svg[^>]*class="([^"]*)"[^>]*>.*?<\/svg><span class="sr-only">([^<]*)<\/span><\/span>/.exec(
+        card,
+      );
+    if (!found) return null;
+    const [, state, title, classes, label] = found;
+    // The tooltip and the text for a screen reader are the same words. The icon itself is hidden from it.
+    expect(title).toBe(label);
+    expect(classes).not.toBe("");
+    expect(card).toMatch(/<span class="ch-state"[^>]*><svg[^>]*aria-hidden="true"/);
+    const icon: string = classes.split(" ").find((name: string): boolean => /^icon-[a-z]/.test(name)) ?? "";
+    return { state, icon, turns: classes.split(" ").includes("ch-turn"), words: label };
   }
 
-  it("show the name and status, one sentence, the button, and then closed notes", (): void => {
+  it("have the heading as the link target, and no disclosure around them", (): void => {
+    const markup: string = section([connected("twitch"), ...offered.slice(1)]);
+    expect(markup).toContain(
+      '<section class="ov-step" aria-labelledby="channels-title" data-step="channels">' +
+        '<h2 class="ov-step-title" id="channels-title" tabindex="-1">Connect channels</h2><div class="ch-panel">',
+    );
+    expect(markup).not.toContain("ch-details");
+    expect(markup).not.toContain("data-channels-summary");
+    // The only details are the closed notes at the bottom of each card.
+    expect(markup.match(/<details/g)).toHaveLength(3);
+    expect(markup.match(/<details class="ch-more">/g)).toHaveLength(3);
+    expect(markup.match(/<li class="ch-item" data-channel="(twitch|youtube|kick)">/g)).toHaveLength(3);
+  });
+
+  it("have the platform and Connect on one line without a connection, then the closed notes", (): void => {
     const [twitch, youtube, kick] = cards(offered);
-    for (const card of [twitch, youtube, kick]) {
-      // Four parts in one order, so the buttons of the cards are on one line.
-      expect(card.match(/class="ch-(head|body|actions|foot)"/g)).toEqual([
-        'class="ch-head"',
-        'class="ch-body"',
-        'class="ch-actions"',
-        'class="ch-foot"',
-      ]);
-      expect(card.match(/<details/g)).toHaveLength(1);
-      expect(card).toContain('<details class="ch-more"><summary>What is read and the limits</summary>');
+    for (const [card, name] of [
+      [twitch, "Twitch"],
+      [youtube, "YouTube"],
+      [kick, "Kick"],
+    ]) {
+      expect(parts(card)).toEqual(["ch-head", "ch-pill", "ch-logo", "ch-more"]);
+      expect(card).toMatch(
+        new RegExp(
+          `<div class="ch-head"><span class="ch-pill"><svg class="ch-logo"[^>]*>.*?</svg>` +
+            `<span class="sr-only"> </span>${name}</span>` +
+            `<button type="button" class="small-button" data-connect="true" aria-label="Connect ${name}">` +
+            `<svg[^>]*icon-link[^>]*>.*?</svg>Connect</button></div>` +
+            `<details class="ch-more"><summary>What is read and the limits</summary>`,
+        ),
+      );
+      // Nothing else: no status, no second button, and no text in view.
+      expect(card.match(/<button/g)).toHaveLength(1);
+      expect(card).not.toContain("ch-state");
+      expect(card).not.toMatch(/<p[ >]/);
       expect(card).not.toContain("<details open");
       expect(card).not.toContain("ch-reauth");
     }
-    expect(twitch).toContain('<div class="ch-body"><p>Chat starts as soon as the channel is connected.</p></div>');
-    expect(youtube).toContain(
-      '<div class="ch-body"><p>Chat starts when an overlay with your overlay link is open.</p></div>',
-    );
-    expect(kick).toContain('<div class="ch-body"><p>Chat starts as soon as the channel is connected.</p></div>');
+  });
+
+  it("keep what is read, the limits and the gaps in the closed notes, with the support events", (): void => {
+    const [twitch, youtube, kick] = cards(offered);
     expect(twitch).toContain(
-      "<ul><li>Read: chat messages, message deletions, chat clears, bans and timeouts.</li>" +
+      "<ul><li>Chat starts as soon as the channel is connected.</li>" +
+        "<li>Read: chat messages, message deletions, chat clears, bans and timeouts.</li>" +
+        "<li>For alerts and goals: follows, subscriptions, gifted subscriptions, Bits and raids. " +
+        "Twitch asks for permission to read your followers, your subscribers and Bits.</li>" +
         "<li>Twitch emotes show as images.</li>" +
         "<li>If Twitch stops sending events, reconnect the channel to resume.</li></ul>",
     );
     expect(youtube).toContain(
-      "<ul><li>Read: chat messages, message deletions, bans and timeouts.</li>" +
+      "<ul><li>Chat starts when an overlay with your overlay link is open.</li>" +
+        "<li>Read: chat messages, message deletions, bans and timeouts.</li>" +
+        "<li>For alerts and goals: Super Chats, Super Stickers, memberships and gifted memberships.</li>" +
         "<li>Each page can show about 5 hours of YouTube chat a day. If the channel data cannot be refreshed " +
         "for 30 days, the connection is removed.</li>" +
-        "<li>YouTube does not report chat clears or unbans.</li></ul>",
+        "<li>YouTube does not report chat clears or unbans.</li>",
     );
     expect(kick).toContain(
-      "<ul><li>Read: chat messages, bans and timeouts.</li>" +
+      "<ul><li>Chat starts as soon as the channel is connected.</li>" +
+        "<li>Read: chat messages, bans and timeouts.</li>" +
+        "<li>For alerts and goals: follows, subscriptions, gifted subscriptions and KICKs.</li>" +
         "<li>Kick emotes show as their names, not as images.</li>" +
         "<li>Kick does not report message deletions, chat clears or unbans.</li></ul>",
     );
   });
 
-  it("keep the YouTube terms sentence in view beside the YouTube button only", (): void => {
+  it("keep the YouTube terms sentence in the closed notes of the YouTube card until it is connected", (): void => {
     const [twitch, youtube, kick] = cards(offered);
-    const terms: string = "By connecting YouTube, you agree to the YouTube Terms of Service.";
-    expect(youtube.indexOf(terms)).toBeGreaterThan(youtube.indexOf('class="ch-actions"'));
-    expect(youtube.indexOf(terms)).toBeLessThan(youtube.indexOf("Connect YouTube"));
-    expect(youtube.indexOf("Connect YouTube")).toBeLessThan(youtube.indexOf("<details"));
-    expect(twitch).not.toContain(terms);
-    expect(kick).not.toContain(terms);
+    const terms: string =
+      '<li><a class="text-link" href="https://www.youtube.com/t/terms">' +
+      "By connecting YouTube, you agree to the YouTube Terms of Service.</a></li></ul></details>";
+    expect(youtube).toContain(terms);
+    expect(youtube.indexOf(terms)).toBeGreaterThan(youtube.indexOf("<details"));
+    for (const card of [twitch, kick, ...cards([connected("youtube")])]) expect(card).not.toContain("Terms of Service");
   });
 
-  it("give a platform that the site does not offer no button and no notes", (): void => {
-    const [twitch] = cards([
-      { platform: "twitch", available: false, connection: null, support: false, supportScopes: [] },
-    ]);
-    expect(twitch).toContain("This platform is not set up on this site yet.");
-    expect(twitch).not.toContain("<button");
-    expect(twitch).not.toContain("<details");
+  it("have three lines with a connection: the platform and the account, two equal buttons, the closed notes", (): void => {
+    const [twitch, youtube, kick] = cards([connected("twitch"), connected("youtube"), connected("kick")]);
+    for (const [card, name] of [
+      [twitch, "Twitch"],
+      [youtube, "YouTube"],
+      [kick, "Kick"],
+    ]) {
+      expect(parts(card)).toEqual(["ch-head", "ch-pill", "ch-logo", "ch-who", "ch-state", "ch-account", "ch-actions", "ch-more"]);
+      // Line 1: the platform at the left. At the right, the status icon and then the account name.
+      expect(card).toMatch(
+        new RegExp(
+          `<div class="ch-head"><span class="ch-pill"><svg class="ch-logo"[^>]*>.*?</svg>` +
+            `<span class="sr-only"> </span>${name}</span>` +
+            `<span class="ch-who"><span class="ch-state"[^>]*>.*?</svg><span class="sr-only">[^<]+</span></span>` +
+            `<span class="ch-account">Host</span></span></div>`,
+        ),
+      );
+      // Line 2: Reconnect and then Disconnect, with the same text on each card and the platform in the name.
+      expect(card).toMatch(
+        new RegExp(
+          `<div class="ch-actions">` +
+            `<button type="button" data-connect="true" aria-label="Reconnect ${name}">` +
+            `<svg[^>]*icon-refresh[^>]*>.*?</svg>Reconnect</button>` +
+            `<button type="button" class="danger" data-disconnect="true" aria-label="Disconnect ${name}">` +
+            `<svg[^>]*icon-close[^>]*>.*?</svg>Disconnect</button></div>` +
+            `<details class="ch-more"><summary>What is read and the limits</summary>`,
+        ),
+      );
+      expect(card.match(/<button/g)).toHaveLength(2);
+      // The status is the icon alone: no line of text and no alert.
+      expect(card).not.toMatch(/<p[ >]/);
+      expect(card).not.toContain("<details open");
+      expect(card).not.toContain('role="alert"');
+      expect(card).not.toContain("Connected as");
+    }
+    const actions = (card: string, name: string): string =>
+      (/<div class="ch-actions">.*?<\/div>/.exec(card)?.[0] ?? "").replaceAll(name, "");
+    expect(actions(twitch, "Twitch")).toBe(actions(kick, "Kick"));
+    expect(actions(twitch, "Twitch")).toBe(actions(youtube, "YouTube"));
   });
 
-  it("mark the health of each card with an icon and words", (): void => {
-    const connection = { displayName: "Host", code: null, connectedAt: 1, lastEventAt: null, updatedAt: 1 };
-    const [twitch, youtube, kick] = cards([
-      {
-        platform: "twitch",
-        available: true,
-        connection: { ...connection, status: "active" },
-        support: false,
-        supportScopes: [],
-      },
-      {
-        platform: "youtube",
-        available: true,
-        connection: { ...connection, status: "needs_reauth" },
-        support: false,
-        supportScopes: [],
-      },
-      { platform: "kick", available: true, connection: null, support: false, supportScopes: [] },
+  it("show the status as an icon with a tooltip, and the same words as text for a screen reader", (): void => {
+    const [healthy, revoked, refused] = cards([
+      connected("twitch"),
+      connected("youtube", { status: "needs_reauth", code: "authorization_revoked" }),
+      connected("kick", { status: "error", code: "webhooks_rejected" }),
     ]);
-    const mark = (card: string): string | undefined =>
-      /<span class="ch-mark" data-health="([a-z]+)"><svg[^>]*class="[^"]*(icon-[a-z-]+)"[^>]*>.*?<\/svg>([^<]+)<\/span>/
-        .exec(card)
-        ?.slice(1)
-        .join(" ");
-    expect(mark(twitch)).toBe("healthy icon-success Healthy");
-    expect(mark(youtube)).toBe("attention icon-warning Needs attention");
-    expect(mark(kick)).toBe("none icon-minus Not connected");
-    // The mark is beside the name of the connection, in the head of the card.
-    expect(twitch).toMatch(/<strong>Connected as Host<\/strong><span class="ch-mark"/);
-    expect(twitch.indexOf("ch-mark")).toBeLessThan(twitch.indexOf('class="ch-body"'));
-    // "Not connected" shows once: the mark says it.
-    expect(kick.match(/Not connected/g)).toHaveLength(1);
-    expect(kick).not.toContain("<strong>");
-    // A connection without a chat event says so on the server already. An age waits for the viewer's clock.
-    expect(twitch).toContain('<p class="muted">No chat event yet</p>');
-    const [aged] = cards([
-      {
-        platform: "kick",
-        available: true,
-        connection: { ...connection, status: "active", lastEventAt: 5 },
-        support: false,
-        supportScopes: [],
-      },
-    ]);
-    expect(aged).not.toContain("Last chat event");
-    // A platform that the site does not offer has no health mark.
-    const [gone] = cards([
-      {
-        platform: "twitch",
-        available: false,
-        connection: { ...connection, status: "error" },
-        support: false,
-        supportScopes: [],
-      },
-    ]);
-    expect(gone).not.toContain("ch-mark");
+    const [failed] = cards([connected("twitch", { status: "error", code: "subscribe_failed" })]);
+    expect(status(healthy)).toEqual({
+      state: "healthy",
+      icon: "icon-success",
+      turns: false,
+      words: "Healthy. No chat event yet.",
+    });
+    // A problem that needs the owner.
+    expect(status(revoked)).toEqual({
+      state: "problem",
+      icon: "icon-rejected",
+      turns: false,
+      words:
+        "Access ended. Reconnect to keep receiving chat. Without a reconnect, this connection is removed after 7 days.",
+    });
+    expect(status(failed)).toEqual({
+      state: "problem",
+      icon: "icon-rejected",
+      turns: false,
+      words: "Chat events could not be set up. Reconnect to try again.",
+    });
+    // A problem that ends without the owner: the icon turns.
+    expect(status(refused)).toEqual({
+      state: "repairing",
+      icon: "icon-sync",
+      turns: true,
+      words:
+        "The feed cannot accept events from the platform right now. It checks again on its own: you do not need to reconnect.",
+    });
+    // The age of the last chat event waits for the clock of the viewer.
+    const [aged] = cards([connected("kick", { lastEventAt: 5 })]);
+    expect(status(aged)?.words).toBe("Healthy");
+    // A used-up quota names its reset time in the time zone of the viewer, so its words wait too.
+    const [quota] = cards([connected("youtube", { status: "error", code: "quota_exhausted" })]);
+    expect(status(quota)).toEqual({ state: "repairing", icon: "icon-sync", turns: true, words: "Needs attention" });
   });
 
-  it("have the switch for support events in the body of a connected card only", (): void => {
-    const connection = { displayName: "Host", code: null, connectedAt: 1, lastEventAt: null, updatedAt: 1 };
-    const active = { ...connection, status: "active" as const };
-    const scopes: string[] = ["moderator:read:followers", "channel:read:subscriptions", "bits:read"];
-    const [twitch, youtube, kick] = cards([
-      { platform: "twitch", available: true, connection: active, support: false, supportScopes: scopes },
-      { platform: "youtube", available: true, connection: active, support: true, supportScopes: [] },
-      { platform: "kick", available: true, connection: null, support: false, supportScopes: [] },
+  it("ask the owner of a Twitch channel from before the support events to reconnect one time", (): void => {
+    const [twitch, kick] = cards([
+      { ...connected("twitch"), support: false },
+      { ...connected("kick"), support: false },
     ]);
-    const [gone] = cards([
-      { platform: "twitch", available: false, connection: active, support: true, supportScopes: scopes },
-    ]);
-    expect(twitch).toMatch(/<input type="checkbox" aria-describedby="[^"]+" data-support-switch="true"\/>/);
-    expect(twitch).toContain("<span>Twitch support events</span>");
-    expect(twitch).toContain(
-      "Twitch asks for these permissions: read your followers, read your subscribers, and read Bits.",
+    expect(status(twitch)).toEqual({
+      state: "support_missing",
+      icon: "icon-rejected",
+      turns: false,
+      words: "Reconnect Twitch one time so alerts and goals can read follows, subscriptions and Bits.",
+    });
+    expect(status(kick)).toEqual({
+      state: "support_missing",
+      icon: "icon-rejected",
+      turns: false,
+      words: "Kick does not send the events for alerts and goals. Reconnect Kick to try again.",
+    });
+    // The card keeps its three lines: the state is the icon, and Reconnect is the fix.
+    expect(parts(twitch)).toEqual(["ch-head", "ch-pill", "ch-logo", "ch-who", "ch-state", "ch-account", "ch-actions", "ch-more"]);
+    expect(twitch).toContain('aria-label="Reconnect Twitch"');
+    expect(twitch).not.toContain('role="alert"');
+    // No switch for support events on any card.
+    expect(section([{ ...connected("twitch"), support: false }, connected("kick")])).not.toMatch(
+      /type="checkbox"|data-support-switch/,
     );
-    expect(twitch.indexOf("data-support-switch")).toBeGreaterThan(twitch.indexOf('class="ch-body"'));
-    expect(twitch.indexOf("data-support-switch")).toBeLessThan(twitch.indexOf('class="ch-actions"'));
-    expect(youtube).toMatch(/<input type="checkbox"[^>]* checked=""\/>/);
-    expect(youtube).not.toContain("permissions");
-    // No connection, or a platform that the site does not offer: no switch.
-    for (const card of [kick, gone]) expect(card).not.toContain("data-support-switch");
+  });
+
+  it("give a platform that the site does not offer no Connect button, no status and no notes", (): void => {
+    const [none, old] = cards([
+      { platform: "twitch", available: false, connection: null, support: false },
+      { platform: "kick", available: false, connection: { ...active, status: "error" }, support: true },
+    ]);
+    for (const card of [none, old]) {
+      expect(card).toContain('<p class="muted">This platform is not set up on this site yet.</p>');
+      expect(card).not.toContain("<details");
+      expect(card).not.toContain("ch-state");
+      expect(card).not.toContain("data-connect");
+    }
+    expect(none).not.toContain("<button");
+    // A connection that is left can still go.
+    expect(old.match(/<button/g)).toHaveLength(1);
+    expect(old).toContain('aria-label="Disconnect Kick"');
   });
 
   it("say that the status is old only while the reads fail", (): void => {
-    const panel = (stale: boolean): string => {
-      const Stub = createRoutesStub([
-        {
-          path: "/tools",
-          Component: () =>
-            createElement(ChannelPanel, {
-              channels: offered,
-              stale,
-              providers: [],
-              signInProvider: null,
-              result: null,
-            }),
-        },
-      ]);
-      return renderToStaticMarkup(createElement(Stub, { initialEntries: ["/tools"] }));
-    };
-    expect(panel(true)).toContain(
+    expect(section(offered, true)).toContain(
       '<p class="muted" data-channels-stale="true">Status could not be refreshed. Next try in a moment.</p>',
     );
-    expect(panel(false)).not.toContain("data-channels-stale");
+    expect(section(offered, false)).not.toContain("data-channels-stale");
   });
 });

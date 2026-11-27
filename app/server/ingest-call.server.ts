@@ -13,7 +13,6 @@ export type IngestPath =
   | "close"
   | "refresh"
   | "reconcile"
-  | "support"
   | "playground"
   | "playground-config"
   | "test-chat"

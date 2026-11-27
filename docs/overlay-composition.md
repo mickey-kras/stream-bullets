@@ -489,9 +489,8 @@ The old address `/overlay-control` redirects to it. The page has three sections:
 - **Overlay** (`/tools?view=overlay`) has two numbered steps:
   1. **Build your overlay**: the overlay studio.
   2. **Add to OBS**: the overlay links.
-- **Channels** (`/tools?view=channels`) has the channel connections. With a connected channel, it shows one status line.
-  Select the line to open the full panel.
-  The line and the cards follow the channel health while the page is open.
+- **Channels** (`/tools?view=channels`) has the channel connections: one card for each platform.
+  The cards follow the channel health while the page is open.
 
 When an output has a link, its card in step 2 shows the OBS connection.
 It shows the number of connected sources. Without a source, it shows when the last one connected or went away.
