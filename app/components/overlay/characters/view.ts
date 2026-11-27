@@ -1,3 +1,5 @@
+import { CROWN_BLOCKS, TILE } from "../../../lib/playground/constants";
+import { STANDING_STATES } from "../../../lib/playground/core";
 import type { BlockCell, CharState } from "../../../lib/playground/protocol";
 
 /**
@@ -60,6 +62,12 @@ export function viewForPlatform(view: PlaygroundView, platform: string): Playgro
     (character: CharacterView): boolean => character.platform === platform,
   );
   if (characters.length === view.characters.length) return view;
+  const high: CharacterView[] = characters.filter(
+    (character: CharacterView): boolean =>
+      STANDING_STATES.has(character.state) && view.world.ground - character.y >= CROWN_BLOCKS * TILE,
+  );
+  let holder: CharacterView | undefined = high.find((character: CharacterView): boolean => character.id === view.crown);
+  for (const character of high) if (!holder || character.y < holder.y) holder = character;
   const ids = new Set<number>(characters.map((character: CharacterView): number => character.id));
   return {
     ...view,
@@ -67,7 +75,7 @@ export function viewForPlatform(view: PlaygroundView, platform: string): Playgro
     speakers: view.speakers.filter((id: number): boolean => ids.has(id)),
     ropes: view.ropes.filter((rope: RopeView): boolean => ids.has(rope.id)),
     flags: view.flags.filter((flag: FlagView): boolean => flag.platform === platform),
-    crown: view.crown !== null && ids.has(view.crown) ? view.crown : null,
+    crown: view.crown !== null && ids.has(view.crown) ? view.crown : (holder?.id ?? null),
   };
 }
 
