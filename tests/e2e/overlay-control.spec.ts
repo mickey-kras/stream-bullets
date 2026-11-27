@@ -10,6 +10,7 @@ import {
   defaultLayers,
   layersSql,
   noKeysSql,
+  noLinkQuotaSql,
   placeLayer,
   saved,
   settings,
@@ -125,27 +126,36 @@ async function liveSockets(page: Page, count: number, key: string | null = null)
 }
 
 test("the owner copies the private overlay link, and a new link revokes the old one", async ({ browser }) => {
+  await runSql("overlay-control-link-quota", [noLinkQuotaSql]);
   const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 93));
   await owner.grantPermissions(["clipboard-read", "clipboard-write"], { origin });
   const control = await newPage(owner);
   await control.goto("/tools?view=overlay");
-  // Step 2 shows the link controls without a click.
-  await expect(control.getByRole("region", { name: "2 Add to OBS" })).toBeVisible();
+  // Step 2 shows the link buttons in its title row, without a click.
+  const step = control.getByRole("region", { name: "2 Add to OBS" });
+  await expect(step).toBeVisible();
   // Each output has its own link. This is the link of the horizontal output.
   const link = control.getByRole("region", { name: "Horizontal output" });
-  await link.getByRole("button", { name: "Create overlay link" }).click();
+  await step.getByRole("button", { name: "Create links" }).click();
+  await expect(control.locator(".sb-toast")).toHaveText("New overlay links ready. Copy them into OBS.");
   const field = link.locator("[data-ov-url]");
   await expect(field).toHaveValue(/^http:\/\/localhost:5173\/@feature_host\/overlay\?key=[\w-]{43}$/);
-  await link.getByRole("button", { name: "Copy overlay URL: Horizontal output" }).click();
+  // The copy button of the card shows an icon only.
+  const copy = link.getByRole("button", { name: "Copy overlay URL: Horizontal output" });
+  await expect(copy).toHaveText("");
+  await expect(copy).toHaveAttribute("title", "Copy overlay URL: Horizontal output");
+  await copy.click();
   const oldUrl: string = await control.evaluate(() => navigator.clipboard.readText());
   expect(oldUrl).toBe(await field.inputValue());
   const oldKey: string = new URL(oldUrl).searchParams.get("key") ?? "";
-  // After a reload the link is hidden, and the owner can see the same link again.
+  // After a reload the links do not show, and the owner can see the same link again.
   await control.reload();
   await expect(field).toHaveCount(0);
-  await link.getByRole("button", { name: "Show link", exact: true }).click();
+  await expect(step.locator("[data-ov-private]")).toHaveCount(0);
+  await step.getByRole("button", { name: "Show links" }).click();
   await expect(field).toHaveValue(oldUrl);
-  await expect(link.getByRole("button", { name: "Show link", exact: true })).toHaveCount(0);
+  await expect(step.getByRole("button", { name: "Show links" })).toHaveCount(0);
+  await expect(step.getByRole("button", { name: "Hide links" })).toBeFocused();
 
   // OBS has no session; its network already holds ten guest sockets.
   const obs = await browser.newContext({
@@ -165,11 +175,15 @@ test("the owner copies the private overlay link, and a new link revokes the old 
   const sources = link.locator("[data-ov-sources]");
   await expect(sources).toHaveText("OBS is connected: 1 source.");
 
-  await link.getByRole("button", { name: "Regenerate link" }).click();
-  const confirm = control.getByRole("dialog", { name: "Regenerate the overlay link?" });
-  await expect(confirm).toContainText("OBS");
-  await expect(confirm).toContainText("The link of the other output keeps working.");
-  await confirm.getByRole("button", { name: "Regenerate link" }).click();
+  // The server takes 6 link requests each minute. This spec sends more: start the count again.
+  await runSql("overlay-control-link-quota-again", [noLinkQuotaSql]);
+  await step.getByRole("button", { name: "Regenerate links" }).click();
+  const confirm = control.getByRole("dialog", { name: "Regenerate the overlay links?" });
+  await expect(confirm).toContainText(
+    "The old links of the two outputs stop working right away. Paste the new links into the Browser sources in OBS.",
+  );
+  await confirm.getByRole("button", { name: "Regenerate links" }).click();
+  await expect(confirm).toHaveCount(0);
   await expect(field).not.toHaveValue(oldUrl);
   const newKey: string = new URL(await field.inputValue()).searchParams.get("key") ?? "";
   // The revoked link becomes a guest; the full network must refuse it.
@@ -181,30 +195,35 @@ test("the owner copies the private overlay link, and a new link revokes the old 
   await runSql("overlay-control-link-restore", [noKeysSql]);
 });
 
-test("each output has its own link: both are on stream, and a new link for one leaves the other connected", async ({
+test("each output has its own link: both are on stream, and new links stop the old link of each output", async ({
   browser,
 }) => {
   // The poll is on the grid of the two outputs, at different cells. The editor shows the horizontal output.
   const tall = { c: 2, r: 2, w: 14, h: 8 };
   await runSql("overlay-control-outputs", [
     noKeysSql,
+    noLinkQuotaSql,
     layersSql({ cells: { horizontal: { poll: POLL_CELL }, vertical: { poll: tall } } }),
   ]);
   const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 97));
   const control = await newPage(owner);
   await control.goto("/tools?view=overlay");
+  const step = control.getByRole("region", { name: "2 Add to OBS" });
   const wide = control.getByRole("region", { name: "Horizontal output" });
   const high = control.getByRole("region", { name: "Vertical output" });
   await expect(wide.locator("[data-ov-sources]")).toHaveCount(0);
-  await wide.getByRole("button", { name: "Create overlay link" }).click();
+  // Only the horizontal output has a link, as a page from before the two outputs has.
+  expect((await owner.request.post("/api/overlay/key", { data: { output: "horizontal" } })).status()).toBe(200);
+  await control.reload();
+  await expect(wide.locator("[data-ov-sources]")).toHaveAttribute("data-ov-sources", "0");
+  await expect(high.locator("[data-ov-sources]")).toHaveCount(0);
+  // "Show links" shows the horizontal link and makes the link that the vertical output does not have.
+  await step.getByRole("button", { name: "Show links" }).click();
   await expect(wide.locator("[data-ov-url]")).toHaveValue(/\?key=[\w-]{43}$/);
   const wideUrl: string = await wide.locator("[data-ov-url]").inputValue();
-  await high.getByRole("button", { name: "Create overlay link" }).click();
   await expect(high.locator("[data-ov-url]")).toHaveValue(/\?key=[\w-]{43}$/);
   const highUrl: string = await high.locator("[data-ov-url]").inputValue();
   expect(highUrl).not.toBe(wideUrl);
-  // The new vertical link did not change the horizontal link.
-  await expect(wide.locator("[data-ov-url]")).toHaveValue(wideUrl);
   // No source uses a link yet. The room can hold the time of a source of an earlier spec.
   await expect(wide.locator("[data-ov-sources]")).toHaveAttribute("data-ov-sources", "0");
   await expect(high.locator("[data-ov-sources]")).toHaveAttribute("data-ov-sources", "0");
@@ -242,7 +261,7 @@ test("each output has its own link: both are on stream, and a new link for one l
   // The switch of the editor selects the output to edit. OBS does not change.
   const editor = control.locator("[data-composition-editor]");
   const save = saved(control);
-  await editor.getByRole("button", { name: "Vertical 18 × 32" }).click();
+  await editor.getByRole("button", { name: "Vertical", exact: true }).click();
   await save;
   await expect(editor.getByRole("region", { name: "Composition preview" })).toHaveAttribute(
     "data-orientation",
@@ -251,17 +270,27 @@ test("each output has its own link: both are on stream, and a new link for one l
   near((await pollBox(wideSource)).width, (POLL_CELL.w * 60) / 2);
   near((await pollBox(highSource)).width, (tall.w * 60) / 2);
 
-  // A new vertical link stops the old vertical link only.
-  await high.getByRole("button", { name: "Regenerate link" }).click();
-  await control
-    .getByRole("dialog", { name: "Regenerate the overlay link?" })
-    .getByRole("button", { name: "Regenerate link" })
-    .click();
-  await expect(high.locator("[data-ov-url]")).not.toHaveValue(highUrl);
+  // The server makes a new link for one output at a time. A new vertical link stops the old vertical link only.
+  expect((await owner.request.post("/api/overlay/key", { data: { output: "vertical" } })).status()).toBe(200);
   await expect(highSource.locator(".overlay-connection")).toContainText("Reconnecting");
   await expect(high.locator("[data-ov-sources]")).toContainText("OBS is not connected. Last seen");
   await expect(wide.locator("[data-ov-sources]")).toHaveText("OBS is connected: 1 source.");
   await expect(wideSource.locator(".overlay-connection")).toHaveCount(0);
+
+  // "Regenerate links" makes a new link for each output: the old horizontal link stops too.
+  await runSql("overlay-control-outputs-quota", [noLinkQuotaSql]);
+  await step.getByRole("button", { name: "Regenerate links" }).click();
+  await control
+    .getByRole("dialog", { name: "Regenerate the overlay links?" })
+    .getByRole("button", { name: "Regenerate links" })
+    .click();
+  await expect(wide.locator("[data-ov-url]")).not.toHaveValue(wideUrl);
+  await expect(high.locator("[data-ov-url]")).not.toHaveValue(highUrl);
+  await expect(wideSource.locator(".overlay-connection")).toContainText("Reconnecting");
+  await expect(wide.locator("[data-ov-sources]")).toContainText("OBS is not connected. Last seen");
+  // A source with the new link of an output connects again.
+  await highSource.goto(await high.locator("[data-ov-url]").inputValue());
+  await expect(high.locator("[data-ov-sources]")).toHaveText("OBS is connected: 1 source.");
   await Promise.all([close(owner), close(obs)]);
   await runSql("overlay-control-outputs-restore", [noKeysSql, defaultLayers]);
 });
@@ -490,7 +519,7 @@ test("Streamer tools has the Overlay section with two numbered steps and the Cha
     const control = await newPage(owner);
     await control.goto("/tools?view=overlay");
     // The page has one title and the links to its sections. The address names the Overlay section.
-    await expect(control.getByRole("heading", { level: 1 })).toHaveText("Streamer tools");
+    await expect(control.getByRole("heading", { level: 1 })).toHaveAccessibleName("Streamer tools");
     const sections = control.getByRole("navigation", { name: "Streamer tools sections" });
     await expect(sections.getByRole("link")).toHaveText(["Live", "Overlay", "Channels"]);
     await expect(sections.getByRole("link", { name: "Overlay" })).toHaveAttribute("aria-current", "page");
@@ -506,24 +535,24 @@ test("Streamer tools has the Overlay section with two numbered steps and the Cha
     await expect(build.getByRole("group", { name: "Screen orientation" })).toBeVisible();
     await expect(build.getByRole("group", { name: "Preview background" })).toBeVisible();
     await expect(build.getByRole("button", { name: "Start test" })).toBeVisible();
-    await expect(build.getByRole("group", { name: "Layers · one of each" }).getByRole("button")).toHaveText([
+    await expect(build.getByRole("group", { name: "Layers · one of each" }).locator("[data-comp-layer]")).toHaveText([
       "+ Chat",
       "+ Characters",
+      "+ Camera frame",
       "PollPlaced",
       "+ Topic",
       "+ Up next",
       "+ Message banner",
       "+ Community card",
       "+ Support banner",
-      "+ Camera frame",
     ]);
     await expect(build.getByRole("region", { name: "Composition preview" })).toBeVisible();
     await expect(build.getByRole("region", { name: "No layer selected" })).toBeVisible();
-    await expect(
-      control
-        .getByRole("region", { name: "2 Add to OBS" })
-        .getByRole("button", { name: /overlay link|Regenerate link/ }),
-    ).toHaveCount(2);
+    await expect(build.locator("[data-comp-help]")).toHaveJSProperty("open", false);
+    // Step 2 has its link button in the title row, and one card for each output.
+    const obsStep = control.getByRole("region", { name: "2 Add to OBS" });
+    await expect(obsStep.locator("[data-ov-link-tools]").getByRole("button")).toHaveText(["Create links"]);
+    await expect(obsStep.getByRole("region")).toHaveText([/^Horizontal output/, /^Vertical output/]);
 
     // The Channels section has the channel cards alone, without a step number. No document loads for it.
     let documents: number = 0;
@@ -533,7 +562,7 @@ test("Streamer tools has the Overlay section with two numbered steps and the Cha
     await sections.getByRole("link", { name: "Channels" }).click();
     await expect(control).toHaveURL(/\/tools\?view=channels$/);
     await expect(sections.getByRole("link", { name: "Channels" })).toHaveAttribute("aria-current", "page");
-    await expect(control.getByRole("heading", { level: 1 })).toHaveText("Streamer tools");
+    await expect(control.getByRole("heading", { level: 1 })).toHaveAccessibleName("Streamer tools");
     await expect(control.getByRole("heading", { level: 2 })).toHaveText(["Connect channels"]);
     expect(await steps()).toEqual(["channels"]);
     expect(documents).toBe(0);

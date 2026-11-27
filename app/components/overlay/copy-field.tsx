@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { t } from "../../i18n";
 import { copyText } from "../../lib/clipboard";
-import type { OverlayLayer } from "../../lib/overlay-layers";
 import { IconButton } from "../ui/icon-button";
 import { useToast } from "../ui/toast";
 
@@ -10,18 +9,13 @@ export function CopyField({
   value,
   label,
   copyLabel,
-  layer,
-  describedBy,
   dock = false,
 }: Readonly<{
   value: string;
   label: string;
   copyLabel: string;
-  layer: OverlayLayer | null;
   /** True for the link of the OBS dock: it is not an overlay URL. */
   dock?: boolean;
-  /** The id of a text that describes the field, like the source size of a layer URL. */
-  describedBy?: string;
 }>): ReactNode {
   const toast = useToast();
   async function copy(): Promise<void> {
@@ -35,12 +29,10 @@ export function CopyField({
         readOnly
         value={value}
         aria-label={label}
-        aria-describedby={describedBy}
         spellCheck={false}
         autoComplete="off"
-        data-ov-url={layer === null && !dock ? "" : undefined}
+        data-ov-url={dock ? undefined : ""}
         data-ov-dock-url={dock ? "" : undefined}
-        data-ov-layer-url={layer ?? undefined}
       />
       <IconButton label={copyLabel} icon="copy" iconSize={18} onClick={() => void copy()} />
     </div>

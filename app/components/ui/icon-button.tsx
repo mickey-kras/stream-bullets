@@ -1,4 +1,4 @@
-import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react";
+import { forwardRef, type AnchorHTMLAttributes, type ButtonHTMLAttributes, type ReactNode } from "react";
 import { Icon, type IconName, type IconSize } from "./icon";
 
 export interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children" | "aria-label"> {
@@ -28,3 +28,27 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
     </button>
   );
 });
+
+export interface IconLinkProps extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "children" | "aria-label"> {
+  // Accessible name; also the tooltip unless title overrides it.
+  label: string;
+  icon: IconName;
+  iconSize?: IconSize;
+  href: string;
+}
+
+/** A link with the look of IconButton, for an icon that opens a page. */
+export function IconLink({
+  label,
+  icon,
+  iconSize = 20,
+  className = "",
+  title,
+  ...rest
+}: Readonly<IconLinkProps>): ReactNode {
+  return (
+    <a className={`icon-button ${className}`.trim()} aria-label={label} title={title ?? label} {...rest}>
+      <Icon name={icon} size={iconSize} />
+    </a>
+  );
+}

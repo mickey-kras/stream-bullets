@@ -11,7 +11,7 @@ import {
   type PresetKey,
 } from "../../lib/overlay-layouts";
 import { Dialog, DialogActions } from "../ui/dialog";
-import { Icon } from "../ui/icon";
+import { IconButton } from "../ui/icon-button";
 import { Select, type SelectOption } from "../ui/select";
 
 const PRESET_NAMES: Readonly<Record<PresetKey, MessageId>> = {
@@ -22,6 +22,13 @@ const PRESET_NAMES: Readonly<Record<PresetKey, MessageId>> = {
 
 /** The list value that opens the dialog for a new layout. It is not a layout. */
 const NEW_LAYOUT = "new";
+/** The list value that opens the dialog with the layouts of the streamer. It is not a layout. */
+const MANAGE_LAYOUTS = "manage";
+
+/** A layout that the streamer made and saved: it can get a new name, and it can go. */
+function isOwn(choice: LayoutChoice): boolean {
+  return choice.preset === null && choice.id !== UNSAVED_LAYOUT;
+}
 
 /** The name of a list entry, as the list and the messages show it. */
 function choiceName(choice: LayoutChoice): string {
@@ -32,12 +39,17 @@ function choiceName(choice: LayoutChoice): string {
   return choice.id === UNSAVED_LAYOUT ? t("overlay.layout.unsaved") : choice.name;
 }
 
-/** The entries of the layout list of an output, with "New layout…" as the last one. */
+/**
+ * The entries of the layout list of an output: the layouts, then "New layout…". With a layout of the streamer, the
+ * last entry opens the dialog that renames and deletes those layouts.
+ */
 export function layoutOptions(choices: readonly LayoutChoice[]): SelectOption[] {
-  return [
+  const options: SelectOption[] = [
     ...choices.map((choice: LayoutChoice): SelectOption => ({ value: choice.id, label: choiceName(choice) })),
     { value: NEW_LAYOUT, label: t("overlay.layout.new"), icon: "plus" },
   ];
+  if (choices.some(isOwn)) options.push({ value: MANAGE_LAYOUTS, label: t("overlay.layout.manage"), icon: "pencil" });
+  return options;
 }
 
 /** Sends a layout action. True when the server saved it. */
@@ -147,9 +159,11 @@ function OwnLayoutRow({
 }
 
 /**
- * The layouts of the output that the editor shows: one list with the presets, the layouts of the streamer, and
- * "New layout…". A selected layout opens in the grid and goes on stream at once, as each other change does. There
- * is no separate step to pick a layout.
+ * The layouts of the output that the editor shows, in the toolbar of the studio. The list has the presets, the
+ * layouts of the streamer, "New layout…" and, with a layout of the streamer, the entry that renames and deletes
+ * them. A selected layout opens in the grid and goes on stream at once, as each other change does. At the right
+ * edge are the icon buttons: save as a new layout, and the reset of a preset that the streamer changed. `children`
+ * are the other tools of the toolbar: they come after these buttons.
  */
 export function LayoutPicker({
   output,
@@ -157,6 +171,7 @@ export function LayoutPicker({
   layouts,
   busy,
   act,
+  children,
 }: Readonly<{
   output: Orientation;
   /** The layers that the grid shows. */
@@ -165,20 +180,20 @@ export function LayoutPicker({
   /** True while a layout action saves. */
   busy: boolean;
   act: LayoutAct;
+  children?: ReactNode;
 }>): ReactNode {
   const labelId: string = useId();
   const [dialog, setDialog] = useState<"new" | "manage" | null>(null);
   const choices: LayoutChoice[] = layoutChoices(layouts, layers, output);
   const active: LayoutChoice | undefined = choices.find((choice: LayoutChoice): boolean => choice.active);
-  const own: LayoutChoice[] = choices.filter(
-    (choice: LayoutChoice): boolean => choice.preset === null && choice.id !== UNSAVED_LAYOUT,
-  );
+  const own: LayoutChoice[] = choices.filter(isOwn);
   function pick(id: string): void {
     if (id === NEW_LAYOUT) setDialog("new");
+    else if (id === MANAGE_LAYOUTS) setDialog("manage");
     else if (id !== active?.id) void act({ action: "select", output, id, keep: t("overlay.layout.keepName") });
   }
   return (
-    <div className="ov-comp-bar ov-layout" data-layout-picker={output}>
+    <div className="ov-layout" data-layout-picker={output}>
       <span className="field-label" id={labelId}>
         {t("overlay.layout.label")}
       </span>
@@ -190,22 +205,25 @@ export function LayoutPicker({
         disabled={busy}
         className="ov-layout-select"
       />
-      <button type="button" disabled={busy} onClick={() => setDialog("new")} data-layout-save-as>
-        <Icon name="copy" size={16} />
-        {t("overlay.layout.saveAs")}
-      </button>
-      {active?.preset && active.changed && (
-        <button type="button" disabled={busy} onClick={() => void act({ action: "reset", output })} data-layout-reset>
-          <Icon name="reset" size={16} />
-          {t("overlay.layout.reset")}
-        </button>
-      )}
-      {own.length > 0 && (
-        <button type="button" disabled={busy} onClick={() => setDialog("manage")} data-layout-manage>
-          <Icon name="pencil" size={16} />
-          {t("overlay.layout.manage")}
-        </button>
-      )}
+      <div className="ov-comp-tools" data-comp-tools>
+        <IconButton
+          label={t("overlay.layout.saveAs")}
+          icon="save"
+          disabled={busy}
+          onClick={() => setDialog("new")}
+          data-layout-save-as
+        />
+        {active?.preset && active.changed && (
+          <IconButton
+            label={t("overlay.layout.reset")}
+            icon="reset"
+            disabled={busy}
+            onClick={() => void act({ action: "reset", output })}
+            data-layout-reset
+          />
+        )}
+        {children}
+      </div>
       {dialog === "new" && <NewLayoutDialog output={output} busy={busy} act={act} onClose={() => setDialog(null)} />}
       <Dialog
         open={dialog === "manage"}

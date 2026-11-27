@@ -347,8 +347,31 @@ header .header-end > a.header-streamers:hover { border-color: var(--gold); color
   header .header-end > a.header-streamers { width: 44px; min-width: 44px; height: 44px; padding: 0; justify-content: center; }
   header .header-end > a.header-streamers .hs-label { display: none; }
 }
+/* A phone header on air: the pill is below the name of the streamer, at the left edge of the name. The brand becomes
+   a grid, and the link to the page uses its columns and rows. Thus the link keeps its box and its focus ring.
+   Margins make the gaps, because a gap of the link that differs from the gap of the brand moves the name off the
+   column of the pill. Without a pill, the brand stays one row. */
 @media (max-width: 43.75em) {
-  .streamer-brand .live-pill { position: absolute; left: 50px; bottom: 0; margin: 0; min-height: 24px; min-width: 24px; padding: 2px 8px; font-size: .6875rem; letter-spacing: .5px; z-index: 2; }
+  .streamer-header .streamer-brand:has(> .live-pill) { container: brand / inline-size; display: grid; grid-template-columns: auto auto auto minmax(0, auto); grid-template-rows: auto auto; justify-content: start; align-content: center; gap: 2px 0; }
+  .streamer-brand:has(> .live-pill) > :is(.sb-mark, .brand-divider) { grid-row: 1 / -1; margin-inline-end: 10px; }
+  .streamer-brand:has(> .live-pill) > .brand-divider { width: 1px; }
+  .streamer-header .streamer-brand:has(> .live-pill) > .streamer-home { grid-area: 1 / 3 / -1 / -1; display: grid; grid-template-columns: subgrid; grid-template-rows: subgrid; gap: 2px 0; }
+  .streamer-brand:has(> .live-pill) .streamer-home > .brand-avatar { grid-area: 1 / 1 / -1 / 2; margin-inline-end: 8px; }
+  .streamer-brand:has(> .live-pill) .streamer-home > :is(.streamer-name, .streamer-name-wrap) { grid-area: 1 / 2 / -1 / 3; }
+  /* A brand without the room for the pill below the name: the pill is over the lower edge of the avatar. */
+  .streamer-brand > .live-pill { position: absolute; left: 50px; bottom: 0; z-index: 2; margin: 0; min-height: 24px; min-width: 24px; padding: 2px 8px; font-size: .6875rem; letter-spacing: .5px; }
+  /* The limits are in rem: a larger text size needs a wider brand. From 12.6rem, the longest word of the label in
+     the 11 languages has room below the name. From 13.5rem, the dot has room too. */
+  @container brand (min-width: 12.6rem) {
+    .streamer-brand:has(> .live-pill) .streamer-home > :is(.streamer-name, .streamer-name-wrap) { grid-row: 1; align-self: end; }
+    .streamer-brand > .live-pill { position: relative; left: auto; bottom: auto; z-index: 1; grid-area: 2 / 4; justify-self: start; align-self: start; gap: 4px; padding: 2px 6px; letter-spacing: 0; }
+    .live-pill .live-dot { display: none; }
+    /* The free room below the pill also takes a touch. */
+    .streamer-brand > .live-pill::after { content: ''; position: absolute; inset: 0 0 -20px; }
+  }
+  @container brand (min-width: 13.5rem) {
+    .live-pill .live-dot { display: block; }
+  }
 }
 :root.toast-on > body > .site-footer { margin-top: var(--toast-slot, 0px) !important; }
 :root.toast-on.toast-nofoot > body { box-sizing: border-box; padding-bottom: var(--toast-slot, 0px) !important; }

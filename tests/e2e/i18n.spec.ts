@@ -238,6 +238,8 @@ interface PhoneScreen {
   name: string;
   path: string;
   open?: (page: Page) => Promise<void>;
+  /** Waits for text that the page shows only after it hydrates. Without it, the check can run before that text. */
+  ready?: (page: Page) => Promise<void>;
 }
 
 // Open the tab action through its header button, FAB, or add tile.
@@ -306,7 +308,12 @@ const phoneScreens: { role: string | null; ip: number; screens: PhoneScreen[] }[
     screens: [
       { name: "edit-page", path: "/@feature_host?dialog=page" },
       { name: "tools-live", path: "/tools" },
-      { name: "overlay-control", path: "/tools?view=overlay" },
+      {
+        name: "overlay-control",
+        path: "/tools?view=overlay",
+        // The layout list gets the name of its layout from the client.
+        ready: (page) => expect(page.locator("[data-layout-picker] .cselect-value")).not.toBeEmpty(),
+      },
       { name: "create-poll", path: "/@feature_host?view=polls", open: headerAction },
       { name: "add-event", path: "/@feature_host?view=schedule", open: headerAction },
       { name: "add-card", path: "/@feature_host?view=community", open: headerAction },
@@ -348,6 +355,7 @@ for (const locale of ["de", "ru"])
         await page.goto(screen.path);
         await expect(page.locator("html")).toHaveAttribute("lang", locale);
         await screen.open?.(page);
+        await screen.ready?.(page);
         if (screen.path.includes("dialog=") || screen.path.includes("intent=") || screen.open)
           await expect(page.locator("[role=dialog], .account-menu:not([hidden])").last()).toBeVisible();
         expect(await phoneProblems(page), `${locale} ${screen.name}`).toEqual([]);
