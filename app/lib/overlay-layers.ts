@@ -595,13 +595,3 @@ export function parseLayerParam(value: string | null): OverlayLayer | null | "un
   const layer: OverlayLayer | undefined = OVERLAY_LAYERS.find((name: OverlayLayer): boolean => name === value);
   return layer ?? "unknown";
 }
-
-// Adds, replaces, or (for null) removes `layer` and keeps the other query parameters, such as `key`.
-export function layerUrl(overlayUrl: string, layer: OverlayLayer | null): string {
-  const absolute: boolean = /^[a-z][a-z\d+.-]*:/i.test(overlayUrl);
-  const base = "https://overlay.invalid";
-  const url = new URL(overlayUrl, base);
-  if (layer === null) url.searchParams.delete("layer");
-  else url.searchParams.set("layer", layer);
-  return absolute ? url.toString() : `${url.pathname}${url.search}${url.hash}`;
-}

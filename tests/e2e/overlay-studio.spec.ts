@@ -348,6 +348,7 @@ test("one Start test starts and stops the chat test and the characters test toge
   // The studio has one test button, in the toolbar.
   await expect(page.getByRole("button", { name: /test/i })).toHaveCount(1);
   const toggle = editor.locator(".ov-comp-bar").getByRole("button", { name: "Start test" });
+  await expect(toggle).toHaveText("");
   const status = editor.locator("[data-test-status]");
   const news = editor.locator("[data-test-news]");
   await expect(toggle).toHaveAttribute("aria-disabled", "false");
@@ -510,7 +511,7 @@ test("at 390 px the studio stacks the palette, the grid and the settings, and th
   }
   // The same holds with the vertical frame and with the settings of the characters, the longest panel.
   let save = saved(page);
-  await editor.getByRole("button", { name: "Vertical 18 × 32" }).click();
+  await editor.getByRole("button", { name: "Vertical", exact: true }).click();
   await save;
   await expect(frame).toHaveAttribute("data-orientation", "vertical");
   await page.route("**/api/overlay/characters", (route: Route) =>
@@ -524,21 +525,142 @@ test("at 390 px the studio stacks the palette, the grid and the settings, and th
   await expect(panel.getByRole("button", { name: "Reset playground" })).toBeVisible();
   expect(await sideways()).toBe(0);
 
-  // On a wide screen the three parts are side by side.
+  // On a phone the settings stay below the grid of the vertical output too, and the help is below them.
+  const help = editor.locator("[data-comp-help]");
+  const tallPhone = { grid: await rect(frame), side: await rect(panel), help: await rect(help) };
+  expect(tallPhone.grid.y + tallPhone.grid.height).toBeLessThanOrEqual(tallPhone.side.y);
+  expect(tallPhone.side.y + tallPhone.side.height).toBeLessThanOrEqual(tallPhone.help.y);
+
+  // On a wide screen the palette is beside the work area. The settings are beside the grid of the vertical output.
   await page.setViewportSize({ width: 1440, height: 1000 });
+  await expect(frame).toHaveAttribute("data-scaled", "true");
+  const tall = {
+    palette: await rect(editor.locator("[data-comp-palette]")),
+    grid: await rect(frame),
+    side: await rect(panel),
+    help: await rect(help),
+  };
+  expect(tall.palette.x + tall.palette.width).toBeLessThanOrEqual(tall.grid.x);
+  expect(tall.grid.x + tall.grid.width).toBeLessThanOrEqual(tall.side.x);
+  expect(Math.abs(tall.grid.y - tall.side.y)).toBeLessThan(4);
+  expect(Math.max(tall.grid.y + tall.grid.height, tall.side.y + tall.side.height)).toBeLessThanOrEqual(tall.help.y);
+  expect(await sideways()).toBe(0);
+  // The settings are below the grid of the horizontal output, at the width of the grid. The help is below them.
   save = saved(page);
-  await editor.getByRole("button", { name: "Horizontal 32 × 18" }).click();
+  await editor.getByRole("button", { name: "Horizontal", exact: true }).click();
   await save;
   await expect(frame).toHaveAttribute("data-scaled", "true");
+  await chip(editor, "poll").click();
+  await expect(panel).toHaveAttribute("data-comp-props", "poll");
   const wide = {
     palette: await rect(editor.locator("[data-comp-palette]")),
     grid: await rect(frame),
     side: await rect(panel),
+    help: await rect(help),
   };
   expect(wide.palette.x + wide.palette.width).toBeLessThanOrEqual(wide.grid.x);
-  expect(wide.grid.x + wide.grid.width).toBeLessThanOrEqual(wide.side.x);
   expect(Math.abs(wide.palette.y - wide.grid.y)).toBeLessThan(40);
+  expect(wide.grid.y + wide.grid.height).toBeLessThanOrEqual(wide.side.y);
+  expect(Math.abs(wide.grid.x - wide.side.x)).toBeLessThan(2);
+  expect(Math.abs(wide.grid.width - wide.side.width)).toBeLessThan(2);
+  expect(wide.side.y + wide.side.height).toBeLessThanOrEqual(wide.help.y);
   expect(await sideways()).toBe(0);
+  // The toolbar is one line: the tabs, the layout list, and the icon buttons at the right edge of the step.
+  const bar = await rect(editor.locator("[data-comp-toolbar]"));
+  const tools = await rect(editor.locator("[data-comp-tools]"));
+  const firstTab = await rect(editor.getByRole("button", { name: "Horizontal", exact: true }));
+  const list = await rect(editor.getByRole("combobox", { name: "Layout" }));
+  expect(bar.height).toBeLessThanOrEqual(48);
+  expect(firstTab.x + firstTab.width).toBeLessThan(list.x);
+  expect(list.x + list.width).toBeLessThan(tools.x);
+  expect(Math.abs(tools.x + tools.width - (bar.x + bar.width))).toBeLessThan(2);
+  for (const button of await editor.locator("[data-comp-tools] button").all()) {
+    const box = await rect(button);
+    expect(box.width).toBe(44);
+    expect(box.height).toBe(44);
+    await expect(button).toHaveText("");
+    expect(await button.getAttribute("title")).toContain((await button.getAttribute("aria-label")) ?? "no name");
+  }
+  await close(owner);
+});
+
+test("the layer groups close and open, and the closed help for the grid stays in reach of the keyboard", async ({
+  browser,
+}) => {
+  await runSql("overlay-studio-groups", [layersSql({ cells: { horizontal: { poll: POLL_CELL } } })]);
+  const owner = await signedIn(browser, "featureowner", KEYS_IP);
+  const page = await newPage(owner);
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/tools?view=overlay");
+  const editor = page.locator("[data-composition-editor]");
+  const grid = gridButton(editor, "Layout grid, 32 columns by 18 rows");
+  const picture = editor.locator('[data-comp-group="picture"]');
+  const content = editor.locator('[data-comp-group="content"]');
+  // The two groups start open. The summary of a group has its name and the number of its layers.
+  await expect(picture).toHaveJSProperty("open", true);
+  await expect(content).toHaveJSProperty("open", true);
+  await expect(picture.locator("summary")).toHaveText("Picture · 3");
+  await expect(content.locator("summary")).toHaveText("Content · 6");
+  await expect(picture.locator("[data-comp-layer]")).toHaveText(["+ Chat", "+ Characters", "+ Camera frame"]);
+  // The poll is on the grid: its chip selects it.
+  await chip(editor, "poll").click();
+  await expect(settings(editor)).toHaveAttribute("data-comp-props", "poll");
+  // Enter on the summary closes the group: its chips leave the tab sequence. The other group stays open.
+  await content.locator("summary").focus();
+  await page.keyboard.press("Enter");
+  await expect(content).toHaveJSProperty("open", false);
+  await expect(chip(editor, "poll")).toBeHidden();
+  await expect(chip(editor, "chat")).toBeVisible();
+  await page.keyboard.press("Tab");
+  await expect(grid).toBeFocused();
+  // The layer stays selected. "Remove from grid" moves the focus to its chip, so the closed group opens.
+  await expect(settings(editor)).toHaveAttribute("data-comp-props", "poll");
+  const removed = saved(page);
+  await settings(editor).getByRole("button", { name: "Remove from grid" }).click();
+  await removed;
+  await expect(content).toHaveJSProperty("open", true);
+  await expect(chip(editor, "poll")).toBeFocused();
+  await expect(chip(editor, "poll")).toHaveText("+ Poll");
+
+  // The help for the grid is closed. Its text does not show.
+  const help = editor.locator("[data-comp-help]");
+  const summary = help.locator("summary");
+  await expect(help).toHaveJSProperty("open", false);
+  await expect(summary).toHaveText("How the grid works");
+  await expect(help.getByText("Keyboard: arrow keys move the cursor", { exact: false })).toBeHidden();
+  // While the help is closed, the grid has its description: a hidden text outside the help.
+  const keys =
+    "Select a placed layer to show its handles. Drag the layer to move it. Drag a handle to resize it. Drag the " +
+    "layer onto “Layers · one of each” to remove it. Keyboard: arrow keys move the cursor, Space or Enter picks up " +
+    "and puts down a layer, Shift + arrow moves the selected layer one cell, Alt + arrow resizes it one cell from " +
+    "its bottom-right corner, Delete or Backspace removes the selected layer, Escape cancels.";
+  await expect(grid).toHaveAccessibleDescription(keys);
+  // The browser gives the same description to a screen reader, from its own accessibility tree.
+  const session = await page.context().newCDPSession(page);
+  const described = async (): Promise<string> => {
+    const { root } = await session.send("DOM.getDocument", { depth: 0 });
+    const { nodeId } = await session.send("DOM.querySelector", { nodeId: root.nodeId, selector: "[data-comp-grid]" });
+    const { nodes } = await session.send("Accessibility.getPartialAXTree", { nodeId, fetchRelatives: false });
+    return String(nodes[0]?.description?.value ?? "");
+  };
+  expect(await described()).toBe(keys);
+  // The summary is in the tab sequence after the settings. Enter opens the help, and all of its text shows.
+  await summary.focus();
+  await expect(summary).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(help).toHaveJSProperty("open", true);
+  await expect(help.locator("p")).toHaveText([
+    "In “Layers · one of each”, select a layer to add it at the first free place. Or drag it onto the grid.",
+    "Select a placed layer to show its handles. Drag the layer to move it. Drag a handle to resize it. Drag the layer onto “Layers · one of each” to remove it.",
+    /^Keyboard: arrow keys move the cursor, .* Escape cancels\.$/,
+    "A cell is 60 × 60 pixels. Set the OBS browser source to 1920 × 1080 for this orientation.",
+  ]);
+  await expect(help.locator("p").first()).toBeVisible();
+  // The description of the grid is the same with the open help.
+  await expect(grid).toHaveAccessibleDescription(keys);
+  expect(await described()).toBe(keys);
+  await page.keyboard.press("Enter");
+  await expect(help).toHaveJSProperty("open", false);
   await close(owner);
 });
 
@@ -551,29 +673,38 @@ test("the keyboard alone places, selects, changes and removes a layer", async ({
   const grid = gridButton(editor, "Layout grid, 32 columns by 18 rows");
   const status = editor.locator("[data-grid-status]");
   const panel = settings(editor);
-  // Tab goes through the toolbar, the layout list and its button, then the chips in their order, then the grid.
-  await editor.getByRole("button", { name: "Horizontal 32 × 18" }).focus();
+  // Tab goes through the toolbar (the tabs, the layout list, the icon buttons), the preview background, then each
+  // group of the palette with its chips in their order, then the grid. An icon button has no text: its name is its
+  // label.
+  await editor.getByRole("button", { name: "Horizontal", exact: true }).focus();
   const order: string[] = [];
-  for (let step = 0; step < 15; step += 1) {
+  for (let step = 0; step < 17; step += 1) {
     await page.keyboard.press("Tab");
-    order.push(await page.evaluate(() => (document.activeElement?.textContent ?? "").trim()));
+    order.push(
+      await page.evaluate((): string => {
+        const element: Element | null = document.activeElement;
+        return (element?.getAttribute("aria-label") ?? element?.textContent ?? "").trim();
+      }),
+    );
   }
   expect(order).toEqual([
-    "Vertical 18 × 32",
-    "Transparent",
-    "Sample game",
-    "Start test",
+    "Vertical",
     "Your layout · not saved yet",
     "Save as a new layout",
+    "Start test",
+    "Transparent",
+    "Sample game",
+    "Picture · 3",
     "+ Chat",
     "+ Characters",
+    "+ Camera frame",
+    "Content · 6",
     "+ Poll",
     "+ Topic",
     "+ Up next",
     "+ Message banner",
     "+ Community card",
     "+ Support banner",
-    "+ Camera frame",
   ]);
   await page.keyboard.press("Tab");
   await expect(grid).toBeFocused();
@@ -822,7 +953,7 @@ test("the owner picks a preset in the list, changes it, resets it, and keeps lay
   await expect(obs.locator('.ov-layer[data-layer="chat"]')).toBeVisible();
   await expect(obs.locator('.ov-layer[data-layer="camera"]')).toHaveCount(0);
 
-  // One step: the list is in the row above the grid. A preset opens in the grid and goes on stream at once.
+  // One step: the list is in the toolbar above the grid. A preset opens in the grid and goes on stream at once.
   await list.click();
   await expect(page.getByRole("option")).toHaveText([
     "Just chatting · preset",
@@ -841,22 +972,30 @@ test("the owner picks a preset in the list, changes it, resets it, and keeps lay
   const loads: string[] = [];
   obs.on("framenavigated", (navigated) => loads.push(navigated.url()));
 
-  // An edit of the grid changes the preset: the list says so, and a button brings the preset back.
+  // An edit of the grid changes the preset: the list says so, and an icon button brings the preset back.
   await expect(picker.locator("[data-layout-reset]")).toHaveCount(0);
   const removed = saved(page);
   await page.locator('[data-comp-layer="poll"]').click();
   await page.getByRole("button", { name: "Remove from grid" }).click();
   await removed;
   await expect(list).toHaveText("Gameplay · preset, changed by you");
+  const reset = picker.getByRole("button", { name: "Reset to the preset" });
+  await expect(reset).toHaveText("");
+  await expect(reset).toHaveAttribute("title", "Reset to the preset");
+  await expect(reset.locator("svg")).toHaveClass(/icon-reset/);
   done = layoutSaved(page);
-  await picker.getByRole("button", { name: "Reset to the preset" }).click();
+  await reset.click();
   await done;
   await expect(frame.locator('[data-grid-box="poll"]')).toHaveCount(1);
   await expect(list).toHaveText("Gameplay · preset");
   await expect(picker.locator("[data-layout-reset]")).toHaveCount(0);
 
   // A copy with a name of the owner goes on stream.
-  await picker.getByRole("button", { name: "Save as a new layout" }).click();
+  const saveAs = picker.getByRole("button", { name: "Save as a new layout" });
+  await expect(saveAs).toHaveText("");
+  await expect(saveAs).toHaveAttribute("title", "Save as a new layout");
+  await expect(saveAs.locator("svg")).toHaveClass(/icon-save/);
+  await saveAs.click();
   const fresh = page.getByRole("dialog", { name: "New layout" });
   const create = fresh.getByRole("button", { name: "Create and put on stream" });
   await expect(create).toBeDisabled();
@@ -875,8 +1014,18 @@ test("the owner picks a preset in the list, changes it, resets it, and keeps lay
   const otherList = other.locator('[data-layout-picker="horizontal"]').getByRole("combobox", { name: "Layout" });
   await expect(otherList).toHaveText("Raid night");
 
-  // The layout that the page had first is a layout of the owner now. It gets a new name, and then it goes.
-  await picker.getByRole("button", { name: "Rename or delete layouts" }).click();
+  // The layout that the page had first is a layout of the owner now. It gets a new name, and then it goes. The
+  // last entry of the list opens the layouts of the owner. It is not a layout: the list keeps its value.
+  await list.click();
+  await expect(page.getByRole("option")).toHaveText([
+    "Just chatting · preset",
+    "Gameplay · preset",
+    "My layout",
+    "Raid night",
+    "New layout…",
+    "Rename or delete layouts…",
+  ]);
+  await page.getByRole("option", { name: "Rename or delete layouts…" }).click();
   const mine = page.getByRole("dialog", { name: "Your layouts" });
   await expect(mine.locator("[data-layout-row]")).toHaveCount(2);
   const first = mine.locator("[data-layout-row]").filter({ has: page.getByLabel("Name of My layout") });
@@ -897,6 +1046,7 @@ test("the owner picks a preset in the list, changes it, resets it, and keeps lay
   await done;
   await expect(mine.locator("[data-layout-row]")).toHaveCount(1);
   await page.keyboard.press("Escape");
+  await expect(list).toHaveText("Raid night");
   await otherList.click();
   await expect(other.getByRole("option", { name: "Raid night" })).toBeVisible();
   await expect(other.getByRole("option", { name: "Cozy" })).toHaveCount(0);
@@ -929,7 +1079,7 @@ test("the owner picks a preset in the list, changes it, resets it, and keeps lay
   await page.unroute("**/api/overlay");
   await expect(list).toHaveText("Gameplay · preset");
   const outputSaved = saved(page);
-  await editor.getByRole("button", { name: "Vertical 18 × 32" }).click();
+  await editor.getByRole("button", { name: "Vertical", exact: true }).click();
   await outputSaved;
   const tall = editor.locator('[data-layout-picker="vertical"]').getByRole("combobox", { name: "Layout" });
   await tall.click();

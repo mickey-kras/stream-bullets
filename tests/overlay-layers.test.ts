@@ -24,7 +24,6 @@ import {
   frameSize,
   layerEnabled,
   layerPixels,
-  layerUrl,
   layersPatchSchema,
   mergeLayers,
   onAnyOutput,
@@ -978,7 +977,7 @@ describe("characters maximum", (): void => {
   });
 });
 
-describe("layer URLs", (): void => {
+describe("layer parameter of the overlay URL", (): void => {
   it("reads the layer parameter: none, a known layer or unknown", (): void => {
     expect(parseLayerParam(null)).toBeNull();
     expect(parseLayerParam("chat")).toBe("chat");
@@ -986,21 +985,5 @@ describe("layer URLs", (): void => {
     expect(parseLayerParam("characters")).toBe("characters");
     for (const value of ["", "Chat", "chat ", "all", "__proto__", "toString"])
       expect(parseLayerParam(value)).toBe("unknown");
-  });
-
-  it("adds, replaces or removes the layer and keeps the key", (): void => {
-    const url = "https://sb.example/@host/overlay?key=abc-_123";
-    expect(layerUrl(url, "chat")).toBe("https://sb.example/@host/overlay?key=abc-_123&layer=chat");
-    expect(layerUrl(`${url}&layer=chat`, "characters")).toBe(
-      "https://sb.example/@host/overlay?key=abc-_123&layer=characters",
-    );
-    expect(layerUrl(`${url}&layer=chat`, null)).toBe(url);
-    expect(layerUrl(url, null)).toBe(url);
-    expect(parseLayerParam(new URL(layerUrl(url, "content")).searchParams.get("layer"))).toBe("content");
-  });
-
-  it("keeps a relative URL relative", (): void => {
-    expect(layerUrl("/@host/overlay?key=k", "chat")).toBe("/@host/overlay?key=k&layer=chat");
-    expect(layerUrl("/@host/overlay", "chat")).toBe("/@host/overlay?layer=chat");
   });
 });

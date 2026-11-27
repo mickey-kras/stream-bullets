@@ -8,14 +8,14 @@ import { ChatDeliveryContext } from "../app/components/channels/use-live-channel
 import type { CharactersControl } from "../app/components/overlay/characters-controls";
 import { ChatLayer, chatStyle, shortName } from "../app/components/overlay/chat-layer";
 import { outputSources, type OverlaySources } from "../app/components/live";
-import { LayerPalette } from "../app/components/overlay/layer-palette";
+import { LAYER_GROUPS, LayerPalette, type LayerGroup } from "../app/components/overlay/layer-palette";
 import { LayerProperties, OVERLAY_MESSAGE_MAX } from "../app/components/overlay/layer-properties";
-import { LAYER_NAMES, LayoutGrid, type LayoutGridHandle } from "../app/components/overlay/layout-grid";
+import { GridHelp, LAYER_NAMES, LayoutGrid, type LayoutGridHandle } from "../app/components/overlay/layout-grid";
 import { CharactersSlot, OverlayComposition, usesDesignCanvas } from "../app/components/overlay/overlay-composition";
 import { controlState, OverlayControl } from "../app/components/overlay/overlay-control";
 import { DockLink } from "../app/components/overlay/dock-link";
 import { LayoutPicker, layoutOptions } from "../app/components/overlay/layout-picker";
-import { OverlayLink, sourcesText } from "../app/components/overlay/overlay-link";
+import { OutputCard, OverlayLink, sourcesText, type OutputKey } from "../app/components/overlay/overlay-link";
 import {
   OverlayStage,
   optionColumns,
@@ -135,14 +135,25 @@ const NO_LINKS: Readonly<Record<Orientation, boolean>> = { horizontal: false, ve
 /** The link panel saves nothing in a static render. */
 const LINK_SAVES = { busy: false, hasDock: false, onTwitchOnly: (): void => undefined };
 
-describe("layout list of the studio", () => {
+/** Each icon button in `html`: its accessible name, its tooltip, the other attributes, and its content. */
+function iconButtons(html: string): { name: string; title: string; more: string; content: string }[] {
+  const pattern = /<button type="button" class="icon-button" aria-label="([^"]*)" title="([^"]*)"([^>]*)>(.*?)<\/button>/;
+  return [...html.matchAll(new RegExp(pattern, "gs"))].map((match: RegExpMatchArray) => ({
+    name: match[1],
+    title: match[2],
+    more: match[3],
+    content: match[4],
+  }));
+}
+
+describe("toolbar and layout list of the studio", () => {
   const act = (): Promise<boolean> => Promise.resolve(true);
   const labels = (layouts: OverlayLayouts, layers: OverlayLayers): string[] =>
     layoutOptions(layoutChoices(layouts, layers, "horizontal")).map((option): string => option.label);
   const picker = (layouts: OverlayLayouts, layers: OverlayLayers, busy: boolean = false): string =>
     renderToStaticMarkup(createElement(LayoutPicker, { output: "horizontal", layers, layouts, busy, act }));
 
-  it("is one row in step 1, between the output switch and the grid: no separate step to pick a layout", () => {
+  it("is one line in step 1: the output tabs, the layout list, and the icon buttons at the right edge", () => {
     const html: string = renderToStaticMarkup(
       createElement(OverlayControl, {
         initial: state,
@@ -153,15 +164,55 @@ describe("layout list of the studio", () => {
       }),
     );
     expect(html.match(/class="ov-step-num"/g)).toHaveLength(2);
-    const row: number = html.indexOf('data-layout-picker="horizontal"');
-    expect(row).toBeGreaterThan(html.indexOf("data-comp-orientation-note"));
-    expect(row).toBeLessThan(html.indexOf('class="ov-studio"'));
+    const bar: string = html.slice(html.indexOf("data-comp-toolbar"), html.indexOf('class="ov-comp-notes"'));
+    // The tabs name the output only: no aspect ratio and no grid size.
+    const tabs: string[] = [...bar.matchAll(/data-comp-orientation="[a-z]+">([^<]*)</g)].map(
+      (match: RegExpMatchArray): string => match[1],
+    );
+    expect(tabs).toEqual(["Horizontal", "Vertical"]);
+    // The sequence in the line, which is also the tab sequence: the tabs, the list, the icon buttons.
+    const list: number = bar.indexOf('data-layout-picker="horizontal"');
+    expect(bar.indexOf("data-comp-orientation")).toBeLessThan(list);
+    expect(list).toBeLessThan(bar.indexOf("data-comp-tools"));
+    expect(bar).toContain(">Layout</span>");
+    expect(bar).toContain('role="combobox"');
+    // Each button of the toolbar shows an icon only. Its name is also its tooltip.
+    const buttons = iconButtons(bar);
+    expect(buttons.map((button): string => button.name)).toEqual(["Save as a new layout", "Start test"]);
+    for (const button of buttons) {
+      expect(button.title.startsWith(button.name), button.name).toBe(true);
+      expect(button.content, button.name).toMatch(/^<svg[^>]*aria-hidden="true"[^>]*>.*<\/svg>$/s);
+    }
+    expect(buttons[0].content).toContain("icon-save");
+    expect(buttons[1].content).toContain("icon-play");
+    // The toolbar has no other button.
+    expect(bar.match(/<button/g)).toHaveLength(tabs.length + 1 + buttons.length);
+    expect(bar).not.toContain("data-comp-background");
+    // The line below the toolbar tells what the tabs do and that changes are live. It has the preview background,
+    // which is before the palette and the grid in the tab sequence: Tab goes from the grid to the settings.
+    const notes: string = html.slice(html.indexOf('class="ov-comp-notes"'), html.indexOf('class="ov-studio"'));
+    expect(notes).toContain("data-comp-orientation-note");
+    expect(notes).toContain("Changes go live right away");
+    expect(notes.match(/data-comp-background="[a-z]+"/g)).toEqual([
+      'data-comp-background="checker"',
+      'data-comp-background="game"',
+    ]);
+    const stage: string = html.slice(html.indexOf("data-comp-grid="), html.indexOf("data-comp-help"));
+    expect(stage).toContain("data-comp-props");
+    expect(stage).not.toContain("data-comp-background");
   });
 
   it("shows the layout on stream that is not saved yet, and offers a copy of it", () => {
     const html: string = picker(EMPTY_LAYOUTS, placed);
     expect(html).toContain(">Layout</span>");
-    expect(html).toContain("Save as a new layout");
+    expect(iconButtons(html)).toEqual([
+      {
+        name: "Save as a new layout",
+        title: "Save as a new layout",
+        more: ' data-layout-save-as="true"',
+        content: expect.stringContaining("icon-save") as string,
+      },
+    ]);
     // The list: the presets of the output, the layout on stream, and the entry for a new layout.
     expect(labels(EMPTY_LAYOUTS, placed)).toEqual([
       "Just chatting · preset",
@@ -170,7 +221,6 @@ describe("layout list of the studio", () => {
       "New layout…",
     ]);
     // No layout of the streamer yet, and no preset on stream.
-    expect(html).not.toContain("data-layout-manage");
     expect(html).not.toContain("data-layout-reset");
   });
 
@@ -181,24 +231,45 @@ describe("layout list of the studio", () => {
     });
     expect(picked.layers.cells.horizontal).toEqual(presetCells("gameplay"));
     const same: string = picker(picked.layouts, picked.layers);
+    // The layout that the page had is a layout of the streamer now: the last entry of the list gives it a name or
+    // deletes it.
     expect(labels(picked.layouts, picked.layers)).toEqual([
       "Just chatting · preset",
       "Gameplay · preset",
       "My layout",
       "New layout…",
+      "Rename or delete layouts…",
     ]);
     expect(same).not.toContain("data-layout-reset");
-    // The layout that the page had is a layout of the streamer now: it can get a name or go.
-    expect(same).toContain("Rename or delete layouts");
+    expect(iconButtons(same).map((button): string => button.name)).toEqual(["Save as a new layout"]);
     const moved: OverlayLayers = {
       ...picked.layers,
       cells: { ...picked.layers.cells, horizontal: { ...picked.layers.cells.horizontal, poll: null } },
     };
-    const changed: string = picker(picked.layouts, moved);
+    const changed = iconButtons(picker(picked.layouts, moved));
     expect(labels(picked.layouts, moved)[1]).toBe("Gameplay · preset, changed by you");
-    expect(changed).toContain("Reset to the preset");
-    // No action during a save.
-    expect(picker(picked.layouts, moved, true).match(/<button[^>]* disabled=""/g)?.length).toBeGreaterThanOrEqual(3);
+    expect(changed.map((button): string => button.name)).toEqual(["Save as a new layout", "Reset to the preset"]);
+    expect(changed[1]).toMatchObject({ title: "Reset to the preset", more: ' data-layout-reset="true"' });
+    expect(changed[1].content).toContain("icon-reset");
+    // No action during a save: the list and the two buttons.
+    const busy: string = picker(picked.layouts, moved, true);
+    expect(iconButtons(busy).map((button): string => button.more)).toEqual([
+      ' disabled="" data-layout-save-as="true"',
+      ' disabled="" data-layout-reset="true"',
+    ]);
+    expect(busy).toMatch(/<button[^>]*role="combobox"[^>]* disabled=""/);
+  });
+
+  it("puts more tools of the toolbar after the layout buttons", () => {
+    const html: string = renderToStaticMarkup(
+      createElement(
+        LayoutPicker,
+        { output: "vertical", layers: placed, layouts: EMPTY_LAYOUTS, busy: false, act },
+        createElement("button", { type: "button" }, "More"),
+      ),
+    );
+    expect(html).toContain('data-layout-picker="vertical"');
+    expect(html).toMatch(/data-layout-save-as="true">.*<\/button><button type="button">More<\/button><\/div>/s);
   });
 });
 
@@ -252,45 +323,135 @@ describe("overlay control page", () => {
     expect(sourcesText({ count: 0, seenAt: 1000 }, 1000)).toBe("OBS is not connected. Last seen just now.");
   });
 
-  it("has one link section for each output, with its name, its source size and its own buttons", () => {
+  /** The title row of step 2, with its buttons. */
+  const linkHead = (markup: string): string =>
+    markup.slice(markup.indexOf('class="ov-step-head"'), markup.indexOf('class="ov-url"'));
+  /** The cards of the outputs: they come before the closed sections. */
+  const linkCards = (markup: string): string[] =>
+    markup.slice(0, markup.indexOf("<details")).split('<section class="ov-url-output"').slice(1);
+
+  it("has the link buttons in the title row of step 2, and one card for each output", () => {
     const html = (hasKey: Readonly<Record<Orientation, boolean>>): string =>
       renderToStaticMarkup(
         createElement(OverlayLink, { hasKey, layers: placed, sources: null, now: 1000, ...LINK_SAVES }),
       );
-    // The closed sections come after the two links: the guide, the dock, and the Twitch switches.
-    const sections = (markup: string): string[] =>
-      markup.slice(0, markup.indexOf("<details")).split('<section class="ov-url-output"').slice(1);
     const none: string = html(NO_LINKS);
-    // One sentence for the two links, before them.
+    // Step 2 is a region with its title. A page without a link has one button: it makes the links.
+    expect(none).toMatch(/^<section class="ov-step" aria-labelledby="([^"]+)" data-step="obs">/);
+    expect(linkHead(none)).toContain('<span class="ov-step-num">2</span> Add to OBS</h2>');
+    expect(linkHead(none).match(/<button/g)).toHaveLength(1);
+    expect(linkHead(none)).toMatch(
+      /<button type="button" class="gold" aria-disabled="false" data-ov-links="hidden"><svg[^>]*icon-key.*?<\/svg>Create links</,
+    );
+    // One sentence for the two links, before the cards.
     expect(none.match(/Each output has its own private link for OBS\. Use one link or both\./g)).toHaveLength(1);
-    expect(none.indexOf("Each output has its own private link")).toBeLessThan(none.indexOf("<section"));
-    const [horizontal, vertical] = sections(none);
-    expect(sections(none)).toHaveLength(2);
+    expect(none.indexOf("Each output has its own private link")).toBeLessThan(none.indexOf("ov-url-output"));
+    const [horizontal, vertical] = linkCards(none);
+    expect(linkCards(none)).toHaveLength(2);
     expect(horizontal).toContain('data-ov-output="horizontal"');
     expect(vertical).toContain('data-ov-output="vertical"');
-    // Each section is a region with the name of its output.
-    for (const [section, name] of [
+    // Each card is a region with the name of its output. It has no button and no link of its own.
+    for (const [card, name] of [
       [horizontal, "Horizontal output"],
       [vertical, "Vertical output"],
     ]) {
-      const id: string | undefined = /aria-labelledby="([^"]+)"/.exec(section)?.[1];
+      const id: string | undefined = /aria-labelledby="([^"]+)"/.exec(card)?.[1];
       expect(id).toBeDefined();
-      expect(section).toContain(`<p id="${id}"><strong>${name}</strong></p>`);
-      expect(section.match(/<button/g)).toHaveLength(1);
-      expect(section).toContain(">Create overlay link</button>");
-      expect(section).not.toContain("data-ov-sources");
+      expect(card).toContain(`<h3 class="ov-url-name" id="${id}">${name}</h3>`);
+      expect(card).not.toContain("<button");
+      expect(card).not.toContain("<input");
+      expect(card).not.toContain("data-ov-sources");
     }
     expect(horizontal).toContain("Add a Browser source in OBS: width 1920, height 1080.");
     expect(vertical).toContain("Add a Browser source in OBS: width 1080, height 1920.");
-    // A link of one output: that section offers to show it and to replace it. The other section does not change.
-    const [made, other] = sections(html({ horizontal: false, vertical: true })).reverse();
-    expect(made).toContain('data-ov-output="vertical"');
-    expect(made).toContain(">Show link</button>");
-    expect(made).toContain(">Regenerate link</button>");
-    expect(made).toContain("Your private overlay link is hidden.");
-    expect(other).toContain(">Create overlay link</button>");
-    expect(other).not.toContain("Show link");
-    expect(other).not.toContain("Your private overlay link is hidden.");
+    // A page with a link: the first button shows the links, and the second makes new links.
+    const made: string = html({ horizontal: false, vertical: true });
+    expect(linkHead(made).match(/<button/g)).toHaveLength(2);
+    expect(linkHead(made)).toMatch(
+      /<button type="button" class="gold" aria-disabled="false" data-ov-links="hidden"><svg[^>]*icon-eye".*?<\/svg>Show links</,
+    );
+    expect(linkHead(made)).toMatch(
+      /<button type="button" data-ov-regenerate="true"><svg[^>]*icon-refresh[^>]*>.*?<\/svg>Regenerate links<\/button>/,
+    );
+    // Until the owner shows the links, the page has no link, and no text about hidden links or about privacy.
+    for (const markup of [none, made]) {
+      expect(markup).not.toContain("data-ov-url");
+      expect(markup).not.toContain("data-ov-private");
+      expect(markup).not.toContain("is hidden");
+      expect(markup).not.toContain("?key=");
+    }
+  });
+
+  it("shows the link of an output with a copy button in its card while the links show", () => {
+    const card = (link: OutputKey, visible: boolean = true, output: Orientation = "horizontal"): string =>
+      renderToStaticMarkup(
+        createElement(OutputCard, { output, link, visible, sources: { count: 1, seenAt: 900 }, now: 1000 }),
+      );
+    const url = "https://stream.example.test/@host/overlay?key=abc";
+    const shown: string = card({ made: true, url, kept: true });
+    // The sequence in the card: the name, the state in OBS, the link, the size.
+    expect(shown.indexOf("Horizontal output")).toBeLessThan(shown.indexOf("OBS is connected: 1 source."));
+    expect(shown.indexOf("OBS is connected: 1 source.")).toBeLessThan(shown.indexOf("data-ov-url"));
+    expect(shown.indexOf("data-ov-url")).toBeLessThan(shown.indexOf("Add a Browser source in OBS"));
+    const field: string | undefined = /<input[^>]*>/.exec(shown)?.[0];
+    expect(field).toContain('readOnly="" aria-label="Overlay URL: Horizontal output"');
+    expect(field).toContain(`data-ov-url="" value="${url}"/>`);
+    expect(iconButtons(shown)).toEqual([
+      {
+        name: "Copy overlay URL: Horizontal output",
+        title: "Copy overlay URL: Horizontal output",
+        more: "",
+        content: expect.stringContaining("icon-copy") as string,
+      },
+    ]);
+    expect(card({ made: true, url, kept: true }, true, "vertical")).toContain(
+      'aria-label="Overlay URL: Vertical output"',
+    );
+    // Hidden links, before and after the page read them: the card keeps its name, its state and its size.
+    for (const hidden of [card({ made: true, url: null, kept: true }), card({ made: true, url, kept: true }, false)]) {
+      expect(hidden).not.toContain("<input");
+      expect(hidden).not.toContain("<button");
+      expect(hidden).not.toContain("?key=");
+      expect(hidden).toContain("OBS is connected: 1 source.");
+      expect(hidden).not.toContain("data-ov-not-kept");
+    }
+    // A link that the server cannot give again: the card tells how to get a link that shows.
+    const lost: string = card({ made: true, url: null, kept: false });
+    expect(lost).toContain("This link cannot be shown again.");
+    expect(lost).not.toContain("<input");
+    // The page still has the link that it made: the link shows, without that text.
+    const inMemory: string = card({ made: true, url, kept: false });
+    expect(inMemory).toContain("data-ov-url");
+    expect(inMemory).not.toContain("data-ov-not-kept");
+    // An output without a link has no state in OBS.
+    expect(card({ made: false, url: null, kept: true })).not.toContain("data-ov-sources");
+  });
+
+  it("shows no link for each layer and no hint about the layer parameter", () => {
+    const panel: string = renderToStaticMarkup(
+      createElement(OverlayLink, {
+        hasKey: { horizontal: true, vertical: true },
+        layers: placed,
+        sources: null,
+        now: 1000,
+        ...LINK_SAVES,
+      }),
+    );
+    const card: string = renderToStaticMarkup(
+      createElement(OutputCard, {
+        output: "horizontal",
+        link: { made: true, url: "https://stream.example.test/@host/overlay?key=abc", kept: true },
+        visible: true,
+        sources: null,
+        now: 1000,
+      }),
+    );
+    for (const markup of [panel, card]) {
+      expect(markup).not.toContain("layer=");
+      expect(markup).not.toContain("data-ov-layer");
+      expect(markup).not.toContain("Layer URLs");
+    }
+    expect(card.match(/<input/g)).toHaveLength(1);
   });
 
   it("has a closed guide for a first use of OBS, in three groups of numbered steps", () => {
@@ -301,7 +462,7 @@ describe("overlay control page", () => {
     expect(guide).toMatch(/^<details class="[^"]*" data-ov-guide="true">/);
     expect(guide).not.toMatch(/^<details[^>]* open/);
     expect(guide).toContain("<summary>First time in OBS? Set it up step by step</summary>");
-    // The guide is after the two links and before the Twitch section.
+    // The guide is after the two cards and before the Twitch section.
     expect(html.indexOf("data-ov-guide")).toBeGreaterThan(html.lastIndexOf('<section class="ov-url-output"'));
     expect(html.indexOf("data-ov-guide")).toBeLessThan(html.indexOf("data-ov-twitch"));
     const groups: string[] = guide.split("<section").slice(1);
@@ -381,13 +542,13 @@ describe("overlay control page", () => {
       renderToStaticMarkup(
         createElement(OverlayLink, { hasKey, layers: placed, sources: given, now: 1000, ...LINK_SAVES }),
       );
-    const [horizontal, vertical] = html({ horizontal: true, vertical: true }).split("<section").slice(1);
+    const [horizontal, vertical] = linkCards(html({ horizontal: true, vertical: true }));
     expect(horizontal).toContain('data-ov-sources="2"');
     expect(horizontal).toContain("OBS is connected: 2 sources.");
     expect(vertical).toContain('data-ov-sources="0"');
     expect(vertical).toContain("OBS is not connected. Last seen 3 minutes ago.");
     // An output without a link shows no connection, and nothing shows before the live room tells.
-    const [, noLink] = html({ horizontal: true, vertical: false }).split("<section").slice(1);
+    const [, noLink] = linkCards(html({ horizontal: true, vertical: false }));
     expect(noLink).not.toContain("data-ov-sources");
     expect(html({ horizontal: true, vertical: true }, null)).not.toContain("data-ov-sources");
     // A vertical output that OBS never opened.
@@ -395,9 +556,7 @@ describe("overlay control page", () => {
       ...sources,
       outputs: { horizontal: { count: 2, seenAt: 900 }, vertical: { count: 0, seenAt: null } },
     };
-    expect(html({ horizontal: true, vertical: true }, never).split("<section")[2]).toContain(
-      "OBS did not connect yet.",
-    );
+    expect(linkCards(html({ horizontal: true, vertical: true }, never))[1]).toContain("OBS did not connect yet.");
   });
 
   it("reads the sources of each output, and all sources as horizontal from a room without them", () => {
@@ -414,16 +573,19 @@ describe("overlay control page", () => {
     expect(outputSources(old, "vertical")).toEqual({ count: 0, seenAt: null });
   });
 
-  it("offers each layer one time in the palette and marks the layers on the grid", () => {
+  it("offers each layer one time in the palette, in its group, and marks the layers on the grid", () => {
     const html: string = control();
     const chips: string[] = [...html.matchAll(/<button type="button" class="ov-palette-chip"[^>]*>/g)].map(
       (match: RegExpMatchArray): string => match[0],
     );
-    expect(chips.map((chip: string): string | undefined => /data-comp-layer="([a-z]+)"/.exec(chip)?.[1])).toEqual([
-      ...GRID_LAYERS,
-    ]);
+    const order: (string | undefined)[] = chips.map(
+      (chip: string): string | undefined => /data-comp-layer="([a-z]+)"/.exec(chip)?.[1],
+    );
+    // The sequence of the list is the sequence of the groups: the picture, then the content.
+    expect(order).toEqual(["chat", "characters", "camera", "poll", "topic", "next", "message", "card", "support"]);
+    expect([...order].sort()).toEqual([...GRID_LAYERS].sort());
     const marked: boolean[] = chips.map((chip: string): boolean => chip.includes('data-placed="true"'));
-    expect(marked).toEqual([true, false, true, false, false, false, false, false, false]);
+    expect(marked).toEqual([true, false, false, true, false, false, false, false, false]);
     for (const name of ["Chat", "Characters", "Poll", "Topic", "Up next", "Message banner", "Community card"])
       expect(html).toContain(`<span class="ov-palette-name">${name}</span>`);
     expect(html).toContain('<span class="ov-palette-name">Support banner</span>');
@@ -434,16 +596,37 @@ describe("overlay control page", () => {
     expect(chips[1]).not.toContain("aria-pressed");
   });
 
+  it("has the settings of the layer and the closed help for the grid after the grid", () => {
+    const work = (orientation: Orientation): string => {
+      const html: string = control({ ...state, layers: { ...placed, orientation } });
+      return html.slice(html.indexOf('class="ov-work"'));
+    };
+    for (const orientation of ["horizontal", "vertical"] as const) {
+      const html: string = work(orientation);
+      // The output of the grid sets the place of the settings: below the horizontal grid, beside the vertical one.
+      expect(html.startsWith(`class="ov-work" data-orientation="${orientation}"`), orientation).toBe(true);
+      const grid: number = html.indexOf("data-comp-grid=");
+      const settings: number = html.indexOf("data-comp-props");
+      const help: number = html.indexOf("data-comp-help");
+      expect(grid, orientation).toBeGreaterThan(0);
+      expect(settings, orientation).toBeGreaterThan(grid);
+      expect(help, orientation).toBeGreaterThan(settings);
+    }
+    expect(work("horizontal")).toContain("Set the OBS browser source to 1920 × 1080 for this orientation.");
+    expect(work("vertical")).toContain("Set the OBS browser source to 1080 × 1920 for this orientation.");
+  });
+
   it("starts with no layer selected, and the test needs a layer on stream", () => {
     const html: string = control();
     expect(html).toContain('data-comp-props=""');
     expect(html).toContain("No layer selected");
     expect(html).toContain("Select a layer on the grid to change it.");
     expect(html).not.toContain("data-props-remove");
-    expect(html).toMatch(
-      /<button type="button" aria-disabled="true" aria-describedby="[^"]+" data-test-toggle="true">Start test</,
-    );
-    expect(html).toContain("Put Chat or Characters on stream to start the test.");
+    const [test] = iconButtons(html).filter((button): boolean => button.more.includes("data-test-toggle"));
+    expect(test.name).toBe("Start test");
+    expect(test.title).toBe("Start test\nPut Chat or Characters on stream to start the test.");
+    expect(test.more).toMatch(/^ aria-disabled="true" aria-describedby="[^"]+" data-test-toggle="true"$/);
+    expect(html).toMatch(/<p class="sr-only" id="[^"]+" data-test-status="true">Put Chat or Characters on stream/);
     // The chat is on the grid and off stream: its box is dimmed and the preview has no chat.
     expect(html).toMatch(/data-grid-box="chat"[^>]* data-off="true"/);
     expect(html).not.toMatch(/data-grid-box="poll"[^>]* data-off/);
@@ -455,9 +638,10 @@ describe("overlay control page", () => {
   it("makes the test available and names the sample chat while the chat is on stream", () => {
     const on: OverlayLayers = { ...placed, chat: { ...placed.chat, enabled: true } };
     const html: string = control({ ...state, layers: on });
-    expect(html).toMatch(
-      /<button type="button" aria-disabled="false" aria-describedby="[^"]+" data-test-toggle="true">Start test</,
-    );
+    const [test] = iconButtons(html).filter((button): boolean => button.more.includes("data-test-toggle"));
+    expect(test.name).toBe("Start test");
+    expect(test.title).toMatch(/^Start test\nShows sample chat for 60 seconds/);
+    expect(test.more).toMatch(/^ aria-disabled="false" aria-describedby="[^"]+" data-test-toggle="true"$/);
     expect(html).toContain("Shows sample chat for 60 seconds and sample viewers as characters for 5 minutes in OBS.");
     expect(html).toContain("The preview shows sample messages, not your chat.");
     expect(html).toContain('class="ov-layer" data-layer="chat"');
@@ -720,14 +904,24 @@ describe("the test control", () => {
     );
   }
   const status = (html: string): string | undefined => /data-test-status="true">([^<]*)</.exec(html)?.[1];
-  const label = (html: string): string | undefined => /data-test-toggle="true">([^<]*)</.exec(html)?.[1];
+  /** The accessible name of the button. The button shows an icon only. */
+  const label = (html: string): string | undefined => iconButtons(html)[0]?.name;
   const unavailable = (html: string): boolean => html.includes('aria-disabled="true"');
+  /** The id of the text that describes the button. */
+  const described = (html: string): string | undefined =>
+    /aria-describedby="([^"]+)"/.exec(iconButtons(html)[0].more)?.[1];
 
   it("needs the chat or the characters on stream", () => {
     const html: string = test({});
     expect(label(html)).toBe("Start test");
     expect(unavailable(html)).toBe(true);
     expect(status(html)).toBe("Put Chat or Characters on stream to start the test.");
+    // The button shows the play icon. The text is its description and its tooltip, and it does not show.
+    const [button] = iconButtons(html);
+    expect(button.content).toContain("icon-play");
+    expect(button.title).toBe("Start test\nPut Chat or Characters on stream to start the test.");
+    expect(button.more).not.toContain("data-running");
+    expect(html).toContain(`<p class="sr-only" id="${described(html)}" data-test-status="true">`);
     // The news region is empty until the test starts or stops.
     expect(html).toContain('<p class="sr-only" aria-live="polite" data-test-news="true"></p>');
   });
@@ -758,6 +952,13 @@ describe("the test control", () => {
     expect(label(chat)).toBe("Stop test");
     expect(unavailable(chat)).toBe(false);
     expect(status(chat)).toBe("The test runs in OBS. 30 s left.");
+    // A test that runs: the stop icon in the pressed colors, the name of the stop action, and the time left in view.
+    const [stop] = iconButtons(chat);
+    expect(stop.content).toContain("icon-stop");
+    expect(stop.title).toBe("Stop test");
+    expect(stop.more).toContain('data-running="true"');
+    expect(stop.more).not.toContain("aria-pressed");
+    expect(chat).toContain(`<p class="muted ov-comp-note" id="${described(chat)}" data-test-status="true">`);
     const both: string = test({
       chatUntil: 31_000,
       characters: { enabled: true, testRunning: true, testLeft: 240_500 },
@@ -779,6 +980,31 @@ describe("layer palette and layout grid", () => {
       createElement(LayerPalette, { placed: ["chat", "poll"], selected, grid, onSelect: nothing, drop }),
     );
   }
+
+  it("has the layers in groups that start open, each with its name and the number of its layers", () => {
+    const html: string = palette(null);
+    const groups: string[] = html.split("<details").slice(1);
+    expect(groups.map((group: string): string | undefined => /<summary>([^<]*)</.exec(group)?.[1])).toEqual([
+      "Picture · 3",
+      "Content · 6",
+    ]);
+    for (const group of groups) expect(group).toMatch(/^ class="ov-palette-group" data-comp-group="[a-z]+" open="">/);
+    const layersOf = (group: string): string[] =>
+      [...group.matchAll(/data-comp-layer="([a-z]+)"/g)].map((match: RegExpMatchArray): string => match[1]);
+    expect(layersOf(groups[0])).toEqual(["chat", "characters", "camera"]);
+    expect(layersOf(groups[1])).toEqual(["poll", "topic", "next", "message", "card", "support"]);
+    // The groups are data: each layer of the grid is in one group, and the list shows each group.
+    expect(LAYER_GROUPS.map((group: LayerGroup): string => group.id)).toEqual(["picture", "content"]);
+    const grouped: GridLayer[] = LAYER_GROUPS.flatMap((group: LayerGroup): readonly GridLayer[] => group.layers);
+    expect([...grouped].sort()).toEqual([...GRID_LAYERS].sort());
+    expect(new Set(grouped).size).toBe(grouped.length);
+    // The text about the chips does not show. It is the description of each chip for a screen reader.
+    const hint: string | undefined = /<p hidden="" id="([^"]+)" data-comp-palette-hint="true">Select a layer to/.exec(
+      html,
+    )?.[1];
+    expect(hint).toBeDefined();
+    expect(html.match(new RegExp(`class="ov-palette-chip"[^>]* aria-describedby="${hint}"`, "g"))).toHaveLength(9);
+  });
 
   it("marks the selected chip and shows the drop place while a layer is carried", () => {
     expect(palette(null)).toContain("Layers · one of each");
@@ -824,6 +1050,41 @@ describe("layer palette and layout grid", () => {
     expect(layout(placed, "topic")).not.toContain("data-selected");
     expect(layout({ ...placed, orientation: "vertical" }, "poll")).not.toContain("data-grid-box");
     expect(layout(placed, "poll")).toContain('data-background="checker"');
+  });
+
+  it("describes the grid for a screen reader with a hidden text, outside the closed help", () => {
+    const html: string = layout(placed, null);
+    const id: string | undefined = /data-comp-grid="true"[^>]* aria-describedby="([^"]+)"/.exec(html)?.[1];
+    expect(id).toBeDefined();
+    // The description is not in a details element, so it does not depend on the state of the help.
+    expect(html).not.toContain("<details");
+    expect(html).toContain(
+      `<p hidden="" id="${id}" data-comp-grid-keys="true">Select a placed layer to show its handles. Drag the layer ` +
+        "to move it. Drag a handle to resize it. Drag the layer onto “Layers · one of each” to remove it. " +
+        "Keyboard: arrow keys move the cursor, Space or Enter picks up and puts down a layer, Shift + arrow moves " +
+        "the selected layer one cell, Alt + arrow resizes it one cell from its bottom-right corner, Delete or " +
+        "Backspace removes the selected layer, Escape cancels.</p>",
+    );
+  });
+
+  it("keeps the help for the grid in a closed details element: add, move, resize, remove, keys and sizes", () => {
+    const help = (orientation: Orientation): string => renderToStaticMarkup(createElement(GridHelp, { orientation }));
+    const html: string = help("horizontal");
+    expect(html).toMatch(/^<details class="[^"]*" data-comp-help="true"><summary>How the grid works<\/summary>/);
+    expect(html).not.toMatch(/^<details[^>]* open/);
+    const texts: string[] = [...html.matchAll(/<p>(.*?)<\/p>/g)].map((match: RegExpMatchArray): string => match[1]);
+    expect(texts).toHaveLength(4);
+    expect(texts[0]).toBe(
+      "In “Layers · one of each”, select a layer to add it at the first free place. Or drag it onto the grid.",
+    );
+    expect(texts[1]).toContain("Drag the layer to move it. Drag a handle to resize it.");
+    expect(texts[1]).toContain("to remove it.");
+    expect(texts[2]).toMatch(/^Keyboard: arrow keys move the cursor, .* Escape cancels\.$/);
+    expect(texts[3]).toBe(
+      "A cell is 60 × 60 pixels. <span data-comp-frame-size=\"true\">Set the OBS browser source to 1920 × 1080 for " +
+        "this orientation.</span>",
+    );
+    expect(help("vertical")).toContain("Set the OBS browser source to 1080 × 1920 for this orientation.");
   });
 });
 

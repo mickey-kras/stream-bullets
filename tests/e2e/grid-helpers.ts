@@ -33,6 +33,13 @@ export function verticalKeySql(): string {
 /** SQL that takes each overlay key of the feature host away. Other specs start without a key. */
 export const noKeysSql: string = `DELETE FROM overlay_keys WHERE streamer_id=${FEATURE_HOST};`;
 
+/**
+ * SQL that starts the quota of the feature owner for link requests again. The server takes 6 of these requests each
+ * minute, and the link buttons of the Overlay section send one for each output.
+ */
+export const noLinkQuotaSql: string =
+  "DELETE FROM app_rate_limits WHERE key='content:'||(SELECT id FROM user WHERE name='featureowner');";
+
 /** No layer on the grid, and the chat and the characters off. */
 export const resetLayers: string = layersSql();
 

@@ -36,6 +36,7 @@ import {
   GRID_LAYERS,
   MIN_CELLS,
   cellPixels,
+  frameSize,
   layerEnabled,
   type CellRect,
   type GridLayer,
@@ -609,12 +610,35 @@ export function LayoutGrid({
           </div>
         </div>
       </section>
-      <p className="muted ov-comp-help" id={helpId}>
-        {t("overlay.grid.help", { px: CELL_PX })}
+      {/* The description of the grid for a screen reader. It is hidden and outside the closed help (GridHelp), so
+          that it does not depend on how a browser exposes the content of a closed details element. */}
+      <p hidden id={helpId} data-comp-grid-keys>
+        {t("overlay.grid.helpMove")} {t("overlay.grid.helpKeys")}
       </p>
       <p className="ov-grid-status" data-grid-status data-bad={status.bad || undefined} aria-live="polite">
         {status.text}
       </p>
     </>
+  );
+}
+
+/**
+ * The help for the grid, closed until the owner opens it: how to add, move, resize and remove a layer, the keys,
+ * and the size of a cell and of the OBS source of `orientation`. A keyboard user opens it with Enter or Space on its
+ * summary. The grid and the chips of the palette also have hidden descriptions with these texts, so a screen reader
+ * reads them without the open help.
+ */
+export function GridHelp({ orientation }: Readonly<{ orientation: Orientation }>): ReactNode {
+  return (
+    <details className="ch-details ov-grid-help" data-comp-help>
+      <summary>{t("overlay.grid.helpTitle")}</summary>
+      <p>{t("overlay.grid.helpAdd")}</p>
+      <p>{t("overlay.grid.helpMove")}</p>
+      <p>{t("overlay.grid.helpKeys")}</p>
+      <p>
+        {t("overlay.grid.helpCell", { px: CELL_PX })}{" "}
+        <span data-comp-frame-size>{t("overlay.grid.obsSize", frameSize(orientation))}</span>
+      </p>
+    </details>
   );
 }
