@@ -86,6 +86,13 @@ export function replyParent(thread: CommentThread, reply: Comment): Pick<Comment
   return reply.parentAuthor ? { author: reply.parentAuthor, removed: false } : null;
 }
 
+// Whether reply `id` is still the first (`before`) or last loaded reply of the thread; no ID: none is loaded. A page
+// asked for at that edge fits only while it holds.
+export function atEdge(thread: Pick<CommentThread, "replies">, id: string | undefined, before: boolean): boolean {
+  const ordered: Comment[] = orderReplies(thread.replies);
+  return (before ? ordered[0] : ordered.at(-1))?.id === id;
+}
+
 // A later page of root comments brings threads with their 2-reply preview. A thread the discussion already shows
 // keeps its loaded replies, such as the window of a linked reply or the pages the reader loaded.
 export function keepReplyWindows(current: readonly CommentThread[], page: readonly CommentThread[]): CommentThread[] {

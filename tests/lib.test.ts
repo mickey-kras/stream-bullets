@@ -27,7 +27,7 @@ import {
 } from "../app/lib/shell";
 import { eventsJsonLd, personJsonLd, postingJsonLd, siteJsonLd } from "../app/lib/structured-data";
 import { supportLabel } from "../app/lib/support";
-import { keepReplyWindows, replyParent, visibleReplies, withPage, withReplies } from "../app/lib/threads";
+import { atEdge, keepReplyWindows, replyParent, visibleReplies, withPage, withReplies } from "../app/lib/threads";
 import { usePrefs } from "../app/lib/use-prefs";
 import { formatDate, isValidZone, parseDate } from "../app/lib/zoned";
 import type { Comment, StreamEvent } from "../app/types";
@@ -392,6 +392,17 @@ describe("comment threads", (): void => {
     expect(
       withPage({ ...linked, replies: [], earlierReplies: 0 }, { replies: replies(60, 109), earlierReplies: 59, laterReplies: 11 }, false),
     ).toMatchObject({ earlierReplies: 59, replyCount: 120 });
+  });
+
+  it("fits a page of replies only to the window it was asked for", (): void => {
+    const window71 = { replies: [comment("r70", { createdAt: 70 }), comment("r60", { createdAt: 60 })] };
+    expect(atEdge(window71, "r70", false)).toBe(true);
+    expect(atEdge(window71, "r60", true)).toBe(true);
+    // A link replaced the window with replies 1 to 20 while the page after reply 70 loaded.
+    const replaced = { replies: [comment("r1", { createdAt: 1 }), comment("r20", { createdAt: 20 })] };
+    expect(atEdge(replaced, "r70", false)).toBe(false);
+    expect(atEdge({ replies: [] }, undefined, false)).toBe(true);
+    expect(atEdge(replaced, undefined, false)).toBe(false);
   });
 
   it("keeps the loaded replies of a thread that a later page of root comments brings again", (): void => {

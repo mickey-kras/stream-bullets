@@ -9,6 +9,7 @@ import type { MentionSelection } from "./mention-input";
 import { intlLocale, t } from "../i18n";
 import { useShell } from "../lib/shell";
 import {
+  atEdge,
   keepReplyWindows,
   orderReplies,
   orderThreads,
@@ -867,6 +868,8 @@ export function Discussion({
       setThreads((current: CommentThread[]) =>
         current.map((value: CommentThread) => {
           if (value.id !== thread.id) return value;
+          // A page for a window that a link or a refresh replaced meanwhile would leave a gap: drop it.
+          if (!atEdge(value, edge?.id, before)) return value;
           // The page brings the counts of the server, also when other readers deleted replies since.
           const next = withPage(value, page, before);
           const first: Comment | undefined = orderReplies(next.replies)[0];
