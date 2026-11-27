@@ -73,16 +73,17 @@ async function openEditor(
   return { owner, page, editor, frame, grid, status: editor.locator("[data-grid-status]") };
 }
 
+/** The chips of an empty grid, in the sequence of the groups of the palette: the picture, then the content. */
 const ALL_CHIPS: readonly string[] = [
   "+ Chat",
   "+ Characters",
+  "+ Camera frame",
   "+ Poll",
   "+ Topic",
   "+ Up next",
   "+ Message banner",
   "+ Community card",
   "+ Support banner",
-  "+ Camera frame",
 ];
 
 test("the owner resizes a placed layer by its handles and by the keyboard", async ({ browser }) => {
@@ -296,8 +297,9 @@ test("the owner takes each layer off the grid by a drag to the palette or by a k
   await expect(palette.getByRole("button")).toHaveText([
     "ChatPlaced",
     "CharactersPlaced",
+    "+ Camera frame",
     "PollPlaced",
-    ...ALL_CHIPS.slice(3),
+    ...ALL_CHIPS.slice(4),
   ]);
   await expect(drop).toHaveCount(0);
   const cells = async (): Promise<(c: number, r: number) => { x: number; y: number }> => {
