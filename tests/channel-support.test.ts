@@ -121,7 +121,7 @@ describe("Twitch support events", (): void => {
     const event = one(
       twitchSupport(
         "channel.cheer",
-        { ...(twitchPayloads["channel.cheer"] as object), user_name: "Co‮ol", message: `a\u0000b${"x".repeat(900)}` },
+        { ...(twitchPayloads["channel.cheer"] as object), user_name: "Co\u202Eol", message: `a\u0000b${"x".repeat(900)}` },
         "d1",
         now,
       ),
