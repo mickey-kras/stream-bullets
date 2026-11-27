@@ -433,7 +433,7 @@ We added that art to the two files with Python, Pillow, and NumPy:
    Thus a new row gets the same platform color as an old row.
 3. The props are below the terrain pictures: the planks, the stair, the hook, the flames, the crown, and the viewer flags.
    The mask of the flag cloth is beside the flags. It gets the platform color.
-4. Each file keeps one palette of 256 colors. To fit, we joined the two nearest opaque colors until 256 values were left.
+4. Each file keeps one palette of 256 colors. To fit, we joined the two nearest opaque colors until the file had 256 values.
    No color channel changed by more than 7 of 255. The alpha is exact.
 
 Each atlas URL ends in `?v=` and the first 8 hexadecimal digits of the SHA-256 of the file.
