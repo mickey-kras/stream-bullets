@@ -17,6 +17,7 @@ const ROUTES: readonly string[] = [
   "/privacy",
   "/terms",
   "/ai",
+  "/commands",
   "/no-such-page-here",
 ];
 

@@ -1,55 +1,78 @@
 import { describe, expect, it } from "vitest";
 import {
   parseIntent,
-  problemRole,
   resultMessage,
+  stateText,
   statusMessage,
   type ChannelView,
 } from "../app/components/channels/channel-panel";
-import { channelsStartOpen, channelsSummary } from "../app/components/channels/channels-step";
 import { CHANNEL_STATUS_CODES, CONNECT_RESULTS, type ActivityPlatform } from "../app/lib/activity";
+import { channelCardState, type ChannelCardState } from "../app/lib/channel-health";
 
 /** The channel panel's messages: every callback result and status code, unknown values and the fallbacks. */
 
 type Connection = NonNullable<ChannelView["connection"]>;
 
-function connection(status: Connection["status"], code: string | null): Connection {
-  return { displayName: "Host", status, code, connectedAt: 1, lastEventAt: null, updatedAt: 1 };
+function connection(status: Connection["status"], code: string | null, lastEventAt: number | null = null): Connection {
+  return { displayName: "Host", status, code, connectedAt: 1, lastEventAt, updatedAt: 1 };
 }
 
-function channel(platform: ActivityPlatform, status: Connection["status"] | null, available: boolean = true): ChannelView {
-  return {
-    platform,
-    available,
-    connection: status ? connection(status, null) : null,
-    support: false,
-    supportScopes: [],
-  };
+/** A connected channel that reads support events, as after a connect of today. */
+function channel(platform: ActivityPlatform, value: Connection, support: boolean = true): ChannelView {
+  return { platform, available: true, connection: value, support };
 }
 
-describe("the channels step", (): void => {
-  it("starts open with no channel connected and names nothing", (): void => {
-    const none: ChannelView[] = [channel("twitch", null), channel("kick", null)];
-    expect(channelsSummary(none)).toBe("No channel connected yet");
-    expect(channelsStartOpen(none, null)).toBe(true);
+/** The words of the status icon: its tooltip and its text for a screen reader. */
+function words(view: ChannelView, now: number | null): string {
+  const state: ChannelCardState | null = channelCardState(view);
+  if (state === null) throw new Error("This card has no status icon.");
+  return stateText(view, state, now);
+}
+
+describe("the words of the status icon", (): void => {
+  const now: number = 1_800_000_000_000;
+
+  it("names the health and the last chat event of a healthy connection", (): void => {
+    expect(words(channel("kick", connection("active", null)), now)).toBe("Healthy. No chat event yet.");
+    const recent: ChannelView = channel("kick", connection("active", null, now - 120_000));
+    expect(words(recent, now)).toBe("Healthy. Last chat event 2 minutes ago.");
+    expect(words(channel("kick", connection("active", null, now)), now)).toBe("Healthy. Last chat event just now.");
   });
 
-  it("starts closed with a healthy connection and names the connected platforms", (): void => {
-    const healthy: ChannelView[] = [channel("twitch", "active"), channel("youtube", null), channel("kick", "active")];
-    expect(channelsSummary(healthy)).toBe("Connected: Twitch, Kick");
-    expect(channelsStartOpen(healthy, null)).toBe(false);
+  it("waits for the clock of the viewer before it names an age", (): void => {
+    // The server render does not know the clock of the viewer.
+    expect(words(channel("kick", connection("active", null, now - 120_000)), null)).toBe("Healthy");
+    expect(words(channel("kick", connection("active", null)), null)).toBe("Healthy. No chat event yet.");
   });
 
-  it("starts open for a callback result or a connection that the owner can repair", (): void => {
-    const healthy: ChannelView[] = [channel("twitch", "active")];
-    expect(channelsStartOpen(healthy, "Twitch connected.")).toBe(true);
-    const broken: ChannelView[] = [channel("twitch", "active"), channel("kick", "needs_reauth")];
-    expect(channelsSummary(broken)).toBe("Connected: Twitch · Needs attention: Kick");
-    expect(channelsStartOpen(broken, null)).toBe(true);
-    // A platform that the site does not offer cannot be repaired here.
-    const unavailable: ChannelView[] = [channel("youtube", "error", false)];
-    expect(channelsSummary(unavailable)).toBe("Connected: YouTube");
-    expect(channelsStartOpen(unavailable, null)).toBe(false);
+  it("is the problem of a connection that is not healthy", (): void => {
+    const revoked: ChannelView = channel("kick", connection("needs_reauth", "authorization_revoked"));
+    expect(words(revoked, now)).toBe("Access ended. Reconnect to keep receiving chat.");
+    const refused: ChannelView = channel("twitch", connection("error", "webhooks_rejected"));
+    expect(words(refused, null)).toBe(
+      "The feed cannot accept events from the platform right now. It checks again on its own: you do not need to reconnect.",
+    );
+  });
+
+  it("names the reset time of the YouTube quota only with the clock of the viewer", (): void => {
+    const spent: ChannelView = channel("youtube", connection("error", "quota_exhausted"));
+    expect(words(spent, null)).toBe("Needs attention");
+    expect(words(spent, now)).toMatch(/^The daily YouTube limit /);
+  });
+
+  it("asks the owner of a Twitch channel without the new permissions to reconnect one time", (): void => {
+    const old: ChannelView = channel("twitch", connection("active", null, now - 120_000), false);
+    expect(channelCardState(old)).toBe("support_missing");
+    for (const clock of [now, null])
+      expect(words(old, clock)).toBe(
+        "Reconnect Twitch one time so alerts and goals can read follows, subscriptions and Bits.",
+      );
+  });
+
+  it("names the platform when another provider refused the support events", (): void => {
+    expect(words(channel("kick", connection("active", null), false), now)).toBe(
+      "Kick does not send the events for alerts and goals. Reconnect Kick to try again.",
+    );
   });
 });
 
@@ -59,7 +82,7 @@ describe("resultMessage", (): void => {
     expect(new Set(messages).size).toBe(CONNECT_RESULTS.length);
     expect(resultMessage("kick", "connected")).toBe("Kick connected.");
     expect(resultMessage("twitch", "support_denied")).toBe(
-      "The channel is connected. Twitch did not give the permissions for support events, so they stay off.",
+      "The channel is connected for chat. Twitch did not give the permissions for alerts and goals. Reconnect to try again.",
     );
     expect(resultMessage("youtube", "channel_taken")).toBe(
       "This YouTube channel is already connected to another StreamBullets page.",
@@ -97,10 +120,6 @@ describe("statusMessage", (): void => {
     );
   });
 
-  it("announces a spent quota politely and other problems as alerts", (): void => {
-    expect([problemRole("quota_exhausted"), problemRole("subscribe_failed"), problemRole(null)]).toEqual(["status", "alert", "alert"]);
-  });
-
   it("tells a YouTube owner that a revoked connection goes after 7 days", (): void => {
     expect(statusMessage(connection("needs_reauth", "authorization_revoked"), null, "youtube")).toContain("after 7 days");
     expect(statusMessage(connection("needs_reauth", null), null, "youtube")).toContain("after 7 days");
@@ -132,11 +151,10 @@ describe("parseIntent", (): void => {
       platform: "kick",
       action: "disconnect",
     });
-    // A change of the support events needs a recent sign-in too.
-    expect(parseIntent(stored({ platform: "twitch", action: "support", at: now }), now, "owner_page")).toEqual({
-      platform: "twitch",
-      action: "support",
-    });
+  });
+
+  it("refuses the intent of the switch for support events, which is gone", (): void => {
+    expect(parseIntent(stored({ platform: "twitch", action: "support", at: now }), now, "owner_page")).toBeNull();
   });
 
   it("refuses an intent of another page owner, and each intent when no owner is signed in", (): void => {

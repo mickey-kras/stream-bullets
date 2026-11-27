@@ -89,7 +89,6 @@ const ROUTES: Readonly<Record<string, "GET" | "POST">> = {
   "/close": "POST",
   "/refresh": "POST",
   "/reconcile": "POST",
-  "/support": "POST",
   "/playground": "POST",
   "/playground-config": "POST",
   "/test-chat": "POST",
@@ -177,7 +176,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
       await this.ctx.storage.put("streamerId", streamerId);
     }
     // These requests change a connection or the page: read them from D1 again afterwards.
-    if (/^\/(connect|disconnect|status|page-status|close|refresh|reconcile|support)$/.test(url.pathname))
+    if (/^\/(connect|disconnect|status|page-status|close|refresh|reconcile)$/.test(url.pathname))
       this.forgetConnections();
     // Ingestion is off: consumers get `unavailable` and reconnect once it is on again.
     if (channelsOff(this.env)) this.closeSockets("Channels off");
@@ -197,8 +196,6 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (pathname === "/connect") return Response.json(await this.connectChannel(platform));
     if (pathname === "/disconnect") return Response.json(await this.disconnectChannel(platform));
     if (pathname === "/reconcile") return Response.json(await this.subscriptions.requested(platform, Date.now()));
-    // The streamer changed the support events: their subscriptions come or go now, not at the next check.
-    if (pathname === "/support") return Response.json(await this.subscriptions.requested(platform, Date.now(), true));
     if (pathname === "/upcoming") return Response.json(await this.upcomingRequested(platform));
     return this.statusChanged(platform, request);
   }
@@ -418,7 +415,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
       connection.externalId !== channelId
     )
       return new Response(null, { status: 204 });
-    // Support events count only while the streamer has them on. The chat of the same delivery goes on.
+    // Support events count only while the connection reads them. The chat of the same delivery goes on.
     const admitted = connection.support ? all : withoutSupport(all);
     if (admitted.length === 0) return new Response(null, { status: 204 });
     // A parallel copy of this delivery can finish while the connection is read.
@@ -910,12 +907,11 @@ export class ChannelIngest extends DurableObject<AppEnv> {
       return now - since < YOUTUBE_STARTUP_WINDOW_MS ? YOUTUBE_STARTUP_POLL_MS : YOUTUBE_IDLE_POLL_MS;
     }
     const page = await youtubeChatPage(tokens.accessToken, state.liveChatId, state.pageToken);
-    // The streamer can change the support events while the page comes: the choice of now decides, not the old one.
-    const wanted: boolean = (await this.connection("youtube"))?.support === true;
     current();
     // The first page is ingested too: messages sent before LIVE_WINDOW_MS are not live, so no old command runs.
-    // The support events come from the same page: they cost no further call and no quota.
-    const support = wanted ? youtubeSupport(page.items, now) : [];
+    // The support events come from the same page: they cost no further call and no quota. Only a connect changes
+    // `support_events` of a YouTube connection, and a connect supersedes this poll.
+    const support = connection.support ? youtubeSupport(page.items, now) : [];
     this.ingest(this.admitEvents([...youtubeEvents(page.items, connection.externalId, now), ...support], now), now);
     state.pageToken = page.nextPageToken;
     if (page.items.length > 0) await this.touch("youtube", connection, now);

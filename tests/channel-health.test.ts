@@ -8,6 +8,7 @@ import {
 } from "../app/components/channels/use-live-channels";
 import type { ActivityPlatform } from "../app/lib/activity";
 import {
+  channelCardState,
   channelHealth,
   channelsResponseSchema,
   deliversChat,
@@ -34,7 +35,13 @@ function channel(
     lastEventAt: null,
     updatedAt: 1,
   };
-  return { platform, available, connection: status ? connection : null, support: false, supportScopes: [] };
+  // Each connection reads support events, as after a connect of today.
+  return { platform, available, connection: status ? connection : null, support: status !== null };
+}
+
+/** A connection from before the support events: it has no permission for them. */
+function withoutSupport(view: ChannelView): ChannelView {
+  return { ...view, support: false };
 }
 
 describe("channelHealth", (): void => {
@@ -54,6 +61,43 @@ describe("channelHealth", (): void => {
     expect(deliversChat([channel("youtube", "active", null, false)])).toBe(false);
     expect(deliversChat([])).toBe(false);
   });
+
+  it("keeps a connection without support events healthy: it delivers chat", (): void => {
+    const old: ChannelView = withoutSupport(channel("twitch", "active"));
+    expect(channelHealth(old)).toBe("healthy");
+    expect(deliversChat([old])).toBe(true);
+  });
+});
+
+describe("channelCardState", (): void => {
+  it("is healthy for an active connection that reads support events", (): void => {
+    expect(channelCardState(channel("kick", "active"))).toBe("healthy");
+  });
+
+  it("is a card state of its own for an active connection without support events", (): void => {
+    expect(channelCardState(withoutSupport(channel("twitch", "active")))).toBe("support_missing");
+  });
+
+  it("tells a problem that ends without the owner from one that needs the owner", (): void => {
+    expect(channelCardState(channel("youtube", "error", "quota_exhausted"))).toBe("repairing");
+    expect(channelCardState(channel("kick", "error", "webhooks_rejected"))).toBe("repairing");
+    for (const code of ["subscribe_failed", "delivery_failed", "subscription_removed", "something_new", null])
+      expect(channelCardState(channel("twitch", "error", code))).toBe("problem");
+    expect(channelCardState(channel("kick", "needs_reauth", "authorization_revoked"))).toBe("problem");
+    // The message of this status asks for a reconnect, whatever its code.
+    expect(channelCardState(channel("youtube", "needs_reauth", "quota_exhausted"))).toBe("problem");
+  });
+
+  it("shows the problem of a connection first: a reconnect repairs the support events too", (): void => {
+    expect(channelCardState(withoutSupport(channel("twitch", "needs_reauth")))).toBe("problem");
+    expect(channelCardState(withoutSupport(channel("kick", "error", "webhooks_rejected")))).toBe("repairing");
+  });
+
+  it("has no state without a connection or for a platform that the site does not offer", (): void => {
+    expect(channelCardState(channel("kick", null))).toBeNull();
+    expect(channelCardState(channel("kick", null, null, false))).toBeNull();
+    expect(channelCardState(channel("kick", "active", null, false))).toBeNull();
+  });
 });
 
 describe("the response of GET /api/channels", (): void => {
@@ -63,13 +107,14 @@ describe("the response of GET /api/channels", (): void => {
     expect(channelsResponseSchema.parse(body)).toEqual({ channels: [kick, channel("twitch", null)] });
   });
 
-  it("keeps the support events of a platform: the switch and the permissions that it asks for", (): void => {
-    const twitch: ChannelView = { ...channel("twitch", "active"), support: true, supportScopes: ["bits:read"] };
-    const kick: ChannelView = { ...channel("kick", null), support: false, supportScopes: [] };
-    expect(channelsResponseSchema.parse({ channels: [twitch, kick] })).toEqual({ channels: [twitch, kick] });
+  it("keeps whether a connection reads support events, and drops the field of the old switch", (): void => {
+    const twitch: ChannelView = channel("twitch", "active");
+    const old: ChannelView = withoutSupport(channel("kick", "active"));
+    const body: unknown = { channels: [{ ...twitch, supportScopes: ["bits:read"] }, old] };
+    expect(channelsResponseSchema.parse(body)).toEqual({ channels: [twitch, old] });
     const wrong: unknown = { channels: [{ ...twitch, support: "yes" }] };
     expect(channelsResponseSchema.safeParse(wrong).success).toBe(false);
-    // The card needs both fields for its switch.
+    // The card needs the field for its status icon.
     const before: unknown = { platform: "kick", available: true, connection: null };
     expect(channelsResponseSchema.safeParse({ channels: [before] }).success).toBe(false);
   });
@@ -121,6 +166,15 @@ describe("healthChanges", (): void => {
     expect(healthChanges(healthy, spent)).toHaveLength(1);
     expect(healthChanges(spent, spent)).toEqual([]);
     expect(healthChanges(spent, [channel("youtube", "error", "quota_exhausted")])).toEqual([]);
+  });
+
+  it("reports nothing when a connection loses or gets its support events: that is a state of the card only", (): void => {
+    const reads: ChannelView[] = [channel("twitch", "active"), channel("kick", "active")];
+    const old: ChannelView[] = [withoutSupport(channel("twitch", "active")), channel("kick", "active")];
+    expect(healthChanges(reads, old)).toEqual([]);
+    expect(healthChanges(old, reads)).toEqual([]);
+    expect(healthNews(healthChanges(reads, old))).toBeNull();
+    expect(channelProblem(old[0])).toBeNull();
   });
 });
 
