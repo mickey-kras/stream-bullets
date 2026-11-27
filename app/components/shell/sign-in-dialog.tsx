@@ -32,7 +32,6 @@ function useHere(): string {
   return `${pathname}${search}`;
 }
 
-
 // Show configured providers, provider restrictions, eligibility consent and errors.
 export function SignIn({
   providers,

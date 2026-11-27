@@ -195,13 +195,12 @@ describe("the replies of a thread", (): void => {
     const first = await seedComment(topic, "viewer", root);
     const second = await seedComment(topic, "rival", first);
     await env.DB.prepare("UPDATE entry_comments SET created_at=2000 WHERE id=?").bind(second).run();
-    const response = await replies(`comments/${root}/replies?after=${first}`);
+    const response = await replies(`comments/${root}/replies?after=1000.${first}`);
     expect(response.status).toBe(200);
-    expect((await response.json<{ replies: { id: string; parentAuthor: string }[] }>()).replies).toMatchObject([
-      { id: second, parentAuthor: "viewer" },
-    ]);
-    expect((await replies(`comments/${root}/replies?after=${first}&before=${second}`)).status).toBe(400);
-    expect((await replies(`comments/${root}/replies?after=nope`)).status).toBe(400);
+    expect(await response.json()).toMatchObject({ replies: [{ id: second, parentAuthor: "viewer" }], earlierReplies: 1 });
+    expect((await replies(`comments/${root}/replies?after=1000.${first}&before=2000.${second}`)).status).toBe(400);
+    expect((await replies(`comments/${root}/replies?after=${first}`)).status).toBe(400);
+    expect((await replies(`comments/${root}/replies?from=x.${first}`)).status).toBe(400);
     expect((await replies(`comments/${root}/replies?cursor=x`)).status).toBe(400);
     // A reply is no thread, and a thread on a hidden page is not found.
     expect((await replies(`comments/${first}/replies`)).status).toBe(404);

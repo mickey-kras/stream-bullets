@@ -96,8 +96,6 @@ const threadIds = `thread(root, id) AS (
       UNION ALL SELECT t.root, c.id FROM entry_comments c JOIN thread t ON c.parent_id=t.id
     )`;
 const replyColumns = `${commentColumns}, pu.name AS parent_author, p.removed_at IS NOT NULL AS parent_removed`;
-const replyJoins = `JOIN entry_comments c ON c.id=t.id JOIN user u ON u.id=c.author_id
-    LEFT JOIN entry_comments p ON p.id=c.parent_id LEFT JOIN user pu ON pu.id=p.author_id`;
 
 function replyValue(row: ReplyRow): Comment {
   const parentAuthor = row.parent_removed === 1 ? "" : (row.parent_author ?? "");
@@ -154,11 +152,22 @@ async function replyWindows(
   return windows;
 }
 
-// Where a page of replies starts: just after or just before one reply of the thread.
+// Where a page of replies starts: after, before or at the position of a reply, by its time and ID. The values, not
+// the row, set the place, so a page still works after another reader deleted the reply it starts from.
 export interface ReplyAnchor {
-  direction: "after" | "before";
+  direction: "after" | "before" | "from";
+  createdAt: number;
   id: string;
 }
+
+// A page of replies with the number of replies of the thread before its first one. `earlierReplies` is null for
+// an empty page.
+export interface ReplyPage {
+  replies: Comment[];
+  earlierReplies: number | null;
+}
+
+const ANCHOR_OPERATOR: Readonly<Record<ReplyAnchor["direction"], string>> = { after: ">", before: "<", from: ">=" };
 
 // The replies of thread `rootId` next to `anchor`, oldest first; the first ones without an anchor.
 async function replyPage(
@@ -166,22 +175,30 @@ async function replyPage(
   rootId: string,
   viewerId: string | null,
   anchor: ReplyAnchor | null,
-): Promise<Comment[]> {
+): Promise<ReplyPage> {
   const before = anchor?.direction === "before";
   const order = before ? "DESC" : "ASC";
-  const where = anchor
-    ? `AND (c.created_at, c.id) ${before ? "<" : ">"} (SELECT created_at, id FROM entry_comments WHERE id=?)`
-    : "";
+  const where = anchor ? `WHERE (c.created_at, c.id) ${ANCHOR_OPERATOR[anchor.direction]} (?, ?)` : "";
   const { results } = await env.DB.prepare(`
-    WITH RECURSIVE ${threadIds}
-    SELECT ${replyColumns} FROM thread t ${replyJoins}
-    WHERE t.id<>t.root ${where}
+    WITH RECURSIVE ${threadIds}, ordered AS (
+      SELECT t.id, row_number() OVER (ORDER BY c.created_at, c.id) AS n
+      FROM thread t JOIN entry_comments c ON c.id=t.id WHERE t.id<>t.root
+    )
+    SELECT o.n, ${replyColumns} FROM ordered o JOIN entry_comments c ON c.id=o.id JOIN user u ON u.id=c.author_id
+      LEFT JOIN entry_comments p ON p.id=c.parent_id LEFT JOIN user pu ON pu.id=p.author_id
+    ${where}
     ORDER BY c.created_at ${order}, c.id ${order} LIMIT ?
   `)
-    .bind(JSON.stringify([rootId]), viewerId ?? "", viewerId ?? "", ...(anchor ? [anchor.id] : []), REPLY_PAGE_SIZE)
-    .all<ReplyRow>();
-  const replies: Comment[] = results.map(replyValue);
-  return before ? replies.reverse() : replies;
+    .bind(
+      JSON.stringify([rootId]),
+      viewerId ?? "",
+      viewerId ?? "",
+      ...(anchor ? [anchor.createdAt, anchor.id] : []),
+      REPLY_PAGE_SIZE,
+    )
+    .all<ReplyRow & { n: number }>();
+  const rows = before ? results.reverse() : results;
+  return { replies: rows.map(replyValue), earlierReplies: rows.length ? rows[0].n - 1 : null };
 }
 
 function threadValue(row: CommentRow, window: ReplyWindow | undefined): CommentThread {
@@ -443,13 +460,13 @@ export async function getCommentThread(
   };
 }
 
-// `GET /api/comments/:id/replies`: up to 50 replies of a thread after or before one of its replies, oldest first.
+// `GET /api/comments/:id/replies`: up to 50 replies of a thread after, before or from a place, oldest first.
 export async function listReplies(
   env: AppEnv,
   rootId: string,
   viewerId: string | null,
   anchor: ReplyAnchor | null,
-): Promise<Comment[]> {
+): Promise<ReplyPage> {
   const root = await env.DB.prepare("SELECT entry_id FROM entry_comments WHERE id=? AND parent_id IS NULL")
     .bind(rootId)
     .first<{ entry_id: string }>();

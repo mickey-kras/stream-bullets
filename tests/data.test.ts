@@ -475,22 +475,38 @@ describe("discussion", (): void => {
     expect(ids(thread.replies)).toEqual(range(1, 2));
     expect(thread.replies.map((value: Comment) => value.parentAuthor)).toEqual(["viewer", "other"]);
 
-    expect(ids(await listReplies(env, root, null, { direction: "after", id: reply(2) }))).toEqual(range(3, 52));
-    expect(ids(await listReplies(env, root, null, { direction: "before", id: reply(60) }))).toEqual(range(10, 59));
-    expect(ids(await listReplies(env, root, null, null))).toEqual(range(1, 50));
-    expect(await listReplies(env, root, null, { direction: "after", id: reply(120) })).toEqual([]);
+    // A place is the time and ID of a reply (created at 1000 + its number).
+    const at = (direction: "after" | "before" | "from", index: number) => ({
+      direction,
+      createdAt: 1000 + index,
+      id: reply(index),
+    });
+    const page = (anchor: ReturnType<typeof at> | null) => listReplies(env, root, null, anchor);
+    expect(ids((await page(at("after", 2))).replies)).toEqual(range(3, 52));
+    expect(await page(at("before", 60))).toMatchObject({ earlierReplies: 9 });
+    expect(ids((await page(at("before", 60))).replies)).toEqual(range(10, 59));
+    expect(await page(at("from", 60))).toMatchObject({ earlierReplies: 59 });
+    expect(ids((await page(at("from", 60))).replies)).toEqual(range(60, 109));
+    expect(await page(null)).toMatchObject({ earlierReplies: 0 });
+    expect(ids((await page(null)).replies)).toEqual(range(1, 50));
+    expect(await page(at("after", 120))).toEqual({ replies: [], earlierReplies: null });
+    // Another reader deletes the reply a page starts from: the place still works.
+    await env.DB.prepare("DELETE FROM entry_comments WHERE id=?").bind(reply(52)).run();
+    expect(ids((await page(at("after", 52))).replies)).toEqual(range(53, 102));
+    expect(await page(at("after", 52))).toMatchObject({ earlierReplies: 51 });
 
     // A link to reply 60 brings the 10 replies before and after it, not the whole thread.
     const linked = await getCommentThread(env, reply(60), null);
-    expect(linked.thread).toMatchObject({ id: root, replyCount: 120, earlierReplies: 49 });
-    expect(ids(linked.thread.replies)).toEqual(range(50, 70));
+    // Reply 52 is gone, so reply 60 is the 59th: the window holds the 59th reply and the 10 on each side.
+    expect(linked.thread).toMatchObject({ id: root, replyCount: 119, earlierReplies: 48 });
+    expect(ids(linked.thread.replies)).toEqual([...range(49, 51), ...range(53, 70)]);
     const linkedRoot = await getCommentThread(env, root, null);
     expect(ids(linkedRoot.thread.replies)).toEqual(range(1, 2));
 
     // A removed parent shows no name; only a root comment has a page of replies.
     await mutateComment(env, "other", { action: "delete", id: reply(1) });
-    expect((await listReplies(env, root, null, null))[0]).toMatchObject({ id: reply(1), removed: true });
-    expect((await listReplies(env, root, null, null))[1]).toMatchObject({ id: reply(2), parentAuthor: "" });
+    expect((await page(null)).replies[0]).toMatchObject({ id: reply(1), removed: true });
+    expect((await page(null)).replies[1]).toMatchObject({ id: reply(2), parentAuthor: "" });
     await expect(listReplies(env, reply(3), null, null)).rejects.toMatchObject({ status: 404 });
     await expect(listReplies(env, crypto.randomUUID(), null, null)).rejects.toMatchObject({ status: 404 });
   });

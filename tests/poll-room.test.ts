@@ -2,7 +2,8 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import type { AppEnv } from "../app/env";
 import { MASH_FLUSH_MS, MASH_TICK_MS } from "../app/lib/mash";
 import { DEFAULT_LAYERS, emptyCells, type Orientation } from "../app/lib/overlay-layers";
-import { MAX_PENDING_MESSAGES, PollRoom } from "../app/server/poll-room";
+import { MAX_PENDING_MESSAGES } from "../app/server/message-gate";
+import { PollRoom } from "../app/server/poll-room";
 import type { LiveSnapshot } from "../app/types";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
 import {

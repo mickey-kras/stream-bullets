@@ -27,6 +27,11 @@ export function visibleReplies(
   };
 }
 
+// The place of a reply in its thread for `GET /api/comments/:id/replies`: its time and ID.
+export function replyCursor(reply: Pick<Comment, "createdAt" | "id">): string {
+  return `${reply.createdAt}.${reply.id}`;
+}
+
 // Adds a page of replies to a thread without duplicates. A page before the loaded ones lowers `earlierReplies`.
 export function withReplies(thread: CommentThread, page: readonly Comment[], before: boolean): CommentThread {
   const known = new Set<string>(thread.replies.map((reply: Comment): string => reply.id));
@@ -42,10 +47,7 @@ export function withReplies(thread: CommentThread, page: readonly Comment[], bef
 }
 
 // The author a reply answers; null means a removed comment. A parent that is not loaded comes from `parentAuthor`.
-export function replyParent(
-  thread: CommentThread,
-  reply: Comment,
-): Pick<Comment, "author" | "removed"> | null {
+export function replyParent(thread: CommentThread, reply: Comment): Pick<Comment, "author" | "removed"> | null {
   if (!reply.parentId) return null;
   if (reply.parentId === thread.id) return thread;
   const loaded = thread.replies.find((comment: Comment): boolean => comment.id === reply.parentId);

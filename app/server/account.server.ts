@@ -6,6 +6,7 @@ import { SYSTEM_USER_ID } from "../lib/system";
 import type { AppEnv } from "../env";
 import { getOrigin, HttpError } from "./http.server";
 import { cleanUpImages, imageStorageKey, IMAGE_KINDS, type ImageKind } from "./images.server";
+import { exportNotifications, type NotificationExport } from "./discussion-notifications.server";
 import { notifyRoom } from "./live.server";
 
 // Bound export memory to one page per query.
@@ -402,12 +403,7 @@ export interface AccountExport {
     resolvedAt: string | null;
   }[];
   images: ImageRecord[];
-  // The account's notification settings and its own inbox: which comment, when, and whether it was read. The text
-  // and the author of the comment are other people's data.
-  notifications: {
-    preferences: { replies: boolean; mentions: boolean };
-    items: { id: string; kind: "reply" | "mention"; commentId: string; createdAt: string; read: boolean }[];
-  };
+  notifications: NotificationExport;
   legacyPolls: {
     votes: { pollId: string; choice: number }[];
     reactions: { pollId: string; value: number }[];
@@ -741,29 +737,6 @@ async function exportChannels(env: AppEnv, userId: string): Promise<AccountExpor
     connectedAt: iso(row.created_at),
     lastEventAt: optionalIso(row.last_event_at),
   }));
-}
-
-async function exportNotifications(env: AppEnv, userId: string): Promise<AccountExport["notifications"]> {
-  const [preferences, items] = await env.DB.batch([
-    env.DB.prepare("SELECT replies,mentions FROM notification_preferences WHERE user_id=?").bind(userId),
-    env.DB.prepare(
-      "SELECT id,kind,comment_id,created_at,read FROM notifications WHERE user_id=? ORDER BY created_at,id",
-    ).bind(userId),
-  ]);
-  const saved = preferences.results[0] as { replies: number; mentions: number } | undefined;
-  return {
-    // Without a stored row both kinds are on.
-    preferences: { replies: (saved?.replies ?? 1) === 1, mentions: (saved?.mentions ?? 1) === 1 },
-    items: (
-      items.results as { id: string; kind: "reply" | "mention"; comment_id: string; created_at: number; read: number }[]
-    ).map((row) => ({
-      id: row.id,
-      kind: row.kind,
-      commentId: row.comment_id,
-      createdAt: iso(row.created_at),
-      read: row.read === 1,
-    })),
-  };
 }
 
 export async function exportAccount(env: AppEnv, userId: string): Promise<AccountExport> {

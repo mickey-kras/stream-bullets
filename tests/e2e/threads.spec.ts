@@ -409,3 +409,41 @@ test("a link to a thread keeps its loaded replies when the discussion refreshes"
     await close(context);
   }
 });
+
+test("a linked reply's window keeps the earlier page the reader loaded when the discussion refreshes", async ({ browser }) => {
+  const users = await accounts();
+  const entryId = randomUUID();
+  const root = randomUUID();
+  const reply = (n: number): string => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
+  const now = Date.now() - 600_000;
+  await runSql("threads-window", [
+    `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,created_at) SELECT '${entryId}',id,'${users.viewer.id}','topic','A long thread','Many replies.','Just chatting',${now} FROM streamers WHERE handle='other_host';`,
+    `INSERT INTO entry_comments(id,entry_id,author_id,text,created_at,parent_id) VALUES ('${root}','${entryId}','${users.viewer.id}','The long root',${now},NULL);`,
+    `DELETE FROM entry_comments WHERE id LIKE '00000000-0000-4000-8000-%';`,
+    `WITH RECURSIVE n(i) AS (SELECT 1 UNION ALL SELECT i + 1 FROM n WHERE i < 80)
+      INSERT INTO entry_comments(id,entry_id,author_id,text,created_at,parent_id)
+      SELECT printf('00000000-0000-4000-8000-%012d', i), '${entryId}', '${users.reporter.id}', 'Long reply ' || i, ${now} + i, '${root}' FROM n;`,
+    `DELETE FROM app_rate_limits WHERE key IN ('content:${users.viewer.id}','write:${users.viewer.id}');`,
+  ]);
+  const context = await signedIn(browser, "viewer", clientIp("threads", 100));
+  try {
+    const page = await newPage(context);
+    await page.goto(`/@other_host?entry=${entryId}&comment=${reply(75)}`);
+    const thread = page.locator("li.thread").filter({ has: page.getByText("The long root", { exact: true }) });
+    const replies = thread.locator(".replies > li > article.comment");
+    // The link brings replies 65 to 80; 64 come before them.
+    await expect(replies).toHaveCount(16);
+    await thread.getByRole("button", { name: "View 64 earlier replies" }).click();
+    await expect(replies).toHaveCount(66);
+    await expect(thread.getByRole("button", { name: "View 14 earlier replies" })).toBeVisible();
+    await commentBox(page, "Write a comment").fill("A comment that refreshes the long thread.");
+    await page.getByRole("button", { name: "Post", exact: true }).click();
+    await expect(page.getByText("A comment that refreshes the long thread.", { exact: true })).toBeVisible();
+    await page.waitForLoadState("networkidle");
+    await expect(replies).toHaveCount(66);
+    await expect(replies.first()).toContainText("Long reply 15");
+    await expect(thread.getByRole("button", { name: "View 14 earlier replies" })).toBeVisible();
+  } finally {
+    await close(context);
+  }
+});

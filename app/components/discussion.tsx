@@ -8,7 +8,7 @@ import { useCommentTranslation } from "./comment-translation";
 import type { MentionSelection } from "./mention-input";
 import { intlLocale, t } from "../i18n";
 import { useShell } from "../lib/shell";
-import { orderReplies, orderThreads, replyParent, visibleReplies, withReplies } from "../lib/threads";
+import { orderReplies, orderThreads, replyCursor, replyParent, visibleReplies, withReplies } from "../lib/threads";
 import type { Comment, CommentThread, SortOrder, StreamerStatus, ThreadSnapshot, Viewer } from "../types";
 import { KeyConfirm } from "./admin/key-confirm";
 import { errorMessage, needsStepUp, postJson, requestJson } from "./api";
@@ -534,45 +534,66 @@ function Thread({
   );
 }
 
-// One page of replies of thread `rootId` after or before reply `anchor`; the first page without one.
+type ReplyDirection = "after" | "before" | "from";
+
+// The replies the reader loaded in a thread: from the place of its first one (null: the first reply of the thread)
+// and how many. A refresh of the discussion loads the same ones again.
+interface LoadedReplies {
+  from: string | null;
+  count: number;
+}
+
+// One page of replies of thread `rootId` at a place (`replyCursor`); the first page without one.
 async function fetchReplies(
   rootId: string,
-  anchor: { before: boolean; id: string } | null,
+  anchor: { direction: ReplyDirection; cursor: string } | null,
   signal?: AbortSignal,
-): Promise<Comment[]> {
-  const query: string = anchor ? `?${anchor.before ? "before" : "after"}=${encodeURIComponent(anchor.id)}` : "";
-  const page = await requestJson<{ replies: Comment[] }>(
+): Promise<{ replies: Comment[]; earlierReplies: number | null }> {
+  const query: string = anchor ? `?${anchor.direction}=${encodeURIComponent(anchor.cursor)}` : "";
+  return requestJson<{ replies: Comment[]; earlierReplies: number | null }>(
     `/api/comments/${encodeURIComponent(rootId)}/replies${query}`,
     { signal },
   );
-  return page.replies;
 }
 
-// After a refresh, the threads whose replies the reader had loaded get as many again.
+// After a refresh, the threads whose replies the reader had loaded get the same window again.
 async function restoreReplies(
   threads: CommentThread[],
-  loaded: ReadonlyMap<string, number>,
+  loaded: ReadonlyMap<string, LoadedReplies>,
   signal: AbortSignal,
 ): Promise<CommentThread[]> {
   let values: CommentThread[] = threads;
-  for (const [id, count] of loaded) {
+  for (const [id, window] of loaded) {
     const thread = values.find((value: CommentThread) => value.id === id);
-    if (!thread || thread.replies.length >= Math.min(count, thread.replyCount)) continue;
-    const again = await repliesFromStart(thread, count, signal);
+    if (!thread) continue;
+    const first: Comment | undefined = orderReplies(thread.replies)[0];
+    const sameStart: boolean =
+      window.from === null ? thread.earlierReplies === 0 : first !== undefined && replyCursor(first) === window.from;
+    if (sameStart && thread.replies.length >= Math.min(window.count, thread.replyCount)) continue;
+    const again = await repliesFrom(thread, window, signal);
     values = values.map((value: CommentThread) => (value.id === id ? again : value));
   }
   return values;
 }
 
-// The first `count` replies of a thread, loaded again after a refresh of the discussion.
-async function repliesFromStart(thread: CommentThread, count: number, signal: AbortSignal): Promise<CommentThread> {
-  let loaded: CommentThread = { ...thread, replies: [], earlierReplies: 0 };
-  let page: Comment[];
-  do {
-    const last: Comment | undefined = loaded.replies.at(-1);
-    page = await fetchReplies(thread.id, last ? { before: false, id: last.id } : null, signal);
+// `window.count` replies of a thread from the place where the reader's window started.
+async function repliesFrom(thread: CommentThread, window: LoadedReplies, signal: AbortSignal): Promise<CommentThread> {
+  const first = await fetchReplies(
+    thread.id,
+    window.from === null ? null : { direction: "from", cursor: window.from },
+    signal,
+  );
+  let loaded: CommentThread = withReplies(
+    { ...thread, replies: [], earlierReplies: first.earlierReplies ?? 0 },
+    first.replies,
+    false,
+  );
+  let page: Comment[] = first.replies;
+  while (page.length > 0 && loaded.replies.length < window.count && loaded.replies.length < thread.replyCount) {
+    const last: Comment = loaded.replies.at(-1)!;
+    page = (await fetchReplies(thread.id, { direction: "after", cursor: replyCursor(last) }, signal)).replies;
     loaded = withReplies(loaded, page, false);
-  } while (page.length > 0 && loaded.replies.length < count && loaded.replies.length < thread.replyCount);
+  }
   return loaded;
 }
 
@@ -670,7 +691,7 @@ export function Discussion({
   const [signIn, setSignIn] = useState<boolean>(false);
   const pages = useRef<number>(1);
   // Threads whose replies the reader loaded from the start, with how many: a refresh loads as many again.
-  const loadedReplies = useRef<Map<string, number>>(new Map());
+  const loadedReplies = useRef<Map<string, LoadedReplies>>(new Map());
   // The reply the viewer posted last: a refresh loads the replies around it, so it shows in a long thread.
   const postedReply = useRef<string | null>(null);
   const focusedTarget = useRef<string | null>(null);
@@ -690,7 +711,6 @@ export function Discussion({
       .then(async (result) => {
         let values = result.threads;
         let targetError = "";
-        values = await restoreReplies(values, loadedReplies.current, controller.signal);
         const targets = new Set([targetId, draftStore.getSnapshot().draft.replyId, postedReply.current]);
         for (const id of targets) {
           if (id === null || (id !== targetId && findComment(values, id))) continue;
@@ -710,6 +730,8 @@ export function Discussion({
             else targetError = errorMessage(error_);
           }
         }
+        // Last, so a thread that a link brought in gets the replies the reader had loaded in it too.
+        values = await restoreReplies(values, loadedReplies.current, controller.signal);
         if (controller.signal.aborted) return;
         pages.current = result.pages;
         setThreads(values);
@@ -788,12 +810,21 @@ export function Discussion({
     const ordered: Comment[] = thread.replies.length ? orderReplies(thread.replies) : [];
     const edge: Comment | undefined = before ? ordered[0] : ordered.at(-1);
     try {
-      const page = await fetchReplies(thread.id, edge ? { before, id: edge.id } : null);
+      const page = await fetchReplies(
+        thread.id,
+        edge ? { direction: before ? "before" : "after", cursor: replyCursor(edge) } : null,
+      );
       setThreads((current: CommentThread[]) =>
         current.map((value: CommentThread) => {
           if (value.id !== thread.id) return value;
-          const next = withReplies(value, page, before);
-          if (next.earlierReplies === 0) loadedReplies.current.set(next.id, next.replies.length);
+          let next = withReplies(value, page.replies, before);
+          // The server counts the replies before an earlier page, also when some went away since.
+          if (before && page.earlierReplies !== null) next = { ...next, earlierReplies: page.earlierReplies };
+          const first: Comment | undefined = orderReplies(next.replies)[0];
+          loadedReplies.current.set(next.id, {
+            from: next.earlierReplies === 0 || !first ? null : replyCursor(first),
+            count: next.replies.length,
+          });
           return next;
         }),
       );
