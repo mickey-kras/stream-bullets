@@ -119,8 +119,11 @@ function firstInView(list: HTMLElement): string | null {
  * in view. A scroll up, or the pause button, pauses the list: it then keeps its place and counts the new rows.
  * "Jump to latest" resumes it. The pause and the platform filters are local to this browser. A moderated message
  * keeps its row and loses its text, also while the list is paused.
+ *
+ * `hideCommands` is the saved setting of the chat layer (`chat.hideCommands`): the list then has no row for a chat
+ * command, and the count of a paused list does not include it.
  */
-export function useChatModel(feed: ActivityFeed): ChatModel {
+export function useChatModel(feed: ActivityFeed, hideCommands: boolean): ChatModel {
   const [state, dispatch] = useReducer(liveChatReducer, undefined, initialLiveChat);
   const { subscribe } = feed;
   useEffect(() => subscribe((message: ActivityMessage): void => dispatch({ type: "message", message })), [subscribe]);
@@ -133,7 +136,7 @@ export function useChatModel(feed: ActivityFeed): ChatModel {
   // The first row in view of a list that the streamer scrolled while it is paused. Null: the list is at its end.
   const anchor = useRef<string | null>(null);
   const sizes = useRef<ResizeObserver | null>(null);
-  const rows: LiveRow[] = shownRows(state.rows, hidden).filter(
+  const rows: LiveRow[] = shownRows(state.rows, hidden, hideCommands).filter(
     (row: LiveRow): boolean => pausedAt === null || row.seq <= pausedAt,
   );
   const last: number = rows.at(-1)?.seq ?? 0;
@@ -194,7 +197,7 @@ export function useChatModel(feed: ActivityFeed): ChatModel {
   return {
     rows,
     paused: pausedAt !== null,
-    waiting: pausedAt === null ? 0 : newSince(state.rows, pausedAt, hidden),
+    waiting: pausedAt === null ? 0 : newSince(state.rows, pausedAt, hidden, hideCommands),
     pause: (): void => dispatch({ type: "pause" }),
     jump: (): void => dispatch({ type: "resume" }),
     hidden,
@@ -497,19 +500,22 @@ function FullChat({
 export function LiveChat({
   feed,
   delivers,
+  hideCommands,
   full = false,
   onFull,
   onAir = null,
 }: Readonly<{
   feed: ActivityFeed;
   delivers: boolean;
+  /** The chat does not show chat commands: `chat.hideCommands` of the saved overlay layers. */
+  hideCommands: boolean;
   /** True while the full-screen view is open. The page keeps this in its address. */
   full?: boolean;
   /** Opens or exits the full-screen view. Without it the part has no button for the view. */
   onFull?: (open: boolean) => void;
   onAir?: string | null;
 }>): ReactNode {
-  const chat: ChatModel = useChatModel(feed);
+  const chat: ChatModel = useChatModel(feed, hideCommands);
   return (
     <LivePart name="chat" title={t("tools.live.chat")}>
       <ChatFilters chat={chat} />

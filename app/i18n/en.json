@@ -961,7 +961,7 @@
   "overlay.comp.chatSourceLink": "Connect channels",
   "overlay.comp.failed": "Layout not saved: {error}",
   "overlay.comp.hideCommands": "Hide chat commands (!jump)",
-  "overlay.comp.hideCommandsHint": "Messages that start with ! do not show on stream.",
+  "overlay.comp.hideCommandsHint": "Messages that start with ! do not show in the chat on stream, in Live and in the OBS dock. The characters still move.",
   "overlay.comp.leaveFailed": "Your last layout change was not saved. Make the change again. Reason: {error}",
   "overlay.comp.liveNote": "Changes go live right away",
   "overlay.comp.preview": "Composition preview",
