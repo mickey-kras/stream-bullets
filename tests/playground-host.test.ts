@@ -17,6 +17,8 @@ import {
   PLAYGROUND_KEY,
   type PlaygroundClock,
   PlaygroundHost,
+  type ReactionSubject,
+  readLayers,
   WATCHDOG_MS,
 } from "../app/server/playground-host";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
@@ -938,7 +940,13 @@ describe("isolation", (): void => {
 describe("PlaygroundHost", (): void => {
   /** A host on fake sockets, storage and clock. */
   function host(
-    options: { put?: () => Promise<void>; remove?: () => Promise<boolean>; layers?: () => Promise<OverlayLayers> } = {},
+    options: {
+      put?: () => Promise<void>;
+      remove?: () => Promise<boolean>;
+      layers?: () => Promise<OverlayLayers>;
+      /** The storage of an earlier host: this host is the object after an eviction. */
+      values?: Map<string, unknown>;
+    } = {},
   ) {
     let now = T0;
     let interval: (() => void) | null = null;
@@ -952,7 +960,7 @@ describe("PlaygroundHost", (): void => {
         interval = null;
       },
     };
-    const values = new Map<string, unknown>();
+    const values: Map<string, unknown> = options.values ?? new Map<string, unknown>();
     const sent: string[] = [];
     const socket = { readyState: 1, send: (message: string): void => void sent.push(message) } as unknown as WebSocket;
     const sockets: WebSocket[] = [];
@@ -977,6 +985,13 @@ describe("PlaygroundHost", (): void => {
         sockets.push(socket);
         await playground.open(socket);
       },
+      /** A characters socket that stayed open across an eviction: the host did not see it open. */
+      attach(): void {
+        sockets.push(socket);
+      },
+      close(): void {
+        sockets.length = 0;
+      },
       step(ms: number): void {
         now += ms;
         interval?.();
@@ -984,8 +999,143 @@ describe("PlaygroundHost", (): void => {
       get running(): boolean {
         return interval !== null;
       },
+      /** The state of each character in the newest frame, by name. Each frame must agree with the contract. */
+      states(): Record<string, string> {
+        const names = new Map<number, string>();
+        let states: [string, string][] = [];
+        for (const raw of sent) {
+          const frame = parseActivityMessage(raw);
+          if (frame?.type !== "playground") throw new Error("not a playground frame");
+          for (const entry of frame.roster ?? []) names.set(entry.id, entry.name);
+          states = frame.chars.map((char): [string, string] => [names.get(char[0]) ?? "", CHAR_STATES[char[3]]]);
+        }
+        return Object.fromEntries(states);
+      },
     };
   }
+
+  /** A running host with one character for each user id: `k…` on Kick and the others on Twitch. */
+  async function crowded(users: string[], options: Parameters<typeof host>[0] = {}): Promise<ReturnType<typeof host>> {
+    const fake = host(options);
+    await fake.open();
+    for (const [i, userId] of users.entries()) {
+      const event: ActivityChat = chat(`m${i}`, userId, "hello");
+      fake.playground.receive(userId.startsWith("k") ? { ...event, platform: "kick", id: `kick:m${i}` } : event);
+    }
+    fake.step(FRAME_MS);
+    return fake;
+  }
+
+  const walks = (users: string[]): Record<string, string> =>
+    Object.fromEntries(users.map((userId: string): [string, string] => [`User ${userId}`, "walk"]));
+
+  it("makes the character of a viewer do the action, without a command bubble", async (): Promise<void> => {
+    const fake = await crowded(["u1", "u2", "u3"]);
+    expect(fake.states()).toEqual(walks(["u1", "u2", "u3"]));
+    expect(fake.playground.react({ platform: "twitch", userId: "u1" }, "wave")).toBe(1);
+    fake.step(FRAME_MS);
+    expect(fake.states()).toEqual({ ...walks(["u2", "u3"]), "User u1": "wave" });
+    expect(fake.playground.react({ platform: "twitch", userId: "u2" }, "jump")).toBe(1);
+    fake.step(FRAME_MS);
+    expect(fake.states()).toEqual({ "User u1": "wave", "User u2": "jump", "User u3": "walk" });
+    // The frames have the bubbles of the messages only, and never the platform user id of the viewer.
+    expect(fake.sent.join("")).not.toMatch(/!wave|!jump|"u1"|"u2"/);
+  });
+
+  it("makes each standing character cheer for an alert without a character", async (): Promise<void> => {
+    const subjects: (ReactionSubject | null)[] = [null, { platform: "kick", userId: "nobody" }];
+    for (const subject of subjects) {
+      const fake = await crowded(["u1", "u2", "k3"]);
+      // The first has its own reaction: it stands, so it cheers after its wave.
+      expect(fake.playground.react({ platform: "twitch", userId: "u1" }, "wave")).toBe(1);
+      fake.step(FRAME_MS);
+      expect(fake.playground.react(subject, "jump")).toBe(3);
+      fake.step(FRAME_MS);
+      expect(fake.states()).toEqual({ "User u1": "wave", "User u2": "cheer", "User k3": "cheer" });
+      for (let i = 0; i < 30 && fake.states()["User u1"] === "wave"; i++) fake.step(FRAME_MS);
+      expect(fake.states()["User u1"]).toBe("cheer");
+      expect(fake.sent.join("")).not.toContain("!");
+    }
+  });
+
+  it("leaves one platform out of the crowd", async (): Promise<void> => {
+    const fake = await crowded(["u1", "k2", "u3", "k4"]);
+    expect(fake.playground.react(null, "cheer", "twitch")).toBe(2);
+    fake.step(FRAME_MS);
+    expect(fake.states()).toEqual({ ...walks(["u1", "u3"]), "User k2": "cheer", "User k4": "cheer" });
+  });
+
+  it("reacts to nothing in registry mode, and keeps no reaction for later", async (): Promise<void> => {
+    const idle = host();
+    // Nobody spoke yet: there is no playground.
+    expect(idle.playground.react(null, "cheer")).toBe(0);
+    const fake = await crowded(["u1", "u2"]);
+    // The last characters socket is gone: the reaction stops the playground and does nothing.
+    fake.close();
+    expect(fake.playground.react({ platform: "twitch", userId: "u1" }, "wave")).toBe(0);
+    expect(fake.running).toBe(false);
+    expect(fake.playground.react(null, "cheer")).toBe(0);
+    const count: number = fake.sent.length;
+    fake.step(FRAME_MS);
+    expect(fake.sent).toHaveLength(count);
+    await fake.open();
+    for (let i = 0; i < 12; i++) {
+      fake.step(FRAME_MS);
+      expect(fake.states()).toEqual(walks(["u1", "u2"]));
+    }
+    const pause = new Request("https://ingest.test/playground", { method: "POST", body: '{"op":"pause"}' });
+    expect((await fake.playground.request("/playground", pause)).status).toBe(200);
+    expect(fake.playground.react(null, "cheer")).toBe(0);
+    expect(fake.running).toBe(false);
+  });
+
+  it("keeps a reaction out of the checkpoint, and runs one right after an eviction", async (): Promise<void> => {
+    const first = await crowded(["u1", "u2"]);
+    expect(first.playground.react(null, "cheer")).toBe(2);
+    // The playground stops with the two reactions queued, and saves.
+    first.close();
+    first.step(FRAME_MS);
+    await new Promise((resolve) => setImmediate(resolve));
+    expect((first.values.get(PLAYGROUND_KEY) as { sim: string }).sim).not.toMatch(/reaction|cheer/);
+    const second = host({ values: first.values });
+    await second.playground.load();
+    second.attach();
+    // An alert wakes the object: the playground starts again for the socket that stayed open, and reacts.
+    expect(second.running).toBe(false);
+    expect(second.playground.react({ platform: "twitch", userId: "u2" }, "wave")).toBe(1);
+    expect(second.running).toBe(true);
+    await second.open();
+    // The clock of this host starts 200 ms before the time of the checkpoint.
+    second.step(FRAME_MS * 3);
+    // Only the new reaction plays: the queued cheers of before the eviction are gone.
+    expect(second.states()).toEqual({ "User u1": "walk", "User u2": "wave" });
+  });
+
+  it("gives the same frames for the same seed, messages and reactions", async (): Promise<void> => {
+    const run = async (reactions: boolean): Promise<string[]> => {
+      const fake = await crowded(["u1", "u2", "k3", "k4"]);
+      for (let i = 0; i < 60; i++) {
+        if (reactions && i === 5) fake.playground.react({ platform: "twitch", userId: "u1" }, "jump");
+        if (reactions && i === 20) fake.playground.react(null, "cheer", "twitch");
+        if (reactions && i === 40) fake.playground.react({ platform: "kick", userId: "nobody" }, "wave");
+        fake.step(FRAME_MS);
+      }
+      return fake.sent;
+    };
+    const first: string[] = await run(true);
+    expect(first).toHaveLength(62);
+    expect(await run(true)).toEqual(first);
+    // The reactions are in the frames: without them the playground goes another way.
+    const plain: string[] = await run(false);
+    expect(plain).toHaveLength(first.length);
+    expect(plain.join("") === first.join("")).toBe(false);
+  });
+
+  it("reads the saved layers of a page, and the defaults without a page or an overlay row", async (): Promise<void> => {
+    expect(await readLayers(env.DB, undefined)).toEqual(DEFAULT_LAYERS);
+    expect(await readLayers(env.DB, "60000000-0000-4000-8000-00000000ffff")).toEqual(DEFAULT_LAYERS);
+    expect(await readLayers(env.DB, page)).toEqual(ON);
+  });
 
   it("runs at most MAX_STEP_TICKS after a stall and does not make the rest up", async (): Promise<void> => {
     const fake = host();

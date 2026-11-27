@@ -7,14 +7,33 @@ import {
   CHARACTERS_TEST_MS,
   CHARACTERS_TEST_TICKS,
   CHECKPOINT_MAX_LENGTH,
+  COMMAND_EXPIRY_TICKS,
+  DURATION,
   REGISTRY_IDLE_TICKS,
   REGISTRY_MAX,
+  RESPAWN_TICKS,
   RESTRICTED_MAX,
   TEST_USER_PREFIX,
   VISIBLE_MAX,
 } from "../app/lib/playground/constants";
-import { COMMANDS, type Command, chooseCrowd, crowdSlots, type Participant } from "../app/lib/playground/crowd";
-import { BUBBLE_MAX_UNITS, CUT_MARK, encodeFrame, FLAG_NEW, FLAG_UNAVAILABLE } from "../app/lib/playground/protocol";
+import {
+  COMMANDS,
+  type Command,
+  chooseCrowd,
+  crowdSlots,
+  type Participant,
+  REACTIONS,
+} from "../app/lib/playground/crowd";
+import {
+  BUBBLE_MAX_UNITS,
+  CHAR_STATES,
+  type CharState,
+  CUT_MARK,
+  encodeFrame,
+  FLAG_NEW,
+  FLAG_UNAVAILABLE,
+  parseFrame,
+} from "../app/lib/playground/protocol";
 import { mulberry32, PlaygroundSim, parseCommand, setState } from "../app/lib/playground/sim";
 import { blockAt, colOf, createWorld, placeBlock, rowOf, solidAt, tileAt } from "../app/lib/playground/terrain";
 import { TEST_CROWD_SIZE, type TestCrowdEvent, testCrowdScript } from "../app/lib/playground/test-crowd";
@@ -766,6 +785,268 @@ describe("registry and admission", () => {
     const { sim } = crowd(REGISTRY_MAX);
     for (const p of sim.list()) p.admitted = true;
     expect(() => sim.receive(chat(viewer(9999), "one more"))).toThrow("registry full");
+  });
+});
+
+/**
+ * A running playground with `count` characters that walk to the right at one speed, 25 px apart. They never turn or
+ * stop at random, so a change of state comes only from the test.
+ */
+function steady(count: number): { sim: PlaygroundSim; chars: Participant[] } {
+  const sim = new PlaygroundSim({ cellsW: 32, cellsH: 4, rng: (): number => 0.9, walkSpread: 0 });
+  sim.resumeAfter(0);
+  for (let i = 0; i < count; i++) sim.receive(chat(viewer(i), "hello"));
+  const chars: Participant[] = sim.list();
+  for (const [i, p] of chars.entries()) {
+    p.pendingText = null;
+    setState(p, "walk", { x: 140 + 25 * i, y: sim.world.gy, dir: 1, free: false });
+  }
+  return { sim, chars };
+}
+
+function say(sim: PlaygroundSim, p: Participant, text: string): void {
+  sim.receive(chat({ platform: p.platform, userId: p.userId, name: p.name }, text));
+}
+
+/** Runs `ticks` ticks. Gives, for each character, the ticks at which it started `state`. */
+function starts(sim: PlaygroundSim, chars: Participant[], state: CharState, ticks: number): number[][] {
+  const at: number[][] = chars.map((): number[] => []);
+  for (let i = 0; i < ticks; i++) {
+    const before: string[] = chars.map((p: Participant): string => p.state);
+    sim.tick();
+    for (const [j, p] of chars.entries()) if (p.state === state && before[j] !== state) at[j].push(sim.clock);
+  }
+  return at;
+}
+
+describe("reactions", () => {
+  it("makes the character of a participant with a slot do each action one time, quietly", () => {
+    for (const action of REACTIONS) {
+      const { sim, chars } = steady(3);
+      const [p, ...others] = chars;
+      const { lastCommand, lastChat, score } = p;
+      expect(sim.react(p.key, action), action).toBe(1);
+      expect(starts(sim, chars, action, 1), action).toEqual([[1], [], []]);
+      expect(others.map((o: Participant) => o.state)).toEqual(["walk", "walk"]);
+      // The frame shows the reaction as a state of the contract alone: no bubble and no mark.
+      const frame = sim.tickFrame();
+      expect(frame.bubbles, action).toEqual([]);
+      expect(frame.chars[0].slice(3, 5), action).toEqual([CHAR_STATES.indexOf(action), 0]);
+      expect(frame.chars[0][6] & FLAG_UNAVAILABLE).toBe(0);
+      expect(parseFrame(encodeFrame(frame)), action).toEqual(frame);
+      // One time: the action ends, the character walks on, and the action never starts again.
+      expect(starts(sim, chars, action, 200), action).toEqual([[], [], []]);
+      expect(p, action).toMatchObject({ state: "walk", reaction: null, bubble: null, mark: 0 });
+      // It is not a command and not a message: it steers nobody, and the cooldown, the timeout and the rank stay.
+      expect(p, action).toMatchObject({ piloted: false, lastCommand, lastChat, score });
+    }
+  });
+
+  it("jumps on the spot, and leaves a steered character steered at its place", () => {
+    const { sim, chars } = steady(2);
+    const [steered, commanded] = chars;
+    setState(steered, "hold", { piloted: true });
+    const { x, y } = steered;
+    const from: number = commanded.x;
+    expect(sim.react(steered.key, "jump")).toBe(1);
+    say(sim, commanded, "!jump");
+    let top: number = y;
+    for (let i = 0; i < 80; i++) {
+      sim.tick();
+      top = Math.min(top, steered.y);
+    }
+    // The character went up more than one block, and came down on its place.
+    expect(y - top).toBeGreaterThan(16);
+    expect(steered).toMatchObject({ state: "hold", piloted: true, x, y });
+    // The jump of a command goes to the front and steers its character.
+    expect(commanded.x - from).toBeGreaterThan(16);
+    expect(commanded).toMatchObject({ state: "hold", piloted: true });
+  });
+
+  it("does not use or start the command cooldown, and lets a queued command go first", () => {
+    const { sim, chars } = steady(2);
+    const [first, second] = chars;
+    starts(sim, chars, "walk", 10);
+    // A command in its cooldown does not stop a reaction, and the command runs before the reaction.
+    say(sim, first, "!wave");
+    expect(sim.react(first.key, "cheer")).toBe(1);
+    expect(first).toMatchObject({ lastCommand: 10, pending: { name: "wave" } });
+    // A reaction starts no cooldown: a command right after it is accepted and waits for the end of the reaction.
+    expect(sim.react(second.key, "wave")).toBe(1);
+    sim.tick();
+    expect([first.state, second.state]).toEqual(["wave", "wave"]);
+    expect(first).toMatchObject({ bubble: { text: "!wave" }, reaction: { action: "cheer" } });
+    expect(second.bubble).toBeNull();
+    say(sim, second, "!jump");
+    expect(second).toMatchObject({ lastCommand: 11, pending: { name: "jump" } });
+    // Each wave runs its whole time: the next action starts on the first tick after it.
+    const next: number = 11 + DURATION.wave + 1;
+    expect(starts(sim, chars, "cheer", DURATION.wave + 1)).toEqual([[next], []]);
+    expect(first.reaction).toBeNull();
+    expect(second).toMatchObject({ state: "jump", t: 0, piloted: true, bubble: { text: "!jump" } });
+  });
+
+  it("waits for a command, a fall and a respawn to end, and is dropped after 10 seconds", () => {
+    const { sim, chars } = steady(4);
+    const [dancer, faller, fallen, sleeper] = chars;
+    say(sim, dancer, "!dance");
+    setState(faller, "fall", { y: faller.y - 30, fromY: faller.y - 30, vx: 0, vy: 0 });
+    setState(fallen, "gone", { wait: RESPAWN_TICKS });
+    setState(sleeper, "idle", { t: -1000 });
+    sim.tick();
+    for (const p of chars) expect(sim.react(p.key, "wave")).toBe(1);
+    const seen: string[][] = chars.map((p: Participant): string[] => [p.state]);
+    const waved: (number | null)[] = chars.map((): null => null);
+    while (sim.clock <= 1 + COMMAND_EXPIRY_TICKS) {
+      sim.tick();
+      for (const [i, p] of chars.entries()) {
+        if (seen[i].at(-1) !== p.state) seen[i].push(p.state);
+        if (p.state === "wave") waved[i] ??= sim.clock;
+      }
+    }
+    // The dance of the command ran its whole time. The wave came on the first tick after it.
+    expect(seen[0]).toEqual(["dance", "walk", "wave", "walk"]);
+    expect(waved[0]).toBe(1 + DURATION.dance + 1);
+    expect(seen[1].slice(0, 5)).toEqual(["fall", "land", "walk", "wave", "walk"]);
+    expect(seen[2]).toEqual(["gone", "respawn", "walk", "wave", "walk"]);
+    expect(waved[2]).toBe(RESPAWN_TICKS + DURATION.respawn + 1);
+    // The character that did not walk or stand in 10 seconds never waves, also later.
+    expect(seen[3]).toEqual(["idle"]);
+    expect(sleeper.reaction).toBeNull();
+    setState(sleeper, "walk");
+    expect(starts(sim, [sleeper], "wave", 100)).toEqual([[]]);
+  });
+
+  it("makes each visible character that stands cheer one time for an alert without a character", () => {
+    for (const subject of ["anonymous", "unknown", "away"] as const) {
+      const { sim, chars } = steady(8);
+      setState(chars[0], "turn");
+      setState(chars[1], "jump", { vx: 0 });
+      setState(chars[2], "gone", { wait: RESPAWN_TICKS });
+      setState(chars[3], "enter", { x: sim.world.entryX, free: true });
+      // A participant that the playground knows, without a slot.
+      expect(sim.remove(chars[7].id)).toBe(true);
+      const key: string | null = { anonymous: null, unknown: "twitch:nobody", away: chars[7].key }[subject];
+      // The crowd always cheers: the action is for a character of the alert only.
+      expect(sim.react(key, "wave"), subject).toBe(4);
+      const cheers: number[][] = starts(sim, chars, "cheer", 1);
+      // The characters that walk cheer at once, together.
+      expect(cheers, subject).toEqual([[], [], [], [], [1], [1], [1], []]);
+      const frame = sim.tickFrame();
+      expect(frame.bubbles).toEqual([]);
+      expect(encodeFrame(frame).length).toBeGreaterThan(0);
+      const later: number[][] = starts(sim, chars, "cheer", 250);
+      // The character that turned stands too: it cheers after its turn. Each cheer comes one time.
+      expect(later, subject).toEqual([[DURATION.turn + 1], [], [], [], [], [], [], []]);
+      expect(starts(sim, chars, "wave", 50).flat()).toEqual([]);
+      expect(chars.map((p: Participant) => p.piloted)).toEqual(chars.map((): boolean => false));
+    }
+  });
+
+  it("gives the crowd effect for a character on its way to the exit", () => {
+    const { sim, chars } = steady(3);
+    setState(chars[0], "goto", { target: sim.world.exitX, after: "exit", free: true, exitReason: "timeout" });
+    expect(sim.react(chars[0].key, "wave")).toBe(2);
+    sim.tick();
+    expect(chars.map((p: Participant) => p.state)).toEqual(["goto", "cheer", "cheer"]);
+    expect(chars[0].reaction).toBeNull();
+  });
+
+  it("reaches no more characters than the visible ones", () => {
+    const { sim, chars, tick } = proto();
+    sim.select();
+    expect(sim.react(null, "cheer")).toBe(VISIBLE_MAX);
+    expect(chars.filter((c) => c.reaction !== null).map((c) => c.admitted)).toEqual(Array(VISIBLE_MAX).fill(true));
+    tick();
+    const frame = sim.tickFrame();
+    expect(frame.chars.map((char) => char[3])).toEqual(Array(VISIBLE_MAX).fill(CHAR_STATES.indexOf("cheer")));
+    expect(frame.bubbles).toEqual([]);
+    expect(encodeFrame(frame).length).toBeGreaterThan(0);
+  });
+
+  it("leaves the characters of one platform out of the crowd, but not the character of the alert", () => {
+    const { sim, chars } = steady(6);
+    expect(sim.react(null, "cheer", "twitch")).toBe(4);
+    sim.tick();
+    expect(chars.map((p: Participant) => `${p.platform} ${p.state}`)).toEqual([
+      "youtube cheer",
+      "twitch walk",
+      "kick cheer",
+      "youtube cheer",
+      "twitch walk",
+      "kick cheer",
+    ]);
+    expect(chars[1].reaction).toBeNull();
+    expect(sim.react(chars[1].key, "wave", "twitch")).toBe(1);
+    sim.tick();
+    expect(chars[1].state).toBe("wave");
+    expect(chars[4].state).toBe("walk");
+  });
+
+  it("does nothing while the playground does not run, and keeps no reaction for later", () => {
+    const { sim, chars } = steady(3);
+    const none: null[] = chars.map((): null => null);
+    sim.pause();
+    expect(sim.react(chars[0].key, "wave")).toBe(0);
+    expect(sim.react(null, "cheer")).toBe(0);
+    sim.resume();
+    sim.stop();
+    expect(sim.react(chars[0].key, "wave")).toBe(0);
+    expect(sim.react(null, "cheer")).toBe(0);
+    expect(chars.map((p: Participant) => p.reaction)).toEqual(none);
+    // A reaction that waits when the playground stops goes with the queued commands.
+    sim.resumeAfter(0);
+    setState(chars[0], "dance");
+    expect(sim.react(null, "cheer")).toBe(3);
+    sim.stop();
+    sim.resumeAfter(30);
+    expect(chars.map((p: Participant) => p.reaction)).toEqual(none);
+    expect(starts(sim, chars, "cheer", 100).flat()).toEqual([]);
+  });
+
+  it("is never in a checkpoint", () => {
+    const plain = steady(4);
+    const reacting = steady(4);
+    setState(plain.chars[0], "dance");
+    setState(reacting.chars[0], "dance");
+    expect(reacting.sim.react(null, "cheer")).toBe(4);
+    expect(reacting.sim.react(reacting.chars[1].key, "jump")).toBe(1);
+    // With reactions that wait, the checkpoint is the one of a playground without them.
+    expect(reacting.sim.checkpoint()).toBe(plain.sim.checkpoint());
+    starts(reacting.sim, reacting.chars, "cheer", 10);
+    expect(reacting.chars.map((p: Participant) => p.state)).toEqual(["dance", "jump", "cheer", "cheer"]);
+    expect(reacting.chars[0].reaction).toMatchObject({ action: "cheer" });
+    const raw: string = reacting.sim.checkpoint();
+    expect(raw).not.toMatch(/reaction|cheer|jump/);
+    const restored: PlaygroundSim = PlaygroundSim.restore(raw, { rng: (): number => 0.9, walkSpread: 0 });
+    const chars: Participant[] = restored.list();
+    expect(chars.map((p: Participant) => [p.state, p.reaction])).toEqual(chars.map(() => ["walk", null]));
+    restored.resumeAfter(0);
+    for (const state of ["cheer", "jump"] as const) expect(starts(restored, chars, state, 60).flat()).toEqual([]);
+  });
+
+  it("gives the same frames for the same seed and the same inputs", () => {
+    const run = (reactions: boolean): string[] => {
+      const sim = new PlaygroundSim({ cellsW: 32, cellsH: 6, rng: mulberry32(5) });
+      sim.resumeAfter(0);
+      const viewers: Viewer[] = Array.from({ length: 12 }, (_, i: number) => viewer(i));
+      for (const v of viewers) sim.receive(chat(v, "hello"));
+      const frames: string[] = [];
+      for (let i = 1; i <= 900; i++) {
+        const turn: number = Math.floor(i / 60);
+        const v: Viewer = viewers[turn % viewers.length];
+        if (i % 60 === 0) sim.receive(chat(v, turn % 3 === 0 ? "!stairs 2" : "words"));
+        if (reactions && i % 60 === 20) sim.react(`${v.platform}:${v.userId}`, REACTIONS[turn % REACTIONS.length]);
+        if (reactions && i % 240 === 100) sim.react(null, "cheer", turn % 8 === 1 ? "twitch" : undefined);
+        sim.tick();
+        frames.push(encodeFrame(sim.tickFrame()));
+      }
+      return frames;
+    };
+    const first: string[] = run(true);
+    expect(run(true)).toEqual(first);
+    // The reactions are in the frames: without them the playground goes another way.
+    expect(run(false)).not.toEqual(first);
   });
 });
 
