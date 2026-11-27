@@ -957,9 +957,33 @@ svg.icon-thumbs-up-filled, svg.icon-thumbs-down-filled { fill: currentColor; }
   .mash-overlay .mash-ring span { font-size: 42px; }
 }
 .ov-control { padding-top: 24px; }
-/* The section links of Streamer tools: in line with the head and the steps of the page. */
-.status-tabs.tools-tabs { display: flex; max-width: 1300px; margin: 16px auto 0; }
-.ov-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 20px; max-width: 1300px; margin: 0 auto; }
+/* The head of Streamer tools (tools-head.tsx), in line with the steps of the page. The section links are first in the
+   document. Desktop: the title of the page is above them, and they are text tabs. */
+.tools-head { display: flex; flex-direction: column; max-width: 1300px; margin: 0 auto; }
+.status-tabs.tools-tabs { order: 1; display: flex; margin: 16px 0 0; }
+.tools-tabs .icon, .tools-section-name { display: none; }
+.ov-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 20px; }
+/* Phone: the section links are icon tabs of equal width in one line below the site header, at the full width. The
+   line stays in view while the page scrolls. The title is the name of the open section. */
+@media (max-width: 43.75em) {
+  main.ov-control { padding: 0 12px 20px; }
+  .tools-head { display: contents; }
+  .status-tabs.tools-tabs { position: sticky; top: 0; z-index: 3; flex-wrap: nowrap; margin: 0 -12px 16px; border-bottom: 1px solid var(--line); background: var(--ink); }
+  .status-tabs.tools-tabs a { flex: 1 1 0; min-width: 0; min-height: 48px; padding: 0; border: 0; border-radius: 0; background: none; }
+  .status-tabs.tools-tabs a:hover { color: var(--gold); }
+  .status-tabs.tools-tabs a.active { background: linear-gradient(110deg, var(--gold-hi), var(--gold-lo)); color: var(--on-gold); }
+  /* The tabs touch the edges of the page, so the focus ring is inside the tab. */
+  .status-tabs.tools-tabs a:focus-visible { outline-offset: -4px; box-shadow: none; }
+  .status-tabs.tools-tabs a.active:focus-visible { outline-color: var(--on-gold); }
+  .tools-tabs .icon { display: inline-block; }
+  .tools-tab-label, .tools-page-name { display: none; }
+  .tools-section-name { display: inline; }
+  .page-panel .tools-head h1 { margin: 0; font-size: 1.5rem; line-height: 1.1; letter-spacing: .8px; }
+}
+/* A phone on its side has little height: the line of tabs scrolls with the page. */
+@media (max-width: 43.75em) and (max-height: 34em) {
+  .status-tabs.tools-tabs { position: static; }
+}
 .ov-frame { aspect-ratio: 16 / 9; overflow: hidden; border-radius: var(--radius-control); border: 2px solid var(--line); background: repeating-conic-gradient(var(--mock-check-a) 0 25%, var(--mock-check-b) 0 50%) 0 0 / 24px 24px; position: relative; }
 .ov-scaler { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform: scale(var(--ov-scale, .3)); transform-origin: 0 0; container-type: inline-size; visibility: hidden; }
 .ov-frame[data-scaled] .ov-scaler { visibility: visible; }
@@ -1448,9 +1472,6 @@ input[type="checkbox"], input[type="radio"], .modal-content .choice input { widt
 .topic-chip > span[lang] { min-width: 0; white-space: normal !important; overflow: visible !important; text-overflow: clip !important; }
 .modal-content.sheet > .sheet-actions { position: static; flex: 0 0 auto; margin: 0; padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line); background: var(--modal); box-shadow: none; }
 .modal-content.sheet > .sheet-body { flex: 1 1 auto; min-height: 0; }
-@media (max-width: 43.75em) {
-  .streamer-brand { position: relative; }
-}
 .poll-option > .option-score { flex: 0 0 8.5em; display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 14px 16px 14px 10px; border-left: 1px solid var(--line); }
 .poll-option > .option-score small { margin: 0; }
 .binary-votes .poll-option > .option-score { flex-basis: 7.5em; }

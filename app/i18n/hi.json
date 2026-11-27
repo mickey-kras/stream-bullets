@@ -1397,6 +1397,7 @@
   "tools.live.obsUnknown": "लाइव अपडेट जुड़ने पर OBS की स्थिति दिखेगी।",
   "tools.live.openChannels": "चैनल खोलें",
   "tools.live.openOverlay": "ओवरले खोलें",
+  "tools.live.editOverlay": "ओवरले संपादित करें",
   "tools.live.preview": "OBS क्या दिखा रहा है",
   "tools.live.previewNote": "बदलाव तुरंत OBS तक पहुँचते हैं।",
   "tools.live.previewEmpty": "कोई लेयर स्ट्रीम पर नहीं है।",

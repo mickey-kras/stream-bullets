@@ -1437,6 +1437,7 @@
   "tools.live.obsUnknown": "Состояние OBS появится, когда подключатся обновления в реальном времени.",
   "tools.live.openChannels": "Открыть «Каналы»",
   "tools.live.openOverlay": "Открыть «Оверлей»",
+  "tools.live.editOverlay": "Изменить оверлей",
   "tools.live.preview": "Что показывает OBS",
   "tools.live.previewNote": "Изменения попадают в OBS сразу.",
   "tools.live.previewEmpty": "На стриме нет ни одного слоя.",

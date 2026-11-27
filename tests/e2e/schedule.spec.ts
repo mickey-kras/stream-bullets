@@ -138,6 +138,111 @@ test("an open Topics tab shows and hides the live badge as a stream starts and e
   await expect(strip).toHaveCount(0);
 });
 
+interface Box {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+interface BrandBoxes {
+  brand: Box;
+  avatar: Box;
+  name: Box;
+  badge: Box | null;
+}
+
+test("on a phone the live badge is below the name of the streamer, and the header keeps its height", async ({
+  page,
+}) => {
+  const boxes = (): Promise<BrandBoxes> =>
+    page.locator(".streamer-brand").evaluate((brand: Element): BrandBoxes => {
+      const box = (element: Element): Box => {
+        const { x, y, width, height } = element.getBoundingClientRect();
+        return { x, y, width, height };
+      };
+      const part = (selector: string): Box => {
+        const element: Element | null = brand.querySelector(selector);
+        if (!element) throw new Error(`The brand has no ${selector}.`);
+        return box(element);
+      };
+      const badge: Element | null = brand.querySelector(".live-pill");
+      return {
+        brand: box(brand),
+        avatar: part(".brand-avatar"),
+        name: part(".streamer-name"),
+        badge: badge && box(badge),
+      };
+    });
+  /** The boxes while the stream is on: the badge is there. */
+  const onAir = async (): Promise<BrandBoxes & { badge: Box }> => {
+    const all: BrandBoxes = await boxes();
+    if (!all.badge) throw new Error("The brand has no live badge.");
+    return { ...all, badge: all.badge };
+  };
+  const badge = page.locator(".streamer-brand .live-pill");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.clock.install({ time: Date.now() });
+  await page.goto("/@feature_host");
+  await expect(page.locator(".streamer-brand .streamer-name")).toHaveText("Feature host");
+  await expect(badge).toHaveCount(0);
+  // No stream: the name is at the middle of the avatar, and the brand has no empty second row.
+  const quiet: BrandBoxes = await boxes();
+  expect(quiet.name.y + quiet.name.height / 2).toBeCloseTo(quiet.avatar.y + quiet.avatar.height / 2, 0);
+
+  await page.clock.fastForward("25:00:00");
+  await expect(badge).toContainText("Mic shootout");
+  const live = await onAir();
+  // Below the name, with the left edge of the name. Not over the avatar and not over the name.
+  expect(live.badge.x).toBeCloseTo(live.name.x, 0);
+  expect(live.badge.y).toBeGreaterThanOrEqual(live.name.y + live.name.height);
+  expect(live.badge.x).toBeGreaterThanOrEqual(live.avatar.x + live.avatar.width);
+  // The badge is in the brand: the brand cuts nothing off. The brand and the avatar keep their place and size.
+  expect(live.badge.x + live.badge.width).toBeLessThanOrEqual(live.brand.x + live.brand.width);
+  expect(live.badge.y + live.badge.height).toBeLessThanOrEqual(live.brand.y + live.brand.height);
+  expect(live.brand.height).toBe(quiet.brand.height);
+  expect(live.avatar).toEqual(quiet.avatar);
+  expect(live.name.x).toBe(quiet.name.x);
+  // A pointer at the middle of the badge gets the badge, not the link to the page below it.
+  await badge.click();
+  await expect(page).toHaveURL(/[?&]view=schedule/);
+
+  // A long name stays one line that ends with an ellipsis, as without a stream. The badge stays below it, and the
+  // brand keeps its box.
+  const name = page.locator(".streamer-brand .streamer-name");
+  await name.evaluate((element: Element): void => {
+    element.textContent = "Bartholomew the Magnificent Speedrunner of Lordran";
+  });
+  expect(
+    await name.evaluate((element: Element): boolean => {
+      const style: CSSStyleDeclaration = getComputedStyle(element);
+      return style.textOverflow === "ellipsis" && element.scrollWidth > element.clientWidth;
+    }),
+  ).toBe(true);
+  const long = await onAir();
+  expect(long.name.height).toBe(live.name.height);
+  expect(long.badge.x).toBeCloseTo(long.name.x, 0);
+  expect(long.badge.y).toBeGreaterThanOrEqual(long.name.y + long.name.height);
+  expect(long.brand).toEqual(live.brand);
+
+  // A 320 px phone has no room below the name: the badge stays in the brand, over the lower edge of the avatar.
+  await page.setViewportSize({ width: 320, height: 700 });
+  await expect(badge).toBeVisible();
+  const narrow = await onAir();
+  expect(narrow.badge.x + narrow.badge.width).toBeLessThanOrEqual(narrow.brand.x + narrow.brand.width);
+  expect(narrow.badge.y + narrow.badge.height).toBeLessThanOrEqual(narrow.brand.y + narrow.brand.height);
+  expect(narrow.brand.height).toBe(quiet.brand.height);
+  expect(await page.evaluate((): number => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+
+  // A desktop keeps the badge beside the name.
+  await page.setViewportSize({ width: 1280, height: 720 });
+  const wide = await onAir();
+  expect(wide.badge.x).toBeGreaterThanOrEqual(wide.name.x + wide.name.width);
+  expect(wide.badge.y).toBeLessThan(wide.name.y + wide.name.height);
+
+  await page.clock.fastForward("03:00:00");
+  await expect(badge).toHaveCount(0);
+});
+
 test("the owner schedules a weekly stream, edits, cancels and deletes it", async ({ browser }) => {
   const context = await signedIn(browser, "featureowner", clientIp("schedule", 125));
   let created: { id: string; seriesId: string | null } | null = null;

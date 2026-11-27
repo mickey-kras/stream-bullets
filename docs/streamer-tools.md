@@ -15,10 +15,35 @@ The page opens the **Live** section. The old address `/overlay-control` opens th
 | --- | --- |
 | Route and loader | `app/routes/tools.tsx` |
 | Sections and their addresses | `app/lib/shell.ts` (`toolsViews`, `toolsPath`) |
+| Title and section tabs | `app/components/tools/tools-head.tsx` |
 | Live section | `app/components/tools/live-section.tsx` and the `live-*.tsx` files beside it |
 | Chat log | `app/lib/live-chat.ts` |
 | Support events in the chat log | `app/components/tools/live-support.tsx` |
 | Overlay state and saves | `app/components/overlay/use-overlay-state.ts` |
+
+## Title and section tabs
+
+The approved design is in `design/components/StreamerTools/README.md`.
+
+On a desktop, the title is the name of the page. The sections are text tabs below the title.
+
+On a phone, the layout is different. A phone is a screen with a maximum width of 700 pixels.
+
+- The sections are tabs of equal width in one line below the site header. The line has the full width of the screen.
+- A tab shows only an icon: `live`, `layers`, or `channels`. The name of the section is the tooltip of the tab and its name for a screen reader.
+- A tab is a minimum of 48 pixels high. The open tab has the gold fill.
+- The line of tabs stays below the header while the page scrolls.
+  On a screen with a maximum height of 544 pixels, the line scrolls with the page.
+- The title is the name of the open section. The name of the page does not show.
+
+The page has one `h1` title at each width. The title of the browser tab is the name of the page in each section.
+
+The header of a streamer page can show a live pill. On a phone, the pill is below the name of the streamer.
+The left edge of the pill is at the left edge of the name. The header does not become higher.
+This applies to each page with that header.
+
+If the header is too narrow for the pill below the name, the pill is on the lower edge of the avatar.
+That occurs on a screen that is less than 360 pixels wide, and at a larger text size on a wider phone.
 
 ## Live
 
@@ -52,6 +77,9 @@ If that output shows Twitch chat only, the preview does the same.
 See [Twitch chat only](overlay-composition.md#twitch-chat-only).
 It uses the activity feed of the owner, without an overlay key.
 
+The preview is read-only. A button with the `pencil` icon is beside the title of the part.
+It opens the **Overlay** section, where the owner changes the overlay.
+
 Live reads that feed through one connection, for the preview and for the chat part.
 The page keeps the recent chat of that connection, without the messages that a moderator removed.
 When the chat layer goes on stream while Live is open, the preview shows that recent chat at once, as OBS does.
@@ -73,6 +101,19 @@ The names of some controls are in code format here: the writing check of this re
 
 **Close voting** shows only while viewers can vote. A Mash Battle has its own controls and no **Close voting**.
 
+**Copy link** and the button for the QR code are small buttons in one line.
+The three controls below them change the stream. They fill one row in equal columns: two columns when **Close voting** does not show.
+The row adapts to the width of the part:
+
+| Width of the part | Layout |
+| --- | --- |
+| 30 rem or more | One row. The icon is before the label. |
+| From 21.5 rem to 30 rem, as on a phone | One row. The icon is above the label. |
+| Less than 21.5 rem, as in a narrow dock | One column of buttons with the same width. |
+
+The widths are in rem. Thus a larger text size gets the narrow layout on a wider screen.
+A label that is too long for its button continues on a second line. The button does not cut the label.
+
 A poll layer that shows the latest active poll changes its poll when that poll closes.
 It then shows the next open poll of the owner. If no poll is open, it shows the newest poll of the owner.
 
@@ -82,12 +123,17 @@ The part lists the six newest topics. If the topic layer shows an older topic, t
 **Feature on stream** shows a topic in the topic layer and turns the layer on.
 `Take off air` turns the topic layer off. The topic stays on the page.
 
+A line divides the rows of the list. The button of a topic is at the end of its row.
+The buttons of the topics and the buttons of the message banner have one width and the same right edge.
+In a part that is less than 30 rem wide, each of these buttons has the full width of the part.
+
 ### Message banner
 
 The part has the text and the style of the message banner.
 `Put on stream` saves the text and the style, and turns the message layer on.
 **Update on stream** saves a changed text or style. `Take off air` turns the layer off.
 The text is a draft while the layer is off: viewers do not get it.
+The state of the banner, on air or off air, is at the start of the row of the buttons.
 
 ### Chat
 
