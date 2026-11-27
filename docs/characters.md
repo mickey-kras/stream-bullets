@@ -46,6 +46,7 @@ To change a value, change `app/lib/playground/constants.ts` and this table.
 | Movement cooldown | 1 second (30 ticks) for `!left`, `!right`, `!look` and their aliases, per viewer |
 | Other command cooldown | 3 seconds (90 ticks), independent of movement, per viewer |
 | Queued commands | 1 for each viewer. It expires after 10 seconds (300 ticks). |
+| Queued reactions | 1 for each character. It expires after 10 seconds (300 ticks). See [Reactions](#reactions). |
 | Bubble time | 4 seconds for a message, 2 seconds for a command |
 | Bubbles at one time | 4. A new bubble removes the bubble that is nearest to its end. |
 | Bubble text | 80 user-perceived characters |
@@ -141,6 +142,8 @@ Each demo runs the rules of the playground in the browser (`app/components/comma
 With reduced motion, the demos stand still.
 
 - A command controls only the character of its sender. Blocks and holes affect all characters.
+- By default, the chat on stream, the chat of **Live**, and the chat of the OBS dock do not show a command message.
+  A hidden command still works. See [Commands](overlay-composition.md#commands).
 - A side on a build command turns the character first: `!block left`.
 - Only live chat runs a command. A message from a snapshot or a late provider retry never runs a command.
   See [Channel connections and activity](channel-connections.md#event-contract).
@@ -154,6 +157,31 @@ With reduced motion, the demos stand still.
   Then a red cross shows above the character.
 - The dig, the dirt blocks, and the stairs use the art of the ground. Each other action has its own pictures.
   The rope of the grapple is a drawn line.
+
+## Reactions
+
+The server can make the characters react to an event, for example to an alert. A reaction is not a chat command.
+`PlaygroundHost.react(subject, action, skipPlatform)` starts a reaction. The rules that call it are not part of the playground.
+
+- The subject is a viewer: the platform and the platform user ID. The actions are `wave`, `jump`, and `cheer`.
+- When the subject has a character on screen, that character does the action one time.
+- When the subject is null or has no character on screen, the crowd reacts. An anonymous event has no subject.
+  Each visible character that stands on a floor then cheers one time.
+- A character on its way to the exit door does not stay for a reaction. For that subject, the crowd reacts.
+- A character stands on a floor when it walks, stands, turns, digs, builds, or does an emote.
+  A character that jumps, falls, flies, enters, leaves, or waits for a respawn does not stand on a floor.
+- `skipPlatform` keeps the characters of one platform out of the crowd.
+  Use it when an output shows only that platform and the event comes from a different platform.
+- A reaction shows no command bubble and no red cross. It does not steer the character. A steered character stays steered.
+- A reaction does not use the command cooldown and does not start it. The score and the inactivity time do not change.
+- The jump of a reaction goes up and comes down at the same place. Thus a reaction does not move a character off its build.
+- A reaction never stops an action. It waits until the character walks or stands in the walking limits.
+  Thus a command, a fall, a respawn, and an entrance end first. A queued command of the viewer also runs first.
+- A reaction that waits expires after 10 seconds (300 ticks). A new reaction replaces a reaction that waits.
+- In registry mode and during a pause, a reaction does nothing. The playground never keeps a reaction for later.
+- A reaction is not in the checkpoint, and it adds nothing to the frame protocol.
+  The frames show it as the `wave`, `jump`, or `cheer` state of the character.
+- The same seed, the same messages, and the same reactions at the same ticks give the same frames.
 
 ## Terrain
 
@@ -312,10 +340,10 @@ When the playground does not run, it is in registry mode. In registry mode no ti
 
 - Chat changes only the scores and the time of the last message.
 - Moderation applies.
-- The playground drops commands. It never keeps them for later.
+- The playground drops commands and reactions. It never keeps them for later.
 
 When the playground runs again, its clock moves over the gap. Due repairs and expiries apply.
-Each visible character then walks. The playground drops actions, bubbles, and queued commands.
+Each visible character then walks. The playground drops actions, bubbles, queued commands, and queued reactions.
 
 In registry mode the host sets an alarm for the next expiry of a participant, a restriction, or the test.
 While the playground keeps a state, the alarm comes at least once each minute (`LAYER_CHECK_MS`).
@@ -332,7 +360,8 @@ It saves the checkpoint at most each 5 seconds while the state changes, and when
 The checkpoint holds the clock, the registry, the restrictions, the terrain with its builds and flags, the rotation, the pause, the test, and the settings.
 
 After an eviction, the object restores the checkpoint. The visible characters come back and walk. The builds stay.
-Actions, bubbles, and queued commands are not in the checkpoint. Thus a restored playground never runs an old command again.
+Actions, bubbles, queued commands, and queued reactions are not in the checkpoint.
+Thus a restored playground never runs an old command or an old reaction again.
 
 While the playground runs, the host keeps an alarm 15 seconds ahead (the watchdog).
 The alarm starts a playground again when an eviction stopped its interval.

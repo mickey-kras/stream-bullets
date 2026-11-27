@@ -96,6 +96,7 @@ These are art handoff assets. Check the timing, the equipment tint, the rope att
 
 `stairs-right.png` is the 16 by 16 runtime tile. `stairs-right-4x.png` is its 4 times export.
 The tile replaces the stair in `props.png`. The runtime terrain atlas holds it at (128, 154).
+
 Its column heights are 4 px at x 0, 8 px at x 3, 12 px at x 5, and 16 px at x 8.
 The renderer mirrors it for stairs to the left. `review-stair.png` shows the final exported pixels.
 The earlier `review-props.png` shows the original proposal. Use `review-stair.png` for the revised stair.

@@ -5,6 +5,7 @@ import { MASH_NAME } from "../../lib/mash";
 import { channelsSectionPath, paths } from "../../lib/shell";
 import {
   LAYER_BACKGROUND,
+  isContentLayer,
   layerEnabled,
   type ContentLayer,
   type GridLayer,
@@ -272,13 +273,12 @@ function BackgroundRange({
   );
 }
 
-/** The background slider of a layer. The characters layer and the camera frame have none. */
+/** The background slider of a layer. Only the chat and the content layers have one. */
 function LayerBackground({
   layer,
   layers,
   change,
 }: Readonly<{ layer: GridLayer; layers: OverlayLayers; change: ChangeLayers }>): ReactNode {
-  if (layer === "characters" || layer === "camera") return null;
   if (layer === "chat")
     return (
       <BackgroundRange
@@ -290,6 +290,7 @@ function LayerBackground({
         }
       />
     );
+  if (!isContentLayer(layer)) return null;
   return (
     <BackgroundRange
       label={t("overlay.props.background")}
@@ -309,7 +310,7 @@ function QrSetting({
   change,
 }: Readonly<{ layer: GridLayer; layers: OverlayLayers; change: ChangeLayers }>): ReactNode {
   const hintId: string = useId();
-  if (layer === "chat" || layer === "characters" || layer === "message" || layer === "camera") return null;
+  if (!isContentLayer(layer) || layer === "message") return null;
   return (
     <>
       <label className="choice">
@@ -417,7 +418,7 @@ export function LayerProperties({
         />
       )}
       {layer === "camera" && <p className="muted ov-comp-note">{t("overlay.camera.note")}</p>}
-      {layer !== "chat" && layer !== "characters" && layer !== "camera" && <ContentSettings layer={layer} {...props} />}
+      {isContentLayer(layer) && <ContentSettings layer={layer} {...props} />}
       <QrSetting layer={layer} layers={layers} change={change} />
       <LayerBackground layer={layer} layers={layers} change={change} />
       <button type="button" onClick={() => onRemove(layer)} data-props-remove>

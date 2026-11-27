@@ -143,6 +143,35 @@ describe("old stored text", (): void => {
     });
   });
 
+  it("gives an old text the default alerts and goal, off the grid, and keeps them in a text of this version", (): void => {
+    for (const raw of [oldText({ chat: true, characters: true }), '{"v":2}', "{}", "{"]) {
+      const layers: OverlayLayers = parseStoredLayers(raw, LEGACY_DEFAULT);
+      expect(layers.alerts, raw).toEqual(DEFAULT_LAYERS.alerts);
+      expect(layers.goal, raw).toEqual(DEFAULT_LAYERS.goal);
+      for (const orientation of ORIENTATIONS) {
+        expect(layers.cells[orientation].alerts, raw).toBeNull();
+        expect(layers.cells[orientation].goal, raw).toBeNull();
+      }
+    }
+    const current: OverlayLayers = {
+      ...DEFAULT_LAYERS,
+      alerts: {
+        enabled: true,
+        rules: { ...DEFAULT_LAYERS.alerts.rules, bits: { ...DEFAULT_LAYERS.alerts.rules.bits, min: 250 } },
+      },
+      goal: { enabled: true, title: "New subscribers", counts: "follows", target: 100 },
+      cells: {
+        horizontal: { ...emptyCells(), alerts: { c: 8, r: 0, w: 16, h: 3 }, goal: { c: 24, r: 0, w: 8, h: 2 } },
+        vertical: emptyCells(),
+      },
+    };
+    const raw: string = storedLayersText(current);
+    expect(legacyLayersText(raw)).toBe(false);
+    expect(parseStoredLayers(raw)).toEqual(current);
+    // A text of this version has no old source on air to place.
+    expect(parseStoredLayers(raw, air("auto"))).toEqual(current);
+  });
+
   it("reads invalid JSON and other values as the defaults, with the old default source", (): void => {
     for (const raw of ["{", "", "null", "[]", "7"]) expect(parseStoredLayers(raw), raw).toEqual(DEFAULT_LAYERS);
     expect(placed(parseStoredLayers("{", LEGACY_DEFAULT))).toEqual(["poll"]);

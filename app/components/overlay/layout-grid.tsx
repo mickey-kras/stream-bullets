@@ -61,6 +61,8 @@ export const LAYER_NAMES: Readonly<Record<GridLayer, MessageId>> = {
   card: "overlay.name.card",
   support: "overlay.name.support",
   camera: "overlay.name.camera",
+  alerts: "overlay.name.alerts",
+  goal: "overlay.name.goal",
 };
 
 /**

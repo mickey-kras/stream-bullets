@@ -46,6 +46,10 @@ The composition has nine layers. Each layer can be on the grid one time.
 
 `poll`, `topic`, `next`, `message`, `card`, and `support` are the content layers.
 
+The grid also has the `alerts` layer and the `goal` layer. The API saves their cells and their settings.
+The overlay does not show these two layers in this version, and the editor does not offer them.
+See [Overlay layers](api.md#overlay-layers).
+
 A layer is on stream in an output when it has a cell in the orientation of that output and its `enabled` setting is on.
 See [Outputs](#outputs).
 In the editor, the `enabled` setting is **Show on stream**.
@@ -200,7 +204,9 @@ A viewer scans the QR code with a phone. The phone then opens the public page of
 - The API accepts `qr` for the `message` layer, but that layer never shows a code.
 
 The stored layers have a limit of 4000 characters. The server stores only what is not a default.
-All nine layers on the grid of the two orientations, with each setting changed, need less than half of the limit.
+All layers on the grid of the two orientations, with each setting changed, need less than three quarters of the limit.
+This includes the `alerts` layer and the `goal` layer.
+
 Migration `0032` raised the limit from 1000 characters. It builds the `overlay_state` table again and keeps all rows.
 An older Worker can use the new table.
 
@@ -246,7 +252,8 @@ The overlay reads stored and broadcast layers leniently. Thus a value from an ol
 - A field with an incorrect value takes its default value.
 - A cell outside the grid or below the minimum size reads as no cell.
 - A cell that overlaps an earlier layer reads as no cell.
-  The sequence is `chat`, `characters`, `poll`, `topic`, `next`, `message`, `card`, `support`, `camera`.
+  The sequence is `chat`, `characters`, `poll`, `topic`, `next`, `message`, `card`, `support`, `camera`, `alerts`, `goal`.
+  A newer layer is later in the sequence. Thus a stored layout keeps the cells that it has.
 - A layer with an incorrect value takes the defaults of that layer.
 
 The API is strict for changes. See [Overlay layers](api.md#overlay-layers).
@@ -838,6 +845,17 @@ The full-width `！` also starts a command. A message that starts with `!` and n
 To show commands, clear **Hide chat commands (!jump)** in the settings of the chat layer.
 When you select the option again, the chat also hides the command rows that are on the screen.
 The chat never runs a command. It only shows or hides the message.
+
+The option applies to each view of the merged chat:
+
+- The chat layer in the two outputs, and in each preview of the composition
+- The chat of **Live**, the full-screen chat, and the chat of the OBS dock. See [Chat](streamer-tools.md#chat).
+
+The server sends each message to each page, and the page shows no row for a hidden command.
+Thus a hidden command never shows, also not for a moment, and it leaves no empty row.
+A hidden command for a character still moves the character and still counts for the score of the viewer.
+The option does not change moderation: a removed message stays removed.
+OBS and the other open pages of the owner get a change of the option at once, without a reload.
 
 ### Reconnection
 

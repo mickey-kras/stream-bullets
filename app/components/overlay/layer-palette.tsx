@@ -25,8 +25,20 @@ export interface LayerGroup {
  */
 export const LAYER_GROUPS: readonly LayerGroup[] = [
   { id: "picture", name: "overlay.group.picture", layers: ["chat", "characters", "camera"] },
+  { id: "recognition", name: "overlay.group.recognition", layers: ["alerts", "goal"] },
   { id: "content", name: "overlay.group.content", layers: CONTENT_LAYERS },
 ];
+
+/**
+ * False until the overlay shows the alerts and the goal (issue #1043). The layer list then has no Recognition group,
+ * so the owner cannot put these two layers on the grid.
+ */
+export const RECOGNITION_READY: boolean = false;
+
+/** The groups that the layer list shows. */
+export function shownGroups(recognition: boolean = RECOGNITION_READY): readonly LayerGroup[] {
+  return LAYER_GROUPS.filter((group: LayerGroup): boolean => recognition || group.id !== "recognition");
+}
 
 /** A press that moves this many pixels is a drag, not a click. */
 const DRAG_START_PX = 6;
@@ -146,7 +158,7 @@ function PaletteGroup({ group, children }: Readonly<{ group: LayerGroup; childre
 }
 
 /**
- * All the layers, as chips in groups (LAYER_GROUPS). Each layer can be on the grid one time. A chip adds its layer
+ * All the layers, as chips in groups (shownGroups). Each layer can be on the grid one time. A chip adds its layer
  * to the grid `grid`, or selects it when it is there (see PaletteChip). The parent puts the palette where it fits:
  * the palette does not know the page around it.
  *
@@ -180,7 +192,7 @@ export function LayerPalette({
     <fieldset className="ov-palette" data-comp-palette data-drop={drop ?? undefined} ref={ref}>
       <legend className="eyebrow ov-studio-title">{t("overlay.grid.palette")}</legend>
       <div className="ov-palette-body">
-        {LAYER_GROUPS.map((group: LayerGroup) => (
+        {shownGroups().map((group: LayerGroup) => (
           <PaletteGroup key={group.id} group={group}>
             {group.layers.map((layer: GridLayer) => (
               <PaletteChip

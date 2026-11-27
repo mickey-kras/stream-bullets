@@ -45,7 +45,8 @@ const color = withFallback(
   undefined,
 );
 
-function parseTime(value: string | undefined | null): number | null {
+/** A provider time as a time in milliseconds, or null for a missing or incorrect value. */
+export function parseTime(value: string | undefined | null): number | null {
   if (!value) return null;
   const time = Date.parse(value);
   return Number.isFinite(time) ? time : null;

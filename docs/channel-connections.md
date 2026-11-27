@@ -62,7 +62,7 @@ It must ignore a message that the parser refuses.
 | `clear` | `platform`, `receivedAt` | A moderator cleared the chat |
 | `clear_user` | `platform`, `userId`, `receivedAt` | A moderator removed all messages of one user |
 | `status` | `platform`, `status`, `code` | The connection changed state |
-| A support kind | `id`, `platform`, `deliveryId`, `sender`, `anonymous`, `amount`, `currency`, optional `text`, `receivedAt`, `replay` | One support event. See [Support events](#support-events). |
+| A support kind | `id`, `platform`, `deliveryId`, `sender`, `anonymous`, `amount`, `currency`, optional `text`, optional `sentAt`, `receivedAt`, `replay` | One support event. See [Support events](#support-events). |
 
 The `id` of a chat message is `platform:messageId`. It is unique across platforms.
 A participant is the pair of `platform` and `user.id`. A display name is not an identity.
@@ -74,6 +74,8 @@ The socket sends these messages:
 - `{"type":"event","event":{...}}` for each live event.
 - `{"type":"unavailable"}` before the server closes the socket. This occurs when the overlay key changes,
   when an administrator suspends the page, and when the owner deletes the account.
+- `{"type":"alerts",...}` and `{"type":"alert",...}` for the alerts and the goal. See [Alerts and the goal](#alerts-and-the-goal).
+  The parser reads them. The server does not send them in this version.
 
 A browser cannot read the HTTP status of a failed WebSocket upgrade.
 Thus the server accepts a connection with a wrong or revoked key and closes it at once with the code `4403`.
@@ -102,7 +104,7 @@ Thus the feed uses the time of the webhook message. We did not check that a Twit
 
 ### Support events
 
-The feed has one format for support from each platform and for direct tips. These are the kinds:
+The feed has one format for support from each platform, for direct tips, and for topic credits. These are the kinds:
 
 | Kind | Meaning | `amount` | `currency` |
 | --- | --- | --- | --- |
@@ -117,20 +119,27 @@ The feed has one format for support from each platform and for direct tips. Thes
 | `kicks` | KICKs | KICKs | `null` |
 | `tip` | A direct tip through StreamBullets | Micros of the currency | The ISO 4217 code |
 | `reactions` | A group of reactions: one event for the group | Reactions | `null` |
+| `topic` | The credit for the author of a topic that the owner shows on stream | `null` | `null` |
 
 Each support event has these fields:
 
-- `platform`: `twitch`, `youtube`, or `kick`. Only a `tip` has `direct`.
+- `platform`: `twitch`, `youtube`, or `kick`. Only a `tip` and a `topic` have `direct`.
 - `deliveryId`: the ID that the provider gave the delivery. `id` is `platform:deliveryId`.
 - `sender`: `{id, displayName}` of the supporter on that platform, or `null`.
 - `anonymous`: `true` when the supporter asked for no name. An anonymous event always has `sender: null`.
 - `amount`: the amount in the native unit of the kind. Money is in micros: 1 000 000 is one unit of the currency.
   The feed never converts an amount to a different unit or currency.
 - `text`: the text that the supporter sent, with at most 500 characters. Show it as text, never as HTML, as for chat text.
+  For a `topic`, the text is the title of the topic.
+- `sentAt`: the time when the platform says that the event occurred. The field is absent when the platform gives no time.
+  Only YouTube events have it in this version.
+  A consumer that counts or plays events must compare this time, not only `receivedAt`. A provider can send an old event again a long time after it occurred.
 - `replay`: `true` for an event that the server sends again: a replay of the owner, a test, or the snapshot of a reconnect.
 
 The parser refuses a support event that does not agree with its kind.
 Examples are a follow with an amount, money without a currency, and a tip that is not direct.
+
+No part of the server makes a `topic` event in this version. `tip` and `reactions` also have no source.
 
 A consumer ignores the kinds that it does not know.
 An `event` message of an unknown kind is not valid for the parser, and the consumer ignores it.
@@ -147,6 +156,85 @@ These rules make each support event count one time:
   Thus a replayed alert does not change a goal or a revenue record.
 
 This section is the format only. See [Support events of each provider](#support-events-of-each-provider) for the provider events.
+
+### Alerts and the goal
+
+`app/lib/alerts.ts` and `app/lib/goals.ts` have the rules for alerts on stream and for the goal.
+They are pure functions. This version has the rules and the message format only.
+The server keeps no alert and no goal, and no page shows them.
+
+A rule tells what a support event does. The alerts layer holds the rules. See [Overlay layers](api.md#overlay-layers).
+
+| Rule | Support kinds | Starts at | Banner | Character action |
+| --- | --- | --- | --- | --- |
+| `follow` | `follow` | Each event | Off | `wave` |
+| `subscription` | `subscription`, `membership` | Each event | On | `jump` |
+| `gift` | `gift` | A bundle of 1 gift | On | `jump` |
+| `bits` | `bits`, `kicks` | 100 Bits or 100 KICKs | On | `jump` |
+| `paid` | `super_chat`, `super_sticker` | Each event | On | `jump` |
+| `raid` | `raid` | 5 viewers | On | `crowd` |
+| `topic` | `topic` | Each event | On | `wave` |
+
+- The table gives the defaults. Each rule has three switches: `banner`, `chat`, and `character`. The defaults of `chat` and `character` are on.
+- `gift`, `bits`, and `raid` have the amount `min`. A live event below `min` makes no alert. Bits and KICKs use one amount.
+- A rule with the three switches off makes no alert.
+- `tip` and `reactions` have no rule. They make no alert.
+- `crowd` makes each character on screen cheer. An alert without a known participant also gets `crowd`.
+- One alert shows at a time, for 6 seconds (`ALERT_SHOW_MS`). The next alerts wait in a line. The line has no limit (`ALERT_QUEUE_MAX`).
+- An alert without a banner does not wait in the line. It plays immediately.
+
+`alertFor` makes the alert of one support event. Its result has the view for the clients and two server values:
+
+- `view`: what a client shows. See the fields below.
+- `subject`: the `platform` and the `userId` of the participant whose character moves. The server never sends it.
+- `action`: the character action, or `null` when the rule has `character` off.
+
+A view (`AlertView`) has these fields:
+
+- `id`: the ID of one play. For a live alert and a test, it is the ID of the event. A replay adds `~r` and the number of the replay.
+- `origin`: `live`, `replay`, or `test`.
+- `kind`, `platform`, `amount`, `currency`: as in the support event. Only a `topic` has the platform `direct`.
+- `name`: the display name of the supporter, or `null`.
+- `anonymous`: `true` when the supporter asked for no name. The parser refuses an anonymous view with a name.
+- `text`: the text of the supporter, with at most 200 characters (`ALERT_TEXT_LENGTH`).
+- `banner` and `chat`: the switches of the rule.
+- `startsAt` and `endsAt`: the server times of the banner. They are equal for an alert without a banner.
+
+A view never has a user ID. The parser drops each field that is not in this list.
+
+A test and a replay are alerts that the owner starts:
+
+- They ignore `min`. They use the three switches of the rule.
+- `testSupport` makes the sample event of a test. The server must not send or store that event. The event has `replay: true`.
+- They never count for a goal, a report, or revenue.
+
+The socket messages are:
+
+- `{"type":"alerts","at","muted","current","waiting","goal"}`: the whole state at the server time `at`.
+  `current` is the view on stream or `null`. `waiting` is the number of alerts in the line.
+  `goal` is `{counts, value, startedAt}` or `null`.
+- `{"type":"alert","alert"}`: one view without a banner.
+
+`alertShownOn` tells whether an output for one platform shows a view.
+Such an output shows the alerts of its platform and each topic credit. See [Twitch chat only](overlay-composition.md#twitch-chat-only).
+`messageForPlatform` does not remove an alert message.
+
+A goal counts one thing (`counts`):
+
+| `counts` | What adds to the value |
+| --- | --- |
+| `subs` | 1 for each `subscription` and each `membership`, and the gifts of each `gift` bundle |
+| `follows` | 1 for each `follow` |
+| `bits` | The Bits of each `bits` event |
+| `kicks` | The KICKs of each `kicks` event |
+| `chatters` | No support event. The value is the number of people who chat. |
+| `votes` | No support event. The value is the number of poll votes and new topics. |
+
+- `goalAmount` gives the amount of one support event for a goal. It gives 0 for an event with `replay: true`.
+- `countSupport` adds the amount to the progress. It adds nothing for an event from before `startedAt`.
+  It compares `sentAt`, or `receivedAt` when the event has no `sentAt`.
+- The caller refuses a known event ID with `acceptDelivery`. Thus an event counts one time.
+- A goal never converts Bits, KICKs, or a currency.
 
 ### Support events of each provider
 
@@ -256,6 +344,7 @@ YouTube sends each event as a message of the live chat, in the same page as the 
 - The `sender` is the author of the message (`authorDetails`). YouTube has no anonymous support in chat.
 - A gift bundle is one `membershipGiftingEvent`. Each person who got a gift also makes a `giftMembershipReceivedEvent`, which gives no event.
 - The delivery ID is the ID of the message. A page that comes again has the same IDs.
+- `sentAt` is the `publishedAt` time of the message. An event without a correct `publishedAt` has no `sentAt`.
 - Permission: these messages come with the chat that the server reads. They need no new scope and no more calls of the API, so they use no more quota.
 - YouTube has no chat message for a new channel subscriber, so the feed has no `follow` from YouTube.
 - `giftEvent` (Jewels) has no kind in the feed. The server does not read it.
@@ -606,6 +695,8 @@ Support events use no quota. The object reads them from each chat page that it r
 It makes the same calls for a connection that reads support events and for a connection that does not.
 For a connection that reads them, the first page after a connect can hold support events from before the consumer connected.
 The object sends each of them one time, as a live event with `replay: false`.
+
+Each of them has its publish time in `sentAt`. Thus a consumer can refuse an old event.
 
 The floor is 20 seconds after a page without items. It is 10 seconds again after a page with items.
 The floor is also 20 seconds after the feed spends 80% of the page budget or of the shared budget.

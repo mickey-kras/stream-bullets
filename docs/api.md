@@ -122,7 +122,7 @@ English also shows `error` for `step_up_required` and `other_key_required`.
 | Endpoint | Body | Response |
 | --- | --- | --- |
 | `GET /api/overlay` | - | `{overlay, data, handle}`. The `OverlayState` of the page of the signed-in owner, and the polls, topics, and cards for the pickers |
-| `POST /api/overlay` | `{action: "layers", write?, orientation?, chat?: {enabled?, hideCommands?, backgroundOpacity?}, characters?: {enabled?, timeout?, max?}, items?: {poll?, topic?, next?, message?, card?, support?}, camera?: {enabled?}, cells?: {horizontal?, vertical?}, twitchOnly?: {horizontal?, vertical?}}` | `{overlay}`. The whole new `OverlayState`, with `layers` |
+| `POST /api/overlay` | `{action: "layers", write?, orientation?, chat?: {enabled?, hideCommands?, backgroundOpacity?}, characters?: {enabled?, timeout?, max?}, items?: {poll?, topic?, next?, message?, card?, support?}, camera?: {enabled?}, alerts?: {enabled?, rules?}, goal?: {enabled?, title?, counts?, target?}, cells?: {horizontal?, vertical?}, twitchOnly?: {horizontal?, vertical?}}` | `{overlay}`. The whole new `OverlayState`, with `layers` |
 | `POST /api/overlay` | `{action: "showResults", on: boolean}` | `{overlay}`. The whole new `OverlayState`, with `showResults` |
 | `POST /api/overlay` | `{action: "message", text, style: "info" \| "hype"}` | `{overlay}`. The whole new `OverlayState`, with `message` and `messageStyle` |
 | `POST /api/overlay` | `{action: "chatTest", on: boolean}` | `{overlay}`. The whole new `OverlayState`, with `chatTestUntil` |
@@ -134,10 +134,12 @@ English also shows `error` for `step_up_required` and `other_key_required`.
 - The overlay shows only the layers on the grid: `chat`, `characters`, the content layers, and `camera`.
   The content layers are `poll`, `topic`, `next`, `message`, `card`, and `support`. Each content layer shows one content source.
   A layer is on stream in an output when it has a cell in the orientation of that output and its `enabled` value is `true`.
+- The grid also has the `alerts` layer and the `goal` layer. The API saves their cells and their settings.
+  The overlay does not show them in this version, and the editor does not offer them.
 - `orientation` is `horizontal` (a grid of 32 × 18 cells) or `vertical` (18 × 32 cells). A cell is 60 pixels.
   It is the output that the editor shows. Each output has its own link, and OBS can show the two outputs together.
   See [Outputs](overlay-composition.md#outputs).
-- Each orientation in `cells` holds `{chat?, characters?, poll?, topic?, next?, message?, card?, support?, camera?}`.
+- Each orientation in `cells` holds `{chat?, characters?, poll?, topic?, next?, message?, card?, support?, camera?, alerts?, goal?}`.
   Each value is a cell rectangle `{c, r, w, h}` of whole cells, or `null`. With `null`, the layer is not on the grid.
   `c + w` is at most the number of columns, and `r + h` is at most the number of rows.
 - Each value in `items` holds the settings of one content layer: `{enabled?, ref?, backgroundOpacity?, qr?}`.
@@ -152,9 +154,20 @@ English also shows `error` for `step_up_required` and `other_key_required`.
   The default is `false`: the merged chat. See [Twitch chat only](overlay-composition.md#twitch-chat-only).
 - `camera` is the camera frame: a frame with a clear window. It has only the `enabled` value.
   See [Camera frame](overlay-composition.md#camera-frame).
+- `alerts.rules` holds the rules of the alerts: `{follow?, subscription?, gift?, bits?, paid?, raid?, topic?}`.
+  - Each rule is `{min?, banner?, chat?, character?}`. The three switches are booleans.
+  - `min` is the amount where the alert starts: a whole number from 1 to 1,000,000.
+    Only `gift`, `bits`, and `raid` accept `min`. A `min` on a different rule returns `400`.
+  - A body changes only the fields of the rules that it names.
+  - See [Alerts and the goal](channel-connections.md#alerts-and-the-goal) for the rules and their defaults.
+- `goal` holds the settings of the goal.
+  - `title` is the title on stream: one line of at most 60 characters. It can be empty. The API keeps the spaces at its ends.
+  - `counts` is `subs`, `follows`, `bits`, `kicks`, `chatters`, or `votes`.
+  - `target` is a whole number from 1 to 10,000,000.
 - `chat.backgroundOpacity` is the opacity of the message cards in percent: an integer from 0 to 100 that is a multiple of 5.
   Other values return `400`. See [Message background](overlay-composition.md#message-background).
 - The minimum size is 6 × 4 cells for `chat`, 12 × 4 for `characters`, 8 × 4 for each content layer, and 6 × 4 for `camera`.
+  It is 8 × 3 cells for `alerts` and 8 × 2 cells for `goal`.
 - After the merge, no two layers can overlap in an orientation. A layer without a cell does not count.
   A layer with a cell counts also while its `enabled` value is `false`.
 - The stored layers have a limit of 4000 characters. The server stores only the cells and the settings that are not the defaults.
@@ -190,12 +203,17 @@ English also shows `error` for `step_up_required` and `other_key_required`.
   Also `404` without a streamer page, `409` when concurrent saves conflict, `423` for a frozen or suspended page, and `429` above the quota.
 - `OverlayState` and `OverlayPublic` are `{showResults, message, messageStyle, layers, chatTestUntil, revision}`.
   `OverlayPublic` is what the overlay page and the live room get. Its `message` is empty unless the `message` layer is on stream.
-- `layers` is `{orientation, chat: {enabled, hideCommands, backgroundOpacity}, characters: {enabled, timeout, max}, items, cells: {horizontal, vertical}}`.
-  Each orientation in `cells` is `{chat, characters, poll, topic, next, message, card, support}`. Each value is a cell or `null`.
+- `layers` is `{orientation, chat: {enabled, hideCommands, backgroundOpacity}, characters: {enabled, timeout, max}, camera: {enabled}, alerts: {enabled, rules}, goal: {enabled, title, counts, target}, items, cells: {horizontal, vertical}, twitchOnly: {horizontal, vertical}}`.
+  Each orientation in `cells` is `{chat, characters, poll, topic, next, message, card, support, camera, alerts, goal}`. Each value is a cell or `null`.
   `items` holds `{enabled, ref, backgroundOpacity, qr}` for each content layer.
   Missing, unknown, or incorrect stored fields take the defaults. Reads never fail because of a stored `layers` value.
   No layer has a cell by default. Chat and characters are off by default, `hideCommands` is on, and `backgroundOpacity` is 100.
+  `hideCommands` applies to the chat layer and to the chat of the owner in **Live** and in the OBS dock.
   The defaults of a content layer are `enabled: true`, `ref: null`, and `backgroundOpacity: 100`. `poll` has `qr: true`. The other content layers have `qr: false`.
+- `alerts` and `goal` are off by default. `alerts.rules` always has each of the seven rules, and each rule has its four fields.
+  A rule that does not accept `min` has `min: 1`.
+  The defaults of `goal` are an empty `title`, `counts: "subs"`, and `target: 25`.
+  The live room sends `layers` to each viewer. Thus the title of a goal is public when the API saves it, also while the layer is off stream.
 - With the `poll` parameter, the overlay page shows that poll in the poll layer, and no other content layer.
   A poll ID that the page does not have returns `404`.
 - The API has no `preview`, `take`, or `layout` action now. Each of them returns `400`.
@@ -248,7 +266,7 @@ See [OBS dock](streamer-tools.md#obs-dock).
   A call without the current dock key of that page returns `403` with the code `dock_key`.
 - `overlay` takes the same actions as `POST /api/overlay`, with these limits.
   A `layers` action can have only `items`, only for `poll`, `topic`, and `message`, and only the fields `enabled`, `ref`, and `qr`.
-  `chatTest` and each other field return `403` with the code `dock_action`.
+  `chatTest` and each other field return `403` with the code `dock_action`. `alerts` and `goal` are such fields.
 - An overlay key is not a dock key. It returns `403`.
 - The live room (`/api/live/:handle`) and the activity feed (`/api/activity/:handle`) accept the dock key in `key`.
   A dock then has the seat and the data of the owner.

@@ -56,6 +56,8 @@ export interface Checkpoint {
   testEndsAt: number | null;
   timeoutSeconds: number;
   visibleMax: number;
+  /** The owner setting for `!push`. It is here so that a restored playground keeps it before the layers are read. */
+  pushEnabled: boolean;
   /** The logical px of one cell of `cellsW` and `cellsH`. */
   cell: number;
   cellsW: number;
@@ -150,6 +152,8 @@ export const checkpointSchema: z.ZodType<Checkpoint> = z
     timeoutSeconds: z.number().int().min(CHARACTERS_TIMEOUT.min).max(CHARACTERS_TIMEOUT.max),
     // A checkpoint from before this setting has no value: it takes the default.
     visibleMax: z.number().int().min(CHARACTERS_MAX.min).max(CHARACTERS_MAX.max).default(CHARACTERS_MAX.default),
+    // A checkpoint from before this setting has no value: `!push` was on.
+    pushEnabled: z.boolean().default(true),
     // A checkpoint from before the cells of 60 design px has no value: its cells are twice as large.
     cell: z.union([z.literal(CELL_LOGICAL), z.literal(COARSE_CELL_LOGICAL)]).default(COARSE_CELL_LOGICAL),
     cellsW: z.number().int(),
