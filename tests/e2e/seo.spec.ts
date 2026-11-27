@@ -16,6 +16,15 @@ test("public pages emit canonical URLs in server HTML", async ({ request }) => {
   expect(robots).not.toMatch(/^Disallow:.*dialog=/mu);
 });
 
+test("the built Worker ships the notices of its dependencies", async ({ request }) => {
+  const notices = await request.get("/third-party-notices.txt");
+  expect(notices.status()).toBe(200);
+  expect(notices.headers()["content-type"]).toBe("text/plain; charset=utf-8");
+  const text: string = await notices.text();
+  expect(text.startsWith("# Third-party notices")).toBe(true);
+  expect(text).toMatch(/^## react \d/m);
+});
+
 test("canonical identity follows tabs and conversation navigation", async ({ page }) => {
   await page.goto("/@feature_host?view=about&dialog=login&utm_source=test");
   const canonical = page.locator('link[rel="canonical"]');

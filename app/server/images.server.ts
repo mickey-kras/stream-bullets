@@ -124,6 +124,41 @@ export async function deleteImageObjects(env: AppEnv, userId: string, kind: Imag
   } while (cursor);
 }
 
+// Prefixes one cleanup run removes at most.
+const CLEANUP_BATCH = 100;
+
+// Removes the image prefixes that `image_cleanup` holds: one account after its deletion, or the oldest rows for the
+// hourly job. Each delete is idempotent and a row goes only after its objects, so a failure leaves the row for the
+// next run. One failure does not stop the other kinds. Returns the number of prefixes that failed.
+export async function cleanUpImages(env: AppEnv, ownerId: string | null = null): Promise<number> {
+  const { results } = await env.DB.prepare(
+    "SELECT owner_id,kind FROM image_cleanup WHERE ?1 IS NULL OR owner_id=?1 ORDER BY created_at LIMIT ?2",
+  )
+    .bind(ownerId, CLEANUP_BATCH)
+    .all<{ owner_id: string; kind: ImageKind }>();
+  let failed = 0;
+  for (const row of results) {
+    try {
+      await deleteImageObjects(env, row.owner_id, row.kind);
+      await env.DB.prepare("DELETE FROM image_cleanup WHERE owner_id=? AND kind=?").bind(row.owner_id, row.kind).run();
+    } catch (error: unknown) {
+      failed += 1;
+      // Only the error class: R2 messages can name the account's keys.
+      console.error("account_image_delete_failed", {
+        kind: row.kind,
+        cause: error instanceof Error ? error.name : "unknown",
+      });
+    }
+  }
+  return failed;
+}
+
+// Hourly: retries the prefixes that a deletion left. A failure fails the run, so the cron alert shows it.
+export async function retryImageCleanup(env: AppEnv): Promise<void> {
+  const failed = await cleanUpImages(env);
+  if (failed > 0) throw new Error(`${failed} image prefixes of deleted accounts could not be removed.`);
+}
+
 async function openImageCache(): Promise<Pick<Cache, "match" | "put"> | undefined> {
   if (typeof caches === "undefined") return undefined;
   try {

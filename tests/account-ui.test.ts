@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { clampZoom, cropGeometry, initialCrop, panBy, settle, zoomTo } from "../app/components/account/crop";
 import { nextHandleChange } from "../app/components/account/edit-page-dialog";
 import { confirmsDeletion, deletionItems } from "../app/components/account/data-dialog";
-import { dialogHref } from "../app/components/account/dialog-route";
+import { closedDialogHref, dialogHref, profileFirst } from "../app/components/account/dialog-route";
 import { AVATAR_ORDER, personPicture, streamerPicture } from "../app/lib/avatars";
 import { directoryHref, readIntent, streamerTarget } from "../app/lib/directory";
 
@@ -70,6 +70,24 @@ describe("account dialogs", (): void => {
     const here = { pathname: "/@zed", search: "?view=polls", hash: "#x" };
     expect(dialogHref(here, "profile")).toBe("/@zed?view=polls&dialog=profile#x");
     expect(dialogHref({ ...here, search: "?view=polls&dialog=data" }, null)).toBe("/@zed?view=polls#x");
+  });
+
+  it("opens the profile of a new account first and the host application after it", (): void => {
+    // Join as a streamer on the landing page carries ?dialog=host through sign-in.
+    const callback = profileFirst("/?dialog=host#join");
+    expect(callback).toBe("/?dialog=profile&resume=host#join");
+    const profile = new URL(callback, "https://local.invalid");
+    // Closing or saving the profile opens the waiting dialog and drops the parameter.
+    expect(closedDialogHref(profile)).toBe("/?dialog=host#join");
+    expect(closedDialogHref({ pathname: "/", search: "?dialog=host", hash: "" })).toBe("/");
+    // Without an intent the profile opens alone and closes to the page.
+    expect(profileFirst("/@zed?view=polls")).toBe("/@zed?view=polls&dialog=profile");
+    expect(profileFirst("/?dialog=profile")).toBe("/?dialog=profile");
+    expect(closedDialogHref({ pathname: "/@zed", search: "?view=polls&dialog=profile", hash: "" })).toBe(
+      "/@zed?view=polls",
+    );
+    // An unknown dialog name is no intent.
+    expect(closedDialogHref({ pathname: "/", search: "?dialog=profile&resume=nope", hash: "" })).toBe("/");
   });
 
   it("allows one handle change every 30 days", (): void => {

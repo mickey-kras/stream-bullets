@@ -210,6 +210,7 @@ const event: StreamEvent = {
   category: null,
   image: null,
   updatedAt: now,
+  sequence: 0,
 };
 const ready: StepUpStatus = {
   mode: "enforce",

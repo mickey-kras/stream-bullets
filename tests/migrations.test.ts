@@ -266,7 +266,7 @@ beforeAll(async (): Promise<void> => {
 afterAll(async (): Promise<void> => database.dispose());
 
 describe("migrations 0006 onwards", (): void => {
-  it("covers 0006 to 0049", (): void => {
+  it("covers 0006 to 0050", (): void => {
     expect(applied.map((file: string): string => file.slice(0, 4))).toEqual([
       "0006",
       "0007",
@@ -312,6 +312,7 @@ describe("migrations 0006 onwards", (): void => {
       "0047",
       "0048",
       "0049",
+      "0050",
     ]);
   });
 
@@ -484,10 +485,63 @@ describe("migrations 0006 onwards", (): void => {
       { external_id: "vidB", event_id: "chA" },
     ]);
     expect(await rows("SELECT name FROM sqlite_master WHERE name='merge_0044'")).toEqual([]);
+
     expect(await rows("SELECT event_id FROM stream_event_topics WHERE entry_id='topic' AND event_id IN ('tw1','yt1')")).toEqual([
       { event_id: "tw1" },
     ]);
   });
+
+  it("moves the answered mark of a joined entry to the entry that stays (0044)", async (): Promise<void> => {
+    // A database of its own: the marks must exist before the migration runs.
+    const own: TestDatabase = await createTestDatabase({ migrate: false });
+    try {
+      const files: string[] = await migrationFiles();
+      await applyMigrations(
+        own.db,
+        files.filter((file: string): boolean => file < "0044"),
+      );
+      const event = (id: string, startsAt: number, platform: string, createdAt: number): D1PreparedStatement =>
+        own.db
+          .prepare(
+            `INSERT INTO stream_events (id,streamer_id,title,starts_at,duration_min,platform,url,tz,imported,created_at,updated_at)
+              VALUES (?,'page',?,?,60,?,'https://www.twitch.tv/host','UTC',1,?,1)`,
+          )
+          .bind(id, id, startsAt, platform, createdAt);
+      const hour = 3_600_000;
+      await own.db.batch([
+        own.db.prepare("INSERT INTO user (id,name,email,email_verified,created_at,updated_at) VALUES ('host','Host','host@example.test',1,1,1)"),
+        own.db.prepare("INSERT INTO streamers (id,owner_id,handle,name) VALUES ('page','host','host_page','Host')"),
+        own.db.prepare(
+          "INSERT INTO entries (id,streamer_id,author_id,kind,title,body,category,options,created_at) VALUES ('topic','page','host','topic','T','','','[]',1)",
+        ),
+        own.db.prepare(
+          "INSERT INTO entry_comments (id,entry_id,author_id,text,created_at) VALUES ('joined','topic','host','Q1',1),('kept','topic','host','Q2',1)",
+        ),
+        // "yt" joins "tw", which starts 10 minutes earlier; "other" stays apart.
+        event("tw", 100 * hour, "twitch", 1),
+        event("yt", 100 * hour + 10 * 60_000, "youtube", 2),
+        event("other", 200 * hour, "youtube", 2),
+        own.db.prepare(
+          `INSERT INTO comment_answers (comment_id,streamer_id,marked_at,platform,url,title,event_id,started_at,offset_s)
+            VALUES ('joined','page',1,'youtube','https://www.twitch.tv/host','Tube title','yt',0,30),
+              ('kept','page',1,'youtube','https://www.twitch.tv/host','Other title','other',0,45)`,
+        ),
+      ]);
+      await applyMigrations(
+        own.db,
+        files.filter((file: string): boolean => file === "0044_schedule_merge_platforms.sql"),
+      );
+      expect(
+        (await own.db.prepare("SELECT comment_id, event_id, offset_s, title FROM comment_answers ORDER BY comment_id").all())
+          .results,
+      ).toEqual([
+        { comment_id: "joined", event_id: "tw", offset_s: 30, title: "Tube title" },
+        { comment_id: "kept", event_id: "other", offset_s: 45, title: "Other title" },
+      ]);
+    } finally {
+      await own.dispose();
+    }
+  }, 60_000);
 
   it("adds the saved layouts of the overlay (0047), with no layout for old rows", async (): Promise<void> => {
     const rows = await db.prepare("SELECT layouts FROM overlay_state").all<{ layouts: string }>();
@@ -568,7 +622,7 @@ describe("migrations 0006 onwards", (): void => {
       db.prepare("INSERT INTO answer_settings (streamer_id,lead_s) VALUES ('page',3601)").run(),
     ).rejects.toThrow(/CHECK constraint failed/);
     await db.prepare("DELETE FROM entry_comments WHERE id='c10'").run();
-    expect(await db.prepare("SELECT count(*) AS n FROM comment_answers").first()).toEqual({ n: 0 });
+    expect(await db.prepare("SELECT count(*) AS n FROM comment_answers WHERE comment_id='c10'").first()).toEqual({ n: 0 });
   });
 
   it("deletes each stored translation (0036 and 0038), so the job makes them again", (): void => {

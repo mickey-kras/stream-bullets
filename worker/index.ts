@@ -1,3 +1,4 @@
+import { NOTICES_PATH, noticesResponse } from "../app/server/notices.server";
 import { sitemapResponse } from "../app/server/sitemap.server";
 import { createRequestHandler, RouterContextProvider } from "react-router";
 import { appContext, type AppContext, type AppEnv } from "../app/env";
@@ -13,7 +14,7 @@ import {
   requireSameOrigin,
   securityHeaders,
 } from "../app/server/http.server";
-import { serveImage } from "../app/server/images.server";
+import { retryImageCleanup, serveImage } from "../app/server/images.server";
 import { serveStreamImage } from "../app/server/stream-images.server";
 import { dockKeyMatches } from "../app/server/dock-key.server";
 import { overlayKeyOutput } from "../app/server/overlay-key.server";
@@ -57,6 +58,8 @@ async function clientKey(request: Request): Promise<string> {
 
 const BINARY_LABELS_COMPATIBILITY_HEADER: string = "X-StreamBullets-Binary-Labels";
 const BINARY_LABELS_COMPATIBILITY_VERSION: string = "1";
+// The commit of this Worker version, which the deployment sets: its smoke check waits for the version it expects.
+const REVISION_HEADER: string = "X-StreamBullets-Revision";
 
 type QuotaScope = "auth" | "connect" | "write" | "private-read";
 
@@ -229,6 +232,7 @@ function secured(
   if (env.APP_ENV === "test") result.headers.set("X-Robots-Tag", "noindex, nofollow");
   result.headers.set("X-Request-ID", context.requestId);
   result.headers.set(BINARY_LABELS_COMPATIBILITY_HEADER, BINARY_LABELS_COMPATIBILITY_VERSION);
+  if (/^[a-f0-9]{40}$/u.test(env.DEPLOYED_COMMIT ?? "")) result.headers.set(REVISION_HEADER, env.DEPLOYED_COMMIT!);
   for (const value of context.responseHeaders.getSetCookie()) result.headers.append("Set-Cookie", value);
   return result;
 }
@@ -266,6 +270,8 @@ async function routeResponse(
     return await activityResponse(request, env, activity[1], nonce, responseHeaders);
   } else if (path === "/sitemap.xml") {
     return await sitemapResponse(request, env);
+  } else if (path === NOTICES_PATH) {
+    return noticesResponse(request);
   } else if (calendar) {
     return await calendarResponse(request, env, calendar[1], origin);
   } else if (live) {
@@ -299,6 +305,8 @@ export default {
       channel_repair: repairChannelSubscriptions,
       // Scheduled streams of connected Twitch and YouTube channels.
       schedule_import: importSchedules,
+      // Images of deleted accounts that a failed R2 delete left.
+      image_cleanup: retryImageCleanup,
     };
     const names: string[] = Object.keys(jobs);
     const results = await Promise.allSettled(names.map((name: string) => jobs[name](env, controller.scheduledTime)));

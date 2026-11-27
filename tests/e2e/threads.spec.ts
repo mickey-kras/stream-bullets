@@ -5,10 +5,14 @@ import { accounts, commentBox, expectCommentText, runSql, signedIn } from "./fix
 import { clientIp } from "./client-ips";
 import { z } from "zod";
 
+// The root comment of the seeded thread, for links to it.
+let seededRoot = "";
+
 async function seedThreads(): Promise<string> {
   const users = await accounts();
   const entryId = randomUUID();
   const root = randomUUID();
+  seededRoot = root;
   const removed = randomUUID();
   const now = Date.now() - 600_000;
   const comment = (id: string, author: string, text: string, at: number, parent: string | null, gone = false): string =>
@@ -373,6 +377,130 @@ test("the link field adds a link and does not post the comment", async ({ browse
       "href",
       "https://example.com/guide",
     );
+  } finally {
+    await close(context);
+  }
+});
+
+test("a link to a thread keeps its loaded replies when the discussion refreshes", async ({ browser }) => {
+  const entryId: string = await seedThreads();
+  const users = await accounts();
+  await runSql("threads-link-quota", [
+    `DELETE FROM app_rate_limits WHERE key IN ('content:${users.viewer.id}','write:${users.viewer.id}');`,
+  ]);
+  const context = await signedIn(browser, "viewer", clientIp("threads", 100));
+  try {
+    const page = await newPage(context);
+    await page.goto(`/@other_host?entry=${entryId}&comment=${seededRoot}`);
+    const thread = page.locator("li.thread").filter({ has: page.getByText("Root comment", { exact: true }) });
+    const replies = thread.locator(".replies > li > article.comment");
+    await expect(replies).toHaveCount(2);
+    await thread.getByRole("button", { name: "View 2 more replies" }).click();
+    await expect(replies).toHaveCount(4);
+    // A new comment refreshes the discussion; the linked thread keeps the four replies it loaded.
+    await commentBox(page, "Write a comment").fill("A comment that refreshes the list.");
+    await page.getByRole("button", { name: "Post", exact: true }).click();
+    await expect(page.getByText("A comment that refreshes the list.", { exact: true })).toBeVisible();
+    // A post refreshes the list more than once, and each refresh reads the linked comment again: wait for the last.
+    await page.waitForLoadState("networkidle");
+    await expect(replies).toHaveCount(4);
+    await expect(thread.getByRole("button", { name: "View 2 more replies" })).toHaveCount(0);
+  } finally {
+    await close(context);
+  }
+});
+
+// A topic whose root comment has `count` replies, "Long reply 1" to "Long reply <count>", oldest first.
+async function seedLongThread(count: number = 80): Promise<string> {
+  const users = await accounts();
+  const entryId = randomUUID();
+  const root = randomUUID();
+  const now = Date.now() - 600_000;
+  await runSql("threads-window", [
+    `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,created_at) SELECT '${entryId}',id,'${users.viewer.id}','topic','A long thread','Many replies.','Just chatting',${now} FROM streamers WHERE handle='other_host';`,
+    `INSERT INTO entry_comments(id,entry_id,author_id,text,created_at,parent_id) VALUES ('${root}','${entryId}','${users.viewer.id}','The long root',${now},NULL);`,
+    `DELETE FROM entry_comments WHERE id LIKE '00000000-0000-4000-8000-%';`,
+    `WITH RECURSIVE n(i) AS (SELECT 1 UNION ALL SELECT i + 1 FROM n WHERE i < ${count})
+      INSERT INTO entry_comments(id,entry_id,author_id,text,created_at,parent_id)
+      SELECT printf('00000000-0000-4000-8000-%012d', i), '${entryId}', '${users.reporter.id}', 'Long reply ' || i, ${now} + i, '${root}' FROM n;`,
+    `DELETE FROM app_rate_limits WHERE key IN ('content:${users.viewer.id}','write:${users.viewer.id}');`,
+  ]);
+  return entryId;
+}
+
+function longReply(n: number): string {
+  return `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
+}
+
+test("a linked reply's window keeps the earlier page the reader loaded when the discussion refreshes", async ({ browser }) => {
+  const entryId: string = await seedLongThread();
+  const context = await signedIn(browser, "viewer", clientIp("threads", 100));
+  try {
+    const page = await newPage(context);
+    await page.goto(`/@other_host?entry=${entryId}&comment=${longReply(75)}`);
+    const thread = page.locator("li.thread").filter({ has: page.getByText("The long root", { exact: true }) });
+    const replies = thread.locator(".replies > li > article.comment");
+    // The link brings replies 65 to 80; 64 come before them.
+    await expect(replies).toHaveCount(16);
+    await thread.getByRole("button", { name: "View 64 earlier replies" }).click();
+    await expect(replies).toHaveCount(66);
+    await expect(thread.getByRole("button", { name: "View 14 earlier replies" })).toBeVisible();
+    await commentBox(page, "Write a comment").fill("A comment that refreshes the long thread.");
+    await page.getByRole("button", { name: "Post", exact: true }).click();
+    await expect(page.getByText("A comment that refreshes the long thread.", { exact: true })).toBeVisible();
+    await page.waitForLoadState("networkidle");
+    await expect(replies).toHaveCount(66);
+    await expect(replies.first()).toContainText("Long reply 15");
+    await expect(thread.getByRole("button", { name: "View 14 earlier replies" })).toBeVisible();
+  } finally {
+    await close(context);
+  }
+});
+
+test("a reply the reader posts in a long thread shows with the replies already loaded", async ({ browser }) => {
+  const entryId: string = await seedLongThread(120);
+  const context = await signedIn(browser, "viewer", clientIp("threads", 100));
+  try {
+    const page = await newPage(context);
+    await page.goto(`/@other_host?entry=${entryId}`);
+    const thread = page.locator("li.thread").filter({ has: page.getByText("The long root", { exact: true }) });
+    const replies = thread.locator(".replies > li > article.comment");
+    await expect(replies).toHaveCount(2);
+    await thread.getByRole("button", { name: "View 118 more replies" }).click();
+    await expect(replies).toHaveCount(52);
+    await replies.nth(51).getByRole("button", { name: "Reply", exact: true }).click();
+    const box = thread.locator(".inline-reply");
+    await commentBox(box, "Write a reply to reporter").fill("A reply at the end of a long thread.");
+    await box.getByRole("button", { name: "Post", exact: true }).click();
+    await expect(thread.getByText("A reply at the end of a long thread.", { exact: true })).toBeVisible();
+    await page.waitForLoadState("networkidle");
+    // The refresh loads the reader's replies again (whole pages: 100), and one more page reaches the new reply.
+    await expect(replies).toHaveCount(121);
+    await expect(replies.first()).toContainText("Long reply 1");
+    await expect(replies.last()).toContainText("A reply at the end of a long thread.");
+  } finally {
+    await close(context);
+  }
+});
+
+test("the reply link of a reply outside the loaded replies opens its parent", async ({ browser }) => {
+  const entryId: string = await seedLongThread();
+  // Reply 75 answers reply 10, far outside the window of a link to reply 75.
+  await runSql("threads-parent", [
+    `UPDATE entry_comments SET parent_id='${longReply(10)}' WHERE id='${longReply(75)}';`,
+  ]);
+  const context = await signedIn(browser, "viewer", clientIp("threads", 100));
+  try {
+    const page = await newPage(context);
+    await page.goto(`/@other_host?entry=${entryId}&comment=${longReply(75)}`);
+    const linked = page.locator(`#cm-${longReply(75)}`);
+    await expect(linked).toBeVisible();
+    await expect(page.locator(`#cm-${longReply(10)}`)).toHaveCount(0);
+    await linked.locator(".reply-mention").click();
+    await expect(page).toHaveURL(new RegExp(`comment=${longReply(10)}`));
+    const parent = page.locator(`#cm-${longReply(10)}`);
+    await expect(parent).toContainText("Long reply 10");
+    await expect(parent).toBeFocused();
   } finally {
     await close(context);
   }

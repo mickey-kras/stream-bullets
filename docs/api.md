@@ -5,6 +5,7 @@ Handlers: `app/server/api/*.ts`. Registry: `app/server/api/index.ts`. Types: `ap
 Reads (`GET`/`HEAD`) allow signed-out access unless noted.
 Writes need sign-in, exact origin, and no query string. Failures return `401`, `403`, or `400`.
 Unknown paths return `404`. Unsupported methods on known paths return `405`.
+The checks of a write come before `405`: another origin gets `403`, a query string `400`, and no sign-in `401`.
 
 The Worker applies address quotas of 120 requests each minute. An address is one IPv4 address or one IPv6 `/64` network.
 Each of these kinds of requests has its own quota: `/api/auth/*`, WebSocket connections, writes, and private reads.
@@ -44,7 +45,7 @@ English also shows `error` for `step_up_required` and `other_key_required`.
 | `PATCH /api/streamer` | `{name?, about?, handle?, logoMode?: "profile" \| "logo"}`. At least one field | `{streamer}` |
 | `PUT /api/images/logo` | PNG, JPEG, or WebP body with `Content-Type`. At most 5 MB | `{url}` |
 | `DELETE /api/images/logo` | None | `{logo: null}` |
-| `GET /api/entries/:id/comments?view=thread` | `sort`, `cursor` query parameters | `{comments: CommentThread[], nextCursor}`. Paged parents with all-depth `replies`, oldest first, keeping `parentId` |
+| `GET /api/entries/:id/comments?view=thread` | `sort`, `cursor` query parameters | `{comments: CommentThread[], nextCursor}`. Paged parents, each with its 2 oldest replies of any depth, `replyCount` and `earlierReplies: 0`. A reply keeps `parentId` and has `parentAuthor`. The name is empty for a removed parent |
 
 - Handle changes need 30 days. Early changes return `409` with the code `handle_cooldown`.
   `details.retryAt` is the ISO timestamp of the next allowed change.
@@ -268,7 +269,8 @@ Streamer-page writes must call `assertStreamerWritable()`.
 | `GET /api/comments/:id/history` | None | `{revisions: {text, mentions, writtenAt, editedAt}[]}`, oldest first. The texts before each edit, kept for 90 days. Only the page owner and administrators can read them. An administrator needs a fresh step-up. Other accounts and signed-out readers get `404`. |
 | `POST /api/comments/:id/answer` | `{action: "mark"}`, `{action: "unmark"}` or `{action: "offset", offsetSeconds}` (0 to 172800) | `{answer: {markedAt, stream} \| null}`. Only the page owner can set, change or remove the mark. Other accounts get `404`. `stream` is null when the page was not live at the mark. It has `platform`, `title`, `startedAt`, `offsetSeconds` and `link`. The link has a time code for a YouTube video and a Twitch VOD. `offset` on a mark without a stream gets `409`. A comment shows its mark as `answer`. A removed comment loses its mark. |
 | `GET /api/streamer/answer-lead`, `PUT /api/streamer/answer-lead` | `{leadMinutes}` (0 to 60) | `{leadMinutes}`. The time code of a new mark is this many minutes before the mark. The default is 5. The signed-in owner's page only. |
-| `GET /api/comments/:id` | None | `{comment, rootId, thread, handle, entryId}`. Exact comment and its thread, subject to page access. |
+| `GET /api/comments/:id` | None | `{comment, rootId, thread, handle, entryId}`. Exact comment and its thread, subject to page access. For a reply, `thread.replies` holds the 10 replies before and after it, and `thread.earlierReplies` counts the older ones it leaves out. |
+| `GET /api/comments/:id/replies` | One of the `after`, `before` or `from` query parameters: a place `<createdAt>.<replyId>` | `{replies: Comment[], earlierReplies, laterReplies}`. Up to 50 replies of root comment `:id` after, before or from that place, oldest first. Without a parameter, the first 50. `earlierReplies` counts the replies before the first one and `laterReplies` the replies after the last one. Both are `null` for an empty page. The place stays valid after its reply goes. A reply or a hidden page gets `404`. Two parameters get `400`. |
 | `POST /api/comments/:id/translation` | `{locale, text}`. `text` is the comment text that the reader sees. The answer is `409` when the comment changed. | `{translation: {text, mentions} \| null}`. Signed-in accounts only. `null`: the comment needs no translation, or the translation failed a check. `503` when translation is off. |
 | `GET /api/entries/:id/mention-candidates` | `query`, at most 40 characters | `{users}`. At most 10 public profiles or participants in this community. Requires sign-in. |
 | `GET /api/notifications` | Optional opaque `cursor` | `NotificationSnapshot`: at most 50 notifications, unread count, preferences and next cursor. Requires sign-in. |

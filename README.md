@@ -44,7 +44,8 @@ See [Authentication setup](docs/auth-setup.md) for production sign-in and admini
 - By default, the poll layer shows the latest active poll of the page owner. It never selects a viewer poll by itself.
 - The owner picks a viewer poll for the poll layer in the **Overlay** section. `?poll=<id>` also selects a poll. Public overlays cannot vote.
 - The **Overlay** section creates a private OBS URL with a secret `key`. It grants owner-priority admission, including full rooms.
-- The full URL appears once. The server stores only its SHA-256 key hash. **Regenerate link** revokes the old key. Update OBS afterward.
+- The server checks a key against its SHA-256 hash. With `CHANNEL_TOKEN_KEYS` set, it also keeps the key encrypted, so the owner can open the link again with **Show link**. Without that secret, the full URL appears once.
+- **Regenerate link** revokes the old key. Update OBS afterward.
 - See [overlay composition](docs/overlay-composition.md) for the layers, the per-layer URLs, and the merged chat.
 - See [OBS setup for the overlay](docs/obs-setup.md) for the steps to add the overlay to OBS for the first time.
 - See [interactive characters](docs/characters.md) for the character playground, its commands, and its controls.

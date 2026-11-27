@@ -20,6 +20,11 @@ export interface FakeProviders {
   refreshStatus: number | null;
   /** Each refresh returns a new refresh token (`<platform>-refresh-<n>`). */
   refreshes: number;
+  /**
+   * The refresh token of each platform that the fake issued last. A rotated token replaces the one before it, as the
+   * providers do, so a refresh with an older token gets `invalid_grant`. Before the first issue any token passes.
+   */
+  refreshTokens: Partial<Record<"twitch" | "youtube" | "kick", string>>;
   revokeStatus: number;
   subscribeStatus: number;
   /** Status for creating a subscription that only support events need, when set. Chat subscriptions go on. */
@@ -130,6 +135,7 @@ export function fakeProviders(): { fake: FakeProviders; fetch: ProviderFetch } {
     tokenStatus: 200,
     refreshStatus: null,
     refreshes: 0,
+    refreshTokens: {},
     revokeStatus: 200,
     subscribeStatus: 202,
     supportStatus: null,
@@ -176,6 +182,9 @@ export function fakeProviders(): { fake: FakeProviders; fetch: ProviderFetch } {
       // The hook runs while the refresh is in flight, whether the provider then accepts or refuses it.
       if (refreshing) await fake.duringRefresh?.();
       if (status !== 200) return json({ error: "invalid_grant" }, status);
+      const current: string | undefined = fake.refreshTokens[platform];
+      if (refreshing && current !== undefined && form.get("refresh_token") !== current)
+        return json({ error: "invalid_grant" }, 400);
       if (refreshing) fake.refreshes += 1;
       const requested: Record<typeof platform, string[]> = {
         twitch: TWITCH_SCOPES,
@@ -183,9 +192,11 @@ export function fakeProviders(): { fake: FakeProviders; fetch: ProviderFetch } {
         kick: ["user:read", "channel:read", "events:subscribe"],
       };
       const scopes = fake.grantedScopes ?? requested[platform];
+      const refreshToken: string = refreshing ? `${platform}-refresh-${fake.refreshes}` : `${platform}-refresh`;
+      fake.refreshTokens[platform] = refreshToken;
       return json({
         access_token: refreshing ? `${platform}-access-${fake.refreshes}` : `${platform}-access`,
-        refresh_token: refreshing ? `${platform}-refresh-${fake.refreshes}` : `${platform}-refresh`,
+        refresh_token: refreshToken,
         expires_in: fake.expiresIn,
         token_type: "bearer",
         scope: platform === "twitch" ? scopes : scopes.join(" "),

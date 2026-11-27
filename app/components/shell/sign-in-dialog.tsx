@@ -5,7 +5,7 @@ import { t } from "../../i18n";
 import { signupPolicy } from "../../signup-policy";
 import { legal } from "../../legal";
 import { localPath, paths, type Provider } from "../../lib/shell";
-import { dialogHref } from "../account/dialog-route";
+import { profileFirst } from "../account/dialog-route";
 import { errorMessage } from "../api";
 import { Dialog } from "../ui/dialog";
 import { Icon, type IconName } from "../ui/icon";
@@ -32,12 +32,6 @@ function useHere(): string {
   return `${pathname}${search}`;
 }
 
-// Open Your profile without losing intent or hash.
-function profileOver(path: string): string {
-  const url = new URL(path, "https://local.invalid");
-  return dialogHref(url, "profile");
-}
-
 // Show configured providers, provider restrictions, eligibility consent and errors.
 export function SignIn({
   providers,
@@ -61,7 +55,7 @@ export function SignIn({
         provider,
         callbackURL: returnTo,
         errorCallbackURL: `/sign-in?${new URLSearchParams({ next: returnTo }).toString()}`,
-        newUserCallbackURL: profileOver(returnTo),
+        newUserCallbackURL: profileFirst(returnTo),
         additionalData: { acceptance: { accepted, ...signupPolicy }, ...(displayName.trim() ? { displayName } : {}) },
       });
       if (result.error)

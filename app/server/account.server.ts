@@ -5,7 +5,8 @@ import { parseStoredLayouts, type OverlayLayouts } from "../lib/overlay-layouts"
 import { SYSTEM_USER_ID } from "../lib/system";
 import type { AppEnv } from "../env";
 import { getOrigin, HttpError } from "./http.server";
-import { deleteImageObjects, imageStorageKey, IMAGE_KINDS, type ImageKind } from "./images.server";
+import { cleanUpImages, imageStorageKey, IMAGE_KINDS, type ImageKind } from "./images.server";
+import { exportNotifications, type NotificationExport } from "./discussion-notifications.server";
 import { notifyRoom } from "./live.server";
 
 // Bound export memory to one page per query.
@@ -15,7 +16,7 @@ const NOTES =
   "This file contains the personal data StreamBullets holds about your account. " +
   "Sign-in tokens, provider tokens, session secrets, and security key public keys are not included because they are credentials, not profile data. " +
   "Uploaded images are listed by address; download them from those addresses while your account exists. " +
-  "Other people's comments and votes are not included. " +
+  "Other people's comments and votes are not included; a notification names the comment by its ID only. " +
   "The AI page counter stores only a keyed daily hash of an IP address, which cannot be linked to your account, so it is not included.";
 
 interface UserRow {
@@ -402,6 +403,7 @@ export interface AccountExport {
     resolvedAt: string | null;
   }[];
   images: ImageRecord[];
+  notifications: NotificationExport;
   legacyPolls: {
     votes: { pollId: string; choice: number }[];
     reactions: { pollId: string; value: number }[];
@@ -880,6 +882,7 @@ export async function exportAccount(env: AppEnv, userId: string): Promise<Accoun
       createdAt: iso(row.created_at),
     })),
     images: await imageRecords(env, userId, origin),
+    notifications: await exportNotifications(env, userId),
     legacyPolls: {
       votes: history.legacyVotes.map((row: LegacyVoteRow) => ({ pollId: row.poll_id, choice: row.choice })),
       reactions: history.legacyReactions.map((row: LegacyReactionRow) => ({ pollId: row.poll_id, value: row.value })),
@@ -949,15 +952,15 @@ export async function deleteAccount(env: AppEnv, userId: string): Promise<void> 
     statement("DELETE FROM poll_votes WHERE user_id=?1"),
     statement("DELETE FROM poll_reactions WHERE user_id=?1"),
     statement("DELETE FROM poll_comments WHERE user_id=?1"),
+    // The image prefixes go with the account: a failed R2 delete below stays recorded for the hourly retry.
+    env.DB.prepare(
+      "INSERT OR IGNORE INTO image_cleanup (owner_id,kind,created_at) SELECT ?1, value, ?2 FROM json_each(?3)",
+    ).bind(userId, Date.now(), JSON.stringify(IMAGE_KINDS)),
     statement("DELETE FROM user WHERE id=?1 RETURNING id"),
   ]);
   if (results.at(-1)?.results.length !== 1) throw new HttpError(404, "Account not found.");
-  try {
-    for (const kind of IMAGE_KINDS) await deleteImageObjects(env, userId, kind);
-  } catch (error_: unknown) {
-    // Deletion already committed: succeed and log only the error class for leftover-image cleanup.
-    console.error("account_image_delete_failed", { cause: error_ instanceof Error ? error_.name : "unknown" });
-  }
+  // Deletion already committed: a failed delete logs and leaves its row for `retryImageCleanup`.
+  await cleanUpImages(env, userId);
   const streamerIds = [...results[0].results, ...results[1].results].map(
     (row: unknown): string => (row as { id: string }).id,
   );

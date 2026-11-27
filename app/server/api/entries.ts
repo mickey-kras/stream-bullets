@@ -8,7 +8,14 @@ import {
   translateAnswers,
   setAnswerLead,
 } from "../comment-answers.server";
-import { getCommentThread, listCommentRevisions, listComments, mutateComment } from "../comments.server";
+import {
+  getCommentThread,
+  listCommentRevisions,
+  listComments,
+  listReplies,
+  mutateComment,
+  type ReplyAnchor,
+} from "../comments.server";
 import { mentionCandidates } from "../discussion-notifications.server";
 import { getVisibleEntry } from "../data.server";
 import { HttpError, json, queryParams, readJson } from "../http.server";
@@ -23,6 +30,21 @@ import { get, parsedQuery, requireViewer, write, type ApiRoute } from "./router"
 
 const entryPath = /entries\/([a-f0-9-]{36})(\/comments)?/;
 
+// A place in a thread: the time and ID of a reply, `<createdAt>.<id>`.
+const replyCursor = z
+  .string()
+  .regex(/^\d{1,15}\.[0-9a-f-]{36}$/u)
+  .transform((value: string): { createdAt: number; id: string } => {
+    const dot: number = value.indexOf(".");
+    return { createdAt: Number(value.slice(0, dot)), id: value.slice(dot + 1) };
+  });
+
+// One place at most: the page after a reply, before it, or from it on.
+const replyQuerySchema = z
+  .object({ after: replyCursor.optional(), before: replyCursor.optional(), from: replyCursor.optional() })
+  .strict()
+  .refine((value): boolean => [value.after, value.before, value.from].filter(Boolean).length <= 1, "Use one place.");
+
 export const entryRoutes: ApiRoute[] = [
   get(/comments\/([a-f0-9-]{36})/, async ({ request, env, match, viewer }) => {
     queryParams(request, []);
@@ -33,6 +55,19 @@ export const entryRoutes: ApiRoute[] = [
     await attachTranslations(env, comments, locale, viewer?.keepOriginal ?? []);
     await attachAnswerTranslations(env, comments, locale, viewer?.keepOriginal ?? []);
     return json(result);
+  }),
+  // GET /api/comments/:id/replies?after= | before= | from=<createdAt>.<replyId> → {replies, earlierReplies}: up to 50
+  // replies of the thread of root comment `:id` at that place, oldest first; the first 50 without one.
+  get(/comments\/([a-f0-9-]{36})\/replies/, async ({ request, env, match, viewer }) => {
+    if (!z.string().uuid().safeParse(match[1]).success) throw new HttpError(404, "Comment not found.");
+    const query = parsedQuery(request, ["after", "before", "from"], replyQuerySchema);
+    const direction = (["after", "before", "from"] as const).find((key) => query[key] !== undefined);
+    const anchor: ReplyAnchor | null = direction ? { direction, ...query[direction]! } : null;
+    const page = await listReplies(env, match[1], viewer?.id ?? null, anchor);
+    const locale = requestLocale(request, viewer?.locale ?? null);
+    await attachTranslations(env, page.replies, locale, viewer?.keepOriginal ?? []);
+    await attachAnswerTranslations(env, page.replies, locale, viewer?.keepOriginal ?? []);
+    return json(page);
   }),
   // GET /api/comments/:id/history → {revisions: [{text, mentions, writtenAt, editedAt}]}, oldest first. The page
   // owner and admins (with step-up) only; 404 for everyone else, also when signed out.
