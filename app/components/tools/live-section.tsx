@@ -27,6 +27,7 @@ import { useDesignScale } from "../overlay/use-design-scale";
 import { useOverlayState } from "../overlay/use-overlay-state";
 import { PlatformIcon } from "../overlay/wasteland/glyphs";
 import { Icon } from "../ui/icon";
+import { IconLink } from "../ui/icon-button";
 import { LiveChat } from "./live-chat";
 import { LiveMessage } from "./live-message";
 import { LivePart } from "./live-part";
@@ -95,7 +96,11 @@ function LivePreview({
   useDesignScale(frame, GRID[layers.orientation].cols * CELL_PX);
   const empty: boolean = !GRID_LAYERS.some((layer: GridLayer): boolean => onStream(layers, layer));
   return (
-    <LivePart name="preview" title={t("tools.live.preview")}>
+    <LivePart
+      name="preview"
+      title={t("tools.live.preview")}
+      action={<IconLink label={t("tools.live.editOverlay")} icon="pencil" href={toolsPath("overlay")} />}
+    >
       <section
         className="ov-frame ov-comp-frame tl-preview"
         data-orientation={layers.orientation}

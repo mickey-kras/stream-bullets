@@ -218,6 +218,150 @@ test("the streamer header offers Tools to the owner of the page only, and the si
   }
 });
 
+interface TabBox {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  fill: string;
+  color: string;
+  icon: number;
+  label: boolean;
+}
+
+test("Streamer tools has icon tabs below the header on a phone and text tabs on a desktop, with one title", async ({
+  browser,
+}) => {
+  const owner = await signedIn(browser, "owner", { width: 390 });
+  const page = await newPage(owner);
+  const sections = page.getByRole("navigation", { name: "Streamer tools sections" });
+  const tabs = (): Promise<TabBox[]> =>
+    sections.getByRole("link").evaluateAll((links: Element[]): TabBox[] =>
+      links.map((link: Element): TabBox => {
+        const { x, y, width, height } = link.getBoundingClientRect();
+        const style: CSSStyleDeclaration = getComputedStyle(link);
+        return {
+          x,
+          y,
+          width,
+          height,
+          fill: style.backgroundImage,
+          color: style.color,
+          icon: link.querySelector("svg")?.getBoundingClientRect().width ?? 0,
+          label: (link.querySelector(".tools-tab-label")?.getClientRects().length ?? 0) > 0,
+        };
+      }),
+    );
+  const bottom = (selector: string): Promise<number> =>
+    page.locator(selector).evaluate((element: Element): number => element.getBoundingClientRect().bottom);
+  const tokens = (): Promise<{ onGold: string; cream: string }> =>
+    page.evaluate((): { onGold: string; cream: string } => {
+      const probe: HTMLElement = document.body.appendChild(document.createElement("span"));
+      const read = (token: string): string => {
+        probe.style.color = `var(${token})`;
+        return getComputedStyle(probe).color;
+      };
+      const colors = { onGold: read("--on-gold"), cream: read("--cream") };
+      probe.remove();
+      return colors;
+    });
+
+  await page.goto("/tools");
+  await expect(page).toHaveTitle("Streamer tools · StreamBullets");
+  // The tabs are one line of equal columns at the full width, directly below the site header.
+  const phone: TabBox[] = await tabs();
+  expect(phone).toHaveLength(3);
+  expect(phone[0].x).toBe(0);
+  expect(phone[2].x + phone[2].width).toBeCloseTo(390, 0);
+  expect(phone[0].y).toBeCloseTo(await bottom("header.site-header"), 0);
+  for (const tab of phone) {
+    expect(tab.y).toBe(phone[0].y);
+    expect(tab.width).toBeCloseTo(130, 0);
+    expect(tab.height).toBeGreaterThanOrEqual(48);
+    // Only the icon shows, at 24 px.
+    expect(tab.icon).toBe(24);
+    expect(tab.label).toBe(false);
+  }
+  // Each tab has its name for a screen reader and as a tooltip.
+  for (const name of ["Live", "Overlay", "Channels"]) {
+    const tab = sections.getByRole("link", { name, exact: true });
+    await expect(tab).toHaveAttribute("title", name);
+    await expect(tab).toBeVisible();
+  }
+  // The open tab has the gold fill and the dark icon. The other tabs have no fill.
+  const colors = await tokens();
+  await expect(sections.getByRole("link", { name: "Live" })).toHaveAttribute("aria-current", "page");
+  expect(phone[0].fill).toContain("linear-gradient");
+  expect(phone[0].color).toBe(colors.onGold);
+  expect(phone[1].fill).toBe("none");
+  expect(phone[1].color).toBe(colors.cream);
+  // The title is the name of the open section. The name of the page and the line above it do not show. The head
+  // has one title at each width. A card of the overlay in a preview has its own heading, so look in the head.
+  const title = page.locator(".ov-head").getByRole("heading", { level: 1 });
+  await expect(title).toHaveCount(1);
+  await expect(title).toHaveAccessibleName("Live");
+  await expect(page.locator(".ov-head .eyebrow")).toBeHidden();
+  await expect(page.locator("h1 .tools-page-name")).toBeHidden();
+  expect(await title.evaluate((element: Element): number => element.getBoundingClientRect().top)).toBeGreaterThan(
+    phone[0].y + phone[0].height,
+  );
+  expect(await page.evaluate((): number => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  // The keyboard reaches each tab, and the focus ring shows inside the tab.
+  const overlay = sections.getByRole("link", { name: "Overlay" });
+  await sections.getByRole("link", { name: "Live" }).focus();
+  await page.keyboard.press("Tab");
+  await expect(overlay).toBeFocused();
+  expect(
+    await overlay.evaluate((element: Element): string[] => {
+      const style: CSSStyleDeclaration = getComputedStyle(element);
+      return [style.outlineStyle, style.outlineWidth];
+    }),
+  ).toEqual(["solid", "2px"]);
+  // A different section: its tab is the open tab and its name is the title. The document does not load again.
+  let documents = 0;
+  page.on("request", (request) => {
+    if (request.isNavigationRequest()) documents += 1;
+  });
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/\/tools\?view=overlay$/);
+  await expect(overlay).toHaveAttribute("aria-current", "page");
+  await expect(sections.getByRole("link", { name: "Live" })).not.toHaveAttribute("aria-current", "page");
+  await expect(title).toHaveAccessibleName("Overlay");
+  await expect(title).toHaveCount(1);
+  await expect(page).toHaveTitle("Streamer tools · StreamBullets");
+  expect(documents).toBe(0);
+  // The tabs stay below the header while the page scrolls.
+  const pinned: number = (await tabs())[0].y;
+  await page.locator("main").evaluate((main: Element): void => main.scrollTo(0, 600));
+  await expect.poll(() => page.locator("main").evaluate((main: Element): number => main.scrollTop)).toBeGreaterThan(0);
+  expect((await tabs())[0].y).toBe(pinned);
+  // A phone on its side has little height: there the tabs scroll with the page.
+  await page.setViewportSize({ width: 640, height: 360 });
+  await page.locator("main").evaluate((main: Element): void => main.scrollTo(0, 0));
+  const start: number = (await tabs())[0].y;
+  await page.locator("main").evaluate((main: Element): void => main.scrollTo(0, 300));
+  await expect.poll(async (): Promise<number> => (await tabs())[0].y).toBeLessThan(start);
+
+  // A desktop has the text tabs and the name of the page as the title.
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto("/tools?view=channels");
+  await expect(title).toHaveAccessibleName("Streamer tools");
+  await expect(title).toHaveCount(1);
+  await expect(page.locator(".ov-head .eyebrow")).toBeVisible();
+  await expect(sections.getByRole("link")).toHaveText(["Live", "Overlay", "Channels"]);
+  const desktop: TabBox[] = await tabs();
+  for (const tab of desktop) {
+    expect(tab.label).toBe(true);
+    expect(tab.icon).toBe(0);
+    expect(tab.height).toBeGreaterThanOrEqual(44);
+    expect(tab.y).toBe(desktop[0].y);
+  }
+  // The tabs are below the title, as before.
+  expect(desktop[0].y).toBeGreaterThan(await bottom(".ov-head h1"));
+  await expect(sections.getByRole("link", { name: "Channels" })).toHaveAttribute("aria-current", "page");
+  await close(owner);
+});
+
 test("the old Overlay control address opens Streamer tools", async ({ browser }) => {
   const owner = await signedIn(browser, "owner");
   const page = await newPage(owner);
