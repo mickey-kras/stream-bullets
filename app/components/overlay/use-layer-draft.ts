@@ -14,6 +14,22 @@ import { errorMessage, postJson, sendJson } from "../api";
 /** Keyboard edits save after this much idle time. Drags and buttons save at once. */
 export const SAVE_IDLE_MS = 400;
 
+/**
+ * Fields that keep a value for a pause in typing, outside the draft. Leaving the page or closing the editor gives each
+ * its value first (as an "idle" edit), so the value goes with the edits not sent yet.
+ */
+const pendingFields = new Set<() => void>();
+
+/** Registers a field's commit for `pendingFields` while the field is shown. `commit` must keep its identity. */
+export function usePendingField(commit: () => void): void {
+  useEffect(() => {
+    pendingFields.add(commit);
+    return (): void => {
+      pendingFields.delete(commit);
+    };
+  }, [commit]);
+}
+
 export type SaveStatus = "idle" | "saving" | "saved";
 
 /**
@@ -120,6 +136,7 @@ export function useLayerDraft(
     leaveFailure = null;
     leaveListeners.add(setError);
     const leave = (closing: boolean): void => {
+      for (const commit of pendingFields) commit();
       if (timer.current) clearTimeout(timer.current);
       timer.current = null;
       const pending: LayersPatch = unsent.current;

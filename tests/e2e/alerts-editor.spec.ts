@@ -282,6 +282,21 @@ test("Start test also sends one test alert while the Alerts layer is on stream",
   await close(owner);
 });
 
+test("a threshold typed just before the owner reloads the page still saves", async ({ browser }) => {
+  await runSql("alerts-editor-leave", [
+    layersSql({ alerts: { enabled: true }, cells: { horizontal: { alerts: { c: 8, r: 0, w: 16, h: 3 } } } }),
+  ]);
+  const { owner, page, editor } = await openEditor(browser, ALERTS_IP);
+  await chip(editor, "alerts").click();
+  const raid = settings(editor).getByRole("textbox", { name: "Starts at: smallest amount for Raid" });
+  await expect(raid).toBeVisible();
+  // The reload comes well inside the pause of the field, and the field keeps the focus.
+  await raid.fill("37");
+  await page.reload();
+  await expect.poll(async () => (await storedLayers(page)).alerts.rules.raid.min).toBe(37);
+  await close(owner);
+});
+
 test("the owner places the Goal layer, edits it, sees its count, and starts the count again", async ({ browser }) => {
   test.setTimeout(90_000);
   await runSql("alerts-editor-key", [horizontalKeySql]);

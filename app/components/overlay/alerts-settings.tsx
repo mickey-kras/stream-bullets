@@ -1,4 +1,4 @@
-import { useContext, useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useCallback, useContext, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { intlLocale, t, tn, type MessageId } from "../../i18n";
 import type { AlertControl } from "../../lib/alert-control";
 import {
@@ -21,7 +21,7 @@ import { Icon } from "../ui/icon";
 import { Select, type SelectOption } from "../ui/select";
 import { ALERT_ICONS } from "./alerts-layer";
 import { ControlApiContext, type ControlApi } from "./control-api";
-import { SAVE_IDLE_MS, type EditTiming } from "./use-layer-draft";
+import { SAVE_IDLE_MS, usePendingField, type EditTiming } from "./use-layer-draft";
 
 /**
  * False until the server makes the alert of a featured topic (issue #1043, the topic credit). The rules table then
@@ -126,7 +126,8 @@ export function parseWholeNumber(text: string, limits: Readonly<{ min: number; m
  * A field for a whole number in `limits`. The text is valid when the owner stops typing for SAVE_IDLE_MS or leaves
  * the field: then the value saves (`onValue` with "now"). Text that becomes invalid cancels the value that waits, so
  * a value typed on the way, such as 2 when 25 is cleared, never saves. The field tells the limits when the focus
- * leaves it with invalid text. A value that waits when the field goes away saves at once.
+ * leaves it with invalid text. A value that waits when the field goes away, or when the owner leaves the page or closes
+ * the editor, goes with the edits that the editor sends then.
  */
 export function WholeNumberInput({
   value,
@@ -158,18 +159,24 @@ export function WholeNumberInput({
   useEffect(() => {
     send.current = onValue;
   }, [onValue]);
-  const stop = (): void => {
+  const stop = useCallback((): void => {
     if (timer.current !== null) clearTimeout(timer.current);
     timer.current = null;
-  };
-  const commit = (): void => {
-    stop();
-    const next: number | null = waiting.current;
-    waiting.current = null;
-    if (next !== null) send.current(next, "now");
-  };
+  }, []);
+  const give = useCallback(
+    (when: EditTiming): void => {
+      stop();
+      const next: number | null = waiting.current;
+      waiting.current = null;
+      if (next !== null) send.current(next, when);
+    },
+    [stop],
+  );
+  const commit = useCallback((): void => give("now"), [give]);
+  // The editor's own save of the edits not sent yet takes the value when the page or the editor goes away.
+  usePendingField(useCallback((): void => give("idle"), [give]));
   // A value that waits saves when the field goes away.
-  useEffect(() => commit, []);
+  useEffect(() => commit, [commit]);
   return (
     <span className="ov-number">
       <input
