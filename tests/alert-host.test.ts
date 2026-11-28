@@ -998,6 +998,45 @@ describe("the goal", (): void => {
     });
   });
 
+  it("starts the first goal at the earliest event of two deliveries that share the first read", async (): Promise<void> => {
+    const { host, readLayers, send } = standalone(withGoal("follows"));
+    let finish: (layers: OverlayLayers) => void = (): void => undefined;
+    readLayers.mockImplementation(
+      (): Promise<OverlayLayers> =>
+        new Promise<OverlayLayers>((resolve: (layers: OverlayLayers) => void): void => {
+          finish = resolve;
+        }),
+    );
+    const first: ActivitySupport = support("follow", "f1", { sentAt: T0 - 200 });
+    const second: ActivitySupport = support("follow", "f2", { sentAt: T0 - 100 });
+    const reads: Promise<boolean>[] = [host.ready(earliestAt([first], T0)), host.ready(earliestAt([second], T0))];
+    finish(withGoal("follows"));
+    await Promise.all(reads);
+    host.receive(first);
+    host.receive(second);
+    expect(await (await send({ op: "status" })).json()).toMatchObject({ goal: { value: 2, startedAt: T0 - 200 } });
+  });
+
+  it("applies no read that a wipe overtook, so a deleted page keeps no goal and no copy", async (): Promise<void> => {
+    const { host, readLayers, storage, send } = standalone(withGoal("follows"));
+    let finish: (layers: OverlayLayers) => void = (): void => undefined;
+    readLayers.mockImplementation(
+      (): Promise<OverlayLayers> =>
+        new Promise<OverlayLayers>((resolve: (layers: OverlayLayers) => void): void => {
+          finish = resolve;
+        }),
+    );
+    const pending: Promise<boolean> = host.ready(T0);
+    host.wipe();
+    finish(withGoal("follows"));
+    expect(await pending).toBe(false);
+    expect(storage.sql.exec<{ n: number }>("SELECT count(*) AS n FROM alert_state").toArray()[0].n).toBe(0);
+    readLayers.mockResolvedValue(withGoal("follows"));
+    // A read after the wipe works as before.
+    expect(await host.ready(T0)).toBe(true);
+    expect(await (await send({ op: "status" })).json()).toMatchObject({ goal: { counts: "follows", value: 0 } });
+  });
+
   it("takes the earliest send time of the live chat and support events only", (): void => {
     const old: ActivitySupport = support("follow", "old", { sentAt: T0 - 10 * 60_000 });
     const status: ActivityEvent = { kind: "clear", platform: "twitch", receivedAt: T0 - 5000 };
@@ -1018,6 +1057,23 @@ describe("the goal", (): void => {
     });
     await room().alarm();
     expect(order).toEqual(["alerts", "subscriptions"]);
+  });
+
+  it("refuses a delivery while the first read of the layers fails, so the retry of the provider counts", async (): Promise<void> => {
+    const error = vi.spyOn(console, "error").mockImplementation((): void => undefined);
+    state().storage.sql.exec("DELETE FROM alert_state");
+    ingest.restart(page);
+    await setLayers(withGoal("follows"), false);
+    const faulty = faultyDatabase(database.db);
+    faulty.fail(/SELECT layers/);
+    env.DB = faulty.db;
+    const body = { deliveryId: "retry-1", channelId: "111", events: [support("follow", "f1")] };
+    expect((await post("event", body, { platform: "twitch" })).status).toBe(503);
+    expect(error).toHaveBeenCalledWith("alerts_config_failed", { cause: "Error" });
+    expect(supportRows()).toEqual([]);
+    faulty.heal();
+    expect((await post("event", body, { platform: "twitch" })).status).toBe(204);
+    expect(await run({ op: "status" })).toMatchObject({ goal: { counts: "follows", value: 1 } });
   });
 
   it("counts while the alerts are muted, off stream, or have no page, and not while the layer has no place", async (): Promise<void> => {
