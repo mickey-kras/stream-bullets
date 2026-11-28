@@ -223,6 +223,8 @@ export class AlertHost {
   private goal: StoredGoal | null = null;
   /** When this instance of the object read the layers. 0: not yet, so the copy from storage can be old. */
   private configAt = 0;
+  /** The number of wipes. A read that a wipe overtook applies nothing, so it cannot bring back deleted state. */
+  private wipes = 0;
   /** While the first read runs: the start of a goal that the read starts. */
   private goalFrom = Infinity;
   /** When the host last tried to read the layers, with or without success. */
@@ -278,6 +280,9 @@ export class AlertHost {
     this.triedAt = 0;
     this.usedAt = 0;
     this.unsent = false;
+    this.wipes += 1;
+    this.refreshing = null;
+    this.stale = false;
     ALERTS.create(this.options.sql);
   }
 
@@ -612,18 +617,23 @@ export class AlertHost {
       this.stale ||= changed;
       return this.refreshing;
     }
-    this.refreshing = this.read().finally((): void => {
-      this.refreshing = null;
+    const reading: Promise<boolean> = this.read().finally((): void => {
+      // A wipe can start a new read while this one runs: that read stays.
+      if (this.refreshing === reading) this.refreshing = null;
     });
-    return this.refreshing;
+    this.refreshing = reading;
+    return reading;
   }
 
   private async read(): Promise<boolean> {
+    const wipes: number = this.wipes;
     let ok: boolean;
     do {
       this.stale = false;
       try {
-        this.apply(await this.options.readLayers());
+        const layers: OverlayLayers = await this.options.readLayers();
+        if (wipes !== this.wipes) return false;
+        this.apply(layers);
         ok = true;
       } catch (error: unknown) {
         console.error("alerts_config_failed", { cause: cause(error) });

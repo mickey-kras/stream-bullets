@@ -1017,6 +1017,26 @@ describe("the goal", (): void => {
     expect(await (await send({ op: "status" })).json()).toMatchObject({ goal: { value: 2, startedAt: T0 - 200 } });
   });
 
+  it("applies no read that a wipe overtook, so a deleted page keeps no goal and no copy", async (): Promise<void> => {
+    const { host, readLayers, storage, send } = standalone(withGoal("follows"));
+    let finish: (layers: OverlayLayers) => void = (): void => undefined;
+    readLayers.mockImplementation(
+      (): Promise<OverlayLayers> =>
+        new Promise<OverlayLayers>((resolve: (layers: OverlayLayers) => void): void => {
+          finish = resolve;
+        }),
+    );
+    const pending: Promise<boolean> = host.ready(T0);
+    host.wipe();
+    finish(withGoal("follows"));
+    expect(await pending).toBe(false);
+    expect(storage.sql.exec<{ n: number }>("SELECT count(*) AS n FROM alert_state").toArray()[0].n).toBe(0);
+    readLayers.mockResolvedValue(withGoal("follows"));
+    // A read after the wipe works as before.
+    expect(await host.ready(T0)).toBe(true);
+    expect(await (await send({ op: "status" })).json()).toMatchObject({ goal: { counts: "follows", value: 0 } });
+  });
+
   it("takes the earliest send time of the live chat and support events only", (): void => {
     const old: ActivitySupport = support("follow", "old", { sentAt: T0 - 10 * 60_000 });
     const status: ActivityEvent = { kind: "clear", platform: "twitch", receivedAt: T0 - 5000 };
