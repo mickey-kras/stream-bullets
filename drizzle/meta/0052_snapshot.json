@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "84204e48-58ed-4b7c-847a-124cb80ac633",
+  "id": "a2074dd7-4018-4f7d-a06c-d0460076d99e",
   "prevId": "425eb0a7-5680-4f16-a6cb-74b2bea640cf",
   "tables": {
     "ai_interest": {
@@ -1909,6 +1909,14 @@
             "voted_at"
           ],
           "isUnique": false
+        },
+        "entry_votes_voted_at_idx": {
+          "name": "entry_votes_voted_at_idx",
+          "columns": [
+            "voted_at"
+          ],
+          "isUnique": false,
+          "where": "\"entry_votes\".\"voted_at\" IS NOT NULL"
         }
       },
       "foreignKeys": {

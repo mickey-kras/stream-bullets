@@ -124,3 +124,18 @@ it("deletes old features of topics and removes old vote times, and keeps the vot
     await database.dispose();
   }
 });
+
+it("finds old vote times with the index of the vote time, without a scan of each vote", async () => {
+  const database = await createTestDatabase();
+  try {
+    const plan = await database.db
+      .prepare("EXPLAIN QUERY PLAN SELECT rowid FROM entry_votes WHERE voted_at < ? LIMIT 5000")
+      .bind(Date.now() - VOTE_TIME_RETENTION_MS)
+      .all<{ detail: string }>();
+    expect(plan.results.map((row) => row.detail)).toEqual([
+      expect.stringMatching(/^SEARCH entry_votes USING (COVERING )?INDEX entry_votes_voted_at_idx \(voted_at<\?\)$/),
+    ]);
+  } finally {
+    await database.dispose();
+  }
+});

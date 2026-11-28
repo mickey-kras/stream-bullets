@@ -64,4 +64,5 @@ CREATE INDEX `stream_sessions_page_idx` ON `stream_sessions` (`streamer_id`,"sta
 CREATE INDEX `stream_sessions_status_idx` ON `stream_sessions` (`status`,`updated_at`);--> statement-breakpoint
 ALTER TABLE `entry_votes` ADD `voted_at` integer;--> statement-breakpoint
 CREATE INDEX `entry_votes_time_idx` ON `entry_votes` (`entry_id`,`voted_at`);--> statement-breakpoint
+CREATE INDEX `entry_votes_voted_at_idx` ON `entry_votes` (`voted_at`) WHERE "entry_votes"."voted_at" IS NOT NULL;--> statement-breakpoint
 CREATE INDEX `stream_events_starts_idx` ON `stream_events` (`starts_at`);
