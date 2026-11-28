@@ -106,6 +106,13 @@ function tileKinds(count: number, w: number): ("g" | "d")[] {
   });
 }
 
+/** The shared build limit, from the same grid dimensions on the server and in the renderer. */
+export function blockLimit(width: number, ground: number): number {
+  const cols: number = Math.ceil(width / TILE);
+  const rows: number = Math.max(0, Math.floor((ground - BUILD_CEILING) / TILE));
+  return Math.max(1, Math.round(cols * rows * BLOCK_FILL));
+}
+
 /** The world of a characters cell of `cellsW` x `cellsH` grid cells. Throws on a size outside the limits. */
 export function createWorld(cellsW: number, cellsH: number): World {
   const w: number = cellCount(cellsW, CELLS_W_MIN, CELLS_W_MAX, "width") * CELL_LOGICAL;
@@ -137,7 +144,7 @@ export function createWorld(cellsW: number, cellsH: number): World {
     bounceMax: w - BOUNCE_INSET,
     cols,
     rows,
-    cap: Math.max(1, Math.round(cols * rows * BLOCK_FILL)),
+    cap: blockLimit(w, gy),
   };
 }
 

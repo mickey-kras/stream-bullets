@@ -440,12 +440,14 @@ export class PlaygroundHost {
     const now = this.clock.now();
     if (this.sim) {
       const sim = this.sim;
-      const shape = (): string => `${sim.world.cellsW} ${sim.world.cellsH} ${sim.timeoutTicks} ${sim.visibleMax}`;
+      const shape = (): string =>
+        `${sim.world.cellsW} ${sim.world.cellsH} ${sim.timeoutTicks} ${sim.visibleMax} ${sim.pushEnabled}`;
       const before: string = shape();
       if (!this.ticking) this.skipTo(now);
       sim.resize(cell.w, cell.h);
       sim.setTimeoutSeconds(layers.characters.timeout);
       sim.setVisibleMax(layers.characters.max);
+      sim.setPushEnabled(layers.characters.pushEnabled);
       // An unchanged layer saves nothing: the alarm reads the layers every LAYER_CHECK_MS.
       this.dirty ||= !this.enabled || shape() !== before;
     } else {
@@ -456,6 +458,7 @@ export class PlaygroundHost {
         timeoutSeconds: layers.characters.timeout,
         visibleMax: layers.characters.max,
       });
+      this.sim.setPushEnabled(layers.characters.pushEnabled);
       this.syncedAt = now;
       // The open sockets get the new playground's full frame.
       this.primed = new WeakSet<WebSocket>();

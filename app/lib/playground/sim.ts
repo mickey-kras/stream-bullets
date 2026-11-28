@@ -19,7 +19,7 @@ import {
   JUMP_VY,
   MARK_TICKS,
   MIN_STAY_TICKS,
-  NEW_TICKS,
+  MOVEMENT_COOLDOWN_TICKS,
   PUSH_VX,
   PUSH_VY,
   REGISTRY_IDLE_TICKS,
@@ -49,14 +49,8 @@ import {
   BUBBLE_MAX_UNITS,
   type BubbleView,
   boundText,
-  CHAR_STATES,
   type CharState,
-  type CharTuple,
   type ExtrasView,
-  type FlagTuple,
-  FLAG_NEW,
-  FLAG_UNAVAILABLE,
-  FRAME_T_WRAP,
   type ModeView,
   CUT_MARK,
   NAME_GRAPHEMES,
@@ -64,14 +58,12 @@ import {
   PLAYGROUND_VERSION,
   type PlaygroundFullFrame,
   type PlaygroundTickFrame,
-  type RopeTuple,
   type RosterEntry,
   type TerrainView,
 } from "./protocol";
 import {
   blockOrder,
   blocksString,
-  cellX,
   clearBuilds,
   colOf,
   createTerrain,
@@ -109,6 +101,7 @@ import {
   siteKey,
   STANDING_STATES,
 } from "./core";
+import { bubbleViews, charTuples, extrasView } from "./frames";
 import { Motion } from "./motion";
 import { Works } from "./works";
 
@@ -160,6 +153,7 @@ export class PlaygroundSim implements SimHost {
   /** Restricted participants by `platform:userId`: the tick at which the restriction ends. */
   readonly restrictions = new Map<string, number>();
   private active = false;
+  private pushOn = true;
   private nextId = 1;
   private timeoutSeconds: number = CHARACTERS_TIMEOUT.default;
   private maxVisible: number = CHARACTERS_MAX.default;
@@ -205,6 +199,21 @@ export class PlaygroundSim implements SimHost {
   setVisibleMax(count: number): void {
     if (!Number.isFinite(count)) throw new RangeError(`playground maximum must be a number: ${count}`);
     this.maxVisible = Math.min(CHARACTERS_MAX.max, Math.max(CHARACTERS_MAX.min, Math.round(count)));
+  }
+
+  /** The owner setting for `!push`. */
+  get pushEnabled(): boolean {
+    return this.pushOn;
+  }
+
+  /** Applies the owner setting immediately, including queued and unfinished pushes. */
+  setPushEnabled(enabled: boolean): void {
+    this.pushOn = enabled;
+    if (enabled) return;
+    for (const p of this.participants.values()) {
+      if (p.pending?.name === "push") p.pending = null;
+      if (p.state === "push") this.rest(p);
+    }
   }
 
   /** The participants in registration order. */
@@ -259,15 +268,23 @@ export class PlaygroundSim implements SimHost {
   private queue(p: Participant, event: ActivityChat): void {
     const call: CommandCall | null = parseCommand(event.text);
     if (call) {
-      if (this.clock - p.lastCommand < COMMAND_COOLDOWN_TICKS) return;
-      p.lastCommand = this.clock;
-      // A stop works at once, also in the middle of a walk or of work of more than one step.
-      if (call.name === "stop") this.halt(p);
-      else p.pending = { ...call, expires: this.clock + COMMAND_EXPIRY_TICKS, key: event.id };
+      this.queueCommand(p, call, event.id);
       return;
     }
     const text: string = boundText(event.text, BUBBLE_LENGTH, BUBBLE_MAX_UNITS, CUT_MARK);
     if (text) p.pendingText = { text, expires: this.clock + COMMAND_EXPIRY_TICKS, key: event.id };
+  }
+
+  private queueCommand(p: Participant, call: CommandCall, key: string): void {
+    if (call.name === "push" && !this.pushOn) return;
+    const movement: boolean = call.name === "left" || call.name === "right" || call.name === "look";
+    const last: number = movement ? p.lastMovement : p.lastCommand;
+    if (this.clock - last < (movement ? MOVEMENT_COOLDOWN_TICKS : COMMAND_COOLDOWN_TICKS)) return;
+    if (movement) p.lastMovement = this.clock;
+    else p.lastCommand = this.clock;
+    // A stop works at once, also in the middle of a walk or of work of more than one step.
+    if (call.name === "stop") this.halt(p);
+    else p.pending = { ...call, expires: this.clock + COMMAND_EXPIRY_TICKS, key };
   }
 
   private register(key: string, platform: ActivityPlatform, userId: string): Participant {
@@ -590,6 +607,7 @@ export class PlaygroundSim implements SimHost {
 
   /** Starts a command action. The caller makes sure the character is walking or standing inside the walking limits. */
   perform(p: Participant, command: Command, key = "", n = 0, side: Side = 0): void {
+    if (command === "push" && !this.pushOn) return;
     const words: string[] = [`!${command}`];
     if (side !== 0) words.push(side < 0 ? "left" : "right");
     if (n > 0) words.push(String(n));
@@ -801,35 +819,6 @@ export class PlaygroundSim implements SimHost {
     return this.list().filter((p: Participant): boolean => p.admitted);
   }
 
-  private chars(visible: Participant[]): CharTuple[] {
-    return visible.map((p: Participant): CharTuple => {
-      const flags: number =
-        (p.mark > 0 ? FLAG_UNAVAILABLE : 0) | (this.clock - p.admittedAt < NEW_TICKS ? FLAG_NEW : 0);
-      return [
-        p.id,
-        Math.round(p.x * 10),
-        Math.round(p.y * 10),
-        CHAR_STATES.indexOf(p.state as CharState),
-        p.t % FRAME_T_WRAP,
-        p.dir,
-        flags,
-      ];
-    });
-  }
-
-  private extras(visible: Participant[]): ExtrasView {
-    const ids = new Set<number>(visible.map((p: Participant): number => p.id));
-    return {
-      ropes: visible.flatMap((p: Participant): RopeTuple[] =>
-        p.rope ? [[p.id, Math.round(p.rope.x), Math.round(p.rope.y), p.rope.hit ? 1 : 0]] : [],
-      ),
-      flags: this.terrain.flags
-        .filter((flag: Flag): boolean => ids.has(flag.id))
-        .map((flag: Flag): FlagTuple => [flag.id, cellX(flag.c), floorY(this.world, flag.r)]),
-      crown: this.crown !== null && ids.has(this.crown) ? this.crown : null,
-    };
-  }
-
   private sections(): {
     roster: RosterEntry[];
     bubbles: BubbleView[];
@@ -840,15 +829,9 @@ export class PlaygroundSim implements SimHost {
     const visible: Participant[] = this.visible();
     return {
       roster: visible.map((p: Participant): RosterEntry => ({ id: p.id, platform: p.platform, name: p.name })),
-      // Oldest first, so the overlay draws the newest bubble on top.
-      bubbles: visible
-        .flatMap((p: Participant): [number, BubbleView][] =>
-          p.bubble ? [[p.bubble.at, { id: p.id, text: p.bubble.text }]] : [],
-        )
-        .sort((a: [number, BubbleView], b: [number, BubbleView]): number => a[0] - b[0])
-        .map(([, bubble]: [number, BubbleView]): BubbleView => bubble),
+      bubbles: bubbleViews(visible),
       terrain: terrainView(this.world, this.terrain),
-      extras: this.extras(visible),
+      extras: extrasView(visible, this.world, this.terrain, this.crown),
       mode: { paused: this.paused, test: this.testEndsAt !== null },
     };
   }
@@ -860,7 +843,7 @@ export class PlaygroundSim implements SimHost {
       v: PLAYGROUND_VERSION,
       full: true,
       tick: this.clock,
-      chars: this.chars(this.visible()),
+      chars: charTuples(this.visible(), this.clock),
       ...this.sections(),
     };
   }
@@ -872,7 +855,7 @@ export class PlaygroundSim implements SimHost {
       v: PLAYGROUND_VERSION,
       full: false,
       tick: this.clock,
-      chars: this.chars(this.visible()),
+      chars: charTuples(this.visible(), this.clock),
     };
     const sections = this.sections();
     for (const name of ["roster", "bubbles", "terrain", "extras", "mode"] as const) {
@@ -923,6 +906,7 @@ export class PlaygroundSim implements SimHost {
       testEndsAt: this.testEndsAt,
       timeoutSeconds: this.timeoutSeconds,
       visibleMax: this.maxVisible,
+      pushEnabled: this.pushOn,
       cell: CELL_LOGICAL,
       cellsW: this.world.cellsW,
       cellsH: this.world.cellsH,
@@ -963,6 +947,7 @@ export class PlaygroundSim implements SimHost {
       visibleMax: data.visibleMax,
     });
     restoreTerrain(sim.world, sim.terrain, data);
+    sim.pushOn = data.pushEnabled;
     Object.assign(sim, {
       clock: data.clock,
       rotation: data.rotation,

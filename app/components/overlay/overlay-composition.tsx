@@ -69,7 +69,12 @@ export function CharactersSlot({ feed, rect, platform = null }: Readonly<Overlay
       columns={rect.w / CELL_PX}
       rows={rect.h / CELL_PX}
       source={source}
-      badges={{ test: t("overlay.characters.badgeTest"), paused: t("overlay.characters.badgePaused") }}
+      badges={{
+        test: t("overlay.characters.badgeTest"),
+        paused: t("overlay.characters.badgePaused"),
+        highest: t("overlay.characters.highest"),
+        blocks: t("overlay.characters.blocks"),
+      }}
       onError={charactersFailed}
     />
   );

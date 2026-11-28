@@ -110,6 +110,17 @@ describe("the characters of one platform", (): void => {
     expect(viewForPlatform(view, "youtube").crown).toBe(2);
   });
 
+  it("crowns the highest standing viewer of the filtered platform and retains all blocks", (): void => {
+    const raised: PlaygroundView = {
+      ...view,
+      characters: view.characters.map((c: CharacterView): CharacterView => ({ ...c, y: c.id === 1 ? 20 : c.id === 4 ? 12 : 0 })),
+    };
+    expect(viewForPlatform(raised, "twitch").crown).toBe(4);
+    expect(viewForPlatform(raised, "twitch").blocks).toBe(view.blocks);
+    const airborne: PlaygroundView = { ...raised, characters: raised.characters.map((c: CharacterView): CharacterView => c.id === 4 ? { ...c, state: "jump" } : c) };
+    expect(viewForPlatform(airborne, "twitch").crown).toBe(1);
+  });
+
   it("returns the same view when each character is of the platform", (): void => {
     const mine: PlaygroundView = { ...view, characters: [character(1, "twitch")], speakers: [1] };
     expect(viewForPlatform(mine, "twitch")).toBe(mine);

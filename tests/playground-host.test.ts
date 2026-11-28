@@ -146,7 +146,7 @@ async function setLayers(layers: OverlayLayers, streamerId: string = page): Prom
 /** The characters on stream in both orientations. */
 const ON: OverlayLayers = {
   ...DEFAULT_LAYERS,
-  characters: { enabled: true, timeout: 60, max: 40 },
+  characters: { enabled: true, pushEnabled: true, timeout: 60, max: 40 },
   cells: {
     horizontal: { ...emptyCells(), characters: { c: 0, r: 14, w: 32, h: 4 } },
     vertical: { ...emptyCells(), characters: { c: 0, r: 26, w: 18, h: 6 } },
@@ -812,6 +812,20 @@ describe("controls", (): void => {
     expect((state().storage.values.get(PLAYGROUND_KEY) as { sim: string }).sim).not.toContain('"u1"');
   });
 
+  it("saves a changed !push setting while paused, so an eviction keeps it", async (): Promise<void> => {
+    await listen();
+    await deliver([chat("m1", "u1", "hello")]);
+    advance(FRAME_MS);
+    await control({ op: "pause" });
+    await fireAlarm();
+    const saved = (): string => (state().storage.values.get(PLAYGROUND_KEY) as { sim: string }).sim;
+    expect(saved()).toContain('"pushEnabled":true');
+    await setLayers({ ...ON, characters: { ...ON.characters, pushEnabled: false } });
+    await post("playground-config");
+    await fireAlarm();
+    expect(saved()).toContain('"pushEnabled":false');
+  });
+
   it("starts a test while the layer is saved on but stands until a socket listens", async (): Promise<void> => {
     expect((await control({ op: "test" })).status).toBe(200);
     expect(vi.getTimerCount()).toBe(0);
@@ -828,7 +842,7 @@ describe("configuration", (): void => {
     const queries = watchQueries();
     const narrow: OverlayLayers = {
       ...ON,
-      characters: { enabled: true, timeout: 120, max: 40 },
+      characters: { enabled: true, pushEnabled: true, timeout: 120, max: 40 },
       cells: { ...ON.cells, horizontal: { ...ON.cells.horizontal, characters: { c: 0, r: 14, w: 16, h: 4 } } },
     };
     await setLayers(narrow);
