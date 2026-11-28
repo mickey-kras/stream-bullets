@@ -998,6 +998,25 @@ describe("the goal", (): void => {
     });
   });
 
+  it("starts the first goal at the earliest event of two deliveries that share the first read", async (): Promise<void> => {
+    const { host, readLayers, send } = standalone(withGoal("follows"));
+    let finish: (layers: OverlayLayers) => void = (): void => undefined;
+    readLayers.mockImplementation(
+      (): Promise<OverlayLayers> =>
+        new Promise<OverlayLayers>((resolve: (layers: OverlayLayers) => void): void => {
+          finish = resolve;
+        }),
+    );
+    const first: ActivitySupport = support("follow", "f1", { sentAt: T0 - 200 });
+    const second: ActivitySupport = support("follow", "f2", { sentAt: T0 - 100 });
+    const reads: Promise<void>[] = [host.ready(earliestAt([first], T0)), host.ready(earliestAt([second], T0))];
+    finish(withGoal("follows"));
+    await Promise.all(reads);
+    host.receive(first);
+    host.receive(second);
+    expect(await (await send({ op: "status" })).json()).toMatchObject({ goal: { value: 2, startedAt: T0 - 200 } });
+  });
+
   it("takes the earliest send time of the live chat and support events only", (): void => {
     const old: ActivitySupport = support("follow", "old", { sentAt: T0 - 10 * 60_000 });
     const status: ActivityEvent = { kind: "clear", platform: "twitch", receivedAt: T0 - 5000 };

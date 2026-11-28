@@ -310,11 +310,12 @@ export class AlertHost {
   /** The saved layers changed (`/playground-config`): the host reads them again. */
   /**
    * Reads the layers when the host has no copy, so the events that come next count for the goal and play alerts. A
-   * goal that this read starts counts from `since`: the earliest of these events.
+   * goal that this read starts counts from `since`: the earliest of these events, also of the callers that share the
+   * read.
    */
   async ready(since: number): Promise<void> {
     if (this.config !== null) return;
-    this.goalFrom = since;
+    this.goalFrom = Math.min(this.goalFrom, since);
     try {
       await this.refresh();
     } finally {
