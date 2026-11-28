@@ -40,7 +40,7 @@ import { type PlaygroundHost, playgroundOf } from "./playground-host";
 import { type AlertHost, alertsOf, earliestAt } from "./alert-host";
 import { detached } from "../lib/detached";
 import { keyRevokes, keyTags, outputInBody, socketKey, type SocketKey } from "./room-connections";
-import { NEW_YOUTUBE_STATE, type Connection, type YoutubeState } from "./channel-ingest-state";
+import { NEW_YOUTUBE_STATE, pageSuspended, type Connection, type YoutubeState } from "./channel-ingest-state";
 import {
   SNAPSHOT_SIZE,
   SNAPSHOT_MAX_AGE_MS,
@@ -225,7 +225,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (!output && request.headers.get("X-SB-Owner") !== "1") return reply("Forbidden", 403);
     const before = this.suspensions;
     const keysBefore = this.overlayKeys;
-    const suspended = await this.pageSuspended();
+    const suspended = await pageSuspended(this.env.DB, this.streamerId);
     // A suspension that arrived while this check waited wins over the read. No await from here to the accept.
     if (suspended || this.suspensions !== before) return reply("Stream not found", 404);
     // A key change that arrived while this check waited revoked the key this request carries.
@@ -269,16 +269,9 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     await this.subscriptions.listeningStarted(now);
   }
 
-  private async pageSuspended(): Promise<boolean> {
-    const row = await this.env.DB.prepare("SELECT status FROM streamers WHERE id=?")
-      .bind(this.streamerId)
-      .first<{ status: string }>();
-    return row?.status === "suspended";
-  }
-
   /** An admin changed the page's status. A suspended page shows nothing: every activity socket closes. */
   private async pageStatusChanged(): Promise<Response> {
-    if (await this.pageSuspended()) {
+    if (await pageSuspended(this.env.DB, this.streamerId)) {
       this.suspensions += 1;
       // A YouTube poll in flight is superseded: its messages are not stored for a later snapshot.
       this.bump("youtube");

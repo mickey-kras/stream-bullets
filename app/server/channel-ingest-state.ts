@@ -48,3 +48,9 @@ export const NEW_REPAIR_STATE: RepairState = { nextAt: 0, backoffMs: 0, alertedA
 
 /** What one subscription check did. `skipped`: a connect, a disconnect or a close overtook it. */
 export type ReconcileResult = "ok" | "repaired" | "failed" | "reauth" | "skipped";
+
+/** True when an admin suspended the page: a suspended page shows nothing, so the ingest object accepts no socket. */
+export async function pageSuspended(db: D1Database, streamerId: string | undefined): Promise<boolean> {
+  const row = await db.prepare("SELECT status FROM streamers WHERE id=?").bind(streamerId).first<{ status: string }>();
+  return row?.status === "suspended";
+}
