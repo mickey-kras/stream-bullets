@@ -37,7 +37,7 @@ import { sampleChatAt } from "../lib/chat-feed";
 import { validateTestEnvironment } from "./test-environment-config";
 import { EVENTS, ID_SQL, SUPPORT, nextExpiry, type IdTable } from "./channel-ingest-sql";
 import { type PlaygroundHost, playgroundOf } from "./playground-host";
-import { type AlertHost, alertsOf } from "./alert-host";
+import { type AlertHost, alertsOf, earliestAt } from "./alert-host";
 import { detached } from "../lib/detached";
 import { keyRevokes, keyTags, outputInBody, socketKey, type SocketKey } from "./room-connections";
 import { NEW_YOUTUBE_STATE, type Connection, type YoutubeState } from "./channel-ingest-state";
@@ -249,7 +249,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     validateTestEnvironment(this.env);
     if (this.env.APP_ENV !== "test") return reply("Not found", 404);
     const now = Date.now();
-    await this.alerts.ready();
+    await this.alerts.ready(now);
     this.ingest(sampleChatAt(now), now);
     await this.scheduleAlarm(Math.min(now + SNAPSHOT_MAX_AGE_MS + 1, this.playground.wakeAt() ?? Infinity));
     return new Response(null, { status: 204 });
@@ -416,8 +416,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     }
     const all = this.admitEvents(parsed, now);
     if (all.length === 0) return new Response(null, { status: 204 });
-    // The checks below come after each await, so a disconnect during these reads drops the delivery.
-    await this.alerts.ready();
+    await this.alerts.ready(earliestAt(all, now)); // Before the checks: a disconnect during the read drops it.
     const connection = await this.connection(platform);
     // A delivery for a channel that is gone, needs a new authorization, belongs to a suspended page, or comes from
     // another channel (a route cached before the page changed its channel) is dropped.
@@ -779,8 +778,9 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     this.prune(now);
     const expiry = nextExpiry(this.ctx.storage.sql);
     const cleanup = expiry === null ? null : Math.max(expiry, now + CLEANUP_INTERVAL_MS);
-    // The cleanup alarm is set before the poll, so a failed poll can never stop the retention cleanup.
+    // The cleanup alarm and the alerts come before the poll: a failed or slow poll holds neither of them.
     if (cleanup !== null) await this.ctx.storage.setAlarm(cleanup);
+    await this.alerts.alarm();
     let wait: number | null;
     try {
       wait = await this.pollYoutube(now);
@@ -796,7 +796,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (wait !== null) await this.ctx.storage.setAlarm(cleanup === null ? now + wait : Math.min(cleanup, now + wait));
     // The playground restarts after an eviction and sets its watchdog, or saves a pending checkpoint.
     await this.playground.alarm();
-    await this.alerts.alarm();
+    await this.alerts.wake();
   }
 
   /** One YouTube poll, when one is due. Returns the wait before the next one, or null for none. */
@@ -922,14 +922,15 @@ export class ChannelIngest extends DurableObject<AppEnv> {
       const since = (await this.ctx.storage.get<number>("listeningSince")) ?? now;
       return now - since < YOUTUBE_STARTUP_WINDOW_MS ? YOUTUBE_STARTUP_POLL_MS : YOUTUBE_IDLE_POLL_MS;
     }
-    await this.alerts.ready();
     const page = await youtubeChatPage(tokens.accessToken, state.liveChatId, state.pageToken);
-    current();
     // The first page is ingested too: messages sent before LIVE_WINDOW_MS are not live, so no old command runs.
     // The support events come from the same page: they cost no further call and no quota. Only a connect changes
     // `support_events` of a YouTube connection, and a connect supersedes this poll.
     const support = connection.support ? youtubeSupport(page.items, now) : [];
-    this.ingest(this.admitEvents([...youtubeEvents(page.items, connection.externalId, now), ...support], now), now);
+    const events = [...youtubeEvents(page.items, connection.externalId, now), ...support];
+    await this.alerts.ready(earliestAt(events, now));
+    current();
+    this.ingest(this.admitEvents(events, now), now);
     state.pageToken = page.nextPageToken;
     if (page.items.length > 0) await this.touch("youtube", connection, now);
     if (page.offline) {

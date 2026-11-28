@@ -13,7 +13,8 @@ import { alertRefusal, alertsReplySchema, type AlertsReply } from "../app/lib/al
 import { ALERT_SHOW_MS, DEFAULT_RULES, type AlertRules, type AlertView, type AlertsMessage } from "../app/lib/alerts";
 import type { GoalCount } from "../app/lib/goals";
 import { DEFAULT_LAYERS, emptyCells, storedLayersText, type OverlayLayers } from "../app/lib/overlay-layers";
-import { ALERT_LINE_MAX, AlertHost, GOAL_PEOPLE_MAX } from "../app/server/alert-host";
+import { ALERT_LINE_MAX, AlertHost, GOAL_PEOPLE_MAX, earliestAt } from "../app/server/alert-host";
+import { ChannelSubscriptions } from "../app/server/channel-ingest-subscriptions";
 import { ChannelIngest } from "../app/server/channel-ingest";
 import { SEEN_TTL_MS, SNAPSHOT_MAX_AGE_MS } from "../app/server/channel-ingest-limits";
 import { ALERTS } from "../app/server/channel-ingest-sql";
@@ -973,6 +974,50 @@ describe("the goal", (): void => {
     await setLayers(withGoal("follows"), false);
     await deliver([support("follow", "f1")]);
     expect(await run({ op: "status" })).toMatchObject({ goal: { counts: "follows", value: 1 } });
+  });
+
+  it("starts the first goal at the earliest live event that woke the read, also when the read takes time", async (): Promise<void> => {
+    const { host, readLayers, send } = standalone(withGoal("follows"));
+    readLayers.mockImplementation((): Promise<OverlayLayers> => {
+      vi.setSystemTime(T0 + 500);
+      return Promise.resolve(withGoal("follows"));
+    });
+    const events: ActivityEvent[] = [support("follow", "f1", { sentAt: T0 - 100 }), support("follow", "f2")];
+    await host.ready(earliestAt(events, Date.now()));
+    for (const event of events) host.receive(event);
+    expect(await (await send({ op: "status" })).json()).toMatchObject({
+      goal: { counts: "follows", value: 2, startedAt: T0 - 100 },
+    });
+    // A goal that counts a different thing starts at the read: an event from before it does not count.
+    readLayers.mockResolvedValue(withGoal("subs"));
+    vi.setSystemTime(T0 + 1000);
+    await host.layersChanged();
+    host.receive(support("subscription", "s1", { sentAt: T0 + 900 }));
+    expect(await (await send({ op: "status" })).json()).toMatchObject({
+      goal: { counts: "subs", value: 0, startedAt: T0 + 1000 },
+    });
+  });
+
+  it("takes the earliest send time of the live chat and support events only", (): void => {
+    const old: ActivitySupport = support("follow", "old", { sentAt: T0 - 10 * 60_000 });
+    const status: ActivityEvent = { kind: "clear", platform: "twitch", receivedAt: T0 - 5000 };
+    expect(earliestAt([old, status], T0)).toBe(T0);
+    expect(earliestAt([support("follow", "f1", { sentAt: T0 - 2000 })], T0)).toBe(T0 - 2000);
+  });
+
+  it("advances the alerts at the alarm before the provider work, so a slow provider holds no alert", async (): Promise<void> => {
+    await listen();
+    const order: string[] = [];
+    vi.spyOn(AlertHost.prototype, "alarm").mockImplementation((): Promise<void> => {
+      order.push("alerts");
+      return Promise.resolve();
+    });
+    vi.spyOn(ChannelSubscriptions.prototype, "due").mockImplementation((): Promise<number | null> => {
+      order.push("subscriptions");
+      return Promise.resolve(null);
+    });
+    await room().alarm();
+    expect(order).toEqual(["alerts", "subscriptions"]);
   });
 
   it("counts while the alerts are muted, off stream, or have no page, and not while the layer has no place", async (): Promise<void> => {

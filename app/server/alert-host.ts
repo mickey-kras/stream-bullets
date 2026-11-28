@@ -202,6 +202,17 @@ export function alertsOf(
   });
 }
 
+/** The earliest send time of the live chat and support events, or `now`: the start of a goal that they wake. */
+export function earliestAt(events: readonly ActivityEvent[], now: number): number {
+  let at: number = now;
+  for (const event of events) {
+    if (event.kind !== "chat" && !isSupport(event)) continue;
+    const sentAt: number | null = event.sentAt ?? null;
+    if (isLiveMessage(sentAt, event.receivedAt)) at = Math.min(at, sentAt ?? event.receivedAt);
+  }
+  return at;
+}
+
 export class AlertHost {
   private muted = false;
   private line: AlertLine = EMPTY_LINE;
@@ -212,6 +223,8 @@ export class AlertHost {
   private goal: StoredGoal | null = null;
   /** When this instance of the object read the layers. 0: not yet, so the copy from storage can be old. */
   private configAt = 0;
+  /** While the first read runs: the start of a goal that the read starts. */
+  private goalFrom = Infinity;
   /** When the host last tried to read the layers, with or without success. */
   private triedAt = 0;
   /** When the host last used its copy of the layers for an event: an alert or a count of the goal. */
@@ -295,9 +308,18 @@ export class AlertHost {
   }
 
   /** The saved layers changed (`/playground-config`): the host reads them again. */
-  /** Reads the layers when the host has no copy, so the events that come next count for the goal and play alerts. */
-  async ready(): Promise<void> {
-    if (this.config === null) await this.refresh();
+  /**
+   * Reads the layers when the host has no copy, so the events that come next count for the goal and play alerts. A
+   * goal that this read starts counts from `since`: the earliest of these events.
+   */
+  async ready(since: number): Promise<void> {
+    if (this.config !== null) return;
+    this.goalFrom = since;
+    try {
+      await this.refresh();
+    } finally {
+      this.goalFrom = Infinity;
+    }
   }
 
   async layersChanged(): Promise<void> {
@@ -323,8 +345,8 @@ export class AlertHost {
 
   /**
    * The object's alarm. It reads the layers again when the copy is old and the host uses it: a page listens, the
-   * goal counts, an event used the copy, or the host has no copy. Thus a missed change does not stay. Then it ends the alert on stream when
-   * its time is over, and starts the next one.
+   * goal counts, an event used the copy, or the host has no copy. Thus a missed change does not stay. Then it ends
+   * the alert on stream when its time is over, and starts the next one.
    */
   async alarm(): Promise<void> {
     const used: boolean =
@@ -626,8 +648,10 @@ export class AlertHost {
     this.config = config;
     // Off stream, the alerts stop: no page shows them.
     if (!config.shown) this.clear();
-    // A goal that counts a different thing starts again. A new title or a new target changes nothing here.
-    if (config.goal !== null && this.goal?.progress.counts !== config.goal) this.startGoal(config.goal, this.configAt);
+    // A goal that counts a different thing starts again at the read. A new title or a new target changes nothing here.
+    // The first goal also counts the live events that woke the read.
+    const startAt: number = this.goal === null ? Math.min(this.configAt, this.goalFrom) : this.configAt;
+    if (config.goal !== null && this.goal?.progress.counts !== config.goal) this.startGoal(config.goal, startAt);
     if (this.counting() !== counted) this.unsent = true;
   }
 }

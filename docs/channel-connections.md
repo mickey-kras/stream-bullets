@@ -308,6 +308,7 @@ Thus an event that wakes the object reads no database. The host reads the saved 
 
 - When the API tells the object that the layers changed. This is one more database read for each change of the layers.
 - Before the object takes in events, when the host has no copy. Thus the first events count for the goal.
+  A goal that this read starts counts from the earliest live event of these events.
 - Before each test, each replay, and each `goalReset`.
 - When a socket opens and the copy is older than 60 seconds.
 - When the alarm runs and the copy is older than 60 seconds, while a page listens or the goal counts.
