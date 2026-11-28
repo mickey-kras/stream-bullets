@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { CHANNEL_PLATFORMS } from "../../db/enums";
-import { MAX_TEXT_LENGTH, activityEventSchema, isSupport, type ActivityEvent, type ActivitySupport } from "./activity";
+import { MAX_TEXT_LENGTH, feedEventSchema, isSupport, type ActivityEvent, type ActivitySupport } from "./activity";
 import { cut, type AlertSubject } from "./alerts";
 import { onAnyOutput, type OverlayLayers } from "./overlay-layers";
 
@@ -86,7 +86,7 @@ const subjectSchema: z.ZodType<AlertSubject> = z
   .object({ platform: z.enum(CHANNEL_PLATFORMS), userId: z.string().min(1).max(128) })
   .strict();
 
-const creditEventSchema: z.ZodType<ActivitySupport> = activityEventSchema.transform(
+const creditEventSchema: z.ZodType<ActivitySupport> = feedEventSchema.transform(
   (event: ActivityEvent, context: z.RefinementCtx): ActivitySupport => {
     if (isCredit(event)) return event;
     context.addIssue({ code: "custom", message: "Not a topic credit" });

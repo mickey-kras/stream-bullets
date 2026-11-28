@@ -392,8 +392,8 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (this.known("seen", `delivery:${platform}:${deliveryId}`)) return new Response(null, { status: 204 });
     const parsed: ActivityEvent[] = [];
     for (const event of events) {
-      const result = activityEventSchema.safeParse(event);
-      if (result.success && result.data.platform === platform) parsed.push(result.data);
+      const { success, data } = activityEventSchema.safeParse(event);
+      if (success && data.platform === platform && data.kind !== "stream") parsed.push(data);
     }
     const all = this.admitEvents(parsed, now);
     if (all.length === 0) return new Response(null, { status: 204 });

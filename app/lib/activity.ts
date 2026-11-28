@@ -121,6 +121,27 @@ export type ActivityEvent =
   | { kind: "clear_user"; platform: ActivityPlatform; userId: string; receivedAt: number }
   | { kind: "status"; platform: ActivityPlatform; status: ChannelStatus | "disconnected"; code?: string };
 
+/** The longest stream title that a live signal keeps, in characters. */
+export const STREAM_TITLE_LENGTH = 140;
+
+/**
+ * A live signal of a channel: the provider says that the stream is live, or that it stopped. It is server-only. The
+ * stream session recorder reads it (docs/stream-reports.md). It is not an `ActivityEvent`, so the type system keeps
+ * it out of the sockets, the snapshot, and the stores of chat and support. `startedAt` is when the provider says the
+ * stream started. `title` is untrusted text, as chat text.
+ */
+export interface ActivityStream {
+  kind: "stream";
+  platform: ActivityPlatform;
+  live: boolean;
+  startedAt?: number;
+  title?: string;
+  receivedAt: number;
+}
+
+/** An event in a verified delivery to the server: a feed event, or a server-only live signal. */
+export type IngestEvent = ActivityEvent | ActivityStream;
+
 /** The outcome of a channel callback, shown in the controls as `?channel=<platform>&result=<code>`. */
 export const CONNECT_RESULTS = [
   "connected",
@@ -271,7 +292,8 @@ export function isSupport(event: ActivityEvent): event is ActivitySupport {
   return kinds.includes(event.kind);
 }
 
-export const activityEventSchema: z.ZodType<ActivityEvent> = z.union([
+/** A feed event: what a consumer accepts on the activity socket. A live signal is not one. */
+export const feedEventSchema: z.ZodType<ActivityEvent> = z.union([
   chatSchema,
   supportSchema,
   z.object({ kind: z.literal("delete"), platform, messageId: id, receivedAt: time }),
@@ -292,6 +314,28 @@ export const activityEventSchema: z.ZodType<ActivityEvent> = z.union([
     code: z.string().max(40).optional(),
   }),
 ]);
+
+const streamSchema: z.ZodType<ActivityStream> = z.object({
+  kind: z.literal("stream"),
+  platform,
+  live: z.boolean(),
+  startedAt: time.optional(),
+  title: z.string().max(STREAM_TITLE_LENGTH).optional(),
+  receivedAt: time,
+});
+
+/** An event of a verified delivery: the server parses each one with this schema. */
+export const activityEventSchema: z.ZodType<IngestEvent> = z.union([feedEventSchema, streamSchema]);
+
+/** True for a server-only live signal. */
+export function isStreamSignal(event: IngestEvent): event is ActivityStream {
+  return event.kind === "stream";
+}
+
+/** The feed events of `events`, without the live signals: only these can go to a store or a socket. */
+export function feedEvents(events: readonly IngestEvent[]): ActivityEvent[] {
+  return events.filter((event: IngestEvent): event is ActivityEvent => !isStreamSignal(event));
+}
 
 /**
  * A message on the activity socket: the reconnect snapshot first, then one live event at a time. A socket that asked
@@ -318,6 +362,7 @@ export function messageForPlatform(message: ActivityMessage, platform: ActivityP
   return events.length === message.events.length ? message : { ...message, events };
 }
 
+// "stream" is not here: a live signal never goes to a consumer, and a consumer ignores it as a kind it does not know.
 const EVENT_KINDS: ReadonlySet<string> = new Set<string>([
   "chat",
   "delete",
@@ -340,7 +385,7 @@ const snapshotEvents = z
   .array(z.unknown())
   .max(200)
   .transform((events: unknown[]): unknown[] => events.filter((event: unknown): boolean => !unknownKind(event)))
-  .pipe(z.array(activityEventSchema));
+  .pipe(z.array(feedEventSchema));
 
 const messageSchema: z.ZodType<Exclude<ActivityMessage, PlaygroundFrame>, unknown> = z.union([
   z.object({
@@ -349,7 +394,7 @@ const messageSchema: z.ZodType<Exclude<ActivityMessage, PlaygroundFrame>, unknow
     replay: z.literal(true),
     since: z.number().finite().optional(),
   }),
-  z.object({ type: z.literal("event"), event: activityEventSchema }),
+  z.object({ type: z.literal("event"), event: feedEventSchema }),
   z.object({ type: z.literal("unavailable") }),
   alertsMessageSchema,
 ]);

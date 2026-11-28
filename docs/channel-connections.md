@@ -66,6 +66,8 @@ It must ignore a message that the parser refuses.
 | `status` | `platform`, `status`, `code` | The connection changed state |
 | A support kind | `id`, `platform`, `deliveryId`, `sender`, `anonymous`, `amount`, `currency`, optional `text`, optional `sentAt`, `receivedAt`, `replay` | One support event. See [Support events](#support-events). |
 
+A live signal of the `stream` kind is for the server only. No consumer gets it. See [stream reports](stream-reports.md#live-signals).
+
 The `id` of a chat message is `platform:messageId`. It is unique across platforms.
 A participant is the pair of `platform` and `user.id`. A display name is not an identity.
 The feed never merges participants across platforms.
@@ -383,6 +385,8 @@ The API sends `{op: "count", key}` to the internal path `/goal-count` with `wait
   The alert host knows what the goal counts from its copy of the layers.
   It ignores the key when the goal counts a different thing, or when the goal layer has no place on a grid.
   Thus a vote costs one call to the object and no database read.
+- A key that the host ignores still uses its copy of the layers. Thus the alarm reads the layers again within 60 seconds.
+  A change to a `votes` goal that the host did not get a notice for then counts the next votes.
 - The host reads the saved layers only when it has no copy. If this read fails, the object answers `503`, and the vote does not count.
 - The host keeps a hash of each key that it counted, and not the key. See the storage list below.
   The count stops at 100,000 keys.

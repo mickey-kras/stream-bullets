@@ -74,15 +74,54 @@ function withRows(rows: readonly ActivityRow[], added: readonly ActivityRow[]): 
     .slice(0, ACTIVITY_ROWS);
 }
 
-/** What the part keeps of the socket: the rows, and the server time of the newest `alerts` message. */
+/** What the part keeps of the socket: the rows, the kept IDs, and the server time of the newest `alerts` message. */
 export interface ActivityState {
   /** Newest first, at most ACTIVITY_ROWS. */
   rows: readonly ActivityRow[];
+  /**
+   * The IDs of the support events that the server keeps for a replay, in the order that the server stored them,
+   * newest last, at most REPLAY_KEPT. The socket sends events in that order, and a snapshot lists the kept events in
+   * that order. A time does not give this order: a YouTube poll can store events with an earlier time after an event
+   * of a different platform. A disconnect of a platform deletes its events on the server, and here.
+   */
+  kept: readonly KeptEvent[];
   /** 0 before the first `alerts` message. */
   alertsAt: number;
 }
 
-export const INITIAL_ACTIVITY: ActivityState = { rows: [], alertsAt: 0 };
+export const INITIAL_ACTIVITY: ActivityState = { rows: [], kept: [], alertsAt: 0 };
+
+/** A support event that the server keeps for a replay. */
+export interface KeptEvent {
+  id: string;
+  platform: ActivitySupport["platform"];
+  receivedAt: number;
+}
+
+const keptOf = (event: ActivitySupport): KeptEvent => ({
+  id: event.id,
+  platform: event.platform,
+  receivedAt: event.receivedAt,
+});
+
+/**
+ * The kept events after one message of the socket. A snapshot gives the list of the server; an original adds one; a
+ * disconnect of a platform removes its events, as the server deletes them. As the server does when it stores an event,
+ * the events older than REPLAY_WINDOW_MS go first, and only then the oldest above REPLAY_KEPT.
+ */
+function keptAfter(kept: readonly KeptEvent[], message: ActivityMessage): readonly KeptEvent[] {
+  if (message.type === "snapshot") return message.events.filter(isSupport).map(keptOf).slice(-REPLAY_KEPT);
+  if (message.type !== "event") return kept;
+  const event = message.event;
+  if (event.kind === "status" && event.status === "disconnected") {
+    const left: KeptEvent[] = kept.filter((one: KeptEvent): boolean => one.platform !== event.platform);
+    return left.length === kept.length ? kept : left;
+  }
+  if (!isSupport(event) || event.replay) return kept;
+  const since: number = event.receivedAt - REPLAY_WINDOW_MS;
+  const fresh: KeptEvent[] = kept.filter((one: KeptEvent): boolean => one.id !== event.id && one.receivedAt >= since);
+  return [...fresh, keptOf(event)].slice(-REPLAY_KEPT);
+}
 
 /** The rows after one message of the socket. A reconnect snapshot adds the events that the server keeps. */
 function rowsAfter(rows: readonly ActivityRow[], message: ActivityMessage): readonly ActivityRow[] {
@@ -102,25 +141,24 @@ function rowsAfter(rows: readonly ActivityRow[], message: ActivityMessage): read
 export function activityAfter(state: ActivityState, message: ActivityMessage): ActivityState {
   if (message.type === "alerts") return message.at > state.alertsAt ? { ...state, alertsAt: message.at } : state;
   const rows: readonly ActivityRow[] = rowsAfter(state.rows, message);
-  return rows === state.rows ? state : { ...state, rows };
+  const kept: readonly KeptEvent[] = keptAfter(state.kept, message);
+  return rows === state.rows && kept === state.kept ? state : { ...state, rows, kept };
 }
 
 /**
  * True when the server can still replay the alert of `row` at the server time `serverNow`. The server keeps the
- * newest REPLAY_KEPT support events of the last REPLAY_WINDOW_MS. A row that is itself a replay has no Replay, and
- * neither has a row whose event the server answered as gone (`gone`).
+ * newest REPLAY_KEPT support events of the last REPLAY_WINDOW_MS, in the order that it stored them: `kept` of the
+ * state. A row that is itself a replay has no Replay, and neither has a row whose event the server answered as gone
+ * (`gone`).
  */
 export function replayable(
   row: ActivityRow,
-  rows: readonly ActivityRow[],
+  kept: readonly KeptEvent[],
   serverNow: number,
   gone: ReadonlySet<string>,
 ): boolean {
   if (!row.original || gone.has(row.id) || serverNow - row.receivedAt >= REPLAY_WINDOW_MS) return false;
-  const newer: number = rows.filter(
-    (other: ActivityRow): boolean => other.original && other.receivedAt > row.receivedAt,
-  ).length;
-  return newer < REPLAY_KEPT;
+  return kept.some((one: KeptEvent): boolean => one.id === row.id);
 }
 
 /** The state of the alerts in the part, with the local time when this page ends the alert on stream. */
