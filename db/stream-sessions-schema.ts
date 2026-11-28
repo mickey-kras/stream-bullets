@@ -115,5 +115,7 @@ export const streamFeatures = sqliteTable(
   (table) => [
     primaryKey({ columns: [table.streamerId, table.featuredAt, table.entryId] }),
     index("stream_features_entry_idx").on(table.entryId),
+    // The hourly job finds the old rows of each page with this index, without a scan of each row.
+    index("stream_features_time_idx").on(table.featuredAt),
   ],
 );

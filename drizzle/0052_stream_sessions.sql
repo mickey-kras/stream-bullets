@@ -13,6 +13,7 @@ CREATE TABLE `stream_features` (
 );
 --> statement-breakpoint
 CREATE INDEX `stream_features_entry_idx` ON `stream_features` (`entry_id`);--> statement-breakpoint
+CREATE INDEX `stream_features_time_idx` ON `stream_features` (`featured_at`);--> statement-breakpoint
 CREATE TABLE `stream_session_polls` (
 	`session_id` text NOT NULL,
 	`entry_id` text NOT NULL,

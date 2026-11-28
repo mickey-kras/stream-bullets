@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "a2074dd7-4018-4f7d-a06c-d0460076d99e",
+  "id": "3bc9b443-ad60-45d4-97c6-12b556de16e7",
   "prevId": "425eb0a7-5680-4f16-a6cb-74b2bea640cf",
   "tables": {
     "ai_interest": {
@@ -5133,6 +5133,13 @@
           "name": "stream_features_entry_idx",
           "columns": [
             "entry_id"
+          ],
+          "isUnique": false
+        },
+        "stream_features_time_idx": {
+          "name": "stream_features_time_idx",
+          "columns": [
+            "featured_at"
           ],
           "isUnique": false
         }

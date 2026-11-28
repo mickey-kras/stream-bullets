@@ -139,3 +139,18 @@ it("finds old vote times with the index of the vote time, without a scan of each
     await database.dispose();
   }
 });
+
+it("finds old features of topics with the index of the feature time, without a scan of each feature", async () => {
+  const database = await createTestDatabase();
+  try {
+    const plan = await database.db
+      .prepare("EXPLAIN QUERY PLAN SELECT rowid FROM stream_features WHERE featured_at < ? LIMIT 5000")
+      .bind(Date.now() - FEATURE_RETENTION_MS)
+      .all<{ detail: string }>();
+    expect(plan.results.map((row) => row.detail)).toEqual([
+      expect.stringMatching(/^SEARCH stream_features USING (COVERING )?INDEX stream_features_time_idx \(featured_at<\?\)$/),
+    ]);
+  } finally {
+    await database.dispose();
+  }
+});
