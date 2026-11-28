@@ -168,6 +168,12 @@ function NowTitle({ alert }: Readonly<{ alert: AlertView }>): ReactNode {
   );
 }
 
+/** The label of an alert that is not live: a test or a replay. */
+function originLabel(origin: AlertView["origin"]): string | null {
+  if (origin === "live") return null;
+  return t(origin === "test" ? "tools.live.activity.origin.test" : "tools.live.activity.origin.replay");
+}
+
 /** The alert on stream: who and what, the Skip button, the time left, and the alerts that wait. */
 function OnStreamNow({
   alert,
@@ -177,10 +183,7 @@ function OnStreamNow({
   onSkip,
 }: Readonly<{ alert: AlertView; until: number; waiting: number; busy: boolean; onSkip: () => void }>): ReactNode {
   const seconds: number = useSecondsLeft(until);
-  const origin: string | null =
-    alert.origin === "live"
-      ? null
-      : t(alert.origin === "test" ? "tools.live.activity.origin.test" : "tools.live.activity.origin.replay");
+  const origin: string | null = originLabel(alert.origin);
   return (
     <div className="tl-event tl-event-now" data-live-alert-now={alert.origin}>
       <span className="tl-event-title" data-live-alert-title>
