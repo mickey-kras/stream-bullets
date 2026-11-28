@@ -1009,7 +1009,7 @@ describe("the goal", (): void => {
     );
     const first: ActivitySupport = support("follow", "f1", { sentAt: T0 - 200 });
     const second: ActivitySupport = support("follow", "f2", { sentAt: T0 - 100 });
-    const reads: Promise<void>[] = [host.ready(earliestAt([first], T0)), host.ready(earliestAt([second], T0))];
+    const reads: Promise<boolean>[] = [host.ready(earliestAt([first], T0)), host.ready(earliestAt([second], T0))];
     finish(withGoal("follows"));
     await Promise.all(reads);
     host.receive(first);
@@ -1037,6 +1037,23 @@ describe("the goal", (): void => {
     });
     await room().alarm();
     expect(order).toEqual(["alerts", "subscriptions"]);
+  });
+
+  it("refuses a delivery while the first read of the layers fails, so the retry of the provider counts", async (): Promise<void> => {
+    const error = vi.spyOn(console, "error").mockImplementation((): void => undefined);
+    state().storage.sql.exec("DELETE FROM alert_state");
+    ingest.restart(page);
+    await setLayers(withGoal("follows"), false);
+    const faulty = faultyDatabase(database.db);
+    faulty.fail(/SELECT layers/);
+    env.DB = faulty.db;
+    const body = { deliveryId: "retry-1", channelId: "111", events: [support("follow", "f1")] };
+    expect((await post("event", body, { platform: "twitch" })).status).toBe(503);
+    expect(error).toHaveBeenCalledWith("alerts_config_failed", { cause: "Error" });
+    expect(supportRows()).toEqual([]);
+    faulty.heal();
+    expect((await post("event", body, { platform: "twitch" })).status).toBe(204);
+    expect(await run({ op: "status" })).toMatchObject({ goal: { counts: "follows", value: 1 } });
   });
 
   it("counts while the alerts are muted, off stream, or have no page, and not while the layer has no place", async (): Promise<void> => {

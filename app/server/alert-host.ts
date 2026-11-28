@@ -311,16 +311,17 @@ export class AlertHost {
   /**
    * Reads the layers when the host has no copy, so the events that come next count for the goal and play alerts. A
    * goal that this read starts counts from `since`: the earliest of these events, also of the callers that share the
-   * read.
+   * read. False: the read failed and the host has no copy, so the caller takes in nothing and the events come again.
    */
-  async ready(since: number): Promise<void> {
-    if (this.config !== null) return;
+  async ready(since: number): Promise<boolean> {
+    if (this.config !== null) return true;
     this.goalFrom = Math.min(this.goalFrom, since);
     try {
       await this.refresh();
     } finally {
       this.goalFrom = Infinity;
     }
+    return this.config !== null;
   }
 
   async layersChanged(): Promise<void> {
