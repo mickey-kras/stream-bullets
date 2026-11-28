@@ -612,7 +612,7 @@ describe("Live section", (): void => {
 
   it("has each part, and the preview of what OBS shows", (): void => {
     const html: string = section();
-    for (const part of ["status", "preview", "poll", "topics", "message", "chat"])
+    for (const part of ["status", "preview", "poll", "topics", "message", "chat", "activity"])
       expect(html, part).toContain(`data-live-part="${part}"`);
     expect(html).toContain("Changes reach OBS at once.");
     expect(html).not.toContain("ov-conn");
@@ -627,7 +627,9 @@ describe("Live section", (): void => {
     expect(preview).toMatch(
       /^><div class="tl-part-head"><h2 class="ov-step-title" id="[^"]+">What OBS shows<\/h2><a class="icon-button" aria-label="Edit the overlay" title="Edit the overlay" href="\/tools\?view=overlay"><svg[^>]*icon-pencil/,
     );
-    expect(html.match(/class="tl-part-head"/g)).toHaveLength(1);
+    // The other title with controls in its line is the activity: its buttons test and mute the alerts.
+    expect(html.match(/class="tl-part-head"/g)).toHaveLength(2);
+    expect(html.split('data-live-part="activity"')[1]).toMatch(/^><div class="tl-part-head"><h2[^>]*>Activity<\/h2>/);
     expect(html.match(/aria-label="Edit the overlay"/g)).toHaveLength(1);
     // The preview stays read-only: it has no button and no field.
     expect(preview).not.toMatch(/<button|<input|<select|<textarea/);

@@ -1,5 +1,5 @@
 import { withRouteErrors } from "../server/route-errors.server";
-import { useMemo, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import {
   isRouteErrorResponse,
   useLoaderData,
@@ -21,12 +21,14 @@ import { ConnectionNote } from "../components/overlay/connection-note";
 import { ControlApiContext, dockApi, type ControlApi } from "../components/overlay/control-api";
 import type { OverlayPoll, OverlayScene } from "../components/overlay/overlay-stage";
 import { useOverlayState } from "../components/overlay/use-overlay-state";
+import { LiveActivity } from "../components/tools/live-activity";
 import { LiveChat } from "../components/tools/live-chat";
 import { LiveMessage } from "../components/tools/live-message";
 import { LivePoll } from "../components/tools/live-poll";
 import { onAirTitle } from "../components/tools/live-section";
 import { LiveTopics } from "../components/tools/live-topics";
 import { useRevalidateAt } from "../components/use-clock";
+import { ServerOffset } from "../lib/clock";
 import type { LiveSnapshot, OverlayPublic, OverlayState } from "../types";
 import "../components/overlay/wasteland/wasteland.css";
 import "../components/overlay/composition.css";
@@ -92,6 +94,7 @@ function DockControls({
   connected,
   reconnect,
   dockKey,
+  serverOffset,
 }: Readonly<{
   initial: OverlayState;
   live: OverlayPublic | null;
@@ -100,6 +103,8 @@ function DockControls({
   connected: boolean;
   reconnect?: () => void;
   dockKey: string;
+  /** Server time minus the time of this device, for the time left of the alert on stream. */
+  serverOffset: number;
 }>): ReactNode {
   const { state, busy, send, run } = useOverlayState(initial, live);
   const view: OverlayScene = { ...scene, overlay: state };
@@ -116,6 +121,7 @@ function DockControls({
         hideCommands={state.layers.chat.hideCommands}
         onAir={onAirTitle(view, state.layers)}
       />
+      <LiveActivity feed={feed} layers={state.layers} now={scene.now} serverOffset={serverOffset} dock />
     </>
   );
 }
@@ -139,6 +145,9 @@ export default function DockPage(): ReactNode {
   );
   const current: LiveSnapshot = snapshot && snapshot.revision >= loaded.initial.revision ? snapshot : loaded.initial;
   const now: number = useServerTime(current.serverNow);
+  // Server time minus local time, measured one time for each loader answer, as Live does.
+  const [offsets] = useState<ServerOffset>(() => new ServerOffset());
+  const serverOffset: number = offsets.for(loaded.initial.serverNow);
   useRevalidateAt(loaded.initial.serverNow, loaded.data.next?.startsAt ?? null, revalidator.revalidate);
   const polls: OverlayPoll[] = [...current.polls];
   for (const poll of loaded.initial.polls) if (!polls.some((item) => item.id === poll.id)) polls.push(poll);
@@ -163,6 +172,7 @@ export default function DockPage(): ReactNode {
           connected={status === "live" || status === "connecting"}
           reconnect={status === "offline" ? reconnect : undefined}
           dockKey={key}
+          serverOffset={serverOffset}
         />
       </ControlApiContext.Provider>
     </main>
