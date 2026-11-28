@@ -44,7 +44,9 @@ The code is in these files:
 | Token encryption | `app/server/channel-tokens.server.ts` |
 | Webhook checks | `app/server/channel-webhooks.server.ts` |
 | Payload normalization | `app/server/channel-normalize.ts`, `app/server/channel-support.ts` |
-| Ingestion, snapshot, YouTube poll | `app/server/channel-ingest.ts` |
+| Ingestion, snapshot | `app/server/channel-ingest.ts` |
+| YouTube poll, title refresh, schedule read | `app/server/channel-ingest-youtube.ts` |
+| Provider subscription types | `app/server/channel-subscription-types.ts` |
 | Provider subscriptions and their repair | `app/server/channel-ingest-subscriptions.ts`, `app/server/channel-repair.server.ts` |
 | Streamer controls | `app/components/channels/channel-panel.tsx`, `app/components/channels/channels-step.tsx` |
 | Channel health and its refresh | `app/lib/channel-health.ts`, `app/components/channels/use-live-channels.ts` |
@@ -894,7 +896,7 @@ For more streamers, ask Google for a higher quota:
 1. Open **APIs & Services > YouTube Data API v3 > Quotas** in the Google Cloud project.
 2. Send the quota extension form. Google can audit the app first.
 3. After Google raises the quota, change `YOUTUBE_DAILY_BUDGET` and `YOUTUBE_PAGE_DAILY_BUDGET` in
-   `app/server/channel-ingest.ts`.
+   `app/server/channel-ingest-limits.ts`.
 4. Deploy the change.
 
 ## Token encryption and rotation
