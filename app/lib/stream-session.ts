@@ -559,8 +559,10 @@ function online(
   }
   if (live.offlineAt !== null) {
     // R4: back in the grace time. The session continues, with an offline gap for the channel.
-    out.push({ type: "gapStart", platform: signal.platform, reason: "offline", at: live.offlineAt });
-    out.push({ type: "gapEnd", platform: signal.platform, reason: "offline", at: now });
+    out.push(
+      { type: "gapStart", platform: signal.platform, reason: "offline", at: live.offlineAt },
+      { type: "gapEnd", platform: signal.platform, reason: "offline", at: now },
+    );
     live.offlineAt = null;
     live.heardAt = now;
   }
