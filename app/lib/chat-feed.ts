@@ -5,6 +5,7 @@ import {
   type ActivityFragment,
   type ActivityMessage,
   type ActivityPlatform,
+  type ActivitySupport,
 } from "./activity";
 import { alertFace, type AlertFace } from "./alert-feed";
 import { alertShownOn, type AlertView } from "./alerts";
@@ -79,7 +80,7 @@ export interface MessageRow extends RowBase {
   /** True when the message is a chat command (`!word`), so turning on hideCommands can remove it later. */
   command: boolean;
   /** A message row marks no alert. */
-  alert?: undefined;
+  alert?: never;
 }
 
 /**
@@ -620,4 +621,25 @@ export function sampleChatAt(now: number): ActivityChat[] {
     const messageId = `test-${now}-${index}`;
     return { ...message, id: `${message.platform}:${messageId}`, messageId, receivedAt: now + index, live: true };
   });
+}
+
+/**
+ * One sample support event as a new live event at the time `now`, for the test deployment: a gift of five Twitch
+ * subscriptions. Each call gives a new ID, so each event shows in the lists of the owner and can play an alert.
+ */
+export function sampleSupportAt(now: number): ActivitySupport {
+  const deliveryId = `test-support-${now}`;
+  return {
+    kind: "gift",
+    id: `twitch:${deliveryId}`,
+    platform: "twitch",
+    deliveryId,
+    sender: { id: "sample-supporter", displayName: "LanternFox" },
+    anonymous: false,
+    amount: 5,
+    currency: null,
+    sentAt: now,
+    receivedAt: now,
+    replay: false,
+  };
 }
