@@ -22,6 +22,7 @@ import {
   secondsLeft,
   shownAlerts,
   type ActivityRow,
+  type KeptEvent,
   type ShownAlerts,
 } from "../../lib/live-activity";
 import { onAnyOutput, type OverlayLayers } from "../../lib/overlay-layers";
@@ -311,8 +312,8 @@ function ActivityNote(): ReactNode {
 export interface ActivityViewProps {
   alerts: ShownAlerts;
   rows: readonly ActivityRow[];
-  /** The IDs that the server keeps for a replay (`ActivityState.kept`). */
-  kept: readonly string[];
+  /** The events that the server keeps for a replay (`ActivityState.kept`). */
+  kept: readonly KeptEvent[];
   /** Server time, for the age of the rows and the end of a replay. */
   now: number;
   /** The Alerts layer is on stream in an output. */

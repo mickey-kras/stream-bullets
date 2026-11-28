@@ -224,8 +224,37 @@ describe("Replay", (): void => {
     expect(shown).toContain("youtube:y0");
     // A snapshot gives the list of the server again. A replay does not change it.
     const snapshot: ActivityState = after([{ type: "snapshot", events: [first], replay: true, since: 0 }]);
-    expect(snapshot.kept).toEqual(["twitch:t1"]);
-    expect(after([event(support("t1", { replay: true }))], snapshot).kept).toEqual(["twitch:t1"]);
+    expect(snapshot.kept).toEqual([{ id: "twitch:t1", platform: "twitch" }]);
+    expect(after([event(support("t1", { replay: true }))], snapshot).kept).toBe(snapshot.kept);
+  });
+
+  it("forgets the events of a platform that is disconnected, as the server deletes them", (): void => {
+    const youtube = (n: number): ActivityMessage =>
+      event(support(`y${n}`, { id: `youtube:y${n}`, platform: "youtube", receivedAt: T0 + n }));
+    const twitch: ActivityMessage[] = Array.from({ length: 40 }, (_, n: number) =>
+      event(support(`t${n}`, { receivedAt: T0 + 100 + n })),
+    );
+    const start: ActivityState = after([...Array.from({ length: 10 }, (_, n: number) => youtube(n)), ...twitch]);
+    const disconnected: ActivityMessage = {
+      type: "event",
+      event: { kind: "status", platform: "twitch", status: "disconnected" },
+    };
+    const { rows, kept } = after(
+      [disconnected, ...Array.from({ length: 10 }, (_, n: number) => youtube(300 + n))],
+      start,
+    );
+    const shown: string[] = rows
+      .filter((row: ActivityRow): boolean => replayable(row, kept, T0 + 400, new Set<string>()))
+      .map((row: ActivityRow): string => row.id);
+    // The server keeps the 20 YouTube events. No Twitch event has Replay.
+    expect(shown).toHaveLength(20);
+    expect(shown.every((id: string): boolean => id.startsWith("youtube:"))).toBe(true);
+    // A disconnect of a platform with no kept event changes nothing.
+    const kick: ActivityMessage = {
+      type: "event",
+      event: { kind: "status", platform: "kick", status: "disconnected" },
+    };
+    expect(after([kick], start).kept).toBe(start.kept);
   });
 
   it("does not show for a row that is itself a replay, or for an event that the server answered as gone", (): void => {

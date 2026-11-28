@@ -82,25 +82,37 @@ export interface ActivityState {
    * The IDs of the support events that the server keeps for a replay, in the order that the server stored them,
    * newest last, at most REPLAY_KEPT. The socket sends events in that order, and a snapshot lists the kept events in
    * that order. A time does not give this order: a YouTube poll can store events with an earlier time after an event
-   * of a different platform.
+   * of a different platform. A disconnect of a platform deletes its events on the server, and here.
    */
-  kept: readonly string[];
+  kept: readonly KeptEvent[];
   /** 0 before the first `alerts` message. */
   alertsAt: number;
 }
 
 export const INITIAL_ACTIVITY: ActivityState = { rows: [], kept: [], alertsAt: 0 };
 
-/** The kept IDs after one message of the socket. A snapshot gives the list of the server; an original adds one. */
-function keptAfter(kept: readonly string[], message: ActivityMessage): readonly string[] {
-  if (message.type === "snapshot")
-    return message.events
-      .filter(isSupport)
-      .map((event: ActivitySupport): string => event.id)
-      .slice(-REPLAY_KEPT);
-  if (message.type !== "event" || !isSupport(message.event) || message.event.replay) return kept;
-  const id: string = message.event.id;
-  return [...kept.filter((other: string): boolean => other !== id), id].slice(-REPLAY_KEPT);
+/** A support event that the server keeps for a replay. */
+export interface KeptEvent {
+  id: string;
+  platform: ActivitySupport["platform"];
+}
+
+const keptOf = (event: ActivitySupport): KeptEvent => ({ id: event.id, platform: event.platform });
+
+/**
+ * The kept events after one message of the socket. A snapshot gives the list of the server; an original adds one; a
+ * disconnect of a platform removes its events, as the server deletes them.
+ */
+function keptAfter(kept: readonly KeptEvent[], message: ActivityMessage): readonly KeptEvent[] {
+  if (message.type === "snapshot") return message.events.filter(isSupport).map(keptOf).slice(-REPLAY_KEPT);
+  if (message.type !== "event") return kept;
+  const event = message.event;
+  if (event.kind === "status" && event.status === "disconnected") {
+    const left: KeptEvent[] = kept.filter((one: KeptEvent): boolean => one.platform !== event.platform);
+    return left.length === kept.length ? kept : left;
+  }
+  if (!isSupport(event) || event.replay) return kept;
+  return [...kept.filter((one: KeptEvent): boolean => one.id !== event.id), keptOf(event)].slice(-REPLAY_KEPT);
 }
 
 /** The rows after one message of the socket. A reconnect snapshot adds the events that the server keeps. */
@@ -121,7 +133,7 @@ function rowsAfter(rows: readonly ActivityRow[], message: ActivityMessage): read
 export function activityAfter(state: ActivityState, message: ActivityMessage): ActivityState {
   if (message.type === "alerts") return message.at > state.alertsAt ? { ...state, alertsAt: message.at } : state;
   const rows: readonly ActivityRow[] = rowsAfter(state.rows, message);
-  const kept: readonly string[] = keptAfter(state.kept, message);
+  const kept: readonly KeptEvent[] = keptAfter(state.kept, message);
   return rows === state.rows && kept === state.kept ? state : { ...state, rows, kept };
 }
 
@@ -133,12 +145,12 @@ export function activityAfter(state: ActivityState, message: ActivityMessage): A
  */
 export function replayable(
   row: ActivityRow,
-  kept: readonly string[],
+  kept: readonly KeptEvent[],
   serverNow: number,
   gone: ReadonlySet<string>,
 ): boolean {
   if (!row.original || gone.has(row.id) || serverNow - row.receivedAt >= REPLAY_WINDOW_MS) return false;
-  return kept.includes(row.id);
+  return kept.some((one: KeptEvent): boolean => one.id === row.id);
 }
 
 /** The state of the alerts in the part, with the local time when this page ends the alert on stream. */

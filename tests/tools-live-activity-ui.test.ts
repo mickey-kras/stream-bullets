@@ -13,7 +13,13 @@ import { FullChatView, type ChatModel } from "../app/components/tools/live-chat"
 import { DEFAULT_LOCALE, LOCALES, loadCatalog, setLocaleSource, t, type Locale } from "../app/i18n";
 import { ALERT_REFUSALS, type AlertRefusal } from "../app/lib/alert-control";
 import type { AlertView } from "../app/lib/alerts";
-import { REFUSAL_TEXT, REPLAY_WINDOW_MS, type ActivityRow, type ShownAlerts } from "../app/lib/live-activity";
+import {
+  REFUSAL_TEXT,
+  REPLAY_WINDOW_MS,
+  type ActivityRow,
+  type KeptEvent,
+  type ShownAlerts,
+} from "../app/lib/live-activity";
 
 // The Activity part of Live and the dock, as the page renders it for each state of the alerts.
 
@@ -71,7 +77,9 @@ function row(id: string, more: Partial<ActivityRow> = {}): ActivityRow {
 function render(more: Partial<ActivityViewProps> = {}, key: string | null = null): string {
   // By default the server keeps each original row that the test shows.
   const rows: readonly ActivityRow[] = more.rows ?? [];
-  const kept: string[] = rows.filter((one: ActivityRow): boolean => one.original).map((one: ActivityRow) => one.id);
+  const kept: KeptEvent[] = rows
+    .filter((one: ActivityRow): boolean => one.original)
+    .map((one: ActivityRow): KeptEvent => ({ id: one.id, platform: one.platform }));
   const props: ActivityViewProps = {
     alerts: quiet,
     rows,
