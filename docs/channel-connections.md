@@ -64,6 +64,8 @@ It must ignore a message that the parser refuses.
 | `status` | `platform`, `status`, `code` | The connection changed state |
 | A support kind | `id`, `platform`, `deliveryId`, `sender`, `anonymous`, `amount`, `currency`, optional `text`, optional `sentAt`, `receivedAt`, `replay` | One support event. See [Support events](#support-events). |
 
+A live signal of the `stream` kind is for the server only. No consumer gets it. See [stream reports](stream-reports.md#live-signals).
+
 The `id` of a chat message is `platform:messageId`. It is unique across platforms.
 A participant is the pair of `platform` and `user.id`. A display name is not an identity.
 The feed never merges participants across platforms.

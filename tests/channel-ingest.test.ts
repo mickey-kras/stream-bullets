@@ -11,7 +11,9 @@ import {
   supportTotals,
   type ActivityChat,
   type ActivityEvent,
+  type ActivityStream,
   type ActivitySupport,
+  type IngestEvent,
 } from "../app/lib/activity";
 import { DEFAULT_LAYERS, emptyCells, storedLayersText, type OverlayLayers } from "../app/lib/overlay-layers";
 import { ChannelIngest } from "../app/server/channel-ingest";
@@ -114,7 +116,7 @@ function cheer(deliveryId: string, bits: number, receivedAt = Date.now()): Activ
 }
 
 /** A delivery as the Worker forwards it, for the channel the test connection uses (`111` for Twitch and Kick). */
-function deliver(deliveryId: string, events: ActivityEvent[], platform = "twitch", channelId = "111"): Promise<Response> {
+function deliver(deliveryId: string, events: IngestEvent[], platform = "twitch", channelId = "111"): Promise<Response> {
   return post("event", platform, { deliveryId, channelId, events });
 }
 
@@ -1301,6 +1303,18 @@ describe("ChannelIngest races with close", (): void => {
     expect(await (await post("connect", "youtube")).json()).toEqual({ status: "error", code: "subscribe_failed" });
     expect(state().storage.values.size).toBe(0);
     expect(state().storage.alarm).toBeNull();
+  });
+
+  it("stores and sends no live signal, and the chat of the delivery goes on", async (): Promise<void> => {
+    await addConnection("twitch");
+    const socket = await listen();
+    const signal: ActivityStream = { kind: "stream", platform: "twitch", live: true, receivedAt: Date.now() };
+    expect((await deliver("only-live", [signal])).status).toBe(204);
+    expect((await deliver("live-and-chat", [signal, chat("m1")])).status).toBe(204);
+    const sent: string[] = socket.ofType<{ event: ActivityEvent }>("event").map((message) => message.event.kind);
+    expect(sent).toEqual(["chat"]);
+    expect((await snapshot()).map((event: ActivityChat): string => event.id)).toEqual(["twitch:m1"]);
+    expect(state().storage.sql.exec("SELECT message_id FROM events").toArray()).toHaveLength(1);
   });
 
   it("takes no status event from a delivery, also as the first request of a new object", async (): Promise<void> => {
