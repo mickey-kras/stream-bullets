@@ -4,6 +4,7 @@ import { withItem, withPlaced, withRemoved } from "../../lib/layer-geometry";
 import {
   GRID_LAYERS,
   ORIENTATIONS,
+  onAnyOutput,
   onStream,
   type CellRect,
   type GridLayer,
@@ -87,7 +88,8 @@ function placedLayers(layers: OverlayLayers, layer: GridLayer, rect: CellRect, t
  * settings of the selected layer are below the grid of the horizontal output and beside the grid of the vertical
  * output. On a phone they are below the grid. The help for the grid is closed until the owner opens it. The preview
  * plays sample chat. While the characters layer is on stream, it opens the owner's characters socket and shows the
- * live playground. Layer edits go live at once.
+ * live playground. While the goal layer has a place on a grid, it opens the owner's activity socket for the count of
+ * the goal. One socket serves the two. Layer edits go live at once.
  */
 export function CompositionEditor({
   scene,
@@ -139,13 +141,17 @@ export function CompositionEditor({
   const cells: LayerCells = shown.cells[orientation];
   // The preview shows the live playground while the characters layer is on stream: the owner's characters socket.
   const charactersOn: boolean = CHARACTERS_READY && onStream(shown, "characters");
-  const charactersFeed: ActivityFeed = useActivityFeed(scene.handle, null, charactersOn, {
-    characters: true,
+  // The settings of the goal show the count of the server while the goal layer has a place on a grid: the server
+  // counts only then. One owner socket serves the two: with the characters on, it also has the playground.
+  const goalPlaced: boolean = ORIENTATIONS.some((output: Orientation): boolean => shown.cells[output].goal !== null);
+  const ownerFeed: ActivityFeed = useActivityFeed(scene.handle, null, charactersOn || goalPlaced, {
+    characters: charactersOn,
     owner: true,
   });
+  const charactersFeed: ActivityFeed | null = charactersOn ? ownerFeed : null;
   // The server checks the saved layers, so an unsaved draft does not make the test or the controls available.
   const characters: CharactersControl = useCharactersControl(
-    charactersOn ? charactersFeed : null,
+    charactersFeed,
     CHARACTERS_READY && onStream(layers, "characters"),
     scene.now,
   );
@@ -214,6 +220,7 @@ export function CompositionEditor({
             chatUntil={state.chatTestUntil}
             now={scene.now}
             chatOn={onStream(layers, "chat")}
+            alertsOn={onAnyOutput(layers, "alerts")}
             characters={characters}
             onSaved={onSaved}
           />
@@ -260,7 +267,7 @@ export function CompositionEditor({
               layers={shown}
               scene={scene}
               background={background}
-              charactersFeed={charactersOn ? charactersFeed : null}
+              charactersFeed={charactersFeed}
               selected={active}
               onSelect={setSelected}
               onPlace={place}
@@ -284,6 +291,7 @@ export function CompositionEditor({
               run={run}
               change={change}
               characters={characters}
+              feed={goalPlaced ? ownerFeed : null}
               onRemove={removeSelected}
             />
             <output className="ov-comp-status">{statusText}</output>

@@ -240,6 +240,9 @@ describe("YouTube support events", (): void => {
     });
     expect(events[1].text).toBeUndefined();
     expect(events[3].text).toBe("Seven months");
+    // Each event has the time when YouTube published its message, not only the time of the read.
+    const published: number = Date.parse("2026-11-26T10:00:00.000Z");
+    for (const event of events) expect(event.sentAt, event.id).toBe(published);
     // The chat normalizer still reads the text message of the page, and no support message.
     const chat: ActivityEvent[] = youtubeEvents(youtubeItems, "UCchannel", now);
     expect(chat.map((event: ActivityEvent): string => event.kind)).toEqual(["chat"]);
@@ -272,5 +275,27 @@ describe("YouTube support events", (): void => {
     // A message without its author gives no event.
     const noAuthor = youtubeMessageSchema.parse({ id: superChat.id, snippet: superChat.snippet });
     expect(youtubeSupport([noAuthor], now)).toEqual([]);
+  });
+
+  it("gives an event without a time for a message with no correct publish time", (): void => {
+    const [superChat] = youtubeFixture.items;
+    const at = (publishedAt: string | undefined): ActivitySupport[] =>
+      youtubeSupport(
+        [youtubeMessageSchema.parse({ ...superChat, snippet: { ...superChat.snippet, publishedAt } })],
+        now,
+      );
+    for (const publishedAt of [undefined, "", "yesterday", "1969-12-31T23:59:59Z"]) {
+      const [event] = at(publishedAt);
+      expect(event, String(publishedAt)).not.toHaveProperty("sentAt");
+      expect(activityEventSchema.safeParse(event).success, String(publishedAt)).toBe(true);
+    }
+    expect(at("2026-11-26T09:00:00Z")[0].sentAt).toBe(Date.parse("2026-11-26T09:00:00Z"));
+  });
+
+  it("gives no time for a Twitch or a Kick event: only YouTube has one in this version", (): void => {
+    const [follow] = twitchSupport("channel.follow", twitchPayloads["channel.follow"], "m1", now);
+    expect(follow).not.toHaveProperty("sentAt");
+    const [kicked] = kickSupport("channel.followed", kickPayloads["channel.followed"], "d1", now);
+    expect(kicked).not.toHaveProperty("sentAt");
   });
 });

@@ -105,6 +105,15 @@ const codeMessages: Readonly<Record<string, MessageId>> = {
   channel_conflict: "channels.conflict",
   page_frozen: "error.pageFrozen",
   page_suspended: "error.pageSuspended",
+  // The refusals of the alert host (ALERT_REFUSALS in app/lib/alert-control.ts).
+  alerts_off_stream: "overlay.alerts.refusal.alertsOffStream",
+  goal_off: "overlay.alerts.refusal.goalOff",
+  alert_gone: "overlay.alerts.refusal.alertGone",
+  alerts_muted: "overlay.alerts.refusal.alertsMuted",
+  alerts_unwatched: "overlay.alerts.refusal.alertsUnwatched",
+  alert_rule_off: "overlay.alerts.refusal.alertRuleOff",
+  alerts_full: "overlay.alerts.refusal.alertsFull",
+  alerts_unavailable: "overlay.alerts.refusal.alertsUnavailable",
 };
 
 // Show the date of the next allowed handle change in the reader's language.

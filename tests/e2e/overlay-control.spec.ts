@@ -539,6 +539,8 @@ test("Streamer tools has the Overlay section with two numbered steps and the Cha
       "+ Chat",
       "+ Characters",
       "+ Camera frame",
+      "+ Alerts",
+      "+ Goal",
       "PollPlaced",
       "+ Topic",
       "+ Up next",

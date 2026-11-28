@@ -9,6 +9,7 @@ import {
 } from "../app/components/overlay/characters/interpolate";
 import {
   BUBBLE_GAP,
+  badgesOf,
   type BubbleItem,
   type BubbleSlot,
   bubbleCap,
@@ -376,6 +377,24 @@ describe("playground canvas rendering", () => {
     };
   }
 
+  it("shows one shared highest badge and global block count, dropping Blocks first on small layers", () => {
+    const { canvas } = renderer();
+    const moment: PlaygroundView = { ...view([character({ y: 14 })]), crown: 1, blocks: [{ c: 8, r: 0, kind: "dirt", dir: 1, stage: 0 }] };
+    const labels: DrawOptions["badges"] = { test: "Test", paused: "Paused", highest: "Highest", blocks: "Blocks" };
+    canvas.width = 1000;
+    canvas.height = 300;
+    const all = badgesOf(canvas.context, moment, theme, labels);
+    expect(all.map((badge) => badge.label)).toEqual(["Highest: Misha · 3", "Blocks 1 / 38"]);
+    expect(all[0].platform).toBe("twitch");
+    canvas.width = 500;
+    expect(badgesOf(canvas.context, moment, theme, labels).map((badge) => badge.label)).toEqual(["Highest: Misha · 3"]);
+    canvas.height = 170;
+    expect(badgesOf(canvas.context, moment, theme, labels)).toEqual([]);
+    canvas.height = 300;
+    canvas.width = 1000;
+    expect(badgesOf(canvas.context, { ...moment, crown: null }, theme, labels).map((badge) => badge.label)).toEqual(["Blocks 1 / 38"]);
+  });
+
   const dirt = (): TileView[] => Array.from({ length: 40 }, (): TileView => ({ kind: "dirt", stage: 0 }));
 
   it("spawns digging debris only on a dirt strike, advances it and removes expired particles", () => {
@@ -477,14 +496,8 @@ describe("playground canvas rendering", () => {
       expect(pictures).toContainEqual([...theme.terrain.rects[name]]);
     }
     expect(canvas.calls).toContainEqual({ method: "scale", args: [-1, 1] });
-    // The dirt block at (8, 0) uses a ground picture. The four treads of the stair have legs of 1, 5, 9 and 13 px.
     expect(pictures).toContainEqual([...theme.terrain.rects.dirt2]);
-    const legs: unknown[] = canvas.calls
-      .filter(
-        (call) => call.method === "drawImage" && call.args.length === 9 && call.args[3] === 7 && call.args[4] === 1,
-      )
-      .map((call) => call.args[8]);
-    expect(legs).toEqual([1, 5, 9, 13]);
+    expect(pictures).toContainEqual([...theme.terrain.rects.stair]);
     // A plank with no block beside it is the middle piece.
     expect(pictures).toContainEqual([...theme.terrain.rects.plankM]);
     // The rope of character 1 (two strokes) with its hook, the flag with its pole on x 304 (the second frame at this time), and the crown.

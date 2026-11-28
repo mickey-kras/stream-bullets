@@ -20,6 +20,7 @@ The code is in these files:
 | Activity socket client | `app/lib/activity-socket.ts`, `app/components/overlay/activity-feed.tsx` |
 | Chat rows and the composition | `app/components/overlay/chat-layer.tsx`, `app/components/overlay/overlay-composition.tsx` |
 | Content of a layer and its QR code | `app/components/overlay/overlay-stage.tsx`, `app/components/overlay/qr-code.tsx` |
+| Alerts layer and goal layer | `app/components/overlay/alerts-layer.tsx`, `goal-layer.tsx`, `use-alerts.ts`, `app/lib/alert-feed.ts` |
 | Chat appearance and motion | `app/components/overlay/wasteland/`, `app/components/overlay/use-row-motion.ts` |
 | Editor | `app/components/overlay/composition-editor.tsx`, `layout-grid.tsx`, `layer-palette.tsx`, `use-layer-draft.ts` |
 | Layout list and its buttons | `app/components/overlay/layout-picker.tsx` |
@@ -30,7 +31,7 @@ The code is in these files:
 
 ## Layers
 
-The composition has nine layers. Each layer can be on the grid one time.
+The composition has eleven layers. Each layer can be on the grid one time.
 
 | Layer | Name in the editor | What it shows |
 | --- | --- | --- |
@@ -43,13 +44,19 @@ The composition has nine layers. Each layer can be on the grid one time.
 | `card` | Community card | The first Community card, or a card that the owner picks |
 | `support` | Support banner | The first support link |
 | `camera` | Camera frame | A frame with a clear window for the camera source in OBS. See [Camera frame](#camera-frame). |
+| `alerts` | Alerts | The banner of the alert on stream. See [Alerts layer](#alerts-layer). |
+| `goal` | Goal | A title, a count, and a bar. See [Goal layer](#goal-layer). |
 
 `poll`, `topic`, `next`, `message`, `card`, and `support` are the content layers.
+
+The editor has the `alerts` layer and the `goal` layer in the group **Recognition**.
+See [Alerts settings](#alerts-settings) and [Goal settings](#goal-settings).
+The API saves their cells and their settings. See [Overlay layers](api.md#overlay-layers).
 
 A layer is on stream in an output when it has a cell in the orientation of that output and its `enabled` setting is on.
 See [Outputs](#outputs).
 In the editor, the `enabled` setting is **Show on stream**.
-The characters are at the bottom, then the content layers and the camera frame, and the chat is on top.
+The characters are at the bottom, then the content layers, the camera frame, the alerts, and the goal, and the chat is on top.
 Layers cannot overlap, so this sequence shows only at shared edges.
 
 No layer is on the grid by default. The chat layer and the characters layer are off by default.
@@ -108,13 +115,14 @@ With the switch on, the output shows only what comes from Twitch:
 
 - The chat layer shows Twitch messages. This includes the sample chat of a test.
 - The characters layer shows the characters of Twitch viewers. The playground on the server does not change.
+- The alerts layer shows the banner of an alert from Twitch, and of a topic credit. The chat marks the same alerts.
 - Each other event of the activity feed that is not from Twitch does not show.
 
 A change of the switch during a stream applies at once.
 The Twitch messages on screen stay. The messages of the other platforms go, and they do not come back.
 When the switch goes off again, the other platforms show from their next message.
 
-Polls, topics, the message banner, and the other content layers do not change.
+Polls, topics, the message banner, the other content layers, and the goal layer do not change.
 The **Live** section and the full-screen chat always show each platform.
 A preview shows what its output shows, thus a preview of an output with the switch on shows Twitch only.
 
@@ -134,6 +142,8 @@ An OBS source that connected before the two outputs connects again one time when
 | `characters` | 12 × 4 | 720 × 240 |
 | Each content layer | 8 × 4 | 480 × 240 |
 | `camera` | 6 × 4 | 360 × 240 |
+| `alerts` | 8 × 3 | 480 × 180 |
+| `goal` | 8 × 2 | 480 × 120 |
 
 The characters cell sets the size of the playground world: each cell is 20 × 20 world pixels.
 A wide cell gives a long ground. A tall cell gives more sky above the ground.
@@ -153,6 +163,8 @@ Each layer has the `enabled` setting. The other settings are these:
 | `characters` | `timeout` and `max`. See [Interactive characters](characters.md). |
 | Each content layer | `ref`, `backgroundOpacity`, and `qr` |
 | `camera` | No other setting. See [Camera frame](#camera-frame). |
+| `alerts` | `rules`: what each support event does. See [Alerts settings](#alerts-settings). |
+| `goal` | `title`, `counts`, and `target`. See [Goal settings](#goal-settings). |
 
 The settings of a content layer are these:
 
@@ -171,6 +183,9 @@ Two more values are not in the layers. They apply to the layer that uses them:
 - `showResults` shows or hides the results of the poll in the poll layer.
 - `message` and `messageStyle` are the text and the style of the message banner.
   The public overlay state has the text only while the message layer is on stream. Otherwise the text is a draft.
+
+The title of the goal is a part of the layers. Thus the public overlay state has the title when the editor saves it,
+also while the goal layer is off stream. The title has no draft. The editor tells this under the title field.
 
 ### QR code
 
@@ -200,7 +215,9 @@ A viewer scans the QR code with a phone. The phone then opens the public page of
 - The API accepts `qr` for the `message` layer, but that layer never shows a code.
 
 The stored layers have a limit of 4000 characters. The server stores only what is not a default.
-All nine layers on the grid of the two orientations, with each setting changed, need less than half of the limit.
+All layers on the grid of the two orientations, with each setting changed, need less than three quarters of the limit.
+This includes the `alerts` layer and the `goal` layer.
+
 Migration `0032` raised the limit from 1000 characters. It builds the `overlay_state` table again and keeps all rows.
 An older Worker can use the new table.
 
@@ -228,6 +245,94 @@ In the editor, the window shows the text **Your OBS camera shows here**. The ove
 The camera frame has no `ref`, no background setting, and no QR code.
 The frame is a part of the content source (`layer=content`).
 
+### Alerts layer
+
+The alerts layer shows a banner for the alert on stream. One alert shows at a time, for 6 seconds.
+Between alerts, the cell of the layer is empty.
+
+The banner has these parts:
+
+- An icon for the kind of the alert.
+- One line with the name of the supporter and the event, with its amount.
+  An example is **LanternFox gave 5 subscriptions**.
+- One line with the name of the platform and the words **Thank you**. A topic credit has no platform name.
+
+These rules apply to the banner:
+
+- The banner never shows the text that the supporter sent. That text stays in chat and in **Streamer tools**.
+- An anonymous alert shows the word **Anonymous**. It shows no name.
+- A test alert has a small **TEST** tag. A replay looks the same as a live alert.
+- The name is text. A long name continues on the next line, and the banner shows the full name.
+- The banner is as high as its cell. If its text is higher than the cell, the banner becomes smaller until it fits.
+- The minimum size of the layer is 8 × 3 cells. A cell of 16 × 3 cells shows a short line on one line.
+
+The server sends the alert with its start time and its end time. See [Alerts and the goal](channel-connections.md#alerts-and-the-goal).
+
+- The two outputs get the same state. Thus the two outputs show one alert together.
+- Each page ends the banner with its own timer at the end time. A late server message never keeps a banner on stream.
+- A page that connects during an alert shows the banner only for the time that remains.
+- A page never shows a banner for longer than the time of the alert, also when its clock is wrong.
+- The banner comes in for 0.2 seconds and fades for 0.3 seconds before its end.
+  With reduced motion, it appears and goes without a transition. The Motion setting of the site and the system setting apply.
+
+A rule of the alerts layer can also mark the alert in chat. The chat layer then shows one highlight row for the alert.
+
+- The row has the same information as the banner. It never shows the text of the supporter.
+- The row enters in the sequence of the chat rows, with the same motion, and it stays as long as a chat message.
+- Each play of an alert gets one row.
+- A moderation event does not remove the row. The row has no user ID.
+
+In the editor preview, the alerts layer shows a sample banner. The sample is not an alert of the page.
+The alerts layer is a part of the content source (`layer=content`).
+
+### Goal layer
+
+The goal layer shows the title of the goal, the count, and a bar. An example is **New subscribers · 17 of 25**.
+
+- The layer shows whenever it is on stream, also before the first event.
+- The count is 0 until the server sends a count. The bar is then empty.
+- A count above the target shows the real number. The bar is then full, and it does not become longer.
+- A goal without a title shows the count and the bar only.
+- The numbers use the format of the language of the page.
+- The minimum size of the layer is 8 × 2 cells. If the title is too long for the cell, the content becomes smaller until it fits.
+- Each output shows the goal. The switch **Show Twitch chat only** does not change it, because the goal counts each platform.
+
+In the editor preview, the goal layer shows the count 0.
+The goal layer is a part of the content source (`layer=content`).
+
+### Goal count
+
+The goal layer has one count that goes up to a target. The server counts, so each page gets the same value.
+The alert host in the `ChannelIngest` object of the page holds the count. See [Alert host](channel-connections.md#alert-host).
+The goal layer shows it. See [Goal layer](#goal-layer).
+
+- The goal counts while its layer has a place on the grid of an output. **Show on stream** does not stop the count.
+- While the layer has no place on a grid, the page counts no goal. The server keeps the value.
+  When the layer comes back to a grid, the count continues from that value. Events from the time between do not count.
+- `counts` tells what adds to the value. See [Alerts and the goal](channel-connections.md#alerts-and-the-goal) for the amounts.
+- Each support event that the server stored counts one time. A replay and a test never count.
+  An event that a provider sends again does not count again: the server keeps the IDs of the newest 2,000 support events.
+- An event counts only when it occurred at the start of the count or later.
+  The server compares `sentAt` of the event, or `receivedAt` when the event has no `sentAt`.
+- The count continues while the mute is on, while the alerts layer is off stream, and while no overlay page is open.
+- A change of `counts` starts a new count at 0. A change of the title or of the target does not.
+- The `goalReset` control of the owner starts the count again at 0. See [Alert controls](api.md#alert-controls).
+  The dock key does not allow it.
+- The value can be more than the target. The server does not stop the count at the target.
+- `chatters` counts each person who sends a chat message after the start of the count, one time.
+  A person is a participant of one platform. The count stops at 100,000 people.
+  The server keeps a hash for each person, and no user ID.
+- The server counts nothing for `votes` in this version. The value of such a goal stays 0.
+- The pages get the count in the `alerts` message of the activity socket, as `goal`: `{counts, value, startedAt}`.
+  While the page counts no goal, the message has `goal: null`.
+
+### Sources from before the alerts and the goal
+
+An overlay page that OBS loaded before the release of these two layers does not show them.
+That page ignores the alert messages of the server.
+Load each OBS source again one time after the release.
+To do this, open the properties of the browser source in OBS and select `Refresh cache of current page`.
+
 ### Canvas
 
 The page scales the design pixels to the size of the browser source.
@@ -246,7 +351,8 @@ The overlay reads stored and broadcast layers leniently. Thus a value from an ol
 - A field with an incorrect value takes its default value.
 - A cell outside the grid or below the minimum size reads as no cell.
 - A cell that overlaps an earlier layer reads as no cell.
-  The sequence is `chat`, `characters`, `poll`, `topic`, `next`, `message`, `card`, `support`, `camera`.
+  The sequence is `chat`, `characters`, `poll`, `topic`, `next`, `message`, `card`, `support`, `camera`, `alerts`, `goal`.
+  A newer layer is later in the sequence. Thus a stored layout keeps the cells that it has.
 - A layer with an incorrect value takes the defaults of that layer.
 
 The API is strict for changes. See [Overlay layers](api.md#overlay-layers).
@@ -414,7 +520,8 @@ A chat source or a characters source keeps the aspect ratio of its cell and uses
 It aligns the layer with the bottom-right corner of the viewport. Thus the newest chat rows are always visible.
 The free space stays transparent, at the left or at the top.
 
-A content source (`layer=content`) shows all the content layers and the camera frame on stream, without the chat and the characters.
+A content source (`layer=content`) shows the content layers, the camera frame, the alerts, and the goal on stream.
+It does not show the chat and the characters.
 Each of these layers stays at its cell in the canvas of the output, as in the composition.
 Thus a content source has the frame size, not the size of one layer.
 
@@ -527,6 +634,9 @@ It also gives the keys, the size of a cell, and the size of the browser source i
 
 The preview uses the same code as the OBS page. Thus the layer positions in the preview and in OBS agree.
 Each layer on the grid shows its name, its size in pixels, and its real content.
+A layer of 2 rows or less shows its name and its size below its box.
+At the bottom of the grid, it shows them above its box.
+Thus the name does not cover the title of a goal at its minimum size.
 
 The chat layer shows sample messages. The characters layer shows the live playground.
 A layer with **Show on stream** off keeps a dashed box on the grid. The preview does not show its content.
@@ -560,11 +670,12 @@ Then the editor does not keep the change. A message under the grid gives the rea
 
 ### Add and remove a layer
 
-The palette shows one chip for each of the nine layers, in two groups:
+The palette shows one chip for each of the eleven layers, in three groups:
 
 | Group | Layers |
 | --- | --- |
 | **Picture** | Chat, Characters, and Camera frame |
+| **Recognition** | Alerts and Goal |
 | **Content** | Poll, Topic, Up next, Message banner, Community card, and Support banner |
 
 The title of a group shows its name and the number of its layers, such as **Picture · 3**.
@@ -615,6 +726,8 @@ The settings show the name of the selected layer and these controls:
 | **Show QR code** | Each content layer but the message banner | Shows or hides the QR code in the card. See [QR code](#qr-code). |
 | **Background** | Each content layer | The opacity of the card background, from 0 to 100 in steps of 5. |
 | Timeout, **Maximum characters on screen**, **Pause**, **Reset playground**, and the participants | Characters | See [Interactive characters](characters.md). |
+| **Test alert**, **Send test**, the rules, and **How alerts behave** | Alerts | See [Alerts settings](#alerts-settings). |
+| **Title on stream**, **Counts**, **Target**, the count, and **Start again** | Goal | See [Goal settings](#goal-settings). |
 | **Remove from grid** | All | Takes the layer off the grid. |
 
 Up next and the support banner have no picker. The characters layer has no background.
@@ -629,9 +742,86 @@ See [Channel health in Streamer tools](channel-connections.md#channel-health-in-
 The settings are a region with the name of the layer, after the grid in the tab sequence.
 When you select a layer with its chip, a screen reader reads the selection. The grid reads its own selections.
 
+#### Alerts settings
+
+The settings of the alerts layer have these parts:
+
+- **Test alert** and **Send test**, at the right of the name of the layer.
+  The list has the samples of the server: a follow, a subscription, a gift of 5 subscriptions, and 500 Bits.
+  It also has a Super Chat, a raid with 38 viewers, and an anonymous gift.
+  **Send test** sends `{op: "test", kind}`. See [Alert controls](api.md#alert-controls).
+- **Show on stream**.
+- A table with one row for each rule: **Event**, **Starts at**, **Banner**, **In chat**, and **Character**.
+- **How alerts behave**: a closed `details` element with the behavior of the alerts.
+
+**Send test** needs the saved alerts layer on stream in an output.
+While the layer is not on stream, the button is not available. A text under the button gives the reason.
+A test plays on each overlay page that shows the alerts layer. A test never counts for a goal, a report, or revenue.
+
+When the server refuses a control, a text under the button gives the reason in the language of the page.
+The text comes from the code of the refusal:
+
+| Code or status | Reason |
+| --- | --- |
+| `alerts_off_stream` | The alerts layer is not on stream. |
+| `alerts_muted` | The mute is on. Turn it off in **Live** or in the dock. |
+| `alerts_unwatched` | No page shows alerts. Open the overlay in OBS. |
+| `alert_rule_off` | The rule of the alert has its three switches off. |
+| `alerts_full` | Too many alerts wait in the line. |
+| `goal_off` | The goal layer has no place on a grid. |
+| `429` | Too many changes in one minute. |
+| `503` | The server has no alerts, or the alert host cannot answer. |
+
+The table has a row for these rules: follow, subscription and membership, gift, Bits and KICKs, Super Chat and Super Sticker, and raid.
+The `topic` rule has no row. The server does not make the alert of a featured topic in this version, and the test list has no topic test.
+The constant `TOPIC_CREDITS_READY` adds the row and the test.
+
+- **Starts at** is a number only for the rules with an amount: gift, Bits and KICKs, and raid.
+  The number is a whole number from 1 to 1,000,000. The other rules show **Each one**.
+- **Banner**, **In chat**, and **Character** are switches. The **Character** switch also shows the action of the character.
+- Each control has a full name for a screen reader, such as **Banner for Follow**.
+- Each change saves one field of one rule. A switch saves at once. A number saves 400 milliseconds after you stop typing.
+- A number that is not in the limits does not save. When you leave the field, a text gives the limits.
+- In a narrow box, such as on a phone, each row of the table shows its event on one line.
+  The four cells show below it in two columns, each with the name of its column.
+  The editor then hides the header row, but a screen reader still reads it.
+
+**How alerts behave** tells these points:
+
+- The banner shows one alert at a time, with the name and the amount only. The text of the supporter never shows on stream.
+- **In chat** marks the event in the chat layer. **Character** makes the character of the viewer react in the characters layer.
+- An anonymous event shows **Anonymous** and never a name. It makes all characters cheer.
+- A test and a replay never count for a goal, a report, or revenue.
+- **Mute**, **Skip**, and **Replay** are in **Live** and in the dock.
+  The mute stops the alert on stream and removes the alerts that wait. Alerts from the muted time do not play later.
+- With reduced motion on the computer that runs OBS, a banner shows and goes without movement.
+
+#### Goal settings
+
+The settings of the goal layer have these parts:
+
+- **Show on stream**.
+- **Title on stream**: up to 60 characters. The title saves 400 milliseconds after you stop typing.
+  A text under the field tells that viewers can see the title when it saves. See [Layer settings](#layer-settings).
+- **Counts**: what the goal counts. The list has subscriptions with memberships and gifts, follows, Bits, KICKs,
+  and people who chat. A change starts the count again at 0. A text under the list tells this.
+- **Target**: a whole number from 1 to 10,000,000.
+- The count of the server, as a bar and as text, such as **17 of 25**.
+- **Start again**: it asks first, because it sets the count to 0. Then it sends `{op: "goalReset"}`.
+- One line: a goal counts one thing. Bits, KICKs, and currencies do not convert.
+
+The list **Counts** has no entry for poll votes and new topics. The server does not count them in this version.
+A goal that already counts `votes` keeps the entry, so that the list shows the saved value.
+The constant `VOTES_GOAL_READY` adds the entry.
+
+While the goal layer has a place on a grid, the editor opens the activity socket of the owner.
+The count comes from the `alerts` messages of that socket. Without a message, the count is 0.
+The editor preview still shows the count 0 in the layer. See [Goal layer](#goal-layer).
+
 ### Keyboard
 
 Tab moves to the toolbar, the preview background, the groups with their chips, the grid, the settings, and the help, in that sequence.
+In the settings of the alerts layer, Tab moves to the test list, **Send test**, **Show on stream**, and the table, row by row.
 Enter or Space on a chip adds its layer, or selects the layer if it is on the grid.
 Enter or Space on the title of a group closes or opens the group. The chips of a closed group are not in the tab sequence.
 Enter or Space on **How the grid works** opens or closes the help.
@@ -687,6 +877,7 @@ The page of the poll shows the full names.
 
 A drag, a chip, a key that puts down a layer, a picker, or a switch saves at once.
 Shift or Alt with an arrow key, and a step of a background slider, save after 400 milliseconds without a change.
+The numbers of the alerts and of the goal, and the title of the goal, also save after 400 milliseconds without a change.
 If you close the page or go to a different page before then, the editor sends the change at once.
 
 The editor does not wait for the result of a change that it sends while you leave.
@@ -708,7 +899,7 @@ The samples include all three platforms, Unicode text, emoji, an emote, and a co
 
 ## Test
 
-Use the test to see the chat and the characters in your real OBS scene before you go live.
+Use the test to see the chat, the characters, and an alert in your real OBS scene before you go live.
 In the toolbar of the studio, select the `play` button, **Start test**.
 During a test, the same button shows the `stop` icon and has the colors of a pressed control. Its name is then **Stop test**, and it ends the test at once.
 
@@ -718,8 +909,13 @@ One button starts two tests together:
 - The characters test, if the saved characters layer is on stream. It runs for 5 minutes.
   See [Characters test](characters.md#characters-test).
 
+A start also sends one test alert, a gift of 5 subscriptions, if the saved alerts layer is on stream in an output.
+An alert has no time to stop. Thus the alert alone does not make the button show **Stop test**.
+If the server refuses the alert, a message gives the reason. The other tests start.
+
 If only one of the two layers is on stream, the button starts only that test.
-If neither is on stream, the button starts nothing. Its tooltip gives the reason, and a message gives the reason when you press it.
+If no layer of the test is on stream, the button starts nothing.
+Its tooltip gives the reason, and a message gives the reason when you press it.
 The server also refuses the start of a test whose layer is off stream.
 
 - The tooltip of **Start test** tells what the test does. A screen reader reads the same text as the description of the button.
@@ -839,11 +1035,22 @@ To show commands, clear **Hide chat commands (!jump)** in the settings of the ch
 When you select the option again, the chat also hides the command rows that are on the screen.
 The chat never runs a command. It only shows or hides the message.
 
+The option applies to each view of the merged chat:
+
+- The chat layer in the two outputs, and in each preview of the composition
+- The chat of **Live**, the full-screen chat, and the chat of the OBS dock. See [Chat](streamer-tools.md#chat).
+
+The server sends each message to each page, and the page shows no row for a hidden command.
+Thus a hidden command never shows, also not for a moment, and it leaves no empty row.
+A hidden command for a character still moves the character and still counts for the score of the viewer.
+The option does not change moderation: a removed message stays removed.
+OBS and the other open pages of the owner get a change of the option at once, without a reload.
+
 ### Reconnection
 
 The page keeps one activity socket. It connects again after each failure, with backoff and jitter.
 The first wait is 1 second. The wait doubles after each failure, up to 60 seconds.
-When the socket opens, the server sends a snapshot of recent chat.
+When the socket opens, the server sends a snapshot of recent chat. Then it sends the state of the alerts and the goal.
 
 The snapshot is the truth for its time window. The chat removes rows that are missing from it.
 Rows from a snapshot never animate. Rows on screen stay and do not animate again.
@@ -863,13 +1070,14 @@ The server polls YouTube chat only while at least one activity socket of the pag
 Each open activity socket keeps the poll alive, and each poll costs YouTube quota.
 Thus close the overlay sources that you do not use.
 
-- The page opens an activity socket only when it shows a chat layer or a characters layer that is on stream.
-  Take both layers off stream to close it.
+- The page opens an activity socket only for these layers: the chat, the characters, the alerts, and the goal.
+  One of them must be on stream in the output of the page. Take these layers off stream to close the socket.
 - A page that shows the characters layer asks its socket for the playground frames (`characters=1`).
   Chat and characters then share that one socket.
 - The editor preview opens an activity socket only while the characters layer is on stream. The chat preview shows sample messages.
 - Each browser source opens its own sockets. A chat, characters, or content source uses one live-room socket.
   A chat source and a characters source also use one activity socket each.
+  A content source uses one activity socket while it shows the alerts layer or the goal layer.
 - A page can have at most 20 activity sockets (`MAX_SOCKETS`).
 - Valid-key overlays and the owner share 10 owner seats in the live room. See [Live-room seats](#live-room-seats).
 

@@ -1,4 +1,5 @@
 import type { ActivityChat, ActivitySupport } from "../lib/activity";
+import type { PendingAlert } from "../lib/alerts";
 import { SEEN_TTL_MS, SNAPSHOT_MAX_AGE_MS } from "./channel-ingest-limits";
 
 /** The id tables of the ingest object. */
@@ -102,6 +103,102 @@ export const SUPPORT = {
   snapshot(sql: SqlStorage): ActivitySupport[] {
     const rows: { body: string }[] = sql.exec<{ body: string }>("SELECT body FROM support ORDER BY seq").toArray();
     return rows.map((row): ActivitySupport => ({ ...(JSON.parse(row.body) as ActivitySupport), replay: true }));
+  },
+  /** The kept event with this ID that the object received at or after `since`, or null. */
+  find(sql: SqlStorage, id: string, since: number): ActivitySupport | null {
+    const rows: { body: string }[] = sql
+      .exec<{ body: string }>("SELECT body FROM support WHERE id=? AND received_at >= ?", id, since)
+      .toArray();
+    return rows.length > 0 ? (JSON.parse(rows[0].body) as ActivitySupport) : null;
+  },
+};
+
+/**
+ * The rows of `alert_state`: the muted flag with the alert on stream, the copy of the layer settings, and the count
+ * of the goal.
+ */
+export type AlertStateKey = "state" | "config" | "goal";
+
+/** A stored JSON text as a value. Null: the text is not JSON. The reader checks the shape of the value. */
+function storedJson(body: string): unknown {
+  try {
+    return JSON.parse(body) as unknown;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * What the alert host keeps (app/server/alert-host.ts): one row for each part of its state, and one row for each
+ * alert that waits in the line. An alert that waits has the display name and the user ID of the supporter. The row
+ * goes when the alert starts, when the owner mutes the alerts, and when the owner disconnects the platform.
+ *
+ * For the goal, the host also keeps the IDs of the newest support events, so an event counts one time, and one key
+ * for each person that a goal for chatters counted. A key is a hash: it has no user ID.
+ */
+export const ALERTS = {
+  create(sql: SqlStorage): void {
+    sql.exec("CREATE TABLE IF NOT EXISTS alert_state (key TEXT PRIMARY KEY, body TEXT NOT NULL)");
+    sql.exec(`CREATE TABLE IF NOT EXISTS alert_line (seq INTEGER PRIMARY KEY AUTOINCREMENT, id TEXT NOT NULL UNIQUE,
+      body TEXT NOT NULL)`);
+    sql.exec(`CREATE TABLE IF NOT EXISTS alert_counted (seq INTEGER PRIMARY KEY AUTOINCREMENT,
+      id TEXT NOT NULL UNIQUE)`);
+    sql.exec("CREATE TABLE IF NOT EXISTS goal_people (key TEXT PRIMARY KEY)");
+  },
+  /** The stored value of `key`. Undefined: the row does not exist. Null: its text is not JSON. */
+  read(sql: SqlStorage, key: AlertStateKey): unknown {
+    const rows: { body: string }[] = sql
+      .exec<{ body: string }>("SELECT body FROM alert_state WHERE key=?", key)
+      .toArray();
+    return rows.length > 0 ? storedJson(rows[0].body) : undefined;
+  },
+  write(sql: SqlStorage, key: AlertStateKey, value: unknown): void {
+    sql.exec(
+      "INSERT INTO alert_state (key, body) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET body = excluded.body",
+      key,
+      JSON.stringify(value),
+    );
+  },
+  /** The alerts that wait, the oldest first. */
+  line(sql: SqlStorage): unknown[] {
+    const rows: { body: string }[] = sql.exec<{ body: string }>("SELECT body FROM alert_line ORDER BY seq").toArray();
+    return rows.map((row): unknown => storedJson(row.body));
+  },
+  /** Adds an alert at the end of the line. */
+  wait(sql: SqlStorage, alert: PendingAlert): void {
+    sql.exec("INSERT OR IGNORE INTO alert_line (id, body) VALUES (?, ?)", alert.view.id, JSON.stringify(alert));
+  },
+  /** Removes the alert with this ID from the line. */
+  drop(sql: SqlStorage, id: string): void {
+    sql.exec("DELETE FROM alert_line WHERE id=?", id);
+  },
+  /** Removes each alert from the line. */
+  clear(sql: SqlStorage): void {
+    sql.exec("DELETE FROM alert_line");
+  },
+  /**
+   * Remembers the ID of a support event. False: the table has the ID, so the event came before. The table keeps the
+   * newest `kept` IDs.
+   */
+  first(sql: SqlStorage, id: string, kept: number): boolean {
+    const added: { seq: number }[] = sql
+      .exec<{ seq: number }>("INSERT OR IGNORE INTO alert_counted (id) VALUES (?) RETURNING seq", id)
+      .toArray();
+    if (added.length === 0) return false;
+    // An ignored insert also uses a sequence number, so the newest rows decide what stays, not the numbers.
+    sql.exec(
+      "DELETE FROM alert_counted WHERE seq <= (SELECT seq FROM alert_counted ORDER BY seq DESC LIMIT 1 OFFSET ?)",
+      kept,
+    );
+    return true;
+  },
+  /** Adds a person to the people of the goal. False: the goal has the person. */
+  person(sql: SqlStorage, key: string): boolean {
+    return sql.exec("INSERT OR IGNORE INTO goal_people (key) VALUES (?) RETURNING 1", key).toArray().length > 0;
+  },
+  /** Removes the people of the goal: a new count starts. */
+  forgetPeople(sql: SqlStorage): void {
+    sql.exec("DELETE FROM goal_people");
   },
 };
 

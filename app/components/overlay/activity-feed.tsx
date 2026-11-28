@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ActivityMessage } from "../../lib/activity";
-import { emptyHistory, historySnapshot, keepHistory, type ActivityHistory } from "../../lib/activity-history";
+import { emptyHistory, historyMessages, keepHistory, type ActivityHistory } from "../../lib/activity-history";
 import {
   activityUrl,
   openActivitySocket,
@@ -13,7 +13,8 @@ export type ActivityFeedStatus = ActivitySocketStatus | "off";
 export interface ActivityFeed {
   /**
    * Every parsed message of the page's activity socket. Returns the unsubscribe function. A reader that subscribes
-   * after the snapshot of the socket gets a snapshot of the chat that the feed has (see `ActivityHistory`).
+   * after the snapshot of the socket gets a snapshot of the chat that the feed has, and the last state of the alerts
+   * (see `ActivityHistory`).
    */
   subscribe(this: void, listener: (message: ActivityMessage) => void): () => void;
   status: ActivityFeedStatus;
@@ -22,7 +23,7 @@ export interface ActivityFeed {
 type Listener = (message: ActivityMessage) => void;
 
 /**
- * One activity socket per page and URL, shared by every layer that reads it (chat and characters). Each
+ * One activity socket per page and URL, shared by every layer that reads it (chat, characters, alerts and goal). Each
  * socket costs provider quota (YouTube is polled only while one is open), so a second reader never opens another.
  */
 interface SharedSocket {
@@ -140,9 +141,9 @@ export function useActivityFeed(
     () =>
       (listener: Listener): (() => void) => {
         listenersRef.current.add(listener);
-        // The socket sent its snapshot before this reader came: give the reader the chat that the feed has.
-        const kept: ActivityMessage | null = historySnapshot(historyRef.current);
-        if (kept) listener(kept);
+        // The socket sent its snapshot and the state of the alerts before this reader came: give the reader what
+        // the feed has.
+        for (const kept of historyMessages(historyRef.current)) listener(kept);
         return (): void => {
           listenersRef.current.delete(listener);
         };

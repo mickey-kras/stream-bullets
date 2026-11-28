@@ -6,12 +6,15 @@ import type { AppEnv } from "../app/env";
 import { DEFAULT_LOCALE, loadCatalog, setLocaleSource, type Locale } from "../app/i18n";
 import { atMark } from "../app/lib/clock";
 import { MASH_COUNTDOWN_MS } from "../app/lib/mash";
+import { ALERT_REFUSALS, type AlertRefusal, type AlertsReply } from "../app/lib/alert-control";
+import { DEFAULT_RULES } from "../app/lib/alerts";
 import { CHAT_TEST_MS } from "../app/lib/chat-test";
 import { legacyLayersText, parseStoredLayers } from "../app/lib/overlay-legacy";
 import {
   DEFAULT_LAYERS,
   STORED_LAYERS_LENGTH,
   emptyCells,
+  onAnyOutput,
   storedLayersSchema,
   storedLayersText,
   type CellRect,
@@ -52,7 +55,7 @@ let database: TestDatabase;
 let env: AppEnv;
 // Record room API calls as path?streamerId plus JSON body.
 let roomCalls: { path: string; body: string }[];
-// Record ingest object calls the same way. The playground control answers with `ingestReply`.
+// Record ingest object calls the same way. A playground control and an alert control answer with `ingestReply`.
 let ingestCalls: { path: string; body: string }[];
 let ingestReply: () => Response;
 
@@ -117,9 +120,8 @@ beforeAll(async (): Promise<void> => {
         fetch: async (url: string, init: RequestInit): Promise<Response> => {
           const target = new URL(url);
           ingestCalls.push({ path: `${target.pathname}${target.search}`, body: await new Response(init.body).text() });
-          return Promise.resolve(
-            target.pathname === "/playground" ? ingestReply() : new Response(null, { status: 204 }),
-          );
+          const control: boolean = target.pathname === "/playground" || target.pathname === "/alerts";
+          return Promise.resolve(control ? ingestReply() : new Response(null, { status: 204 }));
         },
       }),
     } as unknown as DurableObjectNamespace,
@@ -209,6 +211,21 @@ describe("stored overlay and battle values", (): void => {
       revision: 4,
     });
     expect(overlayValue({ ...row, layers: '{"v":2}' }).layers).toEqual(DEFAULT_LAYERS);
+  });
+
+  it("reads the chat commands setting of a stored row as it is, and a row without it as on", (): void => {
+    const stored = (chat: Record<string, unknown>): string => JSON.stringify({ ...JSON.parse(row.layers), chat });
+    expect(overlayValue({ ...row, layers: stored({ enabled: true }) }).layers.chat).toEqual({
+      enabled: true,
+      hideCommands: true,
+      backgroundOpacity: 100,
+    });
+    for (const hideCommands of [true, false]) {
+      const state = overlayValue({ ...row, layers: stored({ enabled: true, hideCommands }) });
+      expect(state.layers.chat.hideCommands).toBe(hideCommands);
+      // The overlay and the pages of the owner get the same value from the live room.
+      expect(overlayPublic(state).layers.chat.hideCommands).toBe(hideCommands);
+    }
   });
 
   it("converts a row from before the overlay studio: the old source on air becomes a layer", (): void => {
@@ -958,8 +975,10 @@ describe("overlay control", (): void => {
       expect(second.layers).toEqual({
         orientation: "vertical",
         chat: { enabled: true, hideCommands: false, backgroundOpacity: 45 },
-        characters: { enabled: true, timeout: 60, max: 40 },
+        characters: { enabled: true, pushEnabled: true, timeout: 60, max: 40 },
         camera: { enabled: false },
+        alerts: DEFAULT_LAYERS.alerts,
+        goal: DEFAULT_LAYERS.goal,
         twitchOnly: { horizontal: false, vertical: true },
         items: DEFAULT_LAYERS.items,
         cells: horizontal({ chat: chatCell, poll: { c: 0, r: 0, w: 12, h: 8 } }),
@@ -982,8 +1001,8 @@ describe("overlay control", (): void => {
     });
 
     it("saves the characters timeout, and does not tell the playground while channels are off", async (): Promise<void> => {
-      const saved = await overlay(await send({ action: "layers", characters: { enabled: true, timeout: 120 } }));
-      expect(saved.layers.characters).toEqual({ enabled: true, timeout: 120, max: 40 });
+      const saved = await overlay(await send({ action: "layers", characters: { enabled: true, pushEnabled: true, timeout: 120 } }));
+      expect(saved.layers.characters).toEqual({ enabled: true, pushEnabled: true, timeout: 120, max: 40 });
       expect(ingestCalls).toEqual([{ path: `/playground-config?streamerId=${page}`, body: "" }]);
       for (const timeout of [9, 601, 30.5, "60"])
         expect((await send({ action: "layers", characters: { timeout } })).status).toBe(400);
@@ -1010,7 +1029,7 @@ describe("overlay control", (): void => {
 
     it("saves the characters maximum, tells the playground and refuses a value outside 5 to 40", async (): Promise<void> => {
       const saved = await overlay(await send({ action: "layers", characters: { enabled: true, max: 12 } }));
-      expect(saved.layers.characters).toEqual({ enabled: true, timeout: 60, max: 12 });
+      expect(saved.layers.characters).toEqual({ enabled: true, pushEnabled: true, timeout: 60, max: 12 });
       expect(storedLayersSchema.parse(await storedLayers(page)).characters.max).toBe(12);
       expect(ingestCalls).toEqual([{ path: `/playground-config?streamerId=${page}`, body: "" }]);
       for (const max of [4, 41, 12.5, "12", null])
@@ -1018,8 +1037,93 @@ describe("overlay control", (): void => {
       expect(ingestCalls).toHaveLength(1);
       // A patch without the maximum keeps it.
       const kept = await overlay(await send({ action: "layers", characters: { timeout: 30 } }));
-      expect(kept.layers.characters).toEqual({ enabled: true, timeout: 30, max: 12 });
+      expect(kept.layers.characters).toEqual({ enabled: true, pushEnabled: true, timeout: 30, max: 12 });
       expect(ingestCalls).toHaveLength(2);
+    });
+
+    it("saves the alerts and the goal, stores only what is not a default, and reads them back", async (): Promise<void> => {
+      const bannerCell: CellRect = { c: 8, r: 0, w: 16, h: 3 };
+      const goalCell: CellRect = { c: 24, r: 0, w: 8, h: 2 };
+      const saved = await overlay(
+        await send({
+          action: "layers",
+          alerts: { enabled: true, rules: { bits: { min: 250 }, follow: { banner: true } } },
+          goal: { enabled: true, title: "New subscribers", target: 100 },
+          cells: { horizontal: { alerts: bannerCell, goal: goalCell } },
+        }),
+      );
+      expect(saved.layers.alerts).toEqual({
+        enabled: true,
+        rules: {
+          ...DEFAULT_RULES,
+          bits: { ...DEFAULT_RULES.bits, min: 250 },
+          follow: { ...DEFAULT_RULES.follow, banner: true },
+        },
+      });
+      expect(saved.layers.goal).toEqual({ enabled: true, title: "New subscribers", counts: "subs", target: 100 });
+      expect(saved.layers.cells).toEqual(horizontal({ alerts: bannerCell, goal: goalCell }));
+      expect(onAnyOutput(saved.layers, "alerts")).toBe(true);
+      expect(onAnyOutput(saved.layers, "goal")).toBe(true);
+      expect(await storedLayers(page)).toMatchObject({
+        alerts: { enabled: true, rules: { bits: { min: 250 }, follow: { banner: true } } },
+        goal: { enabled: true, title: "New subscribers", target: 100 },
+        cells: { horizontal: { alerts: bannerCell, goal: goalCell } },
+      });
+      expect(storedLayersSchema.parse(await storedLayers(page))).toEqual(saved.layers);
+      const read = await body<{ overlay: OverlayState }>(await call("GET", "overlay", { user: "owner" }));
+      expect(read.overlay).toEqual(saved);
+      // A patch with one field of one rule keeps each other field.
+      const next = await overlay(
+        await send({ action: "layers", alerts: { rules: { bits: { chat: false } } }, goal: { counts: "bits" } }),
+      );
+      expect(next.layers.alerts.rules.bits).toEqual({ min: 250, banner: true, chat: false, character: true });
+      expect(next.layers.alerts.rules.follow.banner).toBe(true);
+      expect(next.layers.goal).toEqual({ enabled: true, title: "New subscribers", counts: "bits", target: 100 });
+      // With each setting at its default again, the stored text has no alerts and no goal.
+      const usual = await overlay(
+        await send({
+          action: "layers",
+          alerts: { enabled: false, rules: { bits: { min: 100, chat: true }, follow: { banner: false } } },
+          goal: { enabled: false, title: "", counts: "subs", target: 25 },
+        }),
+      );
+      expect(usual.layers.alerts).toEqual(DEFAULT_LAYERS.alerts);
+      expect(usual.layers.goal).toEqual(DEFAULT_LAYERS.goal);
+      const stored = await storedLayers(page);
+      expect(stored).not.toHaveProperty("alerts");
+      expect(stored).not.toHaveProperty("goal");
+      expect(stored).toMatchObject({ cells: { horizontal: { alerts: bannerCell, goal: goalCell } } });
+      // Each change goes to the live room, and the object of the page reads the saved layers again.
+      expect(roomCalls).toHaveLength(3);
+      expect(ingestCalls).toHaveLength(3);
+    });
+
+    it("refuses a wrong rule, a wrong goal, and a cell of the alerts or the goal that is not valid", async (): Promise<void> => {
+      const refused: Record<string, unknown>[] = [
+        { alerts: { rules: { follow: { min: 5 } } } },
+        { alerts: { rules: { bits: { min: 0 } } } },
+        { alerts: { rules: { bits: { min: 1_000_001 } } } },
+        { alerts: { rules: { tip: { banner: true } } } },
+        { alerts: { rules: { bits: { sound: true } } } },
+        { alerts: { volume: 3 } },
+        { goal: { target: 0 } },
+        { goal: { target: 10_000_001 } },
+        { goal: { counts: "likes" } },
+        { goal: { title: "x".repeat(61) } },
+        { goal: { title: "two\nlines" } },
+        { goal: { value: 17 } },
+        { cells: { horizontal: { alerts: { c: 0, r: 0, w: 7, h: 3 } } } },
+        { cells: { horizontal: { goal: { c: 0, r: 0, w: 8, h: 1 } } } },
+        { cells: { horizontal: { alerts: { c: 8, r: 0, w: 16, h: 3 }, goal: { c: 20, r: 2, w: 8, h: 2 } } } },
+      ];
+      for (const patch of refused)
+        expect((await send({ action: "layers", ...patch })).status, JSON.stringify(patch)).toBe(400);
+      expect(roomCalls).toEqual([]);
+      // A cell over the saved cell of the other layer.
+      await send({ action: "layers", cells: { horizontal: { alerts: { c: 8, r: 0, w: 16, h: 3 } } } });
+      const over = await send({ action: "layers", cells: { horizontal: { goal: { c: 20, r: 2, w: 8, h: 2 } } } });
+      expect(over.status).toBe(400);
+      expect(await body(over)).toEqual({ error: "Layers must not overlap." });
     });
 
     it("refuses cells outside the grid, below the minimum or over each other, and unknown fields", async (): Promise<void> => {
@@ -1051,6 +1155,9 @@ describe("overlay control", (): void => {
         { content: { enabled: false } },
         { orientation: "square" },
         { chat: { enabled: "yes" } },
+        { chat: { hideCommands: "true" } },
+        { chat: { hideCommands: 1 } },
+        { chat: { hideCommands: null } },
         { chat: { backgroundOpacity: 3 } },
         { chat: { backgroundOpacity: "50" } },
         { layers: { chat: { enabled: true } } },
@@ -1217,7 +1324,7 @@ describe("overlay control", (): void => {
         await send({
           action: "layers",
           chat: { enabled: true, hideCommands: false, backgroundOpacity: 0 },
-          characters: { enabled: true, timeout: 600 },
+          characters: { enabled: true, pushEnabled: true, timeout: 600 },
           items,
           cells: { horizontal, vertical: cells(4) },
         }),
@@ -1276,7 +1383,7 @@ describe("overlay control", (): void => {
       await emptyOverlay(otherPage);
       await send({ action: "layers", chat: { enabled: true }, cells: { horizontal: { chat: chatCell } } });
       const other = await overlay(await send({ action: "layers", characters: { enabled: true } }, "other"));
-      expect(other.layers).toEqual({ ...DEFAULT_LAYERS, characters: { enabled: true, timeout: 60, max: 40 } });
+      expect(other.layers).toEqual({ ...DEFAULT_LAYERS, characters: { enabled: true, pushEnabled: true, timeout: 60, max: 40 } });
       expect((await getOverlayState(env, page)).layers).toEqual({
         ...DEFAULT_LAYERS,
         chat: { enabled: true, hideCommands: true, backgroundOpacity: 100 },
@@ -1647,6 +1754,162 @@ describe("overlay control", (): void => {
       expect((await characters({ op: "status" })).status).toBe(500);
       ingestReply = (): Response => new Response("not json");
       expect((await characters({ op: "status" })).status).toBe(500);
+      log.mockRestore();
+    });
+  });
+
+  describe("alert controls", (): void => {
+    function alerts(control: unknown, user: string = "owner"): Promise<Response> {
+      return call("POST", "overlay/alerts", { user, body: control });
+    }
+
+    const reply: AlertsReply = {
+      at: 1_800_000_000_000,
+      muted: false,
+      current: {
+        id: "twitch:g1~r2",
+        origin: "replay",
+        kind: "gift",
+        platform: "twitch",
+        name: "Supporter",
+        anonymous: false,
+        amount: 5,
+        currency: null,
+        banner: true,
+        chat: true,
+        startsAt: 1_800_000_000_000,
+        endsAt: 1_800_000_006_000,
+      },
+      waiting: 2,
+      goal: null,
+    };
+    const controls: Record<string, unknown>[] = [
+      { op: "status" },
+      { op: "test" },
+      { op: "test", kind: "anonymous" },
+      { op: "mute", on: true },
+      { op: "mute", on: false },
+      { op: "skip" },
+      { op: "replay", id: "twitch:g1" },
+      { op: "goalReset" },
+    ];
+
+    beforeEach((): void => {
+      ingestReply = (): Response => Response.json(reply);
+    });
+
+    it("forwards each control to the alert host of the page and answers its state", async (): Promise<void> => {
+      for (const control of controls) {
+        const response = await alerts(control);
+        expect(response.status, JSON.stringify(control)).toBe(200);
+        expect(await response.json()).toEqual(reply);
+      }
+      expect(ingestCalls.map((entry) => entry.path)).toEqual(controls.map(() => `/alerts?streamerId=${page}`));
+      expect(ingestCalls.map((entry): unknown => JSON.parse(entry.body))).toEqual(controls);
+      // The answer has only the fields of the state.
+      ingestReply = (): Response => Response.json({ ...reply, current: { ...reply.current, subject: "viewer-id-1" } });
+      expect(await (await alerts({ op: "status" })).json()).toEqual(reply);
+    });
+
+    it("answers the count of the goal with the state", async (): Promise<void> => {
+      const goal = { counts: "subs", value: 12, startedAt: 1_800_000_000_000 };
+      ingestReply = (): Response => Response.json({ ...reply, goal });
+      expect(await (await alerts({ op: "goalReset" })).json()).toEqual({ ...reply, goal });
+      // A count that breaks the contract is a server error.
+      const log = vi.spyOn(console, "error").mockImplementation((): void => undefined);
+      ingestReply = (): Response => Response.json({ ...reply, goal: { ...goal, counts: "money" } });
+      expect((await alerts({ op: "status" })).status).toBe(500);
+      log.mockRestore();
+    });
+
+    it("uses the write quota for a test, a replay and a new count, never to read, mute or skip", async (): Promise<void> => {
+      await startOfQuotaWindow(env.DB);
+      await env.DB.prepare(
+        `INSERT INTO app_rate_limits (key,count,window_start)
+          VALUES ('write:owner',60,CAST(strftime('%s','now') AS INTEGER)/60*60000)
+          ON CONFLICT(key) DO UPDATE SET count=60, window_start=excluded.window_start`,
+      ).run();
+      for (const control of [{ op: "test" }, { op: "replay", id: "twitch:g1" }, { op: "goalReset" }])
+        expect((await alerts(control)).status).toBe(429);
+      for (const control of [{ op: "status" }, { op: "mute", on: true }, { op: "mute", on: false }, { op: "skip" }])
+        expect((await alerts(control)).status).toBe(200);
+      expect(ingestCalls).toHaveLength(4);
+    });
+
+    it("lets only the owner of a writable page control the alerts", async (): Promise<void> => {
+      expect((await call("POST", "overlay/alerts", { body: { op: "mute", on: true } })).status).toBe(401);
+      expect((await alerts({ op: "mute", on: true }, "viewer")).status).toBe(404);
+      await env.DB.prepare("UPDATE streamers SET status='frozen' WHERE id=?").bind(page).run();
+      expect((await alerts({ op: "mute", on: true })).status).toBe(423);
+      expect(ingestCalls).toEqual([]);
+    });
+
+    it("refuses a malformed control, and answers 503 while channels are off", async (): Promise<void> => {
+      for (const control of [
+        {},
+        { op: "play" },
+        { op: "test", kind: "tip" },
+        { op: "mute" },
+        { op: "mute", on: 1 },
+        { op: "replay" },
+        { op: "replay", id: "" },
+        { op: "replay", id: "x".repeat(161) },
+        { op: "skip", id: "twitch:g1" },
+        { op: "status", extra: true },
+        { op: "goalReset", value: 0 },
+      ])
+        expect((await alerts(control)).status, JSON.stringify(control)).toBe(400);
+      env.CHANNELS_OFF = "1";
+      try {
+        expect((await alerts({ op: "status" })).status).toBe(503);
+      } finally {
+        env.CHANNELS_OFF = undefined;
+      }
+      // Without the activity feed binding there are no alerts either.
+      const binding: DurableObjectNamespace = env.CHANNEL_INGEST;
+      Reflect.deleteProperty(env, "CHANNEL_INGEST");
+      try {
+        const off = await alerts({ op: "mute", on: true });
+        expect(off.status).toBe(503);
+        expect(await off.json()).toMatchObject({ error: "Alerts are off on this server." });
+      } finally {
+        env.CHANNEL_INGEST = binding;
+      }
+      expect(ingestCalls).toEqual([]);
+    });
+
+    it("passes on each refusal of the alert host with its status, its code and a reason", async (): Promise<void> => {
+      const texts = new Set<string>();
+      for (const [code, status] of Object.entries(ALERT_REFUSALS) as [AlertRefusal, number][]) {
+        ingestReply = (): Response => Response.json({ error: code }, { status });
+        const response = await alerts({ op: "replay", id: "twitch:g1" });
+        expect(response.status, code).toBe(status);
+        const answer = await body<{ error: string; code: string }>(response);
+        expect(answer.code).toBe(code);
+        texts.add(answer.error);
+      }
+      expect(texts.size).toBe(Object.keys(ALERT_REFUSALS).length);
+      expect(texts).toContain("Put the alerts layer on stream first.");
+      expect(texts).toContain("Put the goal layer on the grid first.");
+      expect(texts).toContain("Alerts are muted. Turn the mute off first.");
+      expect(texts).toContain("This event is too old for a replay.");
+      // A failure that the API does not know is not passed on.
+      for (const failure of [
+        (): Response => new Response("boom", { status: 500 }),
+        (): Response => Response.json({ error: "Invalid control" }, { status: 400 }),
+        (): Response => Response.json({ error: 7 }, { status: 409 }),
+      ]) {
+        ingestReply = failure;
+        const response = await alerts({ op: "test" });
+        expect(response.status).toBe(503);
+        expect(await response.json()).toMatchObject({ code: "alerts_unavailable" });
+      }
+      // An answer that breaks the state contract is a server error.
+      const log = vi.spyOn(console, "error").mockImplementation((): void => undefined);
+      ingestReply = (): Response => Response.json({ ...reply, waiting: -1 });
+      expect((await alerts({ op: "status" })).status).toBe(500);
+      ingestReply = (): Response => new Response("not json");
+      expect((await alerts({ op: "status" })).status).toBe(500);
       log.mockRestore();
     });
   });

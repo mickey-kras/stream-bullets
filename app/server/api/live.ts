@@ -1,10 +1,12 @@
 import { assertStreamerWritable } from "../access.server";
+import { controlAlerts } from "../alert-control.server";
 import { activityAvailable } from "../channel-tokens.server";
 import { consumeMutationQuota, getOwnStreamer } from "../data.server";
 import { HttpError, getOrigin, json, readJson } from "../http.server";
 import { notifyMash, notifyOverlay, notifyOverlayKey, notifyPlayground } from "../live.server";
 import { mashStartSchema, runMashAction, type MashAction } from "../mash.server";
 import { callIngest } from "../ingest-call.server";
+import { alertControlSchema } from "../../lib/alert-control";
 import { allContentSources, onAnyOutput } from "../../lib/overlay-layers";
 import { playgroundControlSchema, playgroundStatusSchema } from "../../lib/playground/protocol";
 import { overlayKeySchema, regenerateOverlayKey, showOverlayKey } from "../overlay-key.server";
@@ -74,6 +76,15 @@ export const liveRoutes: ApiRoute[] = [
     const status = playgroundStatusSchema.safeParse(await response.json().catch((): null => null));
     if (!status.success) throw new Error("playground status invalid");
     return json(status.data);
+  }),
+  // POST /api/overlay/alerts {op: status|test|mute|skip|replay|goalReset, kind?, on?, id?} → {at, muted, current,
+  // waiting, goal}: the alerts and the goal of the page. `status` only reads. A test, a replay and a new count of
+  // the goal use the write quota; the others never do, so the owner can always read, mute or skip.
+  write("POST", /overlay\/alerts/, async ({ request, env, viewer }) => {
+    const control = await readJson(request, alertControlSchema);
+    const streamer = await getOwnStreamer(env, viewer.id);
+    if (!streamer) throw new HttpError(404, "You do not have a streamer page.");
+    return json(await controlAlerts(env, streamer.id, viewer.id, control));
   }),
   // POST /api/overlay/layouts {action: select|create|rename|delete|reset, output, ...} → {overlay, layouts}: the saved
   // layouts of one output and the layout on stream. A selected layout reaches OBS as each other layer change does.

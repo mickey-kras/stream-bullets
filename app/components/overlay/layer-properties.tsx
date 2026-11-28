@@ -3,10 +3,14 @@ import { t, tAround, type MessageId } from "../../i18n";
 import { withEnabled, withItem } from "../../lib/layer-geometry";
 import { MASH_NAME } from "../../lib/mash";
 import { channelsSectionPath, paths } from "../../lib/shell";
+import type { AlertRule, AlertRuleId } from "../../lib/alerts";
 import {
   LAYER_BACKGROUND,
+  isContentLayer,
   layerEnabled,
+  onAnyOutput,
   type ContentLayer,
+  type GoalLayer,
   type GridLayer,
   type OverlayLayers,
 } from "../../lib/overlay-layers";
@@ -14,7 +18,10 @@ import type { OverlayData, OverlayMessageStyle, OverlayState } from "../../types
 import { ChatDeliveryContext } from "../channels/use-live-channels";
 import { Icon } from "../ui/icon";
 import { Select, type SelectOption } from "../ui/select";
+import type { ActivityFeed } from "./activity-feed";
+import { AlertRulesTable, AlertTest } from "./alerts-settings";
 import { CharactersControls, type CharactersControl } from "./characters-controls";
+import { GoalSettings } from "./goal-settings";
 import { LAYER_NAMES } from "./layout-grid";
 import { CHARACTERS_READY } from "./overlay-composition";
 import type { EditTiming } from "./use-layer-draft";
@@ -272,13 +279,12 @@ function BackgroundRange({
   );
 }
 
-/** The background slider of a layer. The characters layer and the camera frame have none. */
+/** The background slider of a layer. Only the chat and the content layers have one. */
 function LayerBackground({
   layer,
   layers,
   change,
 }: Readonly<{ layer: GridLayer; layers: OverlayLayers; change: ChangeLayers }>): ReactNode {
-  if (layer === "characters" || layer === "camera") return null;
   if (layer === "chat")
     return (
       <BackgroundRange
@@ -290,6 +296,7 @@ function LayerBackground({
         }
       />
     );
+  if (!isContentLayer(layer)) return null;
   return (
     <BackgroundRange
       label={t("overlay.props.background")}
@@ -309,7 +316,7 @@ function QrSetting({
   change,
 }: Readonly<{ layer: GridLayer; layers: OverlayLayers; change: ChangeLayers }>): ReactNode {
   const hintId: string = useId();
-  if (layer === "chat" || layer === "characters" || layer === "message" || layer === "camera") return null;
+  if (!isContentLayer(layer) || layer === "message") return null;
   return (
     <>
       <label className="choice">
@@ -342,14 +349,27 @@ function ContentSettings({ layer, ...props }: Readonly<SettingsProps & { layer: 
   return null;
 }
 
+/** `layers` with some fields of one alert rule replaced. */
+export function withRule(layers: OverlayLayers, rule: AlertRuleId, patch: Partial<AlertRule>): OverlayLayers {
+  const rules = { ...layers.alerts.rules, [rule]: { ...layers.alerts.rules[rule], ...patch } };
+  return { ...layers, alerts: { ...layers.alerts, rules } };
+}
+
+/** `layers` with some fields of the goal replaced. */
+export function withGoal(layers: OverlayLayers, patch: Partial<GoalLayer>): OverlayLayers {
+  return { ...layers, goal: { ...layers.goal, ...patch } };
+}
+
 /**
  * The settings of the selected layer: "Show on stream", what it shows, its QR code, its background and "Remove from
  * grid". With no layer (`layer` null) a hint shows. Layer settings save through `change` like grid edits. The poll
- * results switch and the message save through `run`.
+ * results switch and the message save through `run`. The alerts layer has the test of an alert beside its name, and
+ * its rules. The goal layer has its settings and its count (`feed`).
  */
 export function LayerProperties({
   layer,
   characters,
+  feed,
   onRemove,
   ...props
 }: Readonly<
@@ -357,6 +377,8 @@ export function LayerProperties({
     /** The selected layer when it is on the grid, or null. */
     layer: GridLayer | null;
     characters: CharactersControl;
+    /** The owner's activity feed, for the count of the goal. Null while it is closed. */
+    feed: ActivityFeed | null;
     onRemove: (layer: GridLayer) => void;
   }
 >): ReactNode {
@@ -374,9 +396,13 @@ export function LayerProperties({
   return (
     <section className="ov-props" aria-labelledby={titleId} data-comp-props={layer}>
       <p className="eyebrow ov-studio-title">{t("overlay.props.title")}</p>
-      <h3 className="ov-props-name" id={titleId}>
-        {t(LAYER_NAMES[layer])}
-      </h3>
+      <div className="ov-props-head">
+        <h3 className="ov-props-name" id={titleId}>
+          {t(LAYER_NAMES[layer])}
+        </h3>
+        {/* The server checks the saved layers, not an unsaved draft. */}
+        {layer === "alerts" && <AlertTest onStream={onAnyOutput(props.state.layers, "alerts")} />}
+      </div>
       {layer === "characters" && (
         <p className="muted ov-comp-note">
           {t("overlay.characters.intro")}{" "}
@@ -406,6 +432,10 @@ export function LayerProperties({
           onTimeout={(timeout: number) =>
             change((current: OverlayLayers) => ({ ...current, characters: { ...current.characters, timeout } }))
           }
+          pushEnabled={layers.characters.pushEnabled}
+          onPushEnabled={(pushEnabled: boolean) =>
+            change((current: OverlayLayers) => ({ ...current, characters: { ...current.characters, pushEnabled } }))
+          }
           max={layers.characters.max}
           onMax={(max: number) =>
             change((current: OverlayLayers) => ({ ...current, characters: { ...current.characters, max } }))
@@ -413,7 +443,24 @@ export function LayerProperties({
         />
       )}
       {layer === "camera" && <p className="muted ov-comp-note">{t("overlay.camera.note")}</p>}
-      {layer !== "chat" && layer !== "characters" && layer !== "camera" && <ContentSettings layer={layer} {...props} />}
+      {layer === "alerts" && (
+        <AlertRulesTable
+          rules={layers.alerts.rules}
+          onRule={(rule: AlertRuleId, patch: Partial<AlertRule>, when: EditTiming) =>
+            change((current: OverlayLayers) => withRule(current, rule, patch), when)
+          }
+        />
+      )}
+      {layer === "goal" && (
+        <GoalSettings
+          goal={layers.goal}
+          feed={feed}
+          onGoal={(patch: Partial<GoalLayer>, when: EditTiming) =>
+            change((current: OverlayLayers) => withGoal(current, patch), when)
+          }
+        />
+      )}
+      {isContentLayer(layer) && <ContentSettings layer={layer} {...props} />}
       <QrSetting layer={layer} layers={layers} change={change} />
       <LayerBackground layer={layer} layers={layers} change={change} />
       <button type="button" onClick={() => onRemove(layer)} data-props-remove>

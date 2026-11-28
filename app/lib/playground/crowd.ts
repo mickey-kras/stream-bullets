@@ -1,6 +1,7 @@
 import type { ActivityPlatform } from "../activity";
 import {
   COMMAND_COOLDOWN_TICKS,
+  MOVEMENT_COOLDOWN_TICKS,
   PLATFORM_RESERVE_MIN,
   PLATFORM_RESERVE_SHARE,
   RANKED_SHARE,
@@ -54,6 +55,13 @@ export const COMMAND_ALIASES: Readonly<Record<string, Command>> = {
   shove: "push",
 };
 
+/**
+ * The actions of a reaction: what a character does when the server starts it, without a chat command (see
+ * `PlaygroundSim.react`). Each one is also a command.
+ */
+export const REACTIONS = ["wave", "jump", "cheer"] as const satisfies readonly Command[];
+export type Reaction = (typeof REACTIONS)[number];
+
 /** A command with its number (0 when the text has none) and its side (0 when the text has none). */
 export interface CommandCall {
   name: Command;
@@ -78,6 +86,12 @@ interface PendingCommand extends CommandCall {
   expires: number;
   /** `platform:messageId` of the message, so a delete drops it. */
   key: string;
+}
+
+interface PendingReaction {
+  action: Reaction;
+  /** The reaction is dropped after this tick. */
+  expires: number;
 }
 
 interface PendingText {
@@ -107,6 +121,7 @@ export interface Participant {
   lastScored: number;
   lastChat: number;
   lastCommand: number;
+  lastMovement: number;
   /** Removed by the owner: never admitted again until a reset or registry expiry. */
   removed: boolean;
   /** Holds a visible slot (entrance, exit and respawn included). */
@@ -117,6 +132,8 @@ export interface Participant {
   slot: "ranked" | "rotating";
   pending: PendingCommand | null;
   pendingText: PendingText | null;
+  /** A reaction that waits for the character to walk or stand. A queued command goes first. Never in a checkpoint. */
+  reaction: PendingReaction | null;
   bubble: Bubble | null;
   /** Ticks left of the unavailable mark. */
   mark: number;
@@ -176,6 +193,7 @@ export function newParticipant(
     lastScored: clock - SCORE_COOLDOWN_TICKS,
     lastChat: clock,
     lastCommand: clock - COMMAND_COOLDOWN_TICKS,
+    lastMovement: clock - MOVEMENT_COOLDOWN_TICKS,
     removed: false,
     admitted: false,
     admittedAt: 0,
@@ -183,6 +201,7 @@ export function newParticipant(
     slot: "rotating",
     pending: null,
     pendingText: null,
+    reaction: null,
     bubble: null,
     mark: 0,
     speed,

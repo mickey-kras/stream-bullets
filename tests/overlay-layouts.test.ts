@@ -200,13 +200,17 @@ describe("make, rename, delete and reset", (): void => {
     expect(problem(() => createLayout(state, "horizontal", made, "empty", keep))).toBe("limit");
     // The other output has its own limit.
     expect(problem(() => createLayout(state, "vertical", made, "empty", keep))).toBeNull();
-    // All layouts of the two outputs at full size fit the stored text.
+    // All layouts of the two outputs at full size fit the stored text: each layer of the grid has a cell with the
+    // longest numbers.
+    const wide: CellRect = { c: 20, r: 20, w: 32, h: 32 };
+    const every: LayerCells = { ...emptyCells() };
+    for (const layer of GRID_LAYERS) every[layer] = wide;
     const full: SavedLayout[] = Array.from(
       { length: LAYOUT_LIMIT + 2 },
       (_, index: number): SavedLayout => ({
         id: `00000000-0000-4000-8000-00000000000${index}`,
         name: "N".repeat(40),
-        cells: { ...presetCells("chatting"), characters: { c: 13, r: 13, w: 12, h: 1 }, topic: chatCell },
+        cells: every,
       }),
     );
     const layouts: OverlayLayouts = {

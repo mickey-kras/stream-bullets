@@ -151,6 +151,11 @@ See [Support events](#support-events).
 
 The pause and the platform buttons apply to this browser only. They do not change what OBS shows.
 
+**Hide chat commands (!jump)** in the settings of the chat layer also applies to this list. The option is on by default.
+With the option on, the list has no row for a command, and a paused list does not count it.
+The list keeps these messages: when you clear the option, they show again in their places.
+See [Commands](overlay-composition.md#commands).
+
 A message that a moderator deleted stays in its place without its text.
 The same applies to each message of a viewer who got a ban or a timeout.
 This also applies during a pause of the list.
@@ -225,7 +230,12 @@ The **Overlay** section has two steps. See [the editor](overlay-composition.md#e
 1. **Build your overlay** is the overlay studio.
    - The toolbar is one line: the **Horizontal** and **Vertical** tabs, the list **Layout**, and three icon buttons at its right edge.
      The buttons are **Save as a new layout**, **Reset to the preset**, and **Start test**. Each button has a tooltip.
-   - The layer list has the groups **Picture** and **Content**. Each group starts open, and you can close it.
+   - The layer list has the groups **Picture**, **Recognition**, and **Content**. Each group starts open, and you can close it.
+     **Recognition** has the alerts layer and the goal layer.
+   - The settings of the alerts layer have a test alert with **Send test**, and a table of rules.
+     The settings of the goal layer have the title, what the goal counts, the target, the count, and **Start again**.
+     See [Alerts settings](overlay-composition.md#alerts-settings) and [Goal settings](overlay-composition.md#goal-settings).
+   - **Start test** also sends one test alert while the alerts layer is on stream.
    - The settings of the selected layer are below the grid of the horizontal output.
      They are beside the grid of the vertical output. On a phone, they are below the grid.
    - The help **How the grid works** stays closed until you open it.
@@ -266,6 +276,9 @@ The key allows only these changes:
 - The switch for the poll results, and the end of the voting of a poll.
 - The text and the style of the message banner.
 - For the poll, the topic, and the message banner: the switch **Show on stream**, the picked item, and the QR code.
+- For the alerts: the state, a test alert, the mute, a skip of the alert on stream, and a replay of a support event.
+  The key does not change the rules of the alerts. A test and a replay use the write quota of the owner.
+  The key does not start the count of the goal again.
 
 The server refuses each other change with `403`: the layout, the outputs, the chat, the characters, the links, and the layouts.
 The dock key is not a session. It gives no access to the account, to channel management, or to an overlay link.

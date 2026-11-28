@@ -8,6 +8,8 @@ import { describe, it } from "node:test";
 
 const previousVersion: string = randomUUID();
 const replacementVersion: string = randomUUID();
+const commit: string = "a".repeat(40);
+const previousCommit: string = "b".repeat(40);
 
 async function deploy(scenario: string): Promise<{ status: number | null; calls: string; output: string }> {
   const directory: string = await mkdtemp(join(tmpdir(), "production-deploy-"));
@@ -33,18 +35,33 @@ case "$*" in
 esac
 `,
     );
+    // The Worker that serves a request: the previous one until the deploy, the new one after it until a rollback.
+    // "stale" keeps the previous one at the edge, "stale-rollback" keeps the new one after the rollback.
     await writeFile(
       join(directory, "curl"),
       `#!/usr/bin/env bash
+shopt -s extglob
 printf '%s\\n' "$*" >> "$CALLS"
+revision=$PREVIOUS_COMMIT
+if [ "$SCENARIO" = "no-revision" ]; then revision=""; fi
+if grep -q 'wrangler deploy --' "$CALLS" && [ "$SCENARIO" != "stale" ]; then revision=$COMMIT; fi
+if grep -q 'wrangler rollback' "$CALLS" && [ "$SCENARIO" != "stale-rollback" ]; then
+  revision=$PREVIOUS_COMMIT
+  if [ "$SCENARIO" = "no-revision" ]; then revision=""; fi
+fi
+if [ "$SCENARIO" = "same-commit" ]; then revision=$COMMIT; fi
+header=""
+if [ -n "$revision" ]; then header="X-StreamBullets-Revision: $revision\\r\\n"; fi
 if [[ "$*" == *"--dump-header"* ]]; then
   if [ "$SCENARIO" = "missing-marker" ]; then printf 'HTTP/2 200\\r\\n\\r\\n';
   elif [ "$SCENARIO" = "unsupported-marker" ]; then printf 'HTTP/2 200\\r\\nX-StreamBullets-Binary-Labels: 10\\r\\n\\r\\n';
-  else printf 'HTTP/2 200\\r\\nx-streambullets-binary-labels: 1\\r\\n\\r\\n'; fi
-elif [ "$SCENARIO" = "success" ] || { [ "$SCENARIO" != "restored-smoke-fails" ] && grep -q 'wrangler rollback' "$CALLS"; }; then
-  printf '%s\\n' '<h1 id="landing-title">Stream Bullets</h1>'
+  else printf "HTTP/2 200\\r\\nx-streambullets-binary-labels: 1\\r\\n$header\\r\\n"; fi
+elif [[ "$*" == *"fonts.css"* ]]; then
+  exit 0
+elif [ "$SCENARIO" = "restored-smoke-fails" ] || { [ "$revision" = "$COMMIT" ] && [[ "$SCENARIO" == @(smoke-fails|stale-rollback|rollback-fails) ]]; }; then
+  printf "HTTP/2 200\\r\\n$header\\r\\n%s\\n" 'Broken page'
 else
-  printf '%s\\n' 'Broken page'
+  printf "HTTP/2 200\\r\\n$header\\r\\n%s\\n" '<h1 id="landing-title">Stream Bullets</h1>'
 fi
 `,
     );
@@ -56,7 +73,11 @@ fi
         PATH: `${directory}:${process.env.PATH}`,
         CALLS: calls,
         SCENARIO: scenario,
-        GITHUB_SHA: "revision",
+        GITHUB_SHA: commit,
+        COMMIT: commit,
+        PREVIOUS_COMMIT: previousCommit,
+        SMOKE_ATTEMPTS: "3",
+        SMOKE_DELAY: "0",
       },
       encoding: "utf8",
     });
@@ -76,8 +97,41 @@ void describe("production deployment recovery", (): void => {
     assert.ok(calls[1].includes("Cache-Control: no-cache"));
     assert.ok(calls[2].includes("deployments list"));
     assert.ok(calls[3].includes("d1 migrations apply DB --env production --remote"));
-    assert.ok(calls[4].includes("wrangler deploy --"));
+    assert.ok(calls[4].includes(`wrangler deploy --config build/server/wrangler.json --var DEPLOYED_COMMIT:${commit}`));
+    assert.ok(calls[5].includes("--include https://streambullets.com/"));
     assert.ok(!result.calls.includes("wrangler rollback"));
+  });
+
+  void it("rolls back when every smoke response comes from the previous Worker", async (): Promise<void> => {
+    const result = await deploy("stale");
+    assert.notEqual(result.status, 0);
+    // Three reads of the landing page find the previous revision; its content does not count.
+    assert.ok(result.output.includes(`production serves revision ${previousCommit}, not ${commit} yet`));
+    assert.ok(result.output.includes(`did not serve revision ${commit}`));
+    assert.ok(result.calls.includes(`wrangler rollback ${previousVersion}`));
+    assert.ok(result.output.includes("Previous Worker restored"));
+  });
+
+  void it("fails the rollback check while the edge still serves the new Worker", async (): Promise<void> => {
+    const result = await deploy("stale-rollback");
+    assert.notEqual(result.status, 0);
+    assert.ok(result.calls.includes(`wrangler rollback ${previousVersion}`));
+    assert.ok(result.output.includes(`production serves revision ${commit}, not ${previousCommit} yet`));
+    assert.ok(result.output.includes("Rollback smoke check failed"));
+    assert.ok(!result.output.includes("Previous Worker restored"));
+  });
+
+  void it("deploys over a previous Worker that sends no revision", async (): Promise<void> => {
+    const result = await deploy("no-revision");
+    assert.equal(result.status, 0);
+    assert.ok(!result.calls.includes("wrangler rollback"));
+  });
+
+  void it("refuses a commit that production already serves before migrations", async (): Promise<void> => {
+    const result = await deploy("same-commit");
+    assert.notEqual(result.status, 0);
+    assert.ok(!result.calls.includes("migrations apply"));
+    assert.ok(result.output.includes("already serves this commit"));
   });
 
   void it("refuses a missing or unsupported reader marker before migrations or traffic changes", async (): Promise<void> => {
