@@ -67,10 +67,14 @@ function banner(alert: AlertFace, more: { showMs?: number; still?: boolean } = {
 
 /** The visible text of markup. */
 function textOf(html: string): string {
-  return html
-    .replaceAll(/<[^>]+>/g, "")
-    .replaceAll("&#x27;", "'")
-    .replaceAll("&amp;", "&");
+  let text: string = "";
+  let inTag: boolean = false;
+  for (const char of html) {
+    if (char === "<") inTag = true;
+    else if (char === ">") inTag = false;
+    else if (!inTag) text += char;
+  }
+  return text.replaceAll("&#x27;", "'").replaceAll("&amp;", "&");
 }
 
 afterEach((): void => {
