@@ -249,7 +249,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     validateTestEnvironment(this.env);
     if (this.env.APP_ENV !== "test") return reply("Not found", 404);
     const now = Date.now();
-    await this.alerts.ready(now);
+    if (!(await this.alerts.ready(now))) return reply("Alerts unavailable", 503);
     this.ingest(support ? [sampleSupportAt(now)] : sampleChatAt(now), now);
     await this.scheduleAlarm(Math.min(now + SNAPSHOT_MAX_AGE_MS + 1, this.playground.wakeAt() ?? Infinity));
     await this.alerts.wake();
@@ -417,7 +417,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     }
     const all = this.admitEvents(parsed, now);
     if (all.length === 0) return new Response(null, { status: 204 });
-    await this.alerts.ready(earliestAt(all, now)); // Before the checks: a disconnect during the read drops it.
+    if (!(await this.alerts.ready(earliestAt(all, now)))) return reply("Alerts unavailable", 503); // Before the checks.
     const connection = await this.connection(platform);
     // A delivery for a channel that is gone, needs a new authorization, belongs to a suspended page, or comes from
     // another channel (a route cached before the page changed its channel) is dropped.
@@ -928,7 +928,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     // Support events come from the same page at no cost. Only a connect, which supersedes this poll, changes them.
     const support = connection.support ? youtubeSupport(page.items, now) : [];
     const events = [...youtubeEvents(page.items, connection.externalId, now), ...support];
-    await this.alerts.ready(earliestAt(events, now));
+    if (!(await this.alerts.ready(earliestAt(events, now)))) throw new Error("alerts_unavailable");
     current();
     this.ingest(this.admitEvents(events, now), now);
     state.pageToken = page.nextPageToken;
