@@ -80,7 +80,7 @@ export interface MessageRow extends RowBase {
   /** True when the message is a chat command (`!word`), so turning on hideCommands can remove it later. */
   command: boolean;
   /** A message row marks no alert. */
-  alert?: undefined;
+  alert?: never;
 }
 
 /**
