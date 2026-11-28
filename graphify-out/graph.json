@@ -29289,7 +29289,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_activitynote",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L294",
+      "source_location": "L297",
       "target": "app_i18n_index_taround",
       "weight": 1.0
     },
@@ -29301,7 +29301,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_activitynote",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L299",
+      "source_location": "L302",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -29313,7 +29313,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_activitynote",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L301",
+      "source_location": "L304",
       "target": "app_lib_shell_toolspath",
       "weight": 1.0
     },
@@ -29325,7 +29325,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_activityview",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L337",
+      "source_location": "L340",
       "target": "app_components_tools_live_activity_mutebutton",
       "weight": 1.0
     },
@@ -29337,7 +29337,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_activityview",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L338",
+      "source_location": "L341",
       "target": "app_components_tools_live_activity_testbutton",
       "weight": 1.0
     },
@@ -29349,7 +29349,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_activityview",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L341",
+      "source_location": "L344",
       "target": "app_components_tools_live_part_livepart",
       "weight": 1.0
     },
@@ -29361,7 +29361,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_activityview",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L343",
+      "source_location": "L346",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -29373,7 +29373,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_activityview",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L357",
+      "source_location": "L360",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -29385,7 +29385,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_activityview",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L365",
+      "source_location": "L368",
       "target": "app_lib_shell_toolspath",
       "weight": 1.0
     },
@@ -29397,7 +29397,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_activityview",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L372",
+      "source_location": "L375",
       "target": "app_components_tools_live_activity_docknow",
       "weight": 1.0
     },
@@ -29409,7 +29409,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_activityview",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L375",
+      "source_location": "L378",
       "target": "app_components_tools_live_activity_onstreamnow",
       "weight": 1.0
     },
@@ -29421,7 +29421,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_activityview",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L391",
+      "source_location": "L394",
       "target": "app_components_tools_live_activity_eventrow",
       "weight": 1.0
     },
@@ -29433,7 +29433,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_activityview",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L395",
+      "source_location": "L398",
       "target": "app_lib_live_activity_replayable",
       "weight": 1.0
     },
@@ -29445,7 +29445,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_activityview",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L404",
+      "source_location": "L407",
       "target": "app_components_tools_live_activity_activitynote",
       "weight": 1.0
     },
@@ -29457,7 +29457,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_docknow",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L427",
+      "source_location": "L430",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -29469,7 +29469,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_docknow",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L428",
+      "source_location": "L431",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -29481,7 +29481,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_docknow",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L433",
+      "source_location": "L436",
       "target": "app_components_tools_live_activity_nowtitle",
       "weight": 1.0
     },
@@ -29493,7 +29493,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_eventrow",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L263",
+      "source_location": "L266",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -29505,7 +29505,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_eventrow",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L265",
+      "source_location": "L268",
       "target": "app_components_tools_live_activity_title",
       "weight": 1.0
     },
@@ -29517,7 +29517,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_eventrow",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L272",
+      "source_location": "L275",
       "target": "app_components_tools_live_activity_titletext",
       "weight": 1.0
     },
@@ -29529,7 +29529,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_eventrow",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L272",
+      "source_location": "L275",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -29541,7 +29541,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_eventrow",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L285",
+      "source_location": "L288",
       "target": "app_components_tools_live_activity_rowmeta",
       "weight": 1.0
     },
@@ -29589,7 +29589,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_liveactivity",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L471",
+      "source_location": "L474",
       "target": "app_components_tools_live_activity_usealertscontrol",
       "weight": 1.0
     },
@@ -29601,7 +29601,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_liveactivity",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L472",
+      "source_location": "L475",
       "target": "app_components_overlay_use_alerts_usealerts",
       "weight": 1.0
     },
@@ -29613,7 +29613,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_liveactivity",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L472",
+      "source_location": "L475",
       "target": "app_lib_live_activity_shownalerts_b093640c7fee",
       "weight": 1.0
     },
@@ -29625,7 +29625,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_liveactivity",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L474",
+      "source_location": "L477",
       "target": "app_components_tools_live_activity_activityview",
       "weight": 1.0
     },
@@ -29637,7 +29637,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_liveactivity",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L479",
+      "source_location": "L482",
       "target": "app_lib_overlay_layers_onanyoutput",
       "weight": 1.0
     },
@@ -29649,7 +29649,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_mutebutton",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L214",
+      "source_location": "L217",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -29661,7 +29661,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_mutebutton",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L215",
+      "source_location": "L218",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -29709,7 +29709,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_onstreamnow",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L179",
+      "source_location": "L185",
       "target": "app_components_tools_live_activity_usesecondsleft",
       "weight": 1.0
     },
@@ -29721,8 +29721,8 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_onstreamnow",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L183",
-      "target": "app_i18n_index_t",
+      "source_location": "L186",
+      "target": "app_components_tools_live_activity_originlabel",
       "weight": 1.0
     },
     {
@@ -29733,7 +29733,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_onstreamnow",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L187",
+      "source_location": "L190",
       "target": "app_components_tools_live_activity_nowtitle",
       "weight": 1.0
     },
@@ -29745,7 +29745,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_onstreamnow",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L191",
+      "source_location": "L194",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -29757,8 +29757,32 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_onstreamnow",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L197",
+      "source_location": "L195",
+      "target": "app_i18n_index_t",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_tools_live_activity_onstreamnow",
+      "source_file": "app/components/tools/live-activity.tsx",
+      "source_location": "L200",
       "target": "app_lib_live_activity_nowline",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_tools_live_activity_originlabel",
+      "source_file": "app/components/tools/live-activity.tsx",
+      "source_location": "L174",
+      "target": "app_i18n_index_t",
       "weight": 1.0
     },
     {
@@ -29829,7 +29853,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_testbutton",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L234",
+      "source_location": "L237",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -29841,7 +29865,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_testbutton",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L235",
+      "source_location": "L238",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -34209,7 +34233,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_activityafter",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L143",
+      "source_location": "L144",
       "target": "app_lib_live_activity_rowsafter",
       "weight": 1.0
     },
@@ -34221,7 +34245,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_activityafter",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L144",
+      "source_location": "L145",
       "target": "app_lib_live_activity_keptafter",
       "weight": 1.0
     },
@@ -34233,7 +34257,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_keptafter",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L120",
+      "source_location": "L121",
       "target": "app_lib_activity_issupport",
       "weight": 1.0
     },
@@ -34245,7 +34269,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_keptafter",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L123",
+      "source_location": "L124",
       "target": "app_lib_live_activity_keptof",
       "weight": 1.0
     },
@@ -34257,7 +34281,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_nowline",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L196",
+      "source_location": "L197",
       "target": "app_i18n_index_tn",
       "weight": 1.0
     },
@@ -34269,7 +34293,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_refusaltext",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L221",
+      "source_location": "L222",
       "target": "app_lib_live_activity_isrefusal",
       "weight": 1.0
     },
@@ -34281,7 +34305,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_rowsafter",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L129",
+      "source_location": "L130",
       "target": "app_lib_live_activity_withrows",
       "weight": 1.0
     },
@@ -34293,7 +34317,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_rowsafter",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L131",
+      "source_location": "L132",
       "target": "app_lib_live_activity_torow",
       "weight": 1.0
     },
@@ -34305,7 +34329,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_rowsafter",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L133",
+      "source_location": "L134",
       "target": "app_lib_activity_issupport",
       "weight": 1.0
     },
@@ -38865,7 +38889,7 @@
       "relation": "calls",
       "source": "app_lib_session_csv_estimatenote",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L122",
+      "source_location": "L123",
       "target": "app_lib_stream_report_contributorestimate_b0c3357f0fad",
       "weight": 1.0
     },
@@ -38877,7 +38901,7 @@
       "relation": "calls",
       "source": "app_lib_session_csv_estimatenote",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L129",
+      "source_location": "L130",
       "target": "app_lib_session_csv_isotime",
       "weight": 1.0
     },
@@ -38889,7 +38913,7 @@
       "relation": "calls",
       "source": "app_lib_session_csv_platformrows",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L135",
+      "source_location": "L136",
       "target": "app_lib_session_csv_cellrow",
       "weight": 1.0
     },
@@ -38901,7 +38925,7 @@
       "relation": "calls",
       "source": "app_lib_session_csv_platformrows",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L135",
+      "source_location": "L136",
       "target": "app_lib_stream_report_metriccell",
       "weight": 1.0
     },
@@ -38913,7 +38937,7 @@
       "relation": "calls",
       "source": "app_lib_session_csv_platformrows",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L141",
+      "source_location": "L142",
       "target": "app_lib_session_csv_estimatenote",
       "weight": 1.0
     },
@@ -38925,7 +38949,7 @@
       "relation": "calls",
       "source": "app_lib_session_csv_platformrows",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L155",
+      "source_location": "L156",
       "target": "app_lib_session_csv_formatmicros",
       "weight": 1.0
     },
@@ -38937,7 +38961,7 @@
       "relation": "calls",
       "source": "app_lib_session_csv_reportrows",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L250",
+      "source_location": "L253",
       "target": "app_lib_session_csv_sessionrows",
       "weight": 1.0
     },
@@ -38949,7 +38973,7 @@
       "relation": "calls",
       "source": "app_lib_session_csv_reportrows",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L253",
+      "source_location": "L256",
       "target": "app_lib_session_csv_platformrows",
       "weight": 1.0
     },
@@ -38961,7 +38985,7 @@
       "relation": "calls",
       "source": "app_lib_session_csv_reportrows",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L255",
+      "source_location": "L258",
       "target": "app_lib_session_csv_pagerows",
       "weight": 1.0
     },
@@ -38973,7 +38997,7 @@
       "relation": "calls",
       "source": "app_lib_session_csv_reportrows",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L255",
+      "source_location": "L258",
       "target": "app_lib_session_csv_timelinerows",
       "weight": 1.0
     },
@@ -38985,7 +39009,7 @@
       "relation": "calls",
       "source": "app_lib_session_csv_sessioncsv",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L265",
+      "source_location": "L268",
       "target": "app_lib_session_csv_csvline",
       "weight": 1.0
     },
@@ -38997,7 +39021,7 @@
       "relation": "calls",
       "source": "app_lib_session_csv_sessioncsv",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L266",
+      "source_location": "L269",
       "target": "app_lib_session_csv_reportrows",
       "weight": 1.0
     },
@@ -39009,7 +39033,7 @@
       "relation": "calls",
       "source": "app_lib_session_csv_sessioncsv",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L272",
+      "source_location": "L275",
       "target": "app_lib_session_csv_isotime",
       "weight": 1.0
     },
@@ -39021,7 +39045,7 @@
       "relation": "calls",
       "source": "app_lib_session_csv_timelinerows",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L204",
+      "source_location": "L206",
       "target": "app_lib_session_csv_bucketrows",
       "weight": 1.0
     },
@@ -39213,7 +39237,7 @@
       "relation": "calls",
       "source": "app_lib_stream_session_activity",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L596",
+      "source_location": "L598",
       "target": "app_lib_stream_session_openingof",
       "weight": 1.0
     },
@@ -39225,7 +39249,7 @@
       "relation": "calls",
       "source": "app_lib_stream_session_activity",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L603",
+      "source_location": "L605",
       "target": "app_lib_stream_session_endgap",
       "weight": 1.0
     },
@@ -39321,7 +39345,7 @@
       "relation": "calls",
       "source": "app_lib_stream_session_apply",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L668",
+      "source_location": "L670",
       "target": "app_lib_stream_session_online",
       "weight": 1.0
     },
@@ -39333,7 +39357,7 @@
       "relation": "calls",
       "source": "app_lib_stream_session_apply",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L671",
+      "source_location": "L673",
       "target": "app_lib_stream_session_offline",
       "weight": 1.0
     },
@@ -39345,7 +39369,7 @@
       "relation": "calls",
       "source": "app_lib_stream_session_apply",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L674",
+      "source_location": "L676",
       "target": "app_lib_stream_session_activity",
       "weight": 1.0
     },
@@ -39357,7 +39381,7 @@
       "relation": "calls",
       "source": "app_lib_stream_session_apply",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L677",
+      "source_location": "L679",
       "target": "app_lib_stream_session_status",
       "weight": 1.0
     },
@@ -39369,7 +39393,7 @@
       "relation": "calls",
       "source": "app_lib_stream_session_apply",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L680",
+      "source_location": "L682",
       "target": "app_lib_stream_session_schedulelive",
       "weight": 1.0
     },
@@ -39381,7 +39405,7 @@
       "relation": "calls",
       "source": "app_lib_stream_session_apply",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L683",
+      "source_location": "L685",
       "target": "app_lib_stream_session_checked",
       "weight": 1.0
     },
@@ -39453,7 +39477,7 @@
       "relation": "calls",
       "source": "app_lib_stream_session_checked",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L662",
+      "source_location": "L664",
       "target": "app_lib_stream_session_offline",
       "weight": 1.0
     },
@@ -39561,7 +39585,7 @@
       "relation": "calls",
       "source": "app_lib_stream_session_offline",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L576",
+      "source_location": "L578",
       "target": "app_lib_stream_session_endgap",
       "weight": 1.0
     },
@@ -39681,7 +39705,7 @@
       "relation": "calls",
       "source": "app_lib_stream_session_status",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L622",
+      "source_location": "L624",
       "target": "app_lib_stream_session_endgap",
       "weight": 1.0
     },
@@ -39693,7 +39717,7 @@
       "relation": "calls",
       "source": "app_lib_stream_session_status",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L629",
+      "source_location": "L631",
       "target": "app_lib_stream_session_startgap",
       "weight": 1.0
     },
@@ -79872,7 +79896,7 @@
       "relation": "references",
       "source": "app_components_tools_live_activity_activityviewprops",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L313",
+      "source_location": "L316",
       "target": "app_lib_live_activity_shownalerts",
       "weight": 1.0
     },
@@ -79884,7 +79908,7 @@
       "relation": "references",
       "source": "app_components_tools_live_activity_activityviewprops",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L314",
+      "source_location": "L317",
       "target": "app_lib_live_activity_activityrow",
       "weight": 1.0
     },
@@ -79896,7 +79920,7 @@
       "relation": "references",
       "source": "app_components_tools_live_activity_activityviewprops",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L316",
+      "source_location": "L319",
       "target": "app_lib_live_activity_keptevent",
       "weight": 1.0
     },
@@ -80280,7 +80304,7 @@
       "relation": "references",
       "source": "app_lib_live_activity_keptevent",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L97",
+      "source_location": "L98",
       "target": "app_lib_activity_activitysupport",
       "weight": 1.0
     },
@@ -209277,7 +209301,7 @@
       "relation": "inherits",
       "source": "app_lib_live_activity_shownalerts",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L165",
+      "source_location": "L166",
       "target": "app_lib_alerts_alertsstate",
       "weight": 1.0
     },
@@ -224132,6 +224156,17 @@
       "source": "app_components_tools_live_activity",
       "source_file": "app/components/tools/live-activity.tsx",
       "source_location": "L172",
+      "target": "app_components_tools_live_activity_originlabel",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_tools_live_activity",
+      "source_file": "app/components/tools/live-activity.tsx",
+      "source_location": "L178",
       "target": "app_components_tools_live_activity_onstreamnow",
       "weight": 1.0
     },
@@ -224142,7 +224177,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_activity",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L204",
+      "source_location": "L207",
       "target": "app_components_tools_live_activity_mutebutton",
       "weight": 1.0
     },
@@ -224153,7 +224188,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_activity",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L220",
+      "source_location": "L223",
       "target": "app_components_tools_live_activity_testbutton",
       "weight": 1.0
     },
@@ -224164,7 +224199,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_activity",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L244",
+      "source_location": "L247",
       "target": "app_components_tools_live_activity_eventrow",
       "weight": 1.0
     },
@@ -224175,7 +224210,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_activity",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L293",
+      "source_location": "L296",
       "target": "app_components_tools_live_activity_activitynote",
       "weight": 1.0
     },
@@ -224186,7 +224221,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_activity",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L312",
+      "source_location": "L315",
       "target": "app_components_tools_live_activity_activityviewprops",
       "weight": 1.0
     },
@@ -224197,7 +224232,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_activity",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L326",
+      "source_location": "L329",
       "target": "app_components_tools_live_activity_activityview",
       "weight": 1.0
     },
@@ -224208,7 +224243,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_activity",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L410",
+      "source_location": "L413",
       "target": "app_components_tools_live_activity_docknow",
       "weight": 1.0
     },
@@ -224230,7 +224265,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_activity",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L453",
+      "source_location": "L456",
       "target": "app_components_tools_live_activity_liveactivity",
       "weight": 1.0
     },
@@ -229862,7 +229897,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L101",
+      "source_location": "L102",
       "target": "app_lib_live_activity_keptof",
       "weight": 1.0
     },
@@ -229873,7 +229908,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L112",
+      "source_location": "L113",
       "target": "app_lib_live_activity_keptafter",
       "weight": 1.0
     },
@@ -229884,7 +229919,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L127",
+      "source_location": "L128",
       "target": "app_lib_live_activity_rowsafter",
       "weight": 1.0
     },
@@ -229895,7 +229930,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L141",
+      "source_location": "L142",
       "target": "app_lib_live_activity_activityafter",
       "weight": 1.0
     },
@@ -229906,7 +229941,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L154",
+      "source_location": "L155",
       "target": "app_lib_live_activity_replayable",
       "weight": 1.0
     },
@@ -229917,7 +229952,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L165",
+      "source_location": "L166",
       "target": "app_lib_live_activity_shownalerts",
       "weight": 1.0
     },
@@ -229928,7 +229963,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L176",
+      "source_location": "L177",
       "target": "app_lib_live_activity_shownalerts_b093640c7fee",
       "weight": 1.0
     },
@@ -229939,7 +229974,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L190",
+      "source_location": "L191",
       "target": "app_lib_live_activity_secondsleft",
       "weight": 1.0
     },
@@ -229950,7 +229985,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L195",
+      "source_location": "L196",
       "target": "app_lib_live_activity_nowline",
       "weight": 1.0
     },
@@ -229972,7 +230007,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L201",
+      "source_location": "L202",
       "target": "app_lib_live_activity_refusal_text",
       "weight": 1.0
     },
@@ -229983,7 +230018,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L212",
+      "source_location": "L213",
       "target": "app_lib_live_activity_isrefusal",
       "weight": 1.0
     },
@@ -230005,7 +230040,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L220",
+      "source_location": "L221",
       "target": "app_lib_live_activity_refusaltext",
       "weight": 1.0
     },
@@ -230060,7 +230095,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L78",
+      "source_location": "L79",
       "target": "app_lib_live_activity_activitystate",
       "weight": 1.0
     },
@@ -230071,7 +230106,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L92",
+      "source_location": "L93",
       "target": "app_lib_live_activity_initial_activity",
       "weight": 1.0
     },
@@ -230082,7 +230117,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L95",
+      "source_location": "L96",
       "target": "app_lib_live_activity_keptevent",
       "weight": 1.0
     },
@@ -235329,7 +235364,7 @@
       "relation": "contains",
       "source": "app_lib_session_csv",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L120",
+      "source_location": "L121",
       "target": "app_lib_session_csv_estimatenote",
       "weight": 1.0
     },
@@ -235340,7 +235375,7 @@
       "relation": "contains",
       "source": "app_lib_session_csv",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L133",
+      "source_location": "L134",
       "target": "app_lib_session_csv_platformrows",
       "weight": 1.0
     },
@@ -235351,7 +235386,7 @@
       "relation": "contains",
       "source": "app_lib_session_csv",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L171",
+      "source_location": "L172",
       "target": "app_lib_session_csv_pagerows",
       "weight": 1.0
     },
@@ -235362,7 +235397,7 @@
       "relation": "contains",
       "source": "app_lib_session_csv",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L180",
+      "source_location": "L181",
       "target": "app_lib_session_csv_bucketrows",
       "weight": 1.0
     },
@@ -235373,7 +235408,7 @@
       "relation": "contains",
       "source": "app_lib_session_csv",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L201",
+      "source_location": "L202",
       "target": "app_lib_session_csv_timelinerows",
       "weight": 1.0
     },
@@ -235384,7 +235419,7 @@
       "relation": "contains",
       "source": "app_lib_session_csv",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L248",
+      "source_location": "L251",
       "target": "app_lib_session_csv_reportrows",
       "weight": 1.0
     },
@@ -235395,7 +235430,7 @@
       "relation": "contains",
       "source": "app_lib_session_csv",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L259",
+      "source_location": "L262",
       "target": "app_lib_session_csv_csvline",
       "weight": 1.0
     },
@@ -235406,7 +235441,7 @@
       "relation": "contains",
       "source": "app_lib_session_csv",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L264",
+      "source_location": "L267",
       "target": "app_lib_session_csv_sessioncsv",
       "weight": 1.0
     },
@@ -236979,7 +237014,7 @@
       "relation": "contains",
       "source": "app_lib_stream_session",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L572",
+      "source_location": "L574",
       "target": "app_lib_stream_session_offline",
       "weight": 1.0
     },
@@ -236990,7 +237025,7 @@
       "relation": "contains",
       "source": "app_lib_stream_session",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L580",
+      "source_location": "L582",
       "target": "app_lib_stream_session_activity",
       "weight": 1.0
     },
@@ -237023,7 +237058,7 @@
       "relation": "contains",
       "source": "app_lib_stream_session",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L607",
+      "source_location": "L609",
       "target": "app_lib_stream_session_status",
       "weight": 1.0
     },
@@ -237045,7 +237080,7 @@
       "relation": "contains",
       "source": "app_lib_stream_session",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L633",
+      "source_location": "L635",
       "target": "app_lib_stream_session_schedulelive",
       "weight": 1.0
     },
@@ -237067,7 +237102,7 @@
       "relation": "contains",
       "source": "app_lib_stream_session",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L648",
+      "source_location": "L650",
       "target": "app_lib_stream_session_checked",
       "weight": 1.0
     },
@@ -237078,7 +237113,7 @@
       "relation": "contains",
       "source": "app_lib_stream_session",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L665",
+      "source_location": "L667",
       "target": "app_lib_stream_session_apply",
       "weight": 1.0
     },
@@ -275531,7 +275566,7 @@
       "relation": "indirect_call",
       "source": "app_components_tools_live_activity_liveactivity",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L468",
+      "source_location": "L471",
       "target": "app_lib_live_activity_activityafter",
       "weight": 1.0
     },
@@ -275675,7 +275710,7 @@
       "relation": "indirect_call",
       "source": "app_lib_live_activity_keptafter",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L113",
+      "source_location": "L114",
       "target": "app_lib_live_activity_keptof",
       "weight": 1.0
     },
@@ -275795,7 +275830,7 @@
       "relation": "indirect_call",
       "source": "app_lib_session_csv_csvline",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L260",
+      "source_location": "L263",
       "target": "app_lib_session_csv_csvfield",
       "weight": 1.0
     },
@@ -275807,7 +275842,7 @@
       "relation": "indirect_call",
       "source": "app_lib_session_csv_platformrows",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L144",
+      "source_location": "L145",
       "target": "app_lib_stream_report_issupportmetric",
       "weight": 1.0
     },
@@ -283314,7 +283349,7 @@
       "label": "ActivityViewProps",
       "norm_label": "activityviewprops",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L312"
+      "source_location": "L315"
     },
     {
       "_callable": true,
@@ -284694,7 +284729,7 @@
       "label": "ActivityState",
       "norm_label": "activitystate",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L78"
+      "source_location": "L79"
     },
     {
       "_callable": true,
@@ -284706,7 +284741,7 @@
       "label": "KeptEvent",
       "norm_label": "keptevent",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L95"
+      "source_location": "L96"
     },
     {
       "_callable": true,
@@ -284718,7 +284753,7 @@
       "label": "ShownAlerts",
       "norm_label": "shownalerts",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L165"
+      "source_location": "L166"
     },
     {
       "_callable": true,
@@ -302590,7 +302625,7 @@
       "label": "ActivityNote()",
       "norm_label": "activitynote()",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L293"
+      "source_location": "L296"
     },
     {
       "_callable": true,
@@ -302601,7 +302636,7 @@
       "label": "ActivityView()",
       "norm_label": "activityview()",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L326"
+      "source_location": "L329"
     },
     {
       "_callable": true,
@@ -302623,7 +302658,7 @@
       "label": "DockNow()",
       "norm_label": "docknow()",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L410"
+      "source_location": "L413"
     },
     {
       "_callable": true,
@@ -302634,7 +302669,7 @@
       "label": "EventRow()",
       "norm_label": "eventrow()",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L244"
+      "source_location": "L247"
     },
     {
       "_callable": true,
@@ -302656,7 +302691,7 @@
       "label": "LiveActivity()",
       "norm_label": "liveactivity()",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L453"
+      "source_location": "L456"
     },
     {
       "_callable": true,
@@ -302667,7 +302702,7 @@
       "label": "MuteButton()",
       "norm_label": "mutebutton()",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L204"
+      "source_location": "L207"
     },
     {
       "_callable": true,
@@ -302688,6 +302723,17 @@
       "id": "app_components_tools_live_activity_onstreamnow",
       "label": "OnStreamNow()",
       "norm_label": "onstreamnow()",
+      "source_file": "app/components/tools/live-activity.tsx",
+      "source_location": "L178"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_tools_live_activity_originlabel",
+      "label": "originLabel()",
+      "norm_label": "originlabel()",
       "source_file": "app/components/tools/live-activity.tsx",
       "source_location": "L172"
     },
@@ -302722,7 +302768,7 @@
       "label": "TestButton()",
       "norm_label": "testbutton()",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L220"
+      "source_location": "L223"
     },
     {
       "_callable": true,
@@ -305959,7 +306005,7 @@
       "label": "activityAfter()",
       "norm_label": "activityafter()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L141"
+      "source_location": "L142"
     },
     {
       "_callable": true,
@@ -305970,7 +306016,7 @@
       "label": "isRefusal()",
       "norm_label": "isrefusal()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L212"
+      "source_location": "L213"
     },
     {
       "_callable": true,
@@ -305981,7 +306027,7 @@
       "label": "keptAfter()",
       "norm_label": "keptafter()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L112"
+      "source_location": "L113"
     },
     {
       "_callable": true,
@@ -305992,7 +306038,7 @@
       "label": "keptOf()",
       "norm_label": "keptof()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L101"
+      "source_location": "L102"
     },
     {
       "_callable": true,
@@ -306003,7 +306049,7 @@
       "label": "nowLine()",
       "norm_label": "nowline()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L195"
+      "source_location": "L196"
     },
     {
       "_callable": true,
@@ -306014,7 +306060,7 @@
       "label": "refusalText()",
       "norm_label": "refusaltext()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L220"
+      "source_location": "L221"
     },
     {
       "_callable": true,
@@ -306025,7 +306071,7 @@
       "label": "replayable()",
       "norm_label": "replayable()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L154"
+      "source_location": "L155"
     },
     {
       "_callable": true,
@@ -306036,7 +306082,7 @@
       "label": "rowsAfter()",
       "norm_label": "rowsafter()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L127"
+      "source_location": "L128"
     },
     {
       "_callable": true,
@@ -306047,7 +306093,7 @@
       "label": "secondsLeft()",
       "norm_label": "secondsleft()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L190"
+      "source_location": "L191"
     },
     {
       "_callable": true,
@@ -306058,7 +306104,7 @@
       "label": "shownAlerts()",
       "norm_label": "shownalerts()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L176"
+      "source_location": "L177"
     },
     {
       "_callable": true,
@@ -309442,7 +309488,7 @@
       "label": "bucketRows()",
       "norm_label": "bucketrows()",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L180"
+      "source_location": "L181"
     },
     {
       "_callable": true,
@@ -309475,7 +309521,7 @@
       "label": "csvLine()",
       "norm_label": "csvline()",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L259"
+      "source_location": "L262"
     },
     {
       "_callable": true,
@@ -309486,7 +309532,7 @@
       "label": "estimateNote()",
       "norm_label": "estimatenote()",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L120"
+      "source_location": "L121"
     },
     {
       "_callable": true,
@@ -309519,7 +309565,7 @@
       "label": "pageRows()",
       "norm_label": "pagerows()",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L171"
+      "source_location": "L172"
     },
     {
       "_callable": true,
@@ -309530,7 +309576,7 @@
       "label": "platformRows()",
       "norm_label": "platformrows()",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L133"
+      "source_location": "L134"
     },
     {
       "_callable": true,
@@ -309541,7 +309587,7 @@
       "label": "reportRows()",
       "norm_label": "reportrows()",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L248"
+      "source_location": "L251"
     },
     {
       "_callable": true,
@@ -309552,7 +309598,7 @@
       "label": "sessionCsv()",
       "norm_label": "sessioncsv()",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L264"
+      "source_location": "L267"
     },
     {
       "_callable": true,
@@ -309574,7 +309620,7 @@
       "label": "timelineRows()",
       "norm_label": "timelinerows()",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L201"
+      "source_location": "L202"
     },
     {
       "_callable": true,
@@ -309783,7 +309829,7 @@
       "label": "activity()",
       "norm_label": "activity()",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L580"
+      "source_location": "L582"
     },
     {
       "_callable": true,
@@ -309816,7 +309862,7 @@
       "label": "apply()",
       "norm_label": "apply()",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L665"
+      "source_location": "L667"
     },
     {
       "_callable": true,
@@ -309860,7 +309906,7 @@
       "label": "checked()",
       "norm_label": "checked()",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L648"
+      "source_location": "L650"
     },
     {
       "_callable": true,
@@ -309970,7 +310016,7 @@
       "label": "offline()",
       "norm_label": "offline()",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L572"
+      "source_location": "L574"
     },
     {
       "_callable": true,
@@ -310025,7 +310071,7 @@
       "label": "scheduleLive()",
       "norm_label": "schedulelive()",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L633"
+      "source_location": "L635"
     },
     {
       "_callable": true,
@@ -310069,7 +310115,7 @@
       "label": "status()",
       "norm_label": "status()",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L607"
+      "source_location": "L609"
     },
     {
       "_callable": true,
@@ -337488,7 +337534,7 @@
       "label": "INITIAL_ACTIVITY",
       "norm_label": "initial_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L92"
+      "source_location": "L93"
     },
     {
       "_origin": "ast",
@@ -337498,7 +337544,7 @@
       "label": "REFUSAL_TEXT",
       "norm_label": "refusal_text",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L201"
+      "source_location": "L202"
     },
     {
       "_origin": "ast",

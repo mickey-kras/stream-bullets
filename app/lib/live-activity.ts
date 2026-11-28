@@ -69,7 +69,8 @@ function withRows(rows: readonly ActivityRow[], added: readonly ActivityRow[]): 
   }
   if (fresh.length === 0) return rows;
   // The sort keeps the order of equal times: a row that arrived later comes first.
-  return [...fresh.reverse(), ...rows]
+  fresh.reverse();
+  return [...fresh, ...rows]
     .sort((a: ActivityRow, b: ActivityRow): number => b.receivedAt - a.receivedAt)
     .slice(0, ACTIVITY_ROWS);
 }
