@@ -76,7 +76,11 @@ export async function creditTopic(env: AppEnv, streamerId: string, entryId: stri
  * After a change of the overlay: credits the author of the topic that the change featured, while the alerts layer is
  * on stream in an output. It runs after the answer, as the notices of the live room do.
  */
-export function notifyTopicCredit(env: AppEnv, streamerId: string, update: OverlayUpdate): void {
+export function notifyTopicCredit(
+  env: AppEnv,
+  streamerId: string,
+  update: Pick<OverlayUpdate, "overlay" | "featured">,
+): void {
   const { featured, overlay } = update;
   if (featured === null || !onAnyOutput(overlay.layers, "alerts") || !activityAvailable(env)) return;
   waitUntil(creditTopic(env, streamerId, featured, overlay.revision));

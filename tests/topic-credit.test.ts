@@ -4,6 +4,7 @@ import { parseActivityMessage, type ActivitySupport } from "../app/lib/activity"
 import { ALERT_SHOW_MS, DEFAULT_RULES, type AlertView, type AlertsMessage } from "../app/lib/alerts";
 import { GOAL_COUNTS, goalAmount } from "../app/lib/goals";
 import { DEFAULT_LAYERS, emptyCells, storedLayersText, type OverlayLayers } from "../app/lib/overlay-layers";
+import type { OverlayLayouts } from "../app/lib/overlay-layouts";
 import {
   alertCreditSchema,
   creditedTopic,
@@ -18,6 +19,7 @@ import { creditTopic } from "../app/server/topic-credit.server";
 import { apiCaller } from "./helpers/api";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
 import { FakeSocket, installWorkersRuntime, RoomNamespace, RoomState, serverSocketOf } from "./helpers/room";
+import type { OverlayState } from "../app/types";
 
 // The work that the API starts after its answer. The tests wait for it with `settle`.
 const background = vi.hoisted((): { pending: Promise<unknown>[] } => ({ pending: [] }));
@@ -356,6 +358,28 @@ describe("a topic credit", (): void => {
     expect(current(socket)).toMatchObject({ kind: "topic", name: "Name quiet", text: "Speedrun it" });
     // The author has no Twitch sign-in: the crowd gets the action.
     expect(react.mock.calls).toEqual([[null, "wave", undefined]]);
+  });
+
+  it("plays for a topic that a layout puts on stream", async (): Promise<void> => {
+    const layout = (body: Record<string, unknown>): Promise<Response> =>
+      call("POST", "overlay/layouts", { user: "owner", body });
+    await saveLayers(layers(true, { ref: linked, enabled: true }));
+    const made = await layout({ action: "create", output: "horizontal", name: "Topic", from: "current", keep: "Mine" });
+    expect(made.status).toBe(200);
+    const saved: string | null = (await made.json<{ layouts: OverlayLayouts }>()).layouts.horizontal.active;
+    await settle();
+    const socket = await listen();
+    // A preset has no topic layer and no alerts layer: the topic goes off stream.
+    expect((await layout({ action: "select", output: "horizontal", id: "preset:chatting", keep: "Mine" })).status).toBe(200);
+    await settle();
+    expect(supportEvents(socket)).toEqual([]);
+    // The saved layout brings the topic back on stream, with the alerts layer.
+    const back = await layout({ action: "select", output: "horizontal", id: saved, keep: "Mine" });
+    expect(back.status).toBe(200);
+    await settle();
+    const { overlay } = await back.json<{ overlay: OverlayState }>();
+    expect(supportEvents(socket).map((event) => event.id)).toEqual([`direct:topic:${linked}:${overlay.revision}`]);
+    expect(current(socket)).toMatchObject({ kind: "topic", name: "Name viewer", text: "Which boss first?" });
   });
 
   it("does not play again while the same topic stays on stream, and plays for a new feature", async (): Promise<void> => {

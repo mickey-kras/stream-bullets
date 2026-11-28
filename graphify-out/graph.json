@@ -29253,7 +29253,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_activitynote",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L294",
+      "source_location": "L297",
       "target": "app_i18n_index_taround",
       "weight": 1.0
     },
@@ -29265,7 +29265,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_activitynote",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L299",
+      "source_location": "L302",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -29277,7 +29277,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_activitynote",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L301",
+      "source_location": "L304",
       "target": "app_lib_shell_toolspath",
       "weight": 1.0
     },
@@ -29289,7 +29289,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_activityview",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L337",
+      "source_location": "L340",
       "target": "app_components_tools_live_activity_mutebutton",
       "weight": 1.0
     },
@@ -29301,7 +29301,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_activityview",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L338",
+      "source_location": "L341",
       "target": "app_components_tools_live_activity_testbutton",
       "weight": 1.0
     },
@@ -29313,7 +29313,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_activityview",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L341",
+      "source_location": "L344",
       "target": "app_components_tools_live_part_livepart",
       "weight": 1.0
     },
@@ -29325,7 +29325,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_activityview",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L343",
+      "source_location": "L346",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -29337,7 +29337,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_activityview",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L357",
+      "source_location": "L360",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -29349,7 +29349,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_activityview",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L365",
+      "source_location": "L368",
       "target": "app_lib_shell_toolspath",
       "weight": 1.0
     },
@@ -29361,7 +29361,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_activityview",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L372",
+      "source_location": "L375",
       "target": "app_components_tools_live_activity_docknow",
       "weight": 1.0
     },
@@ -29373,7 +29373,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_activityview",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L375",
+      "source_location": "L378",
       "target": "app_components_tools_live_activity_onstreamnow",
       "weight": 1.0
     },
@@ -29385,7 +29385,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_activityview",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L391",
+      "source_location": "L394",
       "target": "app_components_tools_live_activity_eventrow",
       "weight": 1.0
     },
@@ -29397,7 +29397,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_activityview",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L395",
+      "source_location": "L398",
       "target": "app_lib_live_activity_replayable",
       "weight": 1.0
     },
@@ -29409,7 +29409,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_activityview",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L404",
+      "source_location": "L407",
       "target": "app_components_tools_live_activity_activitynote",
       "weight": 1.0
     },
@@ -29421,7 +29421,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_docknow",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L427",
+      "source_location": "L430",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -29433,7 +29433,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_docknow",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L428",
+      "source_location": "L431",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -29445,7 +29445,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_docknow",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L433",
+      "source_location": "L436",
       "target": "app_components_tools_live_activity_nowtitle",
       "weight": 1.0
     },
@@ -29457,7 +29457,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_eventrow",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L263",
+      "source_location": "L266",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -29469,7 +29469,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_eventrow",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L265",
+      "source_location": "L268",
       "target": "app_components_tools_live_activity_title",
       "weight": 1.0
     },
@@ -29481,7 +29481,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_eventrow",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L272",
+      "source_location": "L275",
       "target": "app_components_tools_live_activity_titletext",
       "weight": 1.0
     },
@@ -29493,7 +29493,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_eventrow",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L272",
+      "source_location": "L275",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -29505,7 +29505,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_eventrow",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L285",
+      "source_location": "L288",
       "target": "app_components_tools_live_activity_rowmeta",
       "weight": 1.0
     },
@@ -29553,7 +29553,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_liveactivity",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L471",
+      "source_location": "L474",
       "target": "app_components_tools_live_activity_usealertscontrol",
       "weight": 1.0
     },
@@ -29565,7 +29565,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_liveactivity",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L472",
+      "source_location": "L475",
       "target": "app_components_overlay_use_alerts_usealerts",
       "weight": 1.0
     },
@@ -29577,7 +29577,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_liveactivity",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L472",
+      "source_location": "L475",
       "target": "app_lib_live_activity_shownalerts_b093640c7fee",
       "weight": 1.0
     },
@@ -29589,7 +29589,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_liveactivity",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L474",
+      "source_location": "L477",
       "target": "app_components_tools_live_activity_activityview",
       "weight": 1.0
     },
@@ -29601,7 +29601,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_liveactivity",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L479",
+      "source_location": "L482",
       "target": "app_lib_overlay_layers_onanyoutput",
       "weight": 1.0
     },
@@ -29613,7 +29613,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_mutebutton",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L214",
+      "source_location": "L217",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -29625,7 +29625,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_mutebutton",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L215",
+      "source_location": "L218",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -29673,7 +29673,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_onstreamnow",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L179",
+      "source_location": "L185",
       "target": "app_components_tools_live_activity_usesecondsleft",
       "weight": 1.0
     },
@@ -29685,8 +29685,8 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_onstreamnow",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L183",
-      "target": "app_i18n_index_t",
+      "source_location": "L186",
+      "target": "app_components_tools_live_activity_originlabel",
       "weight": 1.0
     },
     {
@@ -29697,7 +29697,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_onstreamnow",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L187",
+      "source_location": "L190",
       "target": "app_components_tools_live_activity_nowtitle",
       "weight": 1.0
     },
@@ -29709,7 +29709,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_onstreamnow",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L191",
+      "source_location": "L194",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -29721,8 +29721,32 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_onstreamnow",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L197",
+      "source_location": "L195",
+      "target": "app_i18n_index_t",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_tools_live_activity_onstreamnow",
+      "source_file": "app/components/tools/live-activity.tsx",
+      "source_location": "L200",
       "target": "app_lib_live_activity_nowline",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_tools_live_activity_originlabel",
+      "source_file": "app/components/tools/live-activity.tsx",
+      "source_location": "L174",
+      "target": "app_i18n_index_t",
       "weight": 1.0
     },
     {
@@ -29793,7 +29817,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_testbutton",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L234",
+      "source_location": "L237",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -29805,7 +29829,7 @@
       "relation": "calls",
       "source": "app_components_tools_live_activity_testbutton",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L235",
+      "source_location": "L238",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -34173,7 +34197,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_activityafter",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L143",
+      "source_location": "L144",
       "target": "app_lib_live_activity_rowsafter",
       "weight": 1.0
     },
@@ -34185,7 +34209,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_activityafter",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L144",
+      "source_location": "L145",
       "target": "app_lib_live_activity_keptafter",
       "weight": 1.0
     },
@@ -34197,7 +34221,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_keptafter",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L120",
+      "source_location": "L121",
       "target": "app_lib_activity_issupport",
       "weight": 1.0
     },
@@ -34209,7 +34233,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_keptafter",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L123",
+      "source_location": "L124",
       "target": "app_lib_live_activity_keptof",
       "weight": 1.0
     },
@@ -34221,7 +34245,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_nowline",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L196",
+      "source_location": "L197",
       "target": "app_i18n_index_tn",
       "weight": 1.0
     },
@@ -34233,7 +34257,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_refusaltext",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L221",
+      "source_location": "L222",
       "target": "app_lib_live_activity_isrefusal",
       "weight": 1.0
     },
@@ -34245,7 +34269,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_rowsafter",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L129",
+      "source_location": "L130",
       "target": "app_lib_live_activity_withrows",
       "weight": 1.0
     },
@@ -34257,7 +34281,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_rowsafter",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L131",
+      "source_location": "L132",
       "target": "app_lib_live_activity_torow",
       "weight": 1.0
     },
@@ -34269,7 +34293,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_rowsafter",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L133",
+      "source_location": "L134",
       "target": "app_lib_activity_issupport",
       "weight": 1.0
     },
@@ -38829,7 +38853,7 @@
       "relation": "calls",
       "source": "app_lib_session_csv_estimatenote",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L122",
+      "source_location": "L123",
       "target": "app_lib_stream_report_contributorestimate_b0c3357f0fad",
       "weight": 1.0
     },
@@ -38841,7 +38865,7 @@
       "relation": "calls",
       "source": "app_lib_session_csv_estimatenote",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L129",
+      "source_location": "L130",
       "target": "app_lib_session_csv_isotime",
       "weight": 1.0
     },
@@ -38853,7 +38877,7 @@
       "relation": "calls",
       "source": "app_lib_session_csv_platformrows",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L135",
+      "source_location": "L136",
       "target": "app_lib_session_csv_cellrow",
       "weight": 1.0
     },
@@ -38865,7 +38889,7 @@
       "relation": "calls",
       "source": "app_lib_session_csv_platformrows",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L135",
+      "source_location": "L136",
       "target": "app_lib_stream_report_metriccell",
       "weight": 1.0
     },
@@ -38877,7 +38901,7 @@
       "relation": "calls",
       "source": "app_lib_session_csv_platformrows",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L141",
+      "source_location": "L142",
       "target": "app_lib_session_csv_estimatenote",
       "weight": 1.0
     },
@@ -38889,7 +38913,7 @@
       "relation": "calls",
       "source": "app_lib_session_csv_platformrows",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L155",
+      "source_location": "L156",
       "target": "app_lib_session_csv_formatmicros",
       "weight": 1.0
     },
@@ -38901,7 +38925,7 @@
       "relation": "calls",
       "source": "app_lib_session_csv_reportrows",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L250",
+      "source_location": "L253",
       "target": "app_lib_session_csv_sessionrows",
       "weight": 1.0
     },
@@ -38913,7 +38937,7 @@
       "relation": "calls",
       "source": "app_lib_session_csv_reportrows",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L253",
+      "source_location": "L256",
       "target": "app_lib_session_csv_platformrows",
       "weight": 1.0
     },
@@ -38925,7 +38949,7 @@
       "relation": "calls",
       "source": "app_lib_session_csv_reportrows",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L255",
+      "source_location": "L258",
       "target": "app_lib_session_csv_pagerows",
       "weight": 1.0
     },
@@ -38937,7 +38961,7 @@
       "relation": "calls",
       "source": "app_lib_session_csv_reportrows",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L255",
+      "source_location": "L258",
       "target": "app_lib_session_csv_timelinerows",
       "weight": 1.0
     },
@@ -38949,7 +38973,7 @@
       "relation": "calls",
       "source": "app_lib_session_csv_sessioncsv",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L265",
+      "source_location": "L268",
       "target": "app_lib_session_csv_csvline",
       "weight": 1.0
     },
@@ -38961,7 +38985,7 @@
       "relation": "calls",
       "source": "app_lib_session_csv_sessioncsv",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L266",
+      "source_location": "L269",
       "target": "app_lib_session_csv_reportrows",
       "weight": 1.0
     },
@@ -38973,7 +38997,7 @@
       "relation": "calls",
       "source": "app_lib_session_csv_sessioncsv",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L272",
+      "source_location": "L275",
       "target": "app_lib_session_csv_isotime",
       "weight": 1.0
     },
@@ -38985,7 +39009,7 @@
       "relation": "calls",
       "source": "app_lib_session_csv_timelinerows",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L204",
+      "source_location": "L206",
       "target": "app_lib_session_csv_bucketrows",
       "weight": 1.0
     },
@@ -39177,7 +39201,7 @@
       "relation": "calls",
       "source": "app_lib_stream_session_activity",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L596",
+      "source_location": "L598",
       "target": "app_lib_stream_session_openingof",
       "weight": 1.0
     },
@@ -39189,7 +39213,7 @@
       "relation": "calls",
       "source": "app_lib_stream_session_activity",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L603",
+      "source_location": "L605",
       "target": "app_lib_stream_session_endgap",
       "weight": 1.0
     },
@@ -39285,7 +39309,7 @@
       "relation": "calls",
       "source": "app_lib_stream_session_apply",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L668",
+      "source_location": "L670",
       "target": "app_lib_stream_session_online",
       "weight": 1.0
     },
@@ -39297,7 +39321,7 @@
       "relation": "calls",
       "source": "app_lib_stream_session_apply",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L671",
+      "source_location": "L673",
       "target": "app_lib_stream_session_offline",
       "weight": 1.0
     },
@@ -39309,7 +39333,7 @@
       "relation": "calls",
       "source": "app_lib_stream_session_apply",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L674",
+      "source_location": "L676",
       "target": "app_lib_stream_session_activity",
       "weight": 1.0
     },
@@ -39321,7 +39345,7 @@
       "relation": "calls",
       "source": "app_lib_stream_session_apply",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L677",
+      "source_location": "L679",
       "target": "app_lib_stream_session_status",
       "weight": 1.0
     },
@@ -39333,7 +39357,7 @@
       "relation": "calls",
       "source": "app_lib_stream_session_apply",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L680",
+      "source_location": "L682",
       "target": "app_lib_stream_session_schedulelive",
       "weight": 1.0
     },
@@ -39345,7 +39369,7 @@
       "relation": "calls",
       "source": "app_lib_stream_session_apply",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L683",
+      "source_location": "L685",
       "target": "app_lib_stream_session_checked",
       "weight": 1.0
     },
@@ -39417,7 +39441,7 @@
       "relation": "calls",
       "source": "app_lib_stream_session_checked",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L662",
+      "source_location": "L664",
       "target": "app_lib_stream_session_offline",
       "weight": 1.0
     },
@@ -39525,7 +39549,7 @@
       "relation": "calls",
       "source": "app_lib_stream_session_offline",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L576",
+      "source_location": "L578",
       "target": "app_lib_stream_session_endgap",
       "weight": 1.0
     },
@@ -39645,7 +39669,7 @@
       "relation": "calls",
       "source": "app_lib_stream_session_status",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L622",
+      "source_location": "L624",
       "target": "app_lib_stream_session_endgap",
       "weight": 1.0
     },
@@ -39657,7 +39681,7 @@
       "relation": "calls",
       "source": "app_lib_stream_session_status",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L629",
+      "source_location": "L631",
       "target": "app_lib_stream_session_startgap",
       "weight": 1.0
     },
@@ -56745,7 +56769,7 @@
       "relation": "calls",
       "source": "app_server_overlay_layouts_server_getlayouts",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L42",
+      "source_location": "L43",
       "target": "app_lib_overlay_layouts_parsestoredlayouts",
       "weight": 1.0
     },
@@ -56757,7 +56781,7 @@
       "relation": "calls",
       "source": "app_server_overlay_layouts_server_nextlayoutstate",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L49",
+      "source_location": "L50",
       "target": "app_lib_overlay_layouts_selectlayout",
       "weight": 1.0
     },
@@ -56769,7 +56793,7 @@
       "relation": "calls",
       "source": "app_server_overlay_layouts_server_nextlayoutstate",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L51",
+      "source_location": "L52",
       "target": "app_lib_overlay_layouts_createlayout",
       "weight": 1.0
     },
@@ -56781,7 +56805,7 @@
       "relation": "calls",
       "source": "app_server_overlay_layouts_server_nextlayoutstate",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L52",
+      "source_location": "L53",
       "target": "app_lib_overlay_layouts_resetlayout",
       "weight": 1.0
     },
@@ -56793,7 +56817,7 @@
       "relation": "calls",
       "source": "app_server_overlay_layouts_server_nextlayoutstate",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L55",
+      "source_location": "L56",
       "target": "app_lib_overlay_layouts_renamelayout",
       "weight": 1.0
     },
@@ -56805,7 +56829,7 @@
       "relation": "calls",
       "source": "app_server_overlay_layouts_server_nextlayoutstate",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L56",
+      "source_location": "L57",
       "target": "app_lib_overlay_layouts_deletelayout",
       "weight": 1.0
     },
@@ -56817,7 +56841,7 @@
       "relation": "calls",
       "source": "app_server_overlay_layouts_server_nextlayoutstate",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L59",
+      "source_location": "L60",
       "target": "app_server_overlay_layouts_server_problemerror",
       "weight": 1.0
     },
@@ -56829,7 +56853,7 @@
       "relation": "calls",
       "source": "app_server_overlay_layouts_server_problemerror",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L29",
+      "source_location": "L30",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -56841,7 +56865,31 @@
       "relation": "calls",
       "source": "app_server_overlay_layouts_server_updatelayouts",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L81",
+      "source_location": "L103",
+      "target": "app_lib_overlay_layers_onanyoutput",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_overlay_layouts_server_updatelayouts",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L119",
+      "target": "app_lib_topic_credit_featuredtopic",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_overlay_layouts_server_updatelayouts",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L86",
       "target": "app_server_access_server_assertstreamerwritable",
       "weight": 1.0
     },
@@ -56853,7 +56901,7 @@
       "relation": "calls",
       "source": "app_server_overlay_layouts_server_updatelayouts",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L82",
+      "source_location": "L87",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -56865,7 +56913,7 @@
       "relation": "calls",
       "source": "app_server_overlay_layouts_server_updatelayouts",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L87",
+      "source_location": "L92",
       "target": "app_server_overlay_state_overlayvalue",
       "weight": 1.0
     },
@@ -56877,7 +56925,7 @@
       "relation": "calls",
       "source": "app_server_overlay_layouts_server_updatelayouts",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L88",
+      "source_location": "L93",
       "target": "app_lib_overlay_layouts_parsestoredlayouts",
       "weight": 1.0
     },
@@ -56889,7 +56937,7 @@
       "relation": "calls",
       "source": "app_server_overlay_layouts_server_updatelayouts",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L89",
+      "source_location": "L94",
       "target": "app_server_overlay_layouts_server_nextlayoutstate",
       "weight": 1.0
     },
@@ -56901,7 +56949,7 @@
       "relation": "calls",
       "source": "app_server_overlay_layouts_server_updatelayouts",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L90",
+      "source_location": "L95",
       "target": "app_lib_overlay_layers_storedlayerstext",
       "weight": 1.0
     },
@@ -56913,20 +56961,8 @@
       "relation": "calls",
       "source": "app_server_overlay_layouts_server_updatelayouts",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L91",
+      "source_location": "L96",
       "target": "app_lib_overlay_layouts_storedlayoutstext",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_overlay_layouts_server_updatelayouts",
-      "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L98",
-      "target": "app_lib_overlay_layers_onanyoutput",
       "weight": 1.0
     },
     {
@@ -63957,7 +63993,7 @@
       "relation": "calls",
       "source": "app_server_topic_credit_server_notifytopiccredit",
       "source_file": "app/server/topic-credit.server.ts",
-      "source_location": "L81",
+      "source_location": "L85",
       "target": "app_lib_overlay_layers_onanyoutput",
       "weight": 1.0
     },
@@ -63969,7 +64005,7 @@
       "relation": "calls",
       "source": "app_server_topic_credit_server_notifytopiccredit",
       "source_file": "app/server/topic-credit.server.ts",
-      "source_location": "L81",
+      "source_location": "L85",
       "target": "app_server_channel_tokens_server_activityavailable",
       "weight": 1.0
     },
@@ -63981,7 +64017,7 @@
       "relation": "calls",
       "source": "app_server_topic_credit_server_notifytopiccredit",
       "source_file": "app/server/topic-credit.server.ts",
-      "source_location": "L82",
+      "source_location": "L86",
       "target": "app_server_topic_credit_server_credittopic",
       "weight": 1.0
     },
@@ -63993,19 +64029,7 @@
       "relation": "calls",
       "source": "app_server_topic_credit_server_replaytopiccredit",
       "source_file": "app/server/topic-credit.server.ts",
-      "source_location": "L95",
-      "target": "app_server_topic_credit_server_topicfacts",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_topic_credit_server_replaytopiccredit",
-      "source_file": "app/server/topic-credit.server.ts",
-      "source_location": "L96",
+      "source_location": "L100",
       "target": "app_server_topic_credit_server_sendcredit",
       "weight": 1.0
     },
@@ -64017,8 +64041,20 @@
       "relation": "calls",
       "source": "app_server_topic_credit_server_replaytopiccredit",
       "source_file": "app/server/topic-credit.server.ts",
-      "source_location": "L96",
+      "source_location": "L100",
       "target": "app_server_topic_credit_server_subjectof",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_topic_credit_server_replaytopiccredit",
+      "source_file": "app/server/topic-credit.server.ts",
+      "source_location": "L99",
+      "target": "app_server_topic_credit_server_topicfacts",
       "weight": 1.0
     },
     {
@@ -77625,7 +77661,7 @@
       "relation": "calls",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L216",
+      "source_location": "L218",
       "target": "tests_topic_credit_test_layers",
       "weight": 1.0
     },
@@ -77637,7 +77673,7 @@
       "relation": "calls",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L216",
+      "source_location": "L218",
       "target": "tests_topic_credit_test_savelayers",
       "weight": 1.0
     },
@@ -77649,7 +77685,7 @@
       "relation": "calls",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L302",
+      "source_location": "L304",
       "target": "tests_topic_credit_test_listen",
       "weight": 1.0
     },
@@ -77661,7 +77697,7 @@
       "relation": "calls",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L303",
+      "source_location": "L305",
       "target": "tests_topic_credit_test_featurefromlive",
       "weight": 1.0
     },
@@ -77673,7 +77709,7 @@
       "relation": "calls",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L308",
+      "source_location": "L310",
       "target": "tests_topic_credit_test_supportevents",
       "weight": 1.0
     },
@@ -77685,7 +77721,7 @@
       "relation": "calls",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L323",
+      "source_location": "L325",
       "target": "tests_topic_credit_test_current",
       "weight": 1.0
     },
@@ -77697,7 +77733,7 @@
       "relation": "calls",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L339",
+      "source_location": "L341",
       "target": "tests_topic_credit_test_supportrows",
       "weight": 1.0
     },
@@ -77709,7 +77745,7 @@
       "relation": "calls",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L343",
+      "source_location": "L345",
       "target": "tests_topic_credit_test_everythingstored",
       "weight": 1.0
     },
@@ -77721,7 +77757,7 @@
       "relation": "calls",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L351",
+      "source_location": "L353",
       "target": "tests_topic_credit_test_dockkey",
       "weight": 1.0
     },
@@ -77733,7 +77769,7 @@
       "relation": "calls",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L354",
+      "source_location": "L356",
       "target": "tests_topic_credit_test_featurefromdock",
       "weight": 1.0
     },
@@ -77745,7 +77781,7 @@
       "relation": "calls",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L369",
+      "source_location": "L370",
       "target": "tests_topic_credit_test_settle",
       "weight": 1.0
     },
@@ -77757,7 +77793,7 @@
       "relation": "calls",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L400",
+      "source_location": "L424",
       "target": "tests_topic_credit_test_post",
       "weight": 1.0
     },
@@ -77769,7 +77805,7 @@
       "relation": "calls",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L402",
+      "source_location": "L426",
       "target": "tests_topic_credit_test_alertstates",
       "weight": 1.0
     },
@@ -77781,7 +77817,7 @@
       "relation": "calls",
       "source": "tests_topic_credit_test_alertstates",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L131",
+      "source_location": "L133",
       "target": "app_lib_activity_parseactivitymessage",
       "weight": 1.0
     },
@@ -77793,7 +77829,7 @@
       "relation": "calls",
       "source": "tests_topic_credit_test_current",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L137",
+      "source_location": "L139",
       "target": "tests_topic_credit_test_alertstates",
       "weight": 1.0
     },
@@ -77805,7 +77841,7 @@
       "relation": "calls",
       "source": "tests_topic_credit_test_dockkey",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L112",
+      "source_location": "L114",
       "target": "tests_topic_credit_test_settle",
       "weight": 1.0
     },
@@ -77817,7 +77853,7 @@
       "relation": "calls",
       "source": "tests_topic_credit_test_featurefromdock",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L121",
+      "source_location": "L123",
       "target": "tests_topic_credit_test_settle",
       "weight": 1.0
     },
@@ -77829,7 +77865,7 @@
       "relation": "calls",
       "source": "tests_topic_credit_test_featurefromlive",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L105",
+      "source_location": "L107",
       "target": "tests_topic_credit_test_settle",
       "weight": 1.0
     },
@@ -77841,7 +77877,7 @@
       "relation": "calls",
       "source": "tests_topic_credit_test_layers",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L65",
+      "source_location": "L67",
       "target": "app_lib_overlay_layers_emptycells",
       "weight": 1.0
     },
@@ -77853,7 +77889,7 @@
       "relation": "calls",
       "source": "tests_topic_credit_test_layers",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L65",
+      "source_location": "L67",
       "target": "tests_topic_credit_test_cell",
       "weight": 1.0
     },
@@ -77865,7 +77901,7 @@
       "relation": "calls",
       "source": "tests_topic_credit_test_listen",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L96",
+      "source_location": "L98",
       "target": "tests_helpers_room_serversocketof",
       "weight": 1.0
     },
@@ -77877,7 +77913,7 @@
       "relation": "calls",
       "source": "tests_topic_credit_test_savelayers",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L76",
+      "source_location": "L78",
       "target": "app_lib_overlay_layers_storedlayerstext",
       "weight": 1.0
     },
@@ -77889,7 +77925,7 @@
       "relation": "calls",
       "source": "tests_topic_credit_test_savelayers",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L78",
+      "source_location": "L80",
       "target": "tests_topic_credit_test_post",
       "weight": 1.0
     },
@@ -80520,7 +80556,7 @@
       "relation": "references",
       "source": "app_components_tools_live_activity_activityviewprops",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L313",
+      "source_location": "L316",
       "target": "app_lib_live_activity_shownalerts",
       "weight": 1.0
     },
@@ -80532,7 +80568,7 @@
       "relation": "references",
       "source": "app_components_tools_live_activity_activityviewprops",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L314",
+      "source_location": "L317",
       "target": "app_lib_live_activity_activityrow",
       "weight": 1.0
     },
@@ -80544,7 +80580,7 @@
       "relation": "references",
       "source": "app_components_tools_live_activity_activityviewprops",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L316",
+      "source_location": "L319",
       "target": "app_lib_live_activity_keptevent",
       "weight": 1.0
     },
@@ -80928,7 +80964,7 @@
       "relation": "references",
       "source": "app_lib_live_activity_keptevent",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L97",
+      "source_location": "L98",
       "target": "app_lib_activity_activitysupport",
       "weight": 1.0
     },
@@ -82044,7 +82080,7 @@
       "relation": "references",
       "source": "app_server_overlay_layouts_server_layoutupdate",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L66",
+      "source_location": "L70",
       "target": "app_types_overlaystate",
       "weight": 1.0
     },
@@ -82056,7 +82092,7 @@
       "relation": "references",
       "source": "app_server_overlay_layouts_server_layoutupdate",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L67",
+      "source_location": "L71",
       "target": "app_lib_overlay_layouts_overlaylayouts",
       "weight": 1.0
     },
@@ -121387,6 +121423,18 @@
       "source": "app_server_api_live",
       "source_file": "app/server/api/live.ts",
       "source_location": "L15",
+      "target": "app_server_overlay_layouts_server_layoutupdate",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_api_live",
+      "source_file": "app/server/api/live.ts",
+      "source_location": "L15",
       "target": "app_server_overlay_layouts_server_updatelayouts",
       "weight": 1.0
     },
@@ -128467,7 +128515,7 @@
       "source": "app_server_overlay_layouts_server",
       "source_file": "app/server/overlay-layouts.server.ts",
       "source_location": "L19",
-      "target": "app_types_overlaystate",
+      "target": "app_lib_topic_credit_featuredtopic",
       "weight": 1.0
     },
     {
@@ -128515,7 +128563,7 @@
       "source": "app_server_overlay_layouts_server",
       "source_file": "app/server/overlay-layouts.server.ts",
       "source_location": "L20",
-      "target": "app_server_access_server_assertstreamerwritable",
+      "target": "app_types_overlaystate",
       "weight": 1.0
     },
     {
@@ -128527,6 +128575,18 @@
       "source": "app_server_overlay_layouts_server",
       "source_file": "app/server/overlay-layouts.server.ts",
       "source_location": "L21",
+      "target": "app_server_access_server_assertstreamerwritable",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L22",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -128538,7 +128598,7 @@
       "relation": "imports",
       "source": "app_server_overlay_layouts_server",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L22",
+      "source_location": "L23",
       "target": "app_server_overlay_state_overlay_columns",
       "weight": 1.0
     },
@@ -128550,7 +128610,7 @@
       "relation": "imports",
       "source": "app_server_overlay_layouts_server",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L22",
+      "source_location": "L23",
       "target": "app_server_overlay_state_overlayrow",
       "weight": 1.0
     },
@@ -128562,7 +128622,7 @@
       "relation": "imports",
       "source": "app_server_overlay_layouts_server",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L22",
+      "source_location": "L23",
       "target": "app_server_overlay_state_overlayvalue",
       "weight": 1.0
     },
@@ -163494,7 +163554,7 @@
       "relation": "imports",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L14",
+      "source_location": "L15",
       "target": "app_server_alert_host_alerthost",
       "weight": 1.0
     },
@@ -163506,7 +163566,7 @@
       "relation": "imports",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L15",
+      "source_location": "L16",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -163518,7 +163578,7 @@
       "relation": "imports",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L16",
+      "source_location": "L17",
       "target": "app_server_playground_host_playgroundhost",
       "weight": 1.0
     },
@@ -163530,7 +163590,7 @@
       "relation": "imports",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L17",
+      "source_location": "L18",
       "target": "app_server_topic_credit_server_credittopic",
       "weight": 1.0
     },
@@ -163542,32 +163602,8 @@
       "relation": "imports",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L18",
+      "source_location": "L19",
       "target": "tests_helpers_api_apicaller",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_topic_credit_test",
-      "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L19",
-      "target": "tests_helpers_database_createtestdatabase",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_topic_credit_test",
-      "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L19",
-      "target": "tests_helpers_database_testdatabase",
       "weight": 1.0
     },
     {
@@ -163591,6 +163627,30 @@
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
       "source_location": "L20",
+      "target": "tests_helpers_database_createtestdatabase",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_topic_credit_test",
+      "source_file": "tests/topic-credit.test.ts",
+      "source_location": "L20",
+      "target": "tests_helpers_database_testdatabase",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_topic_credit_test",
+      "source_file": "tests/topic-credit.test.ts",
+      "source_location": "L21",
       "target": "tests_helpers_room_fakesocket",
       "weight": 1.0
     },
@@ -163602,7 +163662,7 @@
       "relation": "imports",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L20",
+      "source_location": "L21",
       "target": "tests_helpers_room_installworkersruntime",
       "weight": 1.0
     },
@@ -163614,7 +163674,7 @@
       "relation": "imports",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L20",
+      "source_location": "L21",
       "target": "tests_helpers_room_roomnamespace",
       "weight": 1.0
     },
@@ -163626,7 +163686,7 @@
       "relation": "imports",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L20",
+      "source_location": "L21",
       "target": "tests_helpers_room_roomstate",
       "weight": 1.0
     },
@@ -163638,8 +163698,20 @@
       "relation": "imports",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L20",
+      "source_location": "L21",
       "target": "tests_helpers_room_serversocketof",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_topic_credit_test",
+      "source_file": "tests/topic-credit.test.ts",
+      "source_location": "L22",
+      "target": "app_types_overlaystate",
       "weight": 1.0
     },
     {
@@ -163795,6 +163867,18 @@
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
       "source_location": "L7",
+      "target": "app_lib_overlay_layouts_overlaylayouts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_topic_credit_test",
+      "source_file": "tests/topic-credit.test.ts",
+      "source_location": "L8",
       "target": "app_lib_topic_credit_alertcreditschema",
       "weight": 1.0
     },
@@ -163806,7 +163890,7 @@
       "relation": "imports",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L7",
+      "source_location": "L8",
       "target": "app_lib_topic_credit_creditedtopic",
       "weight": 1.0
     },
@@ -163818,7 +163902,7 @@
       "relation": "imports",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L7",
+      "source_location": "L8",
       "target": "app_lib_topic_credit_featuredtopic",
       "weight": 1.0
     },
@@ -163830,7 +163914,7 @@
       "relation": "imports",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L7",
+      "source_location": "L8",
       "target": "app_lib_topic_credit_topicdeliveryid",
       "weight": 1.0
     },
@@ -163842,7 +163926,7 @@
       "relation": "imports",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L7",
+      "source_location": "L8",
       "target": "app_lib_topic_credit_topicsupport",
       "weight": 1.0
     },
@@ -190988,8 +191072,7 @@
       "source": "app_server_overlay_layouts_server",
       "source_file": "app/server/overlay-layouts.server.ts",
       "source_location": "L19",
-      "target": "app_types",
-      "type_only": true,
+      "target": "app_lib_topic_credit",
       "weight": 1.0
     },
     {
@@ -191013,7 +191096,8 @@
       "source": "app_server_overlay_layouts_server",
       "source_file": "app/server/overlay-layouts.server.ts",
       "source_location": "L20",
-      "target": "app_server_access_server",
+      "target": "app_types",
+      "type_only": true,
       "weight": 1.0
     },
     {
@@ -191025,7 +191109,7 @@
       "source": "app_server_overlay_layouts_server",
       "source_file": "app/server/overlay-layouts.server.ts",
       "source_location": "L21",
-      "target": "app_server_http_server",
+      "target": "app_server_access_server",
       "weight": 1.0
     },
     {
@@ -191037,6 +191121,18 @@
       "source": "app_server_overlay_layouts_server",
       "source_file": "app/server/overlay-layouts.server.ts",
       "source_location": "L22",
+      "target": "app_server_http_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_overlay_layouts_server",
+      "source_file": "app/server/overlay-layouts.server.ts",
+      "source_location": "L23",
       "target": "app_server_overlay_state",
       "weight": 1.0
     },
@@ -207738,7 +207834,7 @@
       "relation": "imports_from",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L14",
+      "source_location": "L15",
       "target": "app_server_alert_host",
       "weight": 1.0
     },
@@ -207750,7 +207846,7 @@
       "relation": "imports_from",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L15",
+      "source_location": "L16",
       "target": "app_server_channel_ingest",
       "weight": 1.0
     },
@@ -207762,7 +207858,7 @@
       "relation": "imports_from",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L16",
+      "source_location": "L17",
       "target": "app_server_playground_host",
       "weight": 1.0
     },
@@ -207774,7 +207870,7 @@
       "relation": "imports_from",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L17",
+      "source_location": "L18",
       "target": "app_server_topic_credit_server",
       "weight": 1.0
     },
@@ -207786,20 +207882,8 @@
       "relation": "imports_from",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L18",
-      "target": "tests_helpers_api",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports_from",
-      "source": "tests_topic_credit_test",
-      "source_file": "tests/topic-credit.test.ts",
       "source_location": "L19",
-      "target": "tests_helpers_database",
+      "target": "tests_helpers_api",
       "weight": 1.0
     },
     {
@@ -207824,7 +207908,32 @@
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
       "source_location": "L20",
+      "target": "tests_helpers_database",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_topic_credit_test",
+      "source_file": "tests/topic-credit.test.ts",
+      "source_location": "L21",
       "target": "tests_helpers_room",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_topic_credit_test",
+      "source_file": "tests/topic-credit.test.ts",
+      "source_location": "L22",
+      "target": "app_types",
+      "type_only": true,
       "weight": 1.0
     },
     {
@@ -207884,6 +207993,19 @@
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
       "source_location": "L7",
+      "target": "app_lib_overlay_layouts",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_topic_credit_test",
+      "source_file": "tests/topic-credit.test.ts",
+      "source_location": "L8",
       "target": "app_lib_topic_credit",
       "weight": 1.0
     },
@@ -211815,7 +211937,7 @@
       "relation": "inherits",
       "source": "app_lib_live_activity_shownalerts",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L165",
+      "source_location": "L166",
       "target": "app_lib_alerts_alertsstate",
       "weight": 1.0
     },
@@ -226615,6 +226737,17 @@
       "source": "app_components_tools_live_activity",
       "source_file": "app/components/tools/live-activity.tsx",
       "source_location": "L172",
+      "target": "app_components_tools_live_activity_originlabel",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_tools_live_activity",
+      "source_file": "app/components/tools/live-activity.tsx",
+      "source_location": "L178",
       "target": "app_components_tools_live_activity_onstreamnow",
       "weight": 1.0
     },
@@ -226625,7 +226758,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_activity",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L204",
+      "source_location": "L207",
       "target": "app_components_tools_live_activity_mutebutton",
       "weight": 1.0
     },
@@ -226636,7 +226769,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_activity",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L220",
+      "source_location": "L223",
       "target": "app_components_tools_live_activity_testbutton",
       "weight": 1.0
     },
@@ -226647,7 +226780,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_activity",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L244",
+      "source_location": "L247",
       "target": "app_components_tools_live_activity_eventrow",
       "weight": 1.0
     },
@@ -226658,7 +226791,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_activity",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L293",
+      "source_location": "L296",
       "target": "app_components_tools_live_activity_activitynote",
       "weight": 1.0
     },
@@ -226669,7 +226802,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_activity",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L312",
+      "source_location": "L315",
       "target": "app_components_tools_live_activity_activityviewprops",
       "weight": 1.0
     },
@@ -226680,7 +226813,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_activity",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L326",
+      "source_location": "L329",
       "target": "app_components_tools_live_activity_activityview",
       "weight": 1.0
     },
@@ -226691,7 +226824,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_activity",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L410",
+      "source_location": "L413",
       "target": "app_components_tools_live_activity_docknow",
       "weight": 1.0
     },
@@ -226713,7 +226846,7 @@
       "relation": "contains",
       "source": "app_components_tools_live_activity",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L453",
+      "source_location": "L456",
       "target": "app_components_tools_live_activity_liveactivity",
       "weight": 1.0
     },
@@ -232345,7 +232478,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L101",
+      "source_location": "L102",
       "target": "app_lib_live_activity_keptof",
       "weight": 1.0
     },
@@ -232356,7 +232489,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L112",
+      "source_location": "L113",
       "target": "app_lib_live_activity_keptafter",
       "weight": 1.0
     },
@@ -232367,7 +232500,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L127",
+      "source_location": "L128",
       "target": "app_lib_live_activity_rowsafter",
       "weight": 1.0
     },
@@ -232378,7 +232511,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L141",
+      "source_location": "L142",
       "target": "app_lib_live_activity_activityafter",
       "weight": 1.0
     },
@@ -232389,7 +232522,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L154",
+      "source_location": "L155",
       "target": "app_lib_live_activity_replayable",
       "weight": 1.0
     },
@@ -232400,7 +232533,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L165",
+      "source_location": "L166",
       "target": "app_lib_live_activity_shownalerts",
       "weight": 1.0
     },
@@ -232411,7 +232544,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L176",
+      "source_location": "L177",
       "target": "app_lib_live_activity_shownalerts_b093640c7fee",
       "weight": 1.0
     },
@@ -232422,7 +232555,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L190",
+      "source_location": "L191",
       "target": "app_lib_live_activity_secondsleft",
       "weight": 1.0
     },
@@ -232433,7 +232566,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L195",
+      "source_location": "L196",
       "target": "app_lib_live_activity_nowline",
       "weight": 1.0
     },
@@ -232455,7 +232588,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L201",
+      "source_location": "L202",
       "target": "app_lib_live_activity_refusal_text",
       "weight": 1.0
     },
@@ -232466,7 +232599,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L212",
+      "source_location": "L213",
       "target": "app_lib_live_activity_isrefusal",
       "weight": 1.0
     },
@@ -232488,7 +232621,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L220",
+      "source_location": "L221",
       "target": "app_lib_live_activity_refusaltext",
       "weight": 1.0
     },
@@ -232543,7 +232676,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L78",
+      "source_location": "L79",
       "target": "app_lib_live_activity_activitystate",
       "weight": 1.0
     },
@@ -232554,7 +232687,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L92",
+      "source_location": "L93",
       "target": "app_lib_live_activity_initial_activity",
       "weight": 1.0
     },
@@ -232565,7 +232698,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L95",
+      "source_location": "L96",
       "target": "app_lib_live_activity_keptevent",
       "weight": 1.0
     },
@@ -237812,7 +237945,7 @@
       "relation": "contains",
       "source": "app_lib_session_csv",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L120",
+      "source_location": "L121",
       "target": "app_lib_session_csv_estimatenote",
       "weight": 1.0
     },
@@ -237823,7 +237956,7 @@
       "relation": "contains",
       "source": "app_lib_session_csv",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L133",
+      "source_location": "L134",
       "target": "app_lib_session_csv_platformrows",
       "weight": 1.0
     },
@@ -237834,7 +237967,7 @@
       "relation": "contains",
       "source": "app_lib_session_csv",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L171",
+      "source_location": "L172",
       "target": "app_lib_session_csv_pagerows",
       "weight": 1.0
     },
@@ -237845,7 +237978,7 @@
       "relation": "contains",
       "source": "app_lib_session_csv",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L180",
+      "source_location": "L181",
       "target": "app_lib_session_csv_bucketrows",
       "weight": 1.0
     },
@@ -237856,7 +237989,7 @@
       "relation": "contains",
       "source": "app_lib_session_csv",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L201",
+      "source_location": "L202",
       "target": "app_lib_session_csv_timelinerows",
       "weight": 1.0
     },
@@ -237867,7 +238000,7 @@
       "relation": "contains",
       "source": "app_lib_session_csv",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L248",
+      "source_location": "L251",
       "target": "app_lib_session_csv_reportrows",
       "weight": 1.0
     },
@@ -237878,7 +238011,7 @@
       "relation": "contains",
       "source": "app_lib_session_csv",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L259",
+      "source_location": "L262",
       "target": "app_lib_session_csv_csvline",
       "weight": 1.0
     },
@@ -237889,7 +238022,7 @@
       "relation": "contains",
       "source": "app_lib_session_csv",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L264",
+      "source_location": "L267",
       "target": "app_lib_session_csv_sessioncsv",
       "weight": 1.0
     },
@@ -239462,7 +239595,7 @@
       "relation": "contains",
       "source": "app_lib_stream_session",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L572",
+      "source_location": "L574",
       "target": "app_lib_stream_session_offline",
       "weight": 1.0
     },
@@ -239473,7 +239606,7 @@
       "relation": "contains",
       "source": "app_lib_stream_session",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L580",
+      "source_location": "L582",
       "target": "app_lib_stream_session_activity",
       "weight": 1.0
     },
@@ -239506,7 +239639,7 @@
       "relation": "contains",
       "source": "app_lib_stream_session",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L607",
+      "source_location": "L609",
       "target": "app_lib_stream_session_status",
       "weight": 1.0
     },
@@ -239528,7 +239661,7 @@
       "relation": "contains",
       "source": "app_lib_stream_session",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L633",
+      "source_location": "L635",
       "target": "app_lib_stream_session_schedulelive",
       "weight": 1.0
     },
@@ -239550,7 +239683,7 @@
       "relation": "contains",
       "source": "app_lib_stream_session",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L648",
+      "source_location": "L650",
       "target": "app_lib_stream_session_checked",
       "weight": 1.0
     },
@@ -239561,7 +239694,7 @@
       "relation": "contains",
       "source": "app_lib_stream_session",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L665",
+      "source_location": "L667",
       "target": "app_lib_stream_session_apply",
       "weight": 1.0
     },
@@ -250253,7 +250386,7 @@
       "relation": "contains",
       "source": "app_server_overlay_layouts_server",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L28",
+      "source_location": "L29",
       "target": "app_server_overlay_layouts_server_problemerror",
       "weight": 1.0
     },
@@ -250264,7 +250397,7 @@
       "relation": "contains",
       "source": "app_server_overlay_layouts_server",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L38",
+      "source_location": "L39",
       "target": "app_server_overlay_layouts_server_getlayouts",
       "weight": 1.0
     },
@@ -250275,7 +250408,7 @@
       "relation": "contains",
       "source": "app_server_overlay_layouts_server",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L46",
+      "source_location": "L47",
       "target": "app_server_overlay_layouts_server_nextlayoutstate",
       "weight": 1.0
     },
@@ -250286,7 +250419,7 @@
       "relation": "contains",
       "source": "app_server_overlay_layouts_server",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L65",
+      "source_location": "L69",
       "target": "app_server_overlay_layouts_server_layoutupdate",
       "weight": 1.0
     },
@@ -250297,7 +250430,7 @@
       "relation": "contains",
       "source": "app_server_overlay_layouts_server",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L75",
+      "source_location": "L80",
       "target": "app_server_overlay_layouts_server_updatelayouts",
       "weight": 1.0
     },
@@ -253817,7 +253950,7 @@
       "relation": "contains",
       "source": "app_server_topic_credit_server",
       "source_file": "app/server/topic-credit.server.ts",
-      "source_location": "L89",
+      "source_location": "L93",
       "target": "app_server_topic_credit_server_replaytopiccredit",
       "weight": 1.0
     },
@@ -257128,7 +257261,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1104",
+      "source_location": "L1105",
       "target": "docs_channel_connections_logs_and_alerts",
       "weight": 1.0
     },
@@ -257139,7 +257272,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1135",
+      "source_location": "L1136",
       "target": "docs_channel_connections_overlay_key",
       "weight": 1.0
     },
@@ -257150,7 +257283,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1150",
+      "source_location": "L1151",
       "target": "docs_channel_connections_setup",
       "weight": 1.0
     },
@@ -257161,7 +257294,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1178",
+      "source_location": "L1179",
       "target": "docs_channel_connections_runbook",
       "weight": 1.0
     },
@@ -257183,7 +257316,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1203",
+      "source_location": "L1204",
       "target": "docs_channel_connections_turn_the_feature_off",
       "weight": 1.0
     },
@@ -257194,7 +257327,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1241",
+      "source_location": "L1242",
       "target": "docs_channel_connections_rollback",
       "weight": 1.0
     },
@@ -257205,7 +257338,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1252",
+      "source_location": "L1253",
       "target": "docs_channel_connections_threat_model",
       "weight": 1.0
     },
@@ -257216,7 +257349,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1317",
+      "source_location": "L1318",
       "target": "docs_channel_connections_stored_youtube_data",
       "weight": 1.0
     },
@@ -257227,7 +257360,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1356",
+      "source_location": "L1357",
       "target": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
       "weight": 1.0
     },
@@ -257238,7 +257371,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1473",
+      "source_location": "L1474",
       "target": "docs_channel_connections_facts_not_checked",
       "weight": 1.0
     },
@@ -257260,7 +257393,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L553",
+      "source_location": "L554",
       "target": "docs_channel_connections_channel_health_in_streamer_tools",
       "weight": 1.0
     },
@@ -257271,7 +257404,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L617",
+      "source_location": "L618",
       "target": "docs_channel_connections_capability_matrix",
       "weight": 1.0
     },
@@ -257282,7 +257415,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L639",
+      "source_location": "L640",
       "target": "docs_channel_connections_permissions",
       "weight": 1.0
     },
@@ -257293,7 +257426,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L678",
+      "source_location": "L679",
       "target": "docs_channel_connections_scheduled_streams",
       "weight": 1.0
     },
@@ -257304,7 +257437,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L745",
+      "source_location": "L746",
       "target": "docs_channel_connections_limits_and_retention",
       "weight": 1.0
     },
@@ -257315,7 +257448,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L906",
+      "source_location": "L907",
       "target": "docs_channel_connections_token_encryption_and_rotation",
       "weight": 1.0
     },
@@ -257326,7 +257459,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L960",
+      "source_location": "L961",
       "target": "docs_channel_connections_disconnect",
       "weight": 1.0
     },
@@ -257337,7 +257470,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1004",
+      "source_location": "L1005",
       "target": "docs_channel_connections_subscription_repair",
       "weight": 1.0
     },
@@ -257348,7 +257481,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1056",
+      "source_location": "L1057",
       "target": "docs_channel_connections_refused_webhooks",
       "weight": 1.0
     },
@@ -257359,7 +257492,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1080",
+      "source_location": "L1081",
       "target": "docs_channel_connections_account_deletion",
       "weight": 1.0
     },
@@ -257370,7 +257503,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1088",
+      "source_location": "L1089",
       "target": "docs_channel_connections_callback_failures",
       "weight": 1.0
     },
@@ -257381,7 +257514,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L986",
+      "source_location": "L987",
       "target": "docs_channel_connections_provider_subscriptions",
       "weight": 1.0
     },
@@ -257436,7 +257569,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_event_contract",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L375",
+      "source_location": "L376",
       "target": "docs_channel_connections_votes_for_the_goal",
       "weight": 1.0
     },
@@ -257447,7 +257580,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_event_contract",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L399",
+      "source_location": "L400",
       "target": "docs_channel_connections_support_events_of_each_provider",
       "weight": 1.0
     },
@@ -257458,7 +257591,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_event_contract",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L513",
+      "source_location": "L514",
       "target": "docs_channel_connections_native_polls_predictions_and_rewards",
       "weight": 1.0
     },
@@ -257469,7 +257602,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_event_contract",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L528",
+      "source_location": "L529",
       "target": "docs_channel_connections_rules_for_consumers",
       "weight": 1.0
     },
@@ -257480,7 +257613,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_event_contract",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L539",
+      "source_location": "L540",
       "target": "docs_channel_connections_overlay_chat",
       "weight": 1.0
     },
@@ -257491,7 +257624,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_event_contract",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L545",
+      "source_location": "L546",
       "target": "docs_channel_connections_interactive_characters",
       "weight": 1.0
     },
@@ -257502,7 +257635,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_limits_and_retention",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L852",
+      "source_location": "L853",
       "target": "docs_channel_connections_youtube_quota",
       "weight": 1.0
     },
@@ -257513,7 +257646,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1370",
+      "source_location": "L1371",
       "target": "docs_channel_connections_instagram",
       "weight": 1.0
     },
@@ -257524,7 +257657,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1408",
+      "source_location": "L1409",
       "target": "docs_channel_connections_facebook_live",
       "weight": 1.0
     },
@@ -257535,7 +257668,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1444",
+      "source_location": "L1445",
       "target": "docs_channel_connections_tiktok",
       "weight": 1.0
     },
@@ -257546,7 +257679,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1465",
+      "source_location": "L1466",
       "target": "docs_channel_connections_decisions_for_the_owner",
       "weight": 1.0
     },
@@ -257557,7 +257690,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1254",
+      "source_location": "L1255",
       "target": "docs_channel_connections_assets",
       "weight": 1.0
     },
@@ -257568,7 +257701,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1262",
+      "source_location": "L1263",
       "target": "docs_channel_connections_actors",
       "weight": 1.0
     },
@@ -257579,7 +257712,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1270",
+      "source_location": "L1271",
       "target": "docs_channel_connections_threats_and_mitigations",
       "weight": 1.0
     },
@@ -257590,7 +257723,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1299",
+      "source_location": "L1300",
       "target": "docs_channel_connections_residual_risks",
       "weight": 1.0
     },
@@ -257601,7 +257734,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_token_encryption_and_rotation",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L949",
+      "source_location": "L950",
       "target": "docs_channel_connections_refresh",
       "weight": 1.0
     },
@@ -272077,7 +272210,7 @@
       "relation": "contains",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L100",
+      "source_location": "L102",
       "target": "tests_topic_credit_test_featurefromlive",
       "weight": 1.0
     },
@@ -272088,7 +272221,7 @@
       "relation": "contains",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L109",
+      "source_location": "L111",
       "target": "tests_topic_credit_test_dockkey",
       "weight": 1.0
     },
@@ -272099,7 +272232,7 @@
       "relation": "contains",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L116",
+      "source_location": "L118",
       "target": "tests_topic_credit_test_featurefromdock",
       "weight": 1.0
     },
@@ -272110,7 +272243,7 @@
       "relation": "contains",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L125",
+      "source_location": "L127",
       "target": "tests_topic_credit_test_supportevents",
       "weight": 1.0
     },
@@ -272121,7 +272254,7 @@
       "relation": "contains",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L129",
+      "source_location": "L131",
       "target": "tests_topic_credit_test_alertstates",
       "weight": 1.0
     },
@@ -272132,7 +272265,7 @@
       "relation": "contains",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L136",
+      "source_location": "L138",
       "target": "tests_topic_credit_test_current",
       "weight": 1.0
     },
@@ -272143,7 +272276,7 @@
       "relation": "contains",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L140",
+      "source_location": "L142",
       "target": "tests_topic_credit_test_supportrows",
       "weight": 1.0
     },
@@ -272154,7 +272287,7 @@
       "relation": "contains",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L149",
+      "source_location": "L151",
       "target": "tests_topic_credit_test_everythingstored",
       "weight": 1.0
     },
@@ -272165,7 +272298,7 @@
       "relation": "contains",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L23",
+      "source_location": "L25",
       "target": "tests_topic_credit_test_background",
       "weight": 1.0
     },
@@ -272176,7 +272309,7 @@
       "relation": "contains",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L48",
+      "source_location": "L50",
       "target": "tests_topic_credit_test_call",
       "weight": 1.0
     },
@@ -272187,7 +272320,7 @@
       "relation": "contains",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L50",
+      "source_location": "L52",
       "target": "tests_topic_credit_test_settle",
       "weight": 1.0
     },
@@ -272198,7 +272331,7 @@
       "relation": "contains",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L54",
+      "source_location": "L56",
       "target": "tests_topic_credit_test_cell",
       "weight": 1.0
     },
@@ -272209,7 +272342,7 @@
       "relation": "contains",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L59",
+      "source_location": "L61",
       "target": "tests_topic_credit_test_layers",
       "weight": 1.0
     },
@@ -272220,7 +272353,7 @@
       "relation": "contains",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L71",
+      "source_location": "L73",
       "target": "tests_topic_credit_test_savelayers",
       "weight": 1.0
     },
@@ -272231,7 +272364,7 @@
       "relation": "contains",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L81",
+      "source_location": "L83",
       "target": "tests_topic_credit_test_post",
       "weight": 1.0
     },
@@ -272242,7 +272375,7 @@
       "relation": "contains",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L88",
+      "source_location": "L90",
       "target": "tests_topic_credit_test_listen",
       "weight": 1.0
     },
@@ -277994,7 +278127,7 @@
       "relation": "references",
       "source": "docs_channel_connections",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L417",
+      "source_location": "L418",
       "target": "docs_streamer_tools",
       "weight": 1.0
     },
@@ -278016,7 +278149,7 @@
       "relation": "references",
       "source": "docs_channel_connections",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L876",
+      "source_location": "L877",
       "target": "docs_live_room_capacity",
       "weight": 1.0
     },
@@ -278696,7 +278829,7 @@
       "relation": "indirect_call",
       "source": "app_components_tools_live_activity_liveactivity",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L468",
+      "source_location": "L471",
       "target": "app_lib_live_activity_activityafter",
       "weight": 1.0
     },
@@ -278840,7 +278973,7 @@
       "relation": "indirect_call",
       "source": "app_lib_live_activity_keptafter",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L113",
+      "source_location": "L114",
       "target": "app_lib_live_activity_keptof",
       "weight": 1.0
     },
@@ -278960,7 +279093,7 @@
       "relation": "indirect_call",
       "source": "app_lib_session_csv_csvline",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L260",
+      "source_location": "L263",
       "target": "app_lib_session_csv_csvfield",
       "weight": 1.0
     },
@@ -278972,7 +279105,7 @@
       "relation": "indirect_call",
       "source": "app_lib_session_csv_platformrows",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L144",
+      "source_location": "L145",
       "target": "app_lib_stream_report_issupportmetric",
       "weight": 1.0
     },
@@ -280508,7 +280641,7 @@
       "relation": "indirect_call",
       "source": "tests_topic_credit_test",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L214",
+      "source_location": "L216",
       "target": "app_server_schedule_import_server_unlinked",
       "weight": 1.0
     },
@@ -282728,7 +282861,7 @@
       "relation": "calls",
       "source": "tests_topic_credit_test_supportevents",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L126",
+      "source_location": "L128",
       "target": "tests_helpers_room_fakesocket_oftype",
       "weight": 1.0
     },
@@ -283496,7 +283629,7 @@
       "relation": "references",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L965",
+      "source_location": "L966",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -283508,7 +283641,7 @@
       "relation": "references",
       "source": "docs_channel_connections_interactive_characters",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L548",
+      "source_location": "L549",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -283520,7 +283653,7 @@
       "relation": "references",
       "source": "docs_channel_connections_refresh",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L951",
+      "source_location": "L952",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -283532,7 +283665,7 @@
       "relation": "references",
       "source": "docs_channel_connections_rollback",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1243",
+      "source_location": "L1244",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -283544,7 +283677,7 @@
       "relation": "references",
       "source": "docs_channel_connections_scheduled_streams",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L689",
+      "source_location": "L690",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -283556,7 +283689,7 @@
       "relation": "references",
       "source": "docs_channel_connections_setup",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1169",
+      "source_location": "L1170",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -283580,7 +283713,7 @@
       "relation": "references",
       "source": "docs_channel_connections_support_events_of_each_provider",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L423",
+      "source_location": "L424",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -283592,7 +283725,7 @@
       "relation": "references",
       "source": "docs_channel_connections_threats_and_mitigations",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1282",
+      "source_location": "L1283",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -283604,7 +283737,7 @@
       "relation": "references",
       "source": "docs_channel_connections_topic_credit",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L348",
+      "source_location": "L349",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -283616,7 +283749,7 @@
       "relation": "references",
       "source": "docs_channel_connections_votes_for_the_goal",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L378",
+      "source_location": "L379",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -283916,7 +284049,7 @@
       "relation": "references",
       "source": "docs_channel_connections_channel_health_in_streamer_tools",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L600",
+      "source_location": "L601",
       "target": "app_lib_channel_health_channelcardstate_48192f75b106",
       "weight": 1.0
     },
@@ -283928,7 +284061,7 @@
       "relation": "references",
       "source": "docs_channel_connections_channel_health_in_streamer_tools",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L601",
+      "source_location": "L602",
       "target": "app_lib_channel_health_channelhealth_40cffcc64880",
       "weight": 1.0
     },
@@ -283952,7 +284085,7 @@
       "relation": "references",
       "source": "docs_channel_connections_topic_credit",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L339",
+      "source_location": "L340",
       "target": "app_lib_topic_credit_featuredtopic",
       "weight": 1.0
     },
@@ -284048,7 +284181,7 @@
       "relation": "references",
       "source": "docs_channel_connections_scheduled_streams",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L743",
+      "source_location": "L744",
       "target": "app_server_schedule_import_server_teststreams",
       "weight": 1.0
     },
@@ -284074,6 +284207,18 @@
       "source_file": "docs/streamer-tools.md",
       "source_location": "L17",
       "target": "app_lib_shell_toolspath",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "context": "updateLayouts",
+      "relation": "references",
+      "source": "docs_channel_connections_topic_credit",
+      "source_file": "docs/channel-connections.md",
+      "source_location": "L340",
+      "target": "app_server_overlay_layouts_server_updatelayouts",
       "weight": 1.0
     }
   ],
@@ -286700,7 +286845,7 @@
       "label": "ActivityViewProps",
       "norm_label": "activityviewprops",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L312"
+      "source_location": "L315"
     },
     {
       "_callable": true,
@@ -288080,7 +288225,7 @@
       "label": "ActivityState",
       "norm_label": "activitystate",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L78"
+      "source_location": "L79"
     },
     {
       "_callable": true,
@@ -288092,7 +288237,7 @@
       "label": "KeptEvent",
       "norm_label": "keptevent",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L95"
+      "source_location": "L96"
     },
     {
       "_callable": true,
@@ -288104,7 +288249,7 @@
       "label": "ShownAlerts",
       "norm_label": "shownalerts",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L165"
+      "source_location": "L166"
     },
     {
       "_callable": true,
@@ -291248,7 +291393,7 @@
       "label": "LayoutUpdate",
       "norm_label": "layoutupdate",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L65"
+      "source_location": "L69"
     },
     {
       "_callable": true,
@@ -306003,7 +306148,7 @@
       "label": "ActivityNote()",
       "norm_label": "activitynote()",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L293"
+      "source_location": "L296"
     },
     {
       "_callable": true,
@@ -306014,7 +306159,7 @@
       "label": "ActivityView()",
       "norm_label": "activityview()",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L326"
+      "source_location": "L329"
     },
     {
       "_callable": true,
@@ -306036,7 +306181,7 @@
       "label": "DockNow()",
       "norm_label": "docknow()",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L410"
+      "source_location": "L413"
     },
     {
       "_callable": true,
@@ -306047,7 +306192,7 @@
       "label": "EventRow()",
       "norm_label": "eventrow()",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L244"
+      "source_location": "L247"
     },
     {
       "_callable": true,
@@ -306069,7 +306214,7 @@
       "label": "LiveActivity()",
       "norm_label": "liveactivity()",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L453"
+      "source_location": "L456"
     },
     {
       "_callable": true,
@@ -306080,7 +306225,7 @@
       "label": "MuteButton()",
       "norm_label": "mutebutton()",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L204"
+      "source_location": "L207"
     },
     {
       "_callable": true,
@@ -306101,6 +306246,17 @@
       "id": "app_components_tools_live_activity_onstreamnow",
       "label": "OnStreamNow()",
       "norm_label": "onstreamnow()",
+      "source_file": "app/components/tools/live-activity.tsx",
+      "source_location": "L178"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_tools_live_activity_originlabel",
+      "label": "originLabel()",
+      "norm_label": "originlabel()",
       "source_file": "app/components/tools/live-activity.tsx",
       "source_location": "L172"
     },
@@ -306135,7 +306291,7 @@
       "label": "TestButton()",
       "norm_label": "testbutton()",
       "source_file": "app/components/tools/live-activity.tsx",
-      "source_location": "L220"
+      "source_location": "L223"
     },
     {
       "_callable": true,
@@ -309372,7 +309528,7 @@
       "label": "activityAfter()",
       "norm_label": "activityafter()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L141"
+      "source_location": "L142"
     },
     {
       "_callable": true,
@@ -309383,7 +309539,7 @@
       "label": "isRefusal()",
       "norm_label": "isrefusal()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L212"
+      "source_location": "L213"
     },
     {
       "_callable": true,
@@ -309394,7 +309550,7 @@
       "label": "keptAfter()",
       "norm_label": "keptafter()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L112"
+      "source_location": "L113"
     },
     {
       "_callable": true,
@@ -309405,7 +309561,7 @@
       "label": "keptOf()",
       "norm_label": "keptof()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L101"
+      "source_location": "L102"
     },
     {
       "_callable": true,
@@ -309416,7 +309572,7 @@
       "label": "nowLine()",
       "norm_label": "nowline()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L195"
+      "source_location": "L196"
     },
     {
       "_callable": true,
@@ -309427,7 +309583,7 @@
       "label": "refusalText()",
       "norm_label": "refusaltext()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L220"
+      "source_location": "L221"
     },
     {
       "_callable": true,
@@ -309438,7 +309594,7 @@
       "label": "replayable()",
       "norm_label": "replayable()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L154"
+      "source_location": "L155"
     },
     {
       "_callable": true,
@@ -309449,7 +309605,7 @@
       "label": "rowsAfter()",
       "norm_label": "rowsafter()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L127"
+      "source_location": "L128"
     },
     {
       "_callable": true,
@@ -309460,7 +309616,7 @@
       "label": "secondsLeft()",
       "norm_label": "secondsleft()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L190"
+      "source_location": "L191"
     },
     {
       "_callable": true,
@@ -309471,7 +309627,7 @@
       "label": "shownAlerts()",
       "norm_label": "shownalerts()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L176"
+      "source_location": "L177"
     },
     {
       "_callable": true,
@@ -312855,7 +313011,7 @@
       "label": "bucketRows()",
       "norm_label": "bucketrows()",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L180"
+      "source_location": "L181"
     },
     {
       "_callable": true,
@@ -312888,7 +313044,7 @@
       "label": "csvLine()",
       "norm_label": "csvline()",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L259"
+      "source_location": "L262"
     },
     {
       "_callable": true,
@@ -312899,7 +313055,7 @@
       "label": "estimateNote()",
       "norm_label": "estimatenote()",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L120"
+      "source_location": "L121"
     },
     {
       "_callable": true,
@@ -312932,7 +313088,7 @@
       "label": "pageRows()",
       "norm_label": "pagerows()",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L171"
+      "source_location": "L172"
     },
     {
       "_callable": true,
@@ -312943,7 +313099,7 @@
       "label": "platformRows()",
       "norm_label": "platformrows()",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L133"
+      "source_location": "L134"
     },
     {
       "_callable": true,
@@ -312954,7 +313110,7 @@
       "label": "reportRows()",
       "norm_label": "reportrows()",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L248"
+      "source_location": "L251"
     },
     {
       "_callable": true,
@@ -312965,7 +313121,7 @@
       "label": "sessionCsv()",
       "norm_label": "sessioncsv()",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L264"
+      "source_location": "L267"
     },
     {
       "_callable": true,
@@ -312987,7 +313143,7 @@
       "label": "timelineRows()",
       "norm_label": "timelinerows()",
       "source_file": "app/lib/session-csv.ts",
-      "source_location": "L201"
+      "source_location": "L202"
     },
     {
       "_callable": true,
@@ -313196,7 +313352,7 @@
       "label": "activity()",
       "norm_label": "activity()",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L580"
+      "source_location": "L582"
     },
     {
       "_callable": true,
@@ -313229,7 +313385,7 @@
       "label": "apply()",
       "norm_label": "apply()",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L665"
+      "source_location": "L667"
     },
     {
       "_callable": true,
@@ -313273,7 +313429,7 @@
       "label": "checked()",
       "norm_label": "checked()",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L648"
+      "source_location": "L650"
     },
     {
       "_callable": true,
@@ -313383,7 +313539,7 @@
       "label": "offline()",
       "norm_label": "offline()",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L572"
+      "source_location": "L574"
     },
     {
       "_callable": true,
@@ -313438,7 +313594,7 @@
       "label": "scheduleLive()",
       "norm_label": "schedulelive()",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L633"
+      "source_location": "L635"
     },
     {
       "_callable": true,
@@ -313482,7 +313638,7 @@
       "label": "status()",
       "norm_label": "status()",
       "source_file": "app/lib/stream-session.ts",
-      "source_location": "L607"
+      "source_location": "L609"
     },
     {
       "_callable": true,
@@ -321662,7 +321818,7 @@
       "label": "getLayouts()",
       "norm_label": "getlayouts()",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L38"
+      "source_location": "L39"
     },
     {
       "_callable": true,
@@ -321673,7 +321829,7 @@
       "label": "nextLayoutState()",
       "norm_label": "nextlayoutstate()",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L46"
+      "source_location": "L47"
     },
     {
       "_callable": true,
@@ -321684,7 +321840,7 @@
       "label": "problemError()",
       "norm_label": "problemerror()",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L28"
+      "source_location": "L29"
     },
     {
       "_callable": true,
@@ -321695,7 +321851,7 @@
       "label": "updateLayouts()",
       "norm_label": "updatelayouts()",
       "source_file": "app/server/overlay-layouts.server.ts",
-      "source_location": "L75"
+      "source_location": "L80"
     },
     {
       "_callable": true,
@@ -324976,7 +325132,7 @@
       "label": "replayTopicCredit()",
       "norm_label": "replaytopiccredit()",
       "source_file": "app/server/topic-credit.server.ts",
-      "source_location": "L89"
+      "source_location": "L93"
     },
     {
       "_callable": true,
@@ -335440,7 +335596,7 @@
       "label": "alertStates()",
       "norm_label": "alertstates()",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L129"
+      "source_location": "L131"
     },
     {
       "_callable": true,
@@ -335451,7 +335607,7 @@
       "label": "cell()",
       "norm_label": "cell()",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L54"
+      "source_location": "L56"
     },
     {
       "_callable": true,
@@ -335462,7 +335618,7 @@
       "label": "current()",
       "norm_label": "current()",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L136"
+      "source_location": "L138"
     },
     {
       "_callable": true,
@@ -335473,7 +335629,7 @@
       "label": "dockKey()",
       "norm_label": "dockkey()",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L109"
+      "source_location": "L111"
     },
     {
       "_callable": true,
@@ -335484,7 +335640,7 @@
       "label": "everythingStored()",
       "norm_label": "everythingstored()",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L149"
+      "source_location": "L151"
     },
     {
       "_callable": true,
@@ -335495,7 +335651,7 @@
       "label": "featureFromDock()",
       "norm_label": "featurefromdock()",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L116"
+      "source_location": "L118"
     },
     {
       "_callable": true,
@@ -335506,7 +335662,7 @@
       "label": "featureFromLive()",
       "norm_label": "featurefromlive()",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L100"
+      "source_location": "L102"
     },
     {
       "_callable": true,
@@ -335517,7 +335673,7 @@
       "label": "layers()",
       "norm_label": "layers()",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L59"
+      "source_location": "L61"
     },
     {
       "_callable": true,
@@ -335528,7 +335684,7 @@
       "label": "listen()",
       "norm_label": "listen()",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L88"
+      "source_location": "L90"
     },
     {
       "_callable": true,
@@ -335539,7 +335695,7 @@
       "label": "post()",
       "norm_label": "post()",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L81"
+      "source_location": "L83"
     },
     {
       "_callable": true,
@@ -335550,7 +335706,7 @@
       "label": "saveLayers()",
       "norm_label": "savelayers()",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L71"
+      "source_location": "L73"
     },
     {
       "_callable": true,
@@ -335561,7 +335717,7 @@
       "label": "settle()",
       "norm_label": "settle()",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L50"
+      "source_location": "L52"
     },
     {
       "_callable": true,
@@ -335572,7 +335728,7 @@
       "label": "supportEvents()",
       "norm_label": "supportevents()",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L125"
+      "source_location": "L127"
     },
     {
       "_callable": true,
@@ -335583,7 +335739,7 @@
       "label": "supportRows()",
       "norm_label": "supportrows()",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L140"
+      "source_location": "L142"
     },
     {
       "_callable": true,
@@ -341376,7 +341532,7 @@
       "label": "INITIAL_ACTIVITY",
       "norm_label": "initial_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L92"
+      "source_location": "L93"
     },
     {
       "_origin": "ast",
@@ -341386,7 +341542,7 @@
       "label": "REFUSAL_TEXT",
       "norm_label": "refusal_text",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L201"
+      "source_location": "L202"
     },
     {
       "_origin": "ast",
@@ -355736,7 +355892,7 @@
       "label": "background",
       "norm_label": "background",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L23"
+      "source_location": "L25"
     },
     {
       "_origin": "ast",
@@ -355746,7 +355902,7 @@
       "label": "{ call }",
       "norm_label": "{ call }",
       "source_file": "tests/topic-credit.test.ts",
-      "source_location": "L48"
+      "source_location": "L50"
     },
     {
       "_origin": "ast",
@@ -356483,7 +356639,7 @@
       "node_kind": "heading",
       "norm_label": "account deletion",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1080"
+      "source_location": "L1081"
     },
     {
       "_origin": "ast",
@@ -356494,7 +356650,7 @@
       "node_kind": "heading",
       "norm_label": "actors",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1262"
+      "source_location": "L1263"
     },
     {
       "_origin": "ast",
@@ -356527,7 +356683,7 @@
       "node_kind": "heading",
       "norm_label": "assets",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1254"
+      "source_location": "L1255"
     },
     {
       "_origin": "ast",
@@ -356538,7 +356694,7 @@
       "node_kind": "heading",
       "norm_label": "callback failures",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1088"
+      "source_location": "L1089"
     },
     {
       "_origin": "ast",
@@ -356549,7 +356705,7 @@
       "node_kind": "heading",
       "norm_label": "capability matrix",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L617"
+      "source_location": "L618"
     },
     {
       "_origin": "ast",
@@ -356571,7 +356727,7 @@
       "node_kind": "heading",
       "norm_label": "channel health in streamer tools",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L553"
+      "source_location": "L554"
     },
     {
       "_origin": "ast",
@@ -356593,7 +356749,7 @@
       "node_kind": "heading",
       "norm_label": "decisions for the owner",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1465"
+      "source_location": "L1466"
     },
     {
       "_origin": "ast",
@@ -356604,7 +356760,7 @@
       "node_kind": "heading",
       "norm_label": "disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L960"
+      "source_location": "L961"
     },
     {
       "_origin": "ast",
@@ -356626,7 +356782,7 @@
       "node_kind": "heading",
       "norm_label": "facebook live",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1408"
+      "source_location": "L1409"
     },
     {
       "_origin": "ast",
@@ -356637,7 +356793,7 @@
       "node_kind": "heading",
       "norm_label": "facts not checked",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1473"
+      "source_location": "L1474"
     },
     {
       "_origin": "ast",
@@ -356648,7 +356804,7 @@
       "node_kind": "heading",
       "norm_label": "instagram",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1370"
+      "source_location": "L1371"
     },
     {
       "_origin": "ast",
@@ -356659,7 +356815,7 @@
       "node_kind": "heading",
       "norm_label": "interactive characters",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L545"
+      "source_location": "L546"
     },
     {
       "_origin": "ast",
@@ -356670,7 +356826,7 @@
       "node_kind": "heading",
       "norm_label": "limits and retention",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L745"
+      "source_location": "L746"
     },
     {
       "_origin": "ast",
@@ -356681,7 +356837,7 @@
       "node_kind": "heading",
       "norm_label": "logs and alerts",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1104"
+      "source_location": "L1105"
     },
     {
       "_origin": "ast",
@@ -356692,7 +356848,7 @@
       "node_kind": "heading",
       "norm_label": "native polls, predictions, and rewards",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L513"
+      "source_location": "L514"
     },
     {
       "_origin": "ast",
@@ -356703,7 +356859,7 @@
       "node_kind": "heading",
       "norm_label": "overlay chat",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L539"
+      "source_location": "L540"
     },
     {
       "_origin": "ast",
@@ -356714,7 +356870,7 @@
       "node_kind": "heading",
       "norm_label": "overlay key",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1135"
+      "source_location": "L1136"
     },
     {
       "_origin": "ast",
@@ -356725,7 +356881,7 @@
       "node_kind": "heading",
       "norm_label": "permissions",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L639"
+      "source_location": "L640"
     },
     {
       "_origin": "ast",
@@ -356736,7 +356892,7 @@
       "node_kind": "heading",
       "norm_label": "provider subscriptions",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L986"
+      "source_location": "L987"
     },
     {
       "_origin": "ast",
@@ -356747,7 +356903,7 @@
       "node_kind": "heading",
       "norm_label": "refresh",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L949"
+      "source_location": "L950"
     },
     {
       "_origin": "ast",
@@ -356758,7 +356914,7 @@
       "node_kind": "heading",
       "norm_label": "refused webhooks",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1056"
+      "source_location": "L1057"
     },
     {
       "_origin": "ast",
@@ -356769,7 +356925,7 @@
       "node_kind": "heading",
       "norm_label": "research for instagram, facebook live, and tiktok",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1356"
+      "source_location": "L1357"
     },
     {
       "_origin": "ast",
@@ -356780,7 +356936,7 @@
       "node_kind": "heading",
       "norm_label": "residual risks",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1299"
+      "source_location": "L1300"
     },
     {
       "_origin": "ast",
@@ -356791,7 +356947,7 @@
       "node_kind": "heading",
       "norm_label": "rollback",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1241"
+      "source_location": "L1242"
     },
     {
       "_origin": "ast",
@@ -356802,7 +356958,7 @@
       "node_kind": "heading",
       "norm_label": "rules for consumers",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L528"
+      "source_location": "L529"
     },
     {
       "_origin": "ast",
@@ -356813,7 +356969,7 @@
       "node_kind": "heading",
       "norm_label": "runbook",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1178"
+      "source_location": "L1179"
     },
     {
       "_origin": "ast",
@@ -356824,7 +356980,7 @@
       "node_kind": "heading",
       "norm_label": "scheduled streams",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L678"
+      "source_location": "L679"
     },
     {
       "_origin": "ast",
@@ -356835,7 +356991,7 @@
       "node_kind": "heading",
       "norm_label": "setup",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1150"
+      "source_location": "L1151"
     },
     {
       "_origin": "ast",
@@ -356846,7 +357002,7 @@
       "node_kind": "heading",
       "norm_label": "stored youtube data",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1317"
+      "source_location": "L1318"
     },
     {
       "_origin": "ast",
@@ -356857,7 +357013,7 @@
       "node_kind": "heading",
       "norm_label": "subscription repair",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1004"
+      "source_location": "L1005"
     },
     {
       "_origin": "ast",
@@ -356879,7 +357035,7 @@
       "node_kind": "heading",
       "norm_label": "support events of each provider",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L399"
+      "source_location": "L400"
     },
     {
       "_origin": "ast",
@@ -356890,7 +357046,7 @@
       "node_kind": "heading",
       "norm_label": "threat model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1252"
+      "source_location": "L1253"
     },
     {
       "_origin": "ast",
@@ -356901,7 +357057,7 @@
       "node_kind": "heading",
       "norm_label": "threats and mitigations",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1270"
+      "source_location": "L1271"
     },
     {
       "_origin": "ast",
@@ -356912,7 +357068,7 @@
       "node_kind": "heading",
       "norm_label": "tiktok",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1444"
+      "source_location": "L1445"
     },
     {
       "_origin": "ast",
@@ -356923,7 +357079,7 @@
       "node_kind": "heading",
       "norm_label": "token encryption and rotation",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L906"
+      "source_location": "L907"
     },
     {
       "_origin": "ast",
@@ -356945,7 +357101,7 @@
       "node_kind": "heading",
       "norm_label": "turn the feature off",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1203"
+      "source_location": "L1204"
     },
     {
       "_origin": "ast",
@@ -356956,7 +357112,7 @@
       "node_kind": "heading",
       "norm_label": "votes for the goal",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L375"
+      "source_location": "L376"
     },
     {
       "_origin": "ast",
@@ -356967,7 +357123,7 @@
       "node_kind": "heading",
       "norm_label": "youtube quota",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L852"
+      "source_location": "L853"
     },
     {
       "_origin": "ast",

@@ -330,13 +330,14 @@ The user ID of a supporter is only in the line, for the reaction of the characte
 
 ### Topic credit
 
-The owner features a topic in **Live**, in the dock, or in the editor. The author of the topic then gets a credit.
+The owner features a topic in **Live**, in the dock, or in the editor. A layout that puts the topic layer on stream also features its topic.
+The author of the topic then gets a credit.
 The credit is a support event of the kind `topic`. See [Support events](#support-events).
 
 The API makes a credit when these two conditions are true:
 
 - The topic layer is on stream in an output with a topic. Before the change, the layer was not on stream with that topic.
-  `featuredTopic` in `app/lib/topic-credit.ts` makes this check. `updateOverlay` gives the result in `featured`.
+  `featuredTopic` in `app/lib/topic-credit.ts` makes this check. `updateOverlay` and `updateLayouts` give the result in `featured`.
 - The alerts layer is on stream in an output.
 
 Thus a second **Feature on stream** of the topic on stream makes no credit. A change of a different layer also makes no credit.

@@ -76,11 +76,11 @@ export function isoTime(ms: number | null): string {
 export function formatMicros(micros: number): string {
   if (!Number.isSafeInteger(micros) || micros < 0) throw new RangeError(`Money amount is not valid: ${micros}`);
   const whole: number = Math.floor(micros / 1_000_000);
-  const fraction: string = String(micros % 1_000_000)
-    .padStart(6, "0")
-    .replace(/0+$/, "")
-    .padEnd(2, "0");
-  return `${whole}.${fraction}`;
+  const digits: string = String(micros % 1_000_000).padStart(6, "0");
+  // The trailing zeros go, but the cents stay.
+  let end: number = digits.length;
+  while (end > 2 && digits[end - 1] === "0") end -= 1;
+  return `${whole}.${digits.slice(0, end)}`;
 }
 
 function cellRow(
@@ -100,7 +100,8 @@ function cellRow(
 function sessionRows(summary: SessionSummary): CsvRow[] {
   const end: number | null = summary.endedAt;
   const minutes: string = end === null ? "" : String(Math.floor((end - summary.startedAt) / 60_000));
-  const how: string = `Started by ${summary.startedBy}. ${end === null ? "Live." : `Ended by ${summary.endedBy}.`}`;
+  const ended: string = end === null ? "Live." : `Ended by ${summary.endedBy}.`;
+  const how: string = `Started by ${summary.startedBy}. ${ended}`;
   const rows: CsvRow[] = [
     {
       section: "session",
@@ -201,8 +202,10 @@ function bucketRows(
 function timelineRows(timeline: SessionTimeline): CsvRow[] {
   const rows: CsvRow[] = [];
   for (const platform of CHANNEL_PLATFORMS) {
-    rows.push(...bucketRows(platform, "chat_messages", "messages", timeline.chat[platform] ?? [], timeline));
-    rows.push(...bucketRows(platform, "support_events", "events", timeline.support[platform] ?? [], timeline));
+    rows.push(
+      ...bucketRows(platform, "chat_messages", "messages", timeline.chat[platform] ?? [], timeline),
+      ...bucketRows(platform, "support_events", "events", timeline.support[platform] ?? [], timeline),
+    );
   }
   rows.push(...bucketRows("page", "poll_votes", "votes", timeline.votes, timeline));
   for (const interval of timeline.intervals)
