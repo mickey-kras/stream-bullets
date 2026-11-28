@@ -353,11 +353,15 @@ async function resetTestRooms(env: AppEnv, ids: string[]): Promise<void> {
   }
 }
 
-/** Sends one batch of sample chat to the activity feed of `test_host`. Overlay sources of the page show it. */
-async function sendTestChat(env: AppEnv): Promise<void> {
+/**
+ * Sends one batch of sample chat, or with `support` one sample support event, to the activity feed of `test_host`.
+ * Overlay sources of the page show the chat. Live and the dock show the support event, and it can play an alert.
+ */
+async function sendTestChat(env: AppEnv, support: boolean): Promise<void> {
   if (!activityAvailable(env)) throw new HttpError(503, "The activity feed is off in this deployment.");
-  const response = await callIngest(env, fixtureId(1), "test-chat");
-  if (!response.ok) throw new HttpError(503, "The sample chat was not sent.");
+  const response = await callIngest(env, fixtureId(1), "test-chat", { support });
+  if (!response.ok)
+    throw new HttpError(503, support ? "The sample support event was not sent." : "The sample chat was not sent.");
 }
 
 async function deleteTestImages(env: AppEnv, users: string[]): Promise<void> {
@@ -530,7 +534,7 @@ export async function testEnvironmentResponse(request: Request, env: AppEnv): Pr
     const commit: string = /^[a-f0-9]{40}$/u.test(env.DEPLOYED_COMMIT ?? "") ? env.DEPLOYED_COMMIT! : "undeployed";
     const options: string = TEST_ACCOUNTS.map((account: TestAccount): string => `<option>${account}</option>`).join("");
     return new Response(
-      `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>StreamBullets test access</title><style>${GATE_STYLE}</style><main><h1>Test environment</h1><p>Commit: <code>${commit}</code></p><p>Use the shared test access secret from approved secret storage.</p><form method="post"><label>Access secret <input type="password" name="secret" required autocomplete="off"></label><label>Account <select name="account"><option>signedout</option>${options}</select></label><div><button name="action" value="login">Sign in</button><button name="action" value="seed">Seed missing fixtures</button><button name="action" value="reset">Reset synthetic data</button><button name="action" value="chat">Send sample chat to test_host</button></div></form></main></html>`,
+      `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>StreamBullets test access</title><style>${GATE_STYLE}</style><main><h1>Test environment</h1><p>Commit: <code>${commit}</code></p><p>Use the shared test access secret from approved secret storage.</p><form method="post"><label>Access secret <input type="password" name="secret" required autocomplete="off"></label><label>Account <select name="account"><option>signedout</option>${options}</select></label><div><button name="action" value="login">Sign in</button><button name="action" value="seed">Seed missing fixtures</button><button name="action" value="reset">Reset synthetic data</button><button name="action" value="chat">Send sample chat to test_host</button><button name="action" value="support">Send a sample support event to test_host</button></div></form></main></html>`,
       {
         headers: {
           "Content-Type": "text/html; charset=utf-8",
@@ -561,8 +565,8 @@ export async function testEnvironmentResponse(request: Request, env: AppEnv): Pr
       headers: { Location: "/__test", "Cache-Control": "no-store", "Set-Cookie": access },
     });
   }
-  if (action === "chat") {
-    await sendTestChat(env);
+  if (action === "chat" || action === "support") {
+    await sendTestChat(env, action === "support");
     return new Response(null, {
       status: 303,
       headers: { Location: "/__test", "Cache-Control": "no-store", "Set-Cookie": access },

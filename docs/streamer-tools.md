@@ -55,6 +55,7 @@ The **Live** section has the controls for a stream on one page. It has these par
 - **Topics from your viewers**
 - **Message banner**
 - **Chat**
+- **Activity**
 
 Each control saves with `POST /api/overlay`, or with the API of the poll for **Close voting**.
 The live room sends each change to OBS and to the other tabs of the owner at once. OBS does not load the page again.
@@ -80,7 +81,7 @@ It uses the activity feed of the owner, without an overlay key.
 The preview is read-only. A button with the `pencil` icon is beside the title of the part.
 It opens the **Overlay** section, where the owner changes the overlay.
 
-Live reads that feed through one connection, for the preview and for the chat part.
+Live reads that feed through one connection, for the preview, the chat part, and the activity.
 The page keeps the recent chat of that connection, without the messages that a moderator removed.
 When the chat layer goes on stream while Live is open, the preview shows that recent chat at once, as OBS does.
 
@@ -221,7 +222,62 @@ It then opens the full-screen chat without browser bars.
 A new message fades in. The Motion setting of the site and of the system stop this motion.
 
 The full-screen chat shows support events as the chat part does. See [Support events](#support-events).
-Alerts on stream are not in this section yet.
+The full-screen chat has no activity. To control the alerts, use the **Activity** part.
+
+### Activity
+
+The **Activity** part controls the alerts on stream and lists the recent support events.
+On a desktop, it is below **Chat** in the right column. On a phone, it is after **Chat**.
+It uses the activity feed of **Live** and opens no second connection.
+
+The title line has two buttons:
+
+| Control | Result |
+| --- | --- |
+| **Test alert** | Shows a sample alert on stream: a gift of 5 subscriptions. |
+| **Mute alerts** | A toggle. Pressed, no alert shows on stream. |
+
+**Mute alerts** stops the alert on stream at once and removes the alerts that wait.
+An event that comes during the mute does not show later. It still counts for the goal.
+While the mute is on, the button has the gold fill, and a line in the part tells that the mute is on.
+
+While an alert is on stream, a box with a gold border shows it, for example "On stream now: LanternFox gave 5 subscriptions".
+The box has these items:
+
+- **Skip** ends the alert on stream. The next alert that waits then starts.
+- One line gives the time until the alert ends, in seconds. When alerts wait, the line also gives their number, for example "4 s left · 2 alerts wait".
+- For a test or a replay, the line starts with "Test" or "Replay".
+
+The seconds go down with the clock of the page. The page ends the alert at its end time, also without a message of the server.
+
+The list has the recent support events, newest first. It keeps the newest 100.
+Each row has these parts:
+
+- The icon of the kind.
+- The title: the name of the supporter and what the event is, for example "LanternFox gave 5 subscriptions".
+- **Replay**, beside the title.
+- The details line below the title and the button: the platform and the age of the event.
+  For a tip, the line gives "Your tip page". For a topic credit, it gives StreamBullets.
+
+**Replay** shows the alert of an event again. It shows only while the server can replay the event.
+The server keeps the newest 50 support events for 10 minutes. Thus an older row has no **Replay**.
+If the server does not have the event any more, the button goes away from the row.
+A row for an event that the server sent again as a replay has no **Replay**.
+
+A test and a replay show an alert again. They do not count for a goal, a report, or revenue.
+The last line of the part tells this. It also has a link to the **Overlay** section, where the Alerts layer sets what each event does.
+
+**Test alert** and **Replay** need the Alerts layer on stream in an output.
+Without it, the part tells this and gives a link to the **Overlay** section. The two buttons are then off.
+**Mute alerts** and **Skip** always work, so the owner can always stop the alerts.
+
+Skip and Replay have one width and the same left and right edges: **Skip** is above the **Replay** buttons.
+The title of a row has the rest of the width. A label that is too long for its button continues on a second line.
+
+Each control sends `POST /api/overlay/alerts`. See [Alert controls](api.md#alert-controls).
+When the server refuses a control, a message tells the cause, and the screen reader reads it.
+For example, a test during the mute gets a message that tells the owner to stop the mute first.
+The page uses its own text for each refusal code, in the language of the page.
 
 ## Overlay
 
@@ -249,8 +305,17 @@ The **Overlay** section has two steps. See [the editor](overlay-composition.md#e
 
 The OBS dock is a small page with the live controls, for a custom browser dock in OBS.
 The streamer changes the stream there and does not go to a browser.
-The dock has these parts of **Live**, in one column: the poll, the topics, the message banner, and the chat with its pause.
+The dock has these parts of **Live**, in one column: the poll, the topics, the message banner, the chat with its pause, and the activity.
 The chat of the dock also shows the support events.
+
+The activity of the dock has the actions of the **Activity** part of **Live**:
+
+- **Mute alerts** is beside the title.
+- **Test alert** and **Skip alert** are in one row below the title. **Skip alert** works while an alert is on stream.
+- Each row of the list has **Replay**, with the same rules as in **Live**.
+
+The dock shows the alert on stream in one line. Its rows have no details line, and the part has no link to **Streamer tools**.
+Each control of the dock sends `POST /api/dock/<handle>/alerts` with the dock key.
 It is usable from a width of 300 pixels. It scrolls in its panel.
 
 An action in the dock shows in **Live** at once, and an action in **Live** shows in the dock at once.

@@ -28,6 +28,7 @@ import { useOverlayState } from "../overlay/use-overlay-state";
 import { PlatformIcon } from "../overlay/wasteland/glyphs";
 import { Icon } from "../ui/icon";
 import { IconLink } from "../ui/icon-button";
+import { LiveActivity } from "./live-activity";
 import { LiveChat } from "./live-chat";
 import { LiveMessage } from "./live-message";
 import { LivePart } from "./live-part";
@@ -191,7 +192,8 @@ export function LiveSection({
 }>): ReactNode {
   const { state, busy, send, run } = useOverlayState(initial, live);
   const view: OverlayScene = { ...scene, overlay: state };
-  // One socket for the chat and, while the characters layer is on stream, for the playground of the preview.
+  // One socket for the chat, the activity and, while the characters layer is on stream, for the playground of the
+  // preview.
   const characters: boolean = CHARACTERS_READY && onStream(state.layers, "characters");
   const feed: ActivityFeed = useActivityFeed(scene.handle, null, true, { characters, owner: true });
   return (
@@ -220,6 +222,7 @@ export function LiveSection({
             onFull={onChatFull}
             onAir={onAirTitle(view, state.layers)}
           />
+          <LiveActivity feed={feed} layers={state.layers} now={scene.now} serverOffset={serverOffset} />
         </div>
       </div>
     </>

@@ -9,15 +9,12 @@
 .tl-col {
   min-width: 0;
 }
+/* The chat and the activity are in the right column. The column scrolls with the page, so the activity below the
+   chat is always in reach. */
 @media (min-width: 62em) {
   .tl-live {
     grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
     align-items: start;
-  }
-  /* The chat stays in view while the owner scrolls the controls. */
-  .tl-col-chat {
-    position: sticky;
-    top: calc(var(--header-height, 72px) + 12px);
   }
 }
 /* A part is a container: the layout of its buttons follows its width, on a phone and in the dock too. The limits are
@@ -269,6 +266,133 @@
 }
 .tl-chat-bar {
   justify-content: space-between;
+}
+
+/* The activity (live-activity.tsx): the controls of the alerts, the alert on stream and the recent support events.
+   Skip and Replay are in one column of one width, at the end of the rows. The text of a row has the rest of the
+   width: a label of a button wraps, and the text is never cut. */
+[data-live-part="activity"] {
+  --tl-slot-width: 6.5rem;
+}
+[data-live-part="activity"] .tl-part-head {
+  flex-wrap: wrap;
+}
+.tl-activity-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tl-activity-button,
+.tl-event-slot .small-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  overflow-wrap: anywhere;
+}
+/* The mute is a toggle: pressed, it has the gold fill, and a line in the part says that the alerts are muted. */
+.tl-activity-button[aria-pressed="true"] {
+  background: linear-gradient(110deg, var(--gold-hi), var(--gold-lo));
+  border-color: var(--gold-lo);
+  color: var(--on-gold-2);
+}
+.tl-activity-muted {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 0;
+  padding: 8px 12px;
+  border: 1px dashed var(--gold);
+  border-radius: var(--radius-control);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--gold);
+}
+.tl-activity-muted .icon {
+  flex: none;
+  margin-top: 2px;
+}
+.tl-activity-now {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.tl-events {
+  list-style: none;
+  margin-bottom: 0;
+  /* The gold box of the alert on stream has a border of 2px and a padding of 12px: the rows have the same inset,
+     so the Skip button is directly above the Replay buttons, with the same edges. */
+  padding: 0 14px;
+}
+.tl-event {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) var(--tl-slot-width);
+  column-gap: 12px;
+  row-gap: 2px;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+.tl-event-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--gold);
+}
+.tl-event-title {
+  grid-column: 2;
+  min-width: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+/* A row of the list without Replay: the title has the width of the button too. */
+.tl-events .tl-event:not([data-replay]) .tl-event-title {
+  grid-column: 2 / -1;
+}
+.tl-event-slot {
+  grid-column: 3;
+}
+.tl-event-slot .small-button {
+  width: 100%;
+}
+/* A part of the width of a phone: the icon of Skip and Replay is above the label, so the longest label of the 11
+   languages has the full width of the button. */
+@container live-part (width < 30rem) {
+  .tl-event-slot .small-button {
+    flex-direction: column;
+    gap: 2px;
+    padding: 6px 4px;
+    line-height: 1.25;
+  }
+}
+/* The link and the punctuation after it stay on one line. */
+.tl-nowrap {
+  white-space: nowrap;
+}
+.tl-event-meta {
+  grid-column: 2 / -1;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+.tl-event-now {
+  grid-template-columns: minmax(0, 1fr) var(--tl-slot-width);
+  padding: 10px 12px;
+  border: 2px solid var(--gold);
+  border-radius: var(--radius-control);
+}
+.tl-event-now .tl-event-title {
+  grid-column: 1;
+}
+.tl-event-now .tl-event-slot {
+  grid-column: 2;
+}
+/* The seconds change each second: digits of one width keep the line still. */
+.tl-event-now .tl-event-meta {
+  grid-column: 1 / -1;
+  font-variant-numeric: tabular-nums;
+}
+/* The dock is narrow: the rows have no inset and no details line. */
+.dock-page .tl-events {
+  padding: 0;
 }
 
 /* The full-screen chat: a dialog over the whole page, for a phone that stands in front of the streamer. */
