@@ -683,6 +683,37 @@ describe("skip", (): void => {
   });
 });
 
+describe("the sample support event of the test deployment", (): void => {
+  it("shows as a live event, plays its alert, and sets the alarm for the end of the alert", async (): Promise<void> => {
+    // The test-chat path answers only in the test deployment.
+    expect((await post("test-chat", undefined, { sample: "support" })).status).toBe(404);
+    Object.assign(env, {
+      APP_ENV: "test",
+      APP_ORIGIN: "https://test.streambullets.com",
+      TEST_ACCESS_SECRET: "s".repeat(40),
+      TEST_DATABASE_ID: "e475eb5b-db31-43bd-8692-5926711e8faa",
+      ADMIN_EMAILS: "admin@example.test",
+    });
+    const socket = await listen("horizontal");
+    expect((await post("test-chat", undefined, { sample: "support" })).status).toBe(204);
+    const id = `twitch:test-support-${T0}`;
+    const events = socket
+      .messages<{ type: string; event?: ActivitySupport }>()
+      .flatMap((message): ActivitySupport[] => (message.type === "event" && message.event ? [message.event] : []));
+    expect(events).toMatchObject([{ id, kind: "gift", amount: 5, replay: false }]);
+    expect(supportRows()).toEqual([id]);
+    expect(last(socket).current).toMatchObject({ id, origin: "live", name: "LanternFox", amount: 5 });
+    // The alarm ends the alert on time, before the cleanup of the stored messages.
+    expect(state().storage.alarm).toBe(T0 + ALERT_SHOW_MS);
+    await fireAlarm();
+    expect(last(socket).current).toBeNull();
+    // The sample chat stays chat only.
+    vi.setSystemTime(T0 + ALERT_SHOW_MS + 1000);
+    expect((await post("test-chat")).status).toBe(204);
+    expect(supportRows()).toEqual([id]);
+  });
+});
+
 describe("a test and a replay", (): void => {
   it("add no support row and send no event", async (): Promise<void> => {
     const [wide, tall] = [await listen("horizontal"), await listen("vertical")];
