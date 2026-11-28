@@ -3,10 +3,13 @@ import type { ActivityChat, ActivityEvent, ActivityMessage, ActivityPlatform } f
 import {
   HISTORY_SIZE,
   emptyHistory,
+  historyMessages,
   historySnapshot,
   keepHistory,
   type ActivityHistory,
+  type AlertsStateMessage,
 } from "../app/lib/activity-history";
+import type { AlertView } from "../app/lib/alerts";
 
 // What an activity feed keeps for a reader that subscribes after the snapshot of the socket.
 
@@ -131,5 +134,68 @@ describe("the chat that a feed keeps for a late reader", (): void => {
   it("starts again when the feed is not available, and at each new snapshot", (): void => {
     expect(historySnapshot(after(snapshot([chat(1)]), { type: "unavailable" }))).toBeNull();
     expect(kept(after(snapshot([chat(1)]), event(chat(2)), snapshot([chat(7)], 10)))).toEqual(["twitch:m7"]);
+  });
+});
+
+describe("the state of the alerts that a feed keeps for a late reader", (): void => {
+  const alert: AlertView = {
+    id: "twitch:d1",
+    origin: "live",
+    kind: "gift",
+    platform: "twitch",
+    name: "LanternFox",
+    anonymous: false,
+    amount: 5,
+    currency: null,
+    banner: true,
+    chat: true,
+    startsAt: 5000,
+    endsAt: 11_000,
+  };
+  const state = (at: number, more: Partial<AlertsStateMessage> = {}): AlertsStateMessage => ({
+    type: "alerts",
+    at,
+    muted: false,
+    current: null,
+    waiting: 0,
+    goal: { counts: "subs", value: 17, startedAt: 0 },
+    ...more,
+  });
+
+  it("has no message before the socket sent one", (): void => {
+    expect(emptyHistory().alerts).toBeNull();
+    expect(historyMessages(emptyHistory())).toEqual([]);
+  });
+
+  it("gives the snapshot and then the last state, in the sequence of the socket", (): void => {
+    const last: AlertsStateMessage = state(6000, { current: alert, waiting: 2 });
+    const history = after(snapshot([chat(1)], 900), state(5000), event(chat(2)), last);
+    expect(history.alerts).toBe(last);
+    expect(historyMessages(history)).toEqual([
+      { type: "snapshot", events: [chat(1), chat(2)], replay: true, since: 900 },
+      last,
+    ]);
+    // The state has the times of the alert on stream, so the reader shows only the time that is left.
+    expect(history.alerts?.current).toMatchObject({ startsAt: 5000, endsAt: 11_000 });
+  });
+
+  it("keeps the state when the snapshot comes after it, and gives it without a snapshot", (): void => {
+    const first: AlertsStateMessage = state(5000);
+    expect(historyMessages(after(first))).toEqual([first]);
+    expect(historyMessages(after(first, snapshot([chat(1)])))).toEqual([
+      { type: "snapshot", events: [chat(1)], replay: true },
+      first,
+    ]);
+  });
+
+  it("keeps no alert that plays at once: it must not play again for a late reader", (): void => {
+    const follow: ActivityMessage = { type: "alert", alert: { ...alert, id: "twitch:f1", banner: false, endsAt: 5000 } };
+    const history = after(snapshot([chat(1)]), follow);
+    expect(history.alerts).toBeNull();
+    expect(historyMessages(history)).toEqual([{ type: "snapshot", events: [chat(1)], replay: true }]);
+  });
+
+  it("starts again when the feed is not available", (): void => {
+    expect(historyMessages(after(snapshot([chat(1)]), state(5000), { type: "unavailable" }))).toEqual([]);
   });
 });

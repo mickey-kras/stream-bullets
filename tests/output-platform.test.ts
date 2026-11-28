@@ -1,10 +1,14 @@
 import { describe, expect, it } from "vitest";
+import { bannerAlert } from "../app/components/overlay/alerts-layer";
 import type { CharacterView, PlaygroundView } from "../app/components/overlay/characters/view";
 import { viewForPlatform } from "../app/components/overlay/characters/view";
 import { messageForPlatform, type ActivityEvent, type ActivityMessage } from "../app/lib/activity";
+import { chatMark } from "../app/lib/alert-feed";
+import type { AlertView } from "../app/lib/alerts";
 import { SAMPLE_CHAT } from "../app/lib/chat-feed";
 
-// An output that shows Twitch only: the events of the feed and the characters of the other platforms do not show.
+// An output that shows Twitch only: the events of the feed, the characters and the alerts of the other platforms do
+// not show.
 
 const twitch: ActivityEvent[] = SAMPLE_CHAT.filter((row): boolean => row.platform === "twitch");
 const others: ActivityEvent[] = SAMPLE_CHAT.filter((row): boolean => row.platform !== "twitch");
@@ -120,5 +124,69 @@ describe("the characters of one platform", (): void => {
   it("returns the same view when each character is of the platform", (): void => {
     const mine: PlaygroundView = { ...view, characters: [character(1, "twitch")], speakers: [1] };
     expect(viewForPlatform(mine, "twitch")).toBe(mine);
+  });
+});
+
+describe("the alerts of one platform", (): void => {
+  const T0 = 1_800_000_000_000;
+  const alert = (override: Partial<AlertView> = {}): AlertView => ({
+    id: "twitch:d1",
+    origin: "live",
+    kind: "gift",
+    platform: "twitch",
+    name: "LanternFox",
+    anonymous: false,
+    amount: 5,
+    currency: null,
+    banner: true,
+    chat: true,
+    startsAt: T0,
+    endsAt: T0 + 6000,
+    ...override,
+  });
+  const gift: AlertView = alert();
+  const superChat: AlertView = alert({
+    id: "youtube:s1",
+    kind: "super_chat",
+    platform: "youtube",
+    amount: 5_000_000,
+    currency: "USD",
+  });
+  const kicks: AlertView = alert({ id: "kick:k1", kind: "kicks", platform: "kick", amount: 100 });
+  const topic: AlertView = alert({ id: "direct:t1", kind: "topic", platform: "direct", amount: null });
+  const state = (current: AlertView): ActivityMessage => ({
+    type: "alerts",
+    at: T0,
+    muted: false,
+    current,
+    waiting: 0,
+    goal: null,
+  });
+
+  it("passes each alert message to the page: the page selects the alerts that it shows", (): void => {
+    const message: ActivityMessage = state(superChat);
+    expect(messageForPlatform(message, "twitch")).toBe(message);
+  });
+
+  it("shows the banner of a Twitch alert and of a topic credit, and no banner of the other platforms", (): void => {
+    expect(bannerAlert(gift, "twitch")?.id).toBe("twitch:d1");
+    expect(bannerAlert(topic, "twitch")?.id).toBe("direct:t1");
+    expect(bannerAlert(superChat, "twitch")).toBeNull();
+    expect(bannerAlert(kicks, "twitch")).toBeNull();
+    // An output for all platforms shows each alert.
+    for (const each of [gift, superChat, kicks, topic]) expect(bannerAlert(each, null)?.id).toBe(each.id);
+  });
+
+  it("marks the same alerts in chat as the banner shows", (): void => {
+    expect(chatMark(state(gift), "twitch", T0)).toBe(gift);
+    expect(chatMark(state(topic), "twitch", T0)).toBe(topic);
+    expect(chatMark(state(superChat), "twitch", T0)).toBeNull();
+    expect(chatMark(state(kicks), "twitch", T0)).toBeNull();
+    expect(chatMark(state(superChat), null, T0)).toBe(superChat);
+    // An alert without a banner plays at once: the same rule.
+    const follow: AlertView = alert({ id: "kick:f1", kind: "follow", platform: "kick", amount: null, banner: false });
+    expect(chatMark({ type: "alert", alert: follow }, "twitch", T0)).toBeNull();
+    expect(chatMark({ type: "alert", alert: follow }, null, T0)).toBe(follow);
+    expect(chatMark({ type: "alert", alert: { ...follow, id: "twitch:f2", platform: "twitch" } }, "twitch", T0)).not.toBeNull();
   });
 });
