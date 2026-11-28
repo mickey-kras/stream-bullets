@@ -15,6 +15,8 @@ export interface AlertsView extends AlertsState {
    * during an alert has only the time that is left. 0 without an alert.
    */
   showMs: number;
+  /** The local time when this page ends `current`: the time of its first sight plus `showMs`. 0 without an alert. */
+  until: number;
 }
 
 /**
@@ -71,5 +73,7 @@ export function useAlerts(feed: ActivityFeed | null, serverOffset: number = 0): 
   }, [subscribe]);
   const showMs: number = bannerMs(seen, serverOffset);
   const running: boolean = useBefore(seen.seenAt + showMs);
-  return running ? { ...seen.state, showMs } : { ...seen.state, current: null, showMs: 0 };
+  return running
+    ? { ...seen.state, showMs, until: seen.seenAt + showMs }
+    : { ...seen.state, current: null, showMs: 0, until: 0 };
 }

@@ -40,10 +40,14 @@ A streamer must know what each control does when they look at it. Do not make th
 - The poll actions (reveal the results, close the voting, take the poll off air) fill one row in three equal columns.
 - The three buttons that feature a topic and the button that puts the message on stream have one width.
 - Activity has the buttons to test an alert and to mute the alerts in its title row.
-- The alert on stream shows in a box with a gold border and a Skip button. Each row of the list has a Replay button.
+- The alert on stream shows in a box with a gold border and a Skip button. A row has a Replay button while the server keeps its event.
 - Skip and Replay have the same width and the same left and right edges.
 - In an activity row, the title is beside the button. The details line is below them and uses the full width of the row.
 - A test and a replay show an alert again. They do not count for a goal, a report, or revenue.
+- Mute stops the alert on stream at once and removes the alerts that wait. The alerts of the muted time do not play later.
+
+The app has the activity of Live. It has the test and mute buttons, the box of the alert on stream with Skip, and the Replay buttons.
+The behavior is in `docs/streamer-tools.md`, in the section Activity.
 
 ## Overlay
 
@@ -87,10 +91,10 @@ A streamer must know what each control does when they look at it. Do not make th
 
 The private OBS dock has the same actions as Live in a width of 360px.
 It has the poll, the next topic, the chat, and the activity. The activity has the buttons to mute, test, skip, and replay.
+The app has the activity of the dock with these four actions.
 
 ## Not decided
 
 - One goal or two goals at one time.
-- The alerts that occur while the streamer mutes the alerts. The design does not play them later.
 - A limit for the line of alerts. One alert shows for 6 seconds.
 - The amounts where alerts start: 100 Bits, 100 KICKs, and a raid of 5 viewers.

@@ -19,17 +19,21 @@ export type IngestPath =
   | "test-chat"
   | "upcoming";
 
-/** Calls the page's ingest object. `init` defaults to an empty POST. `characters` asks a subscribe for frames. */
+/**
+ * Calls the page's ingest object. `init` defaults to an empty POST. `characters` asks a subscribe for frames.
+ * `support` asks the test chat of the test deployment for one sample support event instead of the sample chat.
+ */
 export function callIngest(
   env: AppEnv,
   streamerId: string,
   path: IngestPath,
-  options: { platform?: ActivityPlatform; init?: RequestInit; characters?: boolean } = {},
+  options: { platform?: ActivityPlatform; init?: RequestInit; characters?: boolean; support?: boolean } = {},
 ): Promise<Response> {
   const query = new URLSearchParams({
     streamerId,
     ...(options.platform ? { platform: options.platform } : {}),
     ...(options.characters ? { characters: "1" } : {}),
+    ...(options.support ? { sample: "support" } : {}),
   });
   const stub = env.CHANNEL_INGEST.get(env.CHANNEL_INGEST.idFromName(streamerId));
   return stub.fetch(`https://channel-ingest.internal/${path}?${query}`, options.init ?? { method: "POST" });

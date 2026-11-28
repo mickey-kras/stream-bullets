@@ -49,6 +49,7 @@ See [Authentication setup](docs/auth-setup.md) for production sign-in and admini
 - See [overlay composition](docs/overlay-composition.md) for the layers, the per-layer URLs, and the merged chat.
 - See [OBS setup for the overlay](docs/obs-setup.md) for the steps to add the overlay to OBS for the first time.
 - See [interactive characters](docs/characters.md) for the character playground, its commands, and its controls.
+- See [stream reports](docs/stream-reports.md) for the rules of a stream session, the report metrics, and the CSV format.
 - **Schedule** supports one-off and weekly streams, platform links, linked topics, edits, cancellation, deletion, and replay links.
 - Viewers see upcoming and past streams in local time. Desktop adds day, week, and month views.
 - `/@handle/schedule.ics` provides a subscribable calendar feed.

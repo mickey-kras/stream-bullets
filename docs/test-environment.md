@@ -144,6 +144,12 @@ In all other deployments, the feed object answers `404`.
 To see the chat, sign in as `owner`, put the chat layer on stream in the **Overlay** section of **Streamer tools**, and create the overlay link.
 Open the link in the same browser, because the test deployment needs the test access cookie.
 
+**Send a sample support event to test_host** sends one support event to the same feed: LanternFox gives 5 Twitch subscriptions.
+The event is live, like an event from a connected channel, and it counts for the goal.
+It shows in the chat and in **Activity** of the **Live** section and of the dock.
+If the Alerts layer is on stream and a page of `test_host` is open, it also shows an alert.
+Each event has a new identifier, so you can send it again. The same checks as for the sample chat apply.
+
 ## Authorization checks
 
 The authorization model has viewers, page owners, and administrators.

@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import type { Locator, WebSocketRoute } from "@playwright/test";
 import { newPage, close, test, expect, type Browser, type BrowserContext, type Page } from "./coverage";
 import { runSql } from "./fixtures";
@@ -9,9 +9,11 @@ import {
   CHAT_CELL,
   FEATURE_HOST,
   POLL_CELL,
+  VERTICAL_KEY,
   defaultLayers,
   layersSql,
   noKeysSql,
+  noLinkQuotaSql,
 } from "./grid-helpers";
 import type { OverlayState } from "../../app/types";
 
@@ -1035,4 +1037,216 @@ test("support events show in the Live chat and in the dock, and never in the ove
   expect(right).toBeLessThanOrEqual(300);
   await Promise.all([close(owner), close(dock)]);
   await runSql("tools-live-support-restore", [noDockKey]);
+});
+
+const ACTIVITY_IP = clientIp("tools-live", 55);
+const ALERTS_OWNER_IP = clientIp("tools-live", 56);
+const ALERTS_OBS_IP = clientIp("tools-live", 57);
+
+/** The alerts layer on stream in the two outputs, beside the chat of the horizontal output. */
+const alertLayers: string = layersSql({
+  chat: { enabled: true },
+  alerts: { enabled: true },
+  cells: {
+    horizontal: { chat: CHAT_CELL, alerts: { c: 12, r: 0, w: 16, h: 3 } },
+    vertical: { alerts: { c: 0, r: 0, w: 18, h: 3 } },
+  },
+});
+
+/** The state of the alerts, as the answer of `POST /api/overlay/alerts` and as the socket sends it. */
+function alertsState(current: Record<string, unknown> | null, waiting = 0): Record<string, unknown> {
+  return { at: Date.now(), muted: false, current, waiting, goal: null };
+}
+
+/** The alert of a support event as the server sends it in its state. */
+function alertOf(id: string, origin: "live" | "replay" | "test"): Record<string, unknown> {
+  const now: number = Date.now();
+  return {
+    id,
+    origin,
+    kind: "gift",
+    platform: "twitch",
+    name: "LanternFox",
+    anonymous: false,
+    amount: 5,
+    currency: null,
+    banner: true,
+    chat: true,
+    startsAt: now,
+    endsAt: now + 6000,
+  };
+}
+
+test("Activity lists the support events beside the chat, replays a recent one, and hides Replay when the event is gone", async ({
+  browser,
+}) => {
+  await runSql("tools-live-activity", [alertLayers]);
+  const owner = await signedIn(browser, "featureowner", ACTIVITY_IP);
+  const page = await newPage(owner);
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  const old = support("bits", "old", "twitch", {
+    amount: 500,
+    sender: { id: "u1", displayName: "pixel_aunt" },
+    receivedAt: Date.now() - 11 * 60_000,
+  });
+  const raid = support("follow", "raid", "kick", {
+    kind: "raid",
+    amount: 38,
+    sender: { id: "u2", displayName: "NorthWind" },
+  });
+  const gift = support("bits", "gift", "twitch", {
+    kind: "gift",
+    amount: 5,
+    sender: { id: "u3", displayName: "LanternFox" },
+  });
+  const sockets: WebSocketRoute[] = [];
+  await page.routeWebSocket("**/api/activity/**", (socket: WebSocketRoute) => {
+    sockets.push(socket);
+    const kept = [
+      { ...old, replay: true },
+      { ...raid, replay: true },
+    ];
+    socket.send(JSON.stringify({ type: "snapshot", events: kept, replay: true }));
+    socket.send(JSON.stringify({ type: "alerts", ...alertsState(null) }));
+  });
+  const controls: unknown[] = [];
+  await page.route("**/api/overlay/alerts", async (route) => {
+    const body = route.request().postDataJSON() as { op: string; id?: string };
+    controls.push(body);
+    if (body.op === "replay" && body.id === raid.id)
+      return route.fulfill({ status: 404, json: { error: "This event is too old for a replay.", code: "alert_gone" } });
+    return route.fulfill({ status: 200, json: alertsState(null) });
+  });
+  await page.goto("/tools?view=live");
+  const part = page.locator('[data-live-part="activity"]');
+  await expect(part.getByRole("heading", { level: 2, name: "Activity" })).toBeVisible();
+
+  // A live event shows in Activity and in the chat: both places.
+  await expect(part.locator("[data-activity-row]")).toHaveCount(2);
+  expect(sockets).toHaveLength(1);
+  sockets[0].send(JSON.stringify({ type: "event", event: { ...gift, receivedAt: Date.now() } }));
+  const rows = part.locator("[data-activity-row]");
+  await expect(rows).toHaveCount(3);
+  // On a desktop the part is in the right column, below the chat.
+  const chat = page.locator('[data-live-part="chat"]');
+  await expect
+    .poll(async (): Promise<boolean> => {
+      const [chatBox, partBox] = [await chat.boundingBox(), await part.boundingBox()];
+      return chatBox !== null && partBox !== null && partBox.y >= chatBox.y + chatBox.height && partBox.x === chatBox.x;
+    })
+    .toBe(true);
+  await expect(rows.nth(0)).toContainText("LanternFox gave 5 subscriptions");
+  await expect(rows.nth(0)).toContainText("Twitch ·");
+  await expect(rows.nth(1)).toContainText("NorthWind raid with 38 viewers");
+  await expect(rows.nth(2)).toContainText("pixel_aunt 500 Bits");
+  await expect(page.locator('[data-live-part="chat"] [data-support="gift"]')).toContainText(
+    "LanternFox gave 5 subscriptions",
+  );
+  // The server keeps an event for 10 minutes: the old row has no Replay.
+  await expect(rows.nth(2).locator("[data-activity-replay]")).toHaveCount(0);
+  await expect(rows.nth(2)).toContainText("11 minutes ago");
+
+  // Replay sends the ID of the event, and the alert on stream shows in the box with Skip.
+  await rows.nth(0).getByRole("button", { name: "Replay: LanternFox gave 5 subscriptions" }).click();
+  await expect.poll(() => controls).toEqual([{ op: "replay", id: gift.id }]);
+  sockets[0].send(JSON.stringify({ type: "alerts", ...alertsState(alertOf(`${String(gift.id)}~r1`, "replay"), 2) }));
+  const box = part.locator("[data-live-alert-now]");
+  await expect(box).toContainText("On stream now: LanternFox gave 5 subscriptions");
+  await expect(box.locator("[data-live-alert-left]")).toHaveText(/^Replay · [1-6] s left · 2 alerts wait$/);
+  // Skip and Replay have the same width and the same edges.
+  const skip = await box.locator("[data-live-alert-skip]").boundingBox();
+  const replay = await rows.nth(1).locator("[data-activity-replay]").boundingBox();
+  if (!skip || !replay) throw new Error("Skip and Replay must show.");
+  expect([Math.round(skip.x), Math.round(skip.width)]).toEqual([Math.round(replay.x), Math.round(replay.width)]);
+  await box.locator("[data-live-alert-skip]").click();
+  await expect.poll(() => controls.at(-1)).toEqual({ op: "skip" });
+  await expect(box).toHaveCount(0);
+
+  // The server no longer keeps the raid: a clear message, and the row loses its Replay.
+  await rows.nth(1).getByRole("button", { name: "Replay: NorthWind raid with 38 viewers" }).click();
+  await expect(page.locator(".sb-toast")).toHaveText("This event is too old for a replay.");
+  await expect(rows.nth(1).locator("[data-activity-replay]")).toHaveCount(0);
+  await expect(rows.nth(0).locator("[data-activity-replay]")).toHaveCount(1);
+  await close(owner);
+});
+
+/** SQL that gives the feature host a horizontal key and the vertical key VERTICAL_KEY. */
+function outputKeysSql(horizontalKey: string): string {
+  const hash = (key: string): string => createHash("sha256").update(key).digest("hex");
+  return `INSERT INTO overlay_keys (streamer_id, output, key_hash, created_at, other_key_hash, other_created_at)
+    VALUES (${FEATURE_HOST}, 'horizontal', '${hash(horizontalKey)}', 0, '${hash(VERTICAL_KEY)}', 0)
+    ON CONFLICT(streamer_id) DO UPDATE SET output='horizontal', key_hash=excluded.key_hash, created_at=0,
+      other_key_hash=excluded.other_key_hash, other_created_at=0;`;
+}
+
+test("a test alert from Live shows on both outputs, Skip ends it, and a mute in Live shows in the dock", async ({
+  browser,
+}) => {
+  const horizontalKey: string = "H".repeat(43);
+  // The other specs of this file make dock links too: the quota of link requests starts again.
+  await runSql("tools-live-alerts", [alertLayers, noDockKey, noLinkQuotaSql, outputKeysSql(horizontalKey)]);
+  const owner = await signedIn(browser, "featureowner", ALERTS_OWNER_IP);
+  const obs = async (key: string, viewport: { width: number; height: number }): Promise<Page> => {
+    const page = await newPage(browser, {
+      viewport,
+      extraHTTPHeaders: { "CF-Connecting-IP": `192.0.2.${ALERTS_OBS_IP}` },
+    });
+    await page.goto(`/@feature_host/overlay?key=${key}`);
+    return page;
+  };
+  const outputs: Page[] = [
+    await obs(horizontalKey, { width: 1280, height: 720 }),
+    await obs(VERTICAL_KEY, { width: 540, height: 960 }),
+  ];
+  const made = await owner.request.post("/api/dock/key", { data: {} });
+  expect(made.status()).toBe(200);
+  const dock = await newPage(browser, {
+    viewport: { width: 360, height: 900 },
+    extraHTTPHeaders: { "CF-Connecting-IP": `192.0.2.${ALERTS_OBS_IP}` },
+  });
+  await dock.goto(((await made.json()) as { url: string }).url);
+  const live = await newPage(owner);
+  await live.setViewportSize({ width: 1440, height: 1000 });
+  await live.goto("/tools?view=live");
+  const part = live.locator('[data-live-part="activity"]');
+  const dockPart = dock.locator('[data-live-part="activity"]');
+  const mute = part.locator("[data-live-alerts-mute]");
+  const dockMute = dockPart.locator("[data-live-alerts-mute]");
+  await expect(mute).toHaveAttribute("aria-pressed", "false");
+  await expect(dockMute).toHaveAttribute("aria-pressed", "false");
+  await expect(dockPart.locator("[data-live-alert-skip]")).toBeDisabled();
+  const banners: Locator[] = outputs.map((page: Page): Locator => page.locator("[data-overlay-alert]"));
+
+  // A test alert reaches the two outputs, Live and the dock.
+  await part.getByRole("button", { name: "Test alert" }).click();
+  for (const banner of banners)
+    await expect(banner.locator("[data-alert-title]")).toHaveText("Mad Maxine gave 5 subscriptions");
+  await expect(part.locator("[data-live-alert-now]")).toContainText("On stream now: Mad Maxine gave 5 subscriptions");
+  await expect(part.locator("[data-live-alert-left]")).toHaveText(/^Test · [1-6] s left$/);
+  await expect(dockPart.locator("[data-live-alert-skip]")).toBeEnabled();
+  // Skip ends it on each output.
+  await part.locator("[data-live-alert-skip]").click();
+  for (const banner of banners) await expect(banner).toHaveCount(0);
+  await expect(part.locator("[data-live-alert-now]")).toHaveCount(0);
+
+  // A mute stops the alert on stream at once, on the two outputs, and the dock shows the mute.
+  await part.getByRole("button", { name: "Test alert" }).click();
+  for (const banner of banners) await expect(banner).toHaveCount(1);
+  await mute.click();
+  await expect(mute).toHaveAttribute("aria-pressed", "true");
+  for (const banner of banners) await expect(banner).toHaveCount(0);
+  await expect(dockMute).toHaveAttribute("aria-pressed", "true");
+  await expect(dockPart.locator("[data-live-alerts-muted]")).toHaveText(
+    "Alerts are muted. No alert shows on stream. Events still count for the goal.",
+  );
+  // While muted, a test is refused with a clear message, and nothing shows.
+  await part.getByRole("button", { name: "Test alert" }).click();
+  await expect(live.locator(".sb-toast")).toHaveText("Alerts are muted. Turn off Mute alerts first.");
+  for (const banner of banners) await expect(banner).toHaveCount(0);
+  // The dock lets the alerts play again, and Live shows it.
+  await dockMute.click();
+  await expect(mute).toHaveAttribute("aria-pressed", "false");
+  await expect(part.locator("[data-live-alerts-muted]")).toHaveCount(0);
+  await Promise.all([close(owner), close(dock), ...outputs.map((page: Page) => close(page))]);
+  await runSql("tools-live-alerts-restore", [noDockKey, noKeysSql]);
 });
