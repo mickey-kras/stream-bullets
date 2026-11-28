@@ -1,10 +1,11 @@
 import { z } from "zod";
 import type { AppEnv } from "../env";
-import type { ActivityEvent, ActivityPlatform, ChannelStatusCode } from "../lib/activity";
+import type { ActivityPlatform, ChannelStatusCode, IngestEvent } from "../lib/activity";
 import { channelsOff } from "./channel-tokens.server";
 import { kickEvents, twitchEvents } from "./channel-normalize";
 import { markWebhookAccepted, markWebhookRejected, resetWebhookHealth } from "./channel-repair.server";
 import { kickSupport, twitchSupport } from "./channel-support";
+import { kickLiveSignal, twitchLiveSignal } from "./channel-live";
 import { connectionForChannel, forgetRoutes, routeFor } from "./channels.server";
 import { HttpError, readBody } from "./http.server";
 import { callIngest } from "./ingest-call.server";
@@ -137,7 +138,7 @@ async function forward(
   platform: ActivityPlatform,
   externalId: string,
   deliveryId: string,
-  events: ActivityEvent[],
+  events: IngestEvent[],
   now: number,
 ): Promise<boolean> {
   const streamerId = await routeFor(env, platform, externalId, now);
@@ -273,9 +274,10 @@ async function twitchDelivery(
     throw new WebhookRejected(403, "Invalid message id.", "payload", false, broadcaster);
   const { type } = parsed.subscription;
   // The message id is the delivery id of a support event: Twitch sends a notification again with the same id.
-  const events: ActivityEvent[] = [
+  const events: IngestEvent[] = [
     ...twitchEvents(type, parsed.event, now, Date.parse(message.timestamp)),
     ...twitchSupport(type, parsed.event, message.id, now),
+    ...twitchLiveSignal(type, parsed.event, now),
   ];
   // A signed notification for an unknown channel gets a 410: Twitch counts failures and revokes the subscription.
   if (!(await forward(env, "twitch", broadcaster, message.id, events, now))) {
@@ -426,7 +428,11 @@ export async function kickWebhook(
   // Reserved before the forward, so parallel copies count as repeats. A failed forward releases the id: it answers
   // 5xx, and Kick's retry must get through.
   rememberKickId(id);
-  const events: ActivityEvent[] = [...kickEvents(type, payload, now), ...kickSupport(type, payload, id, now)];
+  const events: IngestEvent[] = [
+    ...kickEvents(type, payload, now),
+    ...kickSupport(type, payload, id, now),
+    ...kickLiveSignal(type, payload, now),
+  ];
   try {
     await forward(env, "kick", String(broadcaster.data.broadcaster.user_id), id, events, now);
   } catch (error: unknown) {

@@ -3,6 +3,7 @@ import type { AppEnv } from "../env";
 import type { ActivityPlatform } from "../lib/activity";
 import { KICK_SUPPORT_EVENTS, TWITCH_SUPPORT_TYPES, type TwitchSubscription } from "./channel-support";
 import { KICK_EVENTS, twitchSubscriptions } from "./channel-subscription-types";
+import { KICK_LIVE_EVENTS, TWITCH_LIVE_TYPES, liveRefused } from "./channel-live";
 import type { ChannelTokens } from "./channel-tokens.server";
 import { HttpError } from "./http.server";
 
@@ -347,7 +348,7 @@ async function listTwitchSubscriptions(
   };
   const subscriptions: ProviderSubscription[] = [];
   let cursor: string | undefined;
-  // At most 10 pages of 100: far more than the eleven subscriptions of one channel.
+  // At most 10 pages of 100: far more than the thirteen subscriptions of one channel.
   for (let page = 0; page < 10; page++) {
     const url = new URL(TWITCH_SUBSCRIPTIONS_URL);
     url.searchParams.set("user_id", externalId);
@@ -406,6 +407,19 @@ type Subscribed = { conflicts: string[]; refused: boolean };
 /** Which subscriptions a call makes: the types a repair names in `only` (null: all), with or without support. */
 type SubscribeScope = { only: readonly string[] | null; support: boolean };
 
+/**
+ * A Twitch 403 for a subscription: the broadcaster's authorization is missing for it. A live type and a support type
+ * are optional, so their refusal throws nothing. Returns true for a refused support type: the support events go off.
+ */
+function twitchRefused(type: string): boolean {
+  if (TWITCH_LIVE_TYPES.includes(type)) {
+    liveRefused("twitch", type);
+    return false;
+  }
+  if (TWITCH_SUPPORT_TYPES.includes(type)) return true;
+  throw new ReauthRequired();
+}
+
 async function subscribeTwitch(
   env: AppEnv,
   externalId: string,
@@ -444,13 +458,12 @@ async function subscribeTwitch(
       conflicts.push(subscription.type);
       continue;
     }
-    // 403: the broadcaster's authorization is missing. A 401 refuses the app token: no owner can repair that.
-    // The types of chat come first, so a 403 for a support type leaves chat as it is.
-    if (response.status === 403 && optional) {
-      refused = true;
+    // A 401 refuses the app token: no owner can repair that. The types of chat come first, so a 403 for a support
+    // type or a live type leaves chat as it is.
+    if (response.status === 403) {
+      refused = twitchRefused(subscription.type) || refused;
       continue;
     }
-    if (response.status === 403) throw new ReauthRequired();
     if (!response.ok) throw new ProviderError(response.status);
     const body = z
       .object({ data: z.array(z.object({ id: z.string().min(1).max(64) })).min(1) })
@@ -497,7 +510,8 @@ const CHAT_ONLY: SubscribeScope = { only: null, support: false };
  * broadcaster's own token. YouTube has no push API: the ingest object polls its live chat instead.
  *
  * The types of chat are made first. A refusal of a type that only support events need throws nothing: the result
- * has `refused`, and the caller clears `support_events` of the connection.
+ * has `refused`, and the caller clears `support_events` of the connection. A refusal of a live type throws nothing
+ * and changes nothing of the connection: it is logged as `channel_live_refused`.
  */
 export async function subscribe(
   env: AppEnv,
@@ -519,9 +533,13 @@ export async function subscribe(
     if (result === "partial") throw new ProviderError(502);
   }
   const support: string[] = scope.support ? KICK_SUPPORT_EVENTS.filter(wanted) : [];
-  if (support.length === 0) return { conflicts: [], refused: false };
   // Kick names no scope for these events, so a refusal of this call alone is about them, not about the token.
-  return { conflicts: [], refused: (await subscribeKick(externalId, accessToken, support, created)) !== "ok" };
+  const refused: boolean =
+    support.length > 0 && (await subscribeKick(externalId, accessToken, support, created)) !== "ok";
+  const live: string[] = KICK_LIVE_EVENTS.filter(wanted);
+  if (live.length > 0 && (await subscribeKick(externalId, accessToken, live, created)) !== "ok")
+    for (const type of live) liveRefused("kick", type);
+  return { conflicts: [], refused };
 }
 
 /** Deletes the provider subscriptions. Returns the ids it could not delete. Never throws. */

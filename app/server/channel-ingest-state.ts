@@ -60,6 +60,8 @@ export interface YoutubeState {
   nextPollAt: number;
   /** When the channel title was last read again from YouTube. */
   nameAt: number;
+  /** Whether the poll last found the stream live. A live signal goes out only when this changes. */
+  live: boolean;
 }
 
 export const NEW_YOUTUBE_STATE: YoutubeState = {
@@ -68,6 +70,7 @@ export const NEW_YOUTUBE_STATE: YoutubeState = {
   backoffMs: 0,
   nextPollAt: 0,
   nameAt: 0,
+  live: false,
 };
 
 /** The subscription repair schedule of one platform that the ingest object keeps in its storage. */

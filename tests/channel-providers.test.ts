@@ -100,6 +100,8 @@ describe("channel provider clients", (): void => {
         "channel.chat.clear",
         "channel.chat.clear_user_messages",
         "channel.moderate",
+        "stream.online",
+        "stream.offline",
       ],
       refused: false,
     });
@@ -175,11 +177,14 @@ describe("channel provider clients", (): void => {
       ["channel.subscription.message", "1", { broadcaster_user_id: "111" }],
       ["channel.cheer", "1", { broadcaster_user_id: "111" }],
       ["channel.raid", "1", { to_broadcaster_user_id: "111" }],
+      ["stream.online", "1", { broadcaster_user_id: "111" }],
+      ["stream.offline", "1", { broadcaster_user_id: "111" }],
     ]);
     // A cheer also sends `channel.bits.use`: the feed never subscribes to it, so Bits count one time.
     expect(requiredSubscriptions("twitch", true)).not.toContain("channel.bits.use");
-    expect(created).toHaveLength(11);
-    expect(requiredSubscriptions("twitch", true)).toEqual(bodies.map((body) => body.type));
+    expect(created).toHaveLength(13);
+    // The live types come last, and a healthy channel does not need them.
+    expect(requiredSubscriptions("twitch", true)).toEqual(bodies.slice(0, 11).map((body) => body.type));
     expect(requiredSubscriptions("kick", true)).toEqual([
       "chat.message.sent",
       "moderation.banned",
@@ -193,6 +198,7 @@ describe("channel provider clients", (): void => {
   });
 
   it("keeps the chat subscriptions when Twitch refuses a support type, and asks for no further support type", async (): Promise<void> => {
+    const warn = vi.spyOn(console, "warn").mockImplementation((): void => undefined);
     let made = 0;
     const requests = answers(
       () => Response.json({ access_token: "app" }),
@@ -204,8 +210,12 @@ describe("channel provider clients", (): void => {
     expect(result).toEqual({ conflicts: [], refused: true });
     // The five chat types and the follow type exist; the refused type ended the support types.
     expect(created).toEqual(["s1", "s2", "s3", "s4", "s5", "s6"]);
-    expect(requests).toHaveLength(8);
+    // The live types are asked for after the support types.
+    expect(requests).toHaveLength(10);
     expect(await requests[7].json()).toMatchObject({ type: "channel.subscribe" });
+    expect(await requests[8].json()).toMatchObject({ type: "stream.online" });
+    expect(warn).toHaveBeenCalledWith("channel_live_refused", { platform: "twitch", type: "stream.online" });
+    warn.mockRestore();
     // The same answer for a chat type still needs a new authorization.
     answers(
       () => Response.json({ access_token: "app" }),
@@ -238,10 +248,11 @@ describe("channel provider clients", (): void => {
     answers(
       () => Response.json({ data: [{ subscription_id: "k1" }, { subscription_id: "k2" }] }),
       () => Response.json({ data: [{ subscription_id: "k3" }, { subscription_id: null, error: "not allowed" }] }),
+      () => Response.json({ data: [{ subscription_id: "k4" }] }),
     );
     const partial: string[] = [];
     expect(await subscribe(env, "kick", "333", "t", "https://app.test", partial, scope)).toEqual({ conflicts: [], refused: true });
-    expect(partial).toEqual(["k1", "k2", "k3"]);
+    expect(partial).toEqual(["k1", "k2", "k3", "k4"]);
     // An outage is no refusal: the repair tries again, and the support events stay on.
     answers(
       () => Response.json({ data: [{ subscription_id: "k1" }, { subscription_id: "k2" }] }),

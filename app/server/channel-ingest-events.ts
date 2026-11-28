@@ -4,6 +4,7 @@ import {
   type ActivityChat,
   type ActivityEvent,
   type ActivitySupport,
+  type IngestEvent,
 } from "../lib/activity";
 
 /**
@@ -15,8 +16,8 @@ export function banKey(event: Extract<ActivityEvent, { kind: "ban" }>): string {
 }
 
 /** `events` without the support events: a connection that does not read them stores and sends none. */
-export function withoutSupport(events: readonly ActivityEvent[]): ActivityEvent[] {
-  return events.filter((event: ActivityEvent): boolean => !isSupport(event));
+export function withoutSupport(events: readonly IngestEvent[]): IngestEvent[] {
+  return events.filter((event: IngestEvent): boolean => !isSupport(event));
 }
 
 /**

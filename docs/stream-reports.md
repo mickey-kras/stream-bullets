@@ -49,6 +49,33 @@ Thus no socket, no snapshot, and no store of chat or support gets a live signal.
 
 A consumer refuses an event message of the `stream` kind. In a snapshot, it ignores the event.
 
+### Sources of the live signals
+
+| Platform | Source | `startedAt` | `title` |
+| --- | --- | --- | --- |
+| Twitch | The EventSub types `stream.online` and `stream.offline` | `started_at` of `stream.online` | None |
+| Kick | The webhook event `livestream.status.updated` | `started_at` | `title` |
+| YouTube | The poll of the live chat | None | None |
+
+[Channel connections](channel-connections.md#live-subscriptions) gives the subscriptions and the payload rules.
+These subscriptions are optional. A channel without them gives no live signals.
+
+The YouTube poll reads the active broadcast. An active broadcast with a live chat gives `live: true`.
+A poll that finds no such broadcast gives `live: false`. A chat that goes offline or stops gives no signal.
+The next poll reads the broadcast again.
+
+The poll sends a signal only when the live state changes, not for each poll. A reconnect keeps the live state.
+The poll runs only while a consumer listens. At other times, YouTube gives no live signal.
+
+A provider can send a signal again, for example a copy from another Kick app. The recorder must accept a repeated signal.
+
+### Signals in the ingest object
+
+The `ChannelIngest` object parses each signal with the event contract. Then `ingest` removes the live signals first.
+Thus no socket, no snapshot, no support table, no alert, and no goal gets a live signal.
+No part of the server reads the live signals yet. Thus the object drops each signal after its validation.
+The recorder comes in a later change.
+
 ## Session rules
 
 `sessionStep(state, signal, now)` applies the rules. It gives the next state and the effects.
