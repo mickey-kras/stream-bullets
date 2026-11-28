@@ -240085,7 +240085,7 @@
       "relation": "contains",
       "source": "readme_quality_gates",
       "source_file": "README.md",
-      "source_location": "L360",
+      "source_location": "L362",
       "target": "readme_board_refreshes_and_public_image_cache",
       "weight": 1.0
     },
@@ -240129,7 +240129,7 @@
       "relation": "contains",
       "source": "readme_streambullets",
       "source_file": "README.md",
-      "source_location": "L238",
+      "source_location": "L240",
       "target": "readme_prototype_data",
       "weight": 1.0
     },
@@ -240140,7 +240140,7 @@
       "relation": "contains",
       "source": "readme_streambullets",
       "source_file": "README.md",
-      "source_location": "L244",
+      "source_location": "L246",
       "target": "readme_security_and_operating_limits",
       "weight": 1.0
     },
@@ -240151,7 +240151,7 @@
       "relation": "contains",
       "source": "readme_streambullets",
       "source_file": "README.md",
-      "source_location": "L274",
+      "source_location": "L276",
       "target": "readme_legal_pages",
       "weight": 1.0
     },
@@ -240162,7 +240162,7 @@
       "relation": "contains",
       "source": "readme_streambullets",
       "source_file": "README.md",
-      "source_location": "L287",
+      "source_location": "L289",
       "target": "readme_quality_gates",
       "weight": 1.0
     },
@@ -257167,7 +257167,7 @@
       "relation": "references",
       "source": "readme",
       "source_file": "README.md",
-      "source_location": "L198",
+      "source_location": "L200",
       "target": "docs_recovery",
       "weight": 1.0
     },
@@ -257178,7 +257178,7 @@
       "relation": "references",
       "source": "readme",
       "source_file": "README.md",
-      "source_location": "L258",
+      "source_location": "L260",
       "target": "docs_live_room_capacity",
       "weight": 1.0
     },
@@ -261925,7 +261925,7 @@
       "relation": "references",
       "source": "readme_deploy_to_cloudflare",
       "source_file": "README.md",
-      "source_location": "L232",
+      "source_location": "L234",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -262069,7 +262069,7 @@
       "relation": "references",
       "source": "readme_deploy_to_cloudflare",
       "source_file": "README.md",
-      "source_location": "L231",
+      "source_location": "L233",
       "target": "app_server_poll_room_pollroom",
       "weight": 1.0
     },
@@ -331414,7 +331414,7 @@
       "node_kind": "heading",
       "norm_label": "board refreshes and public image cache",
       "source_file": "README.md",
-      "source_location": "L360"
+      "source_location": "L362"
     },
     {
       "_origin": "ast",
@@ -331447,7 +331447,7 @@
       "node_kind": "heading",
       "norm_label": "legal pages",
       "source_file": "README.md",
-      "source_location": "L274"
+      "source_location": "L276"
     },
     {
       "_origin": "ast",
@@ -331469,7 +331469,7 @@
       "node_kind": "heading",
       "norm_label": "prototype data",
       "source_file": "README.md",
-      "source_location": "L238"
+      "source_location": "L240"
     },
     {
       "_origin": "ast",
@@ -331480,7 +331480,7 @@
       "node_kind": "heading",
       "norm_label": "quality gates",
       "source_file": "README.md",
-      "source_location": "L287"
+      "source_location": "L289"
     },
     {
       "_origin": "ast",
@@ -331491,7 +331491,7 @@
       "node_kind": "heading",
       "norm_label": "security and operating limits",
       "source_file": "README.md",
-      "source_location": "L244"
+      "source_location": "L246"
     },
     {
       "_origin": "ast",
