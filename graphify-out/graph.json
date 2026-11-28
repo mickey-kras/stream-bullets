@@ -34209,7 +34209,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_nowline",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L158",
+      "source_location": "L160",
       "target": "app_i18n_index_tn",
       "weight": 1.0
     },
@@ -34221,7 +34221,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_refusaltext",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L183",
+      "source_location": "L185",
       "target": "app_lib_live_activity_isrefusal",
       "weight": 1.0
     },
@@ -71661,7 +71661,7 @@
       "relation": "calls",
       "source": "tests_live_activity_test",
       "source_file": "tests/live-activity.test.ts",
-      "source_location": "L207",
+      "source_location": "L224",
       "target": "tests_live_activity_test_view",
       "weight": 1.0
     },
@@ -206107,7 +206107,7 @@
       "relation": "inherits",
       "source": "app_lib_live_activity_shownalerts",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L127",
+      "source_location": "L129",
       "target": "app_lib_alerts_alertsstate",
       "weight": 1.0
     },
@@ -226580,7 +226580,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L113",
+      "source_location": "L115",
       "target": "app_lib_live_activity_replayable",
       "weight": 1.0
     },
@@ -226591,7 +226591,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L127",
+      "source_location": "L129",
       "target": "app_lib_live_activity_shownalerts",
       "weight": 1.0
     },
@@ -226602,7 +226602,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L138",
+      "source_location": "L140",
       "target": "app_lib_live_activity_shownalerts_b093640c7fee",
       "weight": 1.0
     },
@@ -226613,7 +226613,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L152",
+      "source_location": "L154",
       "target": "app_lib_live_activity_secondsleft",
       "weight": 1.0
     },
@@ -226624,7 +226624,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L157",
+      "source_location": "L159",
       "target": "app_lib_live_activity_nowline",
       "weight": 1.0
     },
@@ -226635,7 +226635,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L163",
+      "source_location": "L165",
       "target": "app_lib_live_activity_refusal_text",
       "weight": 1.0
     },
@@ -226646,7 +226646,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L174",
+      "source_location": "L176",
       "target": "app_lib_live_activity_isrefusal",
       "weight": 1.0
     },
@@ -226657,7 +226657,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L182",
+      "source_location": "L184",
       "target": "app_lib_live_activity_refusaltext",
       "weight": 1.0
     },
@@ -279133,7 +279133,7 @@
       "label": "ShownAlerts",
       "norm_label": "shownalerts",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L127"
+      "source_location": "L129"
     },
     {
       "_callable": true,
@@ -299883,7 +299883,7 @@
       "label": "isRefusal()",
       "norm_label": "isrefusal()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L174"
+      "source_location": "L176"
     },
     {
       "_callable": true,
@@ -299894,7 +299894,7 @@
       "label": "nowLine()",
       "norm_label": "nowline()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L157"
+      "source_location": "L159"
     },
     {
       "_callable": true,
@@ -299905,7 +299905,7 @@
       "label": "refusalText()",
       "norm_label": "refusaltext()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L182"
+      "source_location": "L184"
     },
     {
       "_callable": true,
@@ -299916,7 +299916,7 @@
       "label": "replayable()",
       "norm_label": "replayable()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L113"
+      "source_location": "L115"
     },
     {
       "_callable": true,
@@ -299938,7 +299938,7 @@
       "label": "secondsLeft()",
       "norm_label": "secondsleft()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L152"
+      "source_location": "L154"
     },
     {
       "_callable": true,
@@ -299949,7 +299949,7 @@
       "label": "shownAlerts()",
       "norm_label": "shownalerts()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L138"
+      "source_location": "L140"
     },
     {
       "_callable": true,
@@ -330589,7 +330589,7 @@
       "label": "REFUSAL_TEXT",
       "norm_label": "refusal_text",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L163"
+      "source_location": "L165"
     },
     {
       "_origin": "ast",

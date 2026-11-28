@@ -107,8 +107,10 @@ export function activityAfter(state: ActivityState, message: ActivityMessage): A
 
 /**
  * True when the server can still replay the alert of `row` at the server time `serverNow`. The server keeps the
- * newest REPLAY_KEPT support events of the last REPLAY_WINDOW_MS. A row that is itself a replay has no Replay, and
- * neither has a row whose event the server answered as gone (`gone`).
+ * newest REPLAY_KEPT support events of the last REPLAY_WINDOW_MS, by arrival. `rows` is newest first in arrival
+ * order, also for equal times (a YouTube page gives each of its events one time), so the place of `row` in `rows`
+ * tells how many newer events the server keeps. A row that is itself a replay has no Replay, and neither has a row
+ * whose event the server answered as gone (`gone`).
  */
 export function replayable(
   row: ActivityRow,
@@ -117,9 +119,9 @@ export function replayable(
   gone: ReadonlySet<string>,
 ): boolean {
   if (!row.original || gone.has(row.id) || serverNow - row.receivedAt >= REPLAY_WINDOW_MS) return false;
-  const newer: number = rows.filter(
-    (other: ActivityRow): boolean => other.original && other.receivedAt > row.receivedAt,
-  ).length;
+  const place: number = rows.indexOf(row);
+  if (place < 0) return false;
+  const newer: number = rows.slice(0, place).filter((other: ActivityRow): boolean => other.original).length;
   return newer < REPLAY_KEPT;
 }
 

@@ -191,6 +191,23 @@ describe("Replay", (): void => {
     expect(shown).toContain("twitch:d2");
   });
 
+  it("counts events with one time in their order of arrival, as a YouTube page gives them", (): void => {
+    // Each event of one poll page has the same time. The server keeps the newest REPLAY_KEPT by arrival.
+    const messages: ActivityMessage[] = Array.from({ length: REPLAY_KEPT + 1 }, (_, n: number) =>
+      event(support(`p${n}`, { receivedAt: T0 })),
+    );
+    const rows: readonly ActivityRow[] = after(messages).rows;
+    const shown: string[] = rows
+      .filter((row: ActivityRow): boolean => replayable(row, rows, T0 + 10, new Set<string>()))
+      .map((row: ActivityRow): string => row.id);
+    expect(shown).toHaveLength(REPLAY_KEPT);
+    expect(shown).not.toContain("twitch:p0");
+    expect(shown).toContain(`twitch:p${REPLAY_KEPT}`);
+    // A row that is not in the list has no Replay.
+    const [other] = after([event(support("elsewhere"))]).rows;
+    expect(replayable(other, rows, T0 + 10, new Set<string>())).toBe(false);
+  });
+
   it("does not show for a row that is itself a replay, or for an event that the server answered as gone", (): void => {
     const rows: readonly ActivityRow[] = after([
       event(support("d1")),
