@@ -1,4 +1,4 @@
-import type { ChannelStatus } from "../lib/activity";
+import type { ActivityPlatform, ChannelStatus } from "../lib/activity";
 
 /** One stored channel connection as the ingest object uses it. */
 export interface Connection {
@@ -13,6 +13,42 @@ export interface Connection {
   suspended: boolean;
   /** The connection reads support events (`support_events`). Without it, the object drops each support event. */
   support: boolean;
+}
+
+/**
+ * Reads the connection of one platform of a page from D1, with the status of the page. Null: the page has no
+ * connection for the platform, or the ingest object does not know its page yet.
+ */
+export async function readConnection(
+  db: D1Database,
+  streamerId: string | undefined,
+  platform: ActivityPlatform,
+): Promise<Connection | null> {
+  const row = await db
+    .prepare(
+      `SELECT c.id, c.external_id, c.status, c.status_code, c.last_event_at, c.support_events, s.status AS page_status
+        FROM channel_connections c JOIN streamers s ON s.id = c.streamer_id WHERE c.streamer_id=? AND c.platform=?`,
+    )
+    .bind(streamerId, platform)
+    .first<{
+      id: string;
+      external_id: string;
+      status: ChannelStatus;
+      status_code: string | null;
+      last_event_at: number | null;
+      support_events: number;
+      page_status: string;
+    }>();
+  if (!row) return null;
+  return {
+    id: row.id,
+    externalId: row.external_id,
+    status: row.status,
+    code: row.status_code,
+    lastEventAt: row.last_event_at,
+    suspended: row.page_status === "suspended",
+    support: row.support_events === 1,
+  };
 }
 
 /** The YouTube polling state that the ingest object keeps in its storage. */

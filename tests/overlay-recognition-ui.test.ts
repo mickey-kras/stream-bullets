@@ -11,14 +11,14 @@ import {
   testName,
 } from "../app/components/overlay/alerts-settings";
 import { SESSION_API, dockApi } from "../app/components/overlay/control-api";
-import { GoalSettings, VOTES_GOAL_READY, shownCounts } from "../app/components/overlay/goal-settings";
+import { GoalSettings } from "../app/components/overlay/goal-settings";
 import { LayerProperties, withGoal, withRule } from "../app/components/overlay/layer-properties";
 import { tagPlace } from "../app/components/overlay/layout-grid";
 import type { CharactersControl } from "../app/components/overlay/characters-controls";
 import { DEFAULT_LOCALE, loadCatalog, setLocaleSource, type Locale } from "../app/i18n";
 import { ALERT_REFUSALS, type AlertRefusal, type AlertsReply } from "../app/lib/alert-control";
 import { ALERT_MIN, ALERT_RULES, DEFAULT_RULES, TEST_ALERTS, type AlertRuleId } from "../app/lib/alerts";
-import { GOAL_COUNTS, GOAL_TARGET, GOAL_TITLE_LENGTH } from "../app/lib/goals";
+import { GOAL_TARGET, GOAL_TITLE_LENGTH } from "../app/lib/goals";
 import { DEFAULT_LAYERS, emptyCells, type GoalLayer, type OverlayLayers } from "../app/lib/overlay-layers";
 import type { OverlayData, OverlayState } from "../app/types";
 
@@ -241,13 +241,6 @@ describe("a whole number in the editor", () => {
 });
 
 describe("the goal layer in the editor", () => {
-  it("offers what the server counts today: not the poll votes, unless the goal counts them already", () => {
-    expect(VOTES_GOAL_READY).toBe(false);
-    expect(shownCounts("subs")).toEqual(["subs", "follows", "bits", "kicks", "chatters"]);
-    expect(shownCounts("votes")).toEqual(GOAL_COUNTS);
-    expect(shownCounts("subs", true)).toEqual(GOAL_COUNTS);
-  });
-
   it("has the title, the count, the target, the count of the server with Start again, and the one-thing note", () => {
     const html: string = properties("goal", layers(true, { title: "New subscribers", target: 40 }));
     expect(html).toContain(">Goal</h3>");

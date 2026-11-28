@@ -12,12 +12,6 @@ import { ControlApiContext, type ControlApi } from "./control-api";
 import { useAlerts } from "./use-alerts";
 import type { EditTiming } from "./use-layer-draft";
 
-/**
- * False until the server counts poll votes and new topics for a goal (issue #1043). The list of the things to count
- * then has no `votes` entry, unless the saved goal already counts votes.
- */
-export const VOTES_GOAL_READY: boolean = false;
-
 const COUNT_NAMES: Readonly<Record<GoalCount, MessageId>> = {
   subs: "overlay.goal.count.subs",
   follows: "overlay.goal.count.follows",
@@ -26,11 +20,6 @@ const COUNT_NAMES: Readonly<Record<GoalCount, MessageId>> = {
   chatters: "overlay.goal.count.chatters",
   votes: "overlay.goal.count.votes",
 };
-
-/** The things that the list offers to count, in the sequence of GOAL_COUNTS, and the saved one. */
-export function shownCounts(current: GoalCount, votes: boolean = VOTES_GOAL_READY): readonly GoalCount[] {
-  return GOAL_COUNTS.filter((count: GoalCount): boolean => votes || count !== "votes" || count === current);
-}
 
 function isGoalCount(value: string): value is GoalCount {
   const counts: readonly string[] = GOAL_COUNTS;
@@ -71,7 +60,7 @@ export function GoalSettings({
     value: numbers.format(bar.value),
     target: numbers.format(bar.target),
   });
-  const options: SelectOption[] = shownCounts(goal.counts).map(
+  const options: SelectOption[] = GOAL_COUNTS.map(
     (value: GoalCount): SelectOption => ({ value, label: t(COUNT_NAMES[value]) }),
   );
 
