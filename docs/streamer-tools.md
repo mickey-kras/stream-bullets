@@ -230,7 +230,12 @@ The **Overlay** section has two steps. See [the editor](overlay-composition.md#e
 1. **Build your overlay** is the overlay studio.
    - The toolbar is one line: the **Horizontal** and **Vertical** tabs, the list **Layout**, and three icon buttons at its right edge.
      The buttons are **Save as a new layout**, **Reset to the preset**, and **Start test**. Each button has a tooltip.
-   - The layer list has the groups **Picture** and **Content**. Each group starts open, and you can close it.
+   - The layer list has the groups **Picture**, **Recognition**, and **Content**. Each group starts open, and you can close it.
+     **Recognition** has the alerts layer and the goal layer.
+   - The settings of the alerts layer have a test alert with **Send test**, and a table of rules.
+     The settings of the goal layer have the title, what the goal counts, the target, the count, and **Start again**.
+     See [Alerts settings](overlay-composition.md#alerts-settings) and [Goal settings](overlay-composition.md#goal-settings).
+   - **Start test** also sends one test alert while the alerts layer is on stream.
    - The settings of the selected layer are below the grid of the horizontal output.
      They are beside the grid of the vertical output. On a phone, they are below the grid.
    - The help **How the grid works** stays closed until you open it.

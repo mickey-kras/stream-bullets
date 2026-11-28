@@ -161,7 +161,8 @@ This section is the format only. See [Support events of each provider](#support-
 
 `app/lib/alerts.ts` and `app/lib/goals.ts` have the rules for alerts on stream and for the goal.
 They are pure functions. The alert host of the page uses them. See [Alert host](#alert-host).
-No page shows an alert or a goal in this version.
+
+The overlay shows the alerts and the goal. The editor has their settings. See [Alerts settings](overlay-composition.md#alerts-settings).
 
 A rule tells what a support event does. The alerts layer holds the rules. See [Overlay layers](api.md#overlay-layers).
 

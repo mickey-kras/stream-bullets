@@ -678,7 +678,7 @@ test("the keyboard alone places, selects, changes and removes a layer", async ({
   // label.
   await editor.getByRole("button", { name: "Horizontal", exact: true }).focus();
   const order: string[] = [];
-  for (let step = 0; step < 17; step += 1) {
+  for (let step = 0; step < 20; step += 1) {
     await page.keyboard.press("Tab");
     order.push(
       await page.evaluate((): string => {
@@ -698,6 +698,9 @@ test("the keyboard alone places, selects, changes and removes a layer", async ({
     "+ Chat",
     "+ Characters",
     "+ Camera frame",
+    "Recognition · 2",
+    "+ Alerts",
+    "+ Goal",
     "Content · 6",
     "+ Poll",
     "+ Topic",

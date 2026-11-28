@@ -1,4 +1,5 @@
 import { createContext } from "react";
+import type { AlertControl, AlertsReply } from "../../lib/alert-control";
 import type { OverlayState } from "../../types";
 import { postJson, requestJson } from "../api";
 import type { ControlAction } from "./use-overlay-state";
@@ -14,6 +15,8 @@ export interface ControlApi {
   overlay: (action: ControlAction) => Promise<{ overlay: OverlayState }>;
   /** Closes the voting of a poll of the page `handle`. */
   closePoll: (handle: string, id: string) => Promise<void>;
+  /** Sends one alert control: test, mute, skip, replay, status, or a goal reset. */
+  alerts(control: AlertControl): Promise<AlertsReply>;
 }
 
 export const SESSION_API: ControlApi = {
@@ -22,6 +25,8 @@ export const SESSION_API: ControlApi = {
   closePoll: async (handle: string, id: string): Promise<void> => {
     await postJson<{ id: string }>(`/api/streamers/${handle}`, { action: "reveal", id });
   },
+  /** Sends one alert control: test, mute, skip, replay, status, or a goal reset. */
+  alerts: (control: AlertControl): Promise<AlertsReply> => postJson<AlertsReply>("/api/overlay/alerts", control),
 };
 
 /** The control API of the OBS dock of the page `handle`. The key goes in a header, never in the address. */
@@ -38,6 +43,8 @@ export function dockApi(handle: string, key: string): ControlApi {
     closePoll: async (_handle: string, id: string): Promise<void> => {
       await post<{ id: string }>("poll", { id });
     },
+    /** Sends one alert control: test, mute, skip, replay, status, or a goal reset. */
+    alerts: (control: AlertControl): Promise<AlertsReply> => post<AlertsReply>("alerts", control),
   };
 }
 
