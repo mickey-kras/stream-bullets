@@ -6,6 +6,8 @@ import {
   type ActivityMessage,
   type ActivityPlatform,
 } from "./activity";
+import { alertFace, type AlertFace } from "./alert-feed";
+import { alertShownOn, type AlertView } from "./alerts";
 
 /**
  * The merged overlay chat as a pure state machine (issue #663). It consumes the activity feed of #662 and decides
@@ -16,6 +18,8 @@ import {
  * - A reconnect snapshot is authoritative for its window. It never animates and never replays.
  * - Live messages wait in a short queue. A burst favours the newest messages over animation.
  * - Moderation removes rows and queued messages. Nothing here ever runs a chat command.
+ * - An alert with the mark in chat is one row in the same flow (issue #1043). It has no text of the supporter, and
+ *   moderation of chat does not remove it.
  */
 
 export const CHAT_LIMITS = {
@@ -40,22 +44,20 @@ export type ChatLimits = { readonly [K in keyof typeof CHAT_LIMITS]: number };
 /** Ids of moderated messages that the state remembers, so a late duplicate never shows a removed message again. */
 export const MAX_REMOVED_IDS = 1_000;
 
+/** IDs of marked alerts that the state remembers, so the state of the alerts that comes again makes no second row. */
+export const MAX_MARKED_IDS = 50;
+
 /** The snapshot size of the producer (SNAPSHOT_SIZE in channel-ingest-limits.ts). A full snapshot has a window. */
 const FULL_SNAPSHOT = 100;
 
 export type RowPhase = "entering" | "shown" | "removed" | "leaving";
 
-export interface ChatRow {
+/** What each row has: its place in the flow, its times, and its phase. */
+interface RowBase {
   id: string;
   /** Local arrival order. Rows are always sorted by it. */
   seq: number;
-  platform: ActivityPlatform;
-  userId: string;
-  name: string;
-  badges: { id: string; label: string }[];
-  fragments: ActivityFragment[];
-  truncated: boolean;
-  /** Server time of the message (from the feed). */
+  /** Server time of the message (from the feed), or of the start of the alert. */
   receivedAt: number;
   /** Local time from which the row's lifetime counts (for a snapshot row: its server time in local terms). */
   shownAt: number;
@@ -64,9 +66,32 @@ export interface ChatRow {
   phaseAt: number;
   /** True only for a row that slides in. Snapshot rows and burst rows never animate. */
   animate: boolean;
+}
+
+/** A chat message. */
+export interface MessageRow extends RowBase {
+  platform: ActivityPlatform;
+  userId: string;
+  name: string;
+  badges: { id: string; label: string }[];
+  fragments: ActivityFragment[];
+  truncated: boolean;
   /** True when the message is a chat command (`!word`), so turning on hideCommands can remove it later. */
   command: boolean;
+  /** A message row marks no alert. */
+  alert?: undefined;
 }
+
+/**
+ * The mark of an alert in chat: one highlight row with who and what. It has no user ID and no text of the supporter,
+ * so no moderation event names it.
+ */
+export interface AlertRow extends RowBase {
+  alert: AlertFace;
+}
+
+/** A row of the chat: a message, or the mark of an alert. `alert` tells them apart. */
+export type ChatRow = MessageRow | AlertRow;
 
 export interface ChatState {
   /** Goes up at each reset (a `reset` action or an `unavailable` message). Rows from an earlier epoch never fade. */
@@ -80,6 +105,8 @@ export interface ChatState {
   pending: ChatRow[];
   /** Ids of moderated messages (bounded by MAX_REMOVED_IDS, oldest forgotten first). */
   removed: ReadonlySet<string>;
+  /** IDs of the alerts that got a mark, the oldest first (bounded by MAX_MARKED_IDS). */
+  marked: readonly string[];
 }
 
 export interface ChatOptions {
@@ -101,10 +128,12 @@ export type ChatAction =
   | { type: "filter"; hideCommands: boolean; now: number }
   /** The output now shows `platform` only: the rows of the other platforms leave and do not come back. */
   | { type: "platform"; platform: ActivityPlatform; now: number }
+  /** An alert with the mark in chat (`chatMark` in alert-feed.ts selects it). Each alert ID gets one row. */
+  | { type: "alert"; alert: AlertView; now: number }
   | { type: "reset" };
 
 export function initialChatState(): ChatState {
-  return { epoch: 0, at: 0, seq: 0, rows: [], pending: [], removed: new Set<string>() };
+  return { epoch: 0, at: 0, seq: 0, rows: [], pending: [], removed: new Set<string>(), marked: [] };
 }
 
 // Leading white space and invisible format characters (ZWJ, BOM, bidi marks) are skipped. "！" is the full-width "!".
@@ -189,7 +218,7 @@ function limitsOf(options: ChatOptions): ChatLimits {
   return { ...CHAT_LIMITS, ...options.limits };
 }
 
-function toRow(chat: ActivityChat, seq: number, limits: ChatLimits): ChatRow {
+function toRow(chat: ActivityChat, seq: number, limits: ChatLimits): MessageRow {
   const { fragments, truncated } = displayFragments(chat, limits.maxDisplayChars);
   return {
     id: chat.id,
@@ -228,7 +257,12 @@ function dismiss(state: ChatState, gone: (row: ChatRow) => boolean, now: number)
 
 /** Removes the shown and queued command rows when hideCommands turns on (see ChatAction `filter`). */
 function dismissCommands(state: ChatState, now: number): ChatState {
-  return dismiss(state, (row: ChatRow): boolean => row.command, now);
+  return dismiss(state, (row: ChatRow): boolean => row.alert === undefined && row.command, now);
+}
+
+/** True for a row that an output for `platform` only does not show. A mark follows the rule of its alert. */
+function otherPlatform(row: ChatRow, platform: ActivityPlatform): boolean {
+  return row.alert === undefined ? row.platform !== platform : !alertShownOn(row.alert, platform);
 }
 
 function active(row: ChatRow): boolean {
@@ -336,7 +370,12 @@ function receiveChat(state: ChatState, chat: ActivityChat, options: ChatOptions)
   return { ...state, seq, pending };
 }
 
-type Match = (row: ChatRow) => boolean;
+/** Moderation names chat messages only: the mark of an alert stays. */
+type Match = (row: MessageRow) => boolean;
+
+function moderated(row: ChatRow, match: Match): boolean {
+  return row.alert === undefined && match(row);
+}
 
 function moderate(
   state: ChatState,
@@ -348,14 +387,14 @@ function moderate(
   const ids: string[] = extraId ? [extraId] : [];
   let changed = false;
   const rows: ChatRow[] = state.rows.map((row: ChatRow): ChatRow => {
-    if (!match(row)) return row;
+    if (!moderated(row, match)) return row;
     ids.push(row.id);
     if (!active(row)) return row;
     changed = true;
     return { ...row, phase, phaseAt: now, animate: false };
   });
   const pending: ChatRow[] = state.pending.filter((row: ChatRow): boolean => {
-    if (!match(row)) return true;
+    if (!moderated(row, match)) return true;
     ids.push(row.id);
     changed = true;
     return false;
@@ -365,25 +404,52 @@ function moderate(
   return { ...state, rows: changed ? rows : state.rows, pending: changed ? pending : state.pending, removed };
 }
 
+/** The ID of the row that marks an alert. A chat message can have the ID of a support event. */
+function markId(alert: Pick<AlertView, "id">): string {
+  return `alert:${alert.id}`;
+}
+
+/**
+ * The mark of an alert waits in the queue as a chat message does, so it enters in the flow of the rows. An alert ID
+ * that has a mark gets no second one: the server sends the alert on stream again with each change of its state.
+ */
+function receiveAlert(state: ChatState, alert: AlertView, limits: ChatLimits): ChatState {
+  if (state.marked.includes(alert.id)) return state;
+  const seq: number = state.seq + 1;
+  const row: AlertRow = {
+    id: markId(alert),
+    seq,
+    alert: alertFace(alert),
+    receivedAt: alert.startsAt,
+    shownAt: 0,
+    phase: "shown",
+    phaseAt: 0,
+    animate: false,
+  };
+  let pending: ChatRow[] = [...state.pending, row];
+  if (pending.length > limits.maxPending) pending = pending.slice(pending.length - limits.maxPending);
+  return { ...state, seq, pending, marked: [...state.marked, alert.id].slice(-MAX_MARKED_IDS) };
+}
+
 function receiveEvent(state: ChatState, event: ActivityEvent, now: number, options: ChatOptions): ChatState {
   switch (event.kind) {
     case "chat":
       return receiveChat(state, event, options);
     case "delete": {
       const id = `${event.platform}:${event.messageId}`;
-      return moderate(state, (row: ChatRow): boolean => row.id === id, "removed", id, now);
+      return moderate(state, (row: MessageRow): boolean => row.id === id, "removed", id, now);
     }
     case "ban":
     case "clear_user":
       return moderate(
         state,
-        (row: ChatRow): boolean => row.platform === event.platform && row.userId === event.userId,
+        (row: MessageRow): boolean => row.platform === event.platform && row.userId === event.userId,
         "removed",
         null,
         now,
       );
     case "clear":
-      return moderate(state, (row: ChatRow): boolean => row.platform === event.platform, "leaving", null, now);
+      return moderate(state, (row: MessageRow): boolean => row.platform === event.platform, "leaving", null, now);
     default:
       // `status` changes nothing on screen.
       return state;
@@ -414,15 +480,18 @@ function receiveSnapshot(
       : Number.NEGATIVE_INFINITY;
   const outside = (row: ChatRow): boolean =>
     since === undefined ? row.receivedAt < windowStart : row.receivedAt <= since;
-  const confirmed = (row: ChatRow): boolean => !active(row) || ids.has(row.id) || outside(row);
+  // A snapshot has chat only: it tells nothing about the mark of an alert, so the mark stays.
+  const confirmed = (row: ChatRow): boolean =>
+    row.alert !== undefined || !active(row) || ids.has(row.id) || outside(row);
   // Queued messages enter at once: the snapshot already holds anything newer.
   const flushed: ChatRow[] = state.pending
     .filter(confirmed)
     .map((row: ChatRow): ChatRow => ({ ...row, phase: "shown", shownAt: now, phaseAt: now, animate: false }));
   let rows: ChatRow[] = [...state.rows.filter(confirmed), ...flushed];
   const known = new Set<string>(rows.map((row: ChatRow): string => row.id));
+  // The newest chat message on screen. The mark of an alert has the time of its alert, which is not a chat time.
   let newest: number = Number.NEGATIVE_INFINITY;
-  for (const row of rows) if (row.receivedAt > newest) newest = row.receivedAt;
+  for (const row of rows) if (row.alert === undefined && row.receivedAt > newest) newest = row.receivedAt;
   let seq: number = state.seq;
   for (const chat of chats) {
     if (chat.receivedAt < newest || known.has(chat.id) || state.removed.has(chat.id) || hidden(chat, options)) continue;
@@ -455,12 +524,14 @@ function reduce(state: ChatState, action: Exclude<ChatAction, { type: "reset" }>
     return advance(filtered, action.now, limits);
   }
   if (action.type === "platform") {
-    const other = (row: ChatRow): boolean => row.platform !== action.platform;
+    const other = (row: ChatRow): boolean => otherPlatform(row, action.platform);
     return advance(dismiss(state, other, action.now), action.now, limits);
   }
+  if (action.type === "alert") return advance(receiveAlert(state, action.alert, limits), action.now, limits);
   const { message, now } = action;
   if (message.type === "unavailable") return { ...initialChatState(), epoch: state.epoch + 1 };
-  // Other message types (playground frames) are not chat.
+  // Other message types (playground frames and the state of the alerts) are not chat. The reader gives the alert
+  // that the chat marks as an `alert` action.
   if (message.type !== "snapshot" && message.type !== "event") return state;
   const next: ChatState =
     message.type === "snapshot"

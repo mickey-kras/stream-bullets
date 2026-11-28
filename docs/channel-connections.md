@@ -336,7 +336,8 @@ The closed notes of each card in **Streamer tools** list the support events of t
 For Twitch, the notes also name the three permissions in plain words.
 
 **Live** and the dock show the support events in the chat list. See [Chat](streamer-tools.md#chat).
-The overlay chat shows no support event. Alerts on stream are a different feature.
+The overlay chat shows no support event. An alert with the mark in chat makes one row in the overlay chat.
+See [Alerts layer](overlay-composition.md#alerts-layer).
 
 A connection with the field on does these things:
 

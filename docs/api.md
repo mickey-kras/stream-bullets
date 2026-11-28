@@ -135,7 +135,8 @@ English also shows `error` for `step_up_required` and `other_key_required`.
   The content layers are `poll`, `topic`, `next`, `message`, `card`, and `support`. Each content layer shows one content source.
   A layer is on stream in an output when it has a cell in the orientation of that output and its `enabled` value is `true`.
 - The grid also has the `alerts` layer and the `goal` layer. The API saves their cells and their settings.
-  The overlay does not show them in this version, and the editor does not offer them.
+  The overlay shows them. The editor does not offer them in this version.
+  See [Alerts layer](overlay-composition.md#alerts-layer) and [Goal layer](overlay-composition.md#goal-layer).
 - `orientation` is `horizontal` (a grid of 32 × 18 cells) or `vertical` (18 × 32 cells). A cell is 60 pixels.
   It is the output that the editor shows. Each output has its own link, and OBS can show the two outputs together.
   See [Outputs](overlay-composition.md#outputs).
