@@ -69,9 +69,13 @@ function row(id: string, more: Partial<ActivityRow> = {}): ActivityRow {
 }
 
 function render(more: Partial<ActivityViewProps> = {}, key: string | null = null): string {
+  // By default the server keeps each original row that the test shows.
+  const rows: readonly ActivityRow[] = more.rows ?? [];
+  const kept: string[] = rows.filter((one: ActivityRow): boolean => one.original).map((one: ActivityRow) => one.id);
   const props: ActivityViewProps = {
     alerts: quiet,
-    rows: [],
+    rows,
+    kept,
     now: T0,
     onStream: true,
     control: idle,
@@ -173,6 +177,8 @@ describe("the recent support events", (): void => {
       row("old", { receivedAt: T0 - REPLAY_WINDOW_MS }),
     ];
     const html: string = render({ rows, control: { ...idle, gone: new Set<string>(["twitch:gone"]) } });
+    // A row that the server does not keep has no Replay.
+    expect(render({ rows, kept: [] })).not.toContain("data-activity-replay");
     const replays: string[] = [...html.matchAll(/aria-label="Replay: [^"]*"[^>]*data-activity-replay/g)].map(
       (match: RegExpMatchArray): string => match[0],
     );

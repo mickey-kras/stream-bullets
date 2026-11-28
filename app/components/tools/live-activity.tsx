@@ -311,6 +311,8 @@ function ActivityNote(): ReactNode {
 export interface ActivityViewProps {
   alerts: ShownAlerts;
   rows: readonly ActivityRow[];
+  /** The IDs that the server keeps for a replay (`ActivityState.kept`). */
+  kept: readonly string[];
   /** Server time, for the age of the rows and the end of a replay. */
   now: number;
   /** The Alerts layer is on stream in an output. */
@@ -320,7 +322,15 @@ export interface ActivityViewProps {
 }
 
 /** The part for its state: the controls, the alert on stream, and the rows. */
-export function ActivityView({ alerts, rows, now, onStream, control, dock }: Readonly<ActivityViewProps>): ReactNode {
+export function ActivityView({
+  alerts,
+  rows,
+  kept,
+  now,
+  onStream,
+  control,
+  dock,
+}: Readonly<ActivityViewProps>): ReactNode {
   const reason: string = useId();
   const session: boolean = useContext(ControlApiContext).key === null;
   const mute: ReactNode = <MuteButton alerts={alerts} control={control} />;
@@ -381,7 +391,7 @@ export function ActivityView({ alerts, rows, now, onStream, control, dock }: Rea
               key={row.id}
               row={row}
               now={now}
-              replay={replayable(row, rows, now, control.gone)}
+              replay={replayable(row, kept, now, control.gone)}
               onStream={onStream}
               reason={reason}
               control={control}
@@ -463,6 +473,7 @@ export function LiveActivity({
     <ActivityView
       alerts={alerts}
       rows={state.rows}
+      kept={state.kept}
       now={now}
       onStream={onAnyOutput(layers, "alerts")}
       control={control}

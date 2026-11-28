@@ -74,15 +74,34 @@ function withRows(rows: readonly ActivityRow[], added: readonly ActivityRow[]): 
     .slice(0, ACTIVITY_ROWS);
 }
 
-/** What the part keeps of the socket: the rows, and the server time of the newest `alerts` message. */
+/** What the part keeps of the socket: the rows, the kept IDs, and the server time of the newest `alerts` message. */
 export interface ActivityState {
   /** Newest first, at most ACTIVITY_ROWS. */
   rows: readonly ActivityRow[];
+  /**
+   * The IDs of the support events that the server keeps for a replay, in the order that the server stored them,
+   * newest last, at most REPLAY_KEPT. The socket sends events in that order, and a snapshot lists the kept events in
+   * that order. A time does not give this order: a YouTube poll can store events with an earlier time after an event
+   * of a different platform.
+   */
+  kept: readonly string[];
   /** 0 before the first `alerts` message. */
   alertsAt: number;
 }
 
-export const INITIAL_ACTIVITY: ActivityState = { rows: [], alertsAt: 0 };
+export const INITIAL_ACTIVITY: ActivityState = { rows: [], kept: [], alertsAt: 0 };
+
+/** The kept IDs after one message of the socket. A snapshot gives the list of the server; an original adds one. */
+function keptAfter(kept: readonly string[], message: ActivityMessage): readonly string[] {
+  if (message.type === "snapshot")
+    return message.events
+      .filter(isSupport)
+      .map((event: ActivitySupport): string => event.id)
+      .slice(-REPLAY_KEPT);
+  if (message.type !== "event" || !isSupport(message.event) || message.event.replay) return kept;
+  const id: string = message.event.id;
+  return [...kept.filter((other: string): boolean => other !== id), id].slice(-REPLAY_KEPT);
+}
 
 /** The rows after one message of the socket. A reconnect snapshot adds the events that the server keeps. */
 function rowsAfter(rows: readonly ActivityRow[], message: ActivityMessage): readonly ActivityRow[] {
@@ -102,27 +121,24 @@ function rowsAfter(rows: readonly ActivityRow[], message: ActivityMessage): read
 export function activityAfter(state: ActivityState, message: ActivityMessage): ActivityState {
   if (message.type === "alerts") return message.at > state.alertsAt ? { ...state, alertsAt: message.at } : state;
   const rows: readonly ActivityRow[] = rowsAfter(state.rows, message);
-  return rows === state.rows ? state : { ...state, rows };
+  const kept: readonly string[] = keptAfter(state.kept, message);
+  return rows === state.rows && kept === state.kept ? state : { ...state, rows, kept };
 }
 
 /**
  * True when the server can still replay the alert of `row` at the server time `serverNow`. The server keeps the
- * newest REPLAY_KEPT support events of the last REPLAY_WINDOW_MS, by arrival. `rows` is newest first in arrival
- * order, also for equal times (a YouTube page gives each of its events one time), so the place of `row` in `rows`
- * tells how many newer events the server keeps. A row that is itself a replay has no Replay, and neither has a row
- * whose event the server answered as gone (`gone`).
+ * newest REPLAY_KEPT support events of the last REPLAY_WINDOW_MS, in the order that it stored them: `kept` of the
+ * state. A row that is itself a replay has no Replay, and neither has a row whose event the server answered as gone
+ * (`gone`).
  */
 export function replayable(
   row: ActivityRow,
-  rows: readonly ActivityRow[],
+  kept: readonly string[],
   serverNow: number,
   gone: ReadonlySet<string>,
 ): boolean {
   if (!row.original || gone.has(row.id) || serverNow - row.receivedAt >= REPLAY_WINDOW_MS) return false;
-  const place: number = rows.indexOf(row);
-  if (place < 0) return false;
-  const newer: number = rows.slice(0, place).filter((other: ActivityRow): boolean => other.original).length;
-  return newer < REPLAY_KEPT;
+  return kept.includes(row.id);
 }
 
 /** The state of the alerts in the part, with the local time when this page ends the alert on stream. */
