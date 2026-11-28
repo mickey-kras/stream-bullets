@@ -10689,7 +10689,7 @@
       "relation": "calls",
       "source": "app_components_overlay_alerts_settings_alertrulestable",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L402",
+      "source_location": "L426",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -10701,7 +10701,7 @@
       "relation": "calls",
       "source": "app_components_overlay_alerts_settings_alertrulestable",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L413",
+      "source_location": "L437",
       "target": "app_components_overlay_alerts_settings_shownrules",
       "weight": 1.0
     },
@@ -10713,7 +10713,7 @@
       "relation": "calls",
       "source": "app_components_overlay_alerts_settings_alertrulestable",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L414",
+      "source_location": "L438",
       "target": "app_components_overlay_alerts_settings_rulerow",
       "weight": 1.0
     },
@@ -10749,7 +10749,7 @@
       "relation": "calls",
       "source": "app_components_overlay_alerts_settings_alerttest",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L206",
+      "source_location": "L230",
       "target": "app_components_overlay_alerts_settings_showntests",
       "weight": 1.0
     },
@@ -10761,7 +10761,7 @@
       "relation": "calls",
       "source": "app_components_overlay_alerts_settings_alerttest",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L207",
+      "source_location": "L231",
       "target": "app_components_overlay_alerts_settings_testname",
       "weight": 1.0
     },
@@ -10773,7 +10773,7 @@
       "relation": "calls",
       "source": "app_components_overlay_alerts_settings_alerttest",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L218",
+      "source_location": "L242",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -10785,7 +10785,7 @@
       "relation": "calls",
       "source": "app_components_overlay_alerts_settings_alerttest",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L232",
+      "source_location": "L256",
       "target": "app_components_ui_select_select",
       "weight": 1.0
     },
@@ -10797,7 +10797,7 @@
       "relation": "calls",
       "source": "app_components_overlay_alerts_settings_alerttest",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L237",
+      "source_location": "L261",
       "target": "app_components_overlay_alerts_settings_istestalert",
       "weight": 1.0
     },
@@ -10809,7 +10809,7 @@
       "relation": "calls",
       "source": "app_components_overlay_alerts_settings_alerttest",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L245",
+      "source_location": "L269",
       "target": "app_components_overlay_alerts_settings_alerttest_send",
       "weight": 1.0
     },
@@ -10821,7 +10821,7 @@
       "relation": "calls",
       "source": "app_components_overlay_alerts_settings_alerttest",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L248",
+      "source_location": "L272",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -10833,7 +10833,7 @@
       "relation": "calls",
       "source": "app_components_overlay_alerts_settings_alerttest_send",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L218",
+      "source_location": "L242",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -10845,7 +10845,7 @@
       "relation": "calls",
       "source": "app_components_overlay_alerts_settings_alerttest_send",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L220",
+      "source_location": "L244",
       "target": "app_components_overlay_alerts_settings_alertsfailure",
       "weight": 1.0
     },
@@ -10857,7 +10857,7 @@
       "relation": "calls",
       "source": "app_components_overlay_alerts_settings_rulerow",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L319",
+      "source_location": "L343",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -10869,7 +10869,7 @@
       "relation": "calls",
       "source": "app_components_overlay_alerts_settings_rulerow",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L324",
+      "source_location": "L348",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -10881,7 +10881,7 @@
       "relation": "calls",
       "source": "app_components_overlay_alerts_settings_rulerow",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L330",
+      "source_location": "L354",
       "target": "app_components_overlay_alerts_settings_stacklabel",
       "weight": 1.0
     },
@@ -10893,7 +10893,7 @@
       "relation": "calls",
       "source": "app_components_overlay_alerts_settings_rulerow",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L331",
+      "source_location": "L355",
       "target": "app_lib_alerts_hasthreshold",
       "weight": 1.0
     },
@@ -10905,7 +10905,7 @@
       "relation": "calls",
       "source": "app_components_overlay_alerts_settings_rulerow",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L332",
+      "source_location": "L356",
       "target": "app_components_overlay_alerts_settings_wholenumberinput",
       "weight": 1.0
     },
@@ -10917,7 +10917,7 @@
       "relation": "calls",
       "source": "app_components_overlay_alerts_settings_rulerow",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L345",
+      "source_location": "L369",
       "target": "app_components_overlay_alerts_settings_ruleswitch",
       "weight": 1.0
     },
@@ -10929,7 +10929,7 @@
       "relation": "calls",
       "source": "app_components_overlay_alerts_settings_stacklabel",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L304",
+      "source_location": "L328",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -10977,7 +10977,7 @@
       "relation": "calls",
       "source": "app_components_overlay_alerts_settings_wholenumberinput",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L150",
+      "source_location": "L152",
       "target": "app_components_overlay_alerts_settings_parsewholenumber",
       "weight": 1.0
     },
@@ -10989,7 +10989,7 @@
       "relation": "calls",
       "source": "app_components_overlay_alerts_settings_wholenumberinput",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L151",
+      "source_location": "L153",
       "target": "app_i18n_index_intllocale",
       "weight": 1.0
     },
@@ -11001,7 +11001,7 @@
       "relation": "calls",
       "source": "app_components_overlay_alerts_settings_wholenumberinput",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L179",
+      "source_location": "L203",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -67293,7 +67293,7 @@
       "relation": "calls",
       "source": "tests_e2e_alerts_editor_spec",
       "source_file": "tests/e2e/alerts-editor.spec.ts",
-      "source_location": "L197",
+      "source_location": "L211",
       "target": "tests_e2e_alerts_editor_spec_shot",
       "weight": 1.0
     },
@@ -67305,7 +67305,7 @@
       "relation": "calls",
       "source": "tests_e2e_alerts_editor_spec",
       "source_file": "tests/e2e/alerts-editor.spec.ts",
-      "source_location": "L200",
+      "source_location": "L214",
       "target": "tests_e2e_alerts_editor_spec_obspage",
       "weight": 1.0
     },
@@ -67317,7 +67317,7 @@
       "relation": "calls",
       "source": "tests_e2e_alerts_editor_spec",
       "source_file": "tests/e2e/alerts-editor.spec.ts",
-      "source_location": "L201",
+      "source_location": "L215",
       "target": "tests_e2e_alerts_editor_spec_pick",
       "weight": 1.0
     },
@@ -67329,7 +67329,7 @@
       "relation": "calls",
       "source": "tests_e2e_alerts_editor_spec",
       "source_file": "tests/e2e/alerts-editor.spec.ts",
-      "source_location": "L202",
+      "source_location": "L216",
       "target": "tests_e2e_alerts_editor_spec_answered",
       "weight": 1.0
     },
@@ -67341,7 +67341,7 @@
       "relation": "calls",
       "source": "tests_e2e_alerts_editor_spec",
       "source_file": "tests/e2e/alerts-editor.spec.ts",
-      "source_location": "L379",
+      "source_location": "L393",
       "target": "tests_e2e_alerts_editor_spec_focusedname",
       "weight": 1.0
     },
@@ -87704,6 +87704,18 @@
       "source_file": "app/components/overlay/alerts-settings.tsx",
       "source_location": "L24",
       "target": "app_components_overlay_use_layer_draft_edittiming",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_overlay_alerts_settings",
+      "source_file": "app/components/overlay/alerts-settings.tsx",
+      "source_location": "L24",
+      "target": "app_components_overlay_use_layer_draft_save_idle_ms",
       "weight": 1.0
     },
     {
@@ -163267,7 +163279,6 @@
       "source_file": "app/components/overlay/alerts-settings.tsx",
       "source_location": "L24",
       "target": "app_components_overlay_use_layer_draft",
-      "type_only": true,
       "weight": 1.0
     },
     {
@@ -208542,7 +208553,7 @@
       "relation": "contains",
       "source": "app_components_overlay_alerts_settings",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L129",
+      "source_location": "L131",
       "target": "app_components_overlay_alerts_settings_wholenumberinput",
       "weight": 1.0
     },
@@ -208553,7 +208564,7 @@
       "relation": "contains",
       "source": "app_components_overlay_alerts_settings",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L191",
+      "source_location": "L215",
       "target": "app_components_overlay_alerts_settings_alerttest",
       "weight": 1.0
     },
@@ -208564,7 +208575,7 @@
       "relation": "contains",
       "source": "app_components_overlay_alerts_settings",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L270",
+      "source_location": "L294",
       "target": "app_components_overlay_alerts_settings_ruleswitch",
       "weight": 1.0
     },
@@ -208586,19 +208597,8 @@
       "relation": "contains",
       "source": "app_components_overlay_alerts_settings",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L301",
+      "source_location": "L325",
       "target": "app_components_overlay_alerts_settings_stacklabel",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_overlay_alerts_settings",
-      "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L310",
-      "target": "app_components_overlay_alerts_settings_rulerow",
       "weight": 1.0
     },
     {
@@ -208619,8 +208619,8 @@
       "relation": "contains",
       "source": "app_components_overlay_alerts_settings",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L375",
-      "target": "app_components_overlay_alerts_settings_how_alerts_behave",
+      "source_location": "L334",
+      "target": "app_components_overlay_alerts_settings_rulerow",
       "weight": 1.0
     },
     {
@@ -208641,7 +208641,18 @@
       "relation": "contains",
       "source": "app_components_overlay_alerts_settings",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L391",
+      "source_location": "L399",
+      "target": "app_components_overlay_alerts_settings_how_alerts_behave",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_overlay_alerts_settings",
+      "source_file": "app/components/overlay/alerts-settings.tsx",
+      "source_location": "L415",
       "target": "app_components_overlay_alerts_settings_alertrulestable",
       "weight": 1.0
     },
@@ -208718,7 +208729,7 @@
       "relation": "contains",
       "source": "app_components_overlay_alerts_settings_alerttest",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L210",
+      "source_location": "L234",
       "target": "app_components_overlay_alerts_settings_alerttest_send",
       "weight": 1.0
     },
@@ -212097,6 +212108,17 @@
       "source_file": "app/components/overlay/use-design-scale.ts",
       "source_location": "L13",
       "target": "app_components_overlay_use_design_scale_usedesignscale",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_overlay_use_layer_draft",
+      "source_file": "app/components/overlay/use-layer-draft.ts",
+      "source_location": "L15",
+      "target": "app_components_overlay_use_layer_draft_save_idle_ms",
       "weight": 1.0
     },
     {
@@ -284568,7 +284590,7 @@
       "label": "AlertRulesTable()",
       "norm_label": "alertrulestable()",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L391"
+      "source_location": "L415"
     },
     {
       "_callable": true,
@@ -284590,7 +284612,7 @@
       "label": "AlertTest()",
       "norm_label": "alerttest()",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L191"
+      "source_location": "L215"
     },
     {
       "_callable": true,
@@ -284601,7 +284623,7 @@
       "label": "send()",
       "norm_label": "send()",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L210"
+      "source_location": "L234"
     },
     {
       "_callable": true,
@@ -284634,7 +284656,7 @@
       "label": "RuleRow()",
       "norm_label": "rulerow()",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L310"
+      "source_location": "L334"
     },
     {
       "_callable": true,
@@ -284645,7 +284667,7 @@
       "label": "RuleSwitch()",
       "norm_label": "ruleswitch()",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L270"
+      "source_location": "L294"
     },
     {
       "_callable": true,
@@ -284678,7 +284700,7 @@
       "label": "StackLabel()",
       "norm_label": "stacklabel()",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L301"
+      "source_location": "L325"
     },
     {
       "_callable": true,
@@ -284700,7 +284722,7 @@
       "label": "WholeNumberInput()",
       "norm_label": "wholenumberinput()",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L129"
+      "source_location": "L131"
     },
     {
       "_callable": true,
@@ -322497,7 +322519,7 @@
       "label": "HOW_ALERTS_BEHAVE",
       "norm_label": "how_alerts_behave",
       "source_file": "app/components/overlay/alerts-settings.tsx",
-      "source_location": "L375"
+      "source_location": "L399"
     },
     {
       "_origin": "ast",
@@ -323278,6 +323300,16 @@
       "norm_label": "leavelisteners",
       "source_file": "app/components/overlay/use-layer-draft.ts",
       "source_location": "L38"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_overlay_use_layer_draft_save_idle_ms",
+      "label": "SAVE_IDLE_MS",
+      "norm_label": "save_idle_ms",
+      "source_file": "app/components/overlay/use-layer-draft.ts",
+      "source_location": "L15"
     },
     {
       "_origin": "ast",
@@ -335169,42 +335201,42 @@
             "callee": "fulfill",
             "file": "tests/e2e/alerts-editor.spec.ts",
             "lang": "typescript",
-            "line": "L217",
+            "line": "L231",
             "receiver_type": "Route"
           },
           {
             "callee": "url",
             "file": "tests/e2e/alerts-editor.spec.ts",
             "lang": "typescript",
-            "line": "L278",
+            "line": "L292",
             "receiver_type": "WebSocket"
           },
           {
             "callee": "focus",
             "file": "tests/e2e/alerts-editor.spec.ts",
             "lang": "typescript",
-            "line": "L409",
+            "line": "L423",
             "receiver_type": "Locator"
           },
           {
             "callee": "getBoundingClientRect",
             "file": "tests/e2e/alerts-editor.spec.ts",
             "lang": "typescript",
-            "line": "L472",
+            "line": "L486",
             "receiver_type": "Element"
           },
           {
             "callee": "checkVisibility",
             "file": "tests/e2e/alerts-editor.spec.ts",
             "lang": "typescript",
-            "line": "L477",
+            "line": "L491",
             "receiver_type": "Element"
           },
           {
             "callee": "querySelectorAll",
             "file": "tests/e2e/alerts-editor.spec.ts",
             "lang": "typescript",
-            "line": "L489",
+            "line": "L503",
             "receiver_type": "Element"
           }
         ]

@@ -12,7 +12,7 @@ import type { OverlayState } from "../../types";
 import { errorMessage, postJson, sendJson } from "../api";
 
 /** Keyboard edits save after this much idle time. Drags and buttons save at once. */
-const SAVE_IDLE_MS = 400;
+export const SAVE_IDLE_MS = 400;
 
 export type SaveStatus = "idle" | "saving" | "saved";
 

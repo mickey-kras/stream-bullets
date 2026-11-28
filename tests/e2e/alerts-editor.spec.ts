@@ -179,6 +179,20 @@ test("the owner places the Alerts layer, changes its rules, and a test from the 
   await raid.fill("12");
   await save;
   await expect(raid).not.toHaveAttribute("aria-invalid");
+  // A value typed on the way never saves: 25, then two quick Backspaces leave the field empty, and 2 does not save.
+  const before: number = saves.length;
+  await raid.fill("");
+  await raid.pressSequentially("25");
+  await raid.press("Backspace");
+  await raid.press("Backspace");
+  await page.evaluate(() => new Promise<void>((resolve) => setTimeout(resolve, 600)));
+  await raid.blur();
+  await expect(raid).toHaveAttribute("aria-invalid", "true");
+  expect(saves).toHaveLength(before);
+  expect((await storedLayers(page)).alerts.rules.raid.min).toBe(12);
+  await raid.fill("12");
+  await raid.blur();
+  await expect(raid).not.toHaveAttribute("aria-invalid");
   // A switch saves one field at once.
   save = saved(page);
   await table.getByRole("checkbox", { name: "Banner for Follow" }).check();
