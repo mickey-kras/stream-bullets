@@ -118,13 +118,16 @@ These are the rules:
 | `silence` | A live channel had no chat or support for 10 minutes. |
 | `unwatched` | No consumer read the channel. The server reads YouTube only while a page listens. |
 
-An outage or an unwatched time stops a silence gap. Thus a provider error does not end a session.
-The end of an outage starts the silence count again.
+During an outage or an unwatched time, the channel gets no silence gap.
+The 3 hours of silence do not end the channel during that time. The checks continue.
+Thus a provider error does not end a session. The end of the interruption starts the silence count again.
 
 A channel keeps a maximum of 48 live intervals in one session. A further interval joins the newest interval.
 
 `sessionCounts(state, now)` tells if chat and support count now.
 `nextWakeAt(state, now)` gives the next time that an alarm can change the state.
+After a `tick` at a time, this next time is later than that time.
+In the grace time before the limit of 24 hours, it is the end of the grace time, not the limit.
 
 ## Metrics
 

@@ -258,6 +258,12 @@ function livePlatforms(session: OpenSession): [ActivityPlatform, PlatformLive][]
   return result;
 }
 
+/** True while the connection of a live channel has an outage or nothing reads it: it has an open gap of that reason. */
+function isInterrupted(session: OpenSession, name: ActivityPlatform): boolean {
+  const reason: GapReason | undefined = session.gaps[name]?.reason;
+  return reason === "outage" || reason === "unwatched";
+}
+
 /** The end of the last thing that held the session open. */
 interface Release {
   at: number;
@@ -300,8 +306,10 @@ export function sessionCounts(state: SessionState, now: number): boolean {
 export function nextWakeAt(state: SessionState, now: number): number | null {
   const session: OpenSession | null = state.session;
   if (session === null) return null;
-  const times: number[] = [session.startedAt + MAX_SESSION_MS];
+  const capAt: number = session.startedAt + MAX_SESSION_MS;
   const release: Release | null = releaseOf(session, now);
+  // A release before the limit waits for its grace time, and the limit does not apply to it (see `advance`).
+  const times: number[] = release !== null && release.at <= capAt ? [] : [capAt];
   if (release !== null) times.push(release.at + GRACE_MS);
   else if (session.scheduleEndsAt !== null && session.scheduleEndsAt > now) times.push(session.scheduleEndsAt);
   for (const [name, live] of livePlatforms(session)) {
@@ -310,7 +318,8 @@ export function nextWakeAt(state: SessionState, now: number): number | null {
       continue;
     }
     if (!session.gaps[name]) times.push(live.heardAt + SILENCE_GAP_MS);
-    times.push(Math.max(live.confirmedAt, live.checkAt ?? 0) + SILENCE_CHECK_MS, live.confirmedAt + MAX_SILENCE_MS);
+    times.push(Math.max(live.confirmedAt, live.checkAt ?? 0) + SILENCE_CHECK_MS);
+    if (!isInterrupted(session, name)) times.push(live.confirmedAt + MAX_SILENCE_MS);
   }
   return Math.min(...times);
 }
@@ -394,13 +403,18 @@ function endInterval(
   session.intervals.push({ platform: name, from: live.since, to: end, endedBy: by });
 }
 
-/** R3, R5, R9: a channel offline for the grace time ends at its offline time; a silent one at its last activity. */
+/**
+ * R3, R5, R9: a channel offline for the grace time ends at its offline time; a silent one at its last activity. A
+ * channel with an interruption is not silent: the connection, not the stream, stopped the events. The end of the
+ * interruption starts the silence count again.
+ */
 function expirePlatforms(session: OpenSession, now: number, out: SessionEffect[]): void {
   for (const entry of livePlatforms(session)) {
-    const [, live] = entry;
+    const [name, live] = entry;
     if (live.offlineAt !== null) {
       if (live.offlineAt + GRACE_MS <= now) endInterval(session, entry, live.offlineAt, "provider", out);
-    } else if (now - live.confirmedAt >= MAX_SILENCE_MS) endInterval(session, entry, live.heardAt, "silence", out);
+    } else if (!isInterrupted(session, name) && now - live.confirmedAt >= MAX_SILENCE_MS)
+      endInterval(session, entry, live.heardAt, "silence", out);
   }
 }
 

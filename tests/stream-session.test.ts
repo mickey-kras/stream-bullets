@@ -565,6 +565,17 @@ describe("R10: the limit of a session", (): void => {
     expect(closes(run(steps).effects)).toMatchObject([{ endedAt: at(day - 3), endedBy: "provider" }]);
   });
 
+  it("wakes the server at the end of that grace time, not at the limit that passed", (): void => {
+    const steps: Step[] = [[0, online("kick")]];
+    for (let minute = 5; minute < day - 5; minute += 5) steps.push([minute, chat("kick")]);
+    steps.push([day - 3, offline("kick")], [day, tick]);
+    const waiting: Run = run(steps);
+    expect(closes(waiting.effects)).toEqual([]);
+    expect(nextWakeAt(waiting.state, at(day))).toBe(at(day - 3) + GRACE_MS);
+    const end: Run = run([[day + 7, tick]], waiting.state);
+    expect(closes(end.effects)).toMatchObject([{ endedAt: at(day - 3), endedBy: "provider" }]);
+  });
+
   it("continues a schedule that holds the session after the limit", (): void => {
     const { effects, state } = run([
       [0, { type: "scheduleLive", window: window({ endsAt: at(day + 120) }) }],
@@ -657,6 +668,103 @@ describe("R11: gaps", (): void => {
     ]);
     expect(state.interrupted).toEqual({ youtube: "unwatched" });
     expect(gaps(effects)).toEqual([{ platform: "youtube", reason: "unwatched", from: at(5), to: null }]);
+  });
+});
+
+describe("a long interruption", (): void => {
+  const silence: number = MAX_SILENCE_MS / MINUTE;
+
+  it("does not end a channel by silence during an outage, and counts the silence again from the recovery", () => {
+    const steps: Step[] = [
+      [0, online("twitch")],
+      [1, chat("twitch")],
+      [2, { type: "status", platform: "twitch", interruption: "outage" }],
+      ...ticks(5, silence + 30),
+    ];
+    const outage: Run = run(steps);
+    expect(closes(outage.effects)).toEqual([]);
+    // The checks continue during the outage: the provider can still say that the stream is live or offline.
+    expect(checks(outage.effects).length).toBeGreaterThan(0);
+    const wake: number | null = nextWakeAt(outage.state, at(silence + 30));
+    expect(wake).not.toBeNull();
+    expect(wake ?? 0).toBeGreaterThan(at(silence + 30));
+    expect(wake ?? 0).toBeLessThanOrEqual(at(silence + 30) + SILENCE_CHECK_MS);
+    const recovered: Run = run(
+      [
+        [silence + 40, { type: "status", platform: "twitch", interruption: null }],
+        ...ticks(silence + 45, 2 * silence + 35),
+      ],
+      outage.state,
+    );
+    expect(closes(recovered.effects)).toEqual([]);
+    const end: Run = run([[2 * silence + 40, tick]], recovered.state);
+    expect(closes(end.effects)).toMatchObject([{ endedAt: at(silence + 40), endedBy: "silence" }]);
+    expect(gaps([...outage.effects, ...recovered.effects, ...end.effects])).toEqual([
+      { platform: "twitch", reason: "outage", from: at(2), to: at(silence + 40) },
+      { platform: "twitch", reason: "silence", from: at(silence + 40), to: at(silence + 40) },
+    ]);
+  });
+
+  it("does not end an unwatched channel by silence", (): void => {
+    const { effects, state } = run([
+      [0, online("youtube")],
+      [1, { type: "status", platform: "youtube", interruption: "unwatched" }],
+      [silence + 5, tick],
+      [2 * silence, tick],
+    ]);
+    expect(closes(effects)).toEqual([]);
+    expect(state.session?.platforms.youtube?.offlineAt).toBeNull();
+  });
+});
+
+describe("the wake time", (): void => {
+  /** A small deterministic generator, so a failure repeats. */
+  function generator(seed: number): () => number {
+    let value: number = seed;
+    return (): number => {
+      value = (value * 1_103_515_245 + 12_345) % 2_147_483_648;
+      return value / 2_147_483_648;
+    };
+  }
+
+  const platforms: readonly ActivityPlatform[] = ["twitch", "youtube", "kick"];
+
+  /** Small steps near the limit. Else mostly steps of some minutes, and sometimes some hours. */
+  function minutesOf(random: () => number, near: boolean): number {
+    if (near) return Math.floor(random() * 4);
+    return Math.floor(random() * (random() < 0.05 ? 600 : 15));
+  }
+
+  function signalOf(random: () => number, minute: number): SessionSignal {
+    const platform: ActivityPlatform = platforms[Math.floor(random() * platforms.length)];
+    const pick: number = random();
+    if (pick < 0.15) return online(platform);
+    if (pick < 0.25) return offline(platform);
+    if (pick < 0.5) return chat(platform);
+    if (pick < 0.6) return { type: "status", platform, interruption: random() < 0.5 ? null : "outage" };
+    if (pick < 0.65) return { type: "checked", platform, live: random() < 0.5 };
+    if (pick < 0.7)
+      return { type: "scheduleLive", window: window({ startsAt: at(minute - 5), endsAt: at(minute + 90) }) };
+    return tick;
+  }
+
+  it("is in the future after each tick, or null", (): void => {
+    // Half of the runs start with a session near its limit, so the steps reach the limit often.
+    const nearLimit: SessionState = structuredClone(run([[0, online("twitch")]]).state);
+    if (nearLimit.session) nearLimit.session.startedAt = at(0) - MAX_SESSION_MS + 20 * MINUTE;
+    for (let seed = 1; seed <= 60; seed++) {
+      const random = generator(seed);
+      let state: SessionState = seed % 2 === 0 ? nearLimit : EMPTY_SESSION_STATE;
+      let minute = 0;
+      for (let step = 0; step < 400; step++) {
+        minute += minutesOf(random, seed % 2 === 0 && step < 20);
+        const signal: SessionSignal = signalOf(random, minute);
+        state = sessionStep(state, signal, at(minute)).state;
+        if (signal.type !== "tick") state = sessionStep(state, tick, at(minute)).state;
+        const wake: number | null = nextWakeAt(state, at(minute));
+        if (wake !== null) expect(wake, `seed ${seed}, step ${step}`).toBeGreaterThan(at(minute));
+      }
+    }
   });
 });
 
