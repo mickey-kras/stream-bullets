@@ -173,6 +173,10 @@ const sections = (legal: ReturnType<typeof loader>): readonly LegalSection[] => 
           </li>
           <li>Topics, polls, comments, replies, votes, reactions, and likes.</li>
           <li>
+            The time of your latest vote on each poll. Stream reports use it to count the votes during a stream; a
+            report has counts only, not who voted. We remove the time 7 days after the vote and keep the vote.
+          </li>
+          <li>
             The text of a comment before each edit, with the time it was written and edited. Only the owner of the page
             and administrators can see it. Other readers see only the newest text and the label Edited.
           </li>
@@ -387,6 +391,10 @@ const sections = (legal: ReturnType<typeof loader>): readonly LegalSection[] => 
         </li>
         <li>
           <strong>AI interest votes</strong> are deleted after 30 days by the hourly task.
+        </li>
+        <li>
+          <strong>The time of a poll vote</strong> is removed 7 days after the vote by the hourly task. The vote itself
+          stays, as your other content does.
         </li>
         <li>
           <strong>Earlier texts of an edited comment</strong> are deleted 90 days after the edit by the hourly task.

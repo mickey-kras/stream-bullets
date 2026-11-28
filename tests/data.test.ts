@@ -1,5 +1,5 @@
 import { Buffer as NodeBuffer } from "node:buffer";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AppEnv } from "../app/env";
 import type { Comment, CommentThread, Streamer } from "../app/types";
 import {
@@ -288,6 +288,26 @@ describe("topics and polls", (): void => {
     const entry = await getEntry(env, id, "viewer");
     expect(entry).toMatchObject({ total: 1, counts: [0, 1], myVote: 1 });
     expect((await getEntry(env, id, null))?.myVote).toBeNull();
+  });
+
+  it("stores the server time of a new vote and of a changed vote", async (): Promise<void> => {
+    const id = await seedEntry("choice");
+    const votedAt = (): Promise<number | null> =>
+      env.DB.prepare("SELECT voted_at FROM entry_votes WHERE entry_id=? AND user_id='viewer'")
+        .bind(id)
+        .first<number | null>("voted_at");
+    const start: number = Date.now();
+    vi.useFakeTimers({ toFake: ["Date"], now: start });
+    try {
+      await mutateEntry(env, "viewer", streamer.id, { action: "vote", id, choice: 0 });
+      expect(await votedAt()).toBe(start);
+      vi.setSystemTime(start + 60_000);
+      await mutateEntry(env, "viewer", streamer.id, { action: "vote", id, choice: 1 });
+      expect(await votedAt()).toBe(start + 60_000);
+    } finally {
+      vi.useRealTimers();
+    }
+    expect(await getEntry(env, id, "viewer")).toMatchObject({ total: 1, counts: [0, 1], myVote: 1 });
   });
 
   it("uses database time to reject expired polls and rejects invalid options", async (): Promise<void> => {

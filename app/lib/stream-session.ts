@@ -47,6 +47,10 @@ export type SessionStart = (typeof SESSION_STARTS)[number];
 export const SESSION_ENDS = ["provider", "schedule", "silence", "limit", "lost"] as const;
 export type SessionEnd = (typeof SESSION_ENDS)[number];
 
+/** The status of a stored session: `live` until the server records its end, then `ended`. */
+export const SESSION_STATUSES = ["live", "ended"] as const;
+export type SessionStatus = (typeof SESSION_STATUSES)[number];
+
 /** Why one live interval of a channel ended. */
 export const INTERVAL_ENDS = ["provider", "silence", "limit"] as const;
 export type IntervalEnd = (typeof INTERVAL_ENDS)[number];

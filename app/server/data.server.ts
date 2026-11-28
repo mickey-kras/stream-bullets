@@ -882,16 +882,17 @@ export async function mutateEntry(
   const permission = await entryPermission(env, action.id, streamerId);
   switch (action.action) {
     case "vote": {
+      // `voted_at` is the server time of each vote write, a new vote or a changed one (docs/stream-reports.md).
       await applyMutation(
         env,
         streamerId,
         env.DB.prepare(`
-        INSERT INTO entry_votes (entry_id,user_id,choice)
-        SELECT id,?,? FROM entries WHERE id=? AND streamer_id=? AND kind!='topic' AND revealed=0
+        INSERT INTO entry_votes (entry_id,user_id,choice,voted_at)
+        SELECT id,?,?,? FROM entries WHERE id=? AND streamer_id=? AND kind!='topic' AND revealed=0
           AND NOT EXISTS(SELECT 1 FROM entry_mash m WHERE m.entry_id=entries.id AND m.phase!='setup')
           AND (ends_at IS NULL OR ends_at>CAST(strftime('%s','now') AS INTEGER)*1000+CAST(substr(strftime('%f','now'),4,3) AS INTEGER)) AND ?<json_array_length(options)
-        ON CONFLICT(entry_id,user_id) DO UPDATE SET choice=excluded.choice
-      `).bind(viewerId, action.choice, action.id, streamerId, action.choice),
+        ON CONFLICT(entry_id,user_id) DO UPDATE SET choice=excluded.choice,voted_at=excluded.voted_at
+      `).bind(viewerId, action.choice, Date.now(), action.id, streamerId, action.choice),
         409,
         "Voting is closed or the option is not valid.",
       );

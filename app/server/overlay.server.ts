@@ -219,6 +219,25 @@ function passedWrite(writes: LayersWrites, write: LayersWrite): boolean {
 }
 
 /**
+ * The record of a feature of a topic (docs/stream-reports.md): one `stream_features` row, in the D1 batch of the
+ * overlay write that put the topic on stream. The row goes in only when that write is the stored state now: the
+ * new revision, with the time and the layers that it wrote. Thus a lost compare-and-set records nothing, also when
+ * another write took the same revision. A topic that is gone or of another page records nothing. Two writes of the
+ * same state at the same time record one row.
+ */
+export function featureRecord(
+  env: AppEnv,
+  streamerId: string,
+  entryId: string,
+  write: { revision: number; at: number; layers: string },
+): D1PreparedStatement {
+  const sql = `INSERT OR IGNORE INTO stream_features (streamer_id,entry_id,featured_at)
+    SELECT ?1,?2,?3 WHERE EXISTS (SELECT 1 FROM entries WHERE id=?2 AND streamer_id=?1 AND kind='topic')
+      AND EXISTS (SELECT 1 FROM overlay_state WHERE streamer_id=?1 AND revision=?4 AND updated_at=?3 AND layers=?5)`;
+  return env.DB.prepare(sql).bind(streamerId, entryId, write.at, write.revision, write.layers);
+}
+
+/**
  * The result of `updateOverlay`. `changed` is false when the server ignored an old layer write. `featured` is the
  * topic that the change put on stream (`featuredTopic`), or null. The caller then credits its author.
  */
@@ -250,29 +269,34 @@ export async function updateOverlay(
     if (write && passedWrite(writes, write)) return { overlay: current, changed: false, featured: null };
     const next = await nextOverlayState(env, streamerId, current, action);
     const applied: LayersWrites = write ? recordWrite(writes, write) : writes;
+    const featured: string | null = featuredTopic(current.layers, next.layers);
+    const layersText: string = storedLayersText(next.layers);
+    const now: number = Date.now();
     // The columns from before the overlay studio keep their values: `air`, `preview`, `position`, `size`, `instant`.
-    const result = await env.DB.prepare(`INSERT INTO overlay_state (streamer_id,show_results,message,message_style,
-        layers,chat_test_until,layers_writes,revision,updated_at)
+    const upsert: D1PreparedStatement = env.DB.prepare(`INSERT INTO overlay_state (streamer_id,show_results,message,
+        message_style,layers,chat_test_until,layers_writes,revision,updated_at)
         VALUES (?,?,?,?,?,?,?,?,?)
       ON CONFLICT(streamer_id) DO UPDATE SET show_results=excluded.show_results,message=excluded.message,
         message_style=excluded.message_style,layers=excluded.layers,chat_test_until=excluded.chat_test_until,
         layers_writes=excluded.layers_writes,revision=excluded.revision,updated_at=excluded.updated_at
-      WHERE overlay_state.revision=?`)
-      .bind(
-        streamerId,
-        next.showResults ? 1 : 0,
-        next.message,
-        next.messageStyle,
-        storedLayersText(next.layers),
-        next.chatTestUntil,
-        JSON.stringify(applied),
-        next.revision,
-        Date.now(),
-        current.revision,
-      )
-      .run();
-    if (result.meta.changes > 0)
-      return { overlay: next, changed: true, featured: featuredTopic(current.layers, next.layers) };
+      WHERE overlay_state.revision=?`).bind(
+      streamerId,
+      next.showResults ? 1 : 0,
+      next.message,
+      next.messageStyle,
+      layersText,
+      next.chatTestUntil,
+      JSON.stringify(applied),
+      next.revision,
+      now,
+      current.revision,
+    );
+    const record: D1PreparedStatement[] =
+      featured === null
+        ? []
+        : [featureRecord(env, streamerId, featured, { revision: next.revision, at: now, layers: layersText })];
+    const [result] = await env.DB.batch([upsert, ...record]);
+    if (result.meta.changes > 0) return { overlay: next, changed: true, featured };
   }
   throw new HttpError(409, "The overlay changed in another tab. Try again.");
 }

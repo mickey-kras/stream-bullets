@@ -266,7 +266,7 @@ beforeAll(async (): Promise<void> => {
 afterAll(async (): Promise<void> => database.dispose());
 
 describe("migrations 0006 onwards", (): void => {
-  it("covers 0006 to 0051", (): void => {
+  it("covers 0006 to 0052", (): void => {
     expect(applied.map((file: string): string => file.slice(0, 4))).toEqual([
       "0006",
       "0007",
@@ -314,8 +314,136 @@ describe("migrations 0006 onwards", (): void => {
       "0049",
       "0050",
       "0051",
+      "0052",
     ]);
   });
+
+  it("keeps each old vote and its count, without a time (0052)", async (): Promise<void> => {
+    const votes = await db
+      .prepare(
+        `SELECT (SELECT count(*) FROM entry_votes) AS n, (SELECT count(voted_at) FROM entry_votes) AS timed,
+          (SELECT COALESCE(SUM(votes), 0) FROM entry_vote_counts) AS counted`,
+      )
+      .first<{ n: number; timed: number; counted: number }>();
+    expect(votes?.n).toBeGreaterThan(0);
+    expect(votes).toMatchObject({ timed: 0, counted: votes?.n });
+    const indexes = await db
+      .prepare(
+        `SELECT name FROM sqlite_master WHERE type='index'
+          AND name IN ('entry_votes_time_idx','stream_events_starts_idx') ORDER BY name`,
+      )
+      .all<{ name: string }>();
+    expect(indexes.results.map((row: { name: string }): string => row.name)).toEqual([
+      "entry_votes_time_idx",
+      "stream_events_starts_idx",
+    ]);
+  });
+
+  it("adds the stream sessions (0052) with their checks, and their rows go with the page and the entry", async (): Promise<void> => {
+    const own: TestDatabase = await createTestDatabase();
+    const run = (sql: string): Promise<D1Result> => own.db.prepare(sql).run();
+    const rejects = async (sql: string, pattern: RegExp = /CHECK constraint failed/): Promise<void> => {
+      await expect(run(sql)).rejects.toThrow(pattern);
+    };
+    const count = async (table: string): Promise<number> =>
+      (await own.db.prepare(`SELECT count(*) AS n FROM ${table}`).first<{ n: number }>())?.n ?? -1;
+    // A session row with the given columns. The other columns have valid values.
+    const session = (id: string, columns: Record<string, string | number>): string => {
+      const row: Record<string, string | number> = {
+        id,
+        streamer_id: "page",
+        status: "live",
+        started_at: 10,
+        started_by: "twitch",
+        summary: "{}",
+        timeline: "{}",
+        created_at: 1,
+        updated_at: 1,
+        ...columns,
+      };
+      const values: string[] = Object.values(row).map((value: string | number): string =>
+        typeof value === "number" ? String(value) : `'${value}'`,
+      );
+      return `INSERT INTO stream_sessions (${Object.keys(row).join(",")}) VALUES (${values.join(",")})`;
+    };
+    try {
+      await own.db.batch([
+        own.db.prepare(
+          `INSERT INTO user (id,name,email,email_verified,created_at,updated_at)
+            SELECT value, value, value||'@example.test', 1, 1, 1 FROM json_each('["host","fan"]')`,
+        ),
+        own.db.prepare("INSERT INTO streamers (id,owner_id,handle,name) VALUES ('page','host','host_page','Host')"),
+        own.db.prepare(`INSERT INTO entries (id,streamer_id,author_id,kind,title,options,created_at) VALUES
+          ('topic','page','fan','topic','Topic','[]',1), ('poll','page','host','choice','Poll','["x","y"]',1)`),
+        own.db.prepare(
+          `INSERT INTO stream_events (id,streamer_id,title,starts_at,duration_min,platform,url,tz,created_at,updated_at)
+            VALUES ('ev','page','Show',1,60,'twitch','https://twitch.tv/host','UTC',1,1)`,
+        ),
+      ]);
+      // A live session has no end. An ended session has a reason and an end at or after its start.
+      await run(session("live", { event_id: "ev", title: "t".repeat(140) }));
+      await run(session("ended", { status: "ended", started_by: "schedule", ended_at: 10, ended_by: "lost" }));
+      await run(session("large", { timeline: `{"a":"${"x".repeat(98_296)}"}` }));
+      await rejects(session("s1", { status: "paused" }));
+      await rejects(session("s2", { ended_at: 20 }));
+      await rejects(session("s3", { ended_by: "provider" }));
+      await rejects(session("s4", { status: "ended", ended_at: 20 }));
+      await rejects(session("s4b", { status: "ended", ended_by: "provider" }));
+      await rejects(session("s5", { status: "ended", ended_at: 9, ended_by: "provider" }));
+      await rejects(session("s6", { status: "ended", ended_at: 20, ended_by: "offline" }));
+      await rejects(session("s7", { started_by: "tiktok" }));
+      await rejects(session("s8", { title: "t".repeat(141) }));
+      await rejects(session("s9", { summary: "not json" }));
+      await rejects(session("s10", { timeline: "[]" }));
+      await rejects(session("s11", { summary: `{"a":"${"x".repeat(16_384)}"}` }));
+      await rejects(session("s12", { timeline: `{"a":"${"x".repeat(98_304)}"}` }));
+      await rejects(session("s13", { event_id: "gone" }), /FOREIGN KEY/);
+      await own.db.batch([
+        own.db.prepare("INSERT INTO stream_session_polls (session_id,entry_id,votes) VALUES ('live','poll',0)"),
+        own.db.prepare(
+          `INSERT INTO stream_session_topics (session_id,entry_id,first_featured_at,times)
+            VALUES ('live','topic',10,1), ('ended','topic',10,2)`,
+        ),
+        own.db.prepare(
+          "INSERT INTO stream_features (streamer_id,entry_id,featured_at) VALUES ('page','topic',10), ('page','topic',11)",
+        ),
+      ]);
+      await rejects("INSERT INTO stream_session_polls (session_id,entry_id,votes) VALUES ('ended','poll',-1)");
+      await rejects(
+        "INSERT INTO stream_session_topics (session_id,entry_id,first_featured_at,times) VALUES ('large','topic',10,0)",
+      );
+      await rejects("INSERT INTO stream_session_polls (session_id,entry_id,votes) VALUES ('none','poll',1)", /FOREIGN KEY/);
+      await rejects("INSERT INTO stream_features (streamer_id,entry_id,featured_at) VALUES ('page','none',12)", /FOREIGN KEY/);
+      await rejects("INSERT INTO stream_features (streamer_id,entry_id,featured_at) VALUES ('page','topic',10)", /UNIQUE/);
+      // A deleted stream of the schedule keeps its session. A deleted session takes its polls and topics.
+      await run("DELETE FROM stream_events WHERE id='ev'");
+      expect(await own.db.prepare("SELECT event_id FROM stream_sessions WHERE id='live'").first()).toEqual({
+        event_id: null,
+      });
+      await run("DELETE FROM stream_sessions WHERE id='ended'");
+      expect(await count("stream_session_topics")).toBe(1);
+      // A deleted topic or poll takes its rows, and the sessions stay.
+      await run("DELETE FROM entries WHERE id IN ('topic','poll')");
+      for (const table of ["stream_session_polls", "stream_session_topics", "stream_features"])
+        expect(await count(table), table).toBe(0);
+      expect(await count("stream_sessions")).toBe(2);
+      // A deleted page takes its sessions, their rows, and its features.
+      await own.db.batch([
+        own.db.prepare(
+          "INSERT INTO entries (id,streamer_id,author_id,kind,title,options,created_at) VALUES ('t2','page','fan','topic','T','[]',1)",
+        ),
+        own.db.prepare("INSERT INTO stream_features (streamer_id,entry_id,featured_at) VALUES ('page','t2',1)"),
+        own.db.prepare(
+          "INSERT INTO stream_session_topics (session_id,entry_id,first_featured_at,times) VALUES ('live','t2',1,1)",
+        ),
+      ]);
+      await run("DELETE FROM streamers WHERE id='page'");
+      for (const table of ["stream_sessions", "stream_session_topics", "stream_features"])
+        expect(await count(table), table).toBe(0);
+    } finally {
+      await own.dispose();
+    }
+  }, 60_000);
 
   it("turns the support events on for each old connection that can read them (0051), and keeps the rows and tokens", async (): Promise<void> => {
     // A database of its own: the connections must exist before the migration runs.

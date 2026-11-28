@@ -20,6 +20,7 @@ import { featuredTopic } from "../lib/topic-credit";
 import type { OverlayState } from "../types";
 import { assertStreamerWritable } from "./access.server";
 import { HttpError } from "./http.server";
+import { featureRecord } from "./overlay.server";
 import { OVERLAY_COLUMNS, overlayValue, type OverlayRow } from "./overlay-state";
 
 // The layouts of the overlay: `POST /api/overlay/layouts`. The rules are in app/lib/overlay-layouts.ts. A layout
@@ -103,21 +104,29 @@ export async function updateLayouts(
       chatTestUntil: onAnyOutput(after.layers, "chat") ? current.chatTestUntil : 0,
       revision: current.revision + 1,
     };
-    const result =
-      await env.DB.prepare(`INSERT INTO overlay_state (streamer_id,layers,layouts,chat_test_until,revision,updated_at)
-        VALUES (?,?,?,?,?,?)
+    const featured: string | null = featuredTopic(before.layers, after.layers);
+    const now: number = Date.now();
+    const upsert: D1PreparedStatement = env.DB.prepare(`INSERT INTO overlay_state (streamer_id,layers,layouts,
+        chat_test_until,revision,updated_at) VALUES (?,?,?,?,?,?)
       ON CONFLICT(streamer_id) DO UPDATE SET layers=excluded.layers,layouts=excluded.layouts,
         chat_test_until=excluded.chat_test_until,revision=excluded.revision,updated_at=excluded.updated_at
-      WHERE overlay_state.revision=?`)
-        .bind(streamerId, layersText, layoutsText, next.chatTestUntil, next.revision, Date.now(), current.revision)
-        .run();
+      WHERE overlay_state.revision=?`).bind(
+      streamerId,
+      layersText,
+      layoutsText,
+      next.chatTestUntil,
+      next.revision,
+      now,
+      current.revision,
+    );
+    // The feature of the topic goes in the same batch, as in `updateOverlay`.
+    const record: D1PreparedStatement[] =
+      featured === null
+        ? []
+        : [featureRecord(env, streamerId, featured, { revision: next.revision, at: now, layers: layersText })];
+    const [result] = await env.DB.batch([upsert, ...record]);
     if (result.meta.changes > 0)
-      return {
-        overlay: next,
-        layouts: after.layouts,
-        layersChanged: after.layers !== before.layers,
-        featured: featuredTopic(before.layers, after.layers),
-      };
+      return { overlay: next, layouts: after.layouts, layersChanged: after.layers !== before.layers, featured };
   }
   throw new HttpError(409, "The overlay changed in another tab. Try again.");
 }

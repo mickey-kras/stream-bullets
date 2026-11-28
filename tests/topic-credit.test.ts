@@ -15,6 +15,8 @@ import {
 import { AlertHost } from "../app/server/alert-host";
 import { ChannelIngest } from "../app/server/channel-ingest";
 import { PlaygroundHost } from "../app/server/playground-host";
+import { updateLayouts } from "../app/server/overlay-layouts.server";
+import { updateOverlay } from "../app/server/overlay.server";
 import { creditTopic } from "../app/server/topic-credit.server";
 import { apiCaller } from "./helpers/api";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
@@ -569,5 +571,122 @@ describe("a topic credit", (): void => {
     const logged: string = JSON.stringify([error.mock.calls, warn.mock.calls]);
     for (const secretValue of [TWITCH_ID, linked, "Which boss first?", "Name viewer"])
       expect(logged).not.toContain(secretValue);
+  });
+});
+
+describe("the fact of a feature", (): void => {
+  interface FeatureRow {
+    entry_id: string;
+    featured_at: number;
+  }
+
+  async function features(): Promise<FeatureRow[]> {
+    const rows = await env.DB.prepare(
+      "SELECT entry_id,featured_at FROM stream_features WHERE streamer_id=? ORDER BY featured_at,entry_id",
+    )
+      .bind(page)
+      .all<FeatureRow>();
+    return rows.results;
+  }
+
+  /** Runs `race` after each of the first `times` reads of the overlay row, as a second tab that saves first. */
+  function racing(race: () => Promise<unknown>, times: number): AppEnv {
+    let left: number = times;
+    const db: D1Database = env.DB;
+    const prepare = (sql: string): D1PreparedStatement => {
+      const statement: D1PreparedStatement = db.prepare(sql);
+      if (!sql.startsWith("SELECT air,")) return statement;
+      return {
+        bind: (...values: unknown[]) => {
+          const bound: D1PreparedStatement = statement.bind(...values);
+          return {
+            first: async <T>(): Promise<T | null> => {
+              const row: T | null = await bound.first<T>();
+              if (left-- > 0) await race();
+              return row;
+            },
+          };
+        },
+      } as unknown as D1PreparedStatement;
+    };
+    return { ...env, DB: { prepare, batch: db.batch.bind(db) } as unknown as D1Database };
+  }
+
+  /** A save of another tab: it takes the next revision and features nothing. */
+  function otherTab(): () => Promise<unknown> {
+    let saves = 0;
+    return () => updateOverlay(env, "owner", page, { action: "showResults", on: ++saves % 2 === 0 });
+  }
+
+  const feature = { action: "layers", items: { topic: { ref: linked, enabled: true } } } as const;
+
+  it("is one row for a feature from Live, with the server time of the write", async (): Promise<void> => {
+    expect((await featureFromLive(linked)).status).toBe(200);
+    expect(await features()).toEqual([{ entry_id: linked, featured_at: T0 }]);
+  });
+
+  it("is recorded while the alerts layer is off stream, without a credit", async (): Promise<void> => {
+    await saveLayers(layers(false, { ref: null, enabled: false }));
+    expect((await featureFromLive(linked)).status).toBe(200);
+    expect(ingestPaths).not.toContain("/alert-credit");
+    expect(await features()).toEqual([{ entry_id: linked, featured_at: T0 }]);
+  });
+
+  it("is one row for a feature from the dock", async (): Promise<void> => {
+    const key: string = await dockKey();
+    expect((await featureFromDock(unlinked, key)).status).toBe(200);
+    expect(await features()).toEqual([{ entry_id: unlinked, featured_at: T0 }]);
+  });
+
+  it("is one row for a layout that puts the topic on stream", async (): Promise<void> => {
+    const layout = (body: Record<string, unknown>): Promise<Response> =>
+      call("POST", "overlay/layouts", { user: "owner", body });
+    await saveLayers(layers(true, { ref: linked, enabled: true }));
+    const made = await layout({ action: "create", output: "horizontal", name: "Topic", from: "current", keep: "Mine" });
+    const saved: string | null = (await made.json<{ layouts: OverlayLayouts }>()).layouts.horizontal.active;
+    // The new layout keeps the same topic on stream, and the preset takes it off stream: no feature.
+    vi.setSystemTime(T0 + 1000);
+    expect((await layout({ action: "select", output: "horizontal", id: "preset:chatting", keep: "Mine" })).status).toBe(200);
+    expect(await features()).toEqual([]);
+    vi.setSystemTime(T0 + 2000);
+    expect((await layout({ action: "select", output: "horizontal", id: saved, keep: "Mine" })).status).toBe(200);
+    await settle();
+    expect(await features()).toEqual([{ entry_id: linked, featured_at: T0 + 2000 }]);
+  });
+
+  it("is no row while the same topic stays on stream, and a new row for a new feature", async (): Promise<void> => {
+    await featureFromLive(linked);
+    vi.setSystemTime(T0 + 1000);
+    await featureFromLive(linked);
+    expect((await call("POST", "overlay", { user: "owner", body: { action: "showResults", on: false } })).status).toBe(
+      200,
+    );
+    expect(await features()).toEqual([{ entry_id: linked, featured_at: T0 }]);
+    vi.setSystemTime(T0 + 2000);
+    await featureFromLive(unlinked);
+    expect(await features()).toEqual([
+      { entry_id: linked, featured_at: T0 },
+      { entry_id: unlinked, featured_at: T0 + 2000 },
+    ]);
+  });
+
+  it("is no row for a write that loses the compare-and-set, also when the winner took the same revision", async (): Promise<void> => {
+    await expect(updateOverlay(racing(otherTab(), 3), "owner", page, feature)).rejects.toMatchObject({ status: 409 });
+    expect(await features()).toEqual([]);
+    // One lost write, then a write that wins: one row, from the write that won.
+    const won = await updateOverlay(racing(otherTab(), 1), "owner", page, feature);
+    expect(won).toMatchObject({ changed: true, featured: linked });
+    expect(await features()).toEqual([{ entry_id: linked, featured_at: T0 }]);
+  });
+
+  it("is no row for a layout write that loses the compare-and-set", async (): Promise<void> => {
+    await saveLayers(layers(true, { ref: linked, enabled: true }));
+    const keep = { output: "horizontal", keep: "Mine" } as const;
+    const made = await updateLayouts(env, "owner", page, { action: "create", name: "Topic", from: "current", ...keep });
+    const saved: string = made.layouts.horizontal.active ?? "";
+    await updateLayouts(env, "owner", page, { action: "select", id: "preset:chatting", ...keep });
+    const back = { action: "select", id: saved, ...keep } as const;
+    await expect(updateLayouts(racing(otherTab(), 3), "owner", page, back)).rejects.toMatchObject({ status: 409 });
+    expect(await features()).toEqual([]);
   });
 });
