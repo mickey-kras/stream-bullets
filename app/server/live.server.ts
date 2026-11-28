@@ -77,10 +77,19 @@ export function notifyActivityPage(env: AppEnv, streamerId: string): void {
   waitUntil(callActivity(env, streamerId, "page-status"));
 }
 
+/**
+ * Tells the goal of the page about a poll vote or a new topic (`key`, app/server/goal-votes.ts). Only a goal that
+ * counts votes counts it: the alert host of the page knows what the goal counts, so the API reads nothing for it.
+ * The log of a failure has the path and the status, never the key, because a vote key has the user ID.
+ */
+export function notifyGoalCount(env: AppEnv, streamerId: string, key: string): void {
+  if (activityAvailable(env)) waitUntil(callActivity(env, streamerId, "goal-count", { op: "count", key }));
+}
+
 async function callActivity(
   env: AppEnv,
   streamerId: string,
-  path: "overlay-key" | "page-status" | "playground-config",
+  path: "overlay-key" | "page-status" | "playground-config" | "goal-count",
   body?: unknown,
 ): Promise<void> {
   try {

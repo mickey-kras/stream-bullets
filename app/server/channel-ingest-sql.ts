@@ -134,7 +134,8 @@ function storedJson(body: string): unknown {
  * goes when the alert starts, when the owner mutes the alerts, and when the owner disconnects the platform.
  *
  * For the goal, the host also keeps the IDs of the newest support events, so an event counts one time, and one key
- * for each person that a goal for chatters counted. A key is a hash: it has no user ID.
+ * for each person that a goal for chatters counted and each vote and topic that a goal for votes counted. A key is
+ * a hash: it has no user ID.
  */
 export const ALERTS = {
   create(sql: SqlStorage): void {

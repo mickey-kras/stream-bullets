@@ -1857,6 +1857,9 @@ describe("overlay control", (): void => {
         { op: "skip", id: "twitch:g1" },
         { op: "status", extra: true },
         { op: "goalReset", value: 0 },
+        // The count of a goal for votes is internal: only the API sends it, after a vote or a new topic.
+        { op: "count", key: "topic:12345678-1234-4234-8234-123456789012" },
+        { op: "count", key: "vote:12345678-1234-4234-8234-123456789012:owner" },
       ])
         expect((await alerts(control)).status, JSON.stringify(control)).toBe(400);
       env.CHANNELS_OFF = "1";

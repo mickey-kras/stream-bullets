@@ -239,7 +239,7 @@ A goal counts one thing (`counts`):
 - `countSupport` adds the amount to the progress. It adds nothing for an event from before `startedAt`.
   It compares `sentAt`, or `receivedAt` when the event has no `sentAt`.
 - The alert host refuses a known event ID, as `acceptDelivery` does. Thus an event counts one time.
-- The server counts nothing for `votes` in this version. The value of such a goal stays 0.
+- A goal that counts `votes` counts each poll vote and each new topic of the page one time. See [Votes for the goal](#votes-for-the-goal).
 - A goal never converts Bits, KICKs, or a currency.
 
 ### Alert host
@@ -257,6 +257,7 @@ The object gives the host each support event that it stored and sent to the sock
    The steps for the alert do not change the count.
 
 The object also gives the host each chat message that it stored. A goal that counts chatters counts its sender.
+The API tells the host about each poll vote and each new topic. See [Votes for the goal](#votes-for-the-goal).
 
 The host then does these steps for the alert:
 
@@ -321,6 +322,30 @@ Thus an event that wakes the object reads no database. The host reads the saved 
 
 A message to a socket never has a platform user ID. A view has the display name, and `null` for an anonymous supporter.
 The user ID of a supporter is only in the line, for the reaction of the character.
+
+### Votes for the goal
+
+A goal that counts `votes` counts each poll vote and each new topic of the page, one time.
+After each vote and each new topic, `POST /api/streamers/:handle` tells the `ChannelIngest` object of the page.
+The API sends `{op: "count", key}` to the internal path `/goal-count` with `waitUntil`, after the response.
+`app/server/goal-votes.ts` makes the keys and validates the body.
+
+- The key of a vote is `vote:<entryId>:<userId>`. The key of a new topic is `topic:<entryId>`.
+  A viewer who changes a vote sends the same key again. Thus each vote counts one time.
+- The API does not read what the goal counts. It sends each key while the activity feed is on.
+  The alert host knows what the goal counts from its copy of the layers.
+  It ignores the key when the goal counts a different thing, or when the goal layer has no place on a grid.
+  Thus a vote costs one call to the object and no database read.
+- A key that the host ignores still uses its copy of the layers. Thus the alarm reads the layers again within 60 seconds.
+  A change to a `votes` goal that the host did not get a notice for then counts the next votes.
+- The host reads the saved layers only when it has no copy. If this read fails, the object answers `503`, and the vote does not count.
+- The host keeps a hash of each key that it counted, and not the key. See the storage list below.
+  The count stops at 100,000 keys.
+- A new count forgets the keys. Thus a vote that changes after **Start again** counts in the new count.
+- A test, a replay, and a support event never count for a goal that counts `votes`.
+- Only the API sends `count`, on the internal path. The controls of the owner and of the dock refuse it with `400`.
+- The log of a failed call has the path and the HTTP status. It never has the key, because the key of a vote has a user ID.
+  A failed count does not change the answer to the viewer. The vote stays.
 
 ### Support events of each provider
 
@@ -688,6 +713,7 @@ The test deployment reads no platform. It uses the synthetic streams of `testStr
 | Saved layers in the alert host | The host reads them again at the first alarm or new socket after 60 seconds, while a page listens or the goal counts. It also reads them 60 seconds after a read that an event used |
 | Support event IDs for the goal and the alerts | The newest 2,000, with no time limit |
 | People of a goal for chatters | At most 100,000. The count stops there. |
+| Votes and topics of a goal for votes | At most 100,000 keys. The count stops there. |
 | Delivery IDs, message IDs, ban keys, and support event IDs for deduplication | 15 minutes, at most 97,000 IDs |
 | IDs of deleted messages | 15 minutes, at most 97,000 IDs, in a separate table |
 | Kick message IDs that a Worker isolate forwarded | The last 10,000 |
@@ -734,6 +760,9 @@ The alert host keeps these items in the same storage:
 - The count of the goal: `counts`, `value`, `startedAt`, and a random salt.
 - For a goal that counts chatters: one key for each person that the goal counted, at most 100,000.
   A key is a part of the SHA-256 hash of the salt, the platform, and the user ID. The storage has no user ID of a chatter.
+  A new count has a new salt, and the host removes the keys of the count before.
+- For a goal that counts votes: one key for each vote and each topic that the goal counted, at most 100,000.
+  A key is a part of the SHA-256 hash of the salt and the key from the API. The storage has no user ID of a voter.
   A new count has a new salt, and the host removes the keys of the count before.
 
 A support event has no moderation. Thus the support snapshot needs no boundary such as `since`.
