@@ -202,6 +202,7 @@ interface VoteRow extends PagedRow {
   handle: string;
   choice: number;
   option: string | null;
+  voted_at: number | null;
 }
 
 interface LikeRow extends PagedRow {
@@ -380,7 +381,16 @@ export interface AccountExport {
     earlierTexts: { text: string; writtenAt: string; editedAt: string }[];
   }[];
   reactions: { entryId: string; entryTitle: string; streamerHandle: string; reaction: "like" | "dislike" }[];
-  votes: { entryId: string; entryTitle: string; streamerHandle: string; choice: number; option: string | null }[];
+  // `votedAt`: the time of the latest vote write. It is null after the hourly task removes it, 7 days after the
+  // vote, and for a vote from before migration 0052.
+  votes: {
+    entryId: string;
+    entryTitle: string;
+    streamerHandle: string;
+    choice: number;
+    option: string | null;
+    votedAt: string | null;
+  }[];
   commentLikes: { commentId: string; entryId: string; entryTitle: string; streamerHandle: string }[];
   mashBattleTaps: {
     entryId: string;
@@ -502,7 +512,7 @@ async function readHistory(env: AppEnv, userId: string, now: number) {
   const votes = await readAll<VoteRow>(
     env,
     `SELECT x.rowid AS row_cursor,x.entry_id,e.title AS entry_title,s.handle,x.choice,
-        json_extract(COALESCE(e.binary_labels,e.options),'$['||x.choice||']') AS option
+        json_extract(COALESCE(e.binary_labels,e.options),'$['||x.choice||']') AS option,x.voted_at
       FROM entry_votes x ${entryJoin} WHERE x.user_id=?1 AND ${page}`,
     userId,
   );
@@ -849,6 +859,7 @@ export async function exportAccount(env: AppEnv, userId: string): Promise<Accoun
       streamerHandle: row.handle,
       choice: row.choice,
       option: row.option,
+      votedAt: optionalIso(row.voted_at),
     })),
     commentLikes: history.likes.map((row: LikeRow) => ({
       commentId: row.comment_id,

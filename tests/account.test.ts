@@ -93,9 +93,11 @@ async function seed(): Promise<void> {
       now,
     ),
     run(
-      `INSERT INTO entry_votes (entry_id,user_id,choice) VALUES (?,'leaver',1),(?,'other',0),(?,'other',0)`,
+      `INSERT INTO entry_votes (entry_id,user_id,choice,voted_at) VALUES (?,'leaver',1,?),(?,'other',0,?),(?,'other',0,NULL)`,
       ids.hostPoll,
+      now - 1000,
       ids.hostPoll,
+      now,
       ids.onLeaverPage,
     ),
     run(
@@ -486,7 +488,14 @@ describe("account export", (): void => {
       { entryId: ids.hostTopic, entryTitle: "Host topic", streamerHandle: "host_page", reaction: "dislike" },
     ]);
     expect(data.votes).toEqual([
-      { entryId: ids.hostPoll, entryTitle: "Host poll", streamerHandle: "host_page", choice: 1, option: "Blue" },
+      {
+        entryId: ids.hostPoll,
+        entryTitle: "Host poll",
+        streamerHandle: "host_page",
+        choice: 1,
+        option: "Blue",
+        votedAt: new Date(now - 1000).toISOString(),
+      },
     ]);
     expect(data.commentLikes).toEqual([
       { commentId: "c-other", entryId: ids.hostTopic, entryTitle: "Host topic", streamerHandle: "host_page" },
@@ -584,6 +593,14 @@ describe("account export", (): void => {
         userAgent: null,
         adminVerifiedAt: null,
       },
+    ]);
+  });
+
+  it("gives the time of each vote, and null for a vote without a time", async (): Promise<void> => {
+    const data = await exportAccount(env, "other");
+    expect(data.votes.map((vote) => [vote.entryId, vote.votedAt])).toEqual([
+      [ids.hostPoll, new Date(now).toISOString()],
+      [ids.onLeaverPage, null],
     ]);
   });
 

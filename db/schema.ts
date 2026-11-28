@@ -34,6 +34,7 @@ export * from "./comment-revisions-schema";
 export * from "./comment-answers-schema";
 export * from "./stream-sources-schema";
 export * from "./image-schema";
+export * from "./stream-sessions-schema";
 
 // Keep SQLite CHECK values aligned with the TypeScript enum.
 function enumCheck(name: string, column: AnySQLiteColumn, values: readonly (string | number)[]) {
@@ -164,10 +165,14 @@ export const entryVotes = sqliteTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     choice: integer("choice").notNull(),
+    // The server time of the latest vote write. The hourly job sets it to null after VOTE_TIME_RETENTION_MS
+    // (app/server/cleanup.server.ts). A vote without a time counts for no session.
+    votedAt: integer("voted_at"),
   },
   (table) => [
     primaryKey({ columns: [table.entryId, table.userId] }),
     index("entry_votes_user_idx").on(table.userId),
+    index("entry_votes_time_idx").on(table.entryId, table.votedAt),
     check("entry_votes_choice_check", sql`${table.choice} BETWEEN 0 AND 5`),
   ],
 );
@@ -594,6 +599,8 @@ export const streamEvents = sqliteTable(
   (table) => [
     index("stream_events_schedule_idx").on(table.streamerId, table.startsAt),
     index("stream_events_series_idx").on(table.seriesId, table.startsAt),
+    // The scheduled streams of all pages by their start, for the hourly reports of R8 (docs/stream-reports.md).
+    index("stream_events_starts_idx").on(table.startsAt),
     check("stream_events_title_check", sql`length(${table.title}) BETWEEN 1 AND 100`),
     check("stream_events_notes_check", sql`length(${table.notes}) <= 1000`),
     check("stream_events_duration_check", sql`${table.durationMin} BETWEEN 15 AND 1440`),

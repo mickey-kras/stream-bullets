@@ -5,6 +5,10 @@ import { pruneTranslationAttempts } from "./translation.server";
 
 // Resolved reports are deleted after 365 days.
 export const REPORT_RETENTION_MS = 365 * 86_400_000;
+// The feature of a topic stays for 3 days, for the report of the session that it was part of.
+export const FEATURE_RETENTION_MS = 3 * 86_400_000;
+// The time of a poll vote stays for 7 days. After that the vote stays without its time.
+export const VOTE_TIME_RETENTION_MS = 7 * 86_400_000;
 
 export async function cleanExpiredData(env: AppEnv, now: number): Promise<void> {
   await env.DB.batch([
@@ -35,6 +39,13 @@ export async function cleanExpiredData(env: AppEnv, now: number): Promise<void> 
     env.DB.prepare(
       "DELETE FROM comment_revisions WHERE id IN (SELECT id FROM comment_revisions WHERE edited_at < ? LIMIT 5000)",
     ).bind(now - REVISION_RETENTION_MS),
+    // The facts of stream reports: features of topics, and the times of poll votes.
+    env.DB.prepare(
+      "DELETE FROM stream_features WHERE rowid IN (SELECT rowid FROM stream_features WHERE featured_at < ? LIMIT 5000)",
+    ).bind(now - FEATURE_RETENTION_MS),
+    env.DB.prepare(
+      "UPDATE entry_votes SET voted_at=NULL WHERE rowid IN (SELECT rowid FROM entry_votes WHERE voted_at < ? LIMIT 5000)",
+    ).bind(now - VOTE_TIME_RETENTION_MS),
     // AI interest votes count for 30 days.
     ...pruneAiInterest(env, now),
     pruneTranslationAttempts(env, now),

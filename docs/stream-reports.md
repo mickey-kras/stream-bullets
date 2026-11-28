@@ -4,8 +4,8 @@ StreamBullets records each stream of a page as a stream session.
 After a session ends, the owner gets a report of that session.
 The report has the chat, the people, the poll votes, the topics, and the support of the session.
 
-This document gives the rules of a session, the metrics, the estimate, and the CSV format.
-These parts are pure modules. The recorder, the storage, and the **Reports** section come in later changes.
+This document gives the rules of a session, the metrics, the estimate, the storage, and the CSV format.
+The rules, the metrics, and the CSV format are pure modules. The recorder and the **Reports** section come in later changes.
 
 | Part | File |
 | --- | --- |
@@ -13,6 +13,7 @@ These parts are pure modules. The recorder, the storage, and the **Reports** sec
 | Session rules and their constants | `app/lib/stream-session.ts` |
 | Summary, timeline, metrics, and estimate | `app/lib/stream-report.ts` |
 | CSV format | `app/lib/session-csv.ts` |
+| Tables | `db/stream-sessions-schema.ts`, migration `0052` |
 
 ## Current values
 
@@ -199,6 +200,57 @@ The look-back time is 90 days for Twitch and Kick, and 30 days for YouTube.
 Before the history covers the full look-back time, the report says "History starts" and the date.
 A person with two accounts counts as two people. Voters on the page and topic authors are not contributors.
 
+## Storage
+
+Migration `0052` adds the tables of the sessions. It also adds two facts that a report reads later.
+
+| Table | Content |
+| --- | --- |
+| `stream_sessions` | One row for each session. The session object makes the ID. |
+| `stream_session_polls` | The poll votes of each poll in a session. |
+| `stream_session_topics` | Each topic of a session: the first feature and the number of features. |
+| `stream_features` | One row for each feature of a topic on a page: the topic and the time. |
+
+A `stream_sessions` row has these columns:
+
+| Column | Content |
+| --- | --- |
+| `status` | `live` or `ended` |
+| `started_at`, `started_by` | The start and its reason, from `SESSION_STARTS` |
+| `ended_at`, `ended_by` | Null while the session is live. Then the end and its reason, from `SESSION_ENDS` |
+| `event_id` | The stream of the schedule, or null. If the owner deletes the stream, the session stays. |
+| `title` | Null, or a maximum of 140 characters |
+| `summary` | The JSON of `sessionSummarySchema`, a maximum of 16,384 characters |
+| `timeline` | The JSON of `sessionTimelineSchema`, a maximum of 98,304 characters |
+
+If the owner deletes the page, the sessions and their rows go too.
+If the owner deletes a topic or a poll, its rows go too. The session stays.
+
+### Facts for a report
+
+A report counts the poll votes and the featured topics of its session. Two facts give these counts:
+
+- `entry_votes.voted_at` is the server time of the latest vote of a person on a poll.
+  A new vote sets it. A changed vote sets it again.
+  The votes from before migration `0052` have no time. A vote without a time does not count for a session.
+- The overlay write that puts a topic on stream adds one `stream_features` row.
+  The row is in the same D1 batch as the write. The write from Live, from the dock, and from a layout adds the row.
+  The row does not need the alerts layer. A topic credit needs it.
+
+`featuredTopic` tells if a write puts a topic on stream.
+If the same topic stays on stream, the write adds no row.
+The row goes in only if the write of the batch is the stored state: the new revision, the time, and the layers.
+Thus a write that loses the compare-and-set adds no row.
+
+The hourly job removes the facts in batches of 5000 rows:
+
+| Fact | Retention |
+| --- | --- |
+| `stream_features` row | 3 days (`FEATURE_RETENTION_MS`) |
+| `entry_votes.voted_at` | 7 days (`VOTE_TIME_RETENTION_MS`). The job sets the time to null. The vote stays. |
+
+The data export of a voter has `votedAt` for each vote. It is an ISO 8601 time, or null.
+
 ## CSV
 
 `sessionCsv(report)` makes the CSV file. It validates the report with `sessionReportSchema` first.
@@ -231,3 +283,5 @@ The `timeline` rows have 5-minute buckets of chat, support, and poll votes.
 A report has counts only. It has no names, no platform user IDs, and no person keys.
 Anonymous support is one count for each platform. No row names a supporter.
 The input types of the CSV have no names and no IDs of people. Thus the CSV cannot have them.
+
+The time of a vote stays for 7 days only. The privacy policy tells this.
