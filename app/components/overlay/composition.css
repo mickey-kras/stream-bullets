@@ -414,6 +414,18 @@
 .ov-grid-box[data-selected] .ov-grid-tag {
   margin-inline-start: calc(14px / var(--ov-scale, 1));
 }
+/* A low box has its label outside, below it or above it, so the label does not cover the content (tagPlace). */
+.ov-grid-box[data-tag] .ov-grid-tag {
+  position: absolute;
+  inset-inline-start: 0;
+  margin-inline-start: 0;
+}
+.ov-grid-box[data-tag="below"] .ov-grid-tag {
+  top: 100%;
+}
+.ov-grid-box[data-tag="above"] .ov-grid-tag {
+  bottom: 100%;
+}
 .ov-grid-preview {
   position: absolute;
   z-index: 6;
@@ -696,6 +708,209 @@
 }
 .ov-comp-range-value {
   min-width: 4ch;
+  font-variant-numeric: tabular-nums;
+}
+/* The name of the selected layer, with the test of an alert at its right. On a narrow screen the test goes below. */
+.ov-props-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  min-width: 0;
+}
+/* A closed disclosure that explains a layer. */
+.ov-props-more ul {
+  display: grid;
+  gap: 6px;
+  max-width: 70ch;
+  margin: 0;
+  padding: 0 0 8px 20px;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+/* A whole number with its error below it (WholeNumberInput in alerts-settings.tsx). */
+.ov-number {
+  display: inline-grid;
+  gap: 4px;
+  justify-items: start;
+  min-width: 0;
+}
+.ov-number input {
+  width: 6.5em;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-control);
+  background: var(--field);
+  font-variant-numeric: tabular-nums;
+}
+.ov-number input[aria-invalid="true"] {
+  border-color: var(--error);
+}
+.ov-number-invalid {
+  max-width: 14rem;
+  color: var(--error);
+  font-size: 0.8125rem;
+}
+/* ---------- Alerts layer (alerts-settings.tsx) ---------- */
+.ov-alert-test {
+  display: grid;
+  gap: 6px;
+  justify-items: end;
+  min-width: 0;
+}
+.ov-alert-test-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+}
+.ov-alert-test-row .cselect-trigger {
+  min-height: 44px;
+}
+.ov-alert-test-row > .small-button,
+.ov-goal-progress > .small-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+}
+/* The rules table. In a narrow box (a phone, or the side of a narrow screen) each row stacks: the event, then the
+   four cells in two columns, each with the name of its column. The header row is then hidden but stays for a screen
+   reader. The box scrolls only if a word is wider than it. */
+.ov-work[data-orientation="horizontal"] .ov-props > .ov-rules,
+.ov-work[data-orientation="horizontal"] .ov-props > .ov-props-head {
+  max-width: 52rem;
+}
+.ov-rules {
+  container: rules / inline-size;
+  min-width: 0;
+  overflow-x: auto;
+}
+.ov-rules-stack {
+  display: none;
+}
+.ov-rules-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.ov-rules-table th,
+.ov-rules-table td {
+  padding: 4px 12px 4px 0;
+  border-top: 1px solid var(--line);
+  text-align: start;
+  vertical-align: middle;
+}
+.ov-rules-table thead th {
+  padding-block: 8px;
+  border-top: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+.ov-rules-table tbody th {
+  min-width: 10rem;
+  font-weight: 400;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+.ov-rule-event {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ov-rule-icon {
+  flex: none;
+  color: var(--gold);
+}
+.ov-rule-name {
+  font-weight: 600;
+}
+.ov-props .ov-rule-switch {
+  min-height: 44px;
+}
+.ov-rule-switch input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--gold);
+}
+@container rules (max-width: 36rem) {
+  .ov-rules-table thead tr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+  .ov-rules-table tbody tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px 12px;
+    padding: 8px 0;
+    border-top: 1px solid var(--line);
+  }
+  .ov-rules-table tbody th,
+  .ov-rules-table td {
+    padding: 0;
+    border-top: 0;
+  }
+  .ov-rules-table tbody th {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+  .ov-rules-table td {
+    display: grid;
+    align-content: start;
+    gap: 2px;
+    min-width: 0;
+  }
+  .ov-rules-stack {
+    display: block;
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+  }
+}
+/* ---------- Goal layer (goal-settings.tsx) ---------- */
+.ov-goal-settings {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.ov-goal-fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px;
+}
+.ov-goal-title,
+.ov-goal-counts {
+  flex: 2 1 13.75rem;
+}
+.ov-goal-target {
+  flex: 0 0 auto;
+}
+.ov-goal-progress {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+.ov-goal-progress progress {
+  flex: 1 1 12rem;
+  height: 12px;
+  accent-color: var(--gold);
+}
+.ov-goal-progress-text {
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 /* ---------- Characters controls (characters-controls.tsx) ---------- */

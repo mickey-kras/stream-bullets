@@ -171,6 +171,19 @@ function boxStyle(rect: CellRect): CSSProperties {
   return { left: x, top: y, width: w, height: h };
 }
 
+/** A box of at most this many rows is too low for its name and size inside it: they would cover its content. */
+const LOW_BOX_ROWS = 2;
+
+/**
+ * Where the name and the size of a box show. Inside the box at the top (undefined) when the box is high enough.
+ * A low box, such as the goal at its minimum size, has them outside: below the box, or above it at the bottom edge
+ * of the grid, so they never cover the title of the goal.
+ */
+export function tagPlace(orientation: Orientation, rect: CellRect): "below" | "above" | undefined {
+  if (rect.h > LOW_BOX_ROWS) return undefined;
+  return rect.r + rect.h < GRID[orientation].rows ? "below" : "above";
+}
+
 /** A pointer on the grid: its point in cells, the reach of a resize handle in cells, and whether it is on the grid. */
 interface GridHit {
   point: GridPoint;
@@ -562,6 +575,7 @@ export function LayoutGrid({
                 data-selected={layer === chosen || undefined}
                 data-lifted={layer === lifted || undefined}
                 data-off={!layerEnabled(layers, layer) || undefined}
+                data-tag={tagPlace(orientation, rect)}
                 style={boxStyle(rect)}
                 aria-hidden="true"
               >

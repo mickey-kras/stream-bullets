@@ -49,9 +49,9 @@ The composition has eleven layers. Each layer can be on the grid one time.
 
 `poll`, `topic`, `next`, `message`, `card`, and `support` are the content layers.
 
-The editor does not offer the `alerts` layer and the `goal` layer in this version.
-The API saves their cells and their settings, and the overlay shows them.
-See [Overlay layers](api.md#overlay-layers).
+The editor has the `alerts` layer and the `goal` layer in the group **Recognition**.
+See [Alerts settings](#alerts-settings) and [Goal settings](#goal-settings).
+The API saves their cells and their settings. See [Overlay layers](api.md#overlay-layers).
 
 A layer is on stream in an output when it has a cell in the orientation of that output and its `enabled` setting is on.
 See [Outputs](#outputs).
@@ -163,6 +163,8 @@ Each layer has the `enabled` setting. The other settings are these:
 | `characters` | `timeout` and `max`. See [Interactive characters](characters.md). |
 | Each content layer | `ref`, `backgroundOpacity`, and `qr` |
 | `camera` | No other setting. See [Camera frame](#camera-frame). |
+| `alerts` | `rules`: what each support event does. See [Alerts settings](#alerts-settings). |
+| `goal` | `title`, `counts`, and `target`. See [Goal settings](#goal-settings). |
 
 The settings of a content layer are these:
 
@@ -181,6 +183,9 @@ Two more values are not in the layers. They apply to the layer that uses them:
 - `showResults` shows or hides the results of the poll in the poll layer.
 - `message` and `messageStyle` are the text and the style of the message banner.
   The public overlay state has the text only while the message layer is on stream. Otherwise the text is a draft.
+
+The title of the goal is a part of the layers. Thus the public overlay state has the title when the editor saves it,
+also while the goal layer is off stream. The title has no draft. The editor tells this under the title field.
 
 ### QR code
 
@@ -629,6 +634,9 @@ It also gives the keys, the size of a cell, and the size of the browser source i
 
 The preview uses the same code as the OBS page. Thus the layer positions in the preview and in OBS agree.
 Each layer on the grid shows its name, its size in pixels, and its real content.
+A layer of 2 rows or less shows its name and its size below its box.
+At the bottom of the grid, it shows them above its box.
+Thus the name does not cover the title of a goal at its minimum size.
 
 The chat layer shows sample messages. The characters layer shows the live playground.
 A layer with **Show on stream** off keeps a dashed box on the grid. The preview does not show its content.
@@ -662,11 +670,12 @@ Then the editor does not keep the change. A message under the grid gives the rea
 
 ### Add and remove a layer
 
-The palette shows one chip for each of the nine layers, in two groups:
+The palette shows one chip for each of the eleven layers, in three groups:
 
 | Group | Layers |
 | --- | --- |
 | **Picture** | Chat, Characters, and Camera frame |
+| **Recognition** | Alerts and Goal |
 | **Content** | Poll, Topic, Up next, Message banner, Community card, and Support banner |
 
 The title of a group shows its name and the number of its layers, such as **Picture · 3**.
@@ -717,6 +726,8 @@ The settings show the name of the selected layer and these controls:
 | **Show QR code** | Each content layer but the message banner | Shows or hides the QR code in the card. See [QR code](#qr-code). |
 | **Background** | Each content layer | The opacity of the card background, from 0 to 100 in steps of 5. |
 | Timeout, **Maximum characters on screen**, **Pause**, **Reset playground**, and the participants | Characters | See [Interactive characters](characters.md). |
+| **Test alert**, **Send test**, the rules, and **How alerts behave** | Alerts | See [Alerts settings](#alerts-settings). |
+| **Title on stream**, **Counts**, **Target**, the count, and **Start again** | Goal | See [Goal settings](#goal-settings). |
 | **Remove from grid** | All | Takes the layer off the grid. |
 
 Up next and the support banner have no picker. The characters layer has no background.
@@ -731,9 +742,86 @@ See [Channel health in Streamer tools](channel-connections.md#channel-health-in-
 The settings are a region with the name of the layer, after the grid in the tab sequence.
 When you select a layer with its chip, a screen reader reads the selection. The grid reads its own selections.
 
+#### Alerts settings
+
+The settings of the alerts layer have these parts:
+
+- **Test alert** and **Send test**, at the right of the name of the layer.
+  The list has the samples of the server: a follow, a subscription, a gift of 5 subscriptions, and 500 Bits.
+  It also has a Super Chat, a raid with 38 viewers, and an anonymous gift.
+  **Send test** sends `{op: "test", kind}`. See [Alert controls](api.md#alert-controls).
+- **Show on stream**.
+- A table with one row for each rule: **Event**, **Starts at**, **Banner**, **In chat**, and **Character**.
+- **How alerts behave**: a closed `details` element with the behavior of the alerts.
+
+**Send test** needs the saved alerts layer on stream in an output.
+While the layer is not on stream, the button is not available. A text under the button gives the reason.
+A test plays on each overlay page that shows the alerts layer. A test never counts for a goal, a report, or revenue.
+
+When the server refuses a control, a text under the button gives the reason in the language of the page.
+The text comes from the code of the refusal:
+
+| Code or status | Reason |
+| --- | --- |
+| `alerts_off_stream` | The alerts layer is not on stream. |
+| `alerts_muted` | The mute is on. Turn it off in **Live** or in the dock. |
+| `alerts_unwatched` | No page shows alerts. Open the overlay in OBS. |
+| `alert_rule_off` | The rule of the alert has its three switches off. |
+| `alerts_full` | Too many alerts wait in the line. |
+| `goal_off` | The goal layer has no place on a grid. |
+| `429` | Too many changes in one minute. |
+| `503` | The server has no alerts, or the alert host cannot answer. |
+
+The table has a row for these rules: follow, subscription and membership, gift, Bits and KICKs, Super Chat and Super Sticker, and raid.
+The `topic` rule has no row. The server does not make the alert of a featured topic in this version, and the test list has no topic test.
+The constant `TOPIC_CREDITS_READY` adds the row and the test.
+
+- **Starts at** is a number only for the rules with an amount: gift, Bits and KICKs, and raid.
+  The number is a whole number from 1 to 1,000,000. The other rules show **Each one**.
+- **Banner**, **In chat**, and **Character** are switches. The **Character** switch also shows the action of the character.
+- Each control has a full name for a screen reader, such as **Banner for Follow**.
+- Each change saves one field of one rule. A switch saves at once. A number saves 400 milliseconds after you stop typing.
+- A number that is not in the limits does not save. When you leave the field, a text gives the limits.
+- In a narrow box, such as on a phone, each row of the table shows its event on one line.
+  The four cells show below it in two columns, each with the name of its column.
+  The editor then hides the header row, but a screen reader still reads it.
+
+**How alerts behave** tells these points:
+
+- The banner shows one alert at a time, with the name and the amount only. The text of the supporter never shows on stream.
+- **In chat** marks the event in the chat layer. **Character** makes the character of the viewer react in the characters layer.
+- An anonymous event shows **Anonymous** and never a name. It makes all characters cheer.
+- A test and a replay never count for a goal, a report, or revenue.
+- **Mute**, **Skip**, and **Replay** are in **Live** and in the dock.
+  The mute stops the alert on stream and removes the alerts that wait. Alerts from the muted time do not play later.
+- With reduced motion on the computer that runs OBS, a banner shows and goes without movement.
+
+#### Goal settings
+
+The settings of the goal layer have these parts:
+
+- **Show on stream**.
+- **Title on stream**: up to 60 characters. The title saves 400 milliseconds after you stop typing.
+  A text under the field tells that viewers can see the title when it saves. See [Layer settings](#layer-settings).
+- **Counts**: what the goal counts. The list has subscriptions with memberships and gifts, follows, Bits, KICKs,
+  and people who chat. A change starts the count again at 0. A text under the list tells this.
+- **Target**: a whole number from 1 to 10,000,000.
+- The count of the server, as a bar and as text, such as **17 of 25**.
+- **Start again**: it asks first, because it sets the count to 0. Then it sends `{op: "goalReset"}`.
+- One line: a goal counts one thing. Bits, KICKs, and currencies do not convert.
+
+The list **Counts** has no entry for poll votes and new topics. The server does not count them in this version.
+A goal that already counts `votes` keeps the entry, so that the list shows the saved value.
+The constant `VOTES_GOAL_READY` adds the entry.
+
+While the goal layer has a place on a grid, the editor opens the activity socket of the owner.
+The count comes from the `alerts` messages of that socket. Without a message, the count is 0.
+The editor preview still shows the count 0 in the layer. See [Goal layer](#goal-layer).
+
 ### Keyboard
 
 Tab moves to the toolbar, the preview background, the groups with their chips, the grid, the settings, and the help, in that sequence.
+In the settings of the alerts layer, Tab moves to the test list, **Send test**, **Show on stream**, and the table, row by row.
 Enter or Space on a chip adds its layer, or selects the layer if it is on the grid.
 Enter or Space on the title of a group closes or opens the group. The chips of a closed group are not in the tab sequence.
 Enter or Space on **How the grid works** opens or closes the help.
@@ -789,6 +877,7 @@ The page of the poll shows the full names.
 
 A drag, a chip, a key that puts down a layer, a picker, or a switch saves at once.
 Shift or Alt with an arrow key, and a step of a background slider, save after 400 milliseconds without a change.
+The numbers of the alerts and of the goal, and the title of the goal, also save after 400 milliseconds without a change.
 If you close the page or go to a different page before then, the editor sends the change at once.
 
 The editor does not wait for the result of a change that it sends while you leave.
@@ -810,7 +899,7 @@ The samples include all three platforms, Unicode text, emoji, an emote, and a co
 
 ## Test
 
-Use the test to see the chat and the characters in your real OBS scene before you go live.
+Use the test to see the chat, the characters, and an alert in your real OBS scene before you go live.
 In the toolbar of the studio, select the `play` button, **Start test**.
 During a test, the same button shows the `stop` icon and has the colors of a pressed control. Its name is then **Stop test**, and it ends the test at once.
 
@@ -820,8 +909,13 @@ One button starts two tests together:
 - The characters test, if the saved characters layer is on stream. It runs for 5 minutes.
   See [Characters test](characters.md#characters-test).
 
+A start also sends one test alert, a gift of 5 subscriptions, if the saved alerts layer is on stream in an output.
+An alert has no time to stop. Thus the alert alone does not make the button show **Stop test**.
+If the server refuses the alert, a message gives the reason. The other tests start.
+
 If only one of the two layers is on stream, the button starts only that test.
-If neither is on stream, the button starts nothing. Its tooltip gives the reason, and a message gives the reason when you press it.
+If no layer of the test is on stream, the button starts nothing.
+Its tooltip gives the reason, and a message gives the reason when you press it.
 The server also refuses the start of a test whose layer is off stream.
 
 - The tooltip of **Start test** tells what the test does. A screen reader reads the same text as the description of the button.

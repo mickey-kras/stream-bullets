@@ -30,10 +30,10 @@ export const LAYER_GROUPS: readonly LayerGroup[] = [
 ];
 
 /**
- * False until the overlay shows the alerts and the goal (issue #1043). The layer list then has no Recognition group,
- * so the owner cannot put these two layers on the grid.
+ * True: the overlay shows the alerts and the goal, and the editor has their settings (issue #1043). With false, the
+ * layer list has no Recognition group, so the owner cannot put these two layers on the grid.
  */
-export const RECOGNITION_READY: boolean = false;
+export const RECOGNITION_READY: boolean = true;
 
 /** The groups that the layer list shows. */
 export function shownGroups(recognition: boolean = RECOGNITION_READY): readonly LayerGroup[] {

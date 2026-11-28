@@ -588,15 +588,27 @@ describe("overlay control page", () => {
     const order: (string | undefined)[] = chips.map(
       (chip: string): string | undefined => /data-comp-layer="([a-z]+)"/.exec(chip)?.[1],
     );
-    // The sequence of the list is the sequence of the groups: the picture, then the content.
-    expect(order).toEqual(["chat", "characters", "camera", "poll", "topic", "next", "message", "card", "support"]);
-    // The alerts and the goal are layers of the grid with no chip: the list does not show their group yet.
-    expect(RECOGNITION_READY).toBe(false);
-    expect(GRID_LAYERS.filter((layer: GridLayer): boolean => !order.includes(layer))).toEqual(["alerts", "goal"]);
-    expect(html).not.toContain("Recognition");
+    // The sequence of the list is the sequence of the groups: the picture, the recognition, then the content.
+    expect(order).toEqual([
+      "chat",
+      "characters",
+      "camera",
+      "alerts",
+      "goal",
+      "poll",
+      "topic",
+      "next",
+      "message",
+      "card",
+      "support",
+    ]);
+    // Each layer of the grid has a chip.
+    expect(RECOGNITION_READY).toBe(true);
+    expect(GRID_LAYERS.filter((layer: GridLayer): boolean => !order.includes(layer))).toEqual([]);
+    expect(html).toContain("<summary>Recognition · 2</summary>");
     const marked: boolean[] = chips.map((chip: string): boolean => chip.includes('data-placed="true"'));
-    expect(marked).toEqual([true, false, false, true, false, false, false, false, false]);
-    for (const name of ["Chat", "Characters", "Poll", "Topic", "Up next", "Message banner", "Community card"])
+    expect(marked).toEqual([true, false, false, false, false, true, false, false, false, false, false]);
+    for (const name of ["Chat", "Characters", "Alerts", "Goal", "Poll", "Topic", "Up next", "Message banner"])
       expect(html).toContain(`<span class="ov-palette-name">${name}</span>`);
     expect(html).toContain('<span class="ov-palette-name">Support banner</span>');
     expect(html).toContain('<span class="ov-palette-name">Camera frame</span>');
@@ -634,9 +646,9 @@ describe("overlay control page", () => {
     expect(html).not.toContain("data-props-remove");
     const [test] = iconButtons(html).filter((button): boolean => button.more.includes("data-test-toggle"));
     expect(test.name).toBe("Start test");
-    expect(test.title).toBe("Start test\nPut Chat or Characters on stream to start the test.");
+    expect(test.title).toBe("Start test\nPut Chat, Characters, or Alerts on stream to start the test.");
     expect(test.more).toMatch(/^ aria-disabled="true" aria-describedby="[^"]+" data-test-toggle="true"$/);
-    expect(html).toMatch(/<p class="sr-only" id="[^"]+" data-test-status="true">Put Chat or Characters on stream/);
+    expect(html).toMatch(/<p class="sr-only" id="[^"]+" data-test-status="true">Put Chat, Characters, or Alerts on/);
     // The chat is on the grid and off stream: its box is dimmed and the preview has no chat.
     expect(html).toMatch(/data-grid-box="chat"[^>]* data-off="true"/);
     expect(html).not.toMatch(/data-grid-box="poll"[^>]* data-off/);
@@ -691,6 +703,7 @@ describe("settings of the selected layer", () => {
         run: nothing,
         change: nothing,
         characters: options.characters ?? playground(),
+        feed: null,
         onRemove: nothing,
       }),
     );
@@ -739,6 +752,7 @@ describe("settings of the selected layer", () => {
             run: nothing,
             change: nothing,
             characters: playground(),
+            feed: null,
             onRemove: nothing,
           }),
         ),
@@ -903,12 +917,18 @@ describe("settings of the selected layer", () => {
 });
 
 describe("the test control", () => {
-  function test(options: { chatOn?: boolean; chatUntil?: number; characters?: Partial<CharactersControl> }): string {
+  function test(options: {
+    chatOn?: boolean;
+    alertsOn?: boolean;
+    chatUntil?: number;
+    characters?: Partial<CharactersControl>;
+  }): string {
     return renderToStaticMarkup(
       createElement(StudioTest, {
         chatUntil: options.chatUntil ?? 0,
         now: 1000,
         chatOn: options.chatOn ?? false,
+        alertsOn: options.alertsOn ?? false,
         characters: playground(options.characters),
         onSaved: nothing,
       }),
@@ -922,15 +942,15 @@ describe("the test control", () => {
   const described = (html: string): string | undefined =>
     /aria-describedby="([^"]+)"/.exec(iconButtons(html)[0].more)?.[1];
 
-  it("needs the chat or the characters on stream", () => {
+  it("needs the chat, the characters, or the alerts on stream", () => {
     const html: string = test({});
     expect(label(html)).toBe("Start test");
     expect(unavailable(html)).toBe(true);
-    expect(status(html)).toBe("Put Chat or Characters on stream to start the test.");
+    expect(status(html)).toBe("Put Chat, Characters, or Alerts on stream to start the test.");
     // The button shows the play icon. The text is its description and its tooltip, and it does not show.
     const [button] = iconButtons(html);
     expect(button.content).toContain("icon-play");
-    expect(button.title).toBe("Start test\nPut Chat or Characters on stream to start the test.");
+    expect(button.title).toBe("Start test\nPut Chat, Characters, or Alerts on stream to start the test.");
     expect(button.more).not.toContain("data-running");
     expect(html).toContain(`<p class="sr-only" id="${described(html)}" data-test-status="true">`);
     // The news region is empty until the test starts or stops.
@@ -952,6 +972,17 @@ describe("the test control", () => {
       "Starting the test resumes the playground.",
     );
     expect(status(test({ chatOn: true, characters: { paused: true } }))).not.toContain("resumes");
+  });
+
+  it("also sends a test alert while the alerts layer is on stream, and tells what a start does", () => {
+    const alone: string = test({ alertsOn: true });
+    expect(unavailable(alone)).toBe(false);
+    expect(status(alone)).toBe("Shows one test alert in OBS. Nothing goes to your channels.");
+    const both: string = test({ chatOn: true, alertsOn: true });
+    expect(status(both)).toMatch(/^Shows sample chat for 60 seconds .* One test alert also shows\.$/);
+    expect(status(test({ chatOn: true }))).not.toContain("alert");
+    // An alert has no time to stop: the button does not run with the alerts alone.
+    expect(label(alone)).toBe("Start test");
   });
 
   it("ignores presses while a request of the playground runs", () => {
@@ -997,21 +1028,23 @@ describe("layer palette and layout grid", () => {
     const groups: string[] = html.split("<details").slice(1);
     expect(groups.map((group: string): string | undefined => /<summary>([^<]*)</.exec(group)?.[1])).toEqual([
       "Picture · 3",
+      "Recognition · 2",
       "Content · 6",
     ]);
     for (const group of groups) expect(group).toMatch(/^ class="ov-palette-group" data-comp-group="[a-z]+" open="">/);
     const layersOf = (group: string): string[] =>
       [...group.matchAll(/data-comp-layer="([a-z]+)"/g)].map((match: RegExpMatchArray): string => match[1]);
     expect(layersOf(groups[0])).toEqual(["chat", "characters", "camera"]);
-    expect(layersOf(groups[1])).toEqual(["poll", "topic", "next", "message", "card", "support"]);
+    expect(layersOf(groups[1])).toEqual(["alerts", "goal"]);
+    expect(layersOf(groups[2])).toEqual(["poll", "topic", "next", "message", "card", "support"]);
     // The groups are data: each layer of the grid is in one group.
     expect(LAYER_GROUPS.map((group: LayerGroup): string => group.id)).toEqual(["picture", "recognition", "content"]);
     const grouped: GridLayer[] = LAYER_GROUPS.flatMap((group: LayerGroup): readonly GridLayer[] => group.layers);
     expect([...grouped].sort()).toEqual([...GRID_LAYERS].sort());
     expect(new Set(grouped).size).toBe(grouped.length);
-    // The list shows each group but Recognition, until the overlay shows the alerts and the goal.
-    expect(shownGroups().map((group: LayerGroup): string => group.id)).toEqual(["picture", "content"]);
-    expect(shownGroups(false)).toEqual(shownGroups());
+    // The list shows each group. Without the Recognition layers it would show the other two only.
+    expect(shownGroups()).toEqual(LAYER_GROUPS);
+    expect(shownGroups(false).map((group: LayerGroup): string => group.id)).toEqual(["picture", "content"]);
     expect(shownGroups(true)).toEqual(LAYER_GROUPS);
     expect(LAYER_GROUPS[1]).toEqual({
       id: "recognition",
@@ -1025,7 +1058,7 @@ describe("layer palette and layout grid", () => {
       html,
     )?.[1];
     expect(hint).toBeDefined();
-    expect(html.match(new RegExp(`class="ov-palette-chip"[^>]* aria-describedby="${hint}"`, "g"))).toHaveLength(9);
+    expect(html.match(new RegExp(`class="ov-palette-chip"[^>]* aria-describedby="${hint}"`, "g"))).toHaveLength(11);
   });
 
   it("marks the selected chip and shows the drop place while a layer is carried", () => {
@@ -1072,6 +1105,17 @@ describe("layer palette and layout grid", () => {
     expect(layout(placed, "topic")).not.toContain("data-selected");
     expect(layout({ ...placed, orientation: "vertical" }, "poll")).not.toContain("data-grid-box");
     expect(layout(placed, "poll")).toContain('data-background="checker"');
+    // A low box has its name and size outside, below it: the goal at its minimum size keeps its title in view.
+    const goal = {
+      ...placed.cells.horizontal,
+      goal: { c: 24, r: 14, w: 8, h: 2 },
+      alerts: { c: 10, r: 14, w: 8, h: 3 },
+    };
+    const low: string = layout({ ...placed, cells: { ...placed.cells, horizontal: goal } }, "goal");
+    expect(low).toMatch(/data-grid-box="goal" data-selected="true"[^>]* data-tag="below"/);
+    expect(low).toMatch(/data-grid-box="alerts"[^>]* style=/);
+    expect(low).not.toMatch(/data-grid-box="alerts"[^>]* data-tag=/);
+    expect(low).toContain("Goal · 480 × 120");
   });
 
   it("describes the grid for a screen reader with a hidden text, outside the closed help", () => {
