@@ -321,7 +321,7 @@ describe("message banner", (): void => {
 
 describe("chat panel", (): void => {
   function part(status: ActivityFeed["status"], delivers: boolean): string {
-    return renderToStaticMarkup(createElement(LiveChat, { feed: { ...feed, status }, delivers }));
+    return renderToStaticMarkup(createElement(LiveChat, { feed: { ...feed, status }, delivers, hideCommands: true }));
   }
 
   it("starts empty and following, with each platform shown", (): void => {
@@ -359,6 +359,7 @@ describe("full-screen chat", (): void => {
     truncated: false,
     receivedAt: 1,
     removed: false,
+    command: false,
   };
   const nothing = (): void => undefined;
 
@@ -452,7 +453,7 @@ describe("full-screen chat", (): void => {
 
   it("offers the full-screen view from the chat part when the page can open it", (): void => {
     const part = (more: Partial<Parameters<typeof LiveChat>[0]>): string =>
-      renderToStaticMarkup(createElement(LiveChat, { feed, delivers: true, ...more }));
+      renderToStaticMarkup(createElement(LiveChat, { feed, delivers: true, hideCommands: true, ...more }));
     expect(part({})).not.toContain("Open chat full screen");
     expect(part({ onFull: nothing })).toContain("Open chat full screen");
     // While the view is open, the page under it has no list.
@@ -499,6 +500,8 @@ describe("support events in the chat", (): void => {
     expect(line("bits", { amount: 1 })).toBe("1 Bit");
     expect(line("kicks", { amount: 50 })).toBe("50 KICKs");
     expect(line("reactions", { amount: 3 })).toBe("3 reactions");
+    // The credit of a topic has no amount: the text of the row is the title of the topic.
+    expect(line("topic", { amount: null, platform: "direct" })).toBe("topic on stream");
   });
 
   it("shows money in its currency, from micros", (): void => {

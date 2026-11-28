@@ -81,11 +81,13 @@ test("the owner places layers on the grid by mouse and keyboard, and the layout 
   const palette = editor.getByRole("group", { name: "Layers · one of each" });
   await expect(frame.locator("[data-grid-box]")).toHaveCount(0);
   await expect(frame.locator(".ov-layer")).toHaveCount(0);
-  await expect(palette.locator("summary")).toHaveText(["Picture · 3", "Content · 6"]);
+  await expect(palette.locator("summary")).toHaveText(["Picture · 3", "Recognition · 2", "Content · 6"]);
   await expect(palette.locator("[data-comp-layer]")).toHaveText([
     "+ Chat",
     "+ Characters",
     "+ Camera frame",
+    "+ Alerts",
+    "+ Goal",
     "+ Poll",
     "+ Topic",
     "+ Up next",
@@ -415,16 +417,16 @@ test("one test button starts and stops the test from the toolbar and shows the t
   // The button shows an icon only: its name is also its tooltip, and the tooltip gives the reason too.
   await expect(toggle).toHaveText("");
   await expect(toggle).toHaveAccessibleName("Start test");
-  await expect(toggle).toHaveAttribute("title", "Start test\nPut Chat or Characters on stream to start the test.");
+  await expect(toggle).toHaveAttribute("title", "Start test\nPut Chat, Characters, or Alerts on stream to start the test.");
   // The test needs the chat or the characters on stream. Until then the button stays focusable, starts nothing,
   // and a press tells the reason. The reason is the description of the button, and it does not show.
   await expect(toggle).toHaveAttribute("aria-disabled", "true");
-  await expect(status).toHaveText("Put Chat or Characters on stream to start the test.");
+  await expect(status).toHaveText("Put Chat, Characters, or Alerts on stream to start the test.");
   await expect(status).toHaveClass("sr-only");
-  await expect(toggle).toHaveAccessibleDescription("Put Chat or Characters on stream to start the test.");
+  await expect(toggle).toHaveAccessibleDescription("Put Chat, Characters, or Alerts on stream to start the test.");
   // Force: Playwright waits for an aria-disabled button to become enabled.
   await toggle.click({ force: true });
-  await expect(page.locator(".sb-toast")).toHaveText("Put Chat or Characters on stream to start the test.");
+  await expect(page.locator(".sb-toast")).toHaveText("Put Chat, Characters, or Alerts on stream to start the test.");
   // The server checks the saved layers, so the test stays unavailable until the layer save lands.
   let releaseLayer: (() => void) | undefined;
   await page.route("**/api/overlay", async (route) => {

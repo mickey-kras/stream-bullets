@@ -13,7 +13,8 @@ import {
 } from "./grid-helpers";
 import { signedIn } from "./live-helpers";
 import { clientIp } from "./client-ips";
-import type { ActivityChat, ActivityEvent, ActivityPlatform } from "../../app/lib/activity";
+import type { ActivityChat, ActivityEvent, ActivityMessage, ActivityPlatform } from "../../app/lib/activity";
+import type { AlertView } from "../../app/lib/alerts";
 import { CHAT_TEST_MS } from "../../app/lib/chat-test";
 import { cellPixels, type CellRect, type LayerRect, type LayersPatch } from "../../app/lib/overlay-layers";
 
@@ -1099,4 +1100,238 @@ test("a chat test ends by itself at its end time, and a past end time shows no t
   } finally {
     await setTestEnd(0);
   }
+});
+
+/** A text of a supporter. It must never show on the overlay. */
+const SUPPORTER_TEXT = "supporter text that stays off the banner";
+
+function alertView(more: Partial<AlertView> = {}): AlertView {
+  const now: number = Date.now();
+  return {
+    id: "twitch:e2e-gift",
+    origin: "live",
+    kind: "gift",
+    platform: "twitch",
+    name: "LanternFox",
+    anonymous: false,
+    amount: 5,
+    currency: null,
+    text: SUPPORTER_TEXT,
+    banner: true,
+    chat: true,
+    startsAt: now,
+    endsAt: now + 6_000,
+    ...more,
+  };
+}
+
+/** The state of the alerts as the server sends it: the alert on stream and the count of the goal. */
+function alertsState(current: AlertView | null, value: number = 17): string {
+  const message: ActivityMessage = {
+    type: "alerts",
+    at: Date.now(),
+    muted: false,
+    current,
+    waiting: 0,
+    goal: { counts: "subs", value, startedAt: 0 },
+  };
+  return JSON.stringify(message);
+}
+
+/** The alerts at 16 x 3 cells, the goal at 8 x 2 cells, and the chat, in the two outputs. */
+const RECOGNITION: LayersPatch = {
+  chat: { enabled: true },
+  alerts: { enabled: true },
+  goal: { enabled: true, title: "New subscribers", counts: "subs", target: 25 },
+  cells: {
+    horizontal: {
+      chat: DEFAULT_CHAT_CELL,
+      alerts: { c: 12, r: 0, w: 16, h: 3 },
+      goal: { c: 24, r: 3, w: 8, h: 2 },
+    },
+    vertical: { alerts: { c: 0, r: 0, w: 18, h: 3 }, goal: { c: 0, r: 3, w: 18, h: 2 }, chat: { c: 0, r: 20, w: 18, h: 12 } },
+  },
+};
+
+/** An overlay page with a mocked activity feed, for a page without a chat layer. `send` uses the newest socket. */
+async function feedSource(
+  browser: Browser,
+  path: string,
+  viewport: { width: number; height: number },
+): Promise<{ page: Page; send(frame: string): void }> {
+  const page = await newPage(browser, { viewport, extraHTTPHeaders: { "CF-Connecting-IP": `192.0.2.${OBS_IP}` } });
+  const sockets: WebSocketRoute[] = [];
+  await page.routeWebSocket("**/api/activity/**", (socket) => {
+    sockets.push(socket);
+    socket.send(snapshot([]));
+  });
+  await page.goto(path);
+  await expect.poll(() => sockets.length).toBe(1);
+  return {
+    page,
+    send(frame: string): void {
+      const socket: WebSocketRoute | undefined = sockets.at(-1);
+      if (!socket) throw new Error("No activity socket.");
+      socket.send(frame);
+    },
+  };
+}
+
+test.describe("alerts and the goal on the overlay", () => {
+  test.beforeEach(async () => {
+    await runSql("overlay-alerts-reset", [layersSql(RECOGNITION), verticalKeySql()]);
+  });
+
+  test.afterAll(async () => {
+    await runSql("overlay-alerts-restore", [layersSql({}), noKeysSql]);
+  });
+
+  test("the two outputs show the banner of one alert for its time, the mark in chat, and the goal", async ({
+    browser,
+  }) => {
+    const size = { width: 1280, height: 720 };
+    const tall = { width: 540, height: 960 };
+    const horizontal = await chatSource(browser, () => snapshot([]), "/@feature_host/overlay?key=e2e-key", size);
+    const vertical = await chatSource(browser, () => snapshot([]), `/@feature_host/overlay?key=${VERTICAL_KEY}`, tall);
+    const outputs: ChatSource[] = [horizontal, vertical];
+    try {
+      for (const output of outputs) {
+        const goal = output.page.locator("[data-overlay-goal]");
+        // The goal shows before any message, at 0.
+        await expect(goal).toContainText("New subscribers · 0 of 25");
+        await expect(output.page.locator("[data-overlay-alert]")).toHaveCount(0);
+        output.send(alertsState(null));
+        await expect(goal).toContainText("New subscribers · 17 of 25");
+        await expect(goal.getByRole("progressbar", { name: "New subscribers" })).toHaveAttribute("value", "17");
+      }
+      // One state of the server goes to each output: the same alert at the same time.
+      const alert: AlertView = alertView();
+      for (const output of outputs) output.send(alertsState(alert, 22));
+      for (const output of outputs) {
+        const banner = output.page.locator("[data-overlay-alert]");
+        await expect(banner).toBeVisible();
+        await expect(banner.locator("[data-alert-title]")).toHaveText("LanternFox gave 5 subscriptions");
+        await expect(banner.locator("[data-alert-meta]")).toHaveText("Twitch · Thank you");
+        await expect(banner.locator("[data-alert-test]")).toHaveCount(0);
+        // The banner is inside the cell of its layer after it came in, and no part of its text is outside the banner.
+        await banner.evaluate(async (card: Element): Promise<void> => {
+          const coming: Animation[] = card
+            .getAnimations()
+            .filter((animation: Animation): boolean => (animation as CSSAnimation).animationName === "ov-alert-in");
+          await Promise.all(coming.map((animation: Animation): Promise<Animation> => animation.finished));
+        });
+        const inside: boolean = await banner.evaluate((card: Element): boolean => {
+          const cell: DOMRect | undefined = card.closest(".ov-layer")?.getBoundingClientRect();
+          const box: DOMRect = card.getBoundingClientRect();
+          if (!cell) return false;
+          const fits: boolean =
+            box.left >= cell.left - 1 && box.right <= cell.right + 1 && box.top >= cell.top - 1 && box.bottom <= cell.bottom + 1;
+          const title: DOMRect | undefined = card.querySelector("[data-alert-title]")?.getBoundingClientRect();
+          return fits && title !== undefined && title.left >= box.left && title.right <= box.right + 1;
+        });
+        expect(inside).toBe(true);
+        // The chat marks the alert with one highlight row, and the goal has the new count.
+        const mark = output.chat.locator("li.wl-item[data-alert]");
+        await expect(mark).toHaveCount(1);
+        await expect(mark).toContainText("LanternFox gave 5 subscriptions");
+        await expect(output.page.locator("[data-overlay-goal]")).toContainText("22 of 25");
+        // The text of the supporter is nowhere on the page.
+        await expect(output.page.locator("main.overlay-screen")).not.toContainText(SUPPORTER_TEXT);
+        // The server sends the state again when the goal counts: no second banner and no second row.
+        output.send(alertsState(alert, 40));
+        await expect(output.page.locator("[data-overlay-goal]")).toContainText("40 of 25");
+        await expect(output.page.locator("[data-goal-count]")).toHaveText("40 of 25");
+        // The bar is full, and not more than full.
+        await expect(output.page.getByRole("progressbar")).toHaveAttribute("value", "25");
+        await expect(output.page.getByRole("progressbar")).toHaveAttribute("max", "25");
+        await expect(mark).toHaveCount(1);
+      }
+      // No server message ends the alert: the timer of each page does. The mark in chat stays, as a chat row does.
+      for (const output of outputs) {
+        await expect(output.page.locator("[data-overlay-alert]")).toHaveCount(0, { timeout: 10_000 });
+        await expect(output.chat.locator("li.wl-item[data-alert]")).toHaveCount(1);
+      }
+    } finally {
+      await Promise.all(outputs.map((output: ChatSource): Promise<void> => close(output.page)));
+    }
+  });
+
+  test("a page that connects during an alert shows the time that is left, and a late state shows no banner", async ({
+    browser,
+  }) => {
+    const now: number = Date.now();
+    // The alert started 4 seconds ago: 2 seconds are left.
+    const running: AlertView = alertView({ startsAt: now - 4_000, endsAt: now + 2_000 });
+    const source = await feedSource(browser, "/@feature_host/overlay?key=e2e-key&layer=content", {
+      width: 1280,
+      height: 720,
+    });
+    try {
+      // A content source reads the feed for the alerts and the goal, and shows no chat.
+      await expect(source.page.locator("main.overlay-screen")).toHaveAttribute("data-feed-status", "live");
+      source.send(alertsState(running));
+      const banner = source.page.locator("[data-overlay-alert]");
+      await expect(banner).toBeVisible();
+      const shownAt: number = Date.now();
+      await expect(banner).toHaveCount(0, { timeout: 8_000 });
+      expect(Date.now() - shownAt).toBeLessThan(4_000);
+      // A state for an alert that ended comes late: nothing shows.
+      source.send(alertsState(alertView({ id: "twitch:e2e-late", startsAt: now - 60_000, endsAt: now - 54_000 })));
+      await expect(source.page.locator("[data-overlay-goal]")).toContainText("17 of 25");
+      await expect(banner).toHaveCount(0);
+      // An anonymous test alert: the word, no name, and a TEST tag.
+      source.send(
+        alertsState(alertView({ id: "twitch:test-1", origin: "test", anonymous: true, name: null, text: undefined })),
+      );
+      await expect(banner.locator("[data-alert-title]")).toHaveText("Anonymous gave 5 subscriptions");
+      await expect(banner.locator("[data-alert-test]")).toHaveText("TEST");
+      // The owner skips the alert: the next state has no alert, and the banner goes at once.
+      source.send(alertsState(null));
+      await expect(banner).toHaveCount(0);
+    } finally {
+      await close(source.page);
+    }
+  });
+
+  test("an output for Twitch only shows no alert of another platform, and reduced motion stops the banner motion", async ({
+    browser,
+  }) => {
+    await runSql("overlay-alerts-twitch", [layersSql({ ...RECOGNITION, twitchOnly: { horizontal: true } })]);
+    const source = await chatSource(browser, () => snapshot([]), "/@feature_host/overlay?key=e2e-key", {
+      width: 1280,
+      height: 720,
+    });
+    try {
+      const banner = source.page.locator("[data-overlay-alert]");
+      const marks = source.chat.locator("li.wl-item[data-alert]");
+      const superChat: AlertView = alertView({
+        id: "youtube:e2e-paid",
+        kind: "super_chat",
+        platform: "youtube",
+        name: "Ngozi Okafor",
+        amount: 5_000_000,
+        currency: "USD",
+      });
+      source.send(alertsState(superChat, 3));
+      // The goal counts each platform, and the output shows it.
+      await expect(source.page.locator("[data-overlay-goal]")).toContainText("3 of 25");
+      await expect(banner).toHaveCount(0);
+      await expect(marks).toHaveCount(0);
+      // An alert from Twitch shows, with its motion.
+      source.send(alertsState(alertView({ id: "twitch:e2e-moving" })));
+      await expect(banner).toBeVisible();
+      await expect(marks).toHaveCount(1);
+      expect(await banner.evaluate((card: Element): number => card.getAnimations().length)).toBeGreaterThan(0);
+      source.send(alertsState(null));
+      await expect(banner).toHaveCount(0);
+      // With reduced motion the banner appears and goes with no transition.
+      await source.page.emulateMedia({ reducedMotion: "reduce" });
+      source.send(alertsState(alertView({ id: "twitch:e2e-still" })));
+      await expect(banner).toBeVisible();
+      expect(await banner.evaluate((card: Element): number => card.getAnimations().length)).toBe(0);
+      expect(await banner.evaluate((card: Element): string => getComputedStyle(card).opacity)).toBe("1");
+    } finally {
+      await close(source.page);
+    }
+  });
 });

@@ -2,7 +2,9 @@
 
 Streamer tools is the page where a streamer runs the stream, at `/tools`.
 This page gives the design that the owner approved for its sections: Live, Overlay, Channels, and Reports.
-The app does not have all of this design yet. Build each section to this page, then replace this note with screenshots of the app.
+The app has the **Overlay** section of this design, with the **Alerts** and **Goal** layers. See [Overlay](#overlay).
+The app does not have all of the other sections yet: **Live** and the dock have no **Activity** part, and there is no **Reports** section.
+Build each section to this page, then replace this note with screenshots of the app.
 
 The mockup has each screen: <https://claude.ai/artifact/VP62UitqK7mL6hANMbq32W>.
 The link opens only for accounts that have access to it.
@@ -58,6 +60,7 @@ A streamer must know what each control does when they look at it. Do not make th
 - The Alerts layer has a list of test alerts with a button that sends the test. It also has the switch that shows the layer on stream.
 - The Alerts layer has a table of rules. For each event, a rule gives the amount where the alert starts.
   A rule also has three switches: the banner, the mark in chat, and the reaction of the character.
+  On a phone, each rule stacks. The event is on one line, and its four cells are below it in two columns.
 - The Goal layer counts one thing. It has the title on stream, the thing that it counts, the target, and a button that starts the count again.
 - The help text for the grid stays closed until the streamer opens it.
 - Step 2 has two buttons beside its title, at the right: one shows or hides the links, and one makes new links. One card for each output shows the link and a copy button when the links show.

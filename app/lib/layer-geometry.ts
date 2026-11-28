@@ -1,12 +1,18 @@
+import { ALERT_RULES, type AlertRule } from "./alerts";
 import {
   CONTENT_LAYERS,
+  GOAL_FIELDS,
   GRID,
   GRID_LAYERS,
   MIN_CELLS,
   ORIENTATIONS,
+  RULE_FIELDS,
   cellFits,
   cellsOverlap,
+  changedFields,
+  changedRules,
   copyCell,
+  isContentLayer,
   type CellRect,
   type CellsPatch,
   type ContentItem,
@@ -16,6 +22,7 @@ import {
   type LayersPatch,
   type Orientation,
   type OverlayLayers,
+  type RulesPatch,
 } from "./overlay-layers";
 
 /**
@@ -75,15 +82,43 @@ function compactItems(items: ItemsPatch | undefined): ItemsPatch {
   return result;
 }
 
+type AlertsPatch = NonNullable<LayersPatch["alerts"]>;
+
+/** The alerts patch with only the rules that name a field, each rule copied. */
+function compactAlerts(alerts: AlertsPatch | undefined): AlertsPatch {
+  const result: AlertsPatch = {};
+  if (alerts?.enabled !== undefined) result.enabled = alerts.enabled;
+  const rules: RulesPatch = {};
+  for (const rule of ALERT_RULES) {
+    const fields: Partial<AlertRule> | undefined = alerts?.rules?.[rule];
+    if (fields && Object.keys(fields).length > 0) rules[rule] = { ...fields };
+  }
+  if (Object.keys(rules).length > 0) result.rules = rules;
+  return result;
+}
+
+/** A copy of `fields`, or undefined when it names no field. */
+function named<T extends object>(fields: T | undefined): T | undefined {
+  return fields && Object.keys(fields).length > 0 ? { ...fields } : undefined;
+}
+
 function compact(patch: LayersPatch): LayersPatch {
   const result: LayersPatch = {};
   if (patch.orientation !== undefined) result.orientation = patch.orientation;
-  if (patch.chat && Object.keys(patch.chat).length > 0) result.chat = { ...patch.chat };
-  if (patch.characters && Object.keys(patch.characters).length > 0) result.characters = { ...patch.characters };
-  if (patch.camera && Object.keys(patch.camera).length > 0) result.camera = { ...patch.camera };
-  if (patch.twitchOnly && Object.keys(patch.twitchOnly).length > 0) result.twitchOnly = { ...patch.twitchOnly };
-  const items: ItemsPatch = compactItems(patch.items);
-  if (Object.keys(items).length > 0) result.items = items;
+  const chat = named(patch.chat);
+  if (chat) result.chat = chat;
+  const characters = named(patch.characters);
+  if (characters) result.characters = characters;
+  const camera = named(patch.camera);
+  if (camera) result.camera = camera;
+  const alerts = named(compactAlerts(patch.alerts));
+  if (alerts) result.alerts = alerts;
+  const goal = named(patch.goal);
+  if (goal) result.goal = goal;
+  const twitchOnly = named(patch.twitchOnly);
+  if (twitchOnly) result.twitchOnly = twitchOnly;
+  const items = named(compactItems(patch.items));
+  if (items) result.items = items;
   const cells: Partial<Record<Orientation, CellsPatch>> = {};
   for (const orientation of ORIENTATIONS) {
     const layout: CellsPatch | undefined = patch.cells?.[orientation];
@@ -117,6 +152,9 @@ function diffTwitchOnly(before: OverlayLayers, after: OverlayLayers): Partial<Re
   return changed;
 }
 
+/** The settings of the characters layer, in the order of a patch. */
+const CHARACTER_FIELDS = ["enabled", "pushEnabled", "timeout", "max"] as const;
+
 /** The fields that differ from `before` to `after`, with their `after` values. */
 export function diffLayers(before: OverlayLayers, after: OverlayLayers): LayersPatch {
   const patch: LayersPatch = {
@@ -132,12 +170,11 @@ export function diffLayers(before: OverlayLayers, after: OverlayLayers): LayersP
     patch.chat = { ...patch.chat, hideCommands: after.chat.hideCommands };
   if (before.chat.backgroundOpacity !== after.chat.backgroundOpacity)
     patch.chat = { ...patch.chat, backgroundOpacity: after.chat.backgroundOpacity };
-  if (before.characters.enabled !== after.characters.enabled) patch.characters = { enabled: after.characters.enabled };
-  if (before.characters.timeout !== after.characters.timeout)
-    patch.characters = { ...patch.characters, timeout: after.characters.timeout };
-  if (before.characters.max !== after.characters.max)
-    patch.characters = { ...patch.characters, max: after.characters.max };
+  patch.characters = changedFields(after.characters, before.characters, CHARACTER_FIELDS);
   if (before.camera.enabled !== after.camera.enabled) patch.camera = { enabled: after.camera.enabled };
+  patch.alerts = { rules: changedRules(after.alerts.rules, before.alerts.rules) };
+  if (before.alerts.enabled !== after.alerts.enabled) patch.alerts.enabled = after.alerts.enabled;
+  patch.goal = changedFields(after.goal, before.goal, GOAL_FIELDS);
   for (const orientation of ORIENTATIONS) {
     const layout: CellsPatch = {};
     for (const layer of GRID_LAYERS) {
@@ -155,6 +192,12 @@ function mergeItems(base: ItemsPatch | undefined, next: ItemsPatch | undefined):
   return items;
 }
 
+function mergeRules(base: RulesPatch | undefined, next: RulesPatch | undefined): RulesPatch {
+  const rules: RulesPatch = {};
+  for (const rule of ALERT_RULES) rules[rule] = { ...base?.[rule], ...next?.[rule] };
+  return rules;
+}
+
 /** Both patches in one. A field in `next` wins. */
 export function mergePatches(base: LayersPatch, next: LayersPatch): LayersPatch {
   return compact({
@@ -162,6 +205,11 @@ export function mergePatches(base: LayersPatch, next: LayersPatch): LayersPatch 
     chat: { ...base.chat, ...next.chat },
     characters: { ...base.characters, ...next.characters },
     camera: { ...base.camera, ...next.camera },
+    alerts: {
+      enabled: next.alerts?.enabled ?? base.alerts?.enabled,
+      rules: mergeRules(base.alerts?.rules, next.alerts?.rules),
+    },
+    goal: { ...base.goal, ...next.goal },
     twitchOnly: { ...base.twitchOnly, ...next.twitchOnly },
     items: mergeItems(base.items, next.items),
     cells: {
@@ -194,8 +242,12 @@ export function withoutSent(draft: LayersPatch, sent: LayersPatch): LayersPatch 
   const result: LayersPatch = compact(draft);
   removeSentFields(result, sent, ["orientation"]);
   removeSentFields(result.chat, sent.chat, ["enabled", "hideCommands", "backgroundOpacity"]);
-  removeSentFields(result.characters, sent.characters, ["enabled"]);
+  removeSentFields(result.characters, sent.characters, CHARACTER_FIELDS);
   removeSentFields(result.camera, sent.camera, ["enabled"]);
+  removeSentFields(result.alerts, sent.alerts, ["enabled"]);
+  for (const rule of ALERT_RULES)
+    removeSentFields(result.alerts?.rules?.[rule], sent.alerts?.rules?.[rule], RULE_FIELDS);
+  removeSentFields(result.goal, sent.goal, GOAL_FIELDS);
   removeSentFields(result.twitchOnly, sent.twitchOnly, ORIENTATIONS);
   for (const layer of CONTENT_LAYERS) removeSentFields(result.items?.[layer], sent.items?.[layer], ITEM_FIELDS);
   for (const orientation of ORIENTATIONS) {
@@ -249,10 +301,8 @@ export function moveCell(orientation: Orientation, rect: CellRect, grab: Cell, a
 
 /** `layers` with the "Show on stream" setting of `layer` set. */
 export function withEnabled(layers: OverlayLayers, layer: GridLayer, enabled: boolean): OverlayLayers {
-  if (layer === "chat") return { ...layers, chat: { ...layers.chat, enabled } };
-  if (layer === "characters") return { ...layers, characters: { ...layers.characters, enabled } };
-  if (layer === "camera") return { ...layers, camera: { enabled } };
-  return withItem(layers, layer, { enabled });
+  if (isContentLayer(layer)) return withItem(layers, layer, { enabled });
+  return { ...layers, [layer]: { ...layers[layer], enabled } };
 }
 
 /** `layers` with some settings of the content layer `layer` replaced. */

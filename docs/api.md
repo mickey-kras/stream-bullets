@@ -122,7 +122,7 @@ English also shows `error` for `step_up_required` and `other_key_required`.
 | Endpoint | Body | Response |
 | --- | --- | --- |
 | `GET /api/overlay` | - | `{overlay, data, handle}`. The `OverlayState` of the page of the signed-in owner, and the polls, topics, and cards for the pickers |
-| `POST /api/overlay` | `{action: "layers", write?, orientation?, chat?: {enabled?, hideCommands?, backgroundOpacity?}, characters?: {enabled?, timeout?, max?}, items?: {poll?, topic?, next?, message?, card?, support?}, camera?: {enabled?}, cells?: {horizontal?, vertical?}, twitchOnly?: {horizontal?, vertical?}}` | `{overlay}`. The whole new `OverlayState`, with `layers` |
+| `POST /api/overlay` | `{action: "layers", write?, orientation?, chat?: {enabled?, hideCommands?, backgroundOpacity?}, characters?: {enabled?, timeout?, max?}, items?: {poll?, topic?, next?, message?, card?, support?}, camera?: {enabled?}, alerts?: {enabled?, rules?}, goal?: {enabled?, title?, counts?, target?}, cells?: {horizontal?, vertical?}, twitchOnly?: {horizontal?, vertical?}}` | `{overlay}`. The whole new `OverlayState`, with `layers` |
 | `POST /api/overlay` | `{action: "showResults", on: boolean}` | `{overlay}`. The whole new `OverlayState`, with `showResults` |
 | `POST /api/overlay` | `{action: "message", text, style: "info" \| "hype"}` | `{overlay}`. The whole new `OverlayState`, with `message` and `messageStyle` |
 | `POST /api/overlay` | `{action: "chatTest", on: boolean}` | `{overlay}`. The whole new `OverlayState`, with `chatTestUntil` |
@@ -134,10 +134,13 @@ English also shows `error` for `step_up_required` and `other_key_required`.
 - The overlay shows only the layers on the grid: `chat`, `characters`, the content layers, and `camera`.
   The content layers are `poll`, `topic`, `next`, `message`, `card`, and `support`. Each content layer shows one content source.
   A layer is on stream in an output when it has a cell in the orientation of that output and its `enabled` value is `true`.
+- The grid also has the `alerts` layer and the `goal` layer. The API saves their cells and their settings.
+  The overlay shows them, and the editor has them in the group **Recognition**.
+  See [Alerts layer](overlay-composition.md#alerts-layer) and [Goal layer](overlay-composition.md#goal-layer).
 - `orientation` is `horizontal` (a grid of 32 × 18 cells) or `vertical` (18 × 32 cells). A cell is 60 pixels.
   It is the output that the editor shows. Each output has its own link, and OBS can show the two outputs together.
   See [Outputs](overlay-composition.md#outputs).
-- Each orientation in `cells` holds `{chat?, characters?, poll?, topic?, next?, message?, card?, support?, camera?}`.
+- Each orientation in `cells` holds `{chat?, characters?, poll?, topic?, next?, message?, card?, support?, camera?, alerts?, goal?}`.
   Each value is a cell rectangle `{c, r, w, h}` of whole cells, or `null`. With `null`, the layer is not on the grid.
   `c + w` is at most the number of columns, and `r + h` is at most the number of rows.
 - Each value in `items` holds the settings of one content layer: `{enabled?, ref?, backgroundOpacity?, qr?}`.
@@ -152,9 +155,20 @@ English also shows `error` for `step_up_required` and `other_key_required`.
   The default is `false`: the merged chat. See [Twitch chat only](overlay-composition.md#twitch-chat-only).
 - `camera` is the camera frame: a frame with a clear window. It has only the `enabled` value.
   See [Camera frame](overlay-composition.md#camera-frame).
+- `alerts.rules` holds the rules of the alerts: `{follow?, subscription?, gift?, bits?, paid?, raid?, topic?}`.
+  - Each rule is `{min?, banner?, chat?, character?}`. The three switches are booleans.
+  - `min` is the amount where the alert starts: a whole number from 1 to 1,000,000.
+    Only `gift`, `bits`, and `raid` accept `min`. A `min` on a different rule returns `400`.
+  - A body changes only the fields of the rules that it names.
+  - See [Alerts and the goal](channel-connections.md#alerts-and-the-goal) for the rules and their defaults.
+- `goal` holds the settings of the goal.
+  - `title` is the title on stream: one line of at most 60 characters. It can be empty. The API keeps the spaces at its ends.
+  - `counts` is `subs`, `follows`, `bits`, `kicks`, `chatters`, or `votes`.
+  - `target` is a whole number from 1 to 10,000,000.
 - `chat.backgroundOpacity` is the opacity of the message cards in percent: an integer from 0 to 100 that is a multiple of 5.
   Other values return `400`. See [Message background](overlay-composition.md#message-background).
 - The minimum size is 6 × 4 cells for `chat`, 12 × 4 for `characters`, 8 × 4 for each content layer, and 6 × 4 for `camera`.
+  It is 8 × 3 cells for `alerts` and 8 × 2 cells for `goal`.
 - After the merge, no two layers can overlap in an orientation. A layer without a cell does not count.
   A layer with a cell counts also while its `enabled` value is `false`.
 - The stored layers have a limit of 4000 characters. The server stores only the cells and the settings that are not the defaults.
@@ -190,12 +204,17 @@ English also shows `error` for `step_up_required` and `other_key_required`.
   Also `404` without a streamer page, `409` when concurrent saves conflict, `423` for a frozen or suspended page, and `429` above the quota.
 - `OverlayState` and `OverlayPublic` are `{showResults, message, messageStyle, layers, chatTestUntil, revision}`.
   `OverlayPublic` is what the overlay page and the live room get. Its `message` is empty unless the `message` layer is on stream.
-- `layers` is `{orientation, chat: {enabled, hideCommands, backgroundOpacity}, characters: {enabled, timeout, max}, items, cells: {horizontal, vertical}}`.
-  Each orientation in `cells` is `{chat, characters, poll, topic, next, message, card, support}`. Each value is a cell or `null`.
+- `layers` is `{orientation, chat: {enabled, hideCommands, backgroundOpacity}, characters: {enabled, timeout, max}, camera: {enabled}, alerts: {enabled, rules}, goal: {enabled, title, counts, target}, items, cells: {horizontal, vertical}, twitchOnly: {horizontal, vertical}}`.
+  Each orientation in `cells` is `{chat, characters, poll, topic, next, message, card, support, camera, alerts, goal}`. Each value is a cell or `null`.
   `items` holds `{enabled, ref, backgroundOpacity, qr}` for each content layer.
   Missing, unknown, or incorrect stored fields take the defaults. Reads never fail because of a stored `layers` value.
   No layer has a cell by default. Chat and characters are off by default, `hideCommands` is on, and `backgroundOpacity` is 100.
+  `hideCommands` applies to the chat layer and to the chat of the owner in **Live** and in the OBS dock.
   The defaults of a content layer are `enabled: true`, `ref: null`, and `backgroundOpacity: 100`. `poll` has `qr: true`. The other content layers have `qr: false`.
+- `alerts` and `goal` are off by default. `alerts.rules` always has each of the seven rules, and each rule has its four fields.
+  A rule that does not accept `min` has `min: 1`.
+  The defaults of `goal` are an empty `title`, `counts: "subs"`, and `target: 25`.
+  The live room sends `layers` to each viewer. Thus the title of a goal is public when the API saves it, also while the layer is off stream.
 - With the `poll` parameter, the overlay page shows that poll in the poll layer, and no other content layer.
   A poll ID that the page does not have returns `404`.
 - The API has no `preview`, `take`, or `layout` action now. Each of them returns `400`.
@@ -233,6 +252,62 @@ See [Layouts](overlay-composition.md#layouts).
 - Each action increases `overlay.revision`, and the live room sends the new revision. Another open tab of the owner then loads the layouts again.
 - Only the owner of the page can use these endpoints. Unknown fields return `400`.
 
+## Alert controls
+
+The alert host of the page plays the alerts on stream. See [Alert host](channel-connections.md#alert-host).
+
+| Endpoint | Body | Response |
+| --- | --- | --- |
+| `POST /api/overlay/alerts` | `{op: "status"}` | `{at, muted, current, waiting, goal}`. The state of the alerts. This control changes nothing. |
+| `POST /api/overlay/alerts` | `{op: "test", kind?}` | The state. A sample alert plays. |
+| `POST /api/overlay/alerts` | `{op: "mute", on: boolean}` | The state. With `on: true`, no alert plays. |
+| `POST /api/overlay/alerts` | `{op: "skip"}` | The state. The alert on stream ends, and the next alert starts. |
+| `POST /api/overlay/alerts` | `{op: "replay", id}` | The state. The alert of one support event plays again. |
+| `POST /api/overlay/alerts` | `{op: "goalReset"}` | The state. The count of the goal starts again at 0. |
+
+- The state has the fields of the `alerts` message of the activity socket, without `type`:
+
+| Field | Value |
+| --- | --- |
+| `at` | The server time of the state, in milliseconds |
+| `muted` | `true` while the mute is on |
+| `current` | The view of the alert on stream, or `null`. Its `endsAt` is the server time when the banner goes. |
+| `waiting` | The number of alerts in the line |
+| `goal` | `{counts, value, startedAt}`: the count of the goal. `null` when the goal layer has no place on a grid. |
+
+- See [Alerts and the goal](channel-connections.md#alerts-and-the-goal) for the fields of a view.
+- `kind` is `follow`, `subscription`, `gift`, `bits`, `super_chat`, `raid`, `topic`, or `anonymous`. Without `kind`, the test is a `gift`.
+  `anonymous` is a gift from a supporter who asked for no name.
+- `id` is the `id` of a support event of the activity feed, with 1 to 160 characters.
+  The server replays only an event that it still keeps: the newest 50 support events of the last 10 minutes.
+- `mute` with `on: true` stops the alert on stream immediately and removes each alert from the line.
+  While the mute is on, a support event makes no alert. After `on: false`, no alert from the muted time plays.
+  The muted state stays until the owner changes it.
+- A test and a replay add no support event, and no page gets an `event` message for them. They do not use `min` of the rule.
+  They never change the count of the goal.
+- `goal.counts` is the `counts` value of the goal layer. `goal.value` is the count. `goal.startedAt` is the server time when the count started.
+  See [Goal count](overlay-composition.md#goal-count).
+- `goalReset` sets `goal.value` to 0 and `goal.startedAt` to the server time. An event from before that time does not count.
+- `test`, `replay`, and `goalReset` count against the write quota of 60 changes each minute. `status`, `mute`, and `skip` do not.
+  Thus the owner can always read the state and stop the alerts.
+- Only the owner of the page can use this endpoint. Unknown fields return `400`.
+- A refusal of the alert host has a code:
+
+| Status | Code | Cause |
+| --- | --- | --- |
+| `400` | `alerts_off_stream` | A test or a replay, and the saved alerts layer is not on stream in an output |
+| `400` | `goal_off` | `goalReset`, and the saved goal layer has no place on a grid |
+| `404` | `alert_gone` | A replay of an event that the server does not keep: the ID is unknown, or the event is older than 10 minutes |
+| `409` | `alerts_muted` | A test or a replay while the mute is on |
+| `409` | `alerts_unwatched` | A test or a replay while no overlay page, no **Streamer tools** page, and no dock is open |
+| `409` | `alert_rule_off` | A test or a replay, and the rule of the alert has its three switches off |
+| `409` | `alerts_full` | A test or a replay while 100 alerts wait in the line |
+| `503` | `alerts_unavailable` | The alert host cannot read the saved layers, or it cannot answer |
+
+- Other errors: `400` for an invalid body, `401` without sign-in, `403` for another origin, and `404` without a streamer page.
+  Also `423` for a frozen or suspended page, and `429` above the quota.
+  The endpoint returns `503` while the `CHANNELS_OFF` secret exists, and when the deployment has no `CHANNEL_INGEST` binding.
+
 ## OBS dock
 
 See [OBS dock](streamer-tools.md#obs-dock).
@@ -242,13 +317,17 @@ See [OBS dock](streamer-tools.md#obs-dock).
 | `POST /api/dock/key` | `{}` | `{url}`. A new dock link for the page of the signed-in owner. The link shows one time. The old link stops immediately. |
 | `POST /api/dock/:handle/overlay` | `{action: "showResults" \| "message" \| "layers", ...}` | `{overlay}`. A live control from the dock |
 | `POST /api/dock/:handle/poll` | `{id}` | `{id}`. The poll takes no more votes |
+| `POST /api/dock/:handle/alerts` | `{op: "status" \| "test" \| "mute" \| "skip" \| "replay", ...}` | `{at, muted, current, waiting, goal}`. An alert control from the dock |
 | `GET /@handle/dock?key` | - | The dock page. Without the current dock key, the answer is `404`. |
 
-- The two dock endpoints with `:handle` need no session. They need the dock key in the `X-SB-Dock-Key` header.
+- The three dock endpoints with `:handle` need no session. They need the dock key in the `X-SB-Dock-Key` header.
   A call without the current dock key of that page returns `403` with the code `dock_key`.
 - `overlay` takes the same actions as `POST /api/overlay`, with these limits.
   A `layers` action can have only `items`, only for `poll`, `topic`, and `message`, and only the fields `enabled`, `ref`, and `qr`.
-  `chatTest` and each other field return `403` with the code `dock_action`.
+  `chatTest` and each other field return `403` with the code `dock_action`. `alerts` and `goal` are such fields.
+- `alerts` takes the same controls as `POST /api/overlay/alerts` and gives the same answers and codes. See [Alert controls](#alert-controls).
+  A test and a replay from the dock count against the write quota of the owner.
+  `goalReset` returns `403` with the code `dock_action`: only the session of the owner starts the goal again.
 - An overlay key is not a dock key. It returns `403`.
 - The live room (`/api/live/:handle`) and the activity feed (`/api/activity/:handle`) accept the dock key in `key`.
   A dock then has the seat and the data of the owner.

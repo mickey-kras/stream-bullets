@@ -1,7 +1,8 @@
 import { memo, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { t, tAround } from "../../i18n";
 import type { ActivityFragment } from "../../lib/activity";
-import { CHAT_LIMITS, graphemes, safeEmoteUrl, type ChatRow } from "../../lib/chat-feed";
+import type { AlertFace } from "../../lib/alert-feed";
+import { CHAT_LIMITS, graphemes, safeEmoteUrl, type AlertRow, type MessageRow } from "../../lib/chat-feed";
 import {
   goneWakeAt,
   nextGone,
@@ -13,7 +14,10 @@ import {
   type ShownRow,
 } from "../../lib/fading-rows";
 import { CHAT_BACKGROUND } from "../../lib/overlay-layers";
+import { supportText } from "../../lib/support-line";
 import { motionReduced } from "../station/motion";
+import { Icon } from "../ui/icon";
+import { alertWho } from "./alerts-layer";
 import { useRowMotion } from "./use-row-motion";
 import { PlatformIcon } from "./wasteland/glyphs";
 import { PLATFORM_NAMES, WASTELAND_STYLE } from "./wasteland/theme";
@@ -107,7 +111,7 @@ function useFadingRows(chat: ChatView): ShownRow[] {
     );
     return (): void => clearTimeout(timer);
   }, [gone]);
-  const rows: readonly ChatRow[] = chat.rows;
+  const rows: ChatView["rows"] = chat.rows;
   return useMemo((): ShownRow[] => shownRows(rows, gone), [rows, gone]);
 }
 
@@ -122,7 +126,7 @@ const ChatRowItem = memo(function ChatRowItem({
   removedText,
   before,
   after,
-}: Readonly<{ row: ChatRow; gone: boolean; newest: boolean; removedText: string } & NameFrame>): ReactNode {
+}: Readonly<{ row: MessageRow; gone: boolean; newest: boolean; removedText: string } & NameFrame>): ReactNode {
   const removed: boolean = row.phase === "removed";
   const occurrences = new Map<string, number>();
   return (
@@ -172,9 +176,56 @@ const ChatRowItem = memo(function ChatRowItem({
   );
 });
 
+/** The icon of a mark: the platform of the alert. A topic credit is not from a platform, so it has a heart. */
+function MarkIcon({ platform }: Readonly<{ platform: AlertFace["platform"] }>): ReactNode {
+  if (platform === "direct") return <Icon name="heart" size={24} className="wl-icon" />;
+  return <PlatformIcon className="wl-icon" platform={platform} label={PLATFORM_NAMES[platform]} />;
+}
+
+/**
+ * The mark of an alert: one highlight card in the flow of the chat, with the same motion as a message. It tells who
+ * and what, as the banner does, and never the text of the supporter. A test has a small TEST mark. The name is not
+ * cut: it wraps.
+ */
+const AlertRowItem = memo(function AlertRowItem({
+  row,
+  gone,
+  newest,
+}: Readonly<{ row: AlertRow; gone: boolean; newest: boolean }>): ReactNode {
+  const alert: AlertFace = row.alert;
+  return (
+    <li
+      className="wl-item"
+      data-row-id={row.id}
+      data-phase={row.phase}
+      data-platform={alert.platform}
+      data-alert={alert.kind}
+      data-enter={row.animate || undefined}
+      data-gone={gone || undefined}
+      data-newest={newest || undefined}
+    >
+      <div className="wl-card">
+        <span className="wl-line">
+          <MarkIcon platform={alert.platform} />
+          <span className="wl-user">
+            <bdi>{alertWho(alert)}</bdi>
+          </span>{" "}
+          <span className="wl-msg">{supportText(alert)}</span>
+          {alert.origin === "test" && (
+            <span className="wl-mark-test" data-alert-test>
+              {t("overlay.alerts.test")}
+            </span>
+          )}
+        </span>
+      </div>
+    </li>
+  );
+});
+
 /**
  * The merged chat in the wasteland theme: one compact card per message, newest at the bottom, overflow faded and
  * clipped at the top. Fills its parent, which sets the size in design pixels. Renders message text as text only.
+ * An alert with the mark in chat is one highlight card in the same list.
  */
 export const ChatLayer = memo(function ChatLayer({
   chat,
@@ -201,17 +252,21 @@ export const ChatLayer = memo(function ChatLayer({
       data-overlay-chat=""
       data-outline={backgroundOpacity < OUTLINE_BELOW || undefined}
     >
-      {shown.map(({ row, gone, newest }: ShownRow) => (
-        <ChatRowItem
-          key={row.id}
-          row={row}
-          gone={gone}
-          newest={newest}
-          removedText={removedText}
-          before={before}
-          after={after}
-        />
-      ))}
+      {shown.map(({ row, gone, newest }: ShownRow) =>
+        row.alert ? (
+          <AlertRowItem key={row.id} row={row} gone={gone} newest={newest} />
+        ) : (
+          <ChatRowItem
+            key={row.id}
+            row={row}
+            gone={gone}
+            newest={newest}
+            removedText={removedText}
+            before={before}
+            after={after}
+          />
+        ),
+      )}
     </ol>
   );
 });

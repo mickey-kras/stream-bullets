@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useContext, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { t, type MessageId } from "../../i18n";
 import { CHAT_TEST_MS, chatTestLeft } from "../../lib/chat-test";
 import { CHARACTERS_TEST_MS } from "../../lib/playground/constants";
@@ -6,11 +6,33 @@ import type { OverlayState } from "../../types";
 import { errorMessage, postJson } from "../api";
 import { IconButton } from "../ui/icon-button";
 import { useToast } from "../ui/toast";
+import { alertsFailure } from "./alerts-settings";
 import type { CharactersControl } from "./characters-controls";
+import { ControlApiContext, type ControlApi } from "./control-api";
+
+/** The status of a test that runs: the time left, when this tab knows it. */
+function runningStatus(left: number): string {
+  return left > 0 ? t("overlay.test.left", { seconds: Math.ceil(left / 1000) }) : t("overlay.test.on");
+}
+
+/** What a start does, from the saved layers on stream, or why it cannot start. */
+function readyStatus(on: Readonly<{ chat: boolean; characters: boolean; paused: boolean; alerts: boolean }>): string {
+  if (!on.chat && !on.characters) return t(on.alerts ? "overlay.test.alertOnly" : "overlay.test.needsLayer");
+  let status: string = t("overlay.test.hint", {
+    seconds: CHAT_TEST_MS / 1000,
+    minutes: CHARACTERS_TEST_MS / 60_000,
+    badge: t("overlay.characters.badgeTest"),
+  });
+  if (on.characters && on.paused) status += ` ${t("overlay.characters.testResumes")}`;
+  if (on.alerts) status += ` ${t("overlay.test.alertHint")}`;
+  return status;
+}
 
 /**
  * Start and Stop for the test: one icon button in the toolbar of the studio. It starts the chat test and the
- * characters test together, each when its layer is on stream, and stops the tests that run. While a test runs, the
+ * characters test together, each when its layer is on stream, and stops the tests that run. A start also sends one
+ * test alert while the alerts layer is on stream; an alert has no time to stop, so it does not make the test run. A
+ * refused alert shows in a toast and does not stop the other tests. While a test runs, the
  * button shows the stop icon in the pressed colors and has the name of the stop action, and the time left shows
  * beside it. The button has no `aria-pressed`: its name changes with its action, and a pressed "Stop test" would
  * tell a screen reader the opposite.
@@ -24,6 +46,7 @@ export function StudioTest({
   chatUntil,
   now,
   chatOn,
+  alertsOn,
   characters,
   onSaved,
 }: Readonly<{
@@ -33,18 +56,21 @@ export function StudioTest({
   now: number;
   /** The saved chat layer is on stream. The server checks the saved layers, not an unsaved draft. */
   chatOn: boolean;
+  /** The saved alerts layer is on stream in an output. */
+  alertsOn: boolean;
   /** The character playground. Its `enabled` says that the saved characters layer is on stream. */
   characters: CharactersControl;
   onSaved: (overlay: OverlayState) => void;
 }>): ReactNode {
   const toast = useToast();
+  const api: ControlApi = useContext(ControlApiContext);
   const hintId: string = useId();
   const [sending, setSending] = useState<boolean>(false);
   const chatLeft: number = chatTestLeft(chatUntil, now);
   const chatRunning: boolean = chatLeft > 0;
   const running: boolean = chatRunning || characters.testRunning;
   const left: number = Math.max(chatLeft, characters.testLeft);
-  const available: boolean = chatOn || characters.enabled;
+  const available: boolean = chatOn || characters.enabled || alertsOn;
   const unavailable: boolean = sending || characters.busy || (!running && !available);
   // Empty on page load; set when `running` changes, so the region speaks only for a start or a stop.
   const [news, setNews] = useState<string>("");
@@ -78,6 +104,32 @@ export function StudioTest({
       toast(t("overlay.test.failed", { error: errorMessage(error_) }), { tone: "error" });
     }
   }
+  /** One test alert. Only the alert starts: the news tells it, because the test does not run. */
+  async function sendAlert(alone: boolean): Promise<void> {
+    try {
+      await api.alerts({ op: "test" });
+      if (alone) setNews(t("overlay.alerts.testSent"));
+    } catch (error_: unknown) {
+      toast(t("overlay.alerts.testFailed", { error: alertsFailure(error_) }), { tone: "error" });
+    }
+  }
+  /** The requests that stop the tests that run. */
+  function stopRequests(): Promise<void>[] {
+    stoppedHere.current = true;
+    const requests: Promise<void>[] = [];
+    if (chatRunning) requests.push(sendChat(false));
+    if (characters.testRunning) requests.push(characters.send({ op: "stopTest" }, { failed }));
+    return requests;
+  }
+  /** The requests that start the test of each layer on stream. */
+  function startRequests(): Promise<void>[] {
+    resumedHere.current = characters.enabled && characters.paused;
+    const requests: Promise<void>[] = [];
+    if (chatOn) requests.push(sendChat(true));
+    if (characters.enabled) requests.push(characters.send({ op: "test" }, { failed }));
+    if (alertsOn) requests.push(sendAlert(!chatOn && !characters.enabled));
+    return requests;
+  }
   /** Stops the tests that run, or starts the test of each layer on stream. */
   async function press(): Promise<void> {
     if (sending || characters.busy) return;
@@ -86,30 +138,13 @@ export function StudioTest({
       return;
     }
     setSending(true);
-    const requests: Promise<void>[] = [];
-    if (running) {
-      stoppedHere.current = true;
-      if (chatRunning) requests.push(sendChat(false));
-      if (characters.testRunning) requests.push(characters.send({ op: "stopTest" }, { failed }));
-    } else {
-      resumedHere.current = characters.enabled && characters.paused;
-      if (chatOn) requests.push(sendChat(true));
-      if (characters.enabled) requests.push(characters.send({ op: "test" }, { failed }));
-    }
-    await Promise.all(requests);
+    await Promise.all(running ? stopRequests() : startRequests());
     setSending(false);
   }
 
-  let status: string = t("overlay.test.needsLayer");
-  if (running) status = left > 0 ? t("overlay.test.left", { seconds: Math.ceil(left / 1000) }) : t("overlay.test.on");
-  else if (available) {
-    status = t("overlay.test.hint", {
-      seconds: CHAT_TEST_MS / 1000,
-      minutes: CHARACTERS_TEST_MS / 60_000,
-      badge: t("overlay.characters.badgeTest"),
-    });
-    if (characters.enabled && characters.paused) status += ` ${t("overlay.characters.testResumes")}`;
-  }
+  const status: string = running
+    ? runningStatus(left)
+    : readyStatus({ chat: chatOn, characters: characters.enabled, paused: characters.paused, alerts: alertsOn });
   const label: string = t(running ? "overlay.test.stop" : "overlay.test.start");
   return (
     <div className="ov-comp-test" data-test-control>

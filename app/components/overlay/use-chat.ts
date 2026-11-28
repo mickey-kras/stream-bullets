@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   messageForPlatform,
   type ActivityChat,
@@ -6,6 +6,8 @@ import {
   type ActivityMessage,
   type ActivityPlatform,
 } from "../../lib/activity";
+import { chatMark } from "../../lib/alert-feed";
+import type { AlertView } from "../../lib/alerts";
 import {
   chatReducer,
   initialChatState,
@@ -16,8 +18,8 @@ import {
 } from "../../lib/chat-feed";
 import { chatTestScript } from "../../lib/chat-test";
 import type { ChatView } from "../../lib/fading-rows";
-import { motionReduced, watchMotion } from "../station/motion";
 import type { ActivityFeed } from "./activity-feed";
+import { useMotionReduced } from "./use-motion-reduced";
 
 /** The editor preview and the chat test add one sample event this often. */
 export const SAMPLE_INTERVAL_MS = 2_400;
@@ -53,23 +55,10 @@ function sampleEvent(sample: ActivityEvent, round: number, now: number): Activit
   return sample;
 }
 
-function subscribeMotion(onChange: () => void): () => void {
-  const stop = new AbortController();
-  watchMotion((): void => onChange(), stop.signal);
-  return (): void => stop.abort();
-}
-
-/**
- * The page's effective reduced-motion setting (the site's Motion preference, or the OS setting), kept current.
- * False on the server and before the first effect.
- */
-function useMotionReduced(): boolean {
-  return useSyncExternalStore(subscribeMotion, motionReduced, (): boolean => false);
-}
-
 /**
  * Where a chat state gets its events: the activity feed, or samples (shown at once if `prefill`, then on a loop).
- * `platform` drops the feed events of the other platforms. Null takes each platform.
+ * `platform` drops the feed events of the other platforms, and the marks of the alerts that the output does not
+ * show. Null takes each platform.
  */
 interface ChatSource {
   feed: ActivityFeed | null;
@@ -80,7 +69,8 @@ interface ChatSource {
 
 /**
  * One chat state: it feeds the activity feed (or the samples) through `chatReducer` and wakes once at `nextWakeAt` to
- * move animations and lifetimes forward. A changed `hideCommands` applies to the rows on screen.
+ * move animations and lifetimes forward. A changed `hideCommands` applies to the rows on screen. An alert of the feed
+ * with the mark in chat becomes one row (`chatMark`).
  *
  * Prefilled samples play on a loop, except with reduced motion: then they show once, as a still snapshot.
  */
@@ -156,8 +146,14 @@ function useChatState(
     if (!subscribe) return;
     return subscribe((message: ActivityMessage): void => {
       const only: ActivityPlatform | null = platformRef.current;
+      const now: number = Date.now();
+      const mark: AlertView | null = chatMark(message, only, now + (offsetRef.current ?? 0));
+      if (mark) {
+        dispatch({ type: "alert", alert: mark, now });
+        return;
+      }
       const shown: ActivityMessage | null = only === null ? message : messageForPlatform(message, only);
-      if (shown) dispatch({ type: "message", message: shown, now: Date.now(), serverOffset: offsetRef.current });
+      if (shown) dispatch({ type: "message", message: shown, now, serverOffset: offsetRef.current });
     });
   }, [subscribe, samples, prefill, dispatch, still]);
 

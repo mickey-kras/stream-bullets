@@ -674,12 +674,12 @@ test("the test, pause and reset are unavailable while the saved characters layer
   const layer = settings(editor);
   const toggle = editor.locator("[data-test-toggle]");
   await expect(toggle).toHaveAttribute("aria-disabled", "true");
-  await expect(toggle).toHaveAccessibleDescription("Put Chat or Characters on stream to start the test.");
+  await expect(toggle).toHaveAccessibleDescription("Put Chat, Characters, or Alerts on stream to start the test.");
   const hint = "Turn on “Show on stream” to pause, reset, or test the characters.";
   // A press starts nothing and tells the reason; force skips Playwright's own check of aria-disabled.
   await toggle.click({ force: true });
   await expect(toggle).toBeFocused();
-  await expect(page.locator(".sb-toast")).toHaveText("Put Chat or Characters on stream to start the test.");
+  await expect(page.locator(".sb-toast")).toHaveText("Put Chat, Characters, or Alerts on stream to start the test.");
   for (const name of ["Pause", "Reset playground"]) {
     const button = layer.getByRole("button", { name });
     await expect(button).toHaveAttribute("aria-disabled", "true");

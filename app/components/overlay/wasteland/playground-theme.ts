@@ -73,11 +73,6 @@ export interface PlaygroundTheme {
      * platform colour. Each frame rectangle is in the strip, with the pole at its left edge.
      */
     viewerFlag: { strip: Rect; mask: Rect; frames: readonly Rect[]; ticksPerFrame: number };
-    /**
-     * The left edge of each of the four treads of a stair in its cell, for a stair that rises to the right. The
-     * treads follow the steps of the rules (stairRise in terrain.ts), so a character stands on what it sees.
-     */
-    stairTreads: readonly number[];
   };
   joinSign: { dx: number; dy: number };
   exitSign: { dx: number; dy: number };
@@ -113,6 +108,7 @@ export interface PlaygroundTheme {
 }
 
 export type TerrainPicture =
+  | "stair"
   | "antenna"
   | "crown"
   | "flame0"
@@ -222,7 +218,7 @@ export const WASTELAND_PLAYGROUND: PlaygroundTheme = {
     gone: null,
   },
   terrain: {
-    url: "/assets/overlay/wasteland-terrain.png?v=526ce68a",
+    url: "/assets/overlay/wasteland-terrain.png?v=00498c25",
     tile: 16,
     rects: {
       antenna: [186, 59, 13, 22],
@@ -266,6 +262,7 @@ export const WASTELAND_PLAYGROUND: PlaygroundTheme = {
       signExit: [108, 59, 38, 24],
       signJoin: [147, 59, 38, 24],
       step: [0, 101, 7, 4],
+      stair: [128, 154, 16, 16],
     },
     girderProps: ["barrel", "railing"],
     dirtProps: ["grass", "sign", "rocks", "shrub", "crate"],
@@ -294,7 +291,6 @@ export const WASTELAND_PLAYGROUND: PlaygroundTheme = {
       ],
       ticksPerFrame: 7,
     },
-    stairTreads: [0, 3, 5, 9],
   },
   joinSign: { dx: 38, dy: -24 },
   exitSign: { dx: -76, dy: -24 },

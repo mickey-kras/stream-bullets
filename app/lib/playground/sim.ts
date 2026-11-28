@@ -19,7 +19,7 @@ import {
   JUMP_VY,
   MARK_TICKS,
   MIN_STAY_TICKS,
-  NEW_TICKS,
+  MOVEMENT_COOLDOWN_TICKS,
   PUSH_VX,
   PUSH_VY,
   REGISTRY_IDLE_TICKS,
@@ -43,19 +43,14 @@ import {
   crowdSlots,
   newParticipant,
   type Participant,
+  type Reaction,
 } from "./crowd";
 import {
   BUBBLE_MAX_UNITS,
   type BubbleView,
   boundText,
-  CHAR_STATES,
   type CharState,
-  type CharTuple,
   type ExtrasView,
-  type FlagTuple,
-  FLAG_NEW,
-  FLAG_UNAVAILABLE,
-  FRAME_T_WRAP,
   type ModeView,
   CUT_MARK,
   NAME_GRAPHEMES,
@@ -63,14 +58,12 @@ import {
   PLAYGROUND_VERSION,
   type PlaygroundFullFrame,
   type PlaygroundTickFrame,
-  type RopeTuple,
   type RosterEntry,
   type TerrainView,
 } from "./protocol";
 import {
   blockOrder,
   blocksString,
-  cellX,
   clearBuilds,
   colOf,
   createTerrain,
@@ -106,7 +99,9 @@ import {
   setState,
   type SimHost,
   siteKey,
+  STANDING_STATES,
 } from "./core";
+import { bubbleViews, charTuples, extrasView } from "./frames";
 import { Motion } from "./motion";
 import { Works } from "./works";
 
@@ -122,6 +117,8 @@ export { mulberry32, parseCommand, setState } from "./core";
  *   kept for later. `skip(gap)` moves the clock over a gap without simulating it.
  *
  * Moderation applies in both modes. Commands run only from live chat (`live: true`).
+ *
+ * The server can also start a reaction (`react`): an action of one character or of the crowd, without a chat command.
  */
 
 interface SimOptions {
@@ -156,6 +153,7 @@ export class PlaygroundSim implements SimHost {
   /** Restricted participants by `platform:userId`: the tick at which the restriction ends. */
   readonly restrictions = new Map<string, number>();
   private active = false;
+  private pushOn = true;
   private nextId = 1;
   private timeoutSeconds: number = CHARACTERS_TIMEOUT.default;
   private maxVisible: number = CHARACTERS_MAX.default;
@@ -201,6 +199,21 @@ export class PlaygroundSim implements SimHost {
   setVisibleMax(count: number): void {
     if (!Number.isFinite(count)) throw new RangeError(`playground maximum must be a number: ${count}`);
     this.maxVisible = Math.min(CHARACTERS_MAX.max, Math.max(CHARACTERS_MAX.min, Math.round(count)));
+  }
+
+  /** The owner setting for `!push`. */
+  get pushEnabled(): boolean {
+    return this.pushOn;
+  }
+
+  /** Applies the owner setting immediately, including queued and unfinished pushes. */
+  setPushEnabled(enabled: boolean): void {
+    this.pushOn = enabled;
+    if (enabled) return;
+    for (const p of this.participants.values()) {
+      if (p.pending?.name === "push") p.pending = null;
+      if (p.state === "push") this.rest(p);
+    }
   }
 
   /** The participants in registration order. */
@@ -255,15 +268,23 @@ export class PlaygroundSim implements SimHost {
   private queue(p: Participant, event: ActivityChat): void {
     const call: CommandCall | null = parseCommand(event.text);
     if (call) {
-      if (this.clock - p.lastCommand < COMMAND_COOLDOWN_TICKS) return;
-      p.lastCommand = this.clock;
-      // A stop works at once, also in the middle of a walk or of work of more than one step.
-      if (call.name === "stop") this.halt(p);
-      else p.pending = { ...call, expires: this.clock + COMMAND_EXPIRY_TICKS, key: event.id };
+      this.queueCommand(p, call, event.id);
       return;
     }
     const text: string = boundText(event.text, BUBBLE_LENGTH, BUBBLE_MAX_UNITS, CUT_MARK);
     if (text) p.pendingText = { text, expires: this.clock + COMMAND_EXPIRY_TICKS, key: event.id };
+  }
+
+  private queueCommand(p: Participant, call: CommandCall, key: string): void {
+    if (call.name === "push" && !this.pushOn) return;
+    const movement: boolean = call.name === "left" || call.name === "right" || call.name === "look";
+    const last: number = movement ? p.lastMovement : p.lastCommand;
+    if (this.clock - last < (movement ? MOVEMENT_COOLDOWN_TICKS : COMMAND_COOLDOWN_TICKS)) return;
+    if (movement) p.lastMovement = this.clock;
+    else p.lastCommand = this.clock;
+    // A stop works at once, also in the middle of a walk or of work of more than one step.
+    if (call.name === "stop") this.halt(p);
+    else p.pending = { ...call, expires: this.clock + COMMAND_EXPIRY_TICKS, key };
   }
 
   private register(key: string, platform: ActivityPlatform, userId: string): Participant {
@@ -512,6 +533,7 @@ export class PlaygroundSim implements SimHost {
     p.bubble = null;
     p.pending = null;
     p.pendingText = null;
+    p.reaction = null;
     p.job = null;
     p.rope = null;
   }
@@ -585,6 +607,7 @@ export class PlaygroundSim implements SimHost {
 
   /** Starts a command action. The caller makes sure the character is walking or standing inside the walking limits. */
   perform(p: Participant, command: Command, key = "", n = 0, side: Side = 0): void {
+    if (command === "push" && !this.pushOn) return;
     const words: string[] = [`!${command}`];
     if (side !== 0) words.push(side < 0 ? "left" : "right");
     if (n > 0) words.push(String(n));
@@ -596,6 +619,34 @@ export class PlaygroundSim implements SimHost {
     this.starts[command](p, n, side);
   }
 
+  /**
+   * A reaction that the server starts, for example for an alert. It is not a command: it shows no command bubble,
+   * does not steer the character, and does not use or start the command cooldown. It is never in a checkpoint.
+   *
+   * - With the `key` (`siteKey`) of a participant that has a slot, that character does `action` one time.
+   * - With null, or with a key that has no character on screen, the crowd reacts: each visible character that stands
+   *   on a floor cheers one time. `skipPlatform` leaves the characters of that platform out of the crowd. A character
+   *   on its way to the exit does not stay to react, so its key gives the crowd too.
+   *
+   * A reaction never ends a command or other action. It waits until its character walks or stands, after a queued
+   * command of its viewer, and is dropped after COMMAND_EXPIRY_TICKS. A newer reaction replaces one that waits.
+   * Returns the number of characters that got the reaction: 0 while the playground does not run.
+   */
+  react(key: string | null, action: Reaction, skipPlatform?: ActivityPlatform): number {
+    if (!this.running) return 0;
+    const expires: number = this.clock + COMMAND_EXPIRY_TICKS;
+    const subject: Participant | undefined = key === null ? undefined : this.participants.get(key);
+    if (subject?.admitted && subject.exitReason === null) {
+      subject.reaction = { action, expires };
+      return 1;
+    }
+    const crowd: Participant[] = this.visible().filter(
+      (p: Participant): boolean => p.platform !== skipPlatform && STANDING_STATES.has(p.state),
+    );
+    for (const p of crowd) p.reaction = { action: "cheer", expires };
+    return crowd.length;
+  }
+
   /** How each command starts. `n` is 0 without a number, and `side` is 0 without a side. */
   private readonly starts: Record<Command, (p: Participant, n: number, side: Side) => void> = {
     left: (p: Participant, n: number): void => this.motion.walkTo(p, -1, n),
@@ -605,7 +656,7 @@ export class PlaygroundSim implements SimHost {
       else setState(p, "turn");
     },
     stop: (p: Participant): void => this.rest(p),
-    jump: (p: Participant): void => setState(p, "jump"),
+    jump: (p: Participant): void => setState(p, "jump", { vx: p.dir * JUMP_VX }),
     block: (p: Participant): void => this.works.job(p, "block", 1, 0),
     up: (p: Participant): void => this.works.job(p, "up", 1, 0),
     stairs: (p: Participant, n: number): void => this.works.job(p, "stairs", n, 0),
@@ -626,6 +677,7 @@ export class PlaygroundSim implements SimHost {
     if (p.mark > 0) p.mark -= 1;
     if (p.pending && p.pending.expires < this.clock) p.pending = null;
     if (p.pendingText && p.pendingText.expires < this.clock) p.pendingText = null;
+    if (p.reaction && p.reaction.expires < this.clock) p.reaction = null;
     if (p.state === "away") return;
     p.t += 1;
     // Work of more than one step ends first: a queued command or an exit waits for it. A stop ends it at once.
@@ -635,7 +687,7 @@ export class PlaygroundSim implements SimHost {
 
   /**
    * A walking or standing character leaves when its time is up, or else shows its queued text and starts its queued
-   * command.
+   * command. Without a queued command, it starts its queued reaction.
    */
   private walkTurn(p: Participant): void {
     const timedOut: boolean = this.clock - p.lastChat >= this.timeoutTicks;
@@ -658,6 +710,11 @@ export class PlaygroundSim implements SimHost {
       const pending = p.pending;
       p.pending = null;
       this.perform(p, pending.name, pending.key, pending.n, pending.side);
+    } else if (p.reaction) {
+      const action: Reaction = p.reaction.action;
+      p.reaction = null;
+      // Quiet: no command bubble, no steering and no cooldown. A jump lands where it started.
+      setState(p, action, action === "jump" ? { vx: 0 } : {});
     }
   }
 
@@ -720,7 +777,8 @@ export class PlaygroundSim implements SimHost {
     },
     jump: (p: Participant): void => {
       if (p.t < DURATION.jumpCrouch) return;
-      if (p.t === DURATION.jumpCrouch) Object.assign(p, { vy: JUMP_VY, vx: p.dir * JUMP_VX, fromY: p.y });
+      // The start of the jump set the speed to the side: a command jumps to the front, and a reaction on the spot.
+      if (p.t === DURATION.jumpCrouch) Object.assign(p, { vy: JUMP_VY, fromY: p.y });
       this.motion.physics(p);
     },
     fall: (p: Participant): void => this.motion.physics(p),
@@ -761,35 +819,6 @@ export class PlaygroundSim implements SimHost {
     return this.list().filter((p: Participant): boolean => p.admitted);
   }
 
-  private chars(visible: Participant[]): CharTuple[] {
-    return visible.map((p: Participant): CharTuple => {
-      const flags: number =
-        (p.mark > 0 ? FLAG_UNAVAILABLE : 0) | (this.clock - p.admittedAt < NEW_TICKS ? FLAG_NEW : 0);
-      return [
-        p.id,
-        Math.round(p.x * 10),
-        Math.round(p.y * 10),
-        CHAR_STATES.indexOf(p.state as CharState),
-        p.t % FRAME_T_WRAP,
-        p.dir,
-        flags,
-      ];
-    });
-  }
-
-  private extras(visible: Participant[]): ExtrasView {
-    const ids = new Set<number>(visible.map((p: Participant): number => p.id));
-    return {
-      ropes: visible.flatMap((p: Participant): RopeTuple[] =>
-        p.rope ? [[p.id, Math.round(p.rope.x), Math.round(p.rope.y), p.rope.hit ? 1 : 0]] : [],
-      ),
-      flags: this.terrain.flags
-        .filter((flag: Flag): boolean => ids.has(flag.id))
-        .map((flag: Flag): FlagTuple => [flag.id, cellX(flag.c), floorY(this.world, flag.r)]),
-      crown: this.crown !== null && ids.has(this.crown) ? this.crown : null,
-    };
-  }
-
   private sections(): {
     roster: RosterEntry[];
     bubbles: BubbleView[];
@@ -800,15 +829,9 @@ export class PlaygroundSim implements SimHost {
     const visible: Participant[] = this.visible();
     return {
       roster: visible.map((p: Participant): RosterEntry => ({ id: p.id, platform: p.platform, name: p.name })),
-      // Oldest first, so the overlay draws the newest bubble on top.
-      bubbles: visible
-        .flatMap((p: Participant): [number, BubbleView][] =>
-          p.bubble ? [[p.bubble.at, { id: p.id, text: p.bubble.text }]] : [],
-        )
-        .sort((a: [number, BubbleView], b: [number, BubbleView]): number => a[0] - b[0])
-        .map(([, bubble]: [number, BubbleView]): BubbleView => bubble),
+      bubbles: bubbleViews(visible),
       terrain: terrainView(this.world, this.terrain),
-      extras: this.extras(visible),
+      extras: extrasView(visible, this.world, this.terrain, this.crown),
       mode: { paused: this.paused, test: this.testEndsAt !== null },
     };
   }
@@ -820,7 +843,7 @@ export class PlaygroundSim implements SimHost {
       v: PLAYGROUND_VERSION,
       full: true,
       tick: this.clock,
-      chars: this.chars(this.visible()),
+      chars: charTuples(this.visible(), this.clock),
       ...this.sections(),
     };
   }
@@ -832,7 +855,7 @@ export class PlaygroundSim implements SimHost {
       v: PLAYGROUND_VERSION,
       full: false,
       tick: this.clock,
-      chars: this.chars(this.visible()),
+      chars: charTuples(this.visible(), this.clock),
     };
     const sections = this.sections();
     for (const name of ["roster", "bubbles", "terrain", "extras", "mode"] as const) {
@@ -883,6 +906,7 @@ export class PlaygroundSim implements SimHost {
       testEndsAt: this.testEndsAt,
       timeoutSeconds: this.timeoutSeconds,
       visibleMax: this.maxVisible,
+      pushEnabled: this.pushOn,
       cell: CELL_LOGICAL,
       cellsW: this.world.cellsW,
       cellsH: this.world.cellsH,
@@ -923,6 +947,7 @@ export class PlaygroundSim implements SimHost {
       visibleMax: data.visibleMax,
     });
     restoreTerrain(sim.world, sim.terrain, data);
+    sim.pushOn = data.pushEnabled;
     Object.assign(sim, {
       clock: data.clock,
       rotation: data.rotation,
