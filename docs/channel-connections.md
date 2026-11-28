@@ -44,6 +44,7 @@ The code is in these files:
 | Token encryption | `app/server/channel-tokens.server.ts` |
 | Webhook checks | `app/server/channel-webhooks.server.ts` |
 | Payload normalization | `app/server/channel-normalize.ts`, `app/server/channel-support.ts` |
+| Live signals and their subscriptions | `app/server/channel-live.ts` |
 | Ingestion, snapshot | `app/server/channel-ingest.ts` |
 | YouTube poll, title refresh, schedule read | `app/server/channel-ingest-youtube.ts` |
 | Provider subscription types | `app/server/channel-subscription-types.ts` |
@@ -676,6 +677,26 @@ For a connection that reads support events, the feed also uses these provider su
 - Kick: `channel.followed`, `channel.subscription.new`, `channel.subscription.renewal`, `channel.subscription.gifts`, and `kicks.gifted` (version 1).
 - YouTube: no subscription and no more calls.
 
+### Live subscriptions
+
+Each connection also asks for the subscriptions of the [live signals](stream-reports.md#live-signals). They are optional:
+
+- Twitch: `stream.online` and `stream.offline` (version 1). The condition is `broadcaster_user_id`. They need no scope. They cost 0 because the broadcaster authorized the app.
+- Kick: `livestream.status.updated` (version 1).
+- YouTube: no subscription. The poll of the live chat reads the live state.
+
+A channel without these subscriptions is healthy. It reads chat and support as before. It gives no live signals.
+
+| Provider event | Signal |
+| --- | --- |
+| Twitch `stream.online` with the `type` value `live` | `live: true`, with `startedAt` from `started_at` |
+| Twitch `stream.online` with the `type` value `playlist`, `watch_party`, `premiere`, or `rerun` | None |
+| Twitch `stream.offline` | `live: false` |
+| Kick `livestream.status.updated` | `live` from `is_live`, with `startedAt` from `started_at` and the `title` |
+
+A payload that does not agree with the documentation of the provider gives no signal.
+`app/server/channel-live.ts` makes the signals. The Worker adds them to the delivery, after the chat and the support events.
+
 ## Scheduled streams
 
 The schedule of a page shows the scheduled streams of its connected Twitch and YouTube channels.
@@ -1002,6 +1023,10 @@ A Twitch `channel.raid` subscription names the channel in `to_broadcaster_user_i
 If the provider refuses a subscription of a support event, the connect does not fail. The object sets `support_events` to off for the connection.
 See [Support events of each provider](#support-events-of-each-provider).
 
+A connect also makes the [live subscriptions](#live-subscriptions), after all other subscriptions.
+Twitch can answer 403 for a live type. Kick can answer 401 or 403, or make no subscription. Then the connect does not fail.
+The connection keeps its status and its `support_events` field. The object writes the `channel_live_refused` log.
+
 ### Subscription repair
 
 The object repairs Twitch and Kick subscriptions without the owner. A check reads the list of the provider for
@@ -1011,6 +1036,9 @@ Thus a check of a healthy channel changes nothing.
 
 The required types follow the `support_events` field of the connection. With the field on, a check also requires the types of the support events.
 With the field off, a check deletes each subscription of a support event. It keeps the chat subscriptions.
+
+A healthy channel does not need the live types. A check also creates a missing live type, after the required types.
+A refusal of a live type sets no status. The check writes the `channel_live_refused` log, and the next check asks again.
 
 Twitch reports a status for each subscription. `enabled` is healthy. `webhook_callback_verification_pending`
 waits for the callback check. Every other status means that the subscription ended. The Twitch check uses only
@@ -1128,6 +1156,7 @@ The logs hold only fixed codes, platforms, and counts. They never hold an ID, a 
 | `channel_connect_failed` | The object cannot make the subscriptions | Alert when it repeats |
 | `channel_ingest_dropped` | The object dropped chat, moderation, or support events over the admission limit (`chat`, `moderation`, `support`) | Information only |
 | `channel_support_refused` | A provider refused a subscription of a support event (`platform`). The object set `support_events` to off for the connection. Chat continues, and the card asks the owner to reconnect. | Alert when it repeats for many channels: a changed permission of the provider. |
+| `channel_live_refused` | A provider refused a live subscription (`platform`, `type`). The log has no token, no ID, and no name. The channel stays healthy. It gives no live signals. | Alert when it repeats for many channels: a changed rule of the provider. |
 | `channel_callback_failed`, `channel_connect_cleanup_failed`, `channel_disconnect_failed`, `channel_cleanup_failed` | A step failed. The log holds the error class. | Alert when it repeats |
 | `activity_notify_failed` | A key or suspension notice did not reach the object | Alert when it repeats |
 | `schedule_read_failed` | A schedule read of a platform failed (`platform`). The read changes nothing. The log holds the error class. | Alert when it repeats for a day |

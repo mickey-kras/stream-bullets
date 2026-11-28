@@ -16,6 +16,7 @@ import {
   type IngestEvent,
 } from "../app/lib/activity";
 import { DEFAULT_LAYERS, emptyCells, storedLayersText, type OverlayLayers } from "../app/lib/overlay-layers";
+import { AlertHost } from "../app/server/alert-host";
 import { ChannelIngest } from "../app/server/channel-ingest";
 import { snapshotEvents, snapshotMessage } from "../app/server/channel-ingest-events";
 import {
@@ -44,6 +45,7 @@ import {
   YOUTUBE_NAME_RETRY_MS,
   YOUTUBE_PAGE_DAILY_BUDGET,
 } from "../app/server/channel-ingest-limits";
+import { PlaygroundHost } from "../app/server/playground-host";
 import { markWebhookAccepted } from "../app/server/channel-repair.server";
 import { loadTokens, tokenStatement } from "../app/server/channel-tokens.server";
 import { recordRejectedWebhook, resetRoutes, WebhookRejected } from "../app/server/channel-webhooks.server";
@@ -1272,7 +1274,8 @@ describe("ChannelIngest load and robustness", (): void => {
     await post("connect", "twitch");
     fake.deleteStatus = 500;
     await post("disconnect", "twitch");
-    expect(await state().storage.get("subs:twitch")).toHaveLength(5);
+    // The five types of chat and the two live types.
+    expect(await state().storage.get("subs:twitch")).toHaveLength(7);
   });
 
   it("closes the activity sockets on the next call while channels are off", async (): Promise<void> => {
@@ -1315,6 +1318,28 @@ describe("ChannelIngest races with close", (): void => {
     expect(sent).toEqual(["chat"]);
     expect((await snapshot()).map((event: ActivityChat): string => event.id)).toEqual(["twitch:m1"]);
     expect(state().storage.sql.exec("SELECT message_id FROM events").toArray()).toHaveLength(1);
+  });
+
+  it("takes each live signal to ingest, and out before the stores, the sockets, the alerts and the goal", async (): Promise<void> => {
+    await addConnection("twitch", { support: true });
+    const socket = await listen();
+    const alerts = vi.spyOn(AlertHost.prototype, "receive");
+    const playground = vi.spyOn(PlaygroundHost.prototype, "receive");
+    const before = socket.messages().length;
+    const now = Date.now();
+    const signal: ActivityStream = { kind: "stream", platform: "twitch", live: true, startedAt: now - 1000, title: "Build", receivedAt: now };
+    expect((await deliver("live-only", [signal])).status).toBe(204);
+    // The signal got through the checks: the delivery is remembered and proves that the channel works.
+    expect(state().storage.sql.exec("SELECT key FROM seen").toArray()).toEqual([{ key: "delivery:twitch:live-only" }]);
+    expect((await connectionRow("twitch")).last_event_at).toBeGreaterThanOrEqual(now);
+    expect(socket.messages()).toHaveLength(before);
+    expect((await deliver("live-and-follow", [signal, follow("f1")])).status).toBe(204);
+    expect(socket.ofType<{ event: ActivityEvent }>("event").map((message) => message.event.kind)).toEqual(["follow"]);
+    expect(JSON.stringify(socket.messages())).not.toContain('"stream"');
+    expect(alerts.mock.calls.map(([event]: [ActivityEvent]): string => event.kind)).toEqual(["follow"]);
+    expect(playground.mock.calls.map(([event]: [ActivityEvent]): string => event.kind)).toEqual(["follow"]);
+    expect(state().storage.sql.exec("SELECT id FROM support").toArray()).toEqual([{ id: "twitch:f1" }]);
+    expect((await snapshot()).map((event: ActivityEvent): string => event.kind)).toEqual(["follow"]);
   });
 
   it("takes no status event from a delivery, also as the first request of a new object", async (): Promise<void> => {
@@ -1399,6 +1424,8 @@ describe("ChannelIngest provider subscriptions", (): void => {
     "channel.chat.clear",
     "channel.chat.clear_user_messages",
     "channel.moderate",
+    "stream.online",
+    "stream.offline",
   ];
 
   function stuck(callbackUrl: string = callback): void {
@@ -1411,7 +1438,7 @@ describe("ChannelIngest provider subscriptions", (): void => {
     stuck();
     fake.deleteStatus = 500;
     expect(await (await post("connect", "twitch")).json()).toEqual({ status: "active", code: null });
-    expect(await state().storage.get("subs:twitch")).toEqual(["stuck-0", "stuck-1", "stuck-2", "stuck-3", "stuck-4"]);
+    expect(await state().storage.get("subs:twitch")).toEqual(["stuck-0", "stuck-1", "stuck-2", "stuck-3", "stuck-4", "stuck-5", "stuck-6"]);
   });
 
   it("adopts on a conflict when only the first list failed", async (): Promise<void> => {
@@ -1421,7 +1448,7 @@ describe("ChannelIngest provider subscriptions", (): void => {
     // The list before the deletes fails, so the stuck ids are unknown until the conflict lists again.
     fake.listFailures = 1;
     expect(await (await post("connect", "twitch")).json()).toEqual({ status: "active", code: null });
-    expect(await state().storage.get("subs:twitch")).toEqual(["stuck-0", "stuck-1", "stuck-2", "stuck-3", "stuck-4"]);
+    expect(await state().storage.get("subs:twitch")).toEqual(["stuck-0", "stuck-1", "stuck-2", "stuck-3", "stuck-4", "stuck-5", "stuck-6"]);
   });
 
   it("fails the connect when a conflicting subscription belongs to another callback", async (): Promise<void> => {
@@ -1706,8 +1733,8 @@ describe("ChannelIngest YouTube polling", (): void => {
     await older;
     expect(await (await newer).json()).toEqual({ status: "active", code: null });
     const ids = fake.subscriptions.map((item) => item.id);
-    expect(ids).toHaveLength(5);
-    expect(fake.calls.filter((call) => call.method === "POST" && call.url.pathname.endsWith("/eventsub/subscriptions"))).toHaveLength(5);
+    expect(ids).toHaveLength(7);
+    expect(fake.calls.filter((call) => call.method === "POST" && call.url.pathname.endsWith("/eventsub/subscriptions"))).toHaveLength(7);
     expect(state().storage.values.get("subs:twitch")).toEqual(ids);
     expect(await connectionRow("twitch")).toMatchObject({ status: "active", status_code: null });
   });
@@ -1739,6 +1766,21 @@ describe("ChannelIngest YouTube polling", (): void => {
     await older;
     expect(await (await newer).json()).toEqual({ status: "active", code: null });
     expect(await connectionRow("twitch")).toMatchObject({ status: "active", status_code: null });
+  });
+
+  it("sends no live signal of the poll to a socket, an alert or a store", async (): Promise<void> => {
+    await addConnection("youtube", { support: true });
+    const socket = await listen();
+    const alerts = vi.spyOn(AlertHost.prototype, "receive");
+    const before = socket.messages().length;
+    // The first poll finds the live broadcast: the poller sends a start signal into ingest.
+    await poll();
+    expect(fake.calls.some((item) => item.url.pathname.endsWith("/liveBroadcasts"))).toBe(true);
+    expect((await state().storage.get<{ live: boolean }>("youtube"))?.live).toBe(true);
+    expect(socket.messages()).toHaveLength(before);
+    expect(alerts).not.toHaveBeenCalled();
+    expect(state().storage.sql.exec("SELECT seq FROM events").toArray()).toEqual([]);
+    expect(state().storage.sql.exec("SELECT seq FROM support").toArray()).toEqual([]);
   });
 
   it("polls only while a consumer listens and marks history on the first page as not live", async (): Promise<void> => {
@@ -2139,6 +2181,7 @@ describe("ChannelIngest YouTube polling", (): void => {
       backoffMs: 0,
       nextPollAt: 0,
       nameAt: clock,
+      live: false,
     });
     await state().storage.put("youtube", { liveChatId: "c", pageToken: "p", backoffMs: 4000, nextPollAt: clock + 50_000 });
     await state().storage.deleteAlarm();
@@ -2149,6 +2192,7 @@ describe("ChannelIngest YouTube polling", (): void => {
       backoffMs: 0,
       nextPollAt: clock + 50_000,
       nameAt: clock,
+      live: false,
     });
     expect(state().storage.alarm).toBe(clock + 50_000);
   });
@@ -2162,6 +2206,8 @@ describe("ChannelIngest subscription repair", (): void => {
     "channel.chat.clear",
     "channel.chat.clear_user_messages",
     "channel.moderate",
+    "stream.online",
+    "stream.offline",
   ];
   let clock: number;
 
@@ -2213,6 +2259,30 @@ describe("ChannelIngest subscription repair", (): void => {
     return warn.mock.calls.filter((call: unknown[]) => call[0] === "channel_webhooks_all_rejected");
   }
 
+  it("keeps a channel healthy when the provider refuses the live types, and asks for them at each check", async (): Promise<void> => {
+    await addConnection("twitch", { support: true });
+    const warn = vi.spyOn(console, "warn").mockImplementation((): void => undefined);
+    fake.liveStatus = 403;
+    expect(await (await post("connect", "twitch")).json()).toEqual({ status: "active", code: null });
+    const refusals = (): unknown[][] => warn.mock.calls.filter((call: unknown[]) => call[0] === "channel_live_refused");
+    expect(refusals()).toEqual([
+      ["channel_live_refused", { platform: "twitch", type: "stream.online" }],
+      ["channel_live_refused", { platform: "twitch", type: "stream.offline" }],
+    ]);
+    // The support events stay on: a live type is not a support type.
+    expect(await env.DB.prepare("SELECT support_events FROM channel_connections").first("support_events")).toBe(1);
+    expect(fake.subscriptions.map((item) => item.type)).not.toContain("stream.online");
+    clock += RECONCILE_INTERVAL_MS;
+    expect(await reconcile()).toBe("ok");
+    expect(refusals()).toHaveLength(4);
+    expect(await connectionRow("twitch")).toMatchObject({ status: "active", status_code: null });
+    // The provider takes them later: the next check makes them.
+    fake.liveStatus = null;
+    clock += RECONCILE_INTERVAL_MS;
+    expect(await reconcile()).toBe("repaired");
+    expect(fake.subscriptions.map((item) => item.type).slice(-2)).toEqual(["stream.online", "stream.offline"]);
+  });
+
   it("creates a missing and a revoked subscription again and leaves the healthy ones", async (): Promise<void> => {
     await addConnection("twitch");
     const warn = vi.spyOn(console, "warn").mockImplementation((): void => undefined);
@@ -2259,7 +2329,7 @@ describe("ChannelIngest subscription repair", (): void => {
     expect(await reconcile()).toBe("ok");
     expect(subscriptionCalls("DELETE")).toEqual([]);
     expect(subscriptionCalls("POST")).toEqual([]);
-    expect(await state().storage.get("subs:twitch")).toEqual(["sub-0", "sub-1", "sub-2", "sub-3", "sub-4"]);
+    expect(await state().storage.get("subs:twitch")).toEqual(["sub-0", "sub-1", "sub-2", "sub-3", "sub-4", "sub-5", "sub-6"]);
     expect(await reconcile("youtube")).toBe("skipped");
     await env.DB.prepare("UPDATE channel_connections SET status='needs_reauth', status_code='authorization_revoked'").run();
     clock += RECONCILE_INTERVAL_MS;
@@ -2289,14 +2359,14 @@ describe("ChannelIngest subscription repair", (): void => {
       return real(input, init);
     });
     expect(await reconcile()).toBe("ok");
-    expect(await state().storage.get("subs:twitch")).toEqual(["sub-0", "sub-1", "sub-2", "sub-3", "raced"]);
+    expect(await state().storage.get("subs:twitch")).toEqual(["sub-0", "sub-1", "sub-2", "sub-3", "sub-5", "sub-6", "raced"]);
     expect(await connectionRow("twitch")).toMatchObject({ status: "active", status_code: null });
     // The conflicting subscription now belongs to another callback: nothing can be adopted.
     for (const item of fake.subscriptions) if (item.id === "raced") item.callback = "https://staging.example.test/hooks/twitch";
     clock += RECONCILE_INTERVAL_MS;
     expect(await reconcile()).toBe("failed");
     expect(await connectionRow("twitch")).toMatchObject({ status: "error", status_code: "subscribe_failed" });
-    expect(fake.subscriptions.map((item) => item.id)).toEqual(["sub-0", "sub-1", "sub-2", "sub-3", "raced"]);
+    expect(fake.subscriptions.map((item) => item.id)).toEqual(["sub-0", "sub-1", "sub-2", "sub-3", "sub-5", "sub-6", "raced"]);
   });
 
   it("marks a failed provider call, retries it with backoff, and leaves it to the hourly job at the longest one", async (): Promise<void> => {
@@ -2355,7 +2425,7 @@ describe("ChannelIngest subscription repair", (): void => {
     });
     expect(await reconcile()).toBe("failed");
     const created = fake.subscriptions.at(-1)?.id;
-    expect(await state().storage.get("subs:twitch")).toEqual(["sub-0", "sub-1", "sub-2", created]);
+    expect(await state().storage.get("subs:twitch")).toEqual(["sub-0", "sub-1", "sub-2", "sub-5", "sub-6", created]);
     expect(await connectionRow("twitch")).toMatchObject({ status: "error", status_code: "delivery_failed" });
   });
 

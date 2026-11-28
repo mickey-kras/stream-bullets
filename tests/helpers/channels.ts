@@ -29,6 +29,8 @@ export interface FakeProviders {
   subscribeStatus: number;
   /** Status for creating a subscription that only support events need, when set. Chat subscriptions go on. */
   supportStatus: number | null;
+  /** Status for creating a subscription of the live signals, when set. The other subscriptions go on. */
+  liveStatus: number | null;
   identity: Record<"twitch" | "youtube" | "kick", { id: string; name: string }>;
   /** Scopes the provider says it granted; null grants the scopes of chat, without the scopes of support events. */
   grantedScopes: string[] | null;
@@ -102,6 +104,9 @@ const SUPPORT_TYPES = [
   "kicks.gifted",
 ];
 
+/** The Twitch subscription types and the Kick event of the live signals. */
+const LIVE_TYPES = ["stream.online", "stream.offline", "livestream.status.updated"];
+
 /** The condition Twitch lists for a subscription: a raid names the channel that gets it. */
 function twitchCondition(type: string, broadcaster: string): Record<string, string> {
   if (type === "channel.raid") return { from_broadcaster_user_id: "", to_broadcaster_user_id: broadcaster };
@@ -139,6 +144,7 @@ export function fakeProviders(): { fake: FakeProviders; fetch: ProviderFetch } {
     revokeStatus: 200,
     subscribeStatus: 202,
     supportStatus: null,
+    liveStatus: null,
     identity: {
       twitch: { id: "111", name: "TwitchHost" },
       youtube: { id: "UCchannel1", name: "Tube Host" },
@@ -256,6 +262,7 @@ export function fakeProviders(): { fake: FakeProviders; fetch: ProviderFetch } {
         };
         const broadcaster = sub.condition.broadcaster_user_id ?? sub.condition.to_broadcaster_user_id ?? "";
         if (fake.supportStatus !== null && SUPPORT_TYPES.includes(sub.type)) return json({ error: "nope" }, fake.supportStatus);
+        if (fake.liveStatus !== null && LIVE_TYPES.includes(sub.type)) return json({ error: "nope" }, fake.liveStatus);
         // Twitch refuses a second subscription of a type for the same condition while the first is enabled or pending.
         const live = ["enabled", "webhook_callback_verification_pending"];
         if (fake.subscriptions.some((item) => item.platform === "twitch" && item.type === sub.type && item.broadcaster === broadcaster && live.includes(item.status ?? "enabled")))
@@ -274,6 +281,8 @@ export function fakeProviders(): { fake: FakeProviders; fetch: ProviderFetch } {
       const request_ = JSON.parse(body) as { broadcaster_user_id: number; events: { name: string }[] };
       if (fake.supportStatus !== null && request_.events.some((event) => SUPPORT_TYPES.includes(event.name)))
         return json({ error: "nope" }, fake.supportStatus);
+      if (fake.liveStatus !== null && request_.events.some((event) => LIVE_TYPES.includes(event.name)))
+        return json({ error: "nope" }, fake.liveStatus);
       const data = request_.events.map((event) => {
         subscription += 1;
         const id = `kick-sub-${subscription}`;

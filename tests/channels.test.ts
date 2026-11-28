@@ -255,7 +255,8 @@ describe("the channel callback", (): void => {
     expect(exchanges.map((item) => new URLSearchParams(item.body).has("code_verifier"))).toEqual([false, true, true]);
     // Twitch EventSub webhooks with an app token; Kick with the broadcaster's token.
     const twitchSubs = fake.calls.filter((item) => item.url.hostname === "api.twitch.tv" && item.method === "POST");
-    // The types of chat come first, then the types of support events: each new connection reads them.
+    // The types of chat come first, then the types of support events: each new connection reads them. The optional
+    // live types come last.
     expect(twitchSubs.map((item) => (JSON.parse(item.body) as { type: string }).type)).toEqual([
       "channel.chat.message",
       "channel.chat.message_delete",
@@ -268,6 +269,8 @@ describe("the channel callback", (): void => {
       "channel.subscription.message",
       "channel.cheer",
       "channel.raid",
+      "stream.online",
+      "stream.offline",
     ]);
     expect(list.map((item) => item.support)).toEqual([true, true, true]);
     expect(JSON.parse(twitchSubs[0].body)).toMatchObject({
@@ -275,7 +278,7 @@ describe("the channel callback", (): void => {
       transport: { method: "webhook", callback: `${origin}/hooks/twitch`, secret: eventSubSecret },
     });
     expect(twitchSubs[0].headers.get("Authorization")).toBe("Bearer twitch-app-token");
-    // Kick: one call for the events of chat, then one call for the support events.
+    // Kick: one call for the events of chat, one call for the support events, then one call for the live event.
     const kickSubs = fake.calls.filter((item) => item.url.hostname === "api.kick.com" && item.method === "POST");
     expect(kickSubs.map((item) => JSON.parse(item.body) as unknown)).toEqual([
       {
@@ -297,11 +300,12 @@ describe("the channel callback", (): void => {
         ],
         method: "webhook",
       },
+      { broadcaster_user_id: 333, events: [{ name: "livestream.status.updated", version: 1 }], method: "webhook" },
     ]);
     expect(await ingestState().storage.get("subs:kick")).toEqual(
       fake.subscriptions.filter((item) => item.platform === "kick").map((item) => item.id),
     );
-    expect(fake.subscriptions.filter((item) => item.platform === "kick")).toHaveLength(7);
+    expect(fake.subscriptions.filter((item) => item.platform === "kick")).toHaveLength(8);
     const audit = await env.DB.prepare("SELECT action, metadata FROM moderation_actions ORDER BY created_at").all();
     expect(audit.results).toEqual([
       { action: "channel_connected", metadata: '{"platform":"twitch"}' },
@@ -637,13 +641,13 @@ describe("DELETE /api/channels/:platform", (): void => {
     expect(await response.json()).toEqual({ revoked: true });
     const ids = fake.subscriptions.map((item) => item.id);
     expect(ids).toHaveLength(0);
-    // One delete for each subscription: two of chat and five of support events.
+    // One delete for each subscription: two of chat, five of support events and one of the live signals.
     expect(fake.calls.map((item) => `${item.method} ${item.url.pathname}`)).toEqual([
       "GET /public/v1/events/subscriptions",
-      ...Array.from({ length: 7 }, (): string => "DELETE /public/v1/events/subscriptions"),
+      ...Array.from({ length: 8 }, (): string => "DELETE /public/v1/events/subscriptions"),
       "POST /oauth/revoke",
     ]);
-    expect(new URLSearchParams(fake.calls[8].body).get("token_hint_type")).toBe("refresh_token");
+    expect(new URLSearchParams(fake.calls[9].body).get("token_hint_type")).toBe("refresh_token");
     expect(await loadTokens(env, connectionId, "kick")).toBeNull();
     expect(await env.DB.prepare("SELECT count(*) AS n FROM channel_connections").first("n")).toBe(0);
     expect(await ingestState().storage.get("subs:kick")).toBeUndefined();
@@ -1109,6 +1113,9 @@ describe("support events of a connection", (): void => {
   const TWITCH_SUPPORT_TYPES = ["channel.cheer", "channel.follow", "channel.raid", "channel.subscribe", "channel.subscription.gift", "channel.subscription.message"];
   const KICK_CHAT_EVENTS = ["chat.message.sent", "moderation.banned"];
   const KICK_SUPPORT_EVENTS = ["channel.followed", "channel.subscription.gifts", "channel.subscription.new", "channel.subscription.renewal", "kicks.gifted"];
+  // The optional live types: each connection asks for them, with or without support events.
+  const TWITCH_LIVE_TYPES = ["stream.offline", "stream.online"];
+  const KICK_LIVE_EVENTS = ["livestream.status.updated"];
 
   function flag(platform: string): Promise<number | null> {
     return env.DB.prepare("SELECT support_events FROM channel_connections WHERE platform=?").bind(platform).first<number>("support_events");
@@ -1150,7 +1157,7 @@ describe("support events of a connection", (): void => {
   it("reads the support events of each new Twitch connection, and asks for their three scopes at each connect and reconnect", async (): Promise<void> => {
     expect(await connectChannel("twitch")).toBe("connected");
     expect(await flag("twitch")).toBe(1);
-    expect(types("twitch")).toEqual([...TWITCH_CHAT_TYPES, ...TWITCH_SUPPORT_TYPES].sort());
+    expect(types("twitch")).toEqual([...TWITCH_CHAT_TYPES, ...TWITCH_SUPPORT_TYPES, ...TWITCH_LIVE_TYPES].sort());
     const list = await channels();
     expect(list[0]).toMatchObject({ support: true, connection: { status: "active", code: null } });
     // No connection: no support events. The list never names a scope, and it has no field of the old switch.
@@ -1167,7 +1174,7 @@ describe("support events of a connection", (): void => {
     expect(again.searchParams.get("scope")?.split(" ")).toEqual(SUPPORTED);
     expect(await finish("twitch", again)).toBe("connected");
     expect(await flag("twitch")).toBe(1);
-    expect(types("twitch")).toEqual([...TWITCH_CHAT_TYPES, ...TWITCH_SUPPORT_TYPES].sort());
+    expect(types("twitch")).toEqual([...TWITCH_CHAT_TYPES, ...TWITCH_SUPPORT_TYPES, ...TWITCH_LIVE_TYPES].sort());
     // A disconnect deletes each subscription, also the raid one that names the channel in another field.
     expect((await call("DELETE", "channels/twitch", { user: "owner" })).status).toBe(200);
     expect(fake.subscriptions).toEqual([]);
@@ -1181,7 +1188,7 @@ describe("support events of a connection", (): void => {
     expect((await startConnect("kick")).searchParams.get("scope")?.split(" ")).toEqual(["user:read", "channel:read", "events:subscribe"]);
     expect(await connectChannel("kick")).toBe("connected");
     expect(await flag("kick")).toBe(1);
-    expect(types("kick")).toEqual([...KICK_SUPPORT_EVENTS, ...KICK_CHAT_EVENTS].sort());
+    expect(types("kick")).toEqual([...KICK_SUPPORT_EVENTS, ...KICK_CHAT_EVENTS, ...KICK_LIVE_EVENTS].sort());
     expect(await status("kick")).toEqual({ status: "active", status_code: null });
     fake.calls.length = 0;
     expect(await connectChannel("youtube")).toBe("connected");
@@ -1205,7 +1212,7 @@ describe("support events of a connection", (): void => {
     expect(await finish("twitch", asked)).toBe("support_denied");
     expect(await flag("twitch")).toBe(0);
     expect(await status("twitch")).toEqual({ status: "active", status_code: null });
-    expect(types("twitch")).toEqual(TWITCH_CHAT_TYPES);
+    expect(types("twitch")).toEqual([...TWITCH_CHAT_TYPES, ...TWITCH_LIVE_TYPES].sort());
     expect((await channels())[0]).toMatchObject({ support: false, connection: { status: "active" } });
     // Chat still reaches the page. The support event of the same delivery leaves nothing.
     const stub = ingest.get(ingest.idFromName(page));
@@ -1241,7 +1248,7 @@ describe("support events of a connection", (): void => {
     fake.calls.length = 0;
     await repairChannelSubscriptions(env, later);
     expect(fake.calls.filter((item) => item.method === "POST" && item.url.hostname === "api.twitch.tv")).toEqual([]);
-    expect(types("twitch")).toEqual(TWITCH_CHAT_TYPES);
+    expect(types("twitch")).toEqual([...TWITCH_CHAT_TYPES, ...TWITCH_LIVE_TYPES].sort());
     expect(ids("twitch", TWITCH_CHAT_TYPES)).toEqual(chat);
     expect(await flag("twitch")).toBe(0);
     expect(await status("twitch")).toEqual({ status: "active", status_code: null });
@@ -1251,7 +1258,7 @@ describe("support events of a connection", (): void => {
     expect(again.searchParams.get("scope")?.split(" ")).toEqual(SUPPORTED);
     expect(await finish("twitch", again)).toBe("connected");
     expect(await flag("twitch")).toBe(1);
-    expect(types("twitch")).toEqual([...TWITCH_CHAT_TYPES, ...TWITCH_SUPPORT_TYPES].sort());
+    expect(types("twitch")).toEqual([...TWITCH_CHAT_TYPES, ...TWITCH_SUPPORT_TYPES, ...TWITCH_LIVE_TYPES].sort());
     expect(channelCardState((await views())[0])).toBe("healthy");
   });
 
@@ -1261,7 +1268,7 @@ describe("support events of a connection", (): void => {
     expect(await connectChannel("twitch")).toBe("support_denied");
     expect(await flag("twitch")).toBe(0);
     expect(await status("twitch")).toEqual({ status: "active", status_code: null });
-    expect(types("twitch")).toEqual(TWITCH_CHAT_TYPES);
+    expect(types("twitch")).toEqual([...TWITCH_CHAT_TYPES, ...TWITCH_LIVE_TYPES].sort());
     expect(warn).toHaveBeenCalledWith("channel_support_refused", { platform: "twitch" });
     expect(JSON.stringify(warn.mock.calls)).not.toMatch(/access|refresh|app-token/);
     expect(channelCardState((await views())[0])).toBe("support_missing");
@@ -1269,11 +1276,11 @@ describe("support events of a connection", (): void => {
     expect(await finish("twitch", await reconnect("twitch"))).toBe("support_denied");
     expect(await flag("twitch")).toBe(0);
     expect(await status("twitch")).toEqual({ status: "active", status_code: null });
-    expect(types("twitch")).toEqual(TWITCH_CHAT_TYPES);
+    expect(types("twitch")).toEqual([...TWITCH_CHAT_TYPES, ...TWITCH_LIVE_TYPES].sort());
     fake.supportStatus = null;
     expect(await finish("twitch", await reconnect("twitch"))).toBe("connected");
     expect(await flag("twitch")).toBe(1);
-    expect(types("twitch")).toEqual([...TWITCH_CHAT_TYPES, ...TWITCH_SUPPORT_TYPES].sort());
+    expect(types("twitch")).toEqual([...TWITCH_CHAT_TYPES, ...TWITCH_SUPPORT_TYPES, ...TWITCH_LIVE_TYPES].sort());
   });
 
   it("keeps chat when Kick refuses the support events, until a reconnect that Kick accepts", async (): Promise<void> => {
@@ -1284,7 +1291,7 @@ describe("support events of a connection", (): void => {
     expect(await finish("kick", await reconnect("kick"))).toBe("support_denied");
     expect(await flag("kick")).toBe(0);
     expect(await status("kick")).toEqual({ status: "active", status_code: null });
-    expect(types("kick")).toEqual(KICK_CHAT_EVENTS);
+    expect(types("kick")).toEqual([...KICK_CHAT_EVENTS, ...KICK_LIVE_EVENTS].sort());
     expect(warn.mock.calls.filter((entry: unknown[]) => entry[0] === "channel_support_refused")).toEqual([
       ["channel_support_refused", { platform: "kick" }],
       ["channel_support_refused", { platform: "kick" }],
@@ -1294,7 +1301,7 @@ describe("support events of a connection", (): void => {
     fake.supportStatus = null;
     expect(await finish("kick", await reconnect("kick"))).toBe("connected");
     expect(await flag("kick")).toBe(1);
-    expect(types("kick")).toEqual([...KICK_SUPPORT_EVENTS, ...KICK_CHAT_EVENTS].sort());
+    expect(types("kick")).toEqual([...KICK_SUPPORT_EVENTS, ...KICK_CHAT_EVENTS, ...KICK_LIVE_EVENTS].sort());
   });
 
   it("makes the support subscriptions of an old Kick connection at the next check after the migration", async (): Promise<void> => {
@@ -1304,13 +1311,13 @@ describe("support events of a connection", (): void => {
     expect(await connectChannel("kick")).toBe("support_denied");
     fake.supportStatus = null;
     const chat = ids("kick", KICK_CHAT_EVENTS);
-    expect(types("kick")).toEqual(KICK_CHAT_EVENTS);
+    expect(types("kick")).toEqual([...KICK_CHAT_EVENTS, ...KICK_LIVE_EVENTS].sort());
     // Migration 0051 writes the row. No request tells the object.
     await env.DB.prepare("UPDATE channel_connections SET support_events=1 WHERE platform='kick'").run();
     const later = Date.now() + RECONCILE_INTERVAL_MS;
     vi.spyOn(Date, "now").mockReturnValue(later);
     await repairChannelSubscriptions(env, later);
-    expect(types("kick")).toEqual([...KICK_SUPPORT_EVENTS, ...KICK_CHAT_EVENTS].sort());
+    expect(types("kick")).toEqual([...KICK_SUPPORT_EVENTS, ...KICK_CHAT_EVENTS, ...KICK_LIVE_EVENTS].sort());
     // The subscriptions of chat are the same ones: the check never touches them.
     expect(ids("kick", KICK_CHAT_EVENTS)).toEqual(chat);
     expect(await flag("kick")).toBe(1);
@@ -1325,7 +1332,7 @@ describe("support events of a connection", (): void => {
       expect(response.status).toBe(404);
     }
     expect(await flag("kick")).toBe(1);
-    expect(types("kick")).toEqual([...KICK_SUPPORT_EVENTS, ...KICK_CHAT_EVENTS].sort());
+    expect(types("kick")).toEqual([...KICK_SUPPORT_EVENTS, ...KICK_CHAT_EVENTS, ...KICK_LIVE_EVENTS].sort());
     expect(await env.DB.prepare("SELECT count(*) AS n FROM verification").first("n")).toBe(0);
     expect(await env.DB.prepare("SELECT count(*) AS n FROM moderation_actions").first("n")).toBe(0);
   });
@@ -1396,20 +1403,20 @@ describe("subscription repair job", (): void => {
   it("makes a missing support subscription again, and deletes the support subscriptions of a connection that does not read them", async (): Promise<void> => {
     expect(await connectChannel("kick")).toBe("connected");
     vi.spyOn(console, "warn").mockImplementation((): void => undefined);
-    expect(fake.subscriptions).toHaveLength(7);
+    expect(fake.subscriptions).toHaveLength(8);
     const gone = fake.subscriptions.findIndex((item) => item.type === "kicks.gifted");
     fake.subscriptions.splice(gone, 1);
     let later = Date.now() + RECONCILE_INTERVAL_MS;
     const clock = vi.spyOn(Date, "now").mockReturnValue(later);
     await repairChannelSubscriptions(env, later);
     expect(fake.subscriptions.filter((item) => item.type === "kicks.gifted")).toHaveLength(1);
-    expect(fake.subscriptions).toHaveLength(7);
+    expect(fake.subscriptions).toHaveLength(8);
     // The connection lost its support events without the object (a refusal that another check found): the next check cleans up.
     await env.DB.prepare("UPDATE channel_connections SET support_events=0").run();
     later += RECONCILE_INTERVAL_MS;
     clock.mockReturnValue(later);
     await repairChannelSubscriptions(env, later);
-    expect(fake.subscriptions.map((item) => item.type).sort()).toEqual(["chat.message.sent", "moderation.banned"]);
+    expect(fake.subscriptions.map((item) => item.type).sort()).toEqual(["chat.message.sent", "livestream.status.updated", "moderation.banned"]);
     expect(await ingestState().storage.get("subs:kick")).toEqual(fake.subscriptions.map((item) => item.id));
     expect(await env.DB.prepare("SELECT status, status_code FROM channel_connections").first()).toEqual({
       status: "active",

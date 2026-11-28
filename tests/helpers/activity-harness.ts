@@ -4,7 +4,7 @@ import { build } from "esbuild";
 import { Miniflare, Response as RuntimeResponse, type Request as RuntimeRequest } from "miniflare";
 import type { AppEnv } from "../../app/env";
 import type { ActivityChat } from "../../app/lib/activity";
-import { requiredSubscriptions } from "../../app/server/channel-subscription-types";
+import { wantedSubscriptions } from "../../app/server/channel-subscription-types";
 import { tokenStatement } from "../../app/server/channel-tokens.server";
 import type { IngestReport, StepReport, WorkerReport } from "./activity-worker";
 import { fakeProviders, type FakeProviders, type ProviderFetch } from "./channels";
@@ -189,7 +189,7 @@ export class ActivityHarness {
     if (page.twitch) {
       statements.push(connection("twitch", page.twitch));
       // A connect made the subscriptions of a connected channel. The fake holds them as Twitch does.
-      for (const type of requiredSubscriptions("twitch", false))
+      for (const type of wantedSubscriptions("twitch", false))
         this.providers.subscriptions.push({
           platform: "twitch",
           id: `capacity-sub-${index}-${type}`,

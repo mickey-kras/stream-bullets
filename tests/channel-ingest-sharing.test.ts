@@ -3,7 +3,7 @@ import type { AppEnv } from "../app/env";
 import type { ActivityChat } from "../app/lib/activity";
 import { ChannelIngest } from "../app/server/channel-ingest";
 import { RECONCILE_INTERVAL_MS, YOUTUBE_MIN_POLL_MS } from "../app/server/channel-ingest-limits";
-import { requiredSubscriptions } from "../app/server/channel-subscription-types";
+import { wantedSubscriptions } from "../app/server/channel-subscription-types";
 import { tokenStatement } from "../app/server/channel-tokens.server";
 import { installFakeProviders, youtubeText, type FakeProviders, type ProviderCall } from "./helpers/channels";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
@@ -213,11 +213,10 @@ describe("one provider ingestion for each connected channel", (): void => {
       const connect = await request("connect", { method: "POST" }, { platform });
       expect(await connect.json()).toEqual({ status: "active", code: null });
     }
-    // The connect made each subscription that the two channels need. Twitch and Kick push: nothing polls.
+    // The connect made each subscription that the two channels need, with the live types. Twitch and Kick push:
+    // nothing polls.
     const subscriptions = fake.subscriptions.map((item): string => item.id);
-    expect(subscriptions).toHaveLength(
-      requiredSubscriptions("twitch", false).length + requiredSubscriptions("kick", false).length,
-    );
+    expect(subscriptions).toHaveLength(wantedSubscriptions("twitch", false).length + wantedSubscriptions("kick", false).length);
     const owner = await listen("owner");
     const one = await live(period);
     // One consumer: one check of each channel in each interval. A check reads the list of the provider.

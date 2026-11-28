@@ -10,7 +10,7 @@ import {
   type ProviderSubscription,
 } from "./channel-providers.server";
 import { SUPPORT_SUBSCRIPTIONS } from "./channel-support";
-import { requiredSubscriptions } from "./channel-subscription-types";
+import { wantedSubscriptions } from "./channel-subscription-types";
 import { getOrigin, logError } from "./http.server";
 
 /** Repair of provider subscriptions without the owner, and the webhook health that the watchdog reads. */
@@ -56,7 +56,8 @@ async function createMissing(
 /**
  * Deletes the subscriptions the provider reports as ended and creates the missing types. Healthy ones stay. With
  * `support`, the types of support events are required too. Without it, their subscriptions are deleted: the
- * authorization has no scopes for them, or the provider refused them.
+ * authorization has no scopes for them, or the provider refused them. A missing live type is asked for again, but a
+ * refusal of it is no failure.
  */
 export async function reconcileSubscriptions(
   env: AppEnv,
@@ -72,7 +73,7 @@ export async function reconcileSubscriptions(
   const ended = listed.filter((item) => !wanted(item)).map((item) => item.id);
   const left = await unsubscribe(env, platform, ended, accessToken);
   const kept = listed.filter(wanted);
-  const missing = requiredSubscriptions(platform, support).filter((type) => !kept.some((item) => item.type === type));
+  const missing = wantedSubscriptions(platform, support).filter((type) => !kept.some((item) => item.type === type));
   const created: string[] = [];
   let adopted: string[] = [];
   let failure: Reconciled["failure"] = null;
