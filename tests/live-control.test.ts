@@ -1438,10 +1438,10 @@ describe("overlay control", (): void => {
         const older = await moveChat(5, 1);
         expect(await chatColumn()).toBe(9);
         // The late write succeeds with the current state, changes nothing and reports that.
-        expect(older).toEqual({ overlay: newer.overlay, changed: false });
+        expect(older).toEqual({ overlay: newer.overlay, changed: false, featured: null });
         expect(older.overlay.revision).toBe(1);
         // The same number again is also old.
-        expect(await moveChat(6, 2)).toEqual({ overlay: newer.overlay, changed: false });
+        expect(await moveChat(6, 2)).toEqual({ overlay: newer.overlay, changed: false, featured: null });
         expect(await chatColumn()).toBe(9);
       });
 

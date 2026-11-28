@@ -12,6 +12,8 @@ import { activityAvailable } from "./channel-tokens.server";
 import { consumeMutationQuota } from "./data.server";
 import { HttpError } from "./http.server";
 import { callIngest } from "./ingest-call.server";
+import { creditedTopic } from "../lib/topic-credit";
+import { replayTopicCredit } from "./topic-credit.server";
 
 /** What the API tells the owner for each refusal of the alert host. The code goes with it, for a client's own text. */
 const REFUSAL_TEXT: Readonly<Record<AlertRefusal, string>> = {
@@ -41,9 +43,14 @@ export async function controlAlerts(
   if (!activityAvailable(env)) throw new HttpError(503, "Alerts are off on this server.");
   const free: boolean = control.op === "status" || control.op === "mute" || control.op === "skip";
   if (!free) await consumeMutationQuota(env, ownerId);
-  const response: Response = await callIngest(env, streamerId, "alerts", {
-    init: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(control) },
-  });
+  // A replay of a topic credit reads the account of its author again: the object keeps no link.
+  const topic: string | null = control.op === "replay" ? creditedTopic(control.id) : null;
+  const response: Response =
+    control.op === "replay" && topic !== null
+      ? await replayTopicCredit(env, streamerId, control.id, topic)
+      : await callIngest(env, streamerId, "alerts", {
+          init: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(control) },
+        });
   const body: unknown = await response.json().catch((): null => null);
   if (!response.ok) {
     const refusal: AlertRefusal = alertRefusal(body) ?? "alerts_unavailable";

@@ -33,6 +33,7 @@ import {
   testSupport,
   type AlertLine,
   type AlertRules,
+  type AlertSubject,
   type AlertView,
   type AlertsMessage,
   type LineStep,
@@ -41,6 +42,7 @@ import {
 } from "../lib/alerts";
 import { GOAL_COUNTS, countSupport, goalProgressSchema, type GoalCount, type GoalProgress } from "../lib/goals";
 import { onAnyOutput, type OverlayLayers } from "../lib/overlay-layers";
+import { alertCreditSchema, type AlertCredit } from "../lib/topic-credit";
 import type { Reaction } from "../lib/playground/crowd";
 import { SNAPSHOT_MAX_AGE_MS } from "./channel-ingest-limits";
 import { ALERTS, SUPPORT } from "./channel-ingest-sql";
@@ -65,7 +67,8 @@ import { LAYER_CHECK_MS, readLayers, type PlaygroundHost, type ReactionSubject }
  * poll vote and each new topic with a key (app/server/goal-votes.ts), and each key counts one time.
  *
  * A message to a socket has the display name of a supporter and never a user ID. The user ID stays in the line, for
- * the reaction of the character, until the alert starts.
+ * the reaction of the character, until the alert starts. The API also sends the credit of a featured topic
+ * (app/lib/topic-credit.ts). The linked account of its author stays in memory only: no storage and no message has it.
  */
 
 /**
@@ -238,6 +241,10 @@ export class AlertHost {
   private refreshing: Promise<boolean> | null = null;
   /** The saved layers changed while a read ran: that read is followed by one more. */
   private stale = false;
+  /** The participant of each topic credit in the line, by the ID of its alert. Only memory has it, never storage. */
+  private readonly links = new Map<string, AlertSubject>();
+  /** While the object takes in a topic credit: its event ID and the participant of its author. */
+  private crediting: { id: string; subject: AlertSubject } | null = null;
 
   constructor(private readonly options: AlertHostOptions) {}
 
@@ -285,6 +292,7 @@ export class AlertHost {
     this.wipes += 1;
     this.refreshing = null;
     this.stale = false;
+    this.links.clear();
     ALERTS.create(this.options.sql);
   }
 
@@ -334,6 +342,51 @@ export class AlertHost {
   async layersChanged(): Promise<void> {
     await this.refresh(true);
     this.flush(Date.now());
+  }
+
+  /** One request on an alert path of the object: `/alerts` (a control) or `/alert-credit` (a topic credit). */
+  route(
+    path: string,
+    request: Request,
+    ingest: (events: readonly ActivityEvent[], now: number) => void,
+  ): Promise<Response> {
+    return path === "/alert-credit" ? this.topicCredit(request, ingest) : this.request(request);
+  }
+
+  /**
+   * The object's `/alert-credit` request: a topic credit from the API, never from the owner or the dock. A `credit`
+   * goes through `ingest` as the support event of a platform does: the same dedupe, support table, snapshot, and
+   * rows. A `replay` plays the alert of a credit that the object keeps. The subject of the author is only in memory.
+   */
+  async topicCredit(
+    request: Request,
+    ingest: (events: readonly ActivityEvent[], now: number) => void,
+  ): Promise<Response> {
+    const parsed = alertCreditSchema.safeParse(await request.json().catch((): null => null));
+    if (!parsed.success) return Response.json({ error: "Invalid credit" }, { status: 400, headers: NO_STORE });
+    const credit: AlertCredit = parsed.data;
+    // The feature can come with the change that put the alerts layer on stream: the host reads the layers first.
+    if (!(await this.refresh(true)) && this.config === null) return refuse("alerts_unavailable");
+    const now: number = Date.now();
+    let refusal: AlertRefusal | null = null;
+    if (credit.op === "replay") {
+      const since: number = now - SNAPSHOT_MAX_AGE_MS;
+      const stored = (): ActivitySupport | null => this.options.support(credit.id, since);
+      refusal = this.play(stored, "replay", now, credit.subject);
+    } else {
+      this.crediting = credit.subject === null ? null : { id: credit.event.id, subject: credit.subject };
+      try {
+        ingest([credit.event], now);
+      } finally {
+        this.crediting = null;
+      }
+      // The alarm expires the stored event on time, also when no other event comes.
+      await this.options.schedule(now + SNAPSHOT_MAX_AGE_MS + 1);
+    }
+    this.keepLinks();
+    this.flush(now);
+    await this.wake();
+    return refusal === null ? Response.json(this.reply(now), { headers: NO_STORE }) : refuse(refusal);
   }
 
   /** The object's `/alerts` request: one control of the owner or of the dock. The API checked who sent it. */
@@ -452,6 +505,7 @@ export class AlertHost {
     // A provider can send an old event again a long time after it occurred: it plays no alert.
     if (!isLiveMessage(event.sentAt ?? null, event.receivedAt)) return;
     const alert: PendingAlert | null = alertFor(shownEvent(event), config.rules);
+    if (alert !== null && this.crediting?.id === event.id) this.link(alert, this.crediting.subject);
     // A line that is full drops the alert.
     if (alert !== null) this.add(alert, now);
   }
@@ -530,6 +584,7 @@ export class AlertHost {
     source: (play: number) => ActivitySupport | null,
     origin: "test" | "replay",
     now: number,
+    subject: AlertSubject | null = null,
   ): AlertRefusal | null {
     const config: AlertConfig | null = this.config;
     if (!config?.shown) return "alerts_off_stream";
@@ -540,6 +595,7 @@ export class AlertHost {
     if (this.options.sockets().length === 0) return "alerts_unwatched";
     const alert: PendingAlert | null = alertFor(shownEvent(event), config.rules, origin, play);
     if (alert === null) return "alert_rule_off";
+    if (subject !== null && event.kind === "topic") this.link(alert, subject);
     if (!this.add(alert, now)) return "alerts_full";
     this.plays = play;
     this.save();
@@ -564,6 +620,19 @@ export class AlertHost {
   /** Empties the line: the alert on stream stops, and no alert waits. */
   private clear(): void {
     if (this.line.current !== null || this.line.waiting.length > 0) this.setLine(EMPTY_LINE);
+    this.keepLinks();
+  }
+
+  /** The character of `subject` reacts when the topic credit `alert` starts. The line in storage has no subject. */
+  private link(alert: PendingAlert, subject: AlertSubject): void {
+    this.links.set(alert.view.id, subject);
+  }
+
+  /** Forgets the subject of each topic credit that left the line without a start: it was dropped or removed. */
+  private keepLinks(): void {
+    if (this.links.size === 0) return;
+    const waiting = new Set<string>(this.line.waiting.map(alertId));
+    for (const id of this.links.keys()) if (!waiting.has(id)) this.links.delete(id);
   }
 
   /** Stores the line: one row for each alert that waits, and the alert on stream with the state. */
@@ -589,7 +658,10 @@ export class AlertHost {
    * is not in the state, so the sockets get it as its own message, when the chat marks it.
    */
   private start(alert: StartedAlert): void {
-    const { view, subject, action } = alert;
+    const { view, action } = alert;
+    // A topic credit has its subject in memory only.
+    const subject: AlertSubject | null = alert.subject ?? this.links.get(view.id) ?? null;
+    this.links.delete(view.id);
     if (action !== null) {
       // One playground serves the two outputs. An output that shows only Twitch must show no reaction to an event
       // of a different platform, so the crowd then leaves the Twitch characters out.

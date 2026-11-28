@@ -16,6 +16,7 @@ export type IngestPath =
   | "playground"
   | "playground-config"
   | "alerts"
+  | "alert-credit"
   | "goal-count"
   | "test-chat"
   | "upcoming";

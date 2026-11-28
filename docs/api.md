@@ -151,6 +151,8 @@ English also shows `error` for `step_up_required` and `other_key_required`.
   - `qr` shows a QR code in the card of the layer. A viewer scans it to open the public page of the item.
     The `message` layer accepts the value and never shows a code.
     See [QR code](overlay-composition.md#qr-code).
+  - A change that puts a topic on stream also credits the author of the topic, while the alerts layer is on stream.
+    The answer does not wait for the credit. See [Topic credit](channel-connections.md#topic-credit).
 - `twitchOnly` has one boolean for each output. With `true`, that output shows chat and characters from Twitch only.
   The default is `false`: the merged chat. See [Twitch chat only](overlay-composition.md#twitch-chat-only).
 - `camera` is the camera frame: a frame with a clear window. It has only the `enabled` value.
@@ -280,6 +282,8 @@ The alert host of the page plays the alerts on stream. See [Alert host](channel-
   `anonymous` is a gift from a supporter who asked for no name.
 - `id` is the `id` of a support event of the activity feed, with 1 to 160 characters.
   The server replays only an event that it still keeps: the newest 50 support events of the last 10 minutes.
+  A replay of a topic credit reads the Twitch sign-in of the author again. See [Topic credit](channel-connections.md#topic-credit).
+- The credit of a featured topic is an internal operation. This endpoint and the dock endpoint refuse it with `400`.
 - `mute` with `on: true` stops the alert on stream immediately and removes each alert from the line.
   While the mute is on, a support event makes no alert. After `on: false`, no alert from the muted time plays.
   The muted state stays until the owner changes it.
@@ -327,6 +331,7 @@ See [OBS dock](streamer-tools.md#obs-dock).
 - `overlay` takes the same actions as `POST /api/overlay`, with these limits.
   A `layers` action can have only `items`, only for `poll`, `topic`, and `message`, and only the fields `enabled`, `ref`, and `qr`.
   `chatTest` and each other field return `403` with the code `dock_action`. `alerts` and `goal` are such fields.
+  A topic that the dock shows on stream credits its author, as from **Streamer tools**.
 - `alerts` takes the same controls as `POST /api/overlay/alerts` and gives the same answers and codes. See [Alert controls](#alert-controls).
   A test and a replay from the dock count against the write quota of the owner.
   `goalReset` returns `403` with the code `dock_action`: only the session of the owner starts the goal again.

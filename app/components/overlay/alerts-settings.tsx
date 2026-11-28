@@ -23,22 +23,6 @@ import { ALERT_ICONS } from "./alerts-layer";
 import { ControlApiContext, type ControlApi } from "./control-api";
 import { SAVE_IDLE_MS, usePendingField, type EditTiming } from "./use-layer-draft";
 
-/**
- * False until the server makes the alert of a featured topic (issue #1043, the topic credit). The rules table then
- * has no `topic` row, and the test list has no topic test: the owner cannot change a rule that never plays.
- */
-export const TOPIC_CREDITS_READY: boolean = false;
-
-/** The rules that the table shows, in the sequence of ALERT_RULES. */
-export function shownRules(topic: boolean = TOPIC_CREDITS_READY): readonly AlertRuleId[] {
-  return ALERT_RULES.filter((rule: AlertRuleId): boolean => topic || rule !== "topic");
-}
-
-/** The test alerts that the list offers, in the sequence of TEST_ALERTS. */
-export function shownTests(topic: boolean = TOPIC_CREDITS_READY): readonly TestAlert[] {
-  return TEST_ALERTS.filter((test: TestAlert): boolean => topic || test !== "topic");
-}
-
 function isTestAlert(value: string): value is TestAlert {
   const tests: readonly string[] = TEST_ALERTS;
   return tests.includes(value);
@@ -234,7 +218,7 @@ export function AlertTest({ onStream }: Readonly<{ onStream: boolean }>): ReactN
     setFailure(null);
   }
   const unavailable: boolean = sending || !onStream;
-  const options: SelectOption[] = shownTests().map(
+  const options: SelectOption[] = TEST_ALERTS.map(
     (value: TestAlert): SelectOption => ({ value, label: testName(value) }),
   );
 
@@ -441,7 +425,7 @@ export function AlertRulesTable({
             </tr>
           </thead>
           <tbody>
-            {shownRules().map((rule: AlertRuleId) => (
+            {ALERT_RULES.map((rule: AlertRuleId) => (
               <RuleRow key={rule} rule={rule} value={rules[rule]} onRule={onRule} />
             ))}
           </tbody>

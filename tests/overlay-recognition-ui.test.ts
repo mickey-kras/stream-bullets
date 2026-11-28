@@ -5,12 +5,9 @@ import { ApiError } from "../app/components/api";
 import {
   AlertRulesTable,
   AlertTest,
-  TOPIC_CREDITS_READY,
   WholeNumberInput,
   alertsFailure,
   parseWholeNumber,
-  shownRules,
-  shownTests,
   testName,
 } from "../app/components/overlay/alerts-settings";
 import { SESSION_API, dockApi } from "../app/components/overlay/control-api";
@@ -96,12 +93,14 @@ afterEach(() => {
 });
 
 describe("the alerts layer in the editor", () => {
-  it("lists the test alerts and the rules that the server makes today, without the featured topic", () => {
-    expect(TOPIC_CREDITS_READY).toBe(false);
-    expect(shownRules()).toEqual(["follow", "subscription", "gift", "bits", "paid", "raid"]);
-    expect(shownRules(true)).toEqual(ALERT_RULES);
-    expect(shownTests()).toEqual(["follow", "subscription", "gift", "bits", "super_chat", "raid", "anonymous"]);
-    expect(shownTests(true)).toEqual(TEST_ALERTS);
+  it("lists each rule, with the featured topic", () => {
+    const html: string = renderToStaticMarkup(
+      createElement(AlertRulesTable, { rules: DEFAULT_LAYERS.alerts.rules, onRule: nothing }),
+    );
+    expect(rows(html).map((row) => row.rule)).toEqual([...ALERT_RULES]);
+    expect(rows(html).at(-1)?.html).toContain(
+      '<span class="ov-rule-name">Featured topic</span> <span class="muted">Credits the author</span>',
+    );
   });
 
   it("names each test alert with the amount of the sample that the server plays", () => {
@@ -149,7 +148,7 @@ describe("the alerts layer in the editor", () => {
       "Character",
     ]);
     const shown = rows(html);
-    expect(shown.map((row) => row.rule)).toEqual(["follow", "subscription", "gift", "bits", "paid", "raid"]);
+    expect(shown.map((row) => row.rule)).toEqual(["follow", "subscription", "gift", "bits", "paid", "raid", "topic"]);
     for (const row of shown) expect(row.html).toMatch(/^<th scope="row" class="ov-rule-event">/);
     const byRule = (rule: AlertRuleId): string => shown.find((row) => row.rule === rule)?.html ?? "";
     expect(byRule("follow")).toContain(
@@ -175,6 +174,7 @@ describe("the alerts layer in the editor", () => {
       "250|Starts at: smallest amount for Bits, KICKs",
       null,
       "5|Starts at: smallest amount for Raid",
+      null,
     ]);
     expect(shown[0].html).toContain('<span class="muted">Each one</span>');
     const switches = (html: string): string[] =>

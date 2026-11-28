@@ -234,7 +234,7 @@ export const pendingAlertSchema: z.ZodType<PendingAlert> = z
   .refine((alert: PendingAlert): boolean => !alert.view.anonymous || alert.subject === null);
 
 /** `value` without the characters after `max`. It never cuts a character in two. */
-function cut(value: string, max: number): string {
+export function cut(value: string, max: number): string {
   let text = "";
   for (const char of value) {
     if (text.length + char.length > max) break;

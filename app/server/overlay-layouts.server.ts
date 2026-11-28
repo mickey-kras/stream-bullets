@@ -16,6 +16,7 @@ import {
   type NewLayout,
   type OverlayLayouts,
 } from "../lib/overlay-layouts";
+import { featuredTopic } from "../lib/topic-credit";
 import type { OverlayState } from "../types";
 import { assertStreamerWritable } from "./access.server";
 import { HttpError } from "./http.server";
@@ -61,11 +62,15 @@ export function nextLayoutState(state: LayoutState, action: LayoutAction): Layou
   }
 }
 
-/** The result of `updateLayouts`. `layersChanged` is false for a new name and for a deleted layout. */
+/**
+ * The result of `updateLayouts`. `layersChanged` is false for a new name and for a deleted layout. `featured` is the
+ * topic that the layout put on stream (`featuredTopic`), or null, as in `updateOverlay`.
+ */
 export interface LayoutUpdate {
   overlay: OverlayState;
   layouts: OverlayLayouts;
   layersChanged: boolean;
+  featured: string | null;
 }
 
 // Retry limit for a save that meets a save of another tab.
@@ -107,7 +112,12 @@ export async function updateLayouts(
         .bind(streamerId, layersText, layoutsText, next.chatTestUntil, next.revision, Date.now(), current.revision)
         .run();
     if (result.meta.changes > 0)
-      return { overlay: next, layouts: after.layouts, layersChanged: after.layers !== before.layers };
+      return {
+        overlay: next,
+        layouts: after.layouts,
+        layersChanged: after.layers !== before.layers,
+        featured: featuredTopic(before.layers, after.layers),
+      };
   }
   throw new HttpError(409, "The overlay changed in another tab. Try again.");
 }

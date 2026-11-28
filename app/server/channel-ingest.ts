@@ -40,7 +40,13 @@ import { type PlaygroundHost, playgroundOf } from "./playground-host";
 import { type AlertHost, alertsOf, earliestAt } from "./alert-host";
 import { detached } from "../lib/detached";
 import { keyRevokes, keyTags, outputInBody, socketKey, type SocketKey } from "./room-connections";
-import { NEW_YOUTUBE_STATE, readConnection, type Connection, type YoutubeState } from "./channel-ingest-state";
+import {
+  NEW_YOUTUBE_STATE,
+  pageSuspended,
+  readConnection,
+  type Connection,
+  type YoutubeState,
+} from "./channel-ingest-state";
 import {
   SNAPSHOT_SIZE,
   SNAPSHOT_MAX_AGE_MS,
@@ -93,6 +99,7 @@ const ROUTES: Readonly<Record<string, "GET" | "POST">> = {
   "/playground": "POST",
   "/playground-config": "POST",
   "/alerts": "POST",
+  "/alert-credit": "POST",
   "/goal-count": "POST",
   "/test-chat": "POST",
   "/upcoming": "POST",
@@ -192,12 +199,12 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (url.pathname === "/page-status") return this.pageStatusChanged();
     if (url.pathname === "/close") return this.closeAll();
     if (url.pathname === "/refresh") return Response.json(await this.refreshRequested());
-    if (/^\/(alerts|goal-count|playground)/.test(url.pathname)) return this.hostRequest(url.pathname, request);
+    if (/^\/(alert|goal-count|playground)/.test(url.pathname)) return this.hostRequest(url.pathname, request);
     return this.platformRequest(url.pathname, platform, request);
   }
   /** A request for the alert host or for the playground. */
   private async hostRequest(pathname: string, request: Request): Promise<Response> {
-    if (pathname === "/alerts") return this.alerts.request(request);
+    if (pathname.startsWith("/alert")) return this.alerts.route(pathname, request, this.ingest.bind(this));
     if (pathname === "/goal-count") return this.alerts.goalCount(request);
     if (pathname === "/playground-config") await this.alerts.layersChanged();
     return this.playground.request(pathname, request);
@@ -231,7 +238,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (!output && request.headers.get("X-SB-Owner") !== "1") return reply("Forbidden", 403);
     const before = this.suspensions;
     const keysBefore = this.overlayKeys;
-    const suspended = await this.pageSuspended();
+    const suspended = await pageSuspended(this.env.DB, this.streamerId);
     // A suspension that arrived while this check waited wins over the read. No await from here to the accept.
     if (suspended || this.suspensions !== before) return reply("Stream not found", 404);
     // A key change that arrived while this check waited revoked the key this request carries.
@@ -275,16 +282,9 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     await this.subscriptions.listeningStarted(now);
   }
 
-  private async pageSuspended(): Promise<boolean> {
-    const row = await this.env.DB.prepare("SELECT status FROM streamers WHERE id=?")
-      .bind(this.streamerId)
-      .first<{ status: string }>();
-    return row?.status === "suspended";
-  }
-
   /** An admin changed the page's status. A suspended page shows nothing: every activity socket closes. */
   private async pageStatusChanged(): Promise<Response> {
-    if (await this.pageSuspended()) {
+    if (await pageSuspended(this.env.DB, this.streamerId)) {
       this.suspensions += 1;
       // A YouTube poll in flight is superseded: its messages are not stored for a later snapshot.
       this.bump("youtube");
