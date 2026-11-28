@@ -42933,7 +42933,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_add",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L489",
+      "source_location": "L494",
       "target": "app_lib_alerts_lineadd",
       "weight": 1.0
     },
@@ -42945,7 +42945,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_add",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L491",
+      "source_location": "L496",
       "target": "app_server_alert_host_alerthost_take",
       "weight": 1.0
     },
@@ -42957,7 +42957,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_alarm",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L326",
+      "source_location": "L331",
       "target": "app_server_alert_host_alerthost_checks",
       "weight": 1.0
     },
@@ -42969,68 +42969,8 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_alarm",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L326",
+      "source_location": "L331",
       "target": "app_server_alert_host_alerthost_counts",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_alert_host_alerthost_alarm",
-      "source_file": "app/server/alert-host.ts",
-      "source_location": "L327",
-      "target": "app_server_alert_host_alerthost_old",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_alert_host_alerthost_alarm",
-      "source_file": "app/server/alert-host.ts",
-      "source_location": "L327",
-      "target": "app_server_alert_host_alerthost_refresh",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_alert_host_alerthost_alarm",
-      "source_file": "app/server/alert-host.ts",
-      "source_location": "L330",
-      "target": "app_server_alert_host_alerthost_clear",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_alert_host_alerthost_alarm",
-      "source_file": "app/server/alert-host.ts",
-      "source_location": "L331",
-      "target": "app_lib_alerts_lineadvance",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_alert_host_alerthost_alarm",
-      "source_file": "app/server/alert-host.ts",
-      "source_location": "L331",
-      "target": "app_server_alert_host_alerthost_take",
       "weight": 1.0
     },
     {
@@ -43042,6 +42982,66 @@
       "source": "app_server_alert_host_alerthost_alarm",
       "source_file": "app/server/alert-host.ts",
       "source_location": "L332",
+      "target": "app_server_alert_host_alerthost_old",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_alert_host_alerthost_alarm",
+      "source_file": "app/server/alert-host.ts",
+      "source_location": "L332",
+      "target": "app_server_alert_host_alerthost_refresh",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_alert_host_alerthost_alarm",
+      "source_file": "app/server/alert-host.ts",
+      "source_location": "L335",
+      "target": "app_server_alert_host_alerthost_clear",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_alert_host_alerthost_alarm",
+      "source_file": "app/server/alert-host.ts",
+      "source_location": "L336",
+      "target": "app_lib_alerts_lineadvance",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_alert_host_alerthost_alarm",
+      "source_file": "app/server/alert-host.ts",
+      "source_location": "L336",
+      "target": "app_server_alert_host_alerthost_take",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_alert_host_alerthost_alarm",
+      "source_file": "app/server/alert-host.ts",
+      "source_location": "L337",
       "target": "app_server_alert_host_alerthost_flush",
       "weight": 1.0
     },
@@ -43053,7 +43053,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_alarm",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L333",
+      "source_location": "L338",
       "target": "app_server_alert_host_alerthost_wake",
       "weight": 1.0
     },
@@ -43065,7 +43065,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_apply",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L612",
+      "source_location": "L617",
       "target": "app_lib_overlay_layers_onanyoutput",
       "weight": 1.0
     },
@@ -43077,7 +43077,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_apply",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L617",
+      "source_location": "L622",
       "target": "app_server_alert_host_alerthost_counting",
       "weight": 1.0
     },
@@ -43089,7 +43089,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_apply",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L623",
+      "source_location": "L628",
       "target": "app_server_alert_host_alerthost_clear",
       "weight": 1.0
     },
@@ -43101,32 +43101,8 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_apply",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L625",
+      "source_location": "L630",
       "target": "app_server_alert_host_alerthost_startgoal",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_alert_host_alerthost_chatted",
-      "source_file": "app/server/alert-host.ts",
-      "source_location": "L426",
-      "target": "app_server_alert_host_alerthost_counting",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_alert_host_alerthost_chatted",
-      "source_file": "app/server/alert-host.ts",
-      "source_location": "L430",
-      "target": "app_server_alert_host_personkey",
       "weight": 1.0
     },
     {
@@ -43138,6 +43114,30 @@
       "source": "app_server_alert_host_alerthost_chatted",
       "source_file": "app/server/alert-host.ts",
       "source_location": "L431",
+      "target": "app_server_alert_host_alerthost_counting",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_alert_host_alerthost_chatted",
+      "source_file": "app/server/alert-host.ts",
+      "source_location": "L435",
+      "target": "app_server_alert_host_personkey",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_alert_host_alerthost_chatted",
+      "source_file": "app/server/alert-host.ts",
+      "source_location": "L436",
       "target": "app_server_alert_host_alerthost_progress",
       "weight": 1.0
     },
@@ -43149,7 +43149,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_clear",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L504",
+      "source_location": "L509",
       "target": "app_server_alert_host_alerthost_setline",
       "weight": 1.0
     },
@@ -43161,7 +43161,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_control",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L369",
+      "source_location": "L374",
       "target": "app_lib_alerts_lineskip",
       "weight": 1.0
     },
@@ -43173,32 +43173,8 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_control",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L369",
+      "source_location": "L374",
       "target": "app_server_alert_host_alerthost_take",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_alert_host_alerthost_control",
-      "source_file": "app/server/alert-host.ts",
-      "source_location": "L372",
-      "target": "app_server_alert_host_alerthost_mute",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_alert_host_alerthost_control",
-      "source_file": "app/server/alert-host.ts",
-      "source_location": "L375",
-      "target": "app_server_alert_host_alerthost_counts",
       "weight": 1.0
     },
     {
@@ -43210,6 +43186,30 @@
       "source": "app_server_alert_host_alerthost_control",
       "source_file": "app/server/alert-host.ts",
       "source_location": "L377",
+      "target": "app_server_alert_host_alerthost_mute",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_alert_host_alerthost_control",
+      "source_file": "app/server/alert-host.ts",
+      "source_location": "L380",
+      "target": "app_server_alert_host_alerthost_counts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_alert_host_alerthost_control",
+      "source_file": "app/server/alert-host.ts",
+      "source_location": "L382",
       "target": "app_server_alert_host_alerthost_startgoal",
       "weight": 1.0
     },
@@ -43221,7 +43221,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_control",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L382",
+      "source_location": "L387",
       "target": "app_lib_alerts_testsupport",
       "weight": 1.0
     },
@@ -43233,7 +43233,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_control",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L382",
+      "source_location": "L387",
       "target": "app_server_alert_host_alerthost_play",
       "weight": 1.0
     },
@@ -43245,7 +43245,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_count",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L417",
+      "source_location": "L422",
       "target": "app_server_alert_host_alerthost_counting",
       "weight": 1.0
     },
@@ -43257,7 +43257,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_count",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L418",
+      "source_location": "L423",
       "target": "app_lib_goals_countsupport",
       "weight": 1.0
     },
@@ -43269,7 +43269,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_count",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L418",
+      "source_location": "L423",
       "target": "app_server_alert_host_alerthost_progress",
       "weight": 1.0
     },
@@ -43281,7 +43281,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_counting",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L412",
+      "source_location": "L417",
       "target": "app_server_alert_host_alerthost_counts",
       "weight": 1.0
     },
@@ -43293,7 +43293,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_dropplatform",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L360",
+      "source_location": "L365",
       "target": "app_lib_alerts_lineadvance",
       "weight": 1.0
     },
@@ -43305,7 +43305,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_dropplatform",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L360",
+      "source_location": "L365",
       "target": "app_server_alert_host_alerthost_take",
       "weight": 1.0
     },
@@ -43317,7 +43317,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_dropplatform",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L361",
+      "source_location": "L366",
       "target": "app_server_alert_host_alerthost_flush",
       "weight": 1.0
     },
@@ -43329,7 +43329,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_flush",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L558",
+      "source_location": "L563",
       "target": "app_server_alert_host_alerthost_reply",
       "weight": 1.0
     },
@@ -43341,7 +43341,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_flush",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L558",
+      "source_location": "L563",
       "target": "app_server_alert_host_alerthost_send",
       "weight": 1.0
     },
@@ -43353,7 +43353,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_layerschanged",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L299",
+      "source_location": "L304",
       "target": "app_server_alert_host_alerthost_refresh",
       "weight": 1.0
     },
@@ -43365,7 +43365,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_layerschanged",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L300",
+      "source_location": "L305",
       "target": "app_server_alert_host_alerthost_flush",
       "weight": 1.0
     },
@@ -43377,7 +43377,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_live",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L399",
+      "source_location": "L404",
       "target": "app_lib_activity_islivemessage",
       "weight": 1.0
     },
@@ -43389,7 +43389,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_live",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L400",
+      "source_location": "L405",
       "target": "app_lib_alerts_alertfor",
       "weight": 1.0
     },
@@ -43401,7 +43401,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_live",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L400",
+      "source_location": "L405",
       "target": "app_server_alert_host_shownevent",
       "weight": 1.0
     },
@@ -43413,7 +43413,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_live",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L402",
+      "source_location": "L407",
       "target": "app_server_alert_host_alerthost_add",
       "weight": 1.0
     },
@@ -43437,7 +43437,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_mute",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L458",
+      "source_location": "L463",
       "target": "app_server_alert_host_alerthost_clear",
       "weight": 1.0
     },
@@ -43449,7 +43449,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_mute",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L459",
+      "source_location": "L464",
       "target": "app_server_alert_host_alerthost_save",
       "weight": 1.0
     },
@@ -43509,7 +43509,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_play",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L479",
+      "source_location": "L484",
       "target": "app_lib_alerts_alertfor",
       "weight": 1.0
     },
@@ -43521,7 +43521,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_play",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L479",
+      "source_location": "L484",
       "target": "app_server_alert_host_shownevent",
       "weight": 1.0
     },
@@ -43533,7 +43533,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_play",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L481",
+      "source_location": "L486",
       "target": "app_server_alert_host_alerthost_add",
       "weight": 1.0
     },
@@ -43545,7 +43545,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_play",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L483",
+      "source_location": "L488",
       "target": "app_server_alert_host_alerthost_save",
       "weight": 1.0
     },
@@ -43557,7 +43557,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_read",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L597",
+      "source_location": "L602",
       "target": "app_server_alert_host_alerthost_apply",
       "weight": 1.0
     },
@@ -43569,8 +43569,20 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_read",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L600",
+      "source_location": "L605",
       "target": "app_server_alert_host_cause",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_alert_host_alerthost_ready",
+      "source_file": "app/server/alert-host.ts",
+      "source_location": "L300",
+      "target": "app_server_alert_host_alerthost_refresh",
       "weight": 1.0
     },
     {
@@ -43641,7 +43653,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_refresh",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L586",
+      "source_location": "L591",
       "target": "app_server_alert_host_alerthost_read",
       "weight": 1.0
     },
@@ -43653,7 +43665,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_reply",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L550",
+      "source_location": "L555",
       "target": "app_server_alert_host_alerthost_counting",
       "weight": 1.0
     },
@@ -43665,7 +43677,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_request",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L311",
+      "source_location": "L316",
       "target": "app_server_alert_host_alerthost_refresh",
       "weight": 1.0
     },
@@ -43677,7 +43689,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_request",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L311",
+      "source_location": "L316",
       "target": "app_server_alert_host_refuse",
       "weight": 1.0
     },
@@ -43689,7 +43701,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_request",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L313",
+      "source_location": "L318",
       "target": "app_server_alert_host_alerthost_control",
       "weight": 1.0
     },
@@ -43701,7 +43713,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_request",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L314",
+      "source_location": "L319",
       "target": "app_server_alert_host_alerthost_flush",
       "weight": 1.0
     },
@@ -43713,7 +43725,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_request",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L315",
+      "source_location": "L320",
       "target": "app_server_alert_host_alerthost_wake",
       "weight": 1.0
     },
@@ -43725,7 +43737,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_request",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L316",
+      "source_location": "L321",
       "target": "app_server_alert_host_alerthost_reply",
       "weight": 1.0
     },
@@ -43737,7 +43749,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_setline",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L517",
+      "source_location": "L522",
       "target": "app_server_alert_host_alerthost_save",
       "weight": 1.0
     },
@@ -43749,7 +43761,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_start",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L534",
+      "source_location": "L539",
       "target": "app_lib_alerts_alertshownon",
       "weight": 1.0
     },
@@ -43761,7 +43773,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_start",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L539",
+      "source_location": "L544",
       "target": "app_server_alert_host_alerthost_send",
       "weight": 1.0
     },
@@ -43773,7 +43785,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_take",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L498",
+      "source_location": "L503",
       "target": "app_server_alert_host_alerthost_setline",
       "weight": 1.0
     },
@@ -43785,7 +43797,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_take",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L499",
+      "source_location": "L504",
       "target": "app_server_alert_host_alerthost_start",
       "weight": 1.0
     },
@@ -43797,7 +43809,7 @@
       "relation": "calls",
       "source": "app_server_alert_host_alerthost_wake",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L342",
+      "source_location": "L347",
       "target": "app_server_alert_host_alerthost_checks",
       "weight": 1.0
     },
@@ -44409,7 +44421,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_accepted",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L445",
+      "source_location": "L447",
       "target": "app_server_channel_ingest_channelingest_touch",
       "weight": 1.0
     },
@@ -44421,7 +44433,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_accepted",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L448",
+      "source_location": "L450",
       "target": "app_server_channel_ingest_channelingest_connection",
       "weight": 1.0
     },
@@ -44433,7 +44445,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_accepted",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L450",
+      "source_location": "L452",
       "target": "app_server_channel_ingest_channelingest_setstatus",
       "weight": 1.0
     },
@@ -44445,7 +44457,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_admitevents",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L462",
+      "source_location": "L464",
       "target": "app_server_channel_ingest_channelingest_known",
       "weight": 1.0
     },
@@ -44457,7 +44469,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_admitevents",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L465",
+      "source_location": "L467",
       "target": "app_server_channel_ingest_events_bankey",
       "weight": 1.0
     },
@@ -44469,7 +44481,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_admitevents",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L467",
+      "source_location": "L469",
       "target": "app_lib_activity_issupport",
       "weight": 1.0
     },
@@ -44481,32 +44493,8 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_alarm",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L775",
+      "source_location": "L777",
       "target": "app_server_channel_ingest_channelingest_closesockets",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_channel_ingest_channelingest_alarm",
-      "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L775",
-      "target": "app_server_channel_tokens_server_channelsoff",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_channel_ingest_channelingest_alarm",
-      "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L776",
-      "target": "app_server_channel_ingest_channelingest_prune",
       "weight": 1.0
     },
     {
@@ -44518,6 +44506,30 @@
       "source": "app_server_channel_ingest_channelingest_alarm",
       "source_file": "app/server/channel-ingest.ts",
       "source_location": "L777",
+      "target": "app_server_channel_tokens_server_channelsoff",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_channel_ingest_channelingest_alarm",
+      "source_file": "app/server/channel-ingest.ts",
+      "source_location": "L778",
+      "target": "app_server_channel_ingest_channelingest_prune",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_channel_ingest_channelingest_alarm",
+      "source_file": "app/server/channel-ingest.ts",
+      "source_location": "L779",
       "target": "app_server_channel_ingest_sql_nextexpiry",
       "weight": 1.0
     },
@@ -44529,7 +44541,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_alarm",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L783",
+      "source_location": "L785",
       "target": "app_server_channel_ingest_channelingest_pollyoutube",
       "weight": 1.0
     },
@@ -44541,7 +44553,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_broadcast",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L349",
+      "source_location": "L350",
       "target": "app_server_channel_ingest_channelingest_send",
       "weight": 1.0
     },
@@ -44553,7 +44565,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_cleanupchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L713",
+      "source_location": "L715",
       "target": "app_server_channel_ingest_channelingest_connection",
       "weight": 1.0
     },
@@ -44565,7 +44577,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_cleanupchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L721",
+      "source_location": "L723",
       "target": "app_server_channel_ingest_channelingest_freshtokens",
       "weight": 1.0
     },
@@ -44577,7 +44589,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_cleanupchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L724",
+      "source_location": "L726",
       "target": "app_server_channel_tokens_server_loadtokens",
       "weight": 1.0
     },
@@ -44589,7 +44601,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_cleanupchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L727",
+      "source_location": "L729",
       "target": "app_server_channel_providers_server_unsubscribe",
       "weight": 1.0
     },
@@ -44601,7 +44613,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_cleanupchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L730",
+      "source_location": "L732",
       "target": "app_server_channel_providers_server_revoketoken",
       "weight": 1.0
     },
@@ -44613,7 +44625,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_cleanupchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L742",
+      "source_location": "L744",
       "target": "app_server_channel_ingest_channelingest_broadcast",
       "weight": 1.0
     },
@@ -44625,7 +44637,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_closeall",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L291",
+      "source_location": "L292",
       "target": "app_server_channel_ingest_channelingest_closesockets",
       "weight": 1.0
     },
@@ -44637,7 +44649,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_closeall",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L292",
+      "source_location": "L293",
       "target": "app_server_channel_ingest_channelingest_bump",
       "weight": 1.0
     },
@@ -44649,7 +44661,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_closeall",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L296",
+      "source_location": "L297",
       "target": "app_server_channel_ingest_channelingest_forgetconnections",
       "weight": 1.0
     },
@@ -44661,7 +44673,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_closeall",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L300",
+      "source_location": "L301",
       "target": "app_server_channel_ingest_channelingest_createtables",
       "weight": 1.0
     },
@@ -44673,7 +44685,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_closesockets",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L311",
+      "source_location": "L312",
       "target": "app_server_channel_ingest_channelingest_send",
       "weight": 1.0
     },
@@ -44685,7 +44697,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_connectchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L660",
+      "source_location": "L662",
       "target": "app_server_channel_ingest_channelingest_connection",
       "weight": 1.0
     },
@@ -44697,7 +44709,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_connectchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L664",
+      "source_location": "L666",
       "target": "app_server_channel_ingest_channelingest_bump",
       "weight": 1.0
     },
@@ -44709,7 +44721,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_connectchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L668",
+      "source_location": "L670",
       "target": "app_server_channel_ingest_channelingest_freshtokens",
       "weight": 1.0
     },
@@ -44721,7 +44733,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_connectchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L671",
+      "source_location": "L673",
       "target": "app_server_channel_ingest_channelingest_connectionstarted",
       "weight": 1.0
     },
@@ -44733,7 +44745,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_connectchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L672",
+      "source_location": "L674",
       "target": "app_server_channel_ingest_channelingest_setstatus",
       "weight": 1.0
     },
@@ -44745,7 +44757,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_connection",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L534",
+      "source_location": "L536",
       "target": "app_server_channel_ingest_channelingest_readconnection",
       "weight": 1.0
     },
@@ -44757,7 +44769,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_connectionstarted",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L695",
+      "source_location": "L697",
       "target": "app_server_channel_ingest_channelingest_schedulealarm",
       "weight": 1.0
     },
@@ -44829,7 +44841,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_disconnectchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L703",
+      "source_location": "L705",
       "target": "app_server_channel_ingest_channelingest_bump",
       "weight": 1.0
     },
@@ -44841,7 +44853,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_disconnectchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L705",
+      "source_location": "L707",
       "target": "app_server_channel_ingest_channelingest_cleanupchannel",
       "weight": 1.0
     },
@@ -44997,7 +45009,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_firstsight",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L393",
+      "source_location": "L394",
       "target": "app_server_channel_ingest_channelingest_known",
       "weight": 1.0
     },
@@ -45009,7 +45021,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_firstsight",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L394",
+      "source_location": "L395",
       "target": "app_server_channel_ingest_channelingest_remember",
       "weight": 1.0
     },
@@ -45021,7 +45033,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_freshtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L614",
+      "source_location": "L616",
       "target": "app_server_channel_ingest_channelingest_loadfreshtokens",
       "weight": 1.0
     },
@@ -45033,7 +45045,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_ingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L482",
+      "source_location": "L484",
       "target": "app_server_channel_ingest_channelingest_broadcast",
       "weight": 1.0
     },
@@ -45045,7 +45057,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_ingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L482",
+      "source_location": "L484",
       "target": "app_server_channel_ingest_channelingest_store",
       "weight": 1.0
     },
@@ -45057,7 +45069,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_ingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L482",
+      "source_location": "L484",
       "target": "app_server_channel_ingest_events_eventforbroadcast",
       "weight": 1.0
     },
@@ -45069,7 +45081,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_ingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L483",
+      "source_location": "L485",
       "target": "app_server_channel_ingest_channelingest_prune",
       "weight": 1.0
     },
@@ -45081,7 +45093,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_listeningstarted",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L261",
+      "source_location": "L262",
       "target": "app_server_channel_ingest_channelingest_connection",
       "weight": 1.0
     },
@@ -45093,7 +45105,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_listeningstarted",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L265",
+      "source_location": "L266",
       "target": "app_server_channel_ingest_channelingest_schedulealarm",
       "weight": 1.0
     },
@@ -45105,7 +45117,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_loadfreshtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L632",
+      "source_location": "L634",
       "target": "app_server_channel_ingest_channelingest_storedtokens",
       "weight": 1.0
     },
@@ -45117,7 +45129,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_loadfreshtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L633",
+      "source_location": "L635",
       "target": "app_server_channel_providers_server_reauthrequired",
       "weight": 1.0
     },
@@ -45129,7 +45141,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_loadfreshtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L639",
+      "source_location": "L641",
       "target": "app_server_channel_providers_server_refreshtokens",
       "weight": 1.0
     },
@@ -45141,7 +45153,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_loadfreshtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L647",
+      "source_location": "L649",
       "target": "app_server_channel_tokens_server_replacetokens",
       "weight": 1.0
     },
@@ -45153,7 +45165,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_overlaykeyrevoked",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L318",
+      "source_location": "L319",
       "target": "app_server_room_connections_outputinbody",
       "weight": 1.0
     },
@@ -45165,7 +45177,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_overlaykeyrevoked",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L319",
+      "source_location": "L320",
       "target": "app_server_channel_ingest_reply",
       "weight": 1.0
     },
@@ -45177,7 +45189,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_overlaykeyrevoked",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L321",
+      "source_location": "L322",
       "target": "app_server_room_connections_keyrevokes",
       "weight": 1.0
     },
@@ -45189,7 +45201,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_overlaykeyrevoked",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L322",
+      "source_location": "L323",
       "target": "app_server_channel_ingest_channelingest_closesockets",
       "weight": 1.0
     },
@@ -45201,7 +45213,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_pagestatuschanged",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L279",
+      "source_location": "L280",
       "target": "app_server_channel_ingest_channelingest_pagesuspended",
       "weight": 1.0
     },
@@ -45213,7 +45225,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_pagestatuschanged",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L282",
+      "source_location": "L283",
       "target": "app_server_channel_ingest_channelingest_bump",
       "weight": 1.0
     },
@@ -45225,7 +45237,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_pagestatuschanged",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L283",
+      "source_location": "L284",
       "target": "app_server_channel_ingest_channelingest_closesockets",
       "weight": 1.0
     },
@@ -45309,7 +45321,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_poll",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L906",
+      "source_location": "L908",
       "target": "app_server_channel_ingest_limits_spendyoutubequota",
       "weight": 1.0
     },
@@ -45321,7 +45333,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_poll",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L907",
+      "source_location": "L909",
       "target": "app_server_channel_providers_server_providererror",
       "weight": 1.0
     },
@@ -45333,7 +45345,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_poll",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L908",
+      "source_location": "L910",
       "target": "app_server_channel_ingest_channelingest_freshtokens",
       "weight": 1.0
     },
@@ -45345,7 +45357,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_poll",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L912",
+      "source_location": "L914",
       "target": "app_server_channel_ingest_channelingest_refreshpollingtitle",
       "weight": 1.0
     },
@@ -45357,7 +45369,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_poll",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L916",
+      "source_location": "L918",
       "target": "app_server_channel_providers_server_youtubelivechat",
       "weight": 1.0
     },
@@ -45369,7 +45381,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_poll",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L922",
+      "source_location": "L924",
       "target": "app_server_channel_providers_server_youtubechatpage",
       "weight": 1.0
     },
@@ -45381,7 +45393,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_poll",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L927",
+      "source_location": "L929",
       "target": "app_server_channel_support_youtubesupport",
       "weight": 1.0
     },
@@ -45393,7 +45405,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_poll",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L928",
+      "source_location": "L931",
       "target": "app_server_channel_ingest_channelingest_admitevents",
       "weight": 1.0
     },
@@ -45405,7 +45417,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_poll",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L928",
+      "source_location": "L931",
       "target": "app_server_channel_ingest_channelingest_ingest",
       "weight": 1.0
     },
@@ -45417,7 +45429,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_poll",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L928",
+      "source_location": "L931",
       "target": "app_server_channel_normalize_youtubeevents",
       "weight": 1.0
     },
@@ -45429,7 +45441,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_poll",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L930",
+      "source_location": "L933",
       "target": "app_server_channel_ingest_channelingest_touch",
       "weight": 1.0
     },
@@ -45441,7 +45453,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_pollfailed",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L963",
+      "source_location": "L966",
       "target": "app_server_channel_ingest_channelingest_setstatus",
       "weight": 1.0
     },
@@ -45453,7 +45465,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_pollfailed",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L976",
+      "source_location": "L979",
       "target": "app_lib_activity_quotaday",
       "weight": 1.0
     },
@@ -45465,7 +45477,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_pollyoutube",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L801",
+      "source_location": "L803",
       "target": "app_server_channel_tokens_server_channelsoff",
       "weight": 1.0
     },
@@ -45477,7 +45489,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_pollyoutube",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L803",
+      "source_location": "L805",
       "target": "app_server_channel_ingest_channelingest_connection",
       "weight": 1.0
     },
@@ -45489,7 +45501,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_pollyoutube",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L813",
+      "source_location": "L815",
       "target": "app_server_channel_ingest_superseded",
       "weight": 1.0
     },
@@ -45501,7 +45513,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_pollyoutube",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L817",
+      "source_location": "L819",
       "target": "app_server_channel_ingest_channelingest_poll",
       "weight": 1.0
     },
@@ -45513,7 +45525,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_pollyoutube",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L820",
+      "source_location": "L822",
       "target": "app_server_channel_ingest_channelingest_setstatus",
       "weight": 1.0
     },
@@ -45525,7 +45537,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_pollyoutube",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L823",
+      "source_location": "L825",
       "target": "app_server_channel_ingest_channelingest_pollfailed",
       "weight": 1.0
     },
@@ -45537,7 +45549,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_prune",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L370",
+      "source_location": "L371",
       "target": "app_server_channel_ingest_channelingest_deleteids",
       "weight": 1.0
     },
@@ -45549,20 +45561,8 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_receive",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L406",
+      "source_location": "L407",
       "target": "app_server_channel_ingest_reply",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_channel_ingest_channelingest_receive",
-      "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L409",
-      "target": "app_server_channel_ingest_channelingest_prune",
       "weight": 1.0
     },
     {
@@ -45574,6 +45574,18 @@
       "source": "app_server_channel_ingest_channelingest_receive",
       "source_file": "app/server/channel-ingest.ts",
       "source_location": "L410",
+      "target": "app_server_channel_ingest_channelingest_prune",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_channel_ingest_channelingest_receive",
+      "source_file": "app/server/channel-ingest.ts",
+      "source_location": "L411",
       "target": "app_server_channel_ingest_channelingest_known",
       "weight": 1.0
     },
@@ -45585,7 +45597,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_receive",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L416",
+      "source_location": "L417",
       "target": "app_server_channel_ingest_channelingest_admitevents",
       "weight": 1.0
     },
@@ -45597,7 +45609,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_receive",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L418",
+      "source_location": "L419",
       "target": "app_server_channel_ingest_channelingest_connection",
       "weight": 1.0
     },
@@ -45609,7 +45621,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_receive",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L429",
+      "source_location": "L430",
       "target": "app_server_channel_ingest_events_withoutsupport",
       "weight": 1.0
     },
@@ -45621,20 +45633,8 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_receive",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L434",
-      "target": "app_server_channel_ingest_channelingest_remember",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_channel_ingest_channelingest_receive",
-      "source_file": "app/server/channel-ingest.ts",
       "source_location": "L435",
-      "target": "app_server_channel_ingest_channelingest_ingest",
+      "target": "app_server_channel_ingest_channelingest_remember",
       "weight": 1.0
     },
     {
@@ -45646,7 +45646,7 @@
       "source": "app_server_channel_ingest_channelingest_receive",
       "source_file": "app/server/channel-ingest.ts",
       "source_location": "L437",
-      "target": "app_server_channel_ingest_channelingest_schedulealarm",
+      "target": "app_server_channel_ingest_channelingest_ingest",
       "weight": 1.0
     },
     {
@@ -45658,6 +45658,18 @@
       "source": "app_server_channel_ingest_channelingest_receive",
       "source_file": "app/server/channel-ingest.ts",
       "source_location": "L439",
+      "target": "app_server_channel_ingest_channelingest_schedulealarm",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_channel_ingest_channelingest_receive",
+      "source_file": "app/server/channel-ingest.ts",
+      "source_location": "L441",
       "target": "app_server_channel_ingest_channelingest_accepted",
       "weight": 1.0
     },
@@ -45669,7 +45681,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_refreshpollingtitle",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L948",
+      "source_location": "L951",
       "target": "app_server_channel_ingest_channelingest_refreshtitle",
       "weight": 1.0
     },
@@ -45681,7 +45693,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_refreshrequested",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L857",
+      "source_location": "L859",
       "target": "app_server_channel_ingest_channelingest_connection",
       "weight": 1.0
     },
@@ -45693,7 +45705,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_refreshrequested",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L862",
+      "source_location": "L864",
       "target": "app_server_channel_ingest_channelingest_freshtokens",
       "weight": 1.0
     },
@@ -45705,7 +45717,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_refreshrequested",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L863",
+      "source_location": "L865",
       "target": "app_server_channel_ingest_channelingest_refreshtitle",
       "weight": 1.0
     },
@@ -45717,20 +45729,8 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_refreshrequested",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L874",
+      "source_location": "L876",
       "target": "app_server_channel_ingest_channelingest_setstatus",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_channel_ingest_channelingest_refreshtitle",
-      "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L836",
-      "target": "app_server_channel_providers_server_channelidentity",
       "weight": 1.0
     },
     {
@@ -45742,6 +45742,18 @@
       "source": "app_server_channel_ingest_channelingest_refreshtitle",
       "source_file": "app/server/channel-ingest.ts",
       "source_location": "L838",
+      "target": "app_server_channel_providers_server_channelidentity",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_channel_ingest_channelingest_refreshtitle",
+      "source_file": "app/server/channel-ingest.ts",
+      "source_location": "L840",
       "target": "app_server_channel_providers_server_providererror",
       "weight": 1.0
     },
@@ -45753,7 +45765,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_refreshtitle",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L839",
+      "source_location": "L841",
       "target": "app_server_channel_ingest_limits_spendyoutubequota",
       "weight": 1.0
     },
@@ -45765,7 +45777,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_remember",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L386",
+      "source_location": "L387",
       "target": "app_server_channel_ingest_channelingest_known",
       "weight": 1.0
     },
@@ -45777,7 +45789,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_setstatus",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L596",
+      "source_location": "L598",
       "target": "app_server_channel_ingest_channelingest_broadcast",
       "weight": 1.0
     },
@@ -45789,7 +45801,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_snapshot",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L358",
+      "source_location": "L359",
       "target": "app_server_channel_ingest_channelingest_prune",
       "weight": 1.0
     },
@@ -45801,7 +45813,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_snapshot",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L360",
+      "source_location": "L361",
       "target": "app_server_channel_ingest_events_snapshotevents",
       "weight": 1.0
     },
@@ -45813,7 +45825,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_snapshot",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L361",
+      "source_location": "L362",
       "target": "app_server_channel_ingest_events_snapshotmessage",
       "weight": 1.0
     },
@@ -45825,7 +45837,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_statuschanged",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L751",
+      "source_location": "L753",
       "target": "app_server_channel_ingest_reply",
       "weight": 1.0
     },
@@ -45837,7 +45849,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_statuschanged",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L753",
+      "source_location": "L755",
       "target": "app_server_channel_ingest_channelingest_connection",
       "weight": 1.0
     },
@@ -45849,7 +45861,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_statuschanged",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L756",
+      "source_location": "L758",
       "target": "app_server_channel_ingest_channelingest_setstatus",
       "weight": 1.0
     },
@@ -45861,7 +45873,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_store",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L491",
+      "source_location": "L493",
       "target": "app_server_channel_ingest_channelingest_firstsight",
       "weight": 1.0
     },
@@ -45873,7 +45885,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_store",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L491",
+      "source_location": "L493",
       "target": "app_server_channel_ingest_channelingest_known",
       "weight": 1.0
     },
@@ -45885,7 +45897,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_store",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L500",
+      "source_location": "L502",
       "target": "app_lib_activity_issupport",
       "weight": 1.0
     },
@@ -45897,7 +45909,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_store",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L505",
+      "source_location": "L507",
       "target": "app_server_channel_ingest_channelingest_remember",
       "weight": 1.0
     },
@@ -45909,7 +45921,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_store",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L508",
+      "source_location": "L510",
       "target": "app_server_channel_ingest_events_bankey",
       "weight": 1.0
     },
@@ -45921,7 +45933,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_storedtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L624",
+      "source_location": "L626",
       "target": "app_server_channel_tokens_server_loadtokens",
       "weight": 1.0
     },
@@ -45933,7 +45945,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_storedtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L627",
+      "source_location": "L629",
       "target": "app_server_channel_providers_server_reauthrequired",
       "weight": 1.0
     },
@@ -46053,7 +46065,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_testchat",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L252",
+      "source_location": "L253",
       "target": "app_lib_chat_feed_samplechatat",
       "weight": 1.0
     },
@@ -46065,7 +46077,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_testchat",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L252",
+      "source_location": "L253",
       "target": "app_server_channel_ingest_channelingest_ingest",
       "weight": 1.0
     },
@@ -46077,7 +46089,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_testchat",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L253",
+      "source_location": "L254",
       "target": "app_server_channel_ingest_channelingest_schedulealarm",
       "weight": 1.0
     },
@@ -46089,7 +46101,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_upcomingrequested",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L884",
+      "source_location": "L886",
       "target": "app_server_channel_ingest_channelingest_connection",
       "weight": 1.0
     },
@@ -46101,7 +46113,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_upcomingrequested",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L884",
+      "source_location": "L886",
       "target": "app_server_channel_tokens_server_channelsoff",
       "weight": 1.0
     },
@@ -46113,7 +46125,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_upcomingrequested",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L892",
+      "source_location": "L894",
       "target": "app_server_channel_providers_server_twitchschedule",
       "weight": 1.0
     },
@@ -46125,7 +46137,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_upcomingrequested",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L893",
+      "source_location": "L895",
       "target": "app_server_channel_ingest_channelingest_freshtokens",
       "weight": 1.0
     },
@@ -46137,7 +46149,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_upcomingrequested",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L894",
+      "source_location": "L896",
       "target": "app_server_channel_ingest_limits_spendyoutubequota",
       "weight": 1.0
     },
@@ -46149,7 +46161,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_upcomingrequested",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L895",
+      "source_location": "L897",
       "target": "app_server_channel_providers_server_youtubeupcoming",
       "weight": 1.0
     },
@@ -46161,7 +46173,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_upcomingrequested",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L898",
+      "source_location": "L900",
       "target": "app_server_channel_ingest_channelingest_setstatus",
       "weight": 1.0
     },
@@ -62421,7 +62433,7 @@
       "relation": "calls",
       "source": "tests_alert_host_test",
       "source_file": "tests/alert-host.test.ts",
-      "source_location": "L1034",
+      "source_location": "L1043",
       "target": "tests_alert_host_test_chat",
       "weight": 1.0
     },
@@ -62433,7 +62445,7 @@
       "relation": "calls",
       "source": "tests_alert_host_test",
       "source_file": "tests/alert-host.test.ts",
-      "source_location": "L1045",
+      "source_location": "L1054",
       "target": "tests_alert_host_test_renamed",
       "weight": 1.0
     },
@@ -62445,7 +62457,7 @@
       "relation": "calls",
       "source": "tests_alert_host_test",
       "source_file": "tests/alert-host.test.ts",
-      "source_location": "L1121",
+      "source_location": "L1130",
       "target": "tests_helpers_room_roomnamespace_restart",
       "weight": 1.0
     },
@@ -77928,7 +77940,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_connectchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L657",
+      "source_location": "L659",
       "target": "app_lib_activity_channelstatus",
       "weight": 1.0
     },
@@ -77940,7 +77952,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_connectchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L657",
+      "source_location": "L659",
       "target": "app_lib_activity_channelstatuscode",
       "weight": 1.0
     },
@@ -77952,7 +77964,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_connection",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L528",
+      "source_location": "L530",
       "target": "app_server_channel_ingest_state_connection",
       "weight": 1.0
     },
@@ -77964,7 +77976,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_freshtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L611",
+      "source_location": "L613",
       "target": "app_server_channel_tokens_server_storedtokens",
       "weight": 1.0
     },
@@ -77976,7 +77988,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_loadfreshtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L631",
+      "source_location": "L633",
       "target": "app_server_channel_tokens_server_storedtokens",
       "weight": 1.0
     },
@@ -77988,7 +78000,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_readconnection",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L542",
+      "source_location": "L544",
       "target": "app_server_channel_ingest_state_connection",
       "weight": 1.0
     },
@@ -78000,7 +78012,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_storedtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L622",
+      "source_location": "L624",
       "target": "app_server_channel_tokens_server_storedtokens",
       "weight": 1.0
     },
@@ -78012,7 +78024,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_upcomingrequested",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L883",
+      "source_location": "L885",
       "target": "app_server_channel_providers_server_importedstream",
       "weight": 1.0
     },
@@ -194217,7 +194229,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_add",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L488",
+      "source_location": "L493",
       "target": "app_lib_alerts_pendingalert",
       "weight": 1.0
     },
@@ -194229,7 +194241,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_apply",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L608",
+      "source_location": "L613",
       "target": "app_lib_overlay_layers_overlaylayers",
       "weight": 1.0
     },
@@ -194241,7 +194253,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_chatted",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L425",
+      "source_location": "L430",
       "target": "app_lib_activity_activitychat",
       "weight": 1.0
     },
@@ -194253,7 +194265,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_control",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L364",
+      "source_location": "L369",
       "target": "app_lib_alert_control_alertcontrol",
       "weight": 1.0
     },
@@ -194265,7 +194277,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_count",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L416",
+      "source_location": "L421",
       "target": "app_lib_activity_activitysupport",
       "weight": 1.0
     },
@@ -194277,7 +194289,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_dropplatform",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L353",
+      "source_location": "L358",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -194289,7 +194301,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_live",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L395",
+      "source_location": "L400",
       "target": "app_lib_activity_activitysupport",
       "weight": 1.0
     },
@@ -194301,7 +194313,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_play",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L467",
+      "source_location": "L472",
       "target": "app_lib_activity_activitysupport",
       "weight": 1.0
     },
@@ -194313,7 +194325,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_progress",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L434",
+      "source_location": "L439",
       "target": "app_lib_goals_goalprogress",
       "weight": 1.0
     },
@@ -194337,7 +194349,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_send",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L561",
+      "source_location": "L566",
       "target": "app_lib_alerts_alertsmessage",
       "weight": 1.0
     },
@@ -194349,7 +194361,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_setline",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L508",
+      "source_location": "L513",
       "target": "app_lib_alerts_alertline",
       "weight": 1.0
     },
@@ -194361,7 +194373,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_start",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L529",
+      "source_location": "L534",
       "target": "app_lib_alerts_startedalert",
       "weight": 1.0
     },
@@ -194373,7 +194385,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_startgoal",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L443",
+      "source_location": "L448",
       "target": "app_lib_goals_goalcount",
       "weight": 1.0
     },
@@ -194385,7 +194397,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_take",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L496",
+      "source_location": "L501",
       "target": "app_lib_alerts_linestep",
       "weight": 1.0
     },
@@ -194397,7 +194409,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_accepted",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L444",
+      "source_location": "L446",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -194409,7 +194421,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_accepted",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L444",
+      "source_location": "L446",
       "target": "app_server_channel_ingest_state_connection",
       "weight": 1.0
     },
@@ -194421,7 +194433,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_admitevents",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L459",
+      "source_location": "L461",
       "target": "app_lib_activity_activityevent",
       "weight": 1.0
     },
@@ -194433,7 +194445,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_broadcast",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L347",
+      "source_location": "L348",
       "target": "app_lib_activity_activityevent",
       "weight": 1.0
     },
@@ -194445,7 +194457,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_bump",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L305",
+      "source_location": "L306",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -194457,7 +194469,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_cleanupchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L708",
+      "source_location": "L710",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -194469,7 +194481,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_connectchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L657",
+      "source_location": "L659",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -194481,7 +194493,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_connection",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L528",
+      "source_location": "L530",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -194493,7 +194505,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_connectionstarted",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L688",
+      "source_location": "L690",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -194517,7 +194529,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_disconnectchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L702",
+      "source_location": "L704",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -194529,7 +194541,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_freshtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L611",
+      "source_location": "L613",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -194541,7 +194553,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_freshtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L611",
+      "source_location": "L613",
       "target": "app_server_channel_ingest_state_connection",
       "weight": 1.0
     },
@@ -194553,7 +194565,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_ingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L481",
+      "source_location": "L483",
       "target": "app_lib_activity_activityevent",
       "weight": 1.0
     },
@@ -194565,7 +194577,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_known",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L381",
+      "source_location": "L382",
       "target": "app_server_channel_ingest_sql_idtable",
       "weight": 1.0
     },
@@ -194577,7 +194589,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_loadfreshtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L631",
+      "source_location": "L633",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -194589,7 +194601,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_loadfreshtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L631",
+      "source_location": "L633",
       "target": "app_server_channel_ingest_state_connection",
       "weight": 1.0
     },
@@ -194601,7 +194613,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_poll",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L905",
+      "source_location": "L907",
       "target": "app_server_channel_ingest_state_connection",
       "weight": 1.0
     },
@@ -194613,7 +194625,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_poll",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L905",
+      "source_location": "L907",
       "target": "app_server_channel_ingest_state_youtubestate",
       "weight": 1.0
     },
@@ -194625,7 +194637,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_pollfailed",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L961",
+      "source_location": "L964",
       "target": "app_server_channel_ingest_state_connection",
       "weight": 1.0
     },
@@ -194637,7 +194649,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_pollfailed",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L961",
+      "source_location": "L964",
       "target": "app_server_channel_ingest_state_youtubestate",
       "weight": 1.0
     },
@@ -194649,7 +194661,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_readconnection",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L542",
+      "source_location": "L544",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -194661,7 +194673,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_receive",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L399",
+      "source_location": "L400",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -194673,7 +194685,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_refreshpollingtitle",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L941",
+      "source_location": "L944",
       "target": "app_server_channel_ingest_state_connection",
       "weight": 1.0
     },
@@ -194685,7 +194697,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_refreshpollingtitle",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L941",
+      "source_location": "L944",
       "target": "app_server_channel_ingest_state_youtubestate",
       "weight": 1.0
     },
@@ -194697,7 +194709,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_refreshtitle",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L835",
+      "source_location": "L837",
       "target": "app_server_channel_ingest_state_connection",
       "weight": 1.0
     },
@@ -194709,7 +194721,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_remember",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L385",
+      "source_location": "L386",
       "target": "app_server_channel_ingest_sql_idtable",
       "weight": 1.0
     },
@@ -194721,7 +194733,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_setstatus",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L569",
+      "source_location": "L571",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -194733,7 +194745,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_setstatus",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L569",
+      "source_location": "L571",
       "target": "app_lib_activity_channelstatus",
       "weight": 1.0
     },
@@ -194745,7 +194757,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_setstatus",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L569",
+      "source_location": "L571",
       "target": "app_lib_activity_channelstatuscode",
       "weight": 1.0
     },
@@ -194757,7 +194769,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_setstatus",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L569",
+      "source_location": "L571",
       "target": "app_server_channel_ingest_state_connection",
       "weight": 1.0
     },
@@ -194769,7 +194781,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_statuschanged",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L747",
+      "source_location": "L749",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -194781,7 +194793,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_store",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L487",
+      "source_location": "L489",
       "target": "app_lib_activity_activityevent",
       "weight": 1.0
     },
@@ -194793,7 +194805,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_storedtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L622",
+      "source_location": "L624",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -194805,7 +194817,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_storedtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L622",
+      "source_location": "L624",
       "target": "app_server_channel_ingest_state_connection",
       "weight": 1.0
     },
@@ -194817,7 +194829,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_touch",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L599",
+      "source_location": "L601",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -194829,7 +194841,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_touch",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L599",
+      "source_location": "L601",
       "target": "app_server_channel_ingest_state_connection",
       "weight": 1.0
     },
@@ -194841,7 +194853,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_upcomingrequested",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L883",
+      "source_location": "L885",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -196309,7 +196321,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_control",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L364",
+      "source_location": "L369",
       "target": "app_lib_alert_control_alertrefusal",
       "weight": 1.0
     },
@@ -196321,7 +196333,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_counts",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L406",
+      "source_location": "L411",
       "target": "app_lib_goals_goalcount",
       "weight": 1.0
     },
@@ -196333,7 +196345,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_play",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L467",
+      "source_location": "L472",
       "target": "app_lib_alert_control_alertrefusal",
       "weight": 1.0
     },
@@ -196345,7 +196357,7 @@
       "relation": "references",
       "source": "app_server_alert_host_alerthost_reply",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L543",
+      "source_location": "L548",
       "target": "app_lib_alert_control_alertsreply",
       "weight": 1.0
     },
@@ -238432,7 +238444,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1019",
+      "source_location": "L1020",
       "target": "docs_channel_connections_logs_and_alerts",
       "weight": 1.0
     },
@@ -238443,7 +238455,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1050",
+      "source_location": "L1051",
       "target": "docs_channel_connections_overlay_key",
       "weight": 1.0
     },
@@ -238454,7 +238466,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1065",
+      "source_location": "L1066",
       "target": "docs_channel_connections_setup",
       "weight": 1.0
     },
@@ -238465,7 +238477,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1093",
+      "source_location": "L1094",
       "target": "docs_channel_connections_runbook",
       "weight": 1.0
     },
@@ -238476,7 +238488,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1118",
+      "source_location": "L1119",
       "target": "docs_channel_connections_turn_the_feature_off",
       "weight": 1.0
     },
@@ -238487,7 +238499,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1156",
+      "source_location": "L1157",
       "target": "docs_channel_connections_rollback",
       "weight": 1.0
     },
@@ -238498,7 +238510,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1167",
+      "source_location": "L1168",
       "target": "docs_channel_connections_threat_model",
       "weight": 1.0
     },
@@ -238520,7 +238532,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1232",
+      "source_location": "L1233",
       "target": "docs_channel_connections_stored_youtube_data",
       "weight": 1.0
     },
@@ -238531,7 +238543,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1271",
+      "source_location": "L1272",
       "target": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
       "weight": 1.0
     },
@@ -238542,7 +238554,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1388",
+      "source_location": "L1389",
       "target": "docs_channel_connections_facts_not_checked",
       "weight": 1.0
     },
@@ -238553,7 +238565,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L472",
+      "source_location": "L473",
       "target": "docs_channel_connections_channel_health_in_streamer_tools",
       "weight": 1.0
     },
@@ -238575,7 +238587,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L536",
+      "source_location": "L537",
       "target": "docs_channel_connections_capability_matrix",
       "weight": 1.0
     },
@@ -238586,7 +238598,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L558",
+      "source_location": "L559",
       "target": "docs_channel_connections_permissions",
       "weight": 1.0
     },
@@ -238597,7 +238609,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L597",
+      "source_location": "L598",
       "target": "docs_channel_connections_scheduled_streams",
       "weight": 1.0
     },
@@ -238608,7 +238620,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L664",
+      "source_location": "L665",
       "target": "docs_channel_connections_limits_and_retention",
       "weight": 1.0
     },
@@ -238619,7 +238631,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L821",
+      "source_location": "L822",
       "target": "docs_channel_connections_token_encryption_and_rotation",
       "weight": 1.0
     },
@@ -238630,7 +238642,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L875",
+      "source_location": "L876",
       "target": "docs_channel_connections_disconnect",
       "weight": 1.0
     },
@@ -238641,7 +238653,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1003",
+      "source_location": "L1004",
       "target": "docs_channel_connections_callback_failures",
       "weight": 1.0
     },
@@ -238652,7 +238664,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L901",
+      "source_location": "L902",
       "target": "docs_channel_connections_provider_subscriptions",
       "weight": 1.0
     },
@@ -238663,7 +238675,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L919",
+      "source_location": "L920",
       "target": "docs_channel_connections_subscription_repair",
       "weight": 1.0
     },
@@ -238674,7 +238686,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L971",
+      "source_location": "L972",
       "target": "docs_channel_connections_refused_webhooks",
       "weight": 1.0
     },
@@ -238685,7 +238697,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L995",
+      "source_location": "L996",
       "target": "docs_channel_connections_account_deletion",
       "weight": 1.0
     },
@@ -238729,7 +238741,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_event_contract",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L319",
+      "source_location": "L320",
       "target": "docs_channel_connections_support_events_of_each_provider",
       "weight": 1.0
     },
@@ -238740,7 +238752,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_event_contract",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L432",
+      "source_location": "L433",
       "target": "docs_channel_connections_native_polls_predictions_and_rewards",
       "weight": 1.0
     },
@@ -238751,7 +238763,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_event_contract",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L447",
+      "source_location": "L448",
       "target": "docs_channel_connections_rules_for_consumers",
       "weight": 1.0
     },
@@ -238762,7 +238774,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_event_contract",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L458",
+      "source_location": "L459",
       "target": "docs_channel_connections_overlay_chat",
       "weight": 1.0
     },
@@ -238773,7 +238785,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_event_contract",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L464",
+      "source_location": "L465",
       "target": "docs_channel_connections_interactive_characters",
       "weight": 1.0
     },
@@ -238784,7 +238796,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_limits_and_retention",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L767",
+      "source_location": "L768",
       "target": "docs_channel_connections_youtube_quota",
       "weight": 1.0
     },
@@ -238795,7 +238807,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1285",
+      "source_location": "L1286",
       "target": "docs_channel_connections_instagram",
       "weight": 1.0
     },
@@ -238806,7 +238818,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1323",
+      "source_location": "L1324",
       "target": "docs_channel_connections_facebook_live",
       "weight": 1.0
     },
@@ -238817,7 +238829,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1359",
+      "source_location": "L1360",
       "target": "docs_channel_connections_tiktok",
       "weight": 1.0
     },
@@ -238828,7 +238840,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_research_for_instagram_facebook_live_and_tiktok",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1380",
+      "source_location": "L1381",
       "target": "docs_channel_connections_decisions_for_the_owner",
       "weight": 1.0
     },
@@ -238839,7 +238851,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1169",
+      "source_location": "L1170",
       "target": "docs_channel_connections_assets",
       "weight": 1.0
     },
@@ -238850,7 +238862,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1177",
+      "source_location": "L1178",
       "target": "docs_channel_connections_actors",
       "weight": 1.0
     },
@@ -238861,7 +238873,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1185",
+      "source_location": "L1186",
       "target": "docs_channel_connections_threats_and_mitigations",
       "weight": 1.0
     },
@@ -238872,7 +238884,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1214",
+      "source_location": "L1215",
       "target": "docs_channel_connections_residual_risks",
       "weight": 1.0
     },
@@ -238883,7 +238895,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_token_encryption_and_rotation",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L864",
+      "source_location": "L865",
       "target": "docs_channel_connections_refresh",
       "weight": 1.0
     },
@@ -254513,7 +254525,18 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L298",
+      "source_location": "L299",
+      "target": "app_server_alert_host_alerthost_ready",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "app_server_alert_host_alerthost",
+      "source_file": "app/server/alert-host.ts",
+      "source_location": "L303",
       "target": "app_server_alert_host_alerthost_layerschanged",
       "weight": 1.0
     },
@@ -254524,7 +254547,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L304",
+      "source_location": "L309",
       "target": "app_server_alert_host_alerthost_request",
       "weight": 1.0
     },
@@ -254535,7 +254558,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L324",
+      "source_location": "L329",
       "target": "app_server_alert_host_alerthost_alarm",
       "weight": 1.0
     },
@@ -254546,7 +254569,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L340",
+      "source_location": "L345",
       "target": "app_server_alert_host_alerthost_wake",
       "weight": 1.0
     },
@@ -254557,7 +254580,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L348",
+      "source_location": "L353",
       "target": "app_server_alert_host_alerthost_checks",
       "weight": 1.0
     },
@@ -254568,7 +254591,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L353",
+      "source_location": "L358",
       "target": "app_server_alert_host_alerthost_dropplatform",
       "weight": 1.0
     },
@@ -254579,7 +254602,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L364",
+      "source_location": "L369",
       "target": "app_server_alert_host_alerthost_control",
       "weight": 1.0
     },
@@ -254590,7 +254613,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L395",
+      "source_location": "L400",
       "target": "app_server_alert_host_alerthost_live",
       "weight": 1.0
     },
@@ -254601,7 +254624,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L406",
+      "source_location": "L411",
       "target": "app_server_alert_host_alerthost_counts",
       "weight": 1.0
     },
@@ -254612,7 +254635,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L411",
+      "source_location": "L416",
       "target": "app_server_alert_host_alerthost_counting",
       "weight": 1.0
     },
@@ -254623,7 +254646,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L416",
+      "source_location": "L421",
       "target": "app_server_alert_host_alerthost_count",
       "weight": 1.0
     },
@@ -254634,7 +254657,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L425",
+      "source_location": "L430",
       "target": "app_server_alert_host_alerthost_chatted",
       "weight": 1.0
     },
@@ -254645,7 +254668,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L434",
+      "source_location": "L439",
       "target": "app_server_alert_host_alerthost_progress",
       "weight": 1.0
     },
@@ -254656,7 +254679,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L443",
+      "source_location": "L448",
       "target": "app_server_alert_host_alerthost_startgoal",
       "weight": 1.0
     },
@@ -254667,7 +254690,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L454",
+      "source_location": "L459",
       "target": "app_server_alert_host_alerthost_mute",
       "weight": 1.0
     },
@@ -254678,7 +254701,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L467",
+      "source_location": "L472",
       "target": "app_server_alert_host_alerthost_play",
       "weight": 1.0
     },
@@ -254689,7 +254712,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L488",
+      "source_location": "L493",
       "target": "app_server_alert_host_alerthost_add",
       "weight": 1.0
     },
@@ -254700,7 +254723,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L496",
+      "source_location": "L501",
       "target": "app_server_alert_host_alerthost_take",
       "weight": 1.0
     },
@@ -254711,7 +254734,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L503",
+      "source_location": "L508",
       "target": "app_server_alert_host_alerthost_clear",
       "weight": 1.0
     },
@@ -254722,7 +254745,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L508",
+      "source_location": "L513",
       "target": "app_server_alert_host_alerthost_setline",
       "weight": 1.0
     },
@@ -254733,7 +254756,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L520",
+      "source_location": "L525",
       "target": "app_server_alert_host_alerthost_save",
       "weight": 1.0
     },
@@ -254744,7 +254767,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L529",
+      "source_location": "L534",
       "target": "app_server_alert_host_alerthost_start",
       "weight": 1.0
     },
@@ -254755,7 +254778,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L543",
+      "source_location": "L548",
       "target": "app_server_alert_host_alerthost_reply",
       "weight": 1.0
     },
@@ -254766,7 +254789,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L555",
+      "source_location": "L560",
       "target": "app_server_alert_host_alerthost_flush",
       "weight": 1.0
     },
@@ -254777,7 +254800,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L561",
+      "source_location": "L566",
       "target": "app_server_alert_host_alerthost_send",
       "weight": 1.0
     },
@@ -254788,7 +254811,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L573",
+      "source_location": "L578",
       "target": "app_server_alert_host_alerthost_old",
       "weight": 1.0
     },
@@ -254799,7 +254822,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L581",
+      "source_location": "L586",
       "target": "app_server_alert_host_alerthost_refresh",
       "weight": 1.0
     },
@@ -254810,7 +254833,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L592",
+      "source_location": "L597",
       "target": "app_server_alert_host_alerthost_read",
       "weight": 1.0
     },
@@ -254821,7 +254844,7 @@
       "relation": "method",
       "source": "app_server_alert_host_alerthost",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L608",
+      "source_location": "L613",
       "target": "app_server_alert_host_alerthost_apply",
       "weight": 1.0
     },
@@ -254909,7 +254932,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L258",
+      "source_location": "L259",
       "target": "app_server_channel_ingest_channelingest_listeningstarted",
       "weight": 1.0
     },
@@ -254920,7 +254943,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L270",
+      "source_location": "L271",
       "target": "app_server_channel_ingest_channelingest_pagesuspended",
       "weight": 1.0
     },
@@ -254931,7 +254954,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L278",
+      "source_location": "L279",
       "target": "app_server_channel_ingest_channelingest_pagestatuschanged",
       "weight": 1.0
     },
@@ -254942,7 +254965,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L289",
+      "source_location": "L290",
       "target": "app_server_channel_ingest_channelingest_closeall",
       "weight": 1.0
     },
@@ -254953,7 +254976,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L305",
+      "source_location": "L306",
       "target": "app_server_channel_ingest_channelingest_bump",
       "weight": 1.0
     },
@@ -254964,7 +254987,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L309",
+      "source_location": "L310",
       "target": "app_server_channel_ingest_channelingest_closesockets",
       "weight": 1.0
     },
@@ -254975,7 +254998,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L317",
+      "source_location": "L318",
       "target": "app_server_channel_ingest_channelingest_overlaykeyrevoked",
       "weight": 1.0
     },
@@ -254986,7 +255009,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L326",
+      "source_location": "L327",
       "target": "app_server_channel_ingest_channelingest_websocketmessage",
       "weight": 1.0
     },
@@ -254997,7 +255020,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L331",
+      "source_location": "L332",
       "target": "app_server_channel_ingest_channelingest_websocketclose",
       "weight": 1.0
     },
@@ -255008,7 +255031,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L335",
+      "source_location": "L336",
       "target": "app_server_channel_ingest_channelingest_websocketerror",
       "weight": 1.0
     },
@@ -255019,7 +255042,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L339",
+      "source_location": "L340",
       "target": "app_server_channel_ingest_channelingest_send",
       "weight": 1.0
     },
@@ -255030,7 +255053,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L347",
+      "source_location": "L348",
       "target": "app_server_channel_ingest_channelingest_broadcast",
       "weight": 1.0
     },
@@ -255041,7 +255064,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L357",
+      "source_location": "L358",
       "target": "app_server_channel_ingest_channelingest_snapshot",
       "weight": 1.0
     },
@@ -255052,7 +255075,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L364",
+      "source_location": "L365",
       "target": "app_server_channel_ingest_channelingest_prune",
       "weight": 1.0
     },
@@ -255063,7 +255086,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L377",
+      "source_location": "L378",
       "target": "app_server_channel_ingest_channelingest_deleteids",
       "weight": 1.0
     },
@@ -255074,7 +255097,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L381",
+      "source_location": "L382",
       "target": "app_server_channel_ingest_channelingest_known",
       "weight": 1.0
     },
@@ -255085,7 +255108,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L385",
+      "source_location": "L386",
       "target": "app_server_channel_ingest_channelingest_remember",
       "weight": 1.0
     },
@@ -255096,7 +255119,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L392",
+      "source_location": "L393",
       "target": "app_server_channel_ingest_channelingest_firstsight",
       "weight": 1.0
     },
@@ -255107,7 +255130,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L399",
+      "source_location": "L400",
       "target": "app_server_channel_ingest_channelingest_receive",
       "weight": 1.0
     },
@@ -255118,7 +255141,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L444",
+      "source_location": "L446",
       "target": "app_server_channel_ingest_channelingest_accepted",
       "weight": 1.0
     },
@@ -255129,7 +255152,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L459",
+      "source_location": "L461",
       "target": "app_server_channel_ingest_channelingest_admitevents",
       "weight": 1.0
     },
@@ -255140,7 +255163,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L481",
+      "source_location": "L483",
       "target": "app_server_channel_ingest_channelingest_ingest",
       "weight": 1.0
     },
@@ -255151,7 +255174,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L487",
+      "source_location": "L489",
       "target": "app_server_channel_ingest_channelingest_store",
       "weight": 1.0
     },
@@ -255162,7 +255185,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L518",
+      "source_location": "L520",
       "target": "app_server_channel_ingest_channelingest_forgetconnections",
       "weight": 1.0
     },
@@ -255173,7 +255196,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L528",
+      "source_location": "L530",
       "target": "app_server_channel_ingest_channelingest_connection",
       "weight": 1.0
     },
@@ -255184,7 +255207,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L542",
+      "source_location": "L544",
       "target": "app_server_channel_ingest_channelingest_readconnection",
       "weight": 1.0
     },
@@ -255195,7 +255218,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L569",
+      "source_location": "L571",
       "target": "app_server_channel_ingest_channelingest_setstatus",
       "weight": 1.0
     },
@@ -255206,7 +255229,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L599",
+      "source_location": "L601",
       "target": "app_server_channel_ingest_channelingest_touch",
       "weight": 1.0
     },
@@ -255217,7 +255240,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L611",
+      "source_location": "L613",
       "target": "app_server_channel_ingest_channelingest_freshtokens",
       "weight": 1.0
     },
@@ -255228,7 +255251,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L622",
+      "source_location": "L624",
       "target": "app_server_channel_ingest_channelingest_storedtokens",
       "weight": 1.0
     },
@@ -255239,7 +255262,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L631",
+      "source_location": "L633",
       "target": "app_server_channel_ingest_channelingest_loadfreshtokens",
       "weight": 1.0
     },
@@ -255250,7 +255273,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L657",
+      "source_location": "L659",
       "target": "app_server_channel_ingest_channelingest_connectchannel",
       "weight": 1.0
     },
@@ -255261,7 +255284,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L688",
+      "source_location": "L690",
       "target": "app_server_channel_ingest_channelingest_connectionstarted",
       "weight": 1.0
     },
@@ -255272,7 +255295,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L702",
+      "source_location": "L704",
       "target": "app_server_channel_ingest_channelingest_disconnectchannel",
       "weight": 1.0
     },
@@ -255283,7 +255306,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L708",
+      "source_location": "L710",
       "target": "app_server_channel_ingest_channelingest_cleanupchannel",
       "weight": 1.0
     },
@@ -255294,7 +255317,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L747",
+      "source_location": "L749",
       "target": "app_server_channel_ingest_channelingest_statuschanged",
       "weight": 1.0
     },
@@ -255305,7 +255328,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L764",
+      "source_location": "L766",
       "target": "app_server_channel_ingest_channelingest_schedulealarm",
       "weight": 1.0
     },
@@ -255316,7 +255339,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L773",
+      "source_location": "L775",
       "target": "app_server_channel_ingest_channelingest_alarm",
       "weight": 1.0
     },
@@ -255327,7 +255350,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L800",
+      "source_location": "L802",
       "target": "app_server_channel_ingest_channelingest_pollyoutube",
       "weight": 1.0
     },
@@ -255338,7 +255361,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L835",
+      "source_location": "L837",
       "target": "app_server_channel_ingest_channelingest_refreshtitle",
       "weight": 1.0
     },
@@ -255349,7 +255372,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L852",
+      "source_location": "L854",
       "target": "app_server_channel_ingest_channelingest_refreshrequested",
       "weight": 1.0
     },
@@ -255360,7 +255383,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L883",
+      "source_location": "L885",
       "target": "app_server_channel_ingest_channelingest_upcomingrequested",
       "weight": 1.0
     },
@@ -255371,7 +255394,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L905",
+      "source_location": "L907",
       "target": "app_server_channel_ingest_channelingest_poll",
       "weight": 1.0
     },
@@ -255382,7 +255405,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L941",
+      "source_location": "L944",
       "target": "app_server_channel_ingest_channelingest_refreshpollingtitle",
       "weight": 1.0
     },
@@ -255393,7 +255416,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L961",
+      "source_location": "L964",
       "target": "app_server_channel_ingest_channelingest_pollfailed",
       "weight": 1.0
     },
@@ -257813,7 +257836,7 @@
       "relation": "references",
       "source": "docs_channel_connections",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L337",
+      "source_location": "L338",
       "target": "docs_streamer_tools",
       "weight": 1.0
     },
@@ -257824,7 +257847,7 @@
       "relation": "references",
       "source": "docs_channel_connections",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L791",
+      "source_location": "L792",
       "target": "docs_live_room_capacity",
       "weight": 1.0
     },
@@ -258782,7 +258805,7 @@
       "relation": "indirect_call",
       "source": "app_server_alert_host_alerthost_setline",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L510",
+      "source_location": "L515",
       "target": "app_server_alert_host_alertid",
       "weight": 1.0
     },
@@ -258794,7 +258817,7 @@
       "relation": "indirect_call",
       "source": "app_server_channel_ingest_channelingest_admitevents",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L470",
+      "source_location": "L472",
       "target": "app_lib_activity_issupport",
       "weight": 1.0
     },
@@ -260558,7 +260581,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_alarm",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L791",
+      "source_location": "L793",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_due",
       "weight": 1.0
     },
@@ -260570,7 +260593,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_alarm",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L795",
+      "source_location": "L797",
       "target": "app_server_playground_host_playgroundhost_alarm",
       "weight": 1.0
     },
@@ -260582,7 +260605,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_alarm",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L796",
+      "source_location": "L798",
       "target": "app_server_alert_host_alerthost_alarm",
       "weight": 1.0
     },
@@ -260594,7 +260617,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_broadcast",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L350",
+      "source_location": "L351",
       "target": "app_server_playground_host_playgroundhost_receive",
       "weight": 1.0
     },
@@ -260606,7 +260629,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_broadcast",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L351",
+      "source_location": "L352",
       "target": "app_server_alert_host_alerthost_receive",
       "weight": 1.0
     },
@@ -260618,7 +260641,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_cleanupchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L726",
+      "source_location": "L728",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_known",
       "weight": 1.0
     },
@@ -260630,7 +260653,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_cleanupchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L741",
+      "source_location": "L743",
       "target": "app_server_alert_host_alerthost_dropplatform",
       "weight": 1.0
     },
@@ -260642,7 +260665,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_closeall",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L290",
+      "source_location": "L291",
       "target": "app_server_playground_host_playgroundhost_wipe",
       "weight": 1.0
     },
@@ -260654,7 +260677,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_closeall",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L301",
+      "source_location": "L302",
       "target": "app_server_alert_host_alerthost_wipe",
       "weight": 1.0
     },
@@ -260666,7 +260689,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_connectchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L669",
+      "source_location": "L671",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_resubscribe",
       "weight": 1.0
     },
@@ -260678,7 +260701,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_connectionstarted",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L689",
+      "source_location": "L691",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_connected",
       "weight": 1.0
     },
@@ -260714,7 +260737,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_disconnectchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L705",
+      "source_location": "L707",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_serial",
       "weight": 1.0
     },
@@ -260762,7 +260785,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_forgetconnections",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L519",
+      "source_location": "L521",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_forget",
       "weight": 1.0
     },
@@ -260774,7 +260797,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_listeningstarted",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L267",
+      "source_location": "L268",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_listeningstarted",
       "weight": 1.0
     },
@@ -260796,9 +260819,33 @@
       "confidence_score": 0.85,
       "context": "call",
       "relation": "calls",
+      "source": "app_server_channel_ingest_channelingest_poll",
+      "source_file": "app/server/channel-ingest.ts",
+      "source_location": "L930",
+      "target": "app_server_alert_host_alerthost_ready",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_receive",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L437",
+      "source_location": "L436",
+      "target": "app_server_alert_host_alerthost_ready",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_channel_ingest_channelingest_receive",
+      "source_file": "app/server/channel-ingest.ts",
+      "source_location": "L439",
       "target": "app_server_playground_host_playgroundhost_wakeat",
       "weight": 1.0
     },
@@ -260810,7 +260857,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_receive",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L438",
+      "source_location": "L440",
       "target": "app_server_alert_host_alerthost_wake",
       "weight": 1.0
     },
@@ -260822,7 +260869,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_statuschanged",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L757",
+      "source_location": "L759",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_owe",
       "weight": 1.0
     },
@@ -260858,7 +260905,19 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_testchat",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L253",
+      "source_location": "L252",
+      "target": "app_server_alert_host_alerthost_ready",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_channel_ingest_channelingest_testchat",
+      "source_file": "app/server/channel-ingest.ts",
+      "source_location": "L254",
       "target": "app_server_playground_host_playgroundhost_wakeat",
       "weight": 1.0
     },
@@ -262802,7 +262861,7 @@
       "relation": "references",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L880",
+      "source_location": "L881",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -262814,7 +262873,7 @@
       "relation": "references",
       "source": "docs_channel_connections_interactive_characters",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L467",
+      "source_location": "L468",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -262826,7 +262885,7 @@
       "relation": "references",
       "source": "docs_channel_connections_refresh",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L866",
+      "source_location": "L867",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -262838,7 +262897,7 @@
       "relation": "references",
       "source": "docs_channel_connections_rollback",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1158",
+      "source_location": "L1159",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -262850,7 +262909,7 @@
       "relation": "references",
       "source": "docs_channel_connections_scheduled_streams",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L608",
+      "source_location": "L609",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -262862,7 +262921,7 @@
       "relation": "references",
       "source": "docs_channel_connections_setup",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1084",
+      "source_location": "L1085",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -262886,7 +262945,7 @@
       "relation": "references",
       "source": "docs_channel_connections_support_events_of_each_provider",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L342",
+      "source_location": "L343",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -262898,7 +262957,7 @@
       "relation": "references",
       "source": "docs_channel_connections_threats_and_mitigations",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1197",
+      "source_location": "L1198",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -263186,7 +263245,7 @@
       "relation": "references",
       "source": "docs_channel_connections_channel_health_in_streamer_tools",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L519",
+      "source_location": "L520",
       "target": "app_lib_channel_health_channelcardstate_48192f75b106",
       "weight": 1.0
     },
@@ -263198,7 +263257,7 @@
       "relation": "references",
       "source": "docs_channel_connections_channel_health_in_streamer_tools",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L520",
+      "source_location": "L521",
       "target": "app_lib_channel_health_channelhealth_40cffcc64880",
       "weight": 1.0
     },
@@ -263282,7 +263341,7 @@
       "relation": "references",
       "source": "docs_channel_connections_scheduled_streams",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L662",
+      "source_location": "L663",
       "target": "app_server_schedule_import_server_teststreams",
       "weight": 1.0
     },
@@ -292737,7 +292796,7 @@
       "label": ".add()",
       "norm_label": ".add()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L488"
+      "source_location": "L493"
     },
     {
       "_callable": true,
@@ -292748,7 +292807,7 @@
       "label": ".alarm()",
       "norm_label": ".alarm()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L324"
+      "source_location": "L329"
     },
     {
       "_callable": true,
@@ -292759,7 +292818,7 @@
       "label": ".apply()",
       "norm_label": ".apply()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L608"
+      "source_location": "L613"
     },
     {
       "_callable": true,
@@ -292770,7 +292829,7 @@
       "label": ".chatted()",
       "norm_label": ".chatted()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L425"
+      "source_location": "L430"
     },
     {
       "_callable": true,
@@ -292781,7 +292840,7 @@
       "label": ".checks()",
       "norm_label": ".checks()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L348"
+      "source_location": "L353"
     },
     {
       "_callable": true,
@@ -292792,7 +292851,7 @@
       "label": ".clear()",
       "norm_label": ".clear()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L503"
+      "source_location": "L508"
     },
     {
       "_callable": true,
@@ -292814,7 +292873,7 @@
       "label": ".control()",
       "norm_label": ".control()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L364"
+      "source_location": "L369"
     },
     {
       "_callable": true,
@@ -292825,7 +292884,7 @@
       "label": ".count()",
       "norm_label": ".count()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L416"
+      "source_location": "L421"
     },
     {
       "_callable": true,
@@ -292836,7 +292895,7 @@
       "label": ".counting()",
       "norm_label": ".counting()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L411"
+      "source_location": "L416"
     },
     {
       "_callable": true,
@@ -292847,7 +292906,7 @@
       "label": ".counts()",
       "norm_label": ".counts()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L406"
+      "source_location": "L411"
     },
     {
       "_callable": true,
@@ -292858,7 +292917,7 @@
       "label": ".dropPlatform()",
       "norm_label": ".dropplatform()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L353"
+      "source_location": "L358"
     },
     {
       "_callable": true,
@@ -292869,7 +292928,7 @@
       "label": ".flush()",
       "norm_label": ".flush()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L555"
+      "source_location": "L560"
     },
     {
       "_callable": true,
@@ -292880,7 +292939,7 @@
       "label": ".layersChanged()",
       "norm_label": ".layerschanged()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L298"
+      "source_location": "L303"
     },
     {
       "_callable": true,
@@ -292891,7 +292950,7 @@
       "label": ".live()",
       "norm_label": ".live()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L395"
+      "source_location": "L400"
     },
     {
       "_callable": true,
@@ -292913,7 +292972,7 @@
       "label": ".mute()",
       "norm_label": ".mute()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L454"
+      "source_location": "L459"
     },
     {
       "_callable": true,
@@ -292924,7 +292983,7 @@
       "label": ".old()",
       "norm_label": ".old()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L573"
+      "source_location": "L578"
     },
     {
       "_callable": true,
@@ -292946,7 +293005,7 @@
       "label": ".play()",
       "norm_label": ".play()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L467"
+      "source_location": "L472"
     },
     {
       "_callable": true,
@@ -292957,7 +293016,7 @@
       "label": ".progress()",
       "norm_label": ".progress()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L434"
+      "source_location": "L439"
     },
     {
       "_callable": true,
@@ -292968,7 +293027,18 @@
       "label": ".read()",
       "norm_label": ".read()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L592"
+      "source_location": "L597"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_alert_host_alerthost_ready",
+      "label": ".ready()",
+      "norm_label": ".ready()",
+      "source_file": "app/server/alert-host.ts",
+      "source_location": "L299"
     },
     {
       "_callable": true,
@@ -292990,7 +293060,7 @@
       "label": ".refresh()",
       "norm_label": ".refresh()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L581"
+      "source_location": "L586"
     },
     {
       "_callable": true,
@@ -293001,7 +293071,7 @@
       "label": ".reply()",
       "norm_label": ".reply()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L543"
+      "source_location": "L548"
     },
     {
       "_callable": true,
@@ -293012,7 +293082,7 @@
       "label": ".request()",
       "norm_label": ".request()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L304"
+      "source_location": "L309"
     },
     {
       "_callable": true,
@@ -293023,7 +293093,7 @@
       "label": ".save()",
       "norm_label": ".save()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L520"
+      "source_location": "L525"
     },
     {
       "_callable": true,
@@ -293038,14 +293108,14 @@
             "callee": "send",
             "file": "app/server/alert-host.ts",
             "lang": "typescript",
-            "line": "L565",
+            "line": "L570",
             "receiver_type": "WebSocket"
           }
         ]
       },
       "norm_label": ".send()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L561"
+      "source_location": "L566"
     },
     {
       "_callable": true,
@@ -293056,7 +293126,7 @@
       "label": ".setLine()",
       "norm_label": ".setline()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L508"
+      "source_location": "L513"
     },
     {
       "_callable": true,
@@ -293067,7 +293137,7 @@
       "label": ".start()",
       "norm_label": ".start()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L529"
+      "source_location": "L534"
     },
     {
       "_callable": true,
@@ -293078,7 +293148,7 @@
       "label": ".startGoal()",
       "norm_label": ".startgoal()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L443"
+      "source_location": "L448"
     },
     {
       "_callable": true,
@@ -293089,7 +293159,7 @@
       "label": ".take()",
       "norm_label": ".take()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L496"
+      "source_location": "L501"
     },
     {
       "_callable": true,
@@ -293100,7 +293170,7 @@
       "label": ".wake()",
       "norm_label": ".wake()",
       "source_file": "app/server/alert-host.ts",
-      "source_location": "L340"
+      "source_location": "L345"
     },
     {
       "_callable": true,
@@ -293617,7 +293687,7 @@
       "label": ".accepted()",
       "norm_label": ".accepted()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L444"
+      "source_location": "L446"
     },
     {
       "_callable": true,
@@ -293628,7 +293698,7 @@
       "label": ".admitEvents()",
       "norm_label": ".admitevents()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L459"
+      "source_location": "L461"
     },
     {
       "_callable": true,
@@ -293639,7 +293709,7 @@
       "label": ".alarm()",
       "norm_label": ".alarm()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L773"
+      "source_location": "L775"
     },
     {
       "_callable": true,
@@ -293650,7 +293720,7 @@
       "label": ".broadcast()",
       "norm_label": ".broadcast()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L347"
+      "source_location": "L348"
     },
     {
       "_callable": true,
@@ -293661,7 +293731,7 @@
       "label": ".bump()",
       "norm_label": ".bump()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L305"
+      "source_location": "L306"
     },
     {
       "_callable": true,
@@ -293672,7 +293742,7 @@
       "label": ".cleanupChannel()",
       "norm_label": ".cleanupchannel()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L708"
+      "source_location": "L710"
     },
     {
       "_callable": true,
@@ -293683,7 +293753,7 @@
       "label": ".closeAll()",
       "norm_label": ".closeall()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L289"
+      "source_location": "L290"
     },
     {
       "_callable": true,
@@ -293698,14 +293768,14 @@
             "callee": "close",
             "file": "app/server/channel-ingest.ts",
             "lang": "typescript",
-            "line": "L312",
+            "line": "L313",
             "receiver_type": "WebSocket"
           }
         ]
       },
       "norm_label": ".closesockets()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L309"
+      "source_location": "L310"
     },
     {
       "_callable": true,
@@ -293716,7 +293786,7 @@
       "label": ".connectChannel()",
       "norm_label": ".connectchannel()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L657"
+      "source_location": "L659"
     },
     {
       "_callable": true,
@@ -293727,7 +293797,7 @@
       "label": ".connection()",
       "norm_label": ".connection()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L528"
+      "source_location": "L530"
     },
     {
       "_callable": true,
@@ -293738,7 +293808,7 @@
       "label": ".connectionStarted()",
       "norm_label": ".connectionstarted()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L688"
+      "source_location": "L690"
     },
     {
       "_callable": true,
@@ -293796,7 +293866,7 @@
       "label": ".deleteIds()",
       "norm_label": ".deleteids()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L377"
+      "source_location": "L378"
     },
     {
       "_callable": true,
@@ -293807,7 +293877,7 @@
       "label": ".disconnectChannel()",
       "norm_label": ".disconnectchannel()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L702"
+      "source_location": "L704"
     },
     {
       "_callable": true,
@@ -293829,7 +293899,7 @@
       "label": ".firstSight()",
       "norm_label": ".firstsight()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L392"
+      "source_location": "L393"
     },
     {
       "_callable": true,
@@ -293840,7 +293910,7 @@
       "label": ".forgetConnections()",
       "norm_label": ".forgetconnections()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L518"
+      "source_location": "L520"
     },
     {
       "_callable": true,
@@ -293851,7 +293921,7 @@
       "label": ".freshTokens()",
       "norm_label": ".freshtokens()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L611"
+      "source_location": "L613"
     },
     {
       "_callable": true,
@@ -293862,7 +293932,7 @@
       "label": ".ingest()",
       "norm_label": ".ingest()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L481"
+      "source_location": "L483"
     },
     {
       "_callable": true,
@@ -293873,7 +293943,7 @@
       "label": ".known()",
       "norm_label": ".known()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L381"
+      "source_location": "L382"
     },
     {
       "_callable": true,
@@ -293884,7 +293954,7 @@
       "label": ".listeningStarted()",
       "norm_label": ".listeningstarted()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L258"
+      "source_location": "L259"
     },
     {
       "_callable": true,
@@ -293895,7 +293965,7 @@
       "label": ".loadFreshTokens()",
       "norm_label": ".loadfreshtokens()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L631"
+      "source_location": "L633"
     },
     {
       "_callable": true,
@@ -293906,7 +293976,7 @@
       "label": ".overlayKeyRevoked()",
       "norm_label": ".overlaykeyrevoked()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L317"
+      "source_location": "L318"
     },
     {
       "_callable": true,
@@ -293917,7 +293987,7 @@
       "label": ".pageStatusChanged()",
       "norm_label": ".pagestatuschanged()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L278"
+      "source_location": "L279"
     },
     {
       "_callable": true,
@@ -293928,7 +293998,7 @@
       "label": ".pageSuspended()",
       "norm_label": ".pagesuspended()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L270"
+      "source_location": "L271"
     },
     {
       "_callable": true,
@@ -293950,7 +294020,7 @@
       "label": ".poll()",
       "norm_label": ".poll()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L905"
+      "source_location": "L907"
     },
     {
       "_callable": true,
@@ -293961,7 +294031,7 @@
       "label": ".pollFailed()",
       "norm_label": ".pollfailed()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L961"
+      "source_location": "L964"
     },
     {
       "_callable": true,
@@ -293972,7 +294042,7 @@
       "label": ".pollYoutube()",
       "norm_label": ".pollyoutube()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L800"
+      "source_location": "L802"
     },
     {
       "_callable": true,
@@ -293983,7 +294053,7 @@
       "label": ".prune()",
       "norm_label": ".prune()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L364"
+      "source_location": "L365"
     },
     {
       "_callable": true,
@@ -293994,7 +294064,7 @@
       "label": ".readConnection()",
       "norm_label": ".readconnection()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L542"
+      "source_location": "L544"
     },
     {
       "_callable": true,
@@ -294005,7 +294075,7 @@
       "label": ".receive()",
       "norm_label": ".receive()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L399"
+      "source_location": "L400"
     },
     {
       "_callable": true,
@@ -294016,7 +294086,7 @@
       "label": ".refreshPollingTitle()",
       "norm_label": ".refreshpollingtitle()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L941"
+      "source_location": "L944"
     },
     {
       "_callable": true,
@@ -294027,7 +294097,7 @@
       "label": ".refreshRequested()",
       "norm_label": ".refreshrequested()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L852"
+      "source_location": "L854"
     },
     {
       "_callable": true,
@@ -294038,7 +294108,7 @@
       "label": ".refreshTitle()",
       "norm_label": ".refreshtitle()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L835"
+      "source_location": "L837"
     },
     {
       "_callable": true,
@@ -294049,7 +294119,7 @@
       "label": ".remember()",
       "norm_label": ".remember()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L385"
+      "source_location": "L386"
     },
     {
       "_callable": true,
@@ -294060,7 +294130,7 @@
       "label": ".scheduleAlarm()",
       "norm_label": ".schedulealarm()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L764"
+      "source_location": "L766"
     },
     {
       "_callable": true,
@@ -294075,14 +294145,14 @@
             "callee": "send",
             "file": "app/server/channel-ingest.ts",
             "lang": "typescript",
-            "line": "L341",
+            "line": "L342",
             "receiver_type": "WebSocket"
           }
         ]
       },
       "norm_label": ".send()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L339"
+      "source_location": "L340"
     },
     {
       "_callable": true,
@@ -294093,7 +294163,7 @@
       "label": ".setStatus()",
       "norm_label": ".setstatus()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L569"
+      "source_location": "L571"
     },
     {
       "_callable": true,
@@ -294104,7 +294174,7 @@
       "label": ".snapshot()",
       "norm_label": ".snapshot()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L357"
+      "source_location": "L358"
     },
     {
       "_callable": true,
@@ -294115,7 +294185,7 @@
       "label": ".statusChanged()",
       "norm_label": ".statuschanged()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L747"
+      "source_location": "L749"
     },
     {
       "_callable": true,
@@ -294126,7 +294196,7 @@
       "label": ".store()",
       "norm_label": ".store()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L487"
+      "source_location": "L489"
     },
     {
       "_callable": true,
@@ -294137,7 +294207,7 @@
       "label": ".storedTokens()",
       "norm_label": ".storedtokens()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L622"
+      "source_location": "L624"
     },
     {
       "_callable": true,
@@ -294170,7 +294240,7 @@
       "label": ".touch()",
       "norm_label": ".touch()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L599"
+      "source_location": "L601"
     },
     {
       "_callable": true,
@@ -294181,7 +294251,7 @@
       "label": ".upcomingRequested()",
       "norm_label": ".upcomingrequested()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L883"
+      "source_location": "L885"
     },
     {
       "_callable": true,
@@ -294207,14 +294277,14 @@
             "callee": "close",
             "file": "app/server/channel-ingest.ts",
             "lang": "typescript",
-            "line": "L332",
+            "line": "L333",
             "receiver_type": "WebSocket"
           }
         ]
       },
       "norm_label": ".websocketclose()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L331"
+      "source_location": "L332"
     },
     {
       "_callable": true,
@@ -294229,14 +294299,14 @@
             "callee": "close",
             "file": "app/server/channel-ingest.ts",
             "lang": "typescript",
-            "line": "L336",
+            "line": "L337",
             "receiver_type": "WebSocket"
           }
         ]
       },
       "norm_label": ".websocketerror()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L335"
+      "source_location": "L336"
     },
     {
       "_callable": true,
@@ -294251,14 +294321,14 @@
             "callee": "close",
             "file": "app/server/channel-ingest.ts",
             "lang": "typescript",
-            "line": "L328",
+            "line": "L329",
             "receiver_type": "WebSocket"
           }
         ]
       },
       "norm_label": ".websocketmessage()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L326"
+      "source_location": "L327"
     },
     {
       "_callable": true,
@@ -330688,7 +330758,7 @@
       "node_kind": "heading",
       "norm_label": "account deletion",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L995"
+      "source_location": "L996"
     },
     {
       "_origin": "ast",
@@ -330699,7 +330769,7 @@
       "node_kind": "heading",
       "norm_label": "actors",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1177"
+      "source_location": "L1178"
     },
     {
       "_origin": "ast",
@@ -330732,7 +330802,7 @@
       "node_kind": "heading",
       "norm_label": "assets",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1169"
+      "source_location": "L1170"
     },
     {
       "_origin": "ast",
@@ -330743,7 +330813,7 @@
       "node_kind": "heading",
       "norm_label": "callback failures",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1003"
+      "source_location": "L1004"
     },
     {
       "_origin": "ast",
@@ -330754,7 +330824,7 @@
       "node_kind": "heading",
       "norm_label": "capability matrix",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L536"
+      "source_location": "L537"
     },
     {
       "_origin": "ast",
@@ -330776,7 +330846,7 @@
       "node_kind": "heading",
       "norm_label": "channel health in streamer tools",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L472"
+      "source_location": "L473"
     },
     {
       "_origin": "ast",
@@ -330798,7 +330868,7 @@
       "node_kind": "heading",
       "norm_label": "decisions for the owner",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1380"
+      "source_location": "L1381"
     },
     {
       "_origin": "ast",
@@ -330809,7 +330879,7 @@
       "node_kind": "heading",
       "norm_label": "disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L875"
+      "source_location": "L876"
     },
     {
       "_origin": "ast",
@@ -330831,7 +330901,7 @@
       "node_kind": "heading",
       "norm_label": "facebook live",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1323"
+      "source_location": "L1324"
     },
     {
       "_origin": "ast",
@@ -330842,7 +330912,7 @@
       "node_kind": "heading",
       "norm_label": "facts not checked",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1388"
+      "source_location": "L1389"
     },
     {
       "_origin": "ast",
@@ -330853,7 +330923,7 @@
       "node_kind": "heading",
       "norm_label": "instagram",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1285"
+      "source_location": "L1286"
     },
     {
       "_origin": "ast",
@@ -330864,7 +330934,7 @@
       "node_kind": "heading",
       "norm_label": "interactive characters",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L464"
+      "source_location": "L465"
     },
     {
       "_origin": "ast",
@@ -330875,7 +330945,7 @@
       "node_kind": "heading",
       "norm_label": "limits and retention",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L664"
+      "source_location": "L665"
     },
     {
       "_origin": "ast",
@@ -330886,7 +330956,7 @@
       "node_kind": "heading",
       "norm_label": "logs and alerts",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1019"
+      "source_location": "L1020"
     },
     {
       "_origin": "ast",
@@ -330897,7 +330967,7 @@
       "node_kind": "heading",
       "norm_label": "native polls, predictions, and rewards",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L432"
+      "source_location": "L433"
     },
     {
       "_origin": "ast",
@@ -330908,7 +330978,7 @@
       "node_kind": "heading",
       "norm_label": "overlay chat",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L458"
+      "source_location": "L459"
     },
     {
       "_origin": "ast",
@@ -330919,7 +330989,7 @@
       "node_kind": "heading",
       "norm_label": "overlay key",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1050"
+      "source_location": "L1051"
     },
     {
       "_origin": "ast",
@@ -330930,7 +331000,7 @@
       "node_kind": "heading",
       "norm_label": "permissions",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L558"
+      "source_location": "L559"
     },
     {
       "_origin": "ast",
@@ -330941,7 +331011,7 @@
       "node_kind": "heading",
       "norm_label": "provider subscriptions",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L901"
+      "source_location": "L902"
     },
     {
       "_origin": "ast",
@@ -330952,7 +331022,7 @@
       "node_kind": "heading",
       "norm_label": "refresh",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L864"
+      "source_location": "L865"
     },
     {
       "_origin": "ast",
@@ -330963,7 +331033,7 @@
       "node_kind": "heading",
       "norm_label": "refused webhooks",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L971"
+      "source_location": "L972"
     },
     {
       "_origin": "ast",
@@ -330974,7 +331044,7 @@
       "node_kind": "heading",
       "norm_label": "research for instagram, facebook live, and tiktok",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1271"
+      "source_location": "L1272"
     },
     {
       "_origin": "ast",
@@ -330985,7 +331055,7 @@
       "node_kind": "heading",
       "norm_label": "residual risks",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1214"
+      "source_location": "L1215"
     },
     {
       "_origin": "ast",
@@ -330996,7 +331066,7 @@
       "node_kind": "heading",
       "norm_label": "rollback",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1156"
+      "source_location": "L1157"
     },
     {
       "_origin": "ast",
@@ -331007,7 +331077,7 @@
       "node_kind": "heading",
       "norm_label": "rules for consumers",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L447"
+      "source_location": "L448"
     },
     {
       "_origin": "ast",
@@ -331018,7 +331088,7 @@
       "node_kind": "heading",
       "norm_label": "runbook",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1093"
+      "source_location": "L1094"
     },
     {
       "_origin": "ast",
@@ -331029,7 +331099,7 @@
       "node_kind": "heading",
       "norm_label": "scheduled streams",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L597"
+      "source_location": "L598"
     },
     {
       "_origin": "ast",
@@ -331040,7 +331110,7 @@
       "node_kind": "heading",
       "norm_label": "setup",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1065"
+      "source_location": "L1066"
     },
     {
       "_origin": "ast",
@@ -331051,7 +331121,7 @@
       "node_kind": "heading",
       "norm_label": "stored youtube data",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1232"
+      "source_location": "L1233"
     },
     {
       "_origin": "ast",
@@ -331062,7 +331132,7 @@
       "node_kind": "heading",
       "norm_label": "subscription repair",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L919"
+      "source_location": "L920"
     },
     {
       "_origin": "ast",
@@ -331084,7 +331154,7 @@
       "node_kind": "heading",
       "norm_label": "support events of each provider",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L319"
+      "source_location": "L320"
     },
     {
       "_origin": "ast",
@@ -331095,7 +331165,7 @@
       "node_kind": "heading",
       "norm_label": "threat model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1167"
+      "source_location": "L1168"
     },
     {
       "_origin": "ast",
@@ -331106,7 +331176,7 @@
       "node_kind": "heading",
       "norm_label": "threats and mitigations",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1185"
+      "source_location": "L1186"
     },
     {
       "_origin": "ast",
@@ -331117,7 +331187,7 @@
       "node_kind": "heading",
       "norm_label": "tiktok",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1359"
+      "source_location": "L1360"
     },
     {
       "_origin": "ast",
@@ -331128,7 +331198,7 @@
       "node_kind": "heading",
       "norm_label": "token encryption and rotation",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L821"
+      "source_location": "L822"
     },
     {
       "_origin": "ast",
@@ -331139,7 +331209,7 @@
       "node_kind": "heading",
       "norm_label": "turn the feature off",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L1118"
+      "source_location": "L1119"
     },
     {
       "_origin": "ast",
@@ -331150,7 +331220,7 @@
       "node_kind": "heading",
       "norm_label": "youtube quota",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L767"
+      "source_location": "L768"
     },
     {
       "_origin": "ast",

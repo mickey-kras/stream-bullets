@@ -295,6 +295,11 @@ export class AlertHost {
   }
 
   /** The saved layers changed (`/playground-config`): the host reads them again. */
+  /** Reads the layers when the host has no copy, so the events that come next count for the goal and play alerts. */
+  async ready(): Promise<void> {
+    if (this.config === null) await this.refresh();
+  }
+
   async layersChanged(): Promise<void> {
     await this.refresh(true);
     this.flush(Date.now());

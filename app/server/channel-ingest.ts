@@ -249,6 +249,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     validateTestEnvironment(this.env);
     if (this.env.APP_ENV !== "test") return reply("Not found", 404);
     const now = Date.now();
+    await this.alerts.ready();
     this.ingest(sampleChatAt(now), now);
     await this.scheduleAlarm(Math.min(now + SNAPSHOT_MAX_AGE_MS + 1, this.playground.wakeAt() ?? Infinity));
     return new Response(null, { status: 204 });
@@ -432,6 +433,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (this.known("seen", `delivery:${platform}:${deliveryId}`)) return new Response(null, { status: 204 });
     // Every accepted delivery is remembered: a repeated clear or ban would otherwise remove newer chat again.
     this.remember("seen", `delivery:${platform}:${deliveryId}`, now);
+    await this.alerts.ready();
     this.ingest(admitted, now);
     // The alarm expires stored messages and ids on time, also when no further delivery comes.
     await this.scheduleAlarm(Math.min(now + SNAPSHOT_MAX_AGE_MS + 1, this.playground.wakeAt() ?? Infinity));
@@ -925,6 +927,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     // The support events come from the same page: they cost no further call and no quota. Only a connect changes
     // `support_events` of a YouTube connection, and a connect supersedes this poll.
     const support = connection.support ? youtubeSupport(page.items, now) : [];
+    await this.alerts.ready();
     this.ingest(this.admitEvents([...youtubeEvents(page.items, connection.externalId, now), ...support], now), now);
     state.pageToken = page.nextPageToken;
     if (page.items.length > 0) await this.touch("youtube", connection, now);

@@ -966,6 +966,15 @@ describe("the goal", (): void => {
     expect(supportRows()).toEqual(["twitch:g1", "twitch:s1", "twitch:m1", "twitch:f1"]);
   });
 
+  it("reads the layers before the first events when the object has no copy, with no page and no notice", async (): Promise<void> => {
+    // An object from before the alerts: it stored no copy of the layers.
+    state().storage.sql.exec("DELETE FROM alert_state");
+    ingest.restart(page);
+    await setLayers(withGoal("follows"), false);
+    await deliver([support("follow", "f1")]);
+    expect(await run({ op: "status" })).toMatchObject({ goal: { counts: "follows", value: 1 } });
+  });
+
   it("counts while the alerts are muted, off stream, or have no page, and not while the layer has no place", async (): Promise<void> => {
     // The alerts layer is off, no socket is open, and the goal has "Show on stream" off.
     await setLayers(withGoal("follows", {}, DEFAULT_LAYERS));
