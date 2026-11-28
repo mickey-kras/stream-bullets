@@ -155,7 +155,7 @@ describe("the rows of the activity", (): void => {
     );
     const state = { type: "alerts", muted: false, current: null, waiting: 0, goal: null } as const;
     const seen: ActivityState = activityAfter(start, { ...state, at: T0 + 10 });
-    expect(seen).toEqual({ rows: start.rows, alertsAt: T0 + 10 });
+    expect(seen).toEqual({ rows: start.rows, kept: start.kept, alertsAt: T0 + 10 });
     // An older state that comes late does not move the time back.
     expect(activityAfter(seen, { ...state, at: T0 + 5 })).toBe(seen);
   });
@@ -168,10 +168,10 @@ describe("Replay", (): void => {
   });
 
   it("shows for an event of the last 10 minutes, and not for an older one", (): void => {
-    const rows: readonly ActivityRow[] = after([event(support("d1"))]).rows;
+    const { rows, kept } = after([event(support("d1"))]);
     const none = new Set<string>();
-    expect(replayable(rows[0], rows, T0 + REPLAY_WINDOW_MS - 1, none)).toBe(true);
-    expect(replayable(rows[0], rows, T0 + REPLAY_WINDOW_MS, none)).toBe(false);
+    expect(replayable(rows[0], kept, T0 + REPLAY_WINDOW_MS - 1, none)).toBe(true);
+    expect(replayable(rows[0], kept, T0 + REPLAY_WINDOW_MS, none)).toBe(false);
   });
 
   it("shows for the newest events that the server keeps, and not for an older row", (): void => {
@@ -180,9 +180,9 @@ describe("Replay", (): void => {
     );
     // A replay row does not count: the server keeps only originals.
     messages.push(event(support("again", { replay: true, receivedAt: T0 + 1000 })));
-    const rows: readonly ActivityRow[] = after(messages).rows;
+    const { rows, kept } = after(messages);
     const shown: string[] = rows
-      .filter((row: ActivityRow): boolean => replayable(row, rows, T0 + 2000, new Set<string>()))
+      .filter((row: ActivityRow): boolean => replayable(row, kept, T0 + 2000, new Set<string>()))
       .map((row: ActivityRow): string => row.id);
     expect(shown).toHaveLength(REPLAY_KEPT);
     expect(shown).not.toContain("twitch:again");
@@ -191,15 +191,93 @@ describe("Replay", (): void => {
     expect(shown).toContain("twitch:d2");
   });
 
+  it("counts events with one time in their order of arrival, as a YouTube page gives them", (): void => {
+    // Each event of one poll page has the same time. The server keeps the newest REPLAY_KEPT by arrival.
+    const messages: ActivityMessage[] = Array.from({ length: REPLAY_KEPT + 1 }, (_, n: number) =>
+      event(support(`p${n}`, { receivedAt: T0 })),
+    );
+    const { rows, kept } = after(messages);
+    const shown: string[] = rows
+      .filter((row: ActivityRow): boolean => replayable(row, kept, T0 + 10, new Set<string>()))
+      .map((row: ActivityRow): string => row.id);
+    expect(shown).toHaveLength(REPLAY_KEPT);
+    expect(shown).not.toContain("twitch:p0");
+    expect(shown).toContain(`twitch:p${REPLAY_KEPT}`);
+    // A row that is not in the list has no Replay.
+    const [other] = after([event(support("elsewhere"))]).rows;
+    expect(replayable(other, kept, T0 + 10, new Set<string>())).toBe(false);
+  });
+
+  it("follows the order in which the server stored the events, not their times", (): void => {
+    // A YouTube poll stores its page after a Twitch event, with the earlier time of the poll start.
+    const first: ActivitySupport = support("t1", { receivedAt: T0 + 100 });
+    const page: ActivityMessage[] = Array.from({ length: REPLAY_KEPT }, (_, n: number) =>
+      event(support(`y${n}`, { id: `youtube:y${n}`, platform: "youtube", receivedAt: T0 })),
+    );
+    const { rows, kept } = after([event(first), ...page]);
+    const shown: string[] = rows
+      .filter((row: ActivityRow): boolean => replayable(row, kept, T0 + 200, new Set<string>()))
+      .map((row: ActivityRow): string => row.id);
+    // The server dropped the Twitch event: it is the oldest that it stored.
+    expect(shown).toHaveLength(REPLAY_KEPT);
+    expect(shown).not.toContain("twitch:t1");
+    expect(shown).toContain("youtube:y0");
+    // A snapshot gives the list of the server again. A replay does not change it.
+    const snapshot: ActivityState = after([{ type: "snapshot", events: [first], replay: true, since: 0 }]);
+    expect(snapshot.kept).toEqual([{ id: "twitch:t1", platform: "twitch", receivedAt: T0 + 100 }]);
+    expect(after([event(support("t1", { replay: true }))], snapshot).kept).toBe(snapshot.kept);
+  });
+
+  it("lets events expire before it drops the oldest above the limit, as the server does", (): void => {
+    // A Twitch event comes first, then 49 YouTube events of a poll that started earlier.
+    const twitch: ActivityMessage = event(support("t1", { receivedAt: T0 + 60_000 }));
+    const page: ActivityMessage[] = Array.from({ length: REPLAY_KEPT - 1 }, (_, n: number) =>
+      event(support(`y${n}`, { id: `youtube:y${n}`, platform: "youtube", receivedAt: T0 })),
+    );
+    // The YouTube events expired, the Twitch event did not, when the next one comes.
+    const late: number = T0 + REPLAY_WINDOW_MS + 1000;
+    const { rows, kept } = after([twitch, ...page, event(support("t2", { receivedAt: late }))]);
+    const shown: string[] = rows
+      .filter((row: ActivityRow): boolean => replayable(row, kept, late + 1, new Set<string>()))
+      .map((row: ActivityRow): string => row.id);
+    expect(shown).toEqual(["twitch:t2", "twitch:t1"]);
+  });
+
+  it("forgets the events of a platform that is disconnected, as the server deletes them", (): void => {
+    const youtube = (n: number): ActivityMessage =>
+      event(support(`y${n}`, { id: `youtube:y${n}`, platform: "youtube", receivedAt: T0 + n }));
+    const twitch: ActivityMessage[] = Array.from({ length: 40 }, (_, n: number) =>
+      event(support(`t${n}`, { receivedAt: T0 + 100 + n })),
+    );
+    const start: ActivityState = after([...Array.from({ length: 10 }, (_, n: number) => youtube(n)), ...twitch]);
+    const disconnected: ActivityMessage = {
+      type: "event",
+      event: { kind: "status", platform: "twitch", status: "disconnected" },
+    };
+    const { rows, kept } = after(
+      [disconnected, ...Array.from({ length: 10 }, (_, n: number) => youtube(300 + n))],
+      start,
+    );
+    const shown: string[] = rows
+      .filter((row: ActivityRow): boolean => replayable(row, kept, T0 + 400, new Set<string>()))
+      .map((row: ActivityRow): string => row.id);
+    // The server keeps the 20 YouTube events. No Twitch event has Replay.
+    expect(shown).toHaveLength(20);
+    expect(shown.every((id: string): boolean => id.startsWith("youtube:"))).toBe(true);
+    // A disconnect of a platform with no kept event changes nothing.
+    const kick: ActivityMessage = {
+      type: "event",
+      event: { kind: "status", platform: "kick", status: "disconnected" },
+    };
+    expect(after([kick], start).kept).toBe(start.kept);
+  });
+
   it("does not show for a row that is itself a replay, or for an event that the server answered as gone", (): void => {
-    const rows: readonly ActivityRow[] = after([
-      event(support("d1")),
-      event(support("again", { replay: true, receivedAt: T0 + 1 })),
-    ]).rows;
+    const { rows, kept } = after([event(support("d1")), event(support("again", { replay: true, receivedAt: T0 + 1 }))]);
     const [again, original] = rows;
-    expect(replayable(again, rows, T0 + 10, new Set<string>())).toBe(false);
-    expect(replayable(original, rows, T0 + 10, new Set<string>())).toBe(true);
-    expect(replayable(original, rows, T0 + 10, new Set<string>(["twitch:d1"]))).toBe(false);
+    expect(replayable(again, kept, T0 + 10, new Set<string>())).toBe(false);
+    expect(replayable(original, kept, T0 + 10, new Set<string>())).toBe(true);
+    expect(replayable(original, kept, T0 + 10, new Set<string>(["twitch:d1"]))).toBe(false);
   });
 });
 

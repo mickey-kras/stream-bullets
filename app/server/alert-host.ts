@@ -414,6 +414,9 @@ export class AlertHost {
     const parsed = goalCountSchema.safeParse(await request.json().catch((): null => null));
     if (!parsed.success) return Response.json({ error: "Invalid count" }, { status: 400, headers: NO_STORE });
     if (!(await this.ready(Date.now()))) return refuse("alerts_unavailable");
+    // The count used the copy of the layers, also when the copy says that the goal does not count votes. Thus the
+    // alarm reads the layers again soon, and a missed change of the goal does not stay.
+    this.usedAt = Date.now();
     this.voted(parsed.data.key);
     this.flush(Date.now());
     await this.wake();

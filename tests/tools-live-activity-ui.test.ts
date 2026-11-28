@@ -13,7 +13,13 @@ import { FullChatView, type ChatModel } from "../app/components/tools/live-chat"
 import { DEFAULT_LOCALE, LOCALES, loadCatalog, setLocaleSource, t, type Locale } from "../app/i18n";
 import { ALERT_REFUSALS, type AlertRefusal } from "../app/lib/alert-control";
 import type { AlertView } from "../app/lib/alerts";
-import { REFUSAL_TEXT, REPLAY_WINDOW_MS, type ActivityRow, type ShownAlerts } from "../app/lib/live-activity";
+import {
+  REFUSAL_TEXT,
+  REPLAY_WINDOW_MS,
+  type ActivityRow,
+  type KeptEvent,
+  type ShownAlerts,
+} from "../app/lib/live-activity";
 
 // The Activity part of Live and the dock, as the page renders it for each state of the alerts.
 
@@ -69,9 +75,15 @@ function row(id: string, more: Partial<ActivityRow> = {}): ActivityRow {
 }
 
 function render(more: Partial<ActivityViewProps> = {}, key: string | null = null): string {
+  // By default the server keeps each original row that the test shows.
+  const rows: readonly ActivityRow[] = more.rows ?? [];
+  const kept: KeptEvent[] = rows
+    .filter((one: ActivityRow): boolean => one.original)
+    .map((one: ActivityRow): KeptEvent => ({ id: one.id, platform: one.platform, receivedAt: one.receivedAt }));
   const props: ActivityViewProps = {
     alerts: quiet,
-    rows: [],
+    rows,
+    kept,
     now: T0,
     onStream: true,
     control: idle,
@@ -173,6 +185,8 @@ describe("the recent support events", (): void => {
       row("old", { receivedAt: T0 - REPLAY_WINDOW_MS }),
     ];
     const html: string = render({ rows, control: { ...idle, gone: new Set<string>(["twitch:gone"]) } });
+    // A row that the server does not keep has no Replay.
+    expect(render({ rows, kept: [] })).not.toContain("data-activity-replay");
     const replays: string[] = [...html.matchAll(/aria-label="Replay: [^"]*"[^>]*data-activity-replay/g)].map(
       (match: RegExpMatchArray): string => match[0],
     );
