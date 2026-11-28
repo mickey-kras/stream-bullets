@@ -3,7 +3,7 @@ import type { AppEnv } from "../app/env";
 import type { ActivityChat } from "../app/lib/activity";
 import { ChannelIngest } from "../app/server/channel-ingest";
 import { RECONCILE_INTERVAL_MS, YOUTUBE_MIN_POLL_MS } from "../app/server/channel-ingest-limits";
-import { requiredSubscriptions } from "../app/server/channel-providers.server";
+import { requiredSubscriptions } from "../app/server/channel-subscription-types";
 import { tokenStatement } from "../app/server/channel-tokens.server";
 import { installFakeProviders, youtubeText, type FakeProviders, type ProviderCall } from "./helpers/channels";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
