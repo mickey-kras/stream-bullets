@@ -271,6 +271,9 @@ The key allows only these changes:
 - The switch for the poll results, and the end of the voting of a poll.
 - The text and the style of the message banner.
 - For the poll, the topic, and the message banner: the switch **Show on stream**, the picked item, and the QR code.
+- For the alerts: the state, a test alert, the mute, a skip of the alert on stream, and a replay of a support event.
+  The key does not change the rules of the alerts. A test and a replay use the write quota of the owner.
+  The key does not start the count of the goal again.
 
 The server refuses each other change with `403`: the layout, the outputs, the chat, the characters, the links, and the layouts.
 The dock key is not a session. It gives no access to the account, to channel management, or to an overlay link.

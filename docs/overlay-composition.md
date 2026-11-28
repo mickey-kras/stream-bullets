@@ -295,6 +295,32 @@ The goal layer shows the title of the goal, the count, and a bar. An example is 
 In the editor preview, the goal layer shows the count 0.
 The goal layer is a part of the content source (`layer=content`).
 
+### Goal count
+
+The goal layer has one count that goes up to a target. The server counts, so each page gets the same value.
+The alert host in the `ChannelIngest` object of the page holds the count. See [Alert host](channel-connections.md#alert-host).
+The goal layer shows it. See [Goal layer](#goal-layer).
+
+- The goal counts while its layer has a place on the grid of an output. **Show on stream** does not stop the count.
+- While the layer has no place on a grid, the page counts no goal. The server keeps the value.
+  When the layer comes back to a grid, the count continues from that value. Events from the time between do not count.
+- `counts` tells what adds to the value. See [Alerts and the goal](channel-connections.md#alerts-and-the-goal) for the amounts.
+- Each support event that the server stored counts one time. A replay and a test never count.
+  An event that a provider sends again does not count again: the server keeps the IDs of the newest 2,000 support events.
+- An event counts only when it occurred at the start of the count or later.
+  The server compares `sentAt` of the event, or `receivedAt` when the event has no `sentAt`.
+- The count continues while the mute is on, while the alerts layer is off stream, and while no overlay page is open.
+- A change of `counts` starts a new count at 0. A change of the title or of the target does not.
+- The `goalReset` control of the owner starts the count again at 0. See [Alert controls](api.md#alert-controls).
+  The dock key does not allow it.
+- The value can be more than the target. The server does not stop the count at the target.
+- `chatters` counts each person who sends a chat message after the start of the count, one time.
+  A person is a participant of one platform. The count stops at 100,000 people.
+  The server keeps a hash for each person, and no user ID.
+- The server counts nothing for `votes` in this version. The value of such a goal stays 0.
+- The pages get the count in the `alerts` message of the activity socket, as `goal`: `{counts, value, startedAt}`.
+  While the page counts no goal, the message has `goal: null`.
+
 ### Sources from before the alerts and the goal
 
 An overlay page that OBS loaded before the release of these two layers does not show them.

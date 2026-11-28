@@ -13,6 +13,7 @@ import {
   type ActivityEvent,
   type ActivitySupport,
 } from "../app/lib/activity";
+import { DEFAULT_LAYERS, emptyCells, storedLayersText, type OverlayLayers } from "../app/lib/overlay-layers";
 import { ChannelIngest } from "../app/server/channel-ingest";
 import { snapshotEvents, snapshotMessage } from "../app/server/channel-ingest-events";
 import {
@@ -347,7 +348,9 @@ describe("ChannelIngest requests", (): void => {
     const [first, ...rest] = overlay.messages<{ since?: number }>();
     expect(first).toMatchObject({ type: "snapshot", events: [], replay: true });
     expect(first.since).toBeLessThanOrEqual(Date.now() - SNAPSHOT_MAX_AGE_MS);
-    expect(rest).toEqual([]);
+    // The state of the alerts comes after the snapshot.
+    expect(rest).toHaveLength(1);
+    expect(rest[0]).toMatchObject({ type: "alerts", muted: false, current: null, waiting: 0, goal: null });
     for (let index = 1; index < MAX_SOCKETS; index++) await listen();
     expect((await stub.fetch(url("subscribe"), { headers: { Upgrade: "websocket", "X-SB-Owner": "1" } })).status).toBe(429);
   });
@@ -784,6 +787,29 @@ describe("ChannelIngest status and disconnect", (): void => {
     await env.DB.prepare("DELETE FROM channel_connections WHERE platform='kick'").run();
     expect(await (await post("disconnect", "kick")).json()).toEqual({ revoked: false, unsubscribed: true });
     expect(await snapshot()).toEqual([]);
+  });
+
+  it("removes the alerts of a platform from the line on disconnect", async (): Promise<void> => {
+    await addConnection("twitch", { support: true });
+    await addConnection("kick", { support: true });
+    const layers: OverlayLayers = {
+      ...DEFAULT_LAYERS,
+      alerts: { ...DEFAULT_LAYERS.alerts, enabled: true },
+      cells: { ...DEFAULT_LAYERS.cells, horizontal: { ...emptyCells(), alerts: { c: 0, r: 0, w: 16, h: 3 } } },
+    };
+    await env.DB.prepare("INSERT INTO overlay_state (streamer_id,position,revision,updated_at,layers) VALUES (?,'lower',1,1,?)")
+      .bind(page, storedLayersText(layers))
+      .run();
+    const socket = await listen();
+    const last = (): unknown => socket.ofType("alerts").at(-1);
+    await deliver("d1", [cheer("c1", 100)]);
+    await deliver("k1", [{ ...cheer("k1", 100), kind: "kicks", platform: "kick", id: "kick:k1" }], "kick");
+    await deliver("d2", [cheer("c2", 100)]);
+    expect(last()).toMatchObject({ current: { id: "twitch:c1" }, waiting: 2 });
+    await post("disconnect", "kick");
+    expect(last()).toMatchObject({ current: { id: "twitch:c1" }, waiting: 1 });
+    await post("disconnect", "twitch");
+    expect(last()).toMatchObject({ current: null, waiting: 0 });
   });
 
   it("reports a connect without a connection row, and a network failure while unsubscribing", async (): Promise<void> => {

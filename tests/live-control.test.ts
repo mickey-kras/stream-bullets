@@ -6,6 +6,7 @@ import type { AppEnv } from "../app/env";
 import { DEFAULT_LOCALE, loadCatalog, setLocaleSource, type Locale } from "../app/i18n";
 import { atMark } from "../app/lib/clock";
 import { MASH_COUNTDOWN_MS } from "../app/lib/mash";
+import { ALERT_REFUSALS, type AlertRefusal, type AlertsReply } from "../app/lib/alert-control";
 import { DEFAULT_RULES } from "../app/lib/alerts";
 import { CHAT_TEST_MS } from "../app/lib/chat-test";
 import { legacyLayersText, parseStoredLayers } from "../app/lib/overlay-legacy";
@@ -54,7 +55,7 @@ let database: TestDatabase;
 let env: AppEnv;
 // Record room API calls as path?streamerId plus JSON body.
 let roomCalls: { path: string; body: string }[];
-// Record ingest object calls the same way. The playground control answers with `ingestReply`.
+// Record ingest object calls the same way. A playground control and an alert control answer with `ingestReply`.
 let ingestCalls: { path: string; body: string }[];
 let ingestReply: () => Response;
 
@@ -119,9 +120,8 @@ beforeAll(async (): Promise<void> => {
         fetch: async (url: string, init: RequestInit): Promise<Response> => {
           const target = new URL(url);
           ingestCalls.push({ path: `${target.pathname}${target.search}`, body: await new Response(init.body).text() });
-          return Promise.resolve(
-            target.pathname === "/playground" ? ingestReply() : new Response(null, { status: 204 }),
-          );
+          const control: boolean = target.pathname === "/playground" || target.pathname === "/alerts";
+          return Promise.resolve(control ? ingestReply() : new Response(null, { status: 204 }));
         },
       }),
     } as unknown as DurableObjectNamespace,
@@ -1754,6 +1754,162 @@ describe("overlay control", (): void => {
       expect((await characters({ op: "status" })).status).toBe(500);
       ingestReply = (): Response => new Response("not json");
       expect((await characters({ op: "status" })).status).toBe(500);
+      log.mockRestore();
+    });
+  });
+
+  describe("alert controls", (): void => {
+    function alerts(control: unknown, user: string = "owner"): Promise<Response> {
+      return call("POST", "overlay/alerts", { user, body: control });
+    }
+
+    const reply: AlertsReply = {
+      at: 1_800_000_000_000,
+      muted: false,
+      current: {
+        id: "twitch:g1~r2",
+        origin: "replay",
+        kind: "gift",
+        platform: "twitch",
+        name: "Supporter",
+        anonymous: false,
+        amount: 5,
+        currency: null,
+        banner: true,
+        chat: true,
+        startsAt: 1_800_000_000_000,
+        endsAt: 1_800_000_006_000,
+      },
+      waiting: 2,
+      goal: null,
+    };
+    const controls: Record<string, unknown>[] = [
+      { op: "status" },
+      { op: "test" },
+      { op: "test", kind: "anonymous" },
+      { op: "mute", on: true },
+      { op: "mute", on: false },
+      { op: "skip" },
+      { op: "replay", id: "twitch:g1" },
+      { op: "goalReset" },
+    ];
+
+    beforeEach((): void => {
+      ingestReply = (): Response => Response.json(reply);
+    });
+
+    it("forwards each control to the alert host of the page and answers its state", async (): Promise<void> => {
+      for (const control of controls) {
+        const response = await alerts(control);
+        expect(response.status, JSON.stringify(control)).toBe(200);
+        expect(await response.json()).toEqual(reply);
+      }
+      expect(ingestCalls.map((entry) => entry.path)).toEqual(controls.map(() => `/alerts?streamerId=${page}`));
+      expect(ingestCalls.map((entry): unknown => JSON.parse(entry.body))).toEqual(controls);
+      // The answer has only the fields of the state.
+      ingestReply = (): Response => Response.json({ ...reply, current: { ...reply.current, subject: "viewer-id-1" } });
+      expect(await (await alerts({ op: "status" })).json()).toEqual(reply);
+    });
+
+    it("answers the count of the goal with the state", async (): Promise<void> => {
+      const goal = { counts: "subs", value: 12, startedAt: 1_800_000_000_000 };
+      ingestReply = (): Response => Response.json({ ...reply, goal });
+      expect(await (await alerts({ op: "goalReset" })).json()).toEqual({ ...reply, goal });
+      // A count that breaks the contract is a server error.
+      const log = vi.spyOn(console, "error").mockImplementation((): void => undefined);
+      ingestReply = (): Response => Response.json({ ...reply, goal: { ...goal, counts: "money" } });
+      expect((await alerts({ op: "status" })).status).toBe(500);
+      log.mockRestore();
+    });
+
+    it("uses the write quota for a test, a replay and a new count, never to read, mute or skip", async (): Promise<void> => {
+      await startOfQuotaWindow(env.DB);
+      await env.DB.prepare(
+        `INSERT INTO app_rate_limits (key,count,window_start)
+          VALUES ('write:owner',60,CAST(strftime('%s','now') AS INTEGER)/60*60000)
+          ON CONFLICT(key) DO UPDATE SET count=60, window_start=excluded.window_start`,
+      ).run();
+      for (const control of [{ op: "test" }, { op: "replay", id: "twitch:g1" }, { op: "goalReset" }])
+        expect((await alerts(control)).status).toBe(429);
+      for (const control of [{ op: "status" }, { op: "mute", on: true }, { op: "mute", on: false }, { op: "skip" }])
+        expect((await alerts(control)).status).toBe(200);
+      expect(ingestCalls).toHaveLength(4);
+    });
+
+    it("lets only the owner of a writable page control the alerts", async (): Promise<void> => {
+      expect((await call("POST", "overlay/alerts", { body: { op: "mute", on: true } })).status).toBe(401);
+      expect((await alerts({ op: "mute", on: true }, "viewer")).status).toBe(404);
+      await env.DB.prepare("UPDATE streamers SET status='frozen' WHERE id=?").bind(page).run();
+      expect((await alerts({ op: "mute", on: true })).status).toBe(423);
+      expect(ingestCalls).toEqual([]);
+    });
+
+    it("refuses a malformed control, and answers 503 while channels are off", async (): Promise<void> => {
+      for (const control of [
+        {},
+        { op: "play" },
+        { op: "test", kind: "tip" },
+        { op: "mute" },
+        { op: "mute", on: 1 },
+        { op: "replay" },
+        { op: "replay", id: "" },
+        { op: "replay", id: "x".repeat(161) },
+        { op: "skip", id: "twitch:g1" },
+        { op: "status", extra: true },
+        { op: "goalReset", value: 0 },
+      ])
+        expect((await alerts(control)).status, JSON.stringify(control)).toBe(400);
+      env.CHANNELS_OFF = "1";
+      try {
+        expect((await alerts({ op: "status" })).status).toBe(503);
+      } finally {
+        env.CHANNELS_OFF = undefined;
+      }
+      // Without the activity feed binding there are no alerts either.
+      const binding: DurableObjectNamespace = env.CHANNEL_INGEST;
+      Reflect.deleteProperty(env, "CHANNEL_INGEST");
+      try {
+        const off = await alerts({ op: "mute", on: true });
+        expect(off.status).toBe(503);
+        expect(await off.json()).toMatchObject({ error: "Alerts are off on this server." });
+      } finally {
+        env.CHANNEL_INGEST = binding;
+      }
+      expect(ingestCalls).toEqual([]);
+    });
+
+    it("passes on each refusal of the alert host with its status, its code and a reason", async (): Promise<void> => {
+      const texts = new Set<string>();
+      for (const [code, status] of Object.entries(ALERT_REFUSALS) as [AlertRefusal, number][]) {
+        ingestReply = (): Response => Response.json({ error: code }, { status });
+        const response = await alerts({ op: "replay", id: "twitch:g1" });
+        expect(response.status, code).toBe(status);
+        const answer = await body<{ error: string; code: string }>(response);
+        expect(answer.code).toBe(code);
+        texts.add(answer.error);
+      }
+      expect(texts.size).toBe(Object.keys(ALERT_REFUSALS).length);
+      expect(texts).toContain("Put the alerts layer on stream first.");
+      expect(texts).toContain("Put the goal layer on the grid first.");
+      expect(texts).toContain("Alerts are muted. Turn the mute off first.");
+      expect(texts).toContain("This event is too old for a replay.");
+      // A failure that the API does not know is not passed on.
+      for (const failure of [
+        (): Response => new Response("boom", { status: 500 }),
+        (): Response => Response.json({ error: "Invalid control" }, { status: 400 }),
+        (): Response => Response.json({ error: 7 }, { status: 409 }),
+      ]) {
+        ingestReply = failure;
+        const response = await alerts({ op: "test" });
+        expect(response.status).toBe(503);
+        expect(await response.json()).toMatchObject({ code: "alerts_unavailable" });
+      }
+      // An answer that breaks the state contract is a server error.
+      const log = vi.spyOn(console, "error").mockImplementation((): void => undefined);
+      ingestReply = (): Response => Response.json({ ...reply, waiting: -1 });
+      expect((await alerts({ op: "status" })).status).toBe(500);
+      ingestReply = (): Response => new Response("not json");
+      expect((await alerts({ op: "status" })).status).toBe(500);
       log.mockRestore();
     });
   });

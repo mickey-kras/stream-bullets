@@ -252,6 +252,62 @@ See [Layouts](overlay-composition.md#layouts).
 - Each action increases `overlay.revision`, and the live room sends the new revision. Another open tab of the owner then loads the layouts again.
 - Only the owner of the page can use these endpoints. Unknown fields return `400`.
 
+## Alert controls
+
+The alert host of the page plays the alerts on stream. See [Alert host](channel-connections.md#alert-host).
+
+| Endpoint | Body | Response |
+| --- | --- | --- |
+| `POST /api/overlay/alerts` | `{op: "status"}` | `{at, muted, current, waiting, goal}`. The state of the alerts. This control changes nothing. |
+| `POST /api/overlay/alerts` | `{op: "test", kind?}` | The state. A sample alert plays. |
+| `POST /api/overlay/alerts` | `{op: "mute", on: boolean}` | The state. With `on: true`, no alert plays. |
+| `POST /api/overlay/alerts` | `{op: "skip"}` | The state. The alert on stream ends, and the next alert starts. |
+| `POST /api/overlay/alerts` | `{op: "replay", id}` | The state. The alert of one support event plays again. |
+| `POST /api/overlay/alerts` | `{op: "goalReset"}` | The state. The count of the goal starts again at 0. |
+
+- The state has the fields of the `alerts` message of the activity socket, without `type`:
+
+| Field | Value |
+| --- | --- |
+| `at` | The server time of the state, in milliseconds |
+| `muted` | `true` while the mute is on |
+| `current` | The view of the alert on stream, or `null`. Its `endsAt` is the server time when the banner goes. |
+| `waiting` | The number of alerts in the line |
+| `goal` | `{counts, value, startedAt}`: the count of the goal. `null` when the goal layer has no place on a grid. |
+
+- See [Alerts and the goal](channel-connections.md#alerts-and-the-goal) for the fields of a view.
+- `kind` is `follow`, `subscription`, `gift`, `bits`, `super_chat`, `raid`, `topic`, or `anonymous`. Without `kind`, the test is a `gift`.
+  `anonymous` is a gift from a supporter who asked for no name.
+- `id` is the `id` of a support event of the activity feed, with 1 to 160 characters.
+  The server replays only an event that it still keeps: the newest 50 support events of the last 10 minutes.
+- `mute` with `on: true` stops the alert on stream immediately and removes each alert from the line.
+  While the mute is on, a support event makes no alert. After `on: false`, no alert from the muted time plays.
+  The muted state stays until the owner changes it.
+- A test and a replay add no support event, and no page gets an `event` message for them. They do not use `min` of the rule.
+  They never change the count of the goal.
+- `goal.counts` is the `counts` value of the goal layer. `goal.value` is the count. `goal.startedAt` is the server time when the count started.
+  See [Goal count](overlay-composition.md#goal-count).
+- `goalReset` sets `goal.value` to 0 and `goal.startedAt` to the server time. An event from before that time does not count.
+- `test`, `replay`, and `goalReset` count against the write quota of 60 changes each minute. `status`, `mute`, and `skip` do not.
+  Thus the owner can always read the state and stop the alerts.
+- Only the owner of the page can use this endpoint. Unknown fields return `400`.
+- A refusal of the alert host has a code:
+
+| Status | Code | Cause |
+| --- | --- | --- |
+| `400` | `alerts_off_stream` | A test or a replay, and the saved alerts layer is not on stream in an output |
+| `400` | `goal_off` | `goalReset`, and the saved goal layer has no place on a grid |
+| `404` | `alert_gone` | A replay of an event that the server does not keep: the ID is unknown, or the event is older than 10 minutes |
+| `409` | `alerts_muted` | A test or a replay while the mute is on |
+| `409` | `alerts_unwatched` | A test or a replay while no overlay page, no **Streamer tools** page, and no dock is open |
+| `409` | `alert_rule_off` | A test or a replay, and the rule of the alert has its three switches off |
+| `409` | `alerts_full` | A test or a replay while 100 alerts wait in the line |
+| `503` | `alerts_unavailable` | The alert host cannot read the saved layers, or it cannot answer |
+
+- Other errors: `400` for an invalid body, `401` without sign-in, `403` for another origin, and `404` without a streamer page.
+  Also `423` for a frozen or suspended page, and `429` above the quota.
+  The endpoint returns `503` while the `CHANNELS_OFF` secret exists, and when the deployment has no `CHANNEL_INGEST` binding.
+
 ## OBS dock
 
 See [OBS dock](streamer-tools.md#obs-dock).
@@ -261,13 +317,17 @@ See [OBS dock](streamer-tools.md#obs-dock).
 | `POST /api/dock/key` | `{}` | `{url}`. A new dock link for the page of the signed-in owner. The link shows one time. The old link stops immediately. |
 | `POST /api/dock/:handle/overlay` | `{action: "showResults" \| "message" \| "layers", ...}` | `{overlay}`. A live control from the dock |
 | `POST /api/dock/:handle/poll` | `{id}` | `{id}`. The poll takes no more votes |
+| `POST /api/dock/:handle/alerts` | `{op: "status" \| "test" \| "mute" \| "skip" \| "replay", ...}` | `{at, muted, current, waiting, goal}`. An alert control from the dock |
 | `GET /@handle/dock?key` | - | The dock page. Without the current dock key, the answer is `404`. |
 
-- The two dock endpoints with `:handle` need no session. They need the dock key in the `X-SB-Dock-Key` header.
+- The three dock endpoints with `:handle` need no session. They need the dock key in the `X-SB-Dock-Key` header.
   A call without the current dock key of that page returns `403` with the code `dock_key`.
 - `overlay` takes the same actions as `POST /api/overlay`, with these limits.
   A `layers` action can have only `items`, only for `poll`, `topic`, and `message`, and only the fields `enabled`, `ref`, and `qr`.
   `chatTest` and each other field return `403` with the code `dock_action`. `alerts` and `goal` are such fields.
+- `alerts` takes the same controls as `POST /api/overlay/alerts` and gives the same answers and codes. See [Alert controls](#alert-controls).
+  A test and a replay from the dock count against the write quota of the owner.
+  `goalReset` returns `403` with the code `dock_action`: only the session of the owner starts the goal again.
 - An overlay key is not a dock key. It returns `403`.
 - The live room (`/api/live/:handle`) and the activity feed (`/api/activity/:handle`) accept the dock key in `key`.
   A dock then has the seat and the data of the owner.

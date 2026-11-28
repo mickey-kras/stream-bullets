@@ -15,6 +15,7 @@ export type IngestPath =
   | "reconcile"
   | "playground"
   | "playground-config"
+  | "alerts"
   | "test-chat"
   | "upcoming";
 

@@ -17,6 +17,7 @@ import {
 import { dockKeyMatches, hasDockKey } from "../app/server/dock-key.server";
 import { apiCaller } from "./helpers/api";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
+import { startOfQuotaWindow } from "./helpers/quota";
 
 const origin = "https://overlay-key.example.test";
 const secret = "test-only-secret-0f9e8d7c6b5a49382716a5b4c3d2e1f0";
@@ -29,6 +30,9 @@ const KEY = /^[\w-]{43}$/;
 let database: TestDatabase;
 let env: AppEnv;
 let roomCalls: string[];
+// The calls to the ingest object, as path?streamerId plus the body. An alert control answers with `ingestReply`.
+let ingestCalls: string[];
+let ingestReply: () => Response;
 
 const { call } = apiCaller(() => env, origin, secret);
 
@@ -72,7 +76,13 @@ beforeAll(async (): Promise<void> => {
     IMAGES: database.bucket,
     CHANNEL_INGEST: {
       idFromName: (name: string) => name,
-      get: () => ({ fetch: (): Promise<Response> => Promise.resolve(new Response(null, { status: 204 })) }),
+      get: () => ({
+        fetch: (url: string, init?: RequestInit): Promise<Response> => {
+          const target = new URL(url);
+          ingestCalls.push(`${target.pathname}${target.search} ${typeof init?.body === "string" ? init.body : ""}`);
+          return Promise.resolve(target.pathname === "/alerts" ? ingestReply() : new Response(null, { status: 204 }));
+        },
+      }),
     } as unknown as DurableObjectNamespace,
     POLL_ROOMS: {
       idFromName: (name: string) => name,
@@ -94,6 +104,8 @@ afterAll(async (): Promise<void> => database.dispose());
 
 beforeEach(async (): Promise<void> => {
   roomCalls = [];
+  ingestCalls = [];
+  ingestReply = (): Response => Response.json({ at: 1, muted: false, current: null, waiting: 0, goal: null });
   await env.DB.batch([
     env.DB.prepare("DELETE FROM user"),
     env.DB.prepare("DELETE FROM moderation_actions"),
@@ -646,6 +658,92 @@ describe("the key of the OBS dock", (): void => {
         })
       ).status,
     ).toBe(401);
+  });
+
+  it("controls the alerts with the dock key: status, test, mute, skip, and replay", async (): Promise<void> => {
+    const { key } = await dockUrl();
+    ingestCalls = [];
+    const state = { at: 5, muted: true, current: null, waiting: 0, goal: null };
+    ingestReply = (): Response => Response.json(state);
+    const controls = [
+      { op: "status" },
+      { op: "test", kind: "raid" },
+      { op: "mute", on: true },
+      { op: "skip" },
+      { op: "replay", id: "twitch:g1" },
+    ];
+    for (const control of controls) {
+      const response = await dock("alerts", control, key);
+      expect(response.status, JSON.stringify(control)).toBe(200);
+      expect(await response.json()).toEqual(state);
+    }
+    expect(ingestCalls).toEqual(controls.map((control) => `/alerts?streamerId=${page} ${JSON.stringify(control)}`));
+    // A refusal of the alert host comes back with its code.
+    ingestReply = (): Response => Response.json({ error: "alerts_muted" }, { status: 409 });
+    const muted = await dock("alerts", { op: "test" }, key);
+    expect(muted.status).toBe(409);
+    expect(await code(muted)).toBe("alerts_muted");
+    for (const control of [{}, { op: "play" }, { op: "mute" }, { op: "replay" }, { op: "status", extra: 1 }])
+      expect((await dock("alerts", control, key)).status, JSON.stringify(control)).toBe(400);
+  });
+
+  it("never starts the goal again with the dock key", async (): Promise<void> => {
+    const { key } = await dockUrl();
+    ingestCalls = [];
+    const refused = await dock("alerts", { op: "goalReset" }, key);
+    expect(refused.status).toBe(403);
+    expect(await code(refused)).toBe("dock_action");
+    expect((await dock("alerts", { op: "goalReset", value: 0 }, key)).status).toBe(400);
+    expect((await dock("alerts", { op: "goalReset" }, "wrong")).status).toBe(403);
+    expect(ingestCalls).toEqual([]);
+    // The owner starts it again with the session.
+    expect((await call("POST", "overlay/alerts", { user: "owner", body: { op: "goalReset" } })).status).toBe(200);
+    expect(ingestCalls).toEqual([`/alerts?streamerId=${page} {"op":"goalReset"}`]);
+  });
+
+  it("refuses an alert control without the dock key, and for a page that cannot change", async (): Promise<void> => {
+    const { key } = await dockUrl();
+    const wide = await newUrl("owner", "horizontal");
+    const frozen = await dockUrl("frozen");
+    ingestCalls = [];
+    for (const wrong of [undefined, "", wide.key, frozen.key]) {
+      const refused = await dock("alerts", { op: "mute", on: true }, wrong);
+      expect(refused.status, String(wrong)).toBe(403);
+      expect(await code(refused)).toBe("dock_key");
+    }
+    expect((await dock("alerts", { op: "status" }, key, "no_such_page")).status).toBe(403);
+    expect((await dock("alerts", { op: "status" }, key, "gone_page")).status).toBe(403);
+    // A frozen page stays visible, but nothing on it changes.
+    const locked = await dock("alerts", { op: "mute", on: true }, frozen.key, "frozen_page");
+    expect(locked.status).toBe(423);
+    expect(await code(locked)).toBe("page_frozen");
+    // The dock key is no session: the endpoint of the owner stays closed.
+    const headers = { "X-SB-Dock-Key": key };
+    expect((await call("POST", "overlay/alerts", { body: { op: "status" }, headers })).status).toBe(401);
+    expect(ingestCalls).toEqual([]);
+  });
+
+  it("uses the write quota of the owner for a test and a replay from the dock", async (): Promise<void> => {
+    const { key } = await dockUrl();
+    ingestCalls = [];
+    await startOfQuotaWindow(env.DB);
+    await env.DB.prepare(
+      `INSERT INTO app_rate_limits (key,count,window_start)
+        VALUES ('write:owner',60,CAST(strftime('%s','now') AS INTEGER)/60*60000)
+        ON CONFLICT(key) DO UPDATE SET count=60, window_start=excluded.window_start`,
+    ).run();
+    for (const control of [{ op: "test" }, { op: "replay", id: "twitch:g1" }])
+      expect((await dock("alerts", control, key)).status).toBe(429);
+    for (const control of [{ op: "status" }, { op: "mute", on: false }, { op: "skip" }])
+      expect((await dock("alerts", control, key)).status).toBe(200);
+    expect(ingestCalls).toHaveLength(3);
+    // While channels are off, the dock gets the same answer as the owner.
+    env.CHANNELS_OFF = "1";
+    try {
+      expect((await dock("alerts", { op: "status" }, key)).status).toBe(503);
+    } finally {
+      env.CHANNELS_OFF = undefined;
+    }
   });
 
   it("closes the voting of a poll of the page, and of nothing else", async (): Promise<void> => {

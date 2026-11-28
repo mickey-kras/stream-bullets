@@ -162,6 +162,7 @@ With reduced motion, the demos stand still.
 
 The server can make the characters react to an event, for example to an alert. A reaction is not a chat command.
 `PlaygroundHost.react(subject, action, skipPlatform)` starts a reaction. The rules that call it are not part of the playground.
+The alert host calls it when an alert starts. See [Alert host](channel-connections.md#alert-host).
 
 - The subject is a viewer: the platform and the platform user ID. The actions are `wave`, `jump`, and `cheer`.
 - When the subject has a character on screen, that character does the action one time.

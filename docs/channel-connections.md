@@ -75,7 +75,7 @@ The socket sends these messages:
 - `{"type":"unavailable"}` before the server closes the socket. This occurs when the overlay key changes,
   when an administrator suspends the page, and when the owner deletes the account.
 - `{"type":"alerts",...}` and `{"type":"alert",...}` for the alerts and the goal. See [Alerts and the goal](#alerts-and-the-goal).
-  The parser reads them. The server does not send them in this version.
+  The server sends `alerts` once after the snapshot, and again after each change of the state. See [Alert host](#alert-host).
 
 A browser cannot read the HTTP status of a failed WebSocket upgrade.
 Thus the server accepts a connection with a wrong or revoked key and closes it at once with the code `4403`.
@@ -160,8 +160,8 @@ This section is the format only. See [Support events of each provider](#support-
 ### Alerts and the goal
 
 `app/lib/alerts.ts` and `app/lib/goals.ts` have the rules for alerts on stream and for the goal.
-They are pure functions. This version has the rules and the message format only.
-The server keeps no alert and no goal, and no page shows them.
+They are pure functions. The alert host of the page uses them. See [Alert host](#alert-host).
+No page shows an alert or a goal in this version.
 
 A rule tells what a support event does. The alerts layer holds the rules. See [Overlay layers](api.md#overlay-layers).
 
@@ -180,7 +180,8 @@ A rule tells what a support event does. The alerts layer holds the rules. See [O
 - A rule with the three switches off makes no alert.
 - `tip` and `reactions` have no rule. They make no alert.
 - `crowd` makes each character on screen cheer. An alert without a known participant also gets `crowd`.
-- One alert shows at a time, for 6 seconds (`ALERT_SHOW_MS`). The next alerts wait in a line. The line has no limit (`ALERT_QUEUE_MAX`).
+- One alert shows at a time, for 6 seconds (`ALERT_SHOW_MS`). The next alerts wait in a line.
+  `ALERT_QUEUE_MAX` sets no limit for the line. The alert host holds at most 100 alerts that wait.
 - An alert without a banner does not wait in the line. It plays immediately.
 
 `alertFor` makes the alert of one support event. Its result has the view for the clients and two server values:
@@ -196,7 +197,8 @@ A view (`AlertView`) has these fields:
 - `kind`, `platform`, `amount`, `currency`: as in the support event. Only a `topic` has the platform `direct`.
 - `name`: the display name of the supporter, or `null`.
 - `anonymous`: `true` when the supporter asked for no name. The parser refuses an anonymous view with a name.
-- `text`: the text of the supporter, with at most 200 characters (`ALERT_TEXT_LENGTH`).
+- `text`: for a `topic`, the title of the topic, with at most 200 characters (`ALERT_TEXT_LENGTH`). No other view has it.
+  The server never puts the message of a supporter in a view. That message stays in the support event.
 - `banner` and `chat`: the switches of the rule.
 - `startsAt` and `endsAt`: the server times of the banner. They are equal for an alert without a banner.
 
@@ -233,8 +235,89 @@ A goal counts one thing (`counts`):
 - `goalAmount` gives the amount of one support event for a goal. It gives 0 for an event with `replay: true`.
 - `countSupport` adds the amount to the progress. It adds nothing for an event from before `startedAt`.
   It compares `sentAt`, or `receivedAt` when the event has no `sentAt`.
-- The caller refuses a known event ID with `acceptDelivery`. Thus an event counts one time.
+- The alert host refuses a known event ID, as `acceptDelivery` does. Thus an event counts one time.
+- The server counts nothing for `votes` in this version. The value of such a goal stays 0.
 - A goal never converts Bits, KICKs, or a currency.
+
+### Alert host
+
+`app/server/alert-host.ts` is the alert host. It is a part of the `ChannelIngest` object of the page.
+It makes the alerts, keeps the line, and runs the controls of the owner.
+See [Alert controls](api.md#alert-controls) for the API.
+
+The object gives the host each support event that it stored and sent to the sockets. The host first does these two steps:
+
+1. If the host knows the `id` of the event, it stops. The event counts for nothing and plays nothing.
+   The host keeps the `id` of the newest 2,000 support events (`DELIVERIES_KEPT`).
+   The object refuses a known `id` for 15 minutes only. A provider can send an event again later.
+2. The goal counts the event. See [Goal count](overlay-composition.md#goal-count).
+   The steps for the alert do not change the count.
+
+The object also gives the host each chat message that it stored. A goal that counts chatters counts its sender.
+
+The host then does these steps for the alert:
+
+1. If the event is not live, the host stops. A live event has no `sentAt`, or its `sentAt` is at most 30 seconds before `receivedAt`.
+   Thus an old event that a provider sends again plays no alert.
+2. If no alert can play, the host stops. See the list below.
+3. `alertFor` makes the alert with the rules of the alerts layer. The host removes the message of the supporter first.
+4. An alert without a banner plays immediately. If the rule has `chat` on, the sockets get an `alert` message.
+5. If no alert is on stream, an alert with a banner starts. If one is on stream, the new alert waits in the line.
+   The sockets get the new state in an `alerts` message.
+6. If the rule has `character` on, the characters react when the alert starts. See [Characters](characters.md).
+
+No alert plays in these conditions, and no such alert plays later:
+
+- The alerts layer is not on stream in an output.
+- The mute is on.
+- No activity socket is open: no overlay page, no **Streamer tools** page, and no dock.
+- 100 alerts wait in the line. The host drops the new alert.
+
+One state applies to each socket of the page. Thus the two outputs, **Streamer tools**, and the dock show the same alert.
+
+- Each alert with a banner shows for 6 seconds. The host sets the alarm of the object to the end time.
+  The alarm ends the alert and starts the next one.
+- A socket that opens gets the `alerts` state after the snapshot. `current.endsAt` tells the page how long the banner stays.
+  A page must also hide the banner at `endsAt` with its own clock, because an alarm can be late.
+  The state never has an alert after its `endsAt`.
+- When the alarm runs and no activity socket is open, the host removes the alert on stream and the line.
+- When the alerts layer goes off stream, the host removes the alert on stream and the line.
+- When the owner disconnects a platform, the host removes the alerts of that platform.
+
+The controls of the owner do these things:
+
+- **Mute** stops the alert on stream immediately and removes the line. While the mute is on, the host makes no alert.
+  Thus nothing from the muted time plays after the mute ends. The muted state survives a restart of the object.
+- **Skip** ends the alert on stream. The next alert of the line starts.
+- **Test** plays a sample alert. **Replay** plays the alert of a support event again.
+  The host finds the event of a replay in the support snapshot: the newest 50 events of the last 10 minutes.
+- A test and a replay use the three switches of the rule and not its `min`.
+  They add no support event and no row, and the sockets get no `event` message for them.
+- The host refuses a test or a replay that cannot play, with a code. It never drops one without an answer.
+
+The characters react as follows:
+
+- The character of the supporter does the action of the rule. The host gives the playground the `platform` and the user ID of the supporter.
+- The crowd cheers for a raid, for an anonymous event, for a test, and for a supporter without a character on screen.
+- One playground serves the two outputs. When an output shows only Twitch and the alert is not from Twitch, the crowd has no Twitch characters.
+  Thus the Twitch output shows no reaction to an event of a different platform. A topic credit shows in each output, so each character can react.
+
+The host has a copy of what it needs from the saved layers. The copy has the rules, and it tells whether the alerts layer is on stream.
+It also tells whether an output shows only Twitch, and what the goal counts.
+Thus an event that wakes the object reads no database. The host reads the saved layers again at these times:
+
+- When the API tells the object that the layers changed. This is one more database read for each change of the layers.
+- Before the object takes in events, when the host has no copy. Thus the first events count for the goal.
+  A goal that this read starts counts from the earliest live event of these events.
+  If this read fails, the object refuses the delivery with 503, and the provider sends it again. A YouTube poll stops before it moves to the next page.
+- Before each test, each replay, and each `goalReset`.
+- When a socket opens and the copy is older than 60 seconds.
+- When the alarm runs and the copy is older than 60 seconds, while a page listens or the goal counts.
+- 60 seconds after the last read, when an event used the copy since the read. The host sets the alarm for this read.
+  Thus a change notice that did not arrive changes the alerts and the goal for at most 60 seconds.
+
+A message to a socket never has a platform user ID. A view has the display name, and `null` for an anonymous supporter.
+The user ID of a supporter is only in the line, for the reaction of the character.
 
 ### Support events of each provider
 
@@ -596,6 +679,12 @@ The test deployment reads no platform. It uses the synthetic streams of `testStr
 | Snapshot | The last 100 chat messages, for at most 10 minutes |
 | Support snapshot | The last 50 support events, for at most 10 minutes |
 | Support events | One event for each delivery ID. The object refuses a known ID for 15 minutes. |
+| Alert on stream | One alert at a time, for 6 seconds |
+| Line of alerts | At most 100 alerts that wait: the alerts of 10 minutes. The object drops a new alert while the line is full. |
+| Replay of an alert | Only for a support event in the support snapshot: the newest 50, for at most 10 minutes |
+| Saved layers in the alert host | The host reads them again at the first alarm or new socket after 60 seconds, while a page listens or the goal counts. It also reads them 60 seconds after a read that an event used |
+| Support event IDs for the goal and the alerts | The newest 2,000, with no time limit |
+| People of a goal for chatters | At most 100,000. The count stops there. |
 | Delivery IDs, message IDs, ban keys, and support event IDs for deduplication | 15 minutes, at most 97,000 IDs |
 | IDs of deleted messages | 15 minutes, at most 97,000 IDs, in a separate table |
 | Kick message IDs that a Worker isolate forwarded | The last 10,000 |
@@ -630,6 +719,19 @@ The object keeps the ID of every delivery with at least one admitted event. It a
 admitted chat message, a content key for every admitted ban, and the ID of every admitted support event.
 Thus the IDs of 10 minutes fit in 2C + 2M + 2S = 97,000.
 The object always finds a provider retry inside the 10-minute window.
+
+The alert host keeps these items in the same storage:
+
+- The muted state, the alert on stream, and the number of tests and replays. They stay until the owner deletes the account.
+- The line: one row for each alert that waits. A row has the view and the user ID of the supporter.
+  The row goes when the alert starts. An alert waits for 10 minutes at most, because the line holds 100 alerts of 6 seconds each.
+  The mute, a disconnect of the platform, and an alarm without an open socket also remove the rows.
+- The copy of the layer settings. It has no personal data.
+- The `id` of the newest 2,000 support events. An `id` is the platform and the delivery ID. It has no user ID.
+- The count of the goal: `counts`, `value`, `startedAt`, and a random salt.
+- For a goal that counts chatters: one key for each person that the goal counted, at most 100,000.
+  A key is a part of the SHA-256 hash of the salt, the platform, and the user ID. The storage has no user ID of a chatter.
+  A new count has a new salt, and the host removes the keys of the count before.
 
 A support event has no moderation. Thus the support snapshot needs no boundary such as `since`.
 A disconnect removes the support events of its platform from the snapshot.
