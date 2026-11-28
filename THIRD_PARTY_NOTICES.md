@@ -3714,7 +3714,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-## lucide-react 1.75.0
+## lucide-react 1.77.0
 
 License: ISC
 
