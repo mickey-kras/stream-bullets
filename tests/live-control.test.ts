@@ -6,12 +6,14 @@ import type { AppEnv } from "../app/env";
 import { DEFAULT_LOCALE, loadCatalog, setLocaleSource, type Locale } from "../app/i18n";
 import { atMark } from "../app/lib/clock";
 import { MASH_COUNTDOWN_MS } from "../app/lib/mash";
+import { DEFAULT_RULES } from "../app/lib/alerts";
 import { CHAT_TEST_MS } from "../app/lib/chat-test";
 import { legacyLayersText, parseStoredLayers } from "../app/lib/overlay-legacy";
 import {
   DEFAULT_LAYERS,
   STORED_LAYERS_LENGTH,
   emptyCells,
+  onAnyOutput,
   storedLayersSchema,
   storedLayersText,
   type CellRect,
@@ -209,6 +211,21 @@ describe("stored overlay and battle values", (): void => {
       revision: 4,
     });
     expect(overlayValue({ ...row, layers: '{"v":2}' }).layers).toEqual(DEFAULT_LAYERS);
+  });
+
+  it("reads the chat commands setting of a stored row as it is, and a row without it as on", (): void => {
+    const stored = (chat: Record<string, unknown>): string => JSON.stringify({ ...JSON.parse(row.layers), chat });
+    expect(overlayValue({ ...row, layers: stored({ enabled: true }) }).layers.chat).toEqual({
+      enabled: true,
+      hideCommands: true,
+      backgroundOpacity: 100,
+    });
+    for (const hideCommands of [true, false]) {
+      const state = overlayValue({ ...row, layers: stored({ enabled: true, hideCommands }) });
+      expect(state.layers.chat.hideCommands).toBe(hideCommands);
+      // The overlay and the pages of the owner get the same value from the live room.
+      expect(overlayPublic(state).layers.chat.hideCommands).toBe(hideCommands);
+    }
   });
 
   it("converts a row from before the overlay studio: the old source on air becomes a layer", (): void => {
@@ -958,8 +975,10 @@ describe("overlay control", (): void => {
       expect(second.layers).toEqual({
         orientation: "vertical",
         chat: { enabled: true, hideCommands: false, backgroundOpacity: 45 },
-        characters: { enabled: true, timeout: 60, max: 40 },
+        characters: { enabled: true, pushEnabled: true, timeout: 60, max: 40 },
         camera: { enabled: false },
+        alerts: DEFAULT_LAYERS.alerts,
+        goal: DEFAULT_LAYERS.goal,
         twitchOnly: { horizontal: false, vertical: true },
         items: DEFAULT_LAYERS.items,
         cells: horizontal({ chat: chatCell, poll: { c: 0, r: 0, w: 12, h: 8 } }),
@@ -982,8 +1001,8 @@ describe("overlay control", (): void => {
     });
 
     it("saves the characters timeout, and does not tell the playground while channels are off", async (): Promise<void> => {
-      const saved = await overlay(await send({ action: "layers", characters: { enabled: true, timeout: 120 } }));
-      expect(saved.layers.characters).toEqual({ enabled: true, timeout: 120, max: 40 });
+      const saved = await overlay(await send({ action: "layers", characters: { enabled: true, pushEnabled: true, timeout: 120 } }));
+      expect(saved.layers.characters).toEqual({ enabled: true, pushEnabled: true, timeout: 120, max: 40 });
       expect(ingestCalls).toEqual([{ path: `/playground-config?streamerId=${page}`, body: "" }]);
       for (const timeout of [9, 601, 30.5, "60"])
         expect((await send({ action: "layers", characters: { timeout } })).status).toBe(400);
@@ -1010,7 +1029,7 @@ describe("overlay control", (): void => {
 
     it("saves the characters maximum, tells the playground and refuses a value outside 5 to 40", async (): Promise<void> => {
       const saved = await overlay(await send({ action: "layers", characters: { enabled: true, max: 12 } }));
-      expect(saved.layers.characters).toEqual({ enabled: true, timeout: 60, max: 12 });
+      expect(saved.layers.characters).toEqual({ enabled: true, pushEnabled: true, timeout: 60, max: 12 });
       expect(storedLayersSchema.parse(await storedLayers(page)).characters.max).toBe(12);
       expect(ingestCalls).toEqual([{ path: `/playground-config?streamerId=${page}`, body: "" }]);
       for (const max of [4, 41, 12.5, "12", null])
@@ -1018,8 +1037,93 @@ describe("overlay control", (): void => {
       expect(ingestCalls).toHaveLength(1);
       // A patch without the maximum keeps it.
       const kept = await overlay(await send({ action: "layers", characters: { timeout: 30 } }));
-      expect(kept.layers.characters).toEqual({ enabled: true, timeout: 30, max: 12 });
+      expect(kept.layers.characters).toEqual({ enabled: true, pushEnabled: true, timeout: 30, max: 12 });
       expect(ingestCalls).toHaveLength(2);
+    });
+
+    it("saves the alerts and the goal, stores only what is not a default, and reads them back", async (): Promise<void> => {
+      const bannerCell: CellRect = { c: 8, r: 0, w: 16, h: 3 };
+      const goalCell: CellRect = { c: 24, r: 0, w: 8, h: 2 };
+      const saved = await overlay(
+        await send({
+          action: "layers",
+          alerts: { enabled: true, rules: { bits: { min: 250 }, follow: { banner: true } } },
+          goal: { enabled: true, title: "New subscribers", target: 100 },
+          cells: { horizontal: { alerts: bannerCell, goal: goalCell } },
+        }),
+      );
+      expect(saved.layers.alerts).toEqual({
+        enabled: true,
+        rules: {
+          ...DEFAULT_RULES,
+          bits: { ...DEFAULT_RULES.bits, min: 250 },
+          follow: { ...DEFAULT_RULES.follow, banner: true },
+        },
+      });
+      expect(saved.layers.goal).toEqual({ enabled: true, title: "New subscribers", counts: "subs", target: 100 });
+      expect(saved.layers.cells).toEqual(horizontal({ alerts: bannerCell, goal: goalCell }));
+      expect(onAnyOutput(saved.layers, "alerts")).toBe(true);
+      expect(onAnyOutput(saved.layers, "goal")).toBe(true);
+      expect(await storedLayers(page)).toMatchObject({
+        alerts: { enabled: true, rules: { bits: { min: 250 }, follow: { banner: true } } },
+        goal: { enabled: true, title: "New subscribers", target: 100 },
+        cells: { horizontal: { alerts: bannerCell, goal: goalCell } },
+      });
+      expect(storedLayersSchema.parse(await storedLayers(page))).toEqual(saved.layers);
+      const read = await body<{ overlay: OverlayState }>(await call("GET", "overlay", { user: "owner" }));
+      expect(read.overlay).toEqual(saved);
+      // A patch with one field of one rule keeps each other field.
+      const next = await overlay(
+        await send({ action: "layers", alerts: { rules: { bits: { chat: false } } }, goal: { counts: "bits" } }),
+      );
+      expect(next.layers.alerts.rules.bits).toEqual({ min: 250, banner: true, chat: false, character: true });
+      expect(next.layers.alerts.rules.follow.banner).toBe(true);
+      expect(next.layers.goal).toEqual({ enabled: true, title: "New subscribers", counts: "bits", target: 100 });
+      // With each setting at its default again, the stored text has no alerts and no goal.
+      const usual = await overlay(
+        await send({
+          action: "layers",
+          alerts: { enabled: false, rules: { bits: { min: 100, chat: true }, follow: { banner: false } } },
+          goal: { enabled: false, title: "", counts: "subs", target: 25 },
+        }),
+      );
+      expect(usual.layers.alerts).toEqual(DEFAULT_LAYERS.alerts);
+      expect(usual.layers.goal).toEqual(DEFAULT_LAYERS.goal);
+      const stored = await storedLayers(page);
+      expect(stored).not.toHaveProperty("alerts");
+      expect(stored).not.toHaveProperty("goal");
+      expect(stored).toMatchObject({ cells: { horizontal: { alerts: bannerCell, goal: goalCell } } });
+      // Each change goes to the live room, and the object of the page reads the saved layers again.
+      expect(roomCalls).toHaveLength(3);
+      expect(ingestCalls).toHaveLength(3);
+    });
+
+    it("refuses a wrong rule, a wrong goal, and a cell of the alerts or the goal that is not valid", async (): Promise<void> => {
+      const refused: Record<string, unknown>[] = [
+        { alerts: { rules: { follow: { min: 5 } } } },
+        { alerts: { rules: { bits: { min: 0 } } } },
+        { alerts: { rules: { bits: { min: 1_000_001 } } } },
+        { alerts: { rules: { tip: { banner: true } } } },
+        { alerts: { rules: { bits: { sound: true } } } },
+        { alerts: { volume: 3 } },
+        { goal: { target: 0 } },
+        { goal: { target: 10_000_001 } },
+        { goal: { counts: "likes" } },
+        { goal: { title: "x".repeat(61) } },
+        { goal: { title: "two\nlines" } },
+        { goal: { value: 17 } },
+        { cells: { horizontal: { alerts: { c: 0, r: 0, w: 7, h: 3 } } } },
+        { cells: { horizontal: { goal: { c: 0, r: 0, w: 8, h: 1 } } } },
+        { cells: { horizontal: { alerts: { c: 8, r: 0, w: 16, h: 3 }, goal: { c: 20, r: 2, w: 8, h: 2 } } } },
+      ];
+      for (const patch of refused)
+        expect((await send({ action: "layers", ...patch })).status, JSON.stringify(patch)).toBe(400);
+      expect(roomCalls).toEqual([]);
+      // A cell over the saved cell of the other layer.
+      await send({ action: "layers", cells: { horizontal: { alerts: { c: 8, r: 0, w: 16, h: 3 } } } });
+      const over = await send({ action: "layers", cells: { horizontal: { goal: { c: 20, r: 2, w: 8, h: 2 } } } });
+      expect(over.status).toBe(400);
+      expect(await body(over)).toEqual({ error: "Layers must not overlap." });
     });
 
     it("refuses cells outside the grid, below the minimum or over each other, and unknown fields", async (): Promise<void> => {
@@ -1051,6 +1155,9 @@ describe("overlay control", (): void => {
         { content: { enabled: false } },
         { orientation: "square" },
         { chat: { enabled: "yes" } },
+        { chat: { hideCommands: "true" } },
+        { chat: { hideCommands: 1 } },
+        { chat: { hideCommands: null } },
         { chat: { backgroundOpacity: 3 } },
         { chat: { backgroundOpacity: "50" } },
         { layers: { chat: { enabled: true } } },
@@ -1217,7 +1324,7 @@ describe("overlay control", (): void => {
         await send({
           action: "layers",
           chat: { enabled: true, hideCommands: false, backgroundOpacity: 0 },
-          characters: { enabled: true, timeout: 600 },
+          characters: { enabled: true, pushEnabled: true, timeout: 600 },
           items,
           cells: { horizontal, vertical: cells(4) },
         }),
@@ -1276,7 +1383,7 @@ describe("overlay control", (): void => {
       await emptyOverlay(otherPage);
       await send({ action: "layers", chat: { enabled: true }, cells: { horizontal: { chat: chatCell } } });
       const other = await overlay(await send({ action: "layers", characters: { enabled: true } }, "other"));
-      expect(other.layers).toEqual({ ...DEFAULT_LAYERS, characters: { enabled: true, timeout: 60, max: 40 } });
+      expect(other.layers).toEqual({ ...DEFAULT_LAYERS, characters: { enabled: true, pushEnabled: true, timeout: 60, max: 40 } });
       expect((await getOverlayState(env, page)).layers).toEqual({
         ...DEFAULT_LAYERS,
         chat: { enabled: true, hideCommands: true, backgroundOpacity: 100 },

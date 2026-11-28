@@ -1,14 +1,4 @@
-import {
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useSyncExternalStore,
-  type CSSProperties,
-  type ReactNode,
-  type RefObject,
-} from "react";
+import { memo, useCallback, useMemo, useRef, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { t } from "../../i18n";
 import type { ActivityChat, ActivityPlatform } from "../../lib/activity";
 import { chatTestLeft } from "../../lib/chat-test";
@@ -30,10 +20,13 @@ import {
   type PlacedContent,
 } from "../../lib/overlay-layers";
 import type { ActivityFeed } from "./activity-feed";
+import { AlertsLayer } from "./alerts-layer";
 import { CharactersLayer } from "./characters/characters-layer";
 import { usePlaygroundSource } from "./characters/use-playground";
 import { viewForPlatform, type PlaygroundView } from "./characters/view";
 import { ChatLayer } from "./chat-layer";
+import { useFitScale } from "./fit-stage";
+import { GoalLayer } from "./goal-layer";
 import { OverlayStage, type OverlayScene } from "./overlay-stage";
 import { useChat } from "./use-chat";
 import { useDesignScale } from "./use-design-scale";
@@ -76,7 +69,12 @@ export function CharactersSlot({ feed, rect, platform = null }: Readonly<Overlay
       columns={rect.w / CELL_PX}
       rows={rect.h / CELL_PX}
       source={source}
-      badges={{ test: t("overlay.characters.badgeTest"), paused: t("overlay.characters.badgePaused") }}
+      badges={{
+        test: t("overlay.characters.badgeTest"),
+        paused: t("overlay.characters.badgePaused"),
+        highest: t("overlay.characters.highest"),
+        blocks: t("overlay.characters.blocks"),
+      }}
       onError={charactersFailed}
     />
   );
@@ -87,10 +85,18 @@ export function usesCharacters(layers: OverlayLayers, only: OverlayLayer | null)
   return CHARACTERS_READY && (only === null || only === "characters") && onStream(layers, "characters");
 }
 
+/**
+ * Whether a page that renders `only` (null: the composition) shows the alerts layer or the goal layer of its output.
+ * The two layers are part of `content`, and they read the alerts and the count of the goal from the activity feed.
+ */
+export function usesAlerts(layers: OverlayLayers, only: OverlayLayer | null): boolean {
+  return (only === null || only === "content") && (onStream(layers, "alerts") || onStream(layers, "goal"));
+}
+
 /** Whether a page that renders `only` (null: the composition) needs the activity feed for an enabled layer. */
 export function usesActivityFeed(layers: OverlayLayers, only: OverlayLayer | null): boolean {
   const chat: boolean = (only === null || only === "chat") && onStream(layers, "chat");
-  return chat || usesCharacters(layers, only);
+  return chat || usesCharacters(layers, only) || usesAlerts(layers, only);
 }
 
 /**
@@ -185,43 +191,6 @@ function LayerBox({
       </div>
     </div>
   );
-}
-
-/**
- * Scales the content in a cell down so that it fits inside the cell (`--ov-fit` on `box`, never above 1). It
- * compares the content with its stage; both scale together, so the ratio does not depend on the scale already set.
- * It measures again when the content or the cell changes size and when the content changes.
- */
-function useFitScale(box: RefObject<HTMLDivElement | null>): void {
-  useEffect(() => {
-    const element: HTMLDivElement | null = box.current;
-    if (!element) return;
-    const measure = (): void => {
-      const stage: Element | null = element.firstElementChild;
-      const content: Element | null | undefined = stage?.firstElementChild;
-      if (!stage || !content) return;
-      const outer: DOMRect = stage.getBoundingClientRect();
-      const inner: DOMRect = content.getBoundingClientRect();
-      const byWidth: number = inner.width > 0 ? outer.width / inner.width : 1;
-      const byHeight: number = inner.height > 0 ? outer.height / inner.height : 1;
-      element.style.setProperty("--ov-fit", String(Math.min(1, byWidth, byHeight)));
-    };
-    const sizes = new ResizeObserver(measure);
-    const watch = (): void => {
-      sizes.disconnect();
-      sizes.observe(element);
-      const content: Element | null | undefined = element.firstElementChild?.firstElementChild;
-      if (content) sizes.observe(content);
-      measure();
-    };
-    const changes = new MutationObserver(watch);
-    changes.observe(element, { childList: true, subtree: true, characterData: true });
-    watch();
-    return (): void => {
-      sizes.disconnect();
-      changes.disconnect();
-    };
-  }, [box]);
 }
 
 /** The content of a layer inside its cell: centred, and scaled down to fit when it is larger than the cell. */
@@ -349,8 +318,11 @@ const ChatSlot = memo(function ChatSlot({
  * per-layer source: the chat or the characters fill the viewport, and `content` is the content layers at their
  * cells. Null renders them all.
  * `testUntil` is the server time when the chat test ends. `charactersFeed` replaces `feed` for the characters: the
- * editor preview plays sample chat but shows the live playground. The camera frame is part of `content`.
- * `cameraHint` marks the window of the camera frame for the owner: a preview sets it, and the overlay page never.
+ * editor preview plays sample chat but shows the live playground. The camera frame, the alerts and the goal are part
+ * of `content`. `cameraHint` marks the window of the camera frame for the owner: a preview sets it, and the overlay
+ * page never.
+ * The alerts layer shows the alert on stream of `feed`, and the goal layer the count of `feed`. A preview with
+ * `samples` reads no feed: its alerts layer shows a sample banner, and its goal layer the count 0.
  */
 export function OverlayComposition({
   scene,
@@ -379,8 +351,10 @@ export function OverlayComposition({
   const chat: LayerRect | null = onStream(layers, "chat") ? layerPixels(layers, "chat") : null;
   const characters: LayerRect | null = onStream(layers, "characters") ? layerPixels(layers, "characters") : null;
   const camera: LayerRect | null = onStream(layers, "camera") ? layerPixels(layers, "camera") : null;
-  // An output that shows Twitch only drops the chat and the characters of the other platforms. A preview does the
-  // same, so the owner sees what the output shows.
+  const alerts: LayerRect | null = onStream(layers, "alerts") ? layerPixels(layers, "alerts") : null;
+  const goal: LayerRect | null = onStream(layers, "goal") ? layerPixels(layers, "goal") : null;
+  // An output that shows Twitch only drops the chat, the characters and the alerts of the other platforms. A preview
+  // does the same, so the owner sees what the output shows. The goal shows on each output.
   const platform: ActivityPlatform | null = shownPlatform(layers);
   const chatSamples: readonly ActivityChat[] | undefined = useMemo(
     () => (platform && samples ? samples.filter((row: ActivityChat): boolean => row.platform === platform) : samples),
@@ -397,6 +371,16 @@ export function OverlayComposition({
       {shows("content") && camera && (
         <LayerBox layer="camera" rect={camera} frame={frame} alone={false}>
           <CameraFrame hint={cameraHint} />
+        </LayerBox>
+      )}
+      {shows("content") && alerts && (
+        <LayerBox layer="alerts" rect={alerts} frame={frame} alone={false}>
+          <AlertsLayer feed={feed} serverOffset={serverOffset} platform={platform} sample={samples !== undefined} />
+        </LayerBox>
+      )}
+      {shows("content") && goal && (
+        <LayerBox layer="goal" rect={goal} frame={frame} alone={false}>
+          <GoalLayer feed={feed} goal={layers.goal} />
         </LayerBox>
       )}
       {shows("chat") && chat && (

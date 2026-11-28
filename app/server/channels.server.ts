@@ -46,10 +46,11 @@ export interface ChannelConnectionView {
     updatedAt: number;
   } | null;
   capabilities: (typeof PLATFORM_CAPABILITIES)[ActivityPlatform];
-  /** Whether the connection reads support events. False without a connection. */
+  /**
+   * Whether the connection reads support events. False without a connection, for a connection whose authorization
+   * has no scopes for them, and after the provider refused their subscriptions.
+   */
   support: boolean;
-  /** The permissions that the provider asks the streamer for when the streamer turns support events on. */
-  supportScopes: string[];
 }
 
 function randomToken(): string {
@@ -68,7 +69,10 @@ export function redirectUri(env: AppEnv, platform: ActivityPlatform): string {
   return `${getOrigin(env)}/channels/callback/${platform}`;
 }
 
-/** Every platform with its connection state. Never includes tokens or the scopes that a connection has. */
+/**
+ * Every platform with its connection state. Never includes tokens or the scopes that a connection has. `support`
+ * tells only whether the connection reads support events (`support_events`).
+ */
 export async function listConnections(env: AppEnv, streamerId: string): Promise<ChannelConnectionView[]> {
   const { results } = await env.DB.prepare(
     `SELECT platform, display_name, status, status_code, created_at, updated_at, last_event_at, support_events
@@ -103,7 +107,6 @@ export async function listConnections(env: AppEnv, streamerId: string): Promise<
         : null,
       capabilities: PLATFORM_CAPABILITIES[platform],
       support: row?.support_events === 1,
-      supportScopes: [...SUPPORT_SCOPES[platform]],
     };
   });
 }
@@ -118,27 +121,22 @@ const stateValueSchema = z.object({
   streamerId: z.string().min(1).max(100),
   platform: platformSchema,
   codeVerifier: z.string().regex(STATE_PATTERN),
-  // A state from before the support events has no value: it asked for the scopes of chat only.
-  support: z.boolean().default(false),
 });
 
 /**
  * Starts a connection: stores a single-use state (only its SHA-256 is the lookup key) with the PKCE verifier,
- * bound to the account and page, and returns the provider's authorization URL. `support` asks for the scopes of
- * support events too. Without a value, the connection of the page keeps its choice: a reconnect of a channel with
- * support events asks for their scopes again.
+ * bound to the account and page, and returns the provider's authorization URL. The URL asks for the scopes of chat
+ * and of support events at each connect and reconnect.
  */
 export async function startConnect(
   env: AppEnv,
   userId: string,
   streamerId: string,
   platform: ActivityPlatform,
-  options: { support?: boolean; now?: number } = {},
+  now: number = Date.now(),
 ): Promise<string> {
   if (!tokenKeysConfigured(env))
     throw new HttpError(503, "Channel connections are not configured.", "platform_unavailable");
-  const now: number = options.now ?? Date.now();
-  const support: boolean = options.support ?? (await supportChosen(env, streamerId, platform));
   const state = randomToken();
   const codeVerifier = randomToken();
   const challenge = toBase64Url(await digest(codeVerifier));
@@ -146,7 +144,6 @@ export async function startConnect(
     state,
     redirectUri: redirectUri(env, platform),
     codeChallenge: challenge,
-    support,
   });
   await env.DB.prepare(
     "INSERT INTO verification (id, identifier, value, expires_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
@@ -154,7 +151,7 @@ export async function startConnect(
     .bind(
       crypto.randomUUID(),
       await stateIdentifier(state),
-      JSON.stringify({ userId, streamerId, platform, codeVerifier, support }),
+      JSON.stringify({ userId, streamerId, platform, codeVerifier }),
       now + STATE_TTL_MS,
       now,
       now,
@@ -163,66 +160,14 @@ export async function startConnect(
   return url;
 }
 
-/** Whether the connection of the page and platform has support events on. False without a connection. */
-async function supportChosen(env: AppEnv, streamerId: string, platform: ActivityPlatform): Promise<boolean> {
-  const chosen = await env.DB.prepare(
+/** Whether the connection of the page and platform reads support events. False without a connection. */
+async function readsSupport(env: AppEnv, streamerId: string, platform: ActivityPlatform): Promise<boolean> {
+  const reads = await env.DB.prepare(
     "SELECT support_events FROM channel_connections WHERE streamer_id=? AND platform=?",
   )
     .bind(streamerId, platform)
     .first<number>("support_events");
-  return chosen === 1;
-}
-
-/**
- * Turns the support events of a connection on or off. A channel whose authorization has no scopes for them gets
- * `url`: the streamer gives the scopes at the provider, and the callback turns the events on. Else the choice is
- * stored, and the ingest object makes or deletes the provider subscriptions of support events. `support` is the
- * state after that: it stays false when the provider refused the subscriptions.
- */
-export async function setSupport(
-  env: AppEnv,
-  userId: string,
-  streamerId: string,
-  platform: ActivityPlatform,
-  on: boolean,
-): Promise<{ url: string | null; support: boolean }> {
-  const row = await env.DB.prepare(
-    `SELECT id, scopes FROM channel_connections
-      WHERE streamer_id=? AND platform=? AND status_code IS NOT 'disconnecting'`,
-  )
-    .bind(streamerId, platform)
-    .first<{ id: string; scopes: string }>();
-  if (!row) throw new HttpError(404, "This channel is not connected.");
-  if (on && !supportGranted(platform, row.scopes.split(" ")))
-    return { url: await startConnect(env, userId, streamerId, platform, { support: true }), support: false };
-  const [update] = await env.DB.batch([
-    env.DB.prepare(
-      `UPDATE channel_connections SET support_events=?1
-        WHERE id=?2 AND support_events<>?1 AND status_code IS NOT 'disconnecting'`,
-    ).bind(on ? 1 : 0, row.id),
-    auditStatement(
-      env,
-      {
-        targetKind: "streamer",
-        targetId: streamerId,
-        streamerId,
-        action: on ? "channel_support_on" : "channel_support_off",
-        actorId: userId,
-        metadata: { platform },
-      },
-      { afterChange: true },
-    ),
-  ]);
-  // No change: the choice was stored before, and its subscriptions are the work of the repair.
-  if (update.meta.changes === 0) return { url: null, support: await supportChosen(env, streamerId, platform) };
-  try {
-    const response = await callIngest(env, streamerId, "support", { platform });
-    if (!response.ok) throw new Error(`Ingest answered ${response.status}`);
-  } catch (error: unknown) {
-    // The choice is stored: the next subscription check makes or deletes the subscriptions.
-    logError("channel_support_failed", error);
-  }
-  return { url: null, support: on && (await supportChosen(env, streamerId, platform)) };
+  return reads === 1;
 }
 
 /** Takes the state row: it works once, before it expires, and only for its platform. */
@@ -282,13 +227,12 @@ export async function completeConnect(
     if (!(error instanceof ReauthRequired)) logError("channel_callback_failed", error);
     return error instanceof ReauthRequired ? "denied" : "failed";
   }
-  const wanted = { userId, streamerId: streamer.id, support: state.support };
-  return connectAuthorizedChannel(env, wanted, platform, tokens, identity, now);
+  return connectAuthorizedChannel(env, { userId, streamerId: streamer.id }, platform, tokens, identity, now);
 }
 
 async function connectAuthorizedChannel(
   env: AppEnv,
-  wanted: { userId: string; streamerId: string; support: boolean },
+  wanted: { userId: string; streamerId: string },
   platform: ActivityPlatform,
   tokens: Awaited<ReturnType<typeof exchangeCode>>,
   identity: { externalId: string; displayName: string },
@@ -299,8 +243,9 @@ async function connectAuthorizedChannel(
     await refuseTokens(env, platform, tokens, identity.externalId);
     return "scope_missing";
   }
-  // The scopes of support events are optional: without them the channel connects and reads chat.
-  const support: boolean = wanted.support && supportGranted(platform, tokens.scopes);
+  // Each connection reads support events. Their scopes are optional: without them the channel connects, reads
+  // chat only, and its card asks the owner to reconnect.
+  const support: boolean = supportGranted(platform, tokens.scopes);
   const owner = await env.DB.prepare(
     `SELECT id, streamer_id, external_id, status_code FROM channel_connections
       WHERE platform=? AND (external_id=? OR streamer_id=?)`,
@@ -377,9 +322,9 @@ async function connectAuthorizedChannel(
       .parse(await response.json().catch((): null => null));
     // A refused subscription keeps the row with its error, so the owner can see it and reconnect.
     if (result.status !== "active") return "failed";
-    // The provider can also refuse the subscriptions of support events: the object then turned them off.
-    const denied: boolean = wanted.support && !(await supportChosen(env, streamerId, platform));
-    return denied ? "support_denied" : "connected";
+    // The provider can also refuse the subscriptions of support events: the object then cleared `support_events`.
+    const reads: boolean = support && (await readsSupport(env, streamerId, platform));
+    return reads ? "connected" : "support_denied";
   } catch (error: unknown) {
     return abandonConnect(
       env,

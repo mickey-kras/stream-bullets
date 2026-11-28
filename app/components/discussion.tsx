@@ -781,8 +781,12 @@ export function Discussion({
         }
         // A thread that only a link brought in gets the replies the reader had loaded in it too.
         const linked = values.filter((thread: CommentThread) => !listed.has(thread.id));
-        const restored = await restoreReplies(linked, loadedReplies.current, controller.signal);
-        values = values.map((thread: CommentThread) => restored.find((value) => value.id === thread.id) ?? thread);
+        const restored = new Map<string, CommentThread>(
+          (await restoreReplies(linked, loadedReplies.current, controller.signal)).map(
+            (thread: CommentThread): [string, CommentThread] => [thread.id, thread],
+          ),
+        );
+        values = values.map((thread: CommentThread) => restored.get(thread.id) ?? thread);
         if (controller.signal.aborted) return;
         pages.current = result.pages;
         setThreads(values);

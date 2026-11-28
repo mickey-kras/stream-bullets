@@ -27,7 +27,27 @@
 .ov-step .ov-url {
   margin-top: 0;
 }
-/* The Channels section: the status line opens the channel panel. */
+/* A title row with the buttons of the step at its right edge. On a narrow screen the buttons go below the title. */
+.ov-step-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 12px;
+}
+.ov-step-head .ov-step-title {
+  margin: 0;
+}
+.ov-step-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ov-step-tools button {
+  min-height: 44px;
+}
+/* A disclosure with a gold summary line: the guides of the overlay links. */
 .ch-details > summary {
   width: fit-content;
   max-width: 100%;
@@ -40,15 +60,34 @@
 .ch-details[open] > summary {
   margin-bottom: 4px;
 }
-/* ---------- Step 2: the overlay studio (composition-editor.tsx) ----------
-   Wide: the palette, the grid and the settings of the selected layer side by side. Medium: the palette above the
-   grid and the settings. Narrow: one column, in that order. */
+/* ---------- Step 1: the overlay studio (composition-editor.tsx) ----------
+   Wide: the palette beside the work area. Medium and narrow: the palette above it. The work area has the grid, the
+   settings of the selected layer and the help for the grid. The settings are below the grid of the horizontal
+   output and beside the grid of the vertical output. On a narrow screen they are always below the grid. */
 .ov-studio {
   display: grid;
-  grid-template-columns: 13rem minmax(0, 1fr) minmax(16rem, 19rem);
+  grid-template-columns: 13rem minmax(0, 1fr);
   gap: 16px;
   align-items: start;
   margin-top: 12px;
+}
+.ov-work {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+  min-width: 0;
+}
+/* The first column has the width of the vertical frame (see .ov-comp-frame below), so the settings are beside it. */
+.ov-work[data-orientation="vertical"] {
+  grid-template-columns: min(420px, max(200px, calc((100dvh - 140px) * 9 / 16))) minmax(0, 1fr);
+}
+.ov-work > .ov-grid-help {
+  grid-column: 1 / -1;
+}
+/* Below the wide grid of the horizontal output, a control of the settings does not fill the full width. */
+.ov-work[data-orientation="horizontal"] .ov-props > * {
+  max-width: 40rem;
 }
 .ov-studio-side {
   display: grid;
@@ -61,14 +100,11 @@
 }
 @media (max-width: 75em) {
   .ov-studio {
-    grid-template-columns: minmax(0, 1fr) minmax(16rem, 19rem);
-  }
-  .ov-palette {
-    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 @media (max-width: 56.25em) {
-  .ov-studio {
+  .ov-work[data-orientation="vertical"] {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -79,6 +115,17 @@
 }
 .ov-comp-help {
   margin: 0;
+}
+/* The help for the grid, closed until the owner opens it (GridHelp in layout-grid.tsx). */
+.ov-grid-help {
+  min-width: 0;
+  border-top: 1px solid var(--line);
+}
+.ov-grid-help p {
+  max-width: 70ch;
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 0.9375rem;
 }
 
 /* ---------- Preview background ---------- */
@@ -133,7 +180,8 @@
 
 /* ---------- Layout grid (layout-grid.tsx) ----------
    The grid boxes sit in the scaler in design pixels: a cell is 60 px. Lines and labels divide by --ov-scale. */
-/* The toolbar: orientation, preview background, the test and the live note. Its controls have one height. */
+/* The toolbar, in one line on a wide screen: the output tabs, the layout list, and the icon buttons at the right
+   edge. Its controls have one height. On a narrow screen the parts wrap, and the icon buttons stay at the right. */
 .ov-comp-bar {
   display: flex;
   flex-wrap: wrap;
@@ -141,18 +189,75 @@
   gap: 12px;
   margin-bottom: 8px;
 }
-/* The layouts of the output: the list and its buttons, in one row above the grid. */
+/* The layouts of the output (layout-picker.tsx): the label, the list, and the icon buttons. */
+.ov-layout {
+  display: flex;
+  flex: 1 1 20rem;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  min-width: 0;
+}
 .ov-layout .field-label {
   margin: 0;
 }
 .ov-layout .ov-layout-select {
   flex: 1 1 14rem;
   max-width: 24rem;
+  min-width: 0;
 }
-.ov-layout button {
-  display: inline-flex;
+/* A long layout name wraps in the list. It is not cut. The list is 44 px high with one line, as the other controls
+   of the toolbar are, and it grows with the lines of the name. A name without a space breaks inside the word. */
+.ov-layout .cselect-trigger {
+  height: auto;
+  min-height: 44px;
+  padding-block: 8px;
+  text-align: start;
+}
+.ov-layout .cselect-value {
+  overflow: visible;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  text-overflow: clip;
+}
+/* The icon buttons: save as a new layout, reset to the preset, and the test. */
+.ov-comp-tools {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+  margin-inline-start: auto;
+}
+.ov-comp-tools .icon-button {
+  width: 44px;
+  min-width: 44px;
+}
+/* The line below the toolbar: what the output tabs do, the preview background, and the note that changes are
+   live. */
+.ov-comp-notes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+.ov-comp-notes .ov-comp-note {
+  flex: 1 1 20rem;
+}
+.ov-comp-notes .ov-seg-field {
+  margin: 0;
+}
+.ov-comp-notes .seg {
+  flex-wrap: nowrap;
+}
+.ov-comp-notes .seg button {
+  height: 44px;
+  min-height: 44px;
+  padding-block: 0;
+}
+.ov-comp-notes .ov-live-note {
+  margin: 0;
 }
 .ov-layout-form {
   display: grid;
@@ -418,14 +523,24 @@
   background: var(--gold);
   color: var(--ink);
 }
+/* A group of layers: a details element that starts open. Its summary has the name of the group and the number of
+   its layers, and is 44 px high for touch. */
+.ov-palette-group > summary {
+  padding: 12px 0;
+  color: var(--muted);
+  font: 600 0.75rem / 1.7 var(--body);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.ov-palette-group > summary::marker {
+  color: var(--gold);
+}
 /* One chip for each layer: a column beside the grid on a wide screen, rows above it on a narrower one. */
 .ov-palette-chips {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
   gap: 6px;
-}
-.ov-palette .ov-comp-note {
-  margin-top: 8px;
 }
 /* A chip is 44 px high for touch. A chip of a layer off the grid does not scroll the page under a finger: a drag
    carries it to the grid. */
@@ -475,17 +590,21 @@
   /* The grid under the chip stays in view, and the chip does not move back with a transition. */
   transition: none;
 }
-/* The test button with its status beside it (studio-test.tsx). */
+/* The test button (studio-test.tsx) is one of the icon buttons of the toolbar: its box does not show, so the
+   button is in the row of the other buttons. The time left of a test that runs shows before the buttons. */
 .ov-comp-test {
-  display: flex;
-  flex: 1 1 18rem;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px 12px;
-  min-width: 0;
+  display: contents;
 }
-.ov-comp-test .ov-comp-note {
-  flex: 1 1 14rem;
+.ov-comp-test [data-test-status]:not(.sr-only) {
+  order: -1;
+  flex: 0 1 auto;
+  text-align: end;
+}
+/* A test that runs: the stop button has the colors of a pressed control. */
+.ov-comp-test [data-test-toggle][data-running] {
+  border-color: var(--gold-lo);
+  background: linear-gradient(110deg, var(--gold-hi), var(--gold-lo));
+  color: var(--on-gold);
 }
 
 /* ---------- Settings of the selected layer (layer-properties.tsx) ---------- */
@@ -657,9 +776,28 @@
   font-size: 0.875rem;
 }
 
-/* ---------- Per-layer overlay URLs (overlay-link.tsx) ---------- */
-/* The link of one output, then the OBS guide and the Twitch switches. A line divides the parts. */
-.ov-url-output,
+/* ---------- The links for OBS (overlay-link.tsx) ---------- */
+/* One card for each output, side by side when the width allows it. */
+.ov-url-outputs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18.75rem), 1fr));
+  gap: 12px;
+}
+.ov-url-output {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--card);
+}
+.ov-url-name {
+  margin: 0;
+  font: 600 1.0625rem / 1.2 var(--heading);
+}
+/* The OBS guide, the dock and the Twitch switches. A line divides the parts. */
 .ov-url-guide,
 .ov-url-dock,
 .ov-url-twitch {
@@ -677,21 +815,4 @@
 .ov-url-guide section {
   display: grid;
   gap: 8px;
-}
-.ov-url-layers {
-  display: grid;
-  gap: 8px;
-}
-.ov-url-layer {
-  display: grid;
-  gap: 4px;
-}
-.ov-url .ov-url-caption {
-  font-size: 0.8125rem;
-  font-weight: 600;
-}
-.ov-url .ov-url-size {
-  margin: 0;
-  font-size: 0.8125rem;
-  font-variant-numeric: tabular-nums;
 }

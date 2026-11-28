@@ -10,6 +10,7 @@ import {
   defaultLayers,
   layersSql,
   noKeysSql,
+  noLinkQuotaSql,
   placeLayer,
   saved,
   settings,
@@ -125,27 +126,36 @@ async function liveSockets(page: Page, count: number, key: string | null = null)
 }
 
 test("the owner copies the private overlay link, and a new link revokes the old one", async ({ browser }) => {
+  await runSql("overlay-control-link-quota", [noLinkQuotaSql]);
   const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 93));
   await owner.grantPermissions(["clipboard-read", "clipboard-write"], { origin });
   const control = await newPage(owner);
   await control.goto("/tools?view=overlay");
-  // Step 2 shows the link controls without a click.
-  await expect(control.getByRole("region", { name: "2 Add to OBS" })).toBeVisible();
+  // Step 2 shows the link buttons in its title row, without a click.
+  const step = control.getByRole("region", { name: "2 Add to OBS" });
+  await expect(step).toBeVisible();
   // Each output has its own link. This is the link of the horizontal output.
   const link = control.getByRole("region", { name: "Horizontal output" });
-  await link.getByRole("button", { name: "Create overlay link" }).click();
+  await step.getByRole("button", { name: "Create links" }).click();
+  await expect(control.locator(".sb-toast")).toHaveText("New overlay links ready. Copy them into OBS.");
   const field = link.locator("[data-ov-url]");
   await expect(field).toHaveValue(/^http:\/\/localhost:5173\/@feature_host\/overlay\?key=[\w-]{43}$/);
-  await link.getByRole("button", { name: "Copy overlay URL: Horizontal output" }).click();
+  // The copy button of the card shows an icon only.
+  const copy = link.getByRole("button", { name: "Copy overlay URL: Horizontal output" });
+  await expect(copy).toHaveText("");
+  await expect(copy).toHaveAttribute("title", "Copy overlay URL: Horizontal output");
+  await copy.click();
   const oldUrl: string = await control.evaluate(() => navigator.clipboard.readText());
   expect(oldUrl).toBe(await field.inputValue());
   const oldKey: string = new URL(oldUrl).searchParams.get("key") ?? "";
-  // After a reload the link is hidden, and the owner can see the same link again.
+  // After a reload the links do not show, and the owner can see the same link again.
   await control.reload();
   await expect(field).toHaveCount(0);
-  await link.getByRole("button", { name: "Show link", exact: true }).click();
+  await expect(step.locator("[data-ov-private]")).toHaveCount(0);
+  await step.getByRole("button", { name: "Show links" }).click();
   await expect(field).toHaveValue(oldUrl);
-  await expect(link.getByRole("button", { name: "Show link", exact: true })).toHaveCount(0);
+  await expect(step.getByRole("button", { name: "Show links" })).toHaveCount(0);
+  await expect(step.getByRole("button", { name: "Hide links" })).toBeFocused();
 
   // OBS has no session; its network already holds ten guest sockets.
   const obs = await browser.newContext({
@@ -165,11 +175,15 @@ test("the owner copies the private overlay link, and a new link revokes the old 
   const sources = link.locator("[data-ov-sources]");
   await expect(sources).toHaveText("OBS is connected: 1 source.");
 
-  await link.getByRole("button", { name: "Regenerate link" }).click();
-  const confirm = control.getByRole("dialog", { name: "Regenerate the overlay link?" });
-  await expect(confirm).toContainText("OBS");
-  await expect(confirm).toContainText("The link of the other output keeps working.");
-  await confirm.getByRole("button", { name: "Regenerate link" }).click();
+  // The server takes 6 link requests each minute. This spec sends more: start the count again.
+  await runSql("overlay-control-link-quota-again", [noLinkQuotaSql]);
+  await step.getByRole("button", { name: "Regenerate links" }).click();
+  const confirm = control.getByRole("dialog", { name: "Regenerate the overlay links?" });
+  await expect(confirm).toContainText(
+    "The old links of the two outputs stop working right away. Paste the new links into the Browser sources in OBS.",
+  );
+  await confirm.getByRole("button", { name: "Regenerate links" }).click();
+  await expect(confirm).toHaveCount(0);
   await expect(field).not.toHaveValue(oldUrl);
   const newKey: string = new URL(await field.inputValue()).searchParams.get("key") ?? "";
   // The revoked link becomes a guest; the full network must refuse it.
@@ -181,30 +195,35 @@ test("the owner copies the private overlay link, and a new link revokes the old 
   await runSql("overlay-control-link-restore", [noKeysSql]);
 });
 
-test("each output has its own link: both are on stream, and a new link for one leaves the other connected", async ({
+test("each output has its own link: both are on stream, and new links stop the old link of each output", async ({
   browser,
 }) => {
   // The poll is on the grid of the two outputs, at different cells. The editor shows the horizontal output.
   const tall = { c: 2, r: 2, w: 14, h: 8 };
   await runSql("overlay-control-outputs", [
     noKeysSql,
+    noLinkQuotaSql,
     layersSql({ cells: { horizontal: { poll: POLL_CELL }, vertical: { poll: tall } } }),
   ]);
   const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 97));
   const control = await newPage(owner);
   await control.goto("/tools?view=overlay");
+  const step = control.getByRole("region", { name: "2 Add to OBS" });
   const wide = control.getByRole("region", { name: "Horizontal output" });
   const high = control.getByRole("region", { name: "Vertical output" });
   await expect(wide.locator("[data-ov-sources]")).toHaveCount(0);
-  await wide.getByRole("button", { name: "Create overlay link" }).click();
+  // Only the horizontal output has a link, as a page from before the two outputs has.
+  expect((await owner.request.post("/api/overlay/key", { data: { output: "horizontal" } })).status()).toBe(200);
+  await control.reload();
+  await expect(wide.locator("[data-ov-sources]")).toHaveAttribute("data-ov-sources", "0");
+  await expect(high.locator("[data-ov-sources]")).toHaveCount(0);
+  // "Show links" shows the horizontal link and makes the link that the vertical output does not have.
+  await step.getByRole("button", { name: "Show links" }).click();
   await expect(wide.locator("[data-ov-url]")).toHaveValue(/\?key=[\w-]{43}$/);
   const wideUrl: string = await wide.locator("[data-ov-url]").inputValue();
-  await high.getByRole("button", { name: "Create overlay link" }).click();
   await expect(high.locator("[data-ov-url]")).toHaveValue(/\?key=[\w-]{43}$/);
   const highUrl: string = await high.locator("[data-ov-url]").inputValue();
   expect(highUrl).not.toBe(wideUrl);
-  // The new vertical link did not change the horizontal link.
-  await expect(wide.locator("[data-ov-url]")).toHaveValue(wideUrl);
   // No source uses a link yet. The room can hold the time of a source of an earlier spec.
   await expect(wide.locator("[data-ov-sources]")).toHaveAttribute("data-ov-sources", "0");
   await expect(high.locator("[data-ov-sources]")).toHaveAttribute("data-ov-sources", "0");
@@ -242,7 +261,7 @@ test("each output has its own link: both are on stream, and a new link for one l
   // The switch of the editor selects the output to edit. OBS does not change.
   const editor = control.locator("[data-composition-editor]");
   const save = saved(control);
-  await editor.getByRole("button", { name: "Vertical 18 × 32" }).click();
+  await editor.getByRole("button", { name: "Vertical", exact: true }).click();
   await save;
   await expect(editor.getByRole("region", { name: "Composition preview" })).toHaveAttribute(
     "data-orientation",
@@ -251,17 +270,27 @@ test("each output has its own link: both are on stream, and a new link for one l
   near((await pollBox(wideSource)).width, (POLL_CELL.w * 60) / 2);
   near((await pollBox(highSource)).width, (tall.w * 60) / 2);
 
-  // A new vertical link stops the old vertical link only.
-  await high.getByRole("button", { name: "Regenerate link" }).click();
-  await control
-    .getByRole("dialog", { name: "Regenerate the overlay link?" })
-    .getByRole("button", { name: "Regenerate link" })
-    .click();
-  await expect(high.locator("[data-ov-url]")).not.toHaveValue(highUrl);
+  // The server makes a new link for one output at a time. A new vertical link stops the old vertical link only.
+  expect((await owner.request.post("/api/overlay/key", { data: { output: "vertical" } })).status()).toBe(200);
   await expect(highSource.locator(".overlay-connection")).toContainText("Reconnecting");
   await expect(high.locator("[data-ov-sources]")).toContainText("OBS is not connected. Last seen");
   await expect(wide.locator("[data-ov-sources]")).toHaveText("OBS is connected: 1 source.");
   await expect(wideSource.locator(".overlay-connection")).toHaveCount(0);
+
+  // "Regenerate links" makes a new link for each output: the old horizontal link stops too.
+  await runSql("overlay-control-outputs-quota", [noLinkQuotaSql]);
+  await step.getByRole("button", { name: "Regenerate links" }).click();
+  await control
+    .getByRole("dialog", { name: "Regenerate the overlay links?" })
+    .getByRole("button", { name: "Regenerate links" })
+    .click();
+  await expect(wide.locator("[data-ov-url]")).not.toHaveValue(wideUrl);
+  await expect(high.locator("[data-ov-url]")).not.toHaveValue(highUrl);
+  await expect(wideSource.locator(".overlay-connection")).toContainText("Reconnecting");
+  await expect(wide.locator("[data-ov-sources]")).toContainText("OBS is not connected. Last seen");
+  // A source with the new link of an output connects again.
+  await highSource.goto(await high.locator("[data-ov-url]").inputValue());
+  await expect(high.locator("[data-ov-sources]")).toHaveText("OBS is connected: 1 source.");
   await Promise.all([close(owner), close(obs)]);
   await runSql("overlay-control-outputs-restore", [noKeysSql, defaultLayers]);
 });
@@ -480,7 +509,7 @@ test("the pickers of a layer change what it shows, hide poll results and recover
   }
 });
 
-test("Streamer tools has the Overlay section with two numbered steps and the Channels section, collapsed when a channel is connected", async ({
+test("Streamer tools has the Overlay section with two numbered steps and the Channels section with its cards in view", async ({
   browser,
 }) => {
   const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 91));
@@ -490,7 +519,7 @@ test("Streamer tools has the Overlay section with two numbered steps and the Cha
     const control = await newPage(owner);
     await control.goto("/tools?view=overlay");
     // The page has one title and the links to its sections. The address names the Overlay section.
-    await expect(control.getByRole("heading", { level: 1 })).toHaveText("Streamer tools");
+    await expect(control.getByRole("heading", { level: 1 })).toHaveAccessibleName("Streamer tools");
     const sections = control.getByRole("navigation", { name: "Streamer tools sections" });
     await expect(sections.getByRole("link")).toHaveText(["Live", "Overlay", "Channels"]);
     await expect(sections.getByRole("link", { name: "Overlay" })).toHaveAttribute("aria-current", "page");
@@ -506,24 +535,24 @@ test("Streamer tools has the Overlay section with two numbered steps and the Cha
     await expect(build.getByRole("group", { name: "Screen orientation" })).toBeVisible();
     await expect(build.getByRole("group", { name: "Preview background" })).toBeVisible();
     await expect(build.getByRole("button", { name: "Start test" })).toBeVisible();
-    await expect(build.getByRole("group", { name: "Layers · one of each" }).getByRole("button")).toHaveText([
+    await expect(build.getByRole("group", { name: "Layers · one of each" }).locator("[data-comp-layer]")).toHaveText([
       "+ Chat",
       "+ Characters",
+      "+ Camera frame",
       "PollPlaced",
       "+ Topic",
       "+ Up next",
       "+ Message banner",
       "+ Community card",
       "+ Support banner",
-      "+ Camera frame",
     ]);
     await expect(build.getByRole("region", { name: "Composition preview" })).toBeVisible();
     await expect(build.getByRole("region", { name: "No layer selected" })).toBeVisible();
-    await expect(
-      control
-        .getByRole("region", { name: "2 Add to OBS" })
-        .getByRole("button", { name: /overlay link|Regenerate link/ }),
-    ).toHaveCount(2);
+    await expect(build.locator("[data-comp-help]")).toHaveJSProperty("open", false);
+    // Step 2 has its link button in the title row, and one card for each output.
+    const obsStep = control.getByRole("region", { name: "2 Add to OBS" });
+    await expect(obsStep.locator("[data-ov-link-tools]").getByRole("button")).toHaveText(["Create links"]);
+    await expect(obsStep.getByRole("region")).toHaveText([/^Horizontal output/, /^Vertical output/]);
 
     // The Channels section has the channel cards alone, without a step number. No document loads for it.
     let documents: number = 0;
@@ -533,27 +562,42 @@ test("Streamer tools has the Overlay section with two numbered steps and the Cha
     await sections.getByRole("link", { name: "Channels" }).click();
     await expect(control).toHaveURL(/\/tools\?view=channels$/);
     await expect(sections.getByRole("link", { name: "Channels" })).toHaveAttribute("aria-current", "page");
-    await expect(control.getByRole("heading", { level: 1 })).toHaveText("Streamer tools");
+    await expect(control.getByRole("heading", { level: 1 })).toHaveAccessibleName("Streamer tools");
     await expect(control.getByRole("heading", { level: 2 })).toHaveText(["Connect channels"]);
     expect(await steps()).toEqual(["channels"]);
     expect(documents).toBe(0);
-    // No channel is connected: the section is open, with the full panel.
+    // No channel is connected. The cards show: no disclosure is around them.
     const channels = control.getByRole("region", { name: "Connect channels" });
-    const details = channels.locator("details.ch-details");
-    const summary = channels.locator("[data-channels-summary]");
     const kick = channels.locator('[data-channel="kick"]');
-    await expect(details).toHaveAttribute("open", "");
-    await expect(summary).toHaveText("No channel connected yet");
-    await expect(kick.getByRole("button", { name: "Connect Kick", exact: true })).toBeVisible();
-
-    // Each card has its name and status, one sentence, and its button. The longer notes are in closed details.
-    // This site offers only Kick: the other two cards say so and have no notes.
     const cards = channels.locator("[data-channel]");
-    await expect(cards.locator(".ch-body")).toHaveText([
-      "This platform is not set up on this site yet.",
-      "This platform is not set up on this site yet.",
-      "Chat starts as soon as the channel is connected.",
-    ]);
+    await expect(channels.locator("details.ch-details, [data-channels-summary]")).toHaveCount(0);
+    await expect(cards.locator(".ch-pill")).toHaveText(["Twitch", "YouTube", "Kick"]);
+    // The cards are in one row and have one height.
+    const frames = async (): Promise<{ y: number; height: number }[]> =>
+      cards.evaluateAll((items: Element[]): { y: number; height: number }[] =>
+        items.map((item: Element): { y: number; height: number } => {
+          const box: DOMRect = item.getBoundingClientRect();
+          return { y: Math.round(box.y), height: Math.round(box.height) };
+        }),
+      );
+    const level = (boxes: { y: number; height: number }[]): number[] => [
+      new Set(boxes.map((box) => box.y)).size,
+      new Set(boxes.map((box) => box.height)).size,
+    ];
+    expect(level(await frames())).toEqual([1, 1]);
+
+    // A card without a connection has the platform and Connect on one line, then the closed notes.
+    // This site offers only Kick: the other two cards say so, and they have no button and no notes.
+    await expect(channels.getByText("This platform is not set up on this site yet.")).toHaveCount(2);
+    await expect(channels.getByRole("button")).toHaveCount(1);
+    const connectKick = kick.getByRole("button", { name: "Connect Kick", exact: true });
+    await expect(connectKick).toHaveText("Connect");
+    await expect(kick.locator(".ch-state")).toHaveCount(0);
+    const middle = (box: { y: number; height: number }): number => box.y + box.height / 2;
+    const pill = (await kick.locator(".ch-pill").boundingBox())!;
+    const connectBox = (await connectKick.boundingBox())!;
+    expect(Math.abs(middle(pill) - middle(connectBox))).toBeLessThanOrEqual(1);
+    expect(connectBox.x).toBeGreaterThan(pill.x + pill.width);
     const more = cards.locator("details");
     await expect(more).toHaveCount(1);
     await expect(more).not.toHaveAttribute("open");
@@ -561,51 +605,85 @@ test("Streamer tools has the Overlay section with two numbered steps and the Cha
     await expect(more.getByRole("listitem").first()).toBeHidden();
     expect((await more.locator("summary").boundingBox())!.height).toBeGreaterThanOrEqual(44);
     // The open notes are below the button: the button does not move.
-    const connectKick = kick.getByRole("button", { name: "Connect Kick", exact: true });
     // Measured from the top of the card: a click can scroll the page.
     const fromCard = async (): Promise<number> => (await connectKick.boundingBox())!.y - (await kick.boundingBox())!.y;
     const before: number = await fromCard();
     await more.locator("summary").click();
     await expect(more.getByRole("listitem")).toHaveText([
+      "Chat starts as soon as the channel is connected.",
       "Read: chat messages, bans and timeouts.",
+      "For alerts and goals: follows, subscriptions, gifted subscriptions and KICKs.",
       "Kick emotes show as their names, not as images.",
       "Kick does not report message deletions, chat clears or unbans.",
     ]);
     expect(await fromCard()).toBe(before);
     const button = (await connectKick.boundingBox())!;
     expect((await more.boundingBox())!.y).toBeGreaterThanOrEqual(button.y + button.height);
+    // The cards of the row keep one height while the notes of one card are open.
+    expect(level(await frames())).toEqual([1, 1]);
     await more.locator("summary").click();
 
-    // With a connected channel the section is one status line. It opens by keyboard and by pointer.
+    // With a connected channel the cards still show. The connected card has three lines.
     await runSql("channel-flow-seed", [
-      `INSERT INTO channel_connections(id,streamer_id,platform,external_id,display_name,scopes,status,status_code,created_at,updated_at,last_event_at) VALUES ('${connectionId}',(SELECT id FROM streamers WHERE handle='feature_host'),'kick','flow-kick','Flow Kick','','active',NULL,${now},${now},NULL);`,
+      `INSERT INTO channel_connections(id,streamer_id,platform,external_id,display_name,scopes,status,status_code,created_at,updated_at,last_event_at,support_events) VALUES ('${connectionId}',(SELECT id FROM streamers WHERE handle='feature_host'),'kick','flow-kick','Flow Kick','','active',NULL,${now},${now},NULL,1);`,
     ]);
     await control.reload();
-    await expect(details).not.toHaveAttribute("open");
-    await expect(summary).toHaveText("Connected: Kick");
-    await expect(kick).toBeHidden();
-    expect((await summary.boundingBox())!.height).toBeGreaterThanOrEqual(44);
-    await summary.focus();
-    await control.keyboard.press("Enter");
-    await expect(details).toHaveAttribute("open", "");
-    await expect(kick).toContainText("Connected as Flow Kick");
-    await summary.click();
-    await expect(kick).toBeHidden();
-    // The "Connect channels" link in the settings of the chat layer opens the Channels section with the panel open.
+    await expect(kick).toBeVisible();
+    expect(level(await frames())).toEqual([1, 1]);
+    // Line 1: the platform at the left. At the right, the status icon and the account name, on one line.
+    const state = kick.locator(".ch-state");
+    await expect(state).toHaveText("Healthy. No chat event yet.");
+    await expect(state).toHaveAttribute("title", "Healthy. No chat event yet.");
+    await expect(state).toHaveAttribute("data-state", "healthy");
+    await expect(state.locator("svg")).toHaveClass(/icon-success/);
+    await expect(kick.locator(".ch-account")).toHaveText("Flow Kick");
+    // The words are for the tooltip and for a screen reader: the card shows no line of text for the status.
+    await expect(kick.locator("p")).toHaveCount(0);
+    expect((await state.locator(".sr-only").boundingBox())!.width).toBeLessThanOrEqual(1);
+    const card = (await kick.boundingBox())!;
+    const pillBox = (await kick.locator(".ch-pill").boundingBox())!;
+    const stateBox = (await state.boundingBox())!;
+    const nameBox = (await kick.locator(".ch-account").boundingBox())!;
+    expect(Math.abs(middle(pillBox) - middle(stateBox))).toBeLessThanOrEqual(1);
+    expect(Math.abs(middle(stateBox) - middle(nameBox))).toBeLessThanOrEqual(1);
+    expect(pillBox.x).toBeLessThan(stateBox.x);
+    expect(stateBox.x).toBeLessThan(nameBox.x);
+    // Line 2: Reconnect and Disconnect in two equal columns that fill the card.
+    const reconnect = kick.getByRole("button", { name: "Reconnect Kick", exact: true });
+    const disconnect = kick.getByRole("button", { name: "Disconnect Kick", exact: true });
+    await expect(reconnect).toHaveText("Reconnect");
+    await expect(disconnect).toHaveText("Disconnect");
+    await expect(reconnect.locator("svg")).toHaveClass(/icon-refresh/);
+    await expect(disconnect.locator("svg")).toHaveClass(/icon-close/);
+    await expect(disconnect).toHaveClass(/danger/);
+    const left = (await reconnect.boundingBox())!;
+    const right = (await disconnect.boundingBox())!;
+    expect(Math.abs(left.width - right.width)).toBeLessThanOrEqual(1);
+    expect(left.y).toBe(right.y);
+    expect(left.height).toBe(right.height);
+    expect(left.height).toBeGreaterThanOrEqual(44);
+    expect(right.x).toBeGreaterThan(left.x + left.width);
+    // The two columns start at the left edge of the first line and end at its right edge.
+    expect(Math.abs(left.x - pillBox.x)).toBeLessThanOrEqual(1);
+    expect(Math.abs(left.x - card.x - (card.x + card.width - right.x - right.width))).toBeLessThanOrEqual(1);
+    // Line 3: the closed notes, at the bottom of the card.
+    const notes = kick.locator("details");
+    await expect(notes).not.toHaveAttribute("open");
+    expect((await notes.boundingBox())!.y).toBeGreaterThanOrEqual(left.y + left.height);
+    // The "Connect channels" link in the settings of the chat layer opens the Channels section at its heading.
     await sections.getByRole("link", { name: "Overlay" }).click();
     await placeLayer(control, build, "chat");
     const link = build.getByRole("region", { name: "Chat" }).getByRole("link", { name: "Connect channels" });
     await expect(link).toHaveAttribute("href", "/tools?view=channels#channels-title");
     await link.click();
     await expect(control).toHaveURL(/\/tools\?view=channels#channels-title$/);
-    await expect(details).toHaveAttribute("open", "");
+    await expect(control.locator("#channels-title")).toBeInViewport();
     await expect(kick).toBeVisible();
-    // The address has the fragment now: a load opens a closed panel again.
-    await summary.click();
-    await expect(kick).toBeHidden();
+    // The address has the fragment now: a load shows the heading and the cards again.
     await control.reload();
     await expect(control).toHaveURL(/#channels-title$/);
-    await expect(details).toHaveAttribute("open", "");
+    await expect(control.locator("#channels-title")).toBeInViewport();
+    await expect(kick).toBeVisible();
   } finally {
     await close(owner);
     await runSql("channel-flow-cleanup", [`DELETE FROM channel_connections WHERE id='${connectionId}';`]);
@@ -620,7 +698,7 @@ test("the channel panel follows a platform that stops and works again while the 
   await runSql("channel-live-seed", [
     // The chat layer is on stream, and the last chat event is 100 seconds old.
     layersSql({ chat: { enabled: true }, cells: { horizontal: { chat: CHAT_CELL, poll: POLL_CELL } } }),
-    `INSERT INTO channel_connections(id,streamer_id,platform,external_id,display_name,scopes,status,status_code,created_at,updated_at,last_event_at) VALUES ('${connectionId}',${FEATURE_HOST},'kick','live-kick','Live Kick','','active',NULL,${now},${now},${now - 100_000});`,
+    `INSERT INTO channel_connections(id,streamer_id,platform,external_id,display_name,scopes,status,status_code,created_at,updated_at,last_event_at,support_events) VALUES ('${connectionId}',${FEATURE_HOST},'kick','live-kick','Live Kick','','active',NULL,${now},${now},${now - 100_000},1);`,
   ]);
   const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 94));
   try {
@@ -634,13 +712,15 @@ test("the channel panel follows a platform that stops and works again while the 
     await control.goto("/tools?view=channels");
     const sections = control.getByRole("navigation", { name: "Streamer tools sections" });
     const section = control.getByRole("region", { name: "Connect channels" });
-    const details = section.locator("details.ch-details");
-    const summary = section.locator("[data-channels-summary]");
     const kick = section.locator('[data-channel="kick"]');
+    // The status of the card: an icon with a tooltip, and the same words as text for a screen reader.
+    const state = kick.locator(".ch-state");
     const toast = control.locator(".sb-toast");
-    // A healthy channel: one status line, a closed panel, no toast and no warning in the chat settings.
-    await expect(summary).toHaveText("Connected: Kick");
-    await expect(details).not.toHaveAttribute("open");
+    // A healthy channel: the icon names the health and the age of the last chat event. No toast, and no warning in
+    // the chat settings.
+    await expect(state).toHaveText("Healthy. Last chat event 1 minute ago.");
+    await expect(state).toHaveAttribute("title", "Healthy. Last chat event 1 minute ago.");
+    await expect(state).toHaveAttribute("data-state", "healthy");
     await expect(toast).toHaveCount(0);
     await sections.getByRole("link", { name: "Overlay" }).click();
     const build = control.locator("[data-composition-editor]");
@@ -664,38 +744,36 @@ test("the channel panel follows a platform that stops and works again while the 
       "href",
       "/tools?view=channels#channels-title",
     );
-    // The Channels section opens with the panel open, because a connection needs the owner.
+    // The card in the Channels section shows the problem as its status icon. The problem is the tooltip of the icon
+    // and its text for a screen reader: the card has no line of text for it.
     await sections.getByRole("link", { name: "Channels" }).click();
-    await expect(summary).toHaveText("Needs attention: Kick");
-    await expect(details).toHaveAttribute("open", "");
-    await expect(kick.locator(".ch-mark")).toHaveText("Needs attention");
-    await expect(kick.locator(".ch-mark")).toHaveAttribute("data-health", "attention");
-    await expect(kick.getByRole("alert")).toHaveText("Access ended. Reconnect to keep receiving chat.");
-    // The age of the last chat event is a time element with the absolute time as its title.
-    const age = kick.locator("time");
-    await expect(age).toHaveText("Last chat event 2 minutes ago");
-    await expect(age).toHaveAttribute("datetime", new Date(now - 100_000).toISOString());
-    await expect(age).toHaveAttribute("title", /\d/);
+    await expect(state).toHaveText("Access ended. Reconnect to keep receiving chat.");
+    await expect(state).toHaveAttribute("title", "Access ended. Reconnect to keep receiving chat.");
+    await expect(state).toHaveAttribute("data-state", "problem");
+    await expect(state.locator("svg")).toHaveClass(/icon-rejected/);
+    await expect(kick.getByRole("alert")).toHaveCount(0);
+    await expect(kick.locator("p")).toHaveCount(0);
+    await expect(kick.getByRole("button", { name: "Reconnect Kick", exact: true })).toBeVisible();
     // The same state at the next read is no news: the toast goes away by itself and does not come back.
     const same = control.waitForResponse((response) => new URL(response.url()).pathname === "/api/channels");
     await control.clock.runFor(15_000);
     await expect(toast).toHaveCount(0);
     await control.clock.runFor(5001);
     await same;
-    await expect(kick.locator(".ch-mark")).toHaveText("Needs attention");
+    await expect(state).toHaveAttribute("data-state", "problem");
     await expect(toast).toHaveCount(0);
 
-    // The channel works again: the card, the status line and a toast say so. The panel stays open.
+    // The channel works again: the icon of the card and a toast say so.
     await runSql("channel-live-back", [status("active", null)]);
     const back = control.waitForResponse((response) => new URL(response.url()).pathname === "/api/channels");
     await control.clock.runFor(20_001);
     await back;
-    await expect(summary).toHaveText("Connected: Kick");
-    await expect(kick.locator(".ch-mark")).toHaveText("Healthy");
-    await expect(kick.getByRole("alert")).toHaveCount(0);
+    await expect(state).toHaveAttribute("data-state", "healthy");
+    await expect(state.locator("svg")).toHaveClass(/icon-success/);
+    // The last chat event is 160 seconds old now.
+    await expect(state).toHaveText("Healthy. Last chat event 2 minutes ago.");
     await expect(toast).toHaveText("Kick chat is back.");
     await expect(control.locator("#sb-announce-polite")).toHaveText("Kick chat is back.");
-    await expect(details).toHaveAttribute("open", "");
 
     // Reads that fail keep the last list. After the third failure in a row, the panel says so, until a read works.
     await control.route("**/api/channels", (route) => route.abort());
@@ -708,7 +786,7 @@ test("the channel panel follows a platform that stops and works again while the 
     await expect(section.locator("[data-channels-stale]")).toHaveText(
       "Status could not be refreshed. Next try in a moment.",
     );
-    await expect(kick.locator(".ch-mark")).toHaveText("Healthy");
+    await expect(state).toHaveAttribute("data-state", "healthy");
     // A failed read makes no toast.
     await expect(toast).toHaveCount(0);
     await control.unroute("**/api/channels");
@@ -735,7 +813,7 @@ test("channel conflicts reload the list and expired authentication leaves a sign
   await runSql("channel-conflict-seed", [
     // The account signs in with Google: the prompt for a new sign-in offers that provider.
     `INSERT INTO account(id,account_id,provider_id,user_id,created_at,updated_at) VALUES ('${accountId}','e2e-google-owner','google',(SELECT id FROM user WHERE name='featureowner'),${now},${now});`,
-    `INSERT INTO channel_connections(id,streamer_id,platform,external_id,display_name,scopes,status,status_code,created_at,updated_at,last_event_at) VALUES ('${connectionId}',(SELECT id FROM streamers WHERE handle='feature_host'),'kick','coverage-kick','Conflict Kick','','active',NULL,${now},${now},NULL);`,
+    `INSERT INTO channel_connections(id,streamer_id,platform,external_id,display_name,scopes,status,status_code,created_at,updated_at,last_event_at,support_events) VALUES ('${connectionId}',(SELECT id FROM streamers WHERE handle='feature_host'),'kick','coverage-kick','Conflict Kick','','active',NULL,${now},${now},NULL,1);`,
   ]);
   const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 91));
   // This case owns 203.0.113.141.
@@ -756,10 +834,9 @@ test("channel conflicts reload the list and expired authentication leaves a sign
     control.on("requestfailed", ended);
     await control.goto("/tools?view=channels");
     const kick = control.locator('[data-channel="kick"]');
-    // A healthy connection: the section starts as one status line. Open it for the full panel.
-    await control.getByText("Connected: Kick", { exact: true }).click();
-    await expect(kick).toContainText("No chat event yet");
-    await expect(kick.locator(".ch-mark")).toHaveText("Healthy");
+    // A healthy connection: its card shows at once, with the account and the status icon.
+    await expect(kick.locator(".ch-account")).toHaveText("Conflict Kick");
+    await expect(kick.locator(".ch-state")).toHaveText("Healthy. No chat event yet.");
     // This tab keeps its old view for this case: hold the reads that keep the panel live.
     await control.route("**/api/channels", (route) => route.abort());
     await control.route("**/api/channels/kick", async (route) => {
@@ -793,7 +870,10 @@ test("channel conflicts reload the list and expired authentication leaves a sign
     await control.unroute("**/tools.data*");
     for (const route of held) await route.continue();
     await expect(kick.getByRole("button", { name: "Connect Kick", exact: true })).toBeFocused();
-    await expect(kick).toContainText("Not connected");
+    // The card has no connection now: no account, no status icon and no Disconnect button.
+    await expect(kick.locator(".ch-who")).toHaveCount(0);
+    await expect(kick.locator(".ch-state")).toHaveCount(0);
+    await expect(kick.getByRole("button")).toHaveCount(1);
     await control.unroute("**/api/channels");
     await control.route("**/api/channels/kick/connect", async (route) => {
       await route.fulfill({ status: 401, json: { error: "Sign in again.", code: "reauth_required" } });
@@ -868,96 +948,114 @@ test("channel conflicts reload the list and expired authentication leaves a sign
   }
 });
 
-test("the support events switch of a connected channel shows each answer of the server", async ({ browser }) => {
+test("a channel without support events shows it on its card only, and the icon of a problem that ends by itself turns", async ({
+  browser,
+}) => {
+  interface Listed {
+    platform: string;
+    available: boolean;
+    connection: Record<string, string | number | null> | null;
+    support: boolean;
+  }
   const connectionId: string = randomUUID();
-  const accountId: string = randomUUID();
   const now: number = Date.now();
   await runSql("channel-support-seed", [
-    `INSERT INTO account(id,account_id,provider_id,user_id,created_at,updated_at) VALUES ('${accountId}','e2e-google-support','google',(SELECT id FROM user WHERE name='featureowner'),${now},${now});`,
-    `INSERT INTO channel_connections(id,streamer_id,platform,external_id,display_name,scopes,status,status_code,created_at,updated_at,last_event_at) VALUES ('${connectionId}',(SELECT id FROM streamers WHERE handle='feature_host'),'kick','support-kick','Support Kick','','active',NULL,${now},${now},NULL);`,
+    // The provider refused the support events of this Kick channel: it reads chat only.
+    `INSERT INTO channel_connections(id,streamer_id,platform,external_id,display_name,scopes,status,status_code,created_at,updated_at,last_event_at,support_events) VALUES ('${connectionId}',(SELECT id FROM streamers WHERE handle='feature_host'),'kick','support-kick','Support Kick','','active',NULL,${now},${now},NULL,0);`,
   ]);
   const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 92));
   try {
     const page = await newPage(owner);
+    // The page reads the channels every 20 seconds. The test moves the page clock in place of a wait.
+    await page.clock.install({ time: now });
     await page.goto("/tools?view=channels");
-    await page.getByText("Connected: Kick", { exact: true }).click();
-    const kick = page.locator('[data-channel="kick"]');
-    const toggle = kick.getByRole("checkbox", { name: "Kick support events" });
-    await expect(toggle).not.toBeChecked();
-    await expect(toggle).toHaveAccessibleDescription(
-      "Shows follows, subscriptions, gifted subscriptions and KICKs in Live and in the OBS dock.",
-    );
-    // A platform without a connection has no switch.
-    await expect(page.getByRole("checkbox", { name: "Twitch support events" })).toHaveCount(0);
+    const section = page.getByRole("region", { name: "Connect channels" });
+    const kick = section.locator('[data-channel="kick"]');
+    const kickState = kick.locator(".ch-state");
+    const toast = page.locator(".sb-toast");
+    // No card has a switch: each connected channel reads the support events.
+    await expect(kick.locator(".ch-account")).toHaveText("Support Kick");
+    await expect(section.getByRole("checkbox")).toHaveCount(0);
+    // The card says with its status icon that this channel reads none, and what the owner does about it.
+    const refused: string = "Kick does not send the events for alerts and goals. Reconnect Kick to try again.";
+    await expect(kickState).toHaveText(refused);
+    await expect(kickState).toHaveAttribute("title", refused);
+    await expect(kickState).toHaveAttribute("data-state", "support_missing");
+    await expect(kickState.locator("svg")).toHaveClass(/icon-rejected/);
+    await expect(kick.getByRole("button", { name: "Reconnect Kick", exact: true })).toBeVisible();
+    await expect(toast).toHaveCount(0);
 
-    // The server of this case: each answer, and the state that the list of the page then reads.
-    let answer: { status: number; json: Record<string, unknown>; stored?: 0 | 1 } = {
-      status: 200,
-      json: { url: null, support: true },
-      stored: 1,
+    // This test server offers only Kick. The next reads of the channels give the list of a site that also offers
+    // Twitch: a Twitch channel from before the support events, without the three permissions for them.
+    await page.waitForLoadState("networkidle");
+    const connection = { status: "active", code: null, connectedAt: now, lastEventAt: null, updatedAt: now };
+    let list: Listed[] = [
+      { platform: "twitch", available: true, connection: { ...connection, displayName: "Old Twitch" }, support: false },
+      { platform: "youtube", available: false, connection: null, support: false },
+      { platform: "kick", available: true, connection: { ...connection, displayName: "Support Kick" }, support: true },
+    ];
+    await page.route("**/api/channels", (route: Route) => route.fulfill({ json: { channels: list } }));
+    const read = async (): Promise<void> => {
+      const response = page.waitForResponse((result) => new URL(result.url()).pathname === "/api/channels");
+      await page.clock.runFor(20_001);
+      await response;
     };
-    const bodies: unknown[] = [];
-    await page.route("**/api/channels/kick/support", async (route: Route) => {
-      bodies.push(route.request().postDataJSON());
-      if (answer.stored !== undefined)
-        await runSql("channel-support-store", [
-          `UPDATE channel_connections SET support_events=${answer.stored} WHERE id='${connectionId}';`,
-        ]);
-      await route.fulfill({ status: answer.status, json: answer.json });
+    await read();
+    const twitch = section.locator('[data-channel="twitch"]');
+    const state = twitch.locator(".ch-state");
+    const once: string = "Reconnect Twitch one time so alerts and goals can read follows, subscriptions and Bits.";
+    await expect(state).toHaveText(once);
+    await expect(state).toHaveAttribute("title", once);
+    await expect(state).toHaveAttribute("data-state", "support_missing");
+    await expect(state.locator("svg")).toHaveClass(/icon-rejected/);
+    // The card keeps its three lines: the account, the two buttons and the closed notes. Reconnect is the fix.
+    await expect(twitch.locator(".ch-account")).toHaveText("Old Twitch");
+    await expect(twitch.getByRole("button", { name: "Reconnect Twitch", exact: true })).toBeVisible();
+    await expect(twitch.getByRole("button", { name: "Disconnect Twitch", exact: true })).toBeVisible();
+    await expect(twitch.locator("details")).not.toHaveAttribute("open");
+    await expect(twitch.getByRole("alert")).toHaveCount(0);
+    await expect(twitch.locator("p")).toHaveCount(0);
+    // The Kick channel reads the support events now: its icon is the healthy one.
+    await expect(kickState).toHaveAttribute("data-state", "healthy");
+    await expect(kickState.locator("svg")).toHaveClass(/icon-success/);
+    // The state is on the card only. It is no news in either direction: no toast and no announcement.
+    await expect(toast).toHaveCount(0);
+    await expect(page.locator("#sb-announce-assertive")).toBeEmpty();
+    await expect(page.locator("#sb-announce-polite")).toBeEmpty();
+
+    // A problem that ends without the owner: the icon is the sync icon, and it turns.
+    list = list.map(
+      (item: Listed): Listed =>
+        item.platform === "kick"
+          ? { ...item, connection: { ...item.connection, status: "error", code: "webhooks_rejected" } }
+          : item,
+    );
+    await read();
+    await expect(kickState).toHaveAttribute("data-state", "repairing");
+    await expect(kickState).toHaveText(
+      "The feed cannot accept events from the platform right now. It checks again on its own: you do not need to reconnect.",
+    );
+    const icon = kickState.locator("svg");
+    await expect(icon).toHaveClass(/icon-sync/);
+    const animation = (): Promise<string> =>
+      icon.evaluate((element: Element): string => getComputedStyle(element).animationName);
+    expect(await animation()).toBe("sb-spin");
+    // The icon of the other card does not turn.
+    expect(
+      await state.locator("svg").evaluate((element: Element): string => getComputedStyle(element).animationName),
+    ).toBe("none");
+    // It stays still for reduced motion: in the system, and in the display settings of the site.
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    expect(await animation()).toBe("none");
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await expect.poll(animation).toBe("sb-spin");
+    await page.locator("html").evaluate((root: Element): void => {
+      root.setAttribute("data-reduced", "true");
     });
-    const alert = kick.locator('.ch-support [role="alert"]');
-
-    // The keyboard turns the switch on. It keeps the focus, and it stays on after the list loads again.
-    const reloaded = page.waitForResponse((response) => new URL(response.url()).pathname === "/tools.data");
-    await toggle.focus();
-    await page.keyboard.press("Space");
-    await expect(toggle).toBeChecked();
-    await expect(toggle).toBeFocused();
-    await reloaded;
-    await expect(toggle).toBeChecked();
-    await expect(alert).toHaveCount(0);
-    answer = { status: 200, json: { url: null, support: false }, stored: 0 };
-    await toggle.click();
-    await expect(toggle).not.toBeChecked();
-    await expect(alert).toHaveCount(0);
-    expect(bodies).toEqual([{ on: true }, { on: false }]);
-
-    // The provider refuses the support events: the switch stays off, and the card says why.
-    answer = { status: 200, json: { url: null, support: false } };
-    await toggle.click();
-    await expect(alert).toHaveText(
-      "The channel is connected. Kick did not give the permissions for support events, so they stay off.",
-    );
-    await expect(toggle).not.toBeChecked();
-
-    // A failed change shows its cause. The next change takes the refusal away.
-    answer = { status: 500, json: { error: "The request failed. Please try again." } };
-    await toggle.click();
-    await expect(page.locator(".sb-toast").filter({ hasText: "The request failed. Please try again." })).toBeVisible();
-    await expect(toggle).not.toBeChecked();
-    await expect(toggle).not.toHaveAttribute("aria-disabled", "true");
-    await expect(alert).toHaveCount(0);
-
-    // An old sign-in: the card shows the prompt for a new one.
-    answer = { status: 403, json: { error: "Sign in again to change channel connections.", code: "reauth_required" } };
-    await toggle.click();
-    await expect(kick.locator(".ch-reauth p").first()).toHaveText(
-      "To change the support events of Kick, first confirm that it is you. Sign in to StreamBullets again with Google. Then change the switch here.",
-    );
-
-    // The answer names the page of the provider: the browser goes there. Here the page is the result of a callback.
-    answer = { status: 200, json: { url: "/tools?view=channels&channel=kick&result=support_denied", support: false } };
-    await toggle.click();
-    await expect(page.locator(".ch-result")).toHaveText(
-      "The channel is connected. Kick did not give the permissions for support events, so they stay off.",
-    );
-    expect(bodies).toHaveLength(6);
+    expect(await animation()).toBe("none");
   } finally {
     await close(owner);
-    await runSql("channel-support-cleanup", [
-      `DELETE FROM channel_connections WHERE id='${connectionId}';`,
-      `DELETE FROM account WHERE id='${accountId}';`,
-    ]);
+    await runSql("channel-support-cleanup", [`DELETE FROM channel_connections WHERE id='${connectionId}';`]);
   }
 });
 
@@ -1056,7 +1154,7 @@ test("the owner sees each channel's connection health and the result of a connec
   const kickId = randomUUID();
   const now = Date.now();
   const row = (id: string, platform: string, external: string, name: string, status: string, code: string): string =>
-    `INSERT INTO channel_connections(id,streamer_id,platform,external_id,display_name,scopes,status,status_code,created_at,updated_at,last_event_at) VALUES ('${id}',${page},'${platform}','${external}','${name}','','${status}','${code}',${now},${now},${now});`;
+    `INSERT INTO channel_connections(id,streamer_id,platform,external_id,display_name,scopes,status,status_code,created_at,updated_at,last_event_at,support_events) VALUES ('${id}',${page},'${platform}','${external}','${name}','','${status}','${code}',${now},${now},${now},1);`;
   await runSql("channels-seed", [
     row(youtubeId, "youtube", "UCe2e", "Feature Tube", "error", "quota_exhausted"),
     row(kickId, "kick", "4242", "Feature Kick", "needs_reauth", "authorization_revoked"),
@@ -1070,9 +1168,9 @@ test("the owner sees each channel's connection health and the result of a connec
     const control = await newPage(owner);
     await control.goto("/tools?view=channels&channel=kick&result=channel_taken");
     const section = control.getByRole("region", { name: "Connect channels" });
-    // A callback result and a connection to repair open the section.
-    await expect(section.locator("details.ch-details")).toHaveAttribute("open", "");
-    await expect(section.locator("[data-channels-summary]")).toHaveText("Connected: YouTube · Needs attention: Kick");
+    // The cards show without a disclosure around them, and the result of the callback is above them.
+    await expect(section.locator("details.ch-details, [data-channels-summary]")).toHaveCount(0);
+    await expect(section.locator("[data-channel]")).toHaveCount(3);
     const banner = section.locator(".ch-result");
     // The result is read once: the banner is a status region with focus, and no toast repeats it.
     await expect(banner).toHaveText("This Kick channel is already connected to another StreamBullets page.");
@@ -1085,18 +1183,25 @@ test("the owner sees each channel's connection health and the result of a connec
     const youtube = section.locator('[data-channel="youtube"]');
     // YouTube is not set up here, so its notes about the YouTube limits stay hidden.
     await expect(youtube).not.toContainText("Chat starts when an overlay");
-    await expect(youtube).toContainText("Connected as Feature Tube");
-    // YouTube is not set up on this test server, so its card gives no reconnect advice.
+    await expect(youtube.locator("details")).toHaveCount(0);
+    await expect(youtube.locator(".ch-account")).toHaveText("Feature Tube");
+    // YouTube is not set up on this test server, so its card makes no health claim and gives no reconnect advice:
+    // no status icon and no Reconnect button. The connection can still go.
+    await expect(youtube.locator(".ch-state")).toHaveCount(0);
     await expect(youtube.getByRole("alert")).toHaveCount(0);
-    await expect(youtube.locator("time")).toHaveText(/^Last chat event (just now|\d+ seconds? ago)$/);
-    // The site does not offer YouTube, so the card makes no health claim. Kick needs the owner.
-    await expect(youtube.locator(".ch-mark")).toHaveCount(0);
-    await expect(section.locator('[data-channel="kick"] .ch-mark')).toHaveText("Needs attention");
-    await expect(section.locator('[data-channel="twitch"] .ch-mark')).toHaveText("Not connected");
+    await expect(youtube.getByRole("button")).toHaveText(["Disconnect"]);
+    // Twitch is not set up either, and it has no connection: no status icon and no button.
+    const twitch = section.locator('[data-channel="twitch"]');
+    await expect(twitch.locator(".ch-state")).toHaveCount(0);
+    await expect(twitch.getByRole("button")).toHaveCount(0);
     await expect(section.getByText("This platform is not set up on this site yet.")).toHaveCount(2);
-    // Kick is set up: its card shows what happened and how to fix it.
+    // Kick is set up and needs the owner: its status icon says what happened and how to fix it.
     const kick = section.locator('[data-channel="kick"]');
-    await expect(kick.getByRole("alert")).toHaveText("Access ended. Reconnect to keep receiving chat.");
+    const state = kick.locator(".ch-state");
+    await expect(state).toHaveText("Access ended. Reconnect to keep receiving chat.");
+    await expect(state).toHaveAttribute("title", "Access ended. Reconnect to keep receiving chat.");
+    await expect(state).toHaveAttribute("data-state", "problem");
+    await expect(state.locator("svg")).toHaveClass(/icon-rejected/);
     await expect(kick.getByRole("button", { name: "Reconnect Kick", exact: true })).toBeVisible();
     // A failed provider handoff restores the controls and clears the callback banner.
     await control.route("**/api/channels/kick/reconnect", async (route) => {
@@ -1113,7 +1218,7 @@ test("the owner sees each channel's connection health and the result of a connec
       .getByRole("button", { name: "Cancel", exact: true })
       .click();
     await expect(kick.getByRole("button", { name: "Disconnect Kick", exact: true })).toBeFocused();
-    await expect(kick).toContainText("Connected as Feature Kick");
+    await expect(kick.locator(".ch-account")).toHaveText("Feature Kick");
     // Disconnect: after the confirmation, focus lands on the platform's Connect button.
     await kick.getByRole("button", { name: "Disconnect Kick", exact: true }).click();
     const dialog = control.getByRole("dialog", { name: "Disconnect Kick?" });
@@ -1121,14 +1226,16 @@ test("the owner sees each channel's connection health and the result of a connec
     await dialog.getByRole("button", { name: "Disconnect Kick", exact: true }).click();
     await expect(dialog).toBeHidden();
     await expect(kick.getByRole("button", { name: "Connect Kick", exact: true })).toBeFocused();
-    await expect(kick).toContainText("Not connected");
+    await expect(kick.locator(".ch-who")).toHaveCount(0);
+    await expect(kick.locator(".ch-state")).toHaveCount(0);
     // Kick could not confirm the revoke (the stored tokens were seeded without any), so the advice stays.
     await expect(kick).toContainText("Remove StreamBullets in your Kick settings.");
     // A platform the site does not offer has no Connect button: focus goes to the section heading.
     await youtube.getByRole("button", { name: "Disconnect YouTube", exact: true }).click();
     const youtubeDialog = control.getByRole("dialog", { name: "Disconnect YouTube?" });
     await youtubeDialog.getByRole("button", { name: "Disconnect YouTube", exact: true }).click();
-    await expect(youtube).toContainText("Not connected");
+    await expect(youtube.locator(".ch-who")).toHaveCount(0);
+    await expect(youtube.getByRole("button")).toHaveCount(0);
     await expect(control.locator("#channels-title")).toBeFocused();
   } finally {
     await runSql("channels-seed", [`DELETE FROM channel_connections WHERE id IN ('${youtubeId}','${kickId}');`]);

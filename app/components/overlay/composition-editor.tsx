@@ -2,10 +2,8 @@ import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { t, type MessageId } from "../../i18n";
 import { withItem, withPlaced, withRemoved } from "../../lib/layer-geometry";
 import {
-  GRID,
   GRID_LAYERS,
   ORIENTATIONS,
-  frameSize,
   onStream,
   type CellRect,
   type GridLayer,
@@ -22,7 +20,14 @@ import { type CharactersControl, useCharactersControl } from "./characters-contr
 import { LayerPalette } from "./layer-palette";
 import { LayoutPicker, type LayoutAct } from "./layout-picker";
 import { LayerProperties, type ChangeLayers, type OverlayAction } from "./layer-properties";
-import { LAYER_NAMES, LayoutGrid, type LayoutGridHandle, type PreviewBackground, type RemoveDrop } from "./layout-grid";
+import {
+  GridHelp,
+  LAYER_NAMES,
+  LayoutGrid,
+  type LayoutGridHandle,
+  type PreviewBackground,
+  type RemoveDrop,
+} from "./layout-grid";
 import { CHARACTERS_READY } from "./overlay-composition";
 import type { OverlayScene } from "./overlay-stage";
 import { StepHeading } from "./step-heading";
@@ -74,10 +79,15 @@ function placedLayers(layers: OverlayLayers, layer: GridLayer, rect: CellRect, t
 }
 
 /**
- * Step 1 of the Overlay section of Streamer tools: the overlay studio. A toolbar sets the orientation and the preview background and
- * starts the test. Below it are the layer palette, the layout grid of the selected orientation over a preview of
- * what OBS shows, and the settings of the selected layer. The preview plays sample chat. While the characters layer
- * is on stream, it opens the owner's characters socket and shows the live playground. Layer edits go live at once.
+ * Step 1 of the Overlay section of Streamer tools: the overlay studio. The toolbar is one line: the output tabs, the
+ * layout list, and at the right edge the icon buttons that save a new layout, reset a preset and start the test.
+ * The line below it has the preview background, which comes before the grid in the tab sequence, so Tab goes from
+ * the grid to the settings. Then come the layer palette and the layout grid of the selected output over a preview
+ * of what OBS shows. The
+ * settings of the selected layer are below the grid of the horizontal output and beside the grid of the vertical
+ * output. On a phone they are below the grid. The help for the grid is closed until the owner opens it. The preview
+ * plays sample chat. While the characters layer is on stream, it opens the owner's characters socket and shows the
+ * live playground. Layer edits go live at once.
  */
 export function CompositionEditor({
   scene,
@@ -156,11 +166,16 @@ export function CompositionEditor({
     setSelected(layer);
     announce(t("overlay.grid.selected", { layer: t(LAYER_NAMES[layer]) }));
   };
-  // The Remove button goes away with its layer: the focus moves to the chip of that layer in the palette.
+  // The Remove button goes away with its layer: the focus moves to the chip of that layer in the palette. A closed
+  // group of the palette opens first, because a chip in a closed group cannot take the focus.
   const removeSelected = (layer: GridLayer): void => {
     remove(layer);
     announce(t("overlay.grid.removed", { layer: t(LAYER_NAMES[layer]) }));
-    palette.current?.querySelector<HTMLButtonElement>(`[data-comp-layer="${layer}"]`)?.focus();
+    const chip: HTMLButtonElement | null =
+      palette.current?.querySelector<HTMLButtonElement>(`[data-comp-layer="${layer}"]`) ?? null;
+    const group: HTMLDetailsElement | null = chip?.closest("details") ?? null;
+    if (group) group.open = true;
+    chip?.focus();
   };
 
   let statusText: string = "";
@@ -170,7 +185,7 @@ export function CompositionEditor({
   return (
     <section className="ov-step ov-comp" aria-labelledby={buildId} data-step="build" data-composition-editor>
       <StepHeading step={1} id={buildId} title={t("overlay.step.build")} />
-      <div className="ov-comp-bar">
+      <div className="ov-comp-bar" data-comp-toolbar>
         <fieldset className="ov-seg-field">
           <legend className="sr-only">{t("overlay.grid.orientation")}</legend>
           <div className="seg">
@@ -183,11 +198,31 @@ export function CompositionEditor({
                 onClick={() => change((current: OverlayLayers) => ({ ...current, orientation: value }))}
                 data-comp-orientation={value}
               >
-                {t(ORIENTATION_NAMES[value], { cols: GRID[value].cols, rows: GRID[value].rows })}
+                {t(ORIENTATION_NAMES[value])}
               </button>
             ))}
           </div>
         </fieldset>
+        <LayoutPicker
+          output={orientation}
+          layers={shown}
+          layouts={layouts}
+          busy={layoutBusy || switching}
+          act={actOnLayout}
+        >
+          <StudioTest
+            chatUntil={state.chatTestUntil}
+            now={scene.now}
+            chatOn={onStream(layers, "chat")}
+            characters={characters}
+            onSaved={onSaved}
+          />
+        </LayoutPicker>
+      </div>
+      <div className="ov-comp-notes">
+        <p className="muted ov-comp-note" id={orientationNoteId} data-comp-orientation-note>
+          {t("overlay.grid.orientationNote")}
+        </p>
         <fieldset className="ov-seg-field">
           <legend className="sr-only">{t("overlay.comp.background")}</legend>
           <div className="seg">
@@ -204,28 +239,11 @@ export function CompositionEditor({
             ))}
           </div>
         </fieldset>
-        <StudioTest
-          chatUntil={state.chatTestUntil}
-          now={scene.now}
-          chatOn={onStream(layers, "chat")}
-          characters={characters}
-          onSaved={onSaved}
-        />
         <p className="ov-live-note" data-comp-live-note>
           <span className="ov-live-dot" aria-hidden="true" />
           {t("overlay.comp.liveNote")}
         </p>
       </div>
-      <p className="muted ov-comp-note" id={orientationNoteId} data-comp-orientation-note>
-        {t("overlay.grid.orientationNote")}
-      </p>
-      <LayoutPicker
-        output={orientation}
-        layers={shown}
-        layouts={layouts}
-        busy={layoutBusy || switching}
-        act={actOnLayout}
-      />
       <div className="ov-studio">
         <LayerPalette
           placed={placed}
@@ -235,43 +253,43 @@ export function CompositionEditor({
           drop={removeDrop}
           ref={palette}
         />
-        <div className="ov-comp-stage">
-          <LayoutGrid
-            ref={grid}
-            layers={shown}
-            scene={scene}
-            background={background}
-            charactersFeed={charactersOn ? charactersFeed : null}
-            selected={active}
-            onSelect={setSelected}
-            onPlace={place}
-            onRemove={remove}
-            removeZone={palette}
-            onRemoveDrop={setRemoveDrop}
-          />
-          <p className="muted ov-comp-help" data-comp-frame-size>
-            {t("overlay.grid.obsSize", frameSize(orientation))}
-          </p>
-          {onStream(shown, "chat") && (
-            <p className="muted ov-comp-help" data-comp-sample>
-              {t("overlay.comp.sampleChat")}
-            </p>
-          )}
-        </div>
-        <div className="ov-studio-side">
-          <LayerProperties
-            layer={active}
-            layers={shown}
-            state={state}
-            data={scene.data}
-            busy={busy}
-            run={run}
-            change={change}
-            characters={characters}
-            onRemove={removeSelected}
-          />
-          <output className="ov-comp-status">{statusText}</output>
-          {error && <EditorAlert error={error} />}
+        <div className="ov-work" data-orientation={orientation}>
+          <div className="ov-comp-stage">
+            <LayoutGrid
+              ref={grid}
+              layers={shown}
+              scene={scene}
+              background={background}
+              charactersFeed={charactersOn ? charactersFeed : null}
+              selected={active}
+              onSelect={setSelected}
+              onPlace={place}
+              onRemove={remove}
+              removeZone={palette}
+              onRemoveDrop={setRemoveDrop}
+            />
+            {onStream(shown, "chat") && (
+              <p className="muted ov-comp-help" data-comp-sample>
+                {t("overlay.comp.sampleChat")}
+              </p>
+            )}
+          </div>
+          <div className="ov-studio-side">
+            <LayerProperties
+              layer={active}
+              layers={shown}
+              state={state}
+              data={scene.data}
+              busy={busy}
+              run={run}
+              change={change}
+              characters={characters}
+              onRemove={removeSelected}
+            />
+            <output className="ov-comp-status">{statusText}</output>
+            {error && <EditorAlert error={error} />}
+          </div>
+          <GridHelp orientation={orientation} />
         </div>
       </div>
     </section>

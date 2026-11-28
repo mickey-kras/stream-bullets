@@ -1,0 +1,902 @@
+{
+  "version": 1,
+  "status": "artwork for review; runtime integration deliberately unchanged",
+  "logicalPixelScale": 1,
+  "exportScale": 4,
+  "characters": {
+    "file": "courier-actions.png",
+    "cell": [
+      32,
+      32
+    ],
+    "columns": 4,
+    "rows": [
+      "dance",
+      "cheer",
+      "grapple-fire",
+      "rope-ride",
+      "climb",
+      "jetpack",
+      "push"
+    ],
+    "anchor": [
+      16,
+      30
+    ],
+    "layers": {
+      "file": "courier-actions-layers.png",
+      "regionWidth": 128,
+      "regionHeight": 224,
+      "baseX": 0,
+      "helmetX": 128,
+      "scarfX": 256
+    },
+    "frames": [
+      {
+        "state": "dance",
+        "column": 0,
+        "rect": [
+          0,
+          0,
+          32,
+          32
+        ],
+        "anchor": [
+          16,
+          30
+        ],
+        "occupied": {
+          "l": 6,
+          "t": 5,
+          "w": 21,
+          "h": 25,
+          "b": 29
+        }
+      },
+      {
+        "state": "dance",
+        "column": 1,
+        "rect": [
+          32,
+          0,
+          32,
+          32
+        ],
+        "anchor": [
+          16,
+          30
+        ],
+        "occupied": {
+          "l": 6,
+          "t": 5,
+          "w": 21,
+          "h": 25,
+          "b": 29
+        }
+      },
+      {
+        "state": "dance",
+        "column": 2,
+        "rect": [
+          64,
+          0,
+          32,
+          32
+        ],
+        "anchor": [
+          16,
+          30
+        ],
+        "occupied": {
+          "l": 7,
+          "t": 5,
+          "w": 19,
+          "h": 25,
+          "b": 29
+        }
+      },
+      {
+        "state": "dance",
+        "column": 3,
+        "rect": [
+          96,
+          0,
+          32,
+          32
+        ],
+        "anchor": [
+          16,
+          30
+        ],
+        "occupied": {
+          "l": 7,
+          "t": 5,
+          "w": 18,
+          "h": 25,
+          "b": 29
+        }
+      },
+      {
+        "state": "cheer",
+        "column": 0,
+        "rect": [
+          0,
+          32,
+          32,
+          32
+        ],
+        "anchor": [
+          16,
+          30
+        ],
+        "occupied": {
+          "l": 8,
+          "t": 7,
+          "w": 18,
+          "h": 23,
+          "b": 29
+        }
+      },
+      {
+        "state": "cheer",
+        "column": 1,
+        "rect": [
+          32,
+          32,
+          32,
+          32
+        ],
+        "anchor": [
+          16,
+          30
+        ],
+        "occupied": {
+          "l": 7,
+          "t": 5,
+          "w": 19,
+          "h": 25,
+          "b": 29
+        }
+      },
+      {
+        "state": "cheer",
+        "column": 2,
+        "rect": [
+          64,
+          32,
+          32,
+          32
+        ],
+        "anchor": [
+          16,
+          30
+        ],
+        "occupied": {
+          "l": 6,
+          "t": 4,
+          "w": 21,
+          "h": 26,
+          "b": 29
+        }
+      },
+      {
+        "state": "cheer",
+        "column": 3,
+        "rect": [
+          96,
+          32,
+          32,
+          32
+        ],
+        "anchor": [
+          16,
+          30
+        ],
+        "occupied": {
+          "l": 7,
+          "t": 6,
+          "w": 18,
+          "h": 24,
+          "b": 29
+        }
+      },
+      {
+        "state": "grapple-fire",
+        "column": 0,
+        "rect": [
+          0,
+          64,
+          32,
+          32
+        ],
+        "anchor": [
+          16,
+          30
+        ],
+        "occupied": {
+          "l": 7,
+          "t": 6,
+          "w": 18,
+          "h": 24,
+          "b": 29
+        }
+      },
+      {
+        "state": "grapple-fire",
+        "column": 1,
+        "rect": [
+          32,
+          64,
+          32,
+          32
+        ],
+        "anchor": [
+          16,
+          30
+        ],
+        "occupied": {
+          "l": 5,
+          "t": 6,
+          "w": 22,
+          "h": 24,
+          "b": 29
+        }
+      },
+      {
+        "state": "grapple-fire",
+        "column": 2,
+        "rect": [
+          64,
+          64,
+          32,
+          32
+        ],
+        "anchor": [
+          16,
+          30
+        ],
+        "occupied": {
+          "l": 2,
+          "t": 6,
+          "w": 27,
+          "h": 24,
+          "b": 29
+        }
+      },
+      {
+        "state": "grapple-fire",
+        "column": 3,
+        "rect": [
+          96,
+          64,
+          32,
+          32
+        ],
+        "anchor": [
+          16,
+          30
+        ],
+        "occupied": {
+          "l": 6,
+          "t": 6,
+          "w": 21,
+          "h": 24,
+          "b": 29
+        }
+      },
+      {
+        "state": "rope-ride",
+        "column": 0,
+        "rect": [
+          0,
+          96,
+          32,
+          32
+        ],
+        "anchor": [
+          16,
+          30
+        ],
+        "occupied": {
+          "l": 6,
+          "t": 2,
+          "w": 17,
+          "h": 28,
+          "b": 29
+        }
+      },
+      {
+        "state": "rope-ride",
+        "column": 1,
+        "rect": [
+          32,
+          96,
+          32,
+          32
+        ],
+        "anchor": [
+          16,
+          30
+        ],
+        "occupied": {
+          "l": 5,
+          "t": 2,
+          "w": 17,
+          "h": 27,
+          "b": 28
+        }
+      },
+      {
+        "state": "rope-ride",
+        "column": 2,
+        "rect": [
+          64,
+          96,
+          32,
+          32
+        ],
+        "anchor": [
+          16,
+          30
+        ],
+        "occupied": {
+          "l": 6,
+          "t": 2,
+          "w": 16,
+          "h": 24,
+          "b": 25
+        }
+      },
+      {
+        "state": "rope-ride",
+        "column": 3,
+        "rect": [
+          96,
+          96,
+          32,
+          32
+        ],
+        "anchor": [
+          16,
+          30
+        ],
+        "occupied": {
+          "l": 6,
+          "t": 2,
+          "w": 17,
+          "h": 23,
+          "b": 24
+        }
+      },
+      {
+        "state": "climb",
+        "column": 0,
+        "rect": [
+          0,
+          128,
+          32,
+          32
+        ],
+        "anchor": [
+          16,
+          30
+        ],
+        "occupied": {
+          "l": 6,
+          "t": 6,
+          "w": 20,
+          "h": 22,
+          "b": 27
+        }
+      },
+      {
+        "state": "climb",
+        "column": 1,
+        "rect": [
+          32,
+          128,
+          32,
+          32
+        ],
+        "anchor": [
+          16,
+          30
+        ],
+        "occupied": {
+          "l": 6,
+          "t": 4,
+          "w": 20,
+          "h": 24,
+          "b": 27
+        }
+      },
+      {
+        "state": "climb",
+        "column": 2,
+        "rect": [
+          64,
+          128,
+          32,
+          32
+        ],
+        "anchor": [
+          16,
+          30
+        ],
+        "occupied": {
+          "l": 4,
+          "t": 5,
+          "w": 22,
+          "h": 22,
+          "b": 26
+        }
+      },
+      {
+        "state": "climb",
+        "column": 3,
+        "rect": [
+          96,
+          128,
+          32,
+          32
+        ],
+        "anchor": [
+          16,
+          30
+        ],
+        "occupied": {
+          "l": 8,
+          "t": 6,
+          "w": 16,
+          "h": 24,
+          "b": 29
+        }
+      },
+      {
+        "state": "jetpack",
+        "column": 0,
+        "rect": [
+          0,
+          160,
+          32,
+          32
+        ],
+        "anchor": [
+          16,
+          30
+        ],
+        "occupied": {
+          "l": 4,
+          "t": 4,
+          "w": 21,
+          "h": 24,
+          "b": 27
+        }
+      },
+      {
+        "state": "jetpack",
+        "column": 1,
+        "rect": [
+          32,
+          160,
+          32,
+          32
+        ],
+        "anchor": [
+          16,
+          30
+        ],
+        "occupied": {
+          "l": 4,
+          "t": 1,
+          "w": 21,
+          "h": 25,
+          "b": 25
+        }
+      },
+      {
+        "state": "jetpack",
+        "column": 2,
+        "rect": [
+          64,
+          160,
+          32,
+          32
+        ],
+        "anchor": [
+          16,
+          30
+        ],
+        "occupied": {
+          "l": 4,
+          "t": 3,
+          "w": 23,
+          "h": 22,
+          "b": 24
+        }
+      },
+      {
+        "state": "jetpack",
+        "column": 3,
+        "rect": [
+          96,
+          160,
+          32,
+          32
+        ],
+        "anchor": [
+          16,
+          30
+        ],
+        "occupied": {
+          "l": 5,
+          "t": 4,
+          "w": 20,
+          "h": 24,
+          "b": 27
+        }
+      },
+      {
+        "state": "push",
+        "column": 0,
+        "rect": [
+          0,
+          192,
+          32,
+          32
+        ],
+        "anchor": [
+          16,
+          30
+        ],
+        "occupied": {
+          "l": 6,
+          "t": 5,
+          "w": 20,
+          "h": 25,
+          "b": 29
+        }
+      },
+      {
+        "state": "push",
+        "column": 1,
+        "rect": [
+          32,
+          192,
+          32,
+          32
+        ],
+        "anchor": [
+          16,
+          30
+        ],
+        "occupied": {
+          "l": 6,
+          "t": 5,
+          "w": 21,
+          "h": 25,
+          "b": 29
+        }
+      },
+      {
+        "state": "push",
+        "column": 2,
+        "rect": [
+          64,
+          192,
+          32,
+          32
+        ],
+        "anchor": [
+          16,
+          30
+        ],
+        "occupied": {
+          "l": 3,
+          "t": 5,
+          "w": 25,
+          "h": 25,
+          "b": 29
+        }
+      },
+      {
+        "state": "push",
+        "column": 3,
+        "rect": [
+          96,
+          192,
+          32,
+          32
+        ],
+        "anchor": [
+          16,
+          30
+        ],
+        "occupied": {
+          "l": 7,
+          "t": 5,
+          "w": 17,
+          "h": 25,
+          "b": 29
+        }
+      }
+    ]
+  },
+  "props": {
+    "file": "props.png",
+    "cell": [
+      16,
+      16
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frames": {
+      "bridge-left": {
+        "rect": [
+          0,
+          0,
+          16,
+          6
+        ],
+        "cell": [
+          0,
+          0,
+          16,
+          16
+        ],
+        "anchor": [
+          0,
+          6
+        ]
+      },
+      "bridge-middle": {
+        "rect": [
+          16,
+          0,
+          16,
+          6
+        ],
+        "cell": [
+          16,
+          0,
+          16,
+          16
+        ],
+        "anchor": [
+          0,
+          6
+        ]
+      },
+      "bridge-right": {
+        "rect": [
+          32,
+          0,
+          16,
+          6
+        ],
+        "cell": [
+          32,
+          0,
+          16,
+          16
+        ],
+        "anchor": [
+          0,
+          6
+        ]
+      },
+      "stairs-right": {
+        "rect": [
+          48,
+          0,
+          16,
+          16
+        ],
+        "cell": [
+          48,
+          0,
+          16,
+          16
+        ],
+        "anchor": [
+          0,
+          16
+        ],
+        "columnHeights": [
+          4,
+          4,
+          4,
+          8,
+          8,
+          12,
+          12,
+          12,
+          16,
+          16,
+          16,
+          16,
+          16,
+          16,
+          16,
+          16
+        ]
+      },
+      "grapple-hook": {
+        "rect": [
+          5,
+          27,
+          5,
+          5
+        ],
+        "cell": [
+          0,
+          16,
+          16,
+          16
+        ],
+        "anchor": [
+          0,
+          5
+        ]
+      },
+      "jetpack-flame-0": {
+        "rect": [
+          21,
+          16,
+          6,
+          8
+        ],
+        "cell": [
+          16,
+          16,
+          16,
+          16
+        ],
+        "anchor": [
+          3,
+          0
+        ]
+      },
+      "jetpack-flame-1": {
+        "rect": [
+          37,
+          16,
+          6,
+          8
+        ],
+        "cell": [
+          32,
+          16,
+          16,
+          16
+        ],
+        "anchor": [
+          3,
+          0
+        ]
+      },
+      "jetpack-flame-2": {
+        "rect": [
+          53,
+          16,
+          6,
+          8
+        ],
+        "cell": [
+          48,
+          16,
+          16,
+          16
+        ],
+        "anchor": [
+          3,
+          0
+        ]
+      },
+      "crown": {
+        "rect": [
+          3,
+          41,
+          10,
+          7
+        ],
+        "cell": [
+          0,
+          32,
+          16,
+          16
+        ],
+        "anchor": [
+          0,
+          7
+        ]
+      },
+      "viewer-flag-0": {
+        "rect": [
+          3,
+          48,
+          10,
+          16
+        ],
+        "cell": [
+          0,
+          48,
+          16,
+          16
+        ],
+        "anchor": [
+          0,
+          16
+        ]
+      },
+      "viewer-flag-1": {
+        "rect": [
+          19,
+          48,
+          10,
+          16
+        ],
+        "cell": [
+          16,
+          48,
+          16,
+          16
+        ],
+        "anchor": [
+          0,
+          16
+        ]
+      },
+      "viewer-flag-2": {
+        "rect": [
+          35,
+          48,
+          10,
+          16
+        ],
+        "cell": [
+          32,
+          48,
+          16,
+          16
+        ],
+        "anchor": [
+          0,
+          16
+        ]
+      },
+      "viewer-flag-3": {
+        "rect": [
+          51,
+          48,
+          10,
+          16
+        ],
+        "cell": [
+          48,
+          48,
+          16,
+          16
+        ],
+        "anchor": [
+          0,
+          16
+        ]
+      }
+    },
+    "flagClothMask": "viewer-flag-cloth-mask.png"
+  },
+  "source": {
+    "characterReference": "public/assets/overlay/wasteland-courier.png",
+    "terrainReference": "public/assets/overlay/wasteland-terrain.png",
+    "method": "Image generation using current atlases as references; nearest-neighbor export, binary alpha, helmet/scarf masks, fixed grid and plank edge registration.",
+    "characterGenerationDimensions": [
+      948,
+      1659
+    ],
+    "propGenerationDimensions": [
+      1261,
+      1247
+    ]
+  }
+}

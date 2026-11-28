@@ -1,5 +1,4 @@
-import { useId, useState, type ReactNode } from "react";
-import { t } from "../../i18n";
+import { useState, type ReactNode } from "react";
 import type { Orientation } from "../../lib/overlay-layers";
 import type { LayoutAction, OverlayLayouts } from "../../lib/overlay-layouts";
 import { errorMessage, postJson } from "../api";
@@ -11,7 +10,6 @@ import { CompositionEditor } from "./composition-editor";
 import { ConnectionNote } from "./connection-note";
 import { OverlayLink } from "./overlay-link";
 import type { OverlayScene } from "./overlay-stage";
-import { StepHeading } from "./step-heading";
 import { useOverlayState } from "./use-overlay-state";
 
 export { controlState } from "./use-overlay-state";
@@ -76,7 +74,6 @@ export function OverlayControl({
       setLayoutBusy(false);
     }
   };
-  const obsId: string = useId();
   const view: OverlayScene = { ...scene, overlay: state };
   return (
     <>
@@ -91,18 +88,15 @@ export function OverlayControl({
         layoutBusy={layoutBusy}
         layoutAct={layoutAct}
       />
-      <section className="ov-step" aria-labelledby={obsId} data-step="obs">
-        <StepHeading step={2} id={obsId} title={t("overlay.step.obs")} />
-        <OverlayLink
-          hasKey={hasOverlayKey}
-          hasDock={hasDockKey}
-          layers={state.layers}
-          sources={sources}
-          now={scene.now}
-          busy={busy}
-          onTwitchOnly={(output: Orientation, on: boolean) => run({ action: "layers", twitchOnly: { [output]: on } })}
-        />
-      </section>
+      <OverlayLink
+        hasKey={hasOverlayKey}
+        hasDock={hasDockKey}
+        layers={state.layers}
+        sources={sources}
+        now={scene.now}
+        busy={busy}
+        onTwitchOnly={(output: Orientation, on: boolean) => run({ action: "layers", twitchOnly: { [output]: on } })}
+      />
     </>
   );
 }

@@ -5,6 +5,7 @@ import { paths } from "../../lib/shell";
 import type { OverlayData, OverlayState } from "../../types";
 import type { OverlayScene } from "../overlay/overlay-stage";
 import type { ControlAction } from "../overlay/use-overlay-state";
+import { Icon } from "../ui/icon";
 import { LivePart, NotOnGrid, placed } from "./live-part";
 
 type Topic = OverlayData["topics"][number];
@@ -21,7 +22,7 @@ export function liveTopics(topics: readonly Topic[], ref: string | null): Topic[
 
 /**
  * The newest viewer topics. "Feature on stream" shows a topic in the topic layer, at the place that the layer has on
- * the grid.
+ * the grid. The button is at the end of its row, at the width that the button of the message banner also has.
  */
 export function LiveTopics({
   scene,
@@ -63,7 +64,7 @@ export function LiveTopics({
                 {canShow && (
                   <button
                     type="button"
-                    className="small-button"
+                    className="tl-action"
                     disabled={busy}
                     aria-label={t(featured ? "tools.live.topics.takeOffLabel" : "tools.live.topics.featureLabel", {
                       title: topic.title,
@@ -75,6 +76,7 @@ export function LiveTopics({
                       })
                     }
                   >
+                    <Icon name={featured ? "stop" : "megaphone"} size={18} />
                     {t(featured ? "tools.live.takeOff" : "tools.live.topics.feature")}
                   </button>
                 )}

@@ -2,9 +2,10 @@ import { useContext, useId, useState, type FormEvent, type ReactNode } from "rea
 import { t, tAround, type MessageId } from "../../i18n";
 import { withEnabled, withItem } from "../../lib/layer-geometry";
 import { MASH_NAME } from "../../lib/mash";
-import { channelsSectionPath } from "../../lib/shell";
+import { channelsSectionPath, paths } from "../../lib/shell";
 import {
   LAYER_BACKGROUND,
+  isContentLayer,
   layerEnabled,
   type ContentLayer,
   type GridLayer,
@@ -272,13 +273,12 @@ function BackgroundRange({
   );
 }
 
-/** The background slider of a layer. The characters layer and the camera frame have none. */
+/** The background slider of a layer. Only the chat and the content layers have one. */
 function LayerBackground({
   layer,
   layers,
   change,
 }: Readonly<{ layer: GridLayer; layers: OverlayLayers; change: ChangeLayers }>): ReactNode {
-  if (layer === "characters" || layer === "camera") return null;
   if (layer === "chat")
     return (
       <BackgroundRange
@@ -290,6 +290,7 @@ function LayerBackground({
         }
       />
     );
+  if (!isContentLayer(layer)) return null;
   return (
     <BackgroundRange
       label={t("overlay.props.background")}
@@ -309,7 +310,7 @@ function QrSetting({
   change,
 }: Readonly<{ layer: GridLayer; layers: OverlayLayers; change: ChangeLayers }>): ReactNode {
   const hintId: string = useId();
-  if (layer === "chat" || layer === "characters" || layer === "message" || layer === "camera") return null;
+  if (!isContentLayer(layer) || layer === "message") return null;
   return (
     <>
       <label className="choice">
@@ -377,7 +378,14 @@ export function LayerProperties({
       <h3 className="ov-props-name" id={titleId}>
         {t(LAYER_NAMES[layer])}
       </h3>
-      {layer === "characters" && <p className="muted ov-comp-note">{t("overlay.characters.intro")}</p>}
+      {layer === "characters" && (
+        <p className="muted ov-comp-note">
+          {t("overlay.characters.intro")}{" "}
+          <a className="text-link" href={paths.commands} target="_blank" rel="noopener noreferrer">
+            {t("overlay.characters.commandsLink")}
+          </a>
+        </p>
+      )}
       <label className="choice">
         <input
           type="checkbox"
@@ -399,6 +407,10 @@ export function LayerProperties({
           onTimeout={(timeout: number) =>
             change((current: OverlayLayers) => ({ ...current, characters: { ...current.characters, timeout } }))
           }
+          pushEnabled={layers.characters.pushEnabled}
+          onPushEnabled={(pushEnabled: boolean) =>
+            change((current: OverlayLayers) => ({ ...current, characters: { ...current.characters, pushEnabled } }))
+          }
           max={layers.characters.max}
           onMax={(max: number) =>
             change((current: OverlayLayers) => ({ ...current, characters: { ...current.characters, max } }))
@@ -406,7 +418,7 @@ export function LayerProperties({
         />
       )}
       {layer === "camera" && <p className="muted ov-comp-note">{t("overlay.camera.note")}</p>}
-      {layer !== "chat" && layer !== "characters" && layer !== "camera" && <ContentSettings layer={layer} {...props} />}
+      {isContentLayer(layer) && <ContentSettings layer={layer} {...props} />}
       <QrSetting layer={layer} layers={layers} change={change} />
       <LayerBackground layer={layer} layers={layers} change={change} />
       <button type="button" onClick={() => onRemove(layer)} data-props-remove>

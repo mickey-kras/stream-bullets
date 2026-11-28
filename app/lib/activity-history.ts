@@ -1,11 +1,16 @@
 import type { ActivityChat, ActivityEvent, ActivityMessage } from "./activity";
 
+/** The state of the alerts as the socket sends it: the `alerts` message. */
+export type AlertsStateMessage = Extract<ActivityMessage, { type: "alerts" }>;
+
 /**
  * What an activity feed keeps of its socket for a reader that subscribes later. A socket sends its snapshot one time,
- * so a late reader would start empty. The history is the chat that a new socket would get now: the chat of the
- * snapshot and of the events after it, without the messages that moderation removed.
+ * so a late reader would start empty. The history is what a new socket would get now: the chat of the snapshot and of
+ * the events after it, without the messages that moderation removed, and the last state of the alerts.
  *
- * Only chat is kept. A support event makes an alert, and an alert must not play again for a late reader.
+ * No support event is kept, and no `alert` message: an alert must not play again for a late reader. The state of
+ * the alerts has the times of the alert on stream, so a late reader shows only the time that is left, and it has
+ * the count of the goal.
  */
 export interface ActivityHistory {
   /** False until the socket sent its snapshot: before that, the reader gets the snapshot of the socket itself. */
@@ -14,13 +19,15 @@ export interface ActivityHistory {
   chats: readonly ActivityChat[];
   /** The receive time after which `chats` has each message that was not moderated. Undefined: the snapshot named none. */
   since: number | undefined;
+  /** The newest `alerts` message of the socket. Null: the socket sent none. */
+  alerts: AlertsStateMessage | null;
 }
 
 /** As many messages as a snapshot of the server holds (SNAPSHOT_SIZE of the ingest). */
 export const HISTORY_SIZE = 100;
 
 export function emptyHistory(): ActivityHistory {
-  return { ready: false, chats: [], since: undefined };
+  return { ready: false, chats: [], since: undefined, alerts: null };
 }
 
 function isChat(event: ActivityEvent): event is ActivityChat {
@@ -66,7 +73,8 @@ function keepEvent(history: ActivityHistory, event: ActivityEvent): ActivityHist
 export function keepHistory(history: ActivityHistory, message: ActivityMessage): ActivityHistory {
   if (message.type === "unavailable") return emptyHistory();
   if (message.type === "snapshot")
-    return trimmed({ ready: true, chats: message.events.filter(isChat), since: message.since });
+    return trimmed({ ...history, ready: true, chats: message.events.filter(isChat), since: message.since });
+  if (message.type === "alerts") return { ...history, alerts: message };
   // Before the snapshot the socket sent nothing that a late reader needs: the snapshot holds it.
   if (message.type === "event") return history.ready ? keepEvent(history, message.event) : history;
   return history;
@@ -77,4 +85,13 @@ export function historySnapshot(history: ActivityHistory): ActivityMessage | nul
   if (!history.ready) return null;
   const snapshot: ActivityMessage = { type: "snapshot", events: [...history.chats], replay: true };
   return history.since === undefined ? snapshot : { ...snapshot, since: history.since };
+}
+
+/**
+ * The messages for a reader that subscribes now, in the sequence of the socket: the snapshot, then the state of the
+ * alerts. Empty while the socket sent none of them.
+ */
+export function historyMessages(history: ActivityHistory): ActivityMessage[] {
+  const snapshot: ActivityMessage | null = historySnapshot(history);
+  return [...(snapshot ? [snapshot] : []), ...(history.alerts ? [history.alerts] : [])];
 }

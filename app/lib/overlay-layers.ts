@@ -1,4 +1,15 @@
 import { catch as fallback, z } from "zod";
+import {
+  ALERT_MIN,
+  ALERT_RULES,
+  DEFAULT_RULES,
+  hasThreshold,
+  ruleRecord,
+  type AlertRule,
+  type AlertRuleId,
+  type AlertRules,
+} from "./alerts";
+import { GOAL_COUNTS, GOAL_TARGET, GOAL_TITLE_LENGTH, type GoalCount } from "./goals";
 
 // Overlay layers sit on a grid of square cells. The streamer picks the orientation of the frame: horizontal is
 // 1920x1080 (32 x 18 cells), vertical is 1080x1920 (18 x 32 cells). Each orientation keeps its own layout.
@@ -20,8 +31,11 @@ export type OverlayLayer = (typeof OVERLAY_LAYERS)[number];
 export const CONTENT_LAYERS = ["poll", "topic", "next", "message", "card", "support"] as const;
 export type ContentLayer = (typeof CONTENT_LAYERS)[number];
 
-/** The layers on the grid, in the order the lenient read resolves them. */
-export const GRID_LAYERS = ["chat", "characters", ...CONTENT_LAYERS, "camera"] as const;
+/**
+ * The layers on the grid, in the order the lenient read resolves them. A new layer goes to the end: then a stored
+ * layout keeps the cells that it has.
+ */
+export const GRID_LAYERS = ["chat", "characters", ...CONTENT_LAYERS, "camera", "alerts", "goal"] as const;
 export type GridLayer = (typeof GRID_LAYERS)[number];
 
 /** A place in whole cells: column, row, width and height. `c + w <= cols` and `r + h <= rows`. */
@@ -45,6 +59,10 @@ export type LayerCells = Record<GridLayer, CellRect | null>;
 
 export interface ChatLayer {
   enabled: boolean;
+  /**
+   * The chat does not show chat commands (`isChatCommand`). It applies to the chat layer and to the chat log of the
+   * owner: Live, the full-screen chat and the OBS dock. The commands still run.
+   */
   hideCommands: boolean;
   /** Percent of the card background that shows behind each message (CHAT_BACKGROUND). */
   backgroundOpacity: number;
@@ -57,6 +75,7 @@ export const CHAT_BACKGROUND = LAYER_BACKGROUND;
 
 export interface CharactersLayer {
   enabled: boolean;
+  pushEnabled: boolean;
   /** Seconds without chat before a character walks out (CHARACTERS_TIMEOUT). */
   timeout: number;
   /** The most characters on screen at one time (CHARACTERS_MAX). */
@@ -79,6 +98,23 @@ export interface CameraLayer {
   enabled: boolean;
 }
 
+/** The alerts layer: the banner of the alert on stream. The rules tell what each support event does (alerts.ts). */
+export interface AlertsLayer {
+  enabled: boolean;
+  rules: AlertRules;
+}
+
+/** The goal layer: one count that goes up to a target (goals.ts). The server holds the count. */
+export interface GoalLayer {
+  enabled: boolean;
+  /** The title on stream: one line of at most GOAL_TITLE_LENGTH characters. Empty: the layer shows no title. */
+  title: string;
+  /** What the goal counts. */
+  counts: GoalCount;
+  /** The value where the goal is complete (GOAL_TARGET). */
+  target: number;
+}
+
 /** The settings of one content layer. */
 export interface ContentItem {
   enabled: boolean;
@@ -90,6 +126,12 @@ export interface ContentItem {
   qr: boolean;
 }
 
+/** True for a layer that shows a content source: its settings are in `items`. */
+export function isContentLayer(layer: GridLayer): layer is ContentLayer {
+  const content: readonly string[] = CONTENT_LAYERS;
+  return content.includes(layer);
+}
+
 /** The content layers that use `ref`. */
 export const REF_LAYERS: ReadonlySet<ContentLayer> = new Set<ContentLayer>(["poll", "topic", "card"]);
 
@@ -98,6 +140,8 @@ export interface OverlayLayers {
   chat: ChatLayer;
   characters: CharactersLayer;
   camera: CameraLayer;
+  alerts: AlertsLayer;
+  goal: GoalLayer;
   items: Record<ContentLayer, ContentItem>;
   cells: Record<Orientation, LayerCells>;
   /**
@@ -109,11 +153,20 @@ export interface OverlayLayers {
 
 export type CellsPatch = Partial<LayerCells>;
 
+/** The changed fields of the rules: each field of each rule is one field of a patch. */
+export type RulesPatch = Partial<Record<AlertRuleId, Partial<AlertRule>>>;
+
+/** The fields of a rule and of the goal layer that a patch can name. */
+export const RULE_FIELDS = ["min", "banner", "chat", "character"] as const;
+export const GOAL_FIELDS = ["enabled", "title", "counts", "target"] as const;
+
 export interface LayersPatch {
   orientation?: Orientation;
   chat?: Partial<ChatLayer>;
   characters?: Partial<CharactersLayer>;
   camera?: Partial<CameraLayer>;
+  alerts?: { enabled?: boolean; rules?: RulesPatch };
+  goal?: Partial<GoalLayer>;
   items?: Partial<Record<ContentLayer, Partial<ContentItem>>>;
   twitchOnly?: Partial<Record<Orientation, boolean>>;
   cells?: Partial<Record<Orientation, CellsPatch>>;
@@ -132,6 +185,9 @@ export const MIN_CELLS: Readonly<Record<GridLayer, Readonly<{ w: number; h: numb
   support: CONTENT_MIN,
   // The window of the smallest frame still holds a face: 360 x 240 design pixels with the frame around it.
   camera: { w: 6, h: 4 },
+  // A banner of one alert, and a title with a progress bar: lower than a content card.
+  alerts: { w: 8, h: 3 },
+  goal: { w: 8, h: 2 },
 };
 
 /** One value for each content layer. */
@@ -148,20 +204,28 @@ function contentRecord<T>(value: (layer: ContentLayer) => T): Record<ContentLaye
 
 /** The cells of an orientation with no layer on the grid. */
 export function emptyCells(): LayerCells {
-  return { chat: null, characters: null, ...contentRecord((): null => null), camera: null };
+  return { chat: null, characters: null, ...contentRecord((): null => null), camera: null, alerts: null, goal: null };
 }
 
 function defaultItem(layer: ContentLayer): ContentItem {
   return { enabled: true, ref: null, backgroundOpacity: LAYER_BACKGROUND.default, qr: layer === "poll" };
 }
 
+/** The rules of a page that changed none, as a new object. */
+function defaultRules(): AlertRules {
+  return ruleRecord((rule: AlertRuleId): AlertRule => ({ ...DEFAULT_RULES[rule] }));
+}
+
 // No layer has a cell by default. A layer shows on stream when it is enabled and has a cell in the selected
-// orientation. The chat, the characters and the camera frame are off until the streamer puts them on the grid.
+// orientation. The chat, the characters, the camera frame, the alerts and the goal are off until the streamer puts
+// them on the grid.
 export const DEFAULT_LAYERS: OverlayLayers = {
   orientation: "horizontal",
   chat: { enabled: false, hideCommands: true, backgroundOpacity: CHAT_BACKGROUND.default },
-  characters: { enabled: false, timeout: CHARACTERS_TIMEOUT.default, max: CHARACTERS_MAX.default },
+  characters: { enabled: false, pushEnabled: true, timeout: CHARACTERS_TIMEOUT.default, max: CHARACTERS_MAX.default },
   camera: { enabled: false },
+  alerts: { enabled: false, rules: defaultRules() },
+  goal: { enabled: false, title: "", counts: "subs", target: GOAL_TARGET.default },
   items: contentRecord(defaultItem),
   cells: {
     horizontal: emptyCells(),
@@ -228,9 +292,7 @@ export interface PlacedContent {
 
 /** The "Show on stream" setting of a layer. */
 export function layerEnabled(layers: OverlayLayers, layer: GridLayer): boolean {
-  return layer === "chat" || layer === "characters" || layer === "camera"
-    ? layers[layer].enabled
-    : layers.items[layer].enabled;
+  return isContentLayer(layer) ? layers.items[layer].enabled : layers[layer].enabled;
 }
 
 /**
@@ -321,6 +383,8 @@ function cellsPatchSchema(orientation: Orientation): z.ZodType<CellsPatch> {
       characters: cellSchema(orientation, "characters").nullable().optional(),
       ...contentRecord((layer: ContentLayer) => cellSchema(orientation, layer).nullable().optional()),
       camera: cellSchema(orientation, "camera").nullable().optional(),
+      alerts: cellSchema(orientation, "alerts").nullable().optional(),
+      goal: cellSchema(orientation, "goal").nullable().optional(),
     })
     .strict()
     .refine((cells: CellsPatch): boolean => overlappingPair(cells) === null, { message: "Layers must not overlap." });
@@ -334,6 +398,23 @@ const layerBackground = z
   .min(LAYER_BACKGROUND.min)
   .max(LAYER_BACKGROUND.max)
   .multipleOf(LAYER_BACKGROUND.step);
+
+const alertMin = z.number().int().min(ALERT_MIN.min).max(ALERT_MIN.max);
+const goalTitle = z
+  .string()
+  .max(GOAL_TITLE_LENGTH)
+  .regex(/^[^\p{Cc}]*$/u, "Use a single line.");
+const goalCounts = z.enum(GOAL_COUNTS);
+const goalTarget = z.number().int().min(GOAL_TARGET.min).max(GOAL_TARGET.max);
+
+/** The patch of one rule. Only a rule with an amount (THRESHOLD_RULES) takes `min`: each other rule refuses it. */
+function rulePatchSchema(rule: AlertRuleId): z.ZodOptional<z.ZodType<Partial<AlertRule>>> {
+  const switches = { banner: z.boolean().optional(), chat: z.boolean().optional(), character: z.boolean().optional() };
+  const patch: z.ZodType<Partial<AlertRule>> = hasThreshold(rule)
+    ? z.object({ min: alertMin.optional(), ...switches }).strict()
+    : z.object(switches).strict();
+  return patch.optional();
+}
 
 /** The `ref` of a content layer. The length limit matches `overlaySourceSchema`. Layers without a ref take null only. */
 function refSchema(layer: ContentLayer): z.ZodType<string | null> {
@@ -353,7 +434,7 @@ function itemPatchSchema(layer: ContentLayer): z.ZodOptional<z.ZodType<Partial<C
 }
 
 // Writes are strict: unknown keys, cells outside the grid, below the minimum size or over each other return 400.
-// A ref on a content layer that has none also returns 400.
+// A ref on a content layer that has none also returns 400, and so does an amount on a rule that has none.
 // The server also checks the merged layout, so a cell never covers a saved cell of another layer.
 export const layersPatchSchema = z
   .object({
@@ -369,12 +450,29 @@ export const layersPatchSchema = z
     characters: z
       .object({
         enabled: z.boolean().optional(),
+        pushEnabled: z.boolean().optional(),
         timeout: characterTimeout.optional(),
         max: characterMax.optional(),
       })
       .strict()
       .optional(),
     camera: z.object({ enabled: z.boolean().optional() }).strict().optional(),
+    alerts: z
+      .object({
+        enabled: z.boolean().optional(),
+        rules: z.object(ruleRecord(rulePatchSchema)).strict().optional(),
+      })
+      .strict()
+      .optional(),
+    goal: z
+      .object({
+        enabled: z.boolean().optional(),
+        title: goalTitle.optional(),
+        counts: goalCounts.optional(),
+        target: goalTarget.optional(),
+      })
+      .strict()
+      .optional(),
     items: z.object(contentRecord(itemPatchSchema)).strict().optional(),
     cells: z
       .object({
@@ -412,7 +510,7 @@ export function readCells(orientation: Orientation, value: unknown): LayerCells 
   const chat: CellRect | null = free("chat");
   const characters: CellRect | null = free("characters");
   const content: Record<ContentLayer, CellRect | null> = contentRecord(free);
-  return { chat, characters, ...content, camera: free("camera") };
+  return { chat, characters, ...content, camera: free("camera"), alerts: free("alerts"), goal: free("goal") };
 }
 
 function defaultItems(): Record<ContentLayer, ContentItem> {
@@ -430,6 +528,21 @@ function storedItemSchema(layer: ContentLayer): z.ZodType<ContentItem, unknown> 
       qr: fallback(z.boolean(), item.qr),
     }),
     (): ContentItem => ({ ...item }),
+  );
+}
+
+/** A stored rule. An invalid field reads as its default. A rule without an amount always reads the amount 1. */
+function storedRuleSchema(rule: AlertRuleId): z.ZodType<AlertRule, unknown> {
+  const usual: AlertRule = DEFAULT_RULES[rule];
+  const min: z.ZodType<number> = hasThreshold(rule) ? alertMin : z.literal(usual.min);
+  return fallback(
+    z.object({
+      min: fallback(min, usual.min),
+      banner: fallback(z.boolean(), usual.banner),
+      chat: fallback(z.boolean(), usual.chat),
+      character: fallback(z.boolean(), usual.character),
+    }),
+    (): AlertRule => ({ ...usual }),
   );
 }
 
@@ -451,6 +564,7 @@ export const storedLayersSchema: z.ZodType<OverlayLayers, unknown> = fallback(
     characters: fallback(
       z.object({
         enabled: fallback(z.boolean(), DEFAULT_LAYERS.characters.enabled),
+        pushEnabled: fallback(z.boolean(), DEFAULT_LAYERS.characters.pushEnabled),
         timeout: fallback(characterTimeout, DEFAULT_LAYERS.characters.timeout),
         max: fallback(characterMax, DEFAULT_LAYERS.characters.max),
       }),
@@ -459,6 +573,22 @@ export const storedLayersSchema: z.ZodType<OverlayLayers, unknown> = fallback(
     camera: fallback(
       z.object({ enabled: fallback(z.boolean(), DEFAULT_LAYERS.camera.enabled) }),
       (): CameraLayer => ({ ...DEFAULT_LAYERS.camera }),
+    ),
+    alerts: fallback(
+      z.object({
+        enabled: fallback(z.boolean(), DEFAULT_LAYERS.alerts.enabled),
+        rules: fallback(z.object(ruleRecord(storedRuleSchema)), defaultRules),
+      }),
+      (): AlertsLayer => ({ enabled: DEFAULT_LAYERS.alerts.enabled, rules: defaultRules() }),
+    ),
+    goal: fallback(
+      z.object({
+        enabled: fallback(z.boolean(), DEFAULT_LAYERS.goal.enabled),
+        title: fallback(goalTitle, DEFAULT_LAYERS.goal.title),
+        counts: fallback(goalCounts, DEFAULT_LAYERS.goal.counts),
+        target: fallback(goalTarget, DEFAULT_LAYERS.goal.target),
+      }),
+      (): GoalLayer => ({ ...DEFAULT_LAYERS.goal }),
     ),
     items: fallback(z.object(contentRecord(storedItemSchema)), defaultItems),
     cells: fallback(z.object({ horizontal: z.unknown().optional(), vertical: z.unknown().optional() }), {
@@ -483,6 +613,8 @@ export const storedLayersSchema: z.ZodType<OverlayLayers, unknown> = fallback(
     chat: { ...DEFAULT_LAYERS.chat },
     characters: { ...DEFAULT_LAYERS.characters },
     camera: { ...DEFAULT_LAYERS.camera },
+    alerts: { enabled: DEFAULT_LAYERS.alerts.enabled, rules: defaultRules() },
+    goal: { ...DEFAULT_LAYERS.goal },
     items: defaultItems(),
     cells: { horizontal: emptyCells(), vertical: emptyCells() },
     twitchOnly: { ...DEFAULT_LAYERS.twitchOnly },
@@ -518,10 +650,37 @@ function storedItem(layer: ContentLayer, item: ContentItem): Partial<ContentItem
   return stored;
 }
 
+/** The fields `keys` of `value` that are not as in `usual`. */
+export function changedFields<T extends object>(value: T, usual: T, keys: readonly (keyof T)[]): Partial<T> {
+  const changed: Partial<T> = {};
+  for (const key of keys) if (value[key] !== usual[key]) changed[key] = value[key];
+  return changed;
+}
+
+/** The fields of each rule that are not as in `usual`. A rule with no such field is not in the result. */
+export function changedRules(rules: Readonly<AlertRules>, usual: Readonly<AlertRules>): RulesPatch {
+  const changed: RulesPatch = {};
+  for (const rule of ALERT_RULES) {
+    const fields: Partial<AlertRule> = changedFields(rules[rule], usual[rule], RULE_FIELDS);
+    if (Object.keys(fields).length > 0) changed[rule] = fields;
+  }
+  return changed;
+}
+
+/** The alerts layer to store: only what is not a default. Undefined: the layer has its defaults. */
+function storedAlerts(alerts: AlertsLayer): LayersPatch["alerts"] {
+  const stored: NonNullable<LayersPatch["alerts"]> = {};
+  if (alerts.enabled !== DEFAULT_LAYERS.alerts.enabled) stored.enabled = alerts.enabled;
+  const rules: RulesPatch = changedRules(alerts.rules, DEFAULT_RULES);
+  if (Object.keys(rules).length > 0) stored.rules = rules;
+  return Object.keys(stored).length > 0 ? stored : undefined;
+}
+
 /**
  * The `layers` JSON text to store. It leaves out what the lenient read fills in: a layer without a cell, each
- * content layer setting at its default, a camera frame that is off, and the Twitch switches when the two are off.
- * Thus the text stays short. The caller checks it against STORED_LAYERS_LENGTH.
+ * content layer setting at its default, a camera frame that is off, the Twitch switches when the two are off, and
+ * each setting of the alerts and the goal at its default. Thus the text stays short. The caller checks it against
+ * STORED_LAYERS_LENGTH.
  */
 export function storedLayersText(layers: OverlayLayers): string {
   const items: LayersPatch["items"] = {};
@@ -529,6 +688,7 @@ export function storedLayersText(layers: OverlayLayers): string {
     const stored: Partial<ContentItem> = storedItem(layer, layers.items[layer]);
     if (Object.keys(stored).length > 0) items[layer] = stored;
   }
+  const goal: Partial<GoalLayer> = changedFields(layers.goal, DEFAULT_LAYERS.goal, GOAL_FIELDS);
   return JSON.stringify({
     v: LAYERS_VERSION,
     orientation: layers.orientation,
@@ -538,6 +698,8 @@ export function storedLayersText(layers: OverlayLayers): string {
     items: Object.keys(items).length > 0 ? items : undefined,
     cells: { horizontal: storedCells(layers.cells.horizontal), vertical: storedCells(layers.cells.vertical) },
     twitchOnly: layers.twitchOnly.horizontal || layers.twitchOnly.vertical ? layers.twitchOnly : undefined,
+    alerts: storedAlerts(layers.alerts),
+    goal: Object.keys(goal).length > 0 ? goal : undefined,
   });
 }
 
@@ -547,7 +709,14 @@ function mergeCells(current: LayerCells, patch: CellsPatch | undefined): LayerCe
     const rect: CellRect | null = next === undefined ? current[layer] : next;
     return rect ? copyCell(rect) : null;
   };
-  return { chat: merged("chat"), characters: merged("characters"), ...contentRecord(merged), camera: merged("camera") };
+  return {
+    chat: merged("chat"),
+    characters: merged("characters"),
+    ...contentRecord(merged),
+    camera: merged("camera"),
+    alerts: merged("alerts"),
+    goal: merged("goal"),
+  };
 }
 
 function mergeItem(current: ContentItem, patch: Partial<ContentItem> | undefined): ContentItem {
@@ -556,6 +725,15 @@ function mergeItem(current: ContentItem, patch: Partial<ContentItem> | undefined
     ref: patch?.ref === undefined ? current.ref : patch.ref,
     backgroundOpacity: patch?.backgroundOpacity ?? current.backgroundOpacity,
     qr: patch?.qr ?? current.qr,
+  };
+}
+
+function mergeRule(current: AlertRule, patch: Partial<AlertRule> | undefined): AlertRule {
+  return {
+    min: patch?.min ?? current.min,
+    banner: patch?.banner ?? current.banner,
+    chat: patch?.chat ?? current.chat,
+    character: patch?.character ?? current.character,
   };
 }
 
@@ -569,10 +747,23 @@ export function mergeLayers(current: OverlayLayers, patch: LayersPatch): Overlay
     },
     characters: {
       enabled: patch.characters?.enabled ?? current.characters.enabled,
+      pushEnabled: patch.characters?.pushEnabled ?? current.characters.pushEnabled,
       timeout: patch.characters?.timeout ?? current.characters.timeout,
       max: patch.characters?.max ?? current.characters.max,
     },
     camera: { enabled: patch.camera?.enabled ?? current.camera.enabled },
+    alerts: {
+      enabled: patch.alerts?.enabled ?? current.alerts.enabled,
+      rules: ruleRecord(
+        (rule: AlertRuleId): AlertRule => mergeRule(current.alerts.rules[rule], patch.alerts?.rules?.[rule]),
+      ),
+    },
+    goal: {
+      enabled: patch.goal?.enabled ?? current.goal.enabled,
+      title: patch.goal?.title ?? current.goal.title,
+      counts: patch.goal?.counts ?? current.goal.counts,
+      target: patch.goal?.target ?? current.goal.target,
+    },
     items: contentRecord((layer: ContentLayer): ContentItem => mergeItem(current.items[layer], patch.items?.[layer])),
     cells: {
       horizontal: mergeCells(current.cells.horizontal, patch.cells?.horizontal),
@@ -590,14 +781,4 @@ export function parseLayerParam(value: string | null): OverlayLayer | null | "un
   if (value === null) return null;
   const layer: OverlayLayer | undefined = OVERLAY_LAYERS.find((name: OverlayLayer): boolean => name === value);
   return layer ?? "unknown";
-}
-
-// Adds, replaces, or (for null) removes `layer` and keeps the other query parameters, such as `key`.
-export function layerUrl(overlayUrl: string, layer: OverlayLayer | null): string {
-  const absolute: boolean = /^[a-z][a-z\d+.-]*:/i.test(overlayUrl);
-  const base = "https://overlay.invalid";
-  const url = new URL(overlayUrl, base);
-  if (layer === null) url.searchParams.delete("layer");
-  else url.searchParams.set("layer", layer);
-  return absolute ? url.toString() : `${url.pathname}${url.search}${url.hash}`;
 }

@@ -1,8 +1,10 @@
 import { z } from "zod";
-import type { ActivityEvent } from "../lib/activity";
+import type { ActivityEvent, ActivityPlatform } from "../lib/activity";
 import { parseStoredLayers } from "../lib/overlay-legacy";
 import { type CellRect, DEFAULT_LAYERS, type OverlayLayers, playgroundCell } from "../lib/overlay-layers";
 import { TICK_HZ } from "../lib/playground/constants";
+import { siteKey } from "../lib/playground/core";
+import type { Reaction } from "../lib/playground/crowd";
 import {
   encodeFrame,
   type PlaygroundControl,
@@ -57,6 +59,12 @@ interface PlaygroundHostOptions {
   seed?: () => number;
 }
 
+/** The viewer that a reaction is for. The playground never sends this identity to a socket. */
+export interface ReactionSubject {
+  platform: ActivityPlatform;
+  userId: string;
+}
+
 interface TestRun {
   seed: number;
   startMs: number;
@@ -99,8 +107,8 @@ function cause(error: unknown): string {
   return error instanceof Error ? error.name : "unknown";
 }
 
-/** The saved layers of a page, or the defaults when the page has no overlay row. */
-async function readLayers(db: D1Database, streamerId: string | undefined): Promise<OverlayLayers> {
+/** The saved layers of a page, or the defaults when the page has no overlay row. One D1 read. */
+export async function readLayers(db: D1Database, streamerId: string | undefined): Promise<OverlayLayers> {
   if (streamerId === undefined) return DEFAULT_LAYERS;
   const row = await db
     .prepare("SELECT layers FROM overlay_state WHERE streamer_id=?")
@@ -192,6 +200,20 @@ export class PlaygroundHost {
     sim.receive(event);
     this.dirty = true;
     if (!this.ticking && event.kind !== "chat") this.publish(sim, this.options.sockets());
+  }
+
+  /**
+   * A reaction of the characters to an alert (see `PlaygroundSim.react`): the character of `subject` does `action`,
+   * or the crowd cheers when `subject` is null or has no character on screen. `skipPlatform` leaves the characters of
+   * that platform out of the crowd. Returns the number of characters that got the reaction. In registry mode, with
+   * the characters layer off, and during a pause, it does nothing and returns 0: a reaction is never kept for later.
+   */
+  react(subject: ReactionSubject | null, action: Reaction, skipPlatform?: ActivityPlatform): number {
+    const sim = this.sim;
+    if (!sim) return 0;
+    // An alert can be the first event after an eviction: the playground starts again for the sockets that are open.
+    this.ensure();
+    return sim.react(subject && siteKey(subject.platform, subject.userId), action, skipPlatform);
   }
 
   /**
@@ -418,12 +440,14 @@ export class PlaygroundHost {
     const now = this.clock.now();
     if (this.sim) {
       const sim = this.sim;
-      const shape = (): string => `${sim.world.cellsW} ${sim.world.cellsH} ${sim.timeoutTicks} ${sim.visibleMax}`;
+      const shape = (): string =>
+        `${sim.world.cellsW} ${sim.world.cellsH} ${sim.timeoutTicks} ${sim.visibleMax} ${sim.pushEnabled}`;
       const before: string = shape();
       if (!this.ticking) this.skipTo(now);
       sim.resize(cell.w, cell.h);
       sim.setTimeoutSeconds(layers.characters.timeout);
       sim.setVisibleMax(layers.characters.max);
+      sim.setPushEnabled(layers.characters.pushEnabled);
       // An unchanged layer saves nothing: the alarm reads the layers every LAYER_CHECK_MS.
       this.dirty ||= !this.enabled || shape() !== before;
     } else {
@@ -434,6 +458,7 @@ export class PlaygroundHost {
         timeoutSeconds: layers.characters.timeout,
         visibleMax: layers.characters.max,
       });
+      this.sim.setPushEnabled(layers.characters.pushEnabled);
       this.syncedAt = now;
       // The open sockets get the new playground's full frame.
       this.primed = new WeakSet<WebSocket>();

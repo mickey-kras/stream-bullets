@@ -43,8 +43,10 @@ To change a value, change `app/lib/playground/constants.ts` and this table.
 | Minimum time on screen | 10 seconds (300 ticks) |
 | Score of a message | +1, at most one time in 3 seconds (90 ticks) |
 | Score decay | `exp(-elapsed / 1800 ticks)`, a time constant of 60 seconds |
-| Command cooldown | 3 seconds (90 ticks) for each viewer |
+| Movement cooldown | 1 second (30 ticks) for `!left`, `!right`, `!look` and their aliases, per viewer |
+| Other command cooldown | 3 seconds (90 ticks), independent of movement, per viewer |
 | Queued commands | 1 for each viewer. It expires after 10 seconds (300 ticks). |
+| Queued reactions | 1 for each character. It expires after 10 seconds (300 ticks). See [Reactions](#reactions). |
 | Bubble time | 4 seconds for a message, 2 seconds for a command |
 | Bubbles at one time | 4. A new bubble removes the bubble that is nearest to its end. |
 | Bubble text | 80 user-perceived characters |
@@ -134,19 +136,52 @@ The sides are `left`, `right`, `l`, and `r`. Capital letters make no difference.
 | `!push` | `!shove` | Push the character in front. That character flies 1 block or more. |
 | `!flag` | | Plant a flag in the platform color. Each character has one flag. A new flag moves the old one. |
 
+The page `/commands` shows each command to viewers, with a demo. Post its link in the chat.
+The **Characters** properties in the **Overlay** section have a link to the page.
+Each demo runs the rules of the playground in the browser (`app/components/commands/demos.ts`). Thus a demo always agrees with the rules.
+With reduced motion, the demos stand still.
+
 - A command controls only the character of its sender. Blocks and holes affect all characters.
+- By default, the chat on stream, the chat of **Live**, and the chat of the OBS dock do not show a command message.
+  A hidden command still works. See [Commands](overlay-composition.md#commands).
 - A side on a build command turns the character first: `!block left`.
 - Only live chat runs a command. A message from a snapshot or a late provider retry never runs a command.
   See [Channel connections and activity](channel-connections.md#event-contract).
 - A command from a viewer without a character waits in the queue. The character first enters.
   The command then runs when the character walks in the walking limits. The playground never runs a command that viewers cannot see.
-- A command in the cooldown does nothing. A queued command that is older than 10 seconds expires.
+- The owner can disable `!push` and `!shove` in the characters settings. This also cancels queued and unfinished pushes.
+- A command in its cooldown group does nothing. A queued command that is older than 10 seconds expires.
 - Work of more than one block ends before the next command starts. `!stop` ends it at once.
 - A character stays on screen until its action ends. Each action has a fixed end.
 - Some commands cannot run: a block in a door zone, a dig on protected ground, a hook that catches nothing.
   Then a red cross shows above the character.
-- The dig, the dirt blocks, and the stairs use the art of the ground. The dance, the cheer, the grapple, the jetpack, and the push
-  have no art of their own. They use the wave, jump, and build pictures.
+- The dig, the dirt blocks, and the stairs use the art of the ground. Each other action has its own pictures.
+  The rope of the grapple is a drawn line.
+
+## Reactions
+
+The server can make the characters react to an event, for example to an alert. A reaction is not a chat command.
+`PlaygroundHost.react(subject, action, skipPlatform)` starts a reaction. The rules that call it are not part of the playground.
+
+- The subject is a viewer: the platform and the platform user ID. The actions are `wave`, `jump`, and `cheer`.
+- When the subject has a character on screen, that character does the action one time.
+- When the subject is null or has no character on screen, the crowd reacts. An anonymous event has no subject.
+  Each visible character that stands on a floor then cheers one time.
+- A character on its way to the exit door does not stay for a reaction. For that subject, the crowd reacts.
+- A character stands on a floor when it walks, stands, turns, digs, builds, or does an emote.
+  A character that jumps, falls, flies, enters, leaves, or waits for a respawn does not stand on a floor.
+- `skipPlatform` keeps the characters of one platform out of the crowd.
+  Use it when an output shows only that platform and the event comes from a different platform.
+- A reaction shows no command bubble and no red cross. It does not steer the character. A steered character stays steered.
+- A reaction does not use the command cooldown and does not start it. The score and the inactivity time do not change.
+- The jump of a reaction goes up and comes down at the same place. Thus a reaction does not move a character off its build.
+- A reaction never stops an action. It waits until the character walks or stands in the walking limits.
+  Thus a command, a fall, a respawn, and an entrance end first. A queued command of the viewer also runs first.
+- A reaction that waits expires after 10 seconds (300 ticks). A new reaction replaces a reaction that waits.
+- In registry mode and during a pause, a reaction does nothing. The playground never keeps a reaction for later.
+- A reaction is not in the checkpoint, and it adds nothing to the frame protocol.
+  The frames show it as the `wave`, `jump`, or `cheer` state of the character.
+- The same seed, the same messages, and the same reactions at the same ticks give the same frames.
 
 ## Terrain
 
@@ -305,10 +340,10 @@ When the playground does not run, it is in registry mode. In registry mode no ti
 
 - Chat changes only the scores and the time of the last message.
 - Moderation applies.
-- The playground drops commands. It never keeps them for later.
+- The playground drops commands and reactions. It never keeps them for later.
 
 When the playground runs again, its clock moves over the gap. Due repairs and expiries apply.
-Each visible character then walks. The playground drops actions, bubbles, and queued commands.
+Each visible character then walks. The playground drops actions, bubbles, queued commands, and queued reactions.
 
 In registry mode the host sets an alarm for the next expiry of a participant, a restriction, or the test.
 While the playground keeps a state, the alarm comes at least once each minute (`LAYER_CHECK_MS`).
@@ -325,7 +360,8 @@ It saves the checkpoint at most each 5 seconds while the state changes, and when
 The checkpoint holds the clock, the registry, the restrictions, the terrain with its builds and flags, the rotation, the pause, the test, and the settings.
 
 After an eviction, the object restores the checkpoint. The visible characters come back and walk. The builds stay.
-Actions, bubbles, and queued commands are not in the checkpoint. Thus a restored playground never runs an old command again.
+Actions, bubbles, queued commands, and queued reactions are not in the checkpoint.
+Thus a restored playground never runs an old command or an old reaction again.
 
 While the playground runs, the host keeps an alarm 15 seconds ahead (the watchdog).
 The alarm starts a playground again when an eviction stopped its interval.
@@ -418,6 +454,20 @@ We made `public/assets/overlay/wasteland-courier.png` from the courier source wi
 We exported them from the drawing code of the prototype in headless Chromium.
 Then we cleaned them to binary alpha and 128 colors. The file also holds the hole edge and the stair step.
 
+The art of the second set is in `design/assets/Imagery/characters/expansion-v1`. Its `README.md` gives the source and the checks.
+We added that art to the two files with Python, Pillow, and NumPy:
+
+1. Seven rows follow the first 12 rows of the courier: dance, cheer, shoot, rope ride, climb, jetpack, and push.
+   The loose equipment is below row 18.
+2. We made the helmet and scarf masks of the new rows lighter, to the 16 levels of the first masks.
+   Thus a new row gets the same platform color as an old row.
+3. The props are below the terrain pictures: the planks, the hook, the flames, the crown, and the viewer flags.
+   The mask of the flag cloth is beside the flags. It gets the platform color.
+   The stair redraw now matches the collision profile: heights 4, 8, 12, and 16 px start at columns 0, 3, 5, and 8.
+   The renderer uses the complete tile and mirrors it for stairs to the left.
+4. Each file keeps one palette of 256 colors. To fit, we joined the two nearest opaque colors until the file had 256 values.
+   No color channel changed by more than 7 of 255. The alpha is exact.
+
 Each atlas URL ends in `?v=` and the first 8 hexadecimal digits of the SHA-256 of the file.
 The art ships under the project license.
 
@@ -431,7 +481,7 @@ The art ships under the project license.
    https://<origin>/@<handle>/overlay?key=<key>&layer=characters
    ```
 
-3. Give the source the size of the characters cell. The **Overlay** section shows it under **Layer URLs**.
+3. Give the source the size of the characters cell. The label of the layer on the grid of the **Overlay** section shows it.
    A cell across the bottom of the horizontal frame is 1920 × 240. A cell of the full frame is 1920 × 1080.
 4. Keep the background of the source transparent.
 5. Select **Start test** to see the playground in OBS before you go live.
@@ -439,3 +489,9 @@ The art ships under the project license.
 
 Each open characters source keeps the playground running and uses one activity socket.
 Close the sources that you do not use.
+
+### Shared playground badges
+
+The top strip shows Highest and Blocks once for the whole playground. Highest shows the crown holder's platform, name, and height in blocks. The renderer hides Highest without a crown holder. On a platform-only output, the crown and Highest use the highest eligible character of that platform. Blocks shows all built blocks against the shared build limit, including on platform-only outputs. At the limit, the oldest block crumbles.
+
+Both badges need at least 180 canvas px of height and 360 px of width. Blocks requires 600 px of width. Labels must fit the available space. Mode badges take priority, then Highest, then Blocks. Speech bubbles avoid the occupied top strip.

@@ -38,6 +38,7 @@ import * as legacyControlRoute from "../app/routes/overlay-control";
 import * as directoryRoute from "../app/routes/streamers";
 import * as signInRoute from "../app/routes/sign-in";
 import * as aiRoute from "../app/routes/ai";
+import * as commandsRoute from "../app/routes/commands";
 import * as rootRoute from "../app/root";
 import * as homeRoute from "../app/routes/home";
 import * as privacyRoute from "../app/routes/privacy";
@@ -712,6 +713,43 @@ describe("overlay loader contracts", (): void => {
     }
   });
 
+  it("shows one part of the output alone for a link with a layer parameter", async (): Promise<void> => {
+    // Streamer tools no longer shows a link for each layer. A link that OBS already has must continue to work.
+    vi.mocked(overlay.getOverlayState).mockResolvedValue({ ...DEFAULT_OVERLAY, layers: twoOutputs });
+    vi.mocked(overlayKey.overlayKeyOutput).mockResolvedValue("vertical");
+    const page = async (query: string): Promise<string> => {
+      const path: string = `/@zed/overlay?key=its-key${query}`;
+      const loaded = await overlayRoute.loader(args(path, { handle: "@zed" }));
+      const Stub = createRoutesStub([{ id: "overlay", path: "/:handle/overlay", Component: overlayRoute.default }]);
+      return renderToStaticMarkup(
+        createElement(Stub, { initialEntries: [path], hydrationData: { loaderData: { overlay: loaded } } }),
+      );
+    };
+    const boxes = (html: string): string[] =>
+      [...html.matchAll(/class="ov-layer" data-layer="([a-z]+)"/g)].map((match: RegExpMatchArray): string => match[1]);
+    // Without the parameter: the composition of the output.
+    const all: string = await page("");
+    expect(boxes(all)).toEqual(["card", "chat"]);
+    expect(all).not.toContain("data-overlay-only");
+    // The chat alone fills the page: it does not use the canvas of the output.
+    const chat: string = await page("&layer=chat");
+    expect(chat).toContain('data-overlay-only="chat"');
+    expect(boxes(chat)).toEqual(["chat"]);
+    expect(chat).toContain('class="overlay-screen ov-screen"');
+    // The content layers alone stay at their cells in the canvas of the output.
+    const content: string = await page("&layer=content");
+    expect(content).toContain('data-overlay-only="content"');
+    expect(boxes(content)).toEqual(["card"]);
+    expect(content).toContain("width:1080px;height:1920px");
+    // The characters layer is off stream in these layers: its source shows nothing.
+    const characters: string = await page("&layer=characters");
+    expect(characters).toContain('data-overlay-only="characters"');
+    expect(boxes(characters)).toEqual([]);
+    // An unknown layer shows an empty page, never an error.
+    const unknown: string = await page("&layer=nope");
+    expect(unknown).toMatch(/<main class="overlay-screen ov-screen" id="main-content" aria-label="[^"]*"><\/main>/);
+  });
+
   it("sends the old Overlay control address to Streamer tools for good", (): void => {
     const moved = (path: string): string | null => {
       const response: Response = legacyControlRoute.loader(args(path));
@@ -1016,6 +1054,7 @@ describe("public route metadata", (): void => {
       [homeRoute.meta, "/"],
       [directoryRoute.meta, "/streamers"],
       [aiRoute.meta, "/ai"],
+      [commandsRoute.meta, "/commands"],
       [privacyRoute.meta, "/privacy"],
       [termsRoute.meta, "/terms"],
     ] as const) {

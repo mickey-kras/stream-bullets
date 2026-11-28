@@ -27,6 +27,7 @@ const DOCK_IP = clientIp("tools-live", 48);
 const REPLAY_IP = clientIp("tools-live", 49);
 const SUPPORT_IP = clientIp("tools-live", 52);
 const SUPPORT_DOCK_IP = clientIp("tools-live", 53);
+const LAYOUT_IP = clientIp("tools-live", 54);
 
 const now: number = Date.now();
 const entry = (id: string, kind: "choice" | "topic", title: string, age: number): string =>
@@ -198,6 +199,134 @@ test("the owner features a viewer topic and puts the message banner on stream", 
   await close(owner);
 });
 
+interface Box {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  // The text is wider than the box, so a part of it does not show.
+  cut: boolean;
+}
+
+function boxes(locator: Locator): Promise<Box[]> {
+  return locator.evaluateAll((elements: Element[]): Box[] =>
+    elements.map((element: Element): Box => {
+      const { x, y, width, height } = element.getBoundingClientRect();
+      return { x, y, width, height, cut: element.scrollWidth > element.clientWidth + 1 };
+    }),
+  );
+}
+
+test("Live has a link to Overlay beside the preview title, the poll actions in one row, and one width for the buttons of the topics and of the message", async ({
+  browser,
+}) => {
+  const owner = await signedIn(browser, "featureowner", LAYOUT_IP);
+  const page = await newPage(owner);
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/tools?view=live");
+  const poll = page.locator('[data-live-part="poll"]');
+  const row = poll.locator("[data-live-poll-actions]");
+  const feature = page.locator('[data-live-part="topics"] .tl-action');
+  const put = page.locator("[data-live-message-show]");
+  await expect(row.getByRole("button")).toHaveText(["Reveal results", "Close voting", "Take off air"]);
+  await expect(feature).toHaveText(["Feature on stream", "Feature on stream", "Feature on stream"]);
+  await expect(put).toHaveText("Put on stream");
+
+  /** The poll actions are one line of equal columns that fills the part. Each one is a touch target. */
+  const oneRow = async (): Promise<void> => {
+    const [part] = await boxes(poll);
+    const actions: Box[] = await boxes(row.getByRole("button"));
+    expect(actions).toHaveLength(3);
+    for (const action of actions) {
+      expect(action.y).toBe(actions[0].y);
+      expect(action.height).toBe(actions[0].height);
+      expect(action.width).toBeCloseTo(actions[0].width, 0);
+      expect(action.height).toBeGreaterThanOrEqual(44);
+      expect(action.cut).toBe(false);
+    }
+    expect(actions[0].x).toBeCloseTo(part.x, 0);
+    expect(actions[2].x + actions[2].width).toBeCloseTo(part.x + part.width, 0);
+  };
+  /** The buttons that feature a topic and the button of the message banner: one width, one right edge. */
+  const oneWidth = async (): Promise<Box[]> => {
+    const buttons: Box[] = [...(await boxes(feature)), ...(await boxes(put))];
+    expect(buttons).toHaveLength(4);
+    for (const button of buttons) {
+      expect(button.width).toBeCloseTo(buttons[0].width, 0);
+      expect(button.x + button.width).toBeCloseTo(buttons[0].x + buttons[0].width, 0);
+      expect(button.height).toBeGreaterThanOrEqual(44);
+      expect(button.cut).toBe(false);
+    }
+    return buttons;
+  };
+
+  await oneRow();
+  const wide: Box[] = await oneWidth();
+  // On a desktop the buttons are at the end of their rows: the text of a row is wider than its button.
+  const [topics] = await boxes(page.locator('[data-live-part="topics"]'));
+  expect(wide[0].x + wide[0].width).toBeCloseTo(topics.x + topics.width, 0);
+  expect(wide[0].width).toBeLessThan(topics.width / 2);
+
+  // The link beside the title of the preview has only an icon, a name, and a tooltip.
+  const preview = page.locator('[data-live-part="preview"]');
+  const edit = preview.getByRole("link", { name: "Edit the overlay" });
+  await expect(edit).toHaveAttribute("title", "Edit the overlay");
+  await expect(edit).toHaveAttribute("href", "/tools?view=overlay");
+  await expect(edit).toHaveText("");
+  const [link] = await boxes(edit);
+  const [heading] = await boxes(preview.locator(".ov-step-title"));
+  expect(link.width).toBeGreaterThanOrEqual(44);
+  expect(link.height).toBeGreaterThanOrEqual(44);
+  expect(link.x).toBeGreaterThan(heading.x + heading.width);
+  expect(link.y + link.height / 2).toBeGreaterThan(heading.y);
+  expect(link.y + link.height / 2).toBeLessThan(heading.y + heading.height);
+  // The preview is read-only: the link is its only control.
+  await expect(preview.locator("button, input, select, textarea")).toHaveCount(0);
+
+  // The message on stream has two buttons of that width, and the topic on stream keeps the width of its button.
+  await page.locator("[data-live-message]").fill("Back soon.");
+  await put.click();
+  const off = page.locator("[data-live-message-off]");
+  await expect(off).toBeVisible();
+  await feature.first().click();
+  await expect(feature.first()).toHaveText("Take off air");
+  const featured: Box[] = await boxes(feature);
+  const [update] = await boxes(put);
+  const [takeOff] = await boxes(off);
+  for (const button of [...featured, update, takeOff]) expect(button.width).toBeCloseTo(wide[0].width, 0);
+  // The button that takes the message off air is at the end of its row. The button that updates it is before it.
+  expect(takeOff.x + takeOff.width).toBeCloseTo(featured[0].x + featured[0].width, 0);
+  expect(update.y).toBe(takeOff.y);
+  expect(update.x + update.width).toBeLessThan(takeOff.x);
+
+  // A phone keeps the poll actions in one row. The other buttons fill the width of the part.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await oneRow();
+  const narrow: Box[] = await oneWidth();
+  const [part] = await boxes(page.locator('[data-live-part="topics"]'));
+  expect(narrow[0].width).toBeCloseTo(part.width, 0);
+  expect(await page.evaluate((): number => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  // A larger text size has no room for three columns: the actions are one column of equal buttons.
+  await page.evaluate((): void => {
+    document.documentElement.dataset.text = "130";
+  });
+  const stacked: Box[] = await boxes(row.getByRole("button"));
+  expect(new Set(stacked.map((action: Box): number => action.y)).size).toBe(3);
+  for (const action of stacked) {
+    expect(action.width).toBeCloseTo(stacked[0].width, 0);
+    expect(action.cut).toBe(false);
+  }
+  await page.evaluate((): void => {
+    delete document.documentElement.dataset.text;
+  });
+
+  // The link opens the Overlay section.
+  await edit.click();
+  await expect(page).toHaveURL(/\/tools\?view=overlay$/);
+  await expect(page.locator(".ov-head").getByRole("heading", { level: 1 })).toHaveAccessibleName("Overlay");
+  await close(owner);
+});
+
 function chat(n: number, platform: "twitch" | "youtube" | "kick"): Record<string, unknown> {
   const text = `chat message ${n}`;
   return {
@@ -283,6 +412,107 @@ test("the chat pauses on a scroll up, counts new messages, filters platforms and
   await list.focus();
   await expect(list).toBeFocused();
   await close(owner);
+});
+
+/** A chat message with `text`, from this moment: the overlay chat shows a message for two minutes. */
+function said(n: number, text: string): Record<string, unknown> {
+  return { ...chat(n, "twitch"), text, fragments: [{ type: "text", text }], receivedAt: Date.now() };
+}
+
+test("hide chat commands applies to the Live chat, the preview, the full-screen chat and the dock, as to the overlay", async ({
+  browser,
+}) => {
+  // The chat layer is on stream, so the preview of Live shows the overlay chat. The option is on, as by default.
+  await runSql("tools-live-commands", [
+    layersSql({ chat: { enabled: true }, cells: { horizontal: { chat: CHAT_CELL, poll: POLL_CELL } } }),
+    noDockKey,
+  ]);
+  const owner = await signedIn(browser, "featureowner", CHAT_IP);
+  const page = await newPage(owner);
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  // A command for a character, one with a full-width mark and arguments, a command of a different bot, and a
+  // message that is not a command.
+  const first: Record<string, unknown>[] = [
+    said(1, "hello all"),
+    said(2, "!jump"),
+    said(3, "！HOOK 3 left"),
+    said(4, "!discord"),
+    said(5, "hello!"),
+  ];
+  const all: string[] = ["hello all", "!jump", "！HOOK 3 left", "!discord", "hello!"];
+  const sockets: WebSocketRoute[] = [];
+  await page.routeWebSocket("**/api/activity/**", (socket: WebSocketRoute) => {
+    sockets.push(socket);
+    socket.send(JSON.stringify({ type: "snapshot", events: first, replay: true }));
+  });
+  const send = (event: Record<string, unknown>): void => sockets[0].send(JSON.stringify({ type: "event", event }));
+  await page.goto("/tools?view=live");
+  const part = page.locator('[data-live-part="chat"]');
+  const log = part.getByRole("log", { name: "Chat" });
+  const texts = (list: Locator): Promise<string[]> => list.locator("[data-chat-row] .tl-chat-text").allTextContents();
+  const preview = page.locator(".tl-preview [data-overlay-chat]");
+  const onStream = (): Promise<string[]> => preview.locator("li.wl-item:not([data-gone]) .wl-msg").allTextContents();
+  // On by default: no view shows a command, and no row stays for one.
+  await expect.poll(() => texts(log)).toEqual(["hello all", "hello!"]);
+  await expect.poll(onStream).toEqual(["hello all", "hello!"]);
+  await expect(log.locator("[data-chat-row]")).toHaveCount(2);
+
+  // The dock has its own link and its own socket.
+  const made = await owner.request.post("/api/dock/key", { data: {} });
+  expect(made.status()).toBe(200);
+  const dock = await newPage(browser, {
+    viewport: { width: 300, height: 720 },
+    extraHTTPHeaders: { "CF-Connecting-IP": `192.0.2.${DOCK_IP}` },
+  });
+  await dock.routeWebSocket("**/api/activity/**", (socket: WebSocketRoute) => {
+    socket.send(JSON.stringify({ type: "snapshot", events: first, replay: true }));
+  });
+  await dock.goto(((await made.json()) as { url: string }).url);
+  const dockLog = dock.locator('[data-live-part="chat"]').getByRole("log", { name: "Chat" });
+  await expect.poll(() => texts(dockLog)).toEqual(["hello all", "hello!"]);
+  // Mark the documents: a reload would drop the mark.
+  for (const open of [page, dock])
+    await open.evaluate(() => document.documentElement.setAttribute("data-e2e-loaded", "1"));
+
+  // A new command gets no row and does not count for a paused chat. A message that is not a command shows and counts.
+  await part.getByRole("button", { name: "Pause chat" }).click();
+  await expect(part.locator("[data-chat-paused]")).toHaveText("Chat paused. New messages: 0");
+  send(said(6, "!wave"));
+  send(said(7, "!lurk"));
+  send(said(8, "! hello"));
+  await expect(part.locator("[data-chat-paused]")).toHaveText("Chat paused. New messages: 1");
+  await expect.poll(onStream).toEqual(["hello all", "hello!", "! hello"]);
+  await part.getByRole("button", { name: "Jump to latest" }).click();
+  await expect.poll(() => texts(log)).toEqual(["hello all", "hello!", "! hello"]);
+
+  // The full-screen chat shows the same rows.
+  await part.getByRole("button", { name: "Open chat full screen" }).click();
+  const view = page.getByRole("dialog", { name: "Chat, full screen" });
+  await expect.poll(() => texts(view.getByRole("log", { name: "Chat" }))).toEqual(["hello all", "hello!", "! hello"]);
+  await view.getByRole("button", { name: "Exit" }).click();
+  await expect(view).toHaveCount(0);
+
+  // The owner clears the option in a different tab: the log shows the commands in their places, without a reload.
+  const show = await owner.request.post("/api/overlay", { data: { action: "layers", chat: { hideCommands: false } } });
+  expect(show.status()).toBe(200);
+  await expect.poll(() => texts(log)).toEqual([...all, "!wave", "!lurk", "! hello"]);
+  await expect.poll(() => texts(dockLog)).toEqual(all);
+  // The chat layer does not bring a hidden command back. It shows the commands that come from now on.
+  send(said(9, "!dance"));
+  await expect.poll(onStream).toEqual(["hello all", "hello!", "! hello", "!dance"]);
+  await expect.poll(() => texts(log)).toEqual([...all, "!wave", "!lurk", "! hello", "!dance"]);
+
+  // The owner selects the option again: the commands go from each view.
+  const hide = await owner.request.post("/api/overlay", { data: { action: "layers", chat: { hideCommands: true } } });
+  expect(hide.status()).toBe(200);
+  await expect.poll(() => texts(log)).toEqual(["hello all", "hello!", "! hello"]);
+  await expect.poll(() => texts(dockLog)).toEqual(["hello all", "hello!"]);
+  await expect.poll(onStream).toEqual(["hello all", "hello!", "! hello"]);
+  // No page loaded again, and Live kept its one socket.
+  for (const open of [page, dock]) await expect(open.locator("html")).toHaveAttribute("data-e2e-loaded", "1");
+  expect(sockets).toHaveLength(1);
+  await Promise.all([close(owner), close(dock)]);
+  await runSql("tools-live-commands-restore", [noDockKey]);
 });
 
 test("the preview shows the recent chat when the chat layer goes on stream from a different tab", async ({
@@ -668,11 +898,8 @@ test("the OBS dock runs the live controls with its own link in a narrow panel, a
   // A key that is not the dock key opens nothing: a wrong key, and the key of an overlay link.
   expect((await dock.request.get(`/@feature_host/dock?key=${"A".repeat(43)}`)).status()).toBe(404);
   expect((await dock.request.get("/@feature_host/dock")).status()).toBe(404);
-  await tools
-    .getByRole("region", { name: "Horizontal output" })
-    .getByRole("button", { name: "Create overlay link" })
-    .click();
-  const overlayField = tools.locator("[data-ov-url]");
+  await tools.getByRole("region", { name: "2 Add to OBS" }).getByRole("button", { name: "Create links" }).click();
+  const overlayField = tools.getByRole("region", { name: "Horizontal output" }).locator("[data-ov-url]");
   await expect(overlayField).toHaveValue(/\?key=[\w-]{43}$/);
   const overlayKey: string = new URL(await overlayField.inputValue()).searchParams.get("key") ?? "";
   expect((await dock.request.get(`/@feature_host/dock?key=${overlayKey}`)).status()).toBe(404);

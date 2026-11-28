@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { CHANNEL_PLATFORMS, CHANNEL_STATUSES } from "../../db/enums";
+import { alertsMessageSchema, type AlertsMessage } from "./alerts";
 import { type PlaygroundFrame, parseFrame } from "./playground/protocol";
 import { addDays, formatDate, localDateOf, zonedTime } from "./zoned";
 
@@ -42,7 +43,8 @@ export interface ActivityChat {
 
 /**
  * The support events. A gift is one event for a gift bundle. `reactions` is one event for a group of reactions.
- * `tip` is a direct tip through StreamBullets: it is not from a platform.
+ * `tip` is a direct tip through StreamBullets, and `topic` is the credit for the author of a topic that the owner
+ * put on stream: these two are not from a platform.
  */
 export const SUPPORT_KINDS = [
   "follow",
@@ -56,13 +58,14 @@ export const SUPPORT_KINDS = [
   "kicks",
   "tip",
   "reactions",
+  "topic",
 ] as const;
 export type SupportKind = (typeof SUPPORT_KINDS)[number];
 
 /** The kinds whose amount is money. Their amount is in micros of `currency`: 1 000 000 is one unit. */
 export const MONEY_KINDS: ReadonlySet<SupportKind> = new Set<SupportKind>(["super_chat", "super_sticker", "tip"]);
 
-/** Where a support event comes from: a platform, or `direct` for a tip through StreamBullets. */
+/** Where a support event comes from: a platform, or `direct` for a tip and a topic credit through StreamBullets. */
 export type SupportSource = ActivityPlatform | "direct";
 
 export interface ActivitySupport {
@@ -78,13 +81,20 @@ export interface ActivitySupport {
   anonymous: boolean;
   /**
    * The amount in the native unit of the kind: months for a subscription and a membership, gifts in a bundle,
-   * viewers of a raid, Bits, KICKs, reactions in a group, and micros of `currency` for money. Null for a follow.
+   * viewers of a raid, Bits, KICKs, reactions in a group, and micros of `currency` for money. Null for a follow
+   * and for a topic credit.
    */
   amount: number | null;
   /** The ISO 4217 code for a money kind. Null for each other kind: no conversion between units. */
   currency: string | null;
-  /** The text that the supporter sent with it. Untrusted, as chat text. */
+  /** The text that the supporter sent with it. Untrusted, as chat text. For a topic credit: the title of the topic. */
   text?: string;
+  /**
+   * When the platform says the event occurred. Absent when the platform does not say. A provider can send an old
+   * event a long time after it occurred: a consumer that counts or plays events compares this time, not only
+   * `receivedAt`.
+   */
+  sentAt?: number;
   receivedAt: number;
   /**
    * True for an event that the server sends again: a replay of the owner, a test, or the snapshot of a reconnect.
@@ -224,6 +234,7 @@ const supportShape = {
   sender: z.object({ id, displayName: z.string().max(100) }).nullable(),
   anonymous: z.boolean(),
   text: z.string().max(MAX_TEXT_LENGTH).optional(),
+  sentAt: time.optional(),
   receivedAt: time,
   replay: z.boolean(),
 };
@@ -235,7 +246,7 @@ const COUNT_KINDS = ["subscription", "membership", "gift", "raid", "bits", "kick
 
 /**
  * A support event. The amount and the currency must agree with the kind, the ID must be the platform and the
- * delivery ID, an anonymous event must have no sender, and only a tip is direct.
+ * delivery ID, an anonymous event must have no sender, and only a tip and a topic credit are direct.
  */
 const supportSchema: z.ZodType<ActivitySupport> = z
   .union([
@@ -243,6 +254,13 @@ const supportSchema: z.ZodType<ActivitySupport> = z
     z.object({ ...supportShape, kind: z.enum(COUNT_KINDS), platform, amount, currency: z.null() }),
     z.object({ ...supportShape, kind: z.enum(["super_chat", "super_sticker"]), platform, amount, currency }),
     z.object({ ...supportShape, kind: z.literal("tip"), platform: z.literal("direct"), amount, currency }),
+    z.object({
+      ...supportShape,
+      kind: z.literal("topic"),
+      platform: z.literal("direct"),
+      amount: z.null(),
+      currency: z.null(),
+    }),
   ])
   .refine((event: ActivitySupport): boolean => event.id === `${event.platform}:${event.deliveryId}`)
   .refine((event: ActivitySupport): boolean => !event.anonymous || event.sender === null);
@@ -277,19 +295,21 @@ export const activityEventSchema: z.ZodType<ActivityEvent> = z.union([
 
 /**
  * A message on the activity socket: the reconnect snapshot first, then one live event at a time. A socket that asked
- * for characters (`?characters=1`) also gets playground frames (playground/protocol.ts).
+ * for characters (`?characters=1`) also gets playground frames (playground/protocol.ts). The alert messages have the
+ * state of the alerts and the goal (alerts.ts).
  */
 export type ActivityMessage =
   | { type: "snapshot"; events: ActivityEvent[]; replay: true; since?: number }
   | { type: "event"; event: ActivityEvent }
   | { type: "unavailable" }
+  | AlertsMessage
   | PlaygroundFrame;
 
 /**
  * `message` with the events of one platform only, or null when no part of it is left. Each event of the feed has a
- * platform, or is a direct tip: a direct tip is not from the platform. A snapshot stays, with the events of the
- * platform. A playground frame and `unavailable` are not events
- * of a platform and stay: `viewForPlatform` selects the characters.
+ * platform, or is direct: a direct event is not from the platform. A snapshot stays, with the events of the
+ * platform. A playground frame, an alert message and `unavailable` are not events of a platform and stay:
+ * `viewForPlatform` selects the characters, and `alertShownOn` selects the alerts.
  */
 export function messageForPlatform(message: ActivityMessage, platform: ActivityPlatform): ActivityMessage | null {
   if (message.type === "event") return message.event.platform === platform ? message : null;
@@ -331,6 +351,7 @@ const messageSchema: z.ZodType<Exclude<ActivityMessage, PlaygroundFrame>, unknow
   }),
   z.object({ type: z.literal("event"), event: activityEventSchema }),
   z.object({ type: z.literal("unavailable") }),
+  alertsMessageSchema,
 ]);
 
 /** The largest number of delivery IDs that `acceptDelivery` keeps for one page. */

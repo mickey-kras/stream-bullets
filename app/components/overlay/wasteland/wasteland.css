@@ -251,6 +251,30 @@
   filter: drop-shadow(0 0 0.06em var(--wl-outline)) drop-shadow(0 0.05em 0.1em var(--wl-outline));
 }
 
+/* The mark of an alert (data-alert, chat-layer.tsx): a highlight card in the flow of the chat. The whole border and
+   the line have the accent colour, so the card differs from the newest message, which has a bar at the left. */
+.wl-item[data-alert] .wl-card::after {
+  border-color: var(--wl-accent);
+  box-shadow: inset 0 0 0 2px var(--wl-accent);
+}
+.wl-item[data-alert] .wl-msg {
+  font-weight: 750;
+  color: var(--wl-accent);
+}
+/* The small TEST tag at the end of the mark of a test alert, in the colours of the chat test tag (.wl-test). */
+.wl-mark-test {
+  display: inline-block;
+  margin-left: 0.4em;
+  padding: 0.12em 0.36em;
+  border-radius: 4px;
+  background: var(--wl-accent);
+  color: #0d1a1b;
+  font-size: 0.62em;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  vertical-align: 0.14em;
+}
+
 /* ---------- Row phases ---------- */
 .wl-item[data-phase="removed"] .wl-msg {
   font-style: italic;
@@ -460,4 +484,113 @@
   font: 600 28px / 1.25 var(--body);
   color: rgb(255 255 255 / 0.7);
   text-align: center;
+}
+
+/* ---------- The alerts layer: the banner of the alert on stream (alerts-layer.tsx) ----------
+   The banner is a card of the theme with a gold border, as the approved design shows it. It is as high as its cell,
+   so it has no shadow: the cell would cut the shadow. A long name wraps, and a card that is then higher than the
+   cell is made smaller to fit (FitStage): no text is cut. Two lines of the title fit the minimum cell of 8 x 3. */
+.ov-stage > .ov-alert {
+  position: relative;
+  box-sizing: border-box;
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 12px 32px 12px 28px;
+  border: 2px solid var(--gold);
+  border-left-width: 6px;
+  box-shadow: none;
+}
+.ov-alert-icon {
+  flex: none;
+  color: var(--gold);
+}
+.ov-alert-text {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+}
+.ov-card.ov-alert h1 {
+  display: block;
+  font-size: 44px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--gold);
+  overflow-wrap: anywhere;
+}
+/* The TEST tag of a test alert sits in the top-right corner of the banner, as the tag of the chat test does. */
+.ov-alert > .wl-test {
+  top: 8px;
+  right: 8px;
+}
+/* The banner comes in and goes out with opacity and a short move only. The fade starts --ov-alert-out after the
+   banner shows, so that it ends when the time of the alert ends. A sample banner has no end (no data-leaves). */
+.ov-alert {
+  animation: ov-alert-in 0.2s ease-out both;
+}
+.ov-alert[data-leaves] {
+  animation:
+    ov-alert-in 0.2s ease-out both,
+    ov-alert-out 0.3s ease-in var(--ov-alert-out, 0s) forwards;
+}
+/* Reduced motion (the Motion setting of the site, or the system): the banner appears and goes with no transition. */
+.ov-alert[data-still] {
+  animation: none;
+}
+@keyframes ov-alert-in {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+}
+@keyframes ov-alert-out {
+  to {
+    opacity: 0;
+  }
+}
+
+/* ---------- The goal layer: the title with the count, and a bar (goal-layer.tsx) ---------- */
+.ov-stage > .ov-goal {
+  box-sizing: border-box;
+  min-height: 100%;
+  align-content: center;
+  gap: 12px;
+  padding: 16px 28px;
+  box-shadow: none;
+}
+.ov-goal-line {
+  margin: 0;
+  font: 600 30px / 1.2 var(--heading);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+.ov-goal-count {
+  color: var(--gold);
+  white-space: nowrap;
+}
+/* The bar is a progress element without the look of the browser: a thin frame and a gold fill. */
+.ov-goal-bar {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 16px;
+  overflow: hidden;
+  border: 1px solid var(--c-5b7071);
+  border-radius: var(--radius-panel);
+  background: transparent;
+}
+.ov-goal-bar::-webkit-progress-bar {
+  background: transparent;
+}
+.ov-goal-bar::-webkit-progress-value {
+  background: var(--gold);
+  transition: width 0.4s ease-out;
+}
+.ov-goal-bar::-moz-progress-bar {
+  background: var(--gold);
 }

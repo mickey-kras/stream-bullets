@@ -1034,7 +1034,7 @@ describe("sitemap", (): void => {
     expect(response.headers.get("Cache-Control")).toBe("public, max-age=300");
     const xml: string = await response.text();
     expect(xml).toContain('xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"');
-    for (const path of ["/", "/streamers", "/privacy", "/terms", "/ai", "/@zed_page", "/@frozen_page"]) {
+    for (const path of ["/", "/streamers", "/privacy", "/terms", "/ai", "/commands", "/@zed_page", "/@frozen_page"]) {
       expect(xml).toContain(`<loc>${origin}${path}</loc>`);
     }
     for (const path of ["hidden_page", "/admin", "/settings", "/overlay", "dialog="]) expect(xml).not.toContain(path);

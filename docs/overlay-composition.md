@@ -20,15 +20,18 @@ The code is in these files:
 | Activity socket client | `app/lib/activity-socket.ts`, `app/components/overlay/activity-feed.tsx` |
 | Chat rows and the composition | `app/components/overlay/chat-layer.tsx`, `app/components/overlay/overlay-composition.tsx` |
 | Content of a layer and its QR code | `app/components/overlay/overlay-stage.tsx`, `app/components/overlay/qr-code.tsx` |
+| Alerts layer and goal layer | `app/components/overlay/alerts-layer.tsx`, `goal-layer.tsx`, `use-alerts.ts`, `app/lib/alert-feed.ts` |
 | Chat appearance and motion | `app/components/overlay/wasteland/`, `app/components/overlay/use-row-motion.ts` |
 | Editor | `app/components/overlay/composition-editor.tsx`, `layout-grid.tsx`, `layer-palette.tsx`, `use-layer-draft.ts` |
+| Layout list and its buttons | `app/components/overlay/layout-picker.tsx` |
 | Layer settings and the test | `app/components/overlay/layer-properties.tsx`, `studio-test.tsx`, `characters-controls.tsx` |
+| Links for OBS | `app/components/overlay/overlay-link.tsx`, `copy-field.tsx` |
 | Overlay page | `app/routes/overlay.tsx` |
 | Overlay actions | `app/server/overlay.server.ts`, `app/server/overlay-state.ts`, `app/server/api/live.ts` |
 
 ## Layers
 
-The composition has nine layers. Each layer can be on the grid one time.
+The composition has eleven layers. Each layer can be on the grid one time.
 
 | Layer | Name in the editor | What it shows |
 | --- | --- | --- |
@@ -41,13 +44,19 @@ The composition has nine layers. Each layer can be on the grid one time.
 | `card` | Community card | The first Community card, or a card that the owner picks |
 | `support` | Support banner | The first support link |
 | `camera` | Camera frame | A frame with a clear window for the camera source in OBS. See [Camera frame](#camera-frame). |
+| `alerts` | Alerts | The banner of the alert on stream. See [Alerts layer](#alerts-layer). |
+| `goal` | Goal | A title, a count, and a bar. See [Goal layer](#goal-layer). |
 
 `poll`, `topic`, `next`, `message`, `card`, and `support` are the content layers.
+
+The editor does not offer the `alerts` layer and the `goal` layer in this version.
+The API saves their cells and their settings, and the overlay shows them.
+See [Overlay layers](api.md#overlay-layers).
 
 A layer is on stream in an output when it has a cell in the orientation of that output and its `enabled` setting is on.
 See [Outputs](#outputs).
 In the editor, the `enabled` setting is **Show on stream**.
-The characters are at the bottom, then the content layers and the camera frame, and the chat is on top.
+The characters are at the bottom, then the content layers, the camera frame, the alerts, and the goal, and the chat is on top.
 Layers cannot overlap, so this sequence shows only at shared edges.
 
 No layer is on the grid by default. The chat layer and the characters layer are off by default.
@@ -106,13 +115,14 @@ With the switch on, the output shows only what comes from Twitch:
 
 - The chat layer shows Twitch messages. This includes the sample chat of a test.
 - The characters layer shows the characters of Twitch viewers. The playground on the server does not change.
+- The alerts layer shows the banner of an alert from Twitch, and of a topic credit. The chat marks the same alerts.
 - Each other event of the activity feed that is not from Twitch does not show.
 
 A change of the switch during a stream applies at once.
 The Twitch messages on screen stay. The messages of the other platforms go, and they do not come back.
 When the switch goes off again, the other platforms show from their next message.
 
-Polls, topics, the message banner, and the other content layers do not change.
+Polls, topics, the message banner, the other content layers, and the goal layer do not change.
 The **Live** section and the full-screen chat always show each platform.
 A preview shows what its output shows, thus a preview of an output with the switch on shows Twitch only.
 
@@ -132,6 +142,8 @@ An OBS source that connected before the two outputs connects again one time when
 | `characters` | 12 × 4 | 720 × 240 |
 | Each content layer | 8 × 4 | 480 × 240 |
 | `camera` | 6 × 4 | 360 × 240 |
+| `alerts` | 8 × 3 | 480 × 180 |
+| `goal` | 8 × 2 | 480 × 120 |
 
 The characters cell sets the size of the playground world: each cell is 20 × 20 world pixels.
 A wide cell gives a long ground. A tall cell gives more sky above the ground.
@@ -198,7 +210,9 @@ A viewer scans the QR code with a phone. The phone then opens the public page of
 - The API accepts `qr` for the `message` layer, but that layer never shows a code.
 
 The stored layers have a limit of 4000 characters. The server stores only what is not a default.
-All nine layers on the grid of the two orientations, with each setting changed, need less than half of the limit.
+All layers on the grid of the two orientations, with each setting changed, need less than three quarters of the limit.
+This includes the `alerts` layer and the `goal` layer.
+
 Migration `0032` raised the limit from 1000 characters. It builds the `overlay_state` table again and keeps all rows.
 An older Worker can use the new table.
 
@@ -226,6 +240,68 @@ In the editor, the window shows the text **Your OBS camera shows here**. The ove
 The camera frame has no `ref`, no background setting, and no QR code.
 The frame is a part of the content source (`layer=content`).
 
+### Alerts layer
+
+The alerts layer shows a banner for the alert on stream. One alert shows at a time, for 6 seconds.
+Between alerts, the cell of the layer is empty.
+
+The banner has these parts:
+
+- An icon for the kind of the alert.
+- One line with the name of the supporter and the event, with its amount.
+  An example is **LanternFox gave 5 subscriptions**.
+- One line with the name of the platform and the words **Thank you**. A topic credit has no platform name.
+
+These rules apply to the banner:
+
+- The banner never shows the text that the supporter sent. That text stays in chat and in **Streamer tools**.
+- An anonymous alert shows the word **Anonymous**. It shows no name.
+- A test alert has a small **TEST** tag. A replay looks the same as a live alert.
+- The name is text. A long name continues on the next line, and the banner shows the full name.
+- The banner is as high as its cell. If its text is higher than the cell, the banner becomes smaller until it fits.
+- The minimum size of the layer is 8 × 3 cells. A cell of 16 × 3 cells shows a short line on one line.
+
+The server sends the alert with its start time and its end time. See [Alerts and the goal](channel-connections.md#alerts-and-the-goal).
+
+- The two outputs get the same state. Thus the two outputs show one alert together.
+- Each page ends the banner with its own timer at the end time. A late server message never keeps a banner on stream.
+- A page that connects during an alert shows the banner only for the time that remains.
+- A page never shows a banner for longer than the time of the alert, also when its clock is wrong.
+- The banner comes in for 0.2 seconds and fades for 0.3 seconds before its end.
+  With reduced motion, it appears and goes without a transition. The Motion setting of the site and the system setting apply.
+
+A rule of the alerts layer can also mark the alert in chat. The chat layer then shows one highlight row for the alert.
+
+- The row has the same information as the banner. It never shows the text of the supporter.
+- The row enters in the sequence of the chat rows, with the same motion, and it stays as long as a chat message.
+- Each play of an alert gets one row.
+- A moderation event does not remove the row. The row has no user ID.
+
+In the editor preview, the alerts layer shows a sample banner. The sample is not an alert of the page.
+The alerts layer is a part of the content source (`layer=content`).
+
+### Goal layer
+
+The goal layer shows the title of the goal, the count, and a bar. An example is **New subscribers · 17 of 25**.
+
+- The layer shows whenever it is on stream, also before the first event.
+- The count is 0 until the server sends a count. The bar is then empty.
+- A count above the target shows the real number. The bar is then full, and it does not become longer.
+- A goal without a title shows the count and the bar only.
+- The numbers use the format of the language of the page.
+- The minimum size of the layer is 8 × 2 cells. If the title is too long for the cell, the content becomes smaller until it fits.
+- Each output shows the goal. The switch **Show Twitch chat only** does not change it, because the goal counts each platform.
+
+In the editor preview, the goal layer shows the count 0.
+The goal layer is a part of the content source (`layer=content`).
+
+### Sources from before the alerts and the goal
+
+An overlay page that OBS loaded before the release of these two layers does not show them.
+That page ignores the alert messages of the server.
+Load each OBS source again one time after the release.
+To do this, open the properties of the browser source in OBS and select `Refresh cache of current page`.
+
 ### Canvas
 
 The page scales the design pixels to the size of the browser source.
@@ -244,7 +320,8 @@ The overlay reads stored and broadcast layers leniently. Thus a value from an ol
 - A field with an incorrect value takes its default value.
 - A cell outside the grid or below the minimum size reads as no cell.
 - A cell that overlaps an earlier layer reads as no cell.
-  The sequence is `chat`, `characters`, `poll`, `topic`, `next`, `message`, `card`, `support`, `camera`.
+  The sequence is `chat`, `characters`, `poll`, `topic`, `next`, `message`, `card`, `support`, `camera`, `alerts`, `goal`.
+  A newer layer is later in the sequence. Thus a stored layout keeps the cells that it has.
 - A layer with an incorrect value takes the defaults of that layer.
 
 The API is strict for changes. See [Overlay layers](api.md#overlay-layers).
@@ -255,11 +332,12 @@ Each output has its own layouts, and one of them is on stream.
 A layout is the cells of the layers of one output. The settings of a layer are not a part of a layout.
 Thus a poll that the owner picked stays when the layout changes.
 
-The list **Layout** is in the row above the grid, in the step **Build your overlay**. It has these entries:
+The list **Layout** is in the toolbar of the step **Build your overlay**. It has these entries:
 
 - The presets of the output. The horizontal output has **Just chatting** and **Gameplay**. The vertical output has **Vertical**.
 - The layouts of the streamer.
 - **New layout…**
+- **Rename or delete layouts…**, when the streamer has a layout.
 
 When you select a layout, it opens in the grid and goes on stream at once. OBS does not load the page again.
 Each edit of the grid changes the layout on stream and saves at once, as before the layouts.
@@ -273,15 +351,18 @@ The switch of each other layer stays.
 | Vertical | Vertical | The camera frame at the top, then the poll, the chat, and the characters |
 
 A preset that you change keeps your version. The list then shows **preset, changed by you**.
-**Reset to the preset** brings back the cells that the preset comes with.
+The toolbar then shows the `reset` button, **Reset to the preset**. It brings back the cells that the preset comes with.
+The button shows only for a preset that you changed.
 
-**Save as a new layout** and **New layout…** make a layout with your name.
+The `save` button of the toolbar, **Save as a new layout**, and the entry **New layout…** make a layout with your name.
 It starts from a copy of the layout on stream or from an empty grid, and it goes on stream.
 
 A layout action first saves the edits of the grid. The grid takes no edit until the action ends.
 When a different tab changes the layouts, the list shows the new layouts without a load of the page.
 
-**Rename or delete layouts** opens the list of your layouts. Each layout can get a new name.
+The entry **Rename or delete layouts…** opens the list of your layouts. Each layout can get a new name.
+The entry is not a layout, thus the list keeps its value.
+
 You cannot delete the layout on stream. Select a different layout first.
 Each output can have 8 layouts of the streamer. The presets do not count.
 
@@ -395,7 +476,8 @@ https://<origin>/@<handle>/overlay?key=<key of the horizontal output>
 https://<origin>/@<handle>/overlay?key=<key of the vertical output>
 ```
 
-Add the `layer` parameter to the URL of an output to show one part of that output alone. Use one browser source for each part:
+Add the `layer` parameter to the URL of an output to show one part of that output alone. Use one browser source for each part.
+**Streamer tools** does not show a link for each layer. Add the parameter to the link of the output:
 
 ```text
 https://<origin>/@<handle>/overlay?key=<key>&layer=chat
@@ -407,25 +489,39 @@ A chat source or a characters source keeps the aspect ratio of its cell and uses
 It aligns the layer with the bottom-right corner of the viewport. Thus the newest chat rows are always visible.
 The free space stays transparent, at the left or at the top.
 
-A content source (`layer=content`) shows all the content layers and the camera frame on stream, without the chat and the characters.
+A content source (`layer=content`) shows the content layers, the camera frame, the alerts, and the goal on stream.
+It does not show the chat and the characters.
 Each of these layers stays at its cell in the canvas of the output, as in the composition.
 Thus a content source has the frame size, not the size of one layer.
 
 An unknown `layer` value shows an empty transparent page. It never shows an error.
+A link with the `layer` parameter from an earlier release continues to work.
 
 The `poll` parameter shows one poll in place of the content layers:
 `https://<origin>/@<handle>/overlay?poll=<poll ID>`.
 The poll layer then shows that poll, and no other content layer shows.
 The poll layer keeps its cell. If it is off the grid, it takes the cell of a poll at size M, or free space near it.
 
-The step **Add to OBS** has one part for each output. Each part shows the state of its link in OBS:
-the number of connected sources, or the time when the last source went away.
-A part shows the full URL and the layer URLs when you make a new key, and when you select **Show link**.
-The server keeps the SHA-256 hash of each key for the check, and the encrypted key for **Show link**.
-If you have the composition URL, add `&layer=chat` to its end for a chat source.
+The step **Add to OBS** has one card for each output. A card shows these items:
 
-**Regenerate link** makes a new key for one output. The old key of that output stops at once, and its sockets close.
-The link of the other output continues to work. After a new key, update the OBS sources of that output.
+- The name of the output.
+- The state of its link in OBS: the number of connected sources, or the time when the last source went away.
+- The size of its browser source.
+
+The title row of the step has two buttons at its right edge. Each button applies to the two outputs.
+
+- **Show links** shows the link of each output in its card. Each link has a `copy` button.
+  If an output has no link, **Show links** makes one. On a page without a link, the name of the button is **Create links**.
+  While the links show, the name of the button is **Hide links**. It hides the links again.
+- **Regenerate links** makes a new key for each output, after you confirm.
+  The old keys stop at once, and their sockets close. Then update each OBS source.
+
+While the links show, one line below the cards tells you to keep them private.
+The server keeps the SHA-256 hash of each key for the check, and the encrypted key for **Show links**.
+If the server did not keep the key of an output, the card tells you that the link cannot show again.
+
+The API makes a new key for one output at a time. See [Overlay layers](api.md#overlay-layers).
+A new key for one output does not stop the link of the other output.
 
 ## OBS browser source
 
@@ -437,10 +533,10 @@ Set the size of the browser source for the composition to the frame size of its 
 - For the vertical output, use 1080 × 1920. A different 9:16 size, such as 720 × 1280, also works.
 
 All sizes with the correct aspect ratio show the same layout as the preview.
-The editor shows the correct size under the grid.
+The card of each output in **Add to OBS** shows the correct size. The help for the grid also shows it.
 For a chat source or a characters source, use the size of its cell, or the same ratio at a smaller size.
+The label of the layer on the grid gives the size of its cell.
 For a content source, use the frame size.
-The link panel shows the size for each layer URL.
 
 A larger layer source shows the layer larger.
 
@@ -468,12 +564,11 @@ The old address `/overlay-control` redirects to it. The page has three sections:
 - **Live** (`/tools`) has the controls for a stream. See [Streamer tools](streamer-tools.md#live).
 - **Overlay** (`/tools?view=overlay`) has two numbered steps:
   1. **Build your overlay**: the overlay studio.
-  2. **Add to OBS**: the overlay link.
-- **Channels** (`/tools?view=channels`) has the channel connections. With a connected channel, it shows one status line.
-  Select the line to open the full panel.
-  The line and the cards follow the channel health while the page is open.
+  2. **Add to OBS**: the overlay links.
+- **Channels** (`/tools?view=channels`) has the channel connections: one card for each platform.
+  The cards follow the channel health while the page is open.
 
-When the page has a link, one line in step 2 shows the OBS connection.
+When an output has a link, its card in step 2 shows the OBS connection.
 It shows the number of connected sources. Without a source, it shows when the last one connected or went away.
 The live room counts the sockets that came in with the current key.
 It sends each change to the owner's tabs.
@@ -483,13 +578,28 @@ The site header has no **Tools** entry.
 
 The studio has these parts:
 
-- A toolbar with the orientation, the preview background, **Start test**, and the note **Changes go live right away**.
-- The palette **Layers · one of each**, with one chip for each layer.
+- A toolbar in one line: the **Horizontal** and **Vertical** tabs, the list **Layout**, and the icon buttons at its right edge.
+- One line below the toolbar: a note about the outputs, the preview background, and the note **Changes go live right away**.
+- The palette **Layers · one of each**, with one chip for each layer, in groups.
 - The grid of the selected orientation on a preview of the frame.
 - The settings of the selected layer.
+- The closed help **How the grid works**.
 
-On a wide screen, the page shows the palette, the grid, and the settings side by side.
-On a narrow screen, such as a phone, they are one below the other in that sequence.
+The icon buttons of the toolbar show an icon and no text. The name of a button is its tooltip and its accessible name.
+
+| Icon | Name | Result |
+| --- | --- | --- |
+| `save` | **Save as a new layout** | Opens the dialog for a new layout. See [Layouts](#layouts). |
+| `reset` | **Reset to the preset** | Brings back the cells of the preset. The button shows only for a preset that you changed. |
+| `play` | **Start test** | Starts the test. During a test, the button shows the `stop` icon and its name is **Stop test**. See [Test](#test). |
+
+On a wide screen, the palette is beside the grid.
+The settings are below the grid of the horizontal output and beside the grid of the vertical output.
+The help is below the grid and the settings.
+On a narrow screen, such as a phone, the palette, the grid, the settings, and the help are one below the other in that sequence.
+
+The help **How the grid works** stays closed until you open it. It tells you how to add, move, and remove a layer, and how to change its size.
+It also gives the keys, the size of a cell, and the size of the browser source in OBS.
 
 The preview uses the same code as the OBS page. Thus the layer positions in the preview and in OBS agree.
 Each layer on the grid shows its name, its size in pixels, and its real content.
@@ -500,11 +610,11 @@ A layer with **Show on stream** off keeps a dashed box on the grid. The preview 
 The grid and the palette are separate parts. The editor holds the selected layer and gives it to both.
 When the page opens, the editor has no selected layer.
 
-In the toolbar, select **Transparent** or **Sample game** for the preview background.
+Above the grid, select **Transparent** or **Sample game** for the preview background.
 
 To change the layout, do these steps:
 
-1. In the toolbar, select **Horizontal 32 × 18** or **Vertical 18 × 32**. This is the output that you edit.
+1. In the toolbar, select **Horizontal** or **Vertical**. This is the output that you edit.
    The selection does not change the picture in OBS. Each output keeps its own layout.
 2. To select a layer, press it on the grid, or select its chip in the palette.
    The selected layer shows eight handles: four on its corners and four on its edges.
@@ -526,7 +636,17 @@ Then the editor does not keep the change. A message under the grid gives the rea
 
 ### Add and remove a layer
 
-The palette shows one chip for each of the nine layers.
+The palette shows one chip for each of the nine layers, in two groups:
+
+| Group | Layers |
+| --- | --- |
+| **Picture** | Chat, Characters, and Camera frame |
+| **Content** | Poll, Topic, Up next, Message banner, Community card, and Support banner |
+
+The title of a group shows its name and the number of its layers, such as **Picture · 3**.
+Each group starts open. Select the title of a group to close it or to open it again.
+The code has the groups as a list (`LAYER_GROUPS`). A new group is one entry in that list.
+
 The chip of a layer on the grid of the selected orientation shows **Placed**.
 Each layer can be on the grid one time.
 
@@ -548,6 +668,7 @@ To remove a layer, use one of these procedures:
   The palette changes color while the pointer is on it. Release the layer there.
 - Select the layer on the grid and press Delete or Backspace.
 - Select the layer and select **Remove from grid** in its settings. The focus then goes to the chip of the layer.
+  A closed group of that chip opens first.
 
 A removed layer has no cell in the selected orientation. OBS does not show it.
 The layer keeps its settings and its cell in the other orientation. Its chip offers it again.
@@ -586,8 +707,10 @@ When you select a layer with its chip, a screen reader reads the selection. The 
 
 ### Keyboard
 
-Tab moves to the toolbar, the chips, the grid, and the settings, in that sequence.
+Tab moves to the toolbar, the preview background, the groups with their chips, the grid, the settings, and the help, in that sequence.
 Enter or Space on a chip adds its layer, or selects the layer if it is on the grid.
+Enter or Space on the title of a group closes or opens the group. The chips of a closed group are not in the tab sequence.
+Enter or Space on **How the grid works** opens or closes the help.
 
 You can use the keyboard on the grid:
 
@@ -606,6 +729,14 @@ To change the size from the top or the left, first change the size, then move th
 A screen reader reads each result from a polite live region under the grid.
 The grid is in a region with the `application` role. Thus a screen reader sends the keys to the grid, also in browse mode.
 If the orientation changes or the grid loses focus during a move or a change of size, the editor cancels it.
+
+The grid and each chip have a description for a screen reader (`aria-describedby`).
+The description of the grid tells how to move a layer, how to change its size, and the keys.
+The description of a chip tells how to add a layer.
+
+Each description is a text with the `hidden` attribute. It is not a part of the help.
+Chromium gives no description from a text in a closed `details` element.
+Thus a description in the help would be empty until you open the help.
 
 ### How the content follows the size
 
@@ -654,7 +785,8 @@ The samples include all three platforms, Unicode text, emoji, an emote, and a co
 ## Test
 
 Use the test to see the chat and the characters in your real OBS scene before you go live.
-In the toolbar of the studio, select **Start test**. The same button, **Stop test**, ends the test at once.
+In the toolbar of the studio, select the `play` button, **Start test**.
+During a test, the same button shows the `stop` icon and has the colors of a pressed control. Its name is then **Stop test**, and it ends the test at once.
 
 One button starts two tests together:
 
@@ -663,10 +795,11 @@ One button starts two tests together:
   See [Characters test](characters.md#characters-test).
 
 If only one of the two layers is on stream, the button starts only that test.
-If neither is on stream, the button does nothing and its text gives the reason.
+If neither is on stream, the button starts nothing. Its tooltip gives the reason, and a message gives the reason when you press it.
 The server also refuses the start of a test whose layer is off stream.
 
-- The text beside the button shows the remaining time of the longer test.
+- The tooltip of **Start test** tells what the test does. A screen reader reads the same text as the description of the button.
+- During a test, the text beside the icon buttons shows the remaining time of the longer test.
   A screen reader reads only the start and the end of the test.
 - A start of the test also ends a pause of the playground.
 - If you take the chat layer off stream, the chat test stops. It does not continue when the layer is on stream again.
@@ -756,7 +889,7 @@ Below 50%, the text and the platform icon get a dark outline. Thus you can read 
 
 Use the slider with a mouse, a finger, or the arrow keys. The preview shows each step at once.
 The editor saves the value after 400 milliseconds without a change. Then OBS shows it without a reload.
-To see the result on a game, select **Sample game** in the toolbar.
+To see the result on a game, select **Sample game** above the grid.
 
 The chat root has the `--wl-bg` CSS property, from 0 to 1. Only the card background reads it.
 The layers store the value as `chat.backgroundOpacity`. A missing or incorrect stored value reads as 100.
@@ -782,11 +915,22 @@ To show commands, clear **Hide chat commands (!jump)** in the settings of the ch
 When you select the option again, the chat also hides the command rows that are on the screen.
 The chat never runs a command. It only shows or hides the message.
 
+The option applies to each view of the merged chat:
+
+- The chat layer in the two outputs, and in each preview of the composition
+- The chat of **Live**, the full-screen chat, and the chat of the OBS dock. See [Chat](streamer-tools.md#chat).
+
+The server sends each message to each page, and the page shows no row for a hidden command.
+Thus a hidden command never shows, also not for a moment, and it leaves no empty row.
+A hidden command for a character still moves the character and still counts for the score of the viewer.
+The option does not change moderation: a removed message stays removed.
+OBS and the other open pages of the owner get a change of the option at once, without a reload.
+
 ### Reconnection
 
 The page keeps one activity socket. It connects again after each failure, with backoff and jitter.
 The first wait is 1 second. The wait doubles after each failure, up to 60 seconds.
-When the socket opens, the server sends a snapshot of recent chat.
+When the socket opens, the server sends a snapshot of recent chat. Then it sends the state of the alerts and the goal.
 
 The snapshot is the truth for its time window. The chat removes rows that are missing from it.
 Rows from a snapshot never animate. Rows on screen stay and do not animate again.
@@ -806,13 +950,14 @@ The server polls YouTube chat only while at least one activity socket of the pag
 Each open activity socket keeps the poll alive, and each poll costs YouTube quota.
 Thus close the overlay sources that you do not use.
 
-- The page opens an activity socket only when it shows a chat layer or a characters layer that is on stream.
-  Take both layers off stream to close it.
+- The page opens an activity socket only for these layers: the chat, the characters, the alerts, and the goal.
+  One of them must be on stream in the output of the page. Take these layers off stream to close the socket.
 - A page that shows the characters layer asks its socket for the playground frames (`characters=1`).
   Chat and characters then share that one socket.
 - The editor preview opens an activity socket only while the characters layer is on stream. The chat preview shows sample messages.
 - Each browser source opens its own sockets. A chat, characters, or content source uses one live-room socket.
   A chat source and a characters source also use one activity socket each.
+  A content source uses one activity socket while it shows the alerts layer or the goal layer.
 - A page can have at most 20 activity sockets (`MAX_SOCKETS`).
 - Valid-key overlays and the owner share 10 owner seats in the live room. See [Live-room seats](#live-room-seats).
 
@@ -828,7 +973,7 @@ Thus close the overlay sources that you do not use.
 - The overlay page sends no `Referer`. Thus an emote image does not get the key.
 - The overlay key gives access to the activity feed. Without a key or an owner session, the socket gets `403`.
   With a wrong or revoked key, the server closes the socket with the code `4403`, and the page does not try again.
-- **Regenerate link** makes a new key for one output. The old key of that output stops at once, and its open sockets close.
+- **Regenerate links** makes a new key for each output. The old keys stop at once, and their open sockets close.
 - The key of one output gives no control of the other output. A key never gives a control action.
 - The chat ignores `user.color`. It uses the theme colors only.
 

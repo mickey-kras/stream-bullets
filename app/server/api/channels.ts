@@ -3,16 +3,13 @@ import type { AppEnv } from "../../env";
 import type { Streamer } from "../../types";
 import { assertStreamerWritable } from "../access.server";
 import { requireRecentSignIn } from "../auth.server";
-import { disconnect, listConnections, platformSchema, setSupport, startConnect } from "../channels.server";
+import { disconnect, listConnections, platformSchema, startConnect } from "../channels.server";
 import { consumeMutationQuota, getOwnStreamer } from "../data.server";
 import { HttpError, json, queryParams, readJson } from "../http.server";
 import { get, requireViewer, write, type ApiRoute } from "./router";
 
 /** Connecting and disconnecting a channel take no options. */
 const emptySchema = z.object({}).strict();
-
-/** The streamer turns the support events of a channel on or off. */
-const supportSchema = z.object({ on: z.boolean() }).strict();
 
 const RECENT_SIGN_IN = "Sign in again to change channel connections.";
 
@@ -46,15 +43,6 @@ export const channelRoutes: ApiRoute[] = [
     await requireRecentSignIn(request, env, Date.now(), RECENT_SIGN_IN);
     await consumeMutationQuota(env, viewer.id, true);
     return json({ authorizeUrl: await startConnect(env, viewer.id, streamer.id, platformOf(match)) });
-  }),
-  // POST /api/channels/:platform/support {on} → {url, support}. `url` is the provider page for the new scopes.
-  write("POST", /channels\/(twitch|youtube|kick)\/support/, async ({ request, env, match, viewer }) => {
-    const { on } = await readJson(request, supportSchema);
-    const streamer = await ownStreamer(env, viewer.id);
-    await assertStreamerWritable(env, streamer.id, viewer.id);
-    await requireRecentSignIn(request, env, Date.now(), RECENT_SIGN_IN);
-    await consumeMutationQuota(env, viewer.id, true);
-    return json(await setSupport(env, viewer.id, streamer.id, platformOf(match), on));
   }),
   // DELETE /api/channels/:platform → {revoked}. A frozen page may still disconnect: it only removes access.
   write("DELETE", /channels\/(twitch|youtube|kick)/, async ({ request, env, match, viewer }) => {

@@ -1,5 +1,6 @@
 import { graphemes } from "../../../lib/chat-feed";
-import { TICK_HZ } from "../../../lib/playground/constants";
+import { TILE, TICK_HZ } from "../../../lib/playground/constants";
+import { blockLimit } from "../../../lib/playground/terrain";
 import { CUT_MARK } from "../../../lib/playground/protocol";
 import { type GlyphShape, glyphOf } from "../wasteland/glyphs";
 import {
@@ -86,7 +87,7 @@ export interface DrawOptions {
   /** No particles, no blinking, first frames only. */
   reduced: boolean;
   /** Badge texts for the test and paused modes. */
-  badges: { test: string; paused: string };
+  badges: { test: string; paused: string; highest?: string; blocks?: string };
 }
 
 /** A repeatable pseudo-random number in [0, 1) for cosmetic scatter. */
@@ -231,7 +232,7 @@ function drawWorld(
   drawProps(view, theme, at);
   drawLandmarks(ctx, view, theme, at, now, reduced, blink);
   drawBlocks(ctx, view, theme, atlas.terrain);
-  drawFlags(ctx, view, theme);
+  drawFlags(ctx, view, theme, atlas, now, reduced);
 }
 
 /** One prop in the middle of each run of equal tiles, unless a hole is there. */
@@ -299,18 +300,13 @@ function drawCharacters(
     if (!sequence) continue;
     const column: number = reduced ? (sequence.still ?? sequence.frames[0]) : frameAt(sequence, c.t);
     const rect: Rect = [column * cell, rows.indexOf(sequence.row) * cell, cell, cell];
-    const { danceTurnTicks, cheerLift, cheerTicks } = theme.builds;
-    // A dance turns around in time, and a cheer jumps on the spot. The atlas has no pictures for them yet.
-    const turned: boolean = !reduced && c.state === "dance" && Math.floor(c.t / danceTurnTicks) % 2 === 1;
-    const left: boolean = c.dir < 0 !== turned;
-    const lift: number =
-      !reduced && c.state === "cheer" ? Math.abs(Math.sin((c.t / cheerTicks) * Math.PI)) * cheerLift : 0;
+    const left: boolean = c.dir < 0;
     picture(
       ctx,
       atlas.sheets.get(c.platform),
       rect,
       snap(c.x) - (left ? cell - anchor.x : anchor.x),
-      snap(c.y - lift) - anchor.y,
+      snap(c.y) - anchor.y,
       left,
     );
   }
@@ -821,41 +817,68 @@ function drawLabels(
 const BADGE_MARGIN = 12;
 const BADGE_SPACE = 8;
 
-/** The test and paused badges, right to left from the top right corner: label, left edge and width in canvas px. */
-function badgesOf(
+interface Badge {
+  label: string;
+  left: number;
+  width: number;
+  platform?: string;
+}
+
+/** Mode badges take priority. On small layers, Blocks drops out before Highest. */
+export function badgesOf(
   ctx: CanvasRenderingContext2D,
   view: PlaygroundView,
   theme: PlaygroundTheme,
   badges: DrawOptions["badges"],
-): { label: string; left: number; width: number }[] {
+): Badge[] {
   const texts: string[] = [view.mode.test ? badges.test : "", view.mode.paused ? badges.paused : ""].filter(Boolean);
   ctx.font = `600 ${theme.label.name.size}px ${theme.label.font}`;
   let right: number = ctx.canvas.width - BADGE_MARGIN;
-  return texts.map((text: string) => {
-    const label: string = cut(text, 24);
-    const width: number = Math.ceil(ctx.measureText(label).width) + 20;
-    right -= width + BADGE_SPACE;
-    return { label, left: right + BADGE_SPACE, width };
-  });
+  const placed: Badge[] = [];
+  function place(label: string, platform?: string): void {
+    const width: number = Math.ceil(ctx.measureText(label).width) + 20 + (platform ? GLYPH_PX + GLYPH_GAP : 0);
+    if (right - width < BADGE_MARGIN) return;
+    right -= width;
+    placed.push({ label, left: right, width, platform });
+    right -= BADGE_SPACE;
+  }
+  for (const text of texts) place(cut(text, 24));
+  if (ctx.canvas.height < 180 || ctx.canvas.width < 360) return placed;
+  const holder: CharacterView | undefined = view.characters.find(
+    (character: CharacterView): boolean => character.id === view.crown,
+  );
+  if (holder && badges.highest) {
+    const height: number = Math.floor((view.world.ground - holder.y) / TILE);
+    place(`${badges.highest}: ${cut(holder.name, 16)} · ${height}`, holder.platform);
+  }
+  if (ctx.canvas.width >= 600 && badges.blocks) {
+    place(`${badges.blocks} ${view.blocks.length} / ${blockLimit(view.world.width, view.world.ground)}`);
+  }
+  return placed;
 }
 
-function drawBadges(
-  ctx: CanvasRenderingContext2D,
-  theme: PlaygroundTheme,
-  placed: readonly { label: string; left: number; width: number }[],
-): void {
+function drawBadges(ctx: CanvasRenderingContext2D, theme: PlaygroundTheme, placed: readonly Badge[]): void {
   const size: number = theme.label.name.size;
   ctx.font = `600 ${size}px ${theme.label.font}`;
   ctx.textBaseline = "middle";
   ctx.direction = "ltr";
   ctx.textAlign = "left";
-  for (const { label, left, width } of placed) {
+  for (const { label, left, width, platform } of placed) {
     ctx.fillStyle = theme.label.badge.fill;
     ctx.beginPath();
     ctx.roundRect(left, BADGE_MARGIN, width, size + 12, 6);
     ctx.fill();
     ctx.fillStyle = theme.label.badge.ink;
-    ctx.fillText(label, left + 10, BADGE_MARGIN + (size + 12) / 2 + 1);
+    if (platform)
+      drawGlyph(
+        ctx,
+        glyphOf(platform),
+        left + 10,
+        BADGE_MARGIN + (size + 12 - GLYPH_PX) / 2,
+        helmetColor(theme, platform),
+      );
+    ctx.fillStyle = theme.label.badge.ink;
+    ctx.fillText(label, left + 10 + (platform ? GLYPH_PX + GLYPH_GAP : 0), BADGE_MARGIN + (size + 12) / 2 + 1);
   }
 }
 
@@ -885,9 +908,9 @@ export function draw(
   ctx.imageSmoothingEnabled = false;
   ctx.setTransform(PIXEL_SCALE, 0, 0, PIXEL_SCALE, 0, top);
   drawWorld(ctx, view, theme, atlas, now, options.reduced);
-  drawRopes(ctx, view, theme, options.reduced);
+  drawRopes(ctx, view, theme, atlas, options.reduced);
   drawCharacters(ctx, view, theme, atlas, options.reduced);
-  drawGear(ctx, view, theme, now);
+  drawGear(ctx, view, theme, atlas, now, options.reduced);
   drawParticles(ctx, memory);
   drawMarks(ctx, view, theme);
   const badges = badgesOf(ctx, view, theme, options.badges);

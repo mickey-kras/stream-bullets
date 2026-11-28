@@ -9,6 +9,7 @@ import {
 } from "../app/components/overlay/characters/interpolate";
 import {
   BUBBLE_GAP,
+  badgesOf,
   type BubbleItem,
   type BubbleSlot,
   bubbleCap,
@@ -362,6 +363,7 @@ describe("playground canvas rendering", () => {
     const atlas: Atlas = {
       terrain: { width: 256, height: 256 } as HTMLImageElement,
       sheets: new SheetCache(theme, (): HTMLCanvasElement => new RenderCanvas() as unknown as HTMLCanvasElement),
+      flags: new SheetCache(theme, (): HTMLCanvasElement => new RenderCanvas() as unknown as HTMLCanvasElement),
     };
     return {
       canvas,
@@ -374,6 +376,24 @@ describe("playground canvas rendering", () => {
       },
     };
   }
+
+  it("shows one shared highest badge and global block count, dropping Blocks first on small layers", () => {
+    const { canvas } = renderer();
+    const moment: PlaygroundView = { ...view([character({ y: 14 })]), crown: 1, blocks: [{ c: 8, r: 0, kind: "dirt", dir: 1, stage: 0 }] };
+    const labels: DrawOptions["badges"] = { test: "Test", paused: "Paused", highest: "Highest", blocks: "Blocks" };
+    canvas.width = 1000;
+    canvas.height = 300;
+    const all = badgesOf(canvas.context, moment, theme, labels);
+    expect(all.map((badge) => badge.label)).toEqual(["Highest: Misha · 3", "Blocks 1 / 38"]);
+    expect(all[0].platform).toBe("twitch");
+    canvas.width = 500;
+    expect(badgesOf(canvas.context, moment, theme, labels).map((badge) => badge.label)).toEqual(["Highest: Misha · 3"]);
+    canvas.height = 170;
+    expect(badgesOf(canvas.context, moment, theme, labels)).toEqual([]);
+    canvas.height = 300;
+    canvas.width = 1000;
+    expect(badgesOf(canvas.context, { ...moment, crown: null }, theme, labels).map((badge) => badge.label)).toEqual(["Blocks 1 / 38"]);
+  });
 
   const dirt = (): TileView[] => Array.from({ length: 40 }, (): TileView => ({ kind: "dirt", stage: 0 }));
 
@@ -476,27 +496,18 @@ describe("playground canvas rendering", () => {
       expect(pictures).toContainEqual([...theme.terrain.rects[name]]);
     }
     expect(canvas.calls).toContainEqual({ method: "scale", args: [-1, 1] });
-    expect(canvas.calls.some((call) => call.method === "fillRect" && call.args[2] === 3 && call.args[3] === 3)).toBe(
-      true,
-    );
-    // The dirt block at (8, 0) uses a ground picture. The four treads of the stair have legs of 1, 5, 9 and 13 px.
     expect(pictures).toContainEqual([...theme.terrain.rects.dirt2]);
-    const legs: unknown[] = canvas.calls
-      .filter(
-        (call) => call.method === "drawImage" && call.args.length === 9 && call.args[3] === 7 && call.args[4] === 1,
-      )
-      .map((call) => call.args[8]);
-    expect(legs).toEqual([1, 5, 9, 13]);
-    // Seven treads: four of the stair and three of the plank.
-    expect(
-      canvas.calls.filter((call) => call.method === "drawImage" && call.args.length === 9 && call.args[4] === 3),
-    ).toHaveLength(7);
-    // The rope of character 1 (two strokes), the flag pole and pennant, and the crown.
+    expect(pictures).toContainEqual([...theme.terrain.rects.stair]);
+    // A plank with no block beside it is the middle piece.
+    expect(pictures).toContainEqual([...theme.terrain.rects.plankM]);
+    // The rope of character 1 (two strokes) with its hook, the flag with its pole on x 304 (the second frame at this time), and the crown.
     expect(canvas.calls.filter((call) => call.method === "stroke")).toHaveLength(2);
-    const rects: unknown[][] = canvas.calls.filter((call) => call.method === "fillRect").map((call) => call.args);
-    expect(rects).toContainEqual([304, 47, 1, 15]);
-    expect(rects).toContainEqual([305, 47, 7, 5]);
-    expect(rects).toContainEqual([95, 27, 10, 5]);
+    expect(pictures).toContainEqual([...theme.terrain.rects.hook]);
+    const placed: unknown[][] = canvas.calls
+      .filter((call) => call.method === "drawImage" && call.args.length === 9)
+      .map((call) => call.args.slice(1));
+    expect(placed).toContainEqual([...theme.builds.viewerFlag.frames[1], 304, 46, 10, 16]);
+    expect(placed).toContainEqual([...theme.terrain.rects.crown, 95, 25, 10, 7]);
     canvas.calls.length = 0;
     render({ ...moment, world: { ...moment.world, ground: 10 } }, theme.blinkMs * 3, true);
     expect(
