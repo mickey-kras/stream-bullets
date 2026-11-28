@@ -50,7 +50,7 @@ const ranges = {
   "layout-widgets": [[251, 254]],
   "tools-live": [
     [41, 49],
-    [52, 54],
+    [52, 57],
   ],
   characters: [[182, 189]],
   "alerts-editor": [[68, 72]],

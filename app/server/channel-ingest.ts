@@ -33,7 +33,7 @@ import {
 import { ChannelSubscriptions } from "./channel-ingest-subscriptions";
 import { channelsOff, loadTokens, replaceTokens, type StoredTokens } from "./channel-tokens.server";
 import { HttpError } from "./http.server";
-import { sampleChatAt } from "../lib/chat-feed";
+import { sampleChatAt, sampleSupportAt } from "../lib/chat-feed";
 import { validateTestEnvironment } from "./test-environment-config";
 import { EVENTS, ID_SQL, SUPPORT, nextExpiry, type IdTable } from "./channel-ingest-sql";
 import { type PlaygroundHost, playgroundOf } from "./playground-host";
@@ -186,7 +186,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     // Ingestion is off: consumers get `unavailable` and reconnect once it is on again.
     if (channelsOff(this.env)) this.closeSockets("Channels off");
     if (url.pathname === "/subscribe") return this.subscribe(request);
-    if (url.pathname === "/test-chat") return this.testChat();
+    if (url.pathname === "/test-chat") return this.testChat(url.searchParams.get("sample") === "support");
     if (url.pathname === "/overlay-key") return await this.overlayKeyRevoked(request);
     if (url.pathname === "/page-status") return this.pageStatusChanged();
     if (url.pathname === "/close") return this.closeAll();
@@ -244,14 +244,15 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     return new Response(null, { status: 101, webSocket: client });
   }
 
-  /** The test deployment only: one batch of sample chat as live messages. It reads no provider and no connection. */
-  private async testChat(): Promise<Response> {
+  /** Test deployment only: sample chat, or one sample support event, as live. It reads no provider or connection. */
+  private async testChat(support: boolean): Promise<Response> {
     validateTestEnvironment(this.env);
     if (this.env.APP_ENV !== "test") return reply("Not found", 404);
     const now = Date.now();
     await this.alerts.ready(now);
-    this.ingest(sampleChatAt(now), now);
+    this.ingest(support ? [sampleSupportAt(now)] : sampleChatAt(now), now);
     await this.scheduleAlarm(Math.min(now + SNAPSHOT_MAX_AGE_MS + 1, this.playground.wakeAt() ?? Infinity));
+    await this.alerts.wake();
     return new Response(null, { status: 204 });
   }
 
@@ -924,8 +925,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     }
     const page = await youtubeChatPage(tokens.accessToken, state.liveChatId, state.pageToken);
     // The first page is ingested too: messages sent before LIVE_WINDOW_MS are not live, so no old command runs.
-    // The support events come from the same page: they cost no further call and no quota. Only a connect changes
-    // `support_events` of a YouTube connection, and a connect supersedes this poll.
+    // Support events come from the same page at no cost. Only a connect, which supersedes this poll, changes them.
     const support = connection.support ? youtubeSupport(page.items, now) : [];
     const events = [...youtubeEvents(page.items, connection.externalId, now), ...support];
     await this.alerts.ready(earliestAt(events, now));
