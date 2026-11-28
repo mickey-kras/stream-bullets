@@ -54,6 +54,7 @@ const ranges = {
   ],
   characters: [[182, 189]],
   "alerts-editor": [[68, 72]],
+  "topic-credit": [[190, 191]],
   "compact-layout": [[220, 231]],
 } as const satisfies Record<string, readonly (readonly [number, number])[]>;
 

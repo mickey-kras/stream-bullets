@@ -13,6 +13,7 @@ import { overlayKeySchema, regenerateOverlayKey, showOverlayKey } from "../overl
 import { getOverlayData, getOverlayState, overlayActionSchema, sourceTopics, updateOverlay } from "../overlay.server";
 import { layoutActionSchema } from "../../lib/overlay-layouts";
 import { getLayouts, updateLayouts } from "../overlay-layouts.server";
+import { notifyTopicCredit } from "../topic-credit.server";
 import { get, requireViewer, write, type ApiRoute } from "./router";
 
 // Mash controls use HTTP; taps use the live WebSocket. Create battles with `POST /api/streamers/:handle
@@ -109,11 +110,14 @@ export const liveRoutes: ApiRoute[] = [
     // costs no quota, so the owner can always end a test.
     if (action.action === "layers" || (action.action === "chatTest" && action.on))
       await consumeMutationQuota(env, viewer.id);
-    const { overlay, changed } = await updateOverlay(env, viewer.id, streamer.id, action);
+    const update = await updateOverlay(env, viewer.id, streamer.id, action);
+    const { overlay, changed } = update;
     // An ignored old layer write changed nothing, so the overlay pages need no update.
     if (changed) notifyOverlay(env, streamer.id);
     // Only the layers configure the character playground.
     if (changed && action.action === "layers") notifyPlayground(env, streamer.id);
+    // A topic that the change put on stream credits its author.
+    notifyTopicCredit(env, streamer.id, update);
     return json({ overlay });
   }),
 ];

@@ -124,6 +124,11 @@ The part lists the six newest topics. If the topic layer shows an older topic, t
 **Feature on stream** shows a topic in the topic layer and turns the layer on.
 `Take off air` turns the topic layer off. The topic stays on the page.
 
+When the Alerts layer is on stream, the author of a featured topic gets a credit: an alert of the **Featured topic** rule.
+The credit also shows in **Activity** and in the chat list, with the name of the author and "topic on stream".
+The author gets one credit for each feature. A second **Feature on stream** of the topic on stream gives no credit.
+See [Topic credit](channel-connections.md#topic-credit).
+
 A line divides the rows of the list. The button of a topic is at the end of its row.
 The buttons of the topics and the buttons of the message banner have one width and the same right edge.
 In a part that is less than 30 rem wide, each of these buttons has the full width of the part.

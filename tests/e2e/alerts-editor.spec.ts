@@ -146,7 +146,7 @@ test("the owner places the Alerts layer, changes its rules, and a test from the 
   const send = panel.getByRole("button", { name: "Send test" });
   await expect(send).toHaveAttribute("aria-disabled", "false");
 
-  // The table has a header row and one row for each rule that the server makes today. The topic credit has none.
+  // The table has a header row and one row for each rule, with the credit of a featured topic.
   const table = panel.getByRole("table", { name: "What each event does" });
   await expect(table.getByRole("columnheader")).toHaveText(["Event", "Starts at", "Banner", "In chat", "Character"]);
   await expect(table.getByRole("rowheader")).toHaveText([
@@ -156,6 +156,7 @@ test("the owner places the Alerts layer, changes its rules, and a test from the 
     "Bits, KICKs Twitch, Kick",
     "Super Chat, Super Sticker YouTube",
     "Raid Twitch · viewers",
+    "Featured topic Credits the author",
   ]);
   await expect(table.getByRole("textbox")).toHaveCount(3);
   const bits = table.getByRole("textbox", { name: "Starts at: smallest amount for Bits, KICKs" });

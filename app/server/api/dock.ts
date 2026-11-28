@@ -8,7 +8,8 @@ import { consumeMutationQuota, getOwnStreamer, getStreamer, mutateEntry } from "
 import { dockKeyMatches, regenerateDockKey } from "../dock-key.server";
 import { HttpError, getOrigin, json, readJson } from "../http.server";
 import { notifyDockKey, notifyOverlay, notifyRoom } from "../live.server";
-import { overlayActionSchema, updateOverlay, type OverlayAction } from "../overlay.server";
+import { overlayActionSchema, updateOverlay, type OverlayAction, type OverlayUpdate } from "../overlay.server";
+import { notifyTopicCredit } from "../topic-credit.server";
 import { openWrite, write, type ApiRoute } from "./router";
 
 // The private OBS dock. The owner makes the dock link with a session. The dock page then has no session: its
@@ -78,9 +79,11 @@ export const dockRoutes: ApiRoute[] = [
     const action: OverlayAction = dockAction(await readJson(request, overlayActionSchema));
     // The dock acts for the owner: its changes use the write quota of the owner.
     await consumeMutationQuota(env, streamer.ownerId);
-    const { overlay, changed } = await updateOverlay(env, streamer.ownerId, streamer.id, action);
-    if (changed) notifyOverlay(env, streamer.id);
-    return json({ overlay });
+    const update: OverlayUpdate = await updateOverlay(env, streamer.ownerId, streamer.id, action);
+    if (update.changed) notifyOverlay(env, streamer.id);
+    // A topic that the dock put on stream credits its author, as from Streamer tools.
+    notifyTopicCredit(env, streamer.id, update);
+    return json({ overlay: update.overlay });
   }),
   // POST /api/dock/:handle/alerts {op: status|test|mute|skip|replay, kind?, on?, id?} → {at, muted, current,
   // waiting, goal}: a control of the alerts from the dock, with the dock key in the header. The dock acts for the

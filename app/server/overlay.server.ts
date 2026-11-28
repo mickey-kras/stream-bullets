@@ -15,6 +15,7 @@ import {
   type ContentSource,
   type OverlayLayers,
 } from "../lib/overlay-layers";
+import { featuredTopic } from "../lib/topic-credit";
 import type { CardIcon, OverlayData, OverlayState, SupportLinkKind } from "../types";
 import { assertStreamerWritable } from "./access.server";
 import { HttpError } from "./http.server";
@@ -217,10 +218,14 @@ function passedWrite(writes: LayersWrites, write: LayersWrite): boolean {
   return writes.some(([writer, seq]: [string, number]): boolean => writer === write.writer && write.seq <= seq);
 }
 
-/** The result of `updateOverlay`. `changed` is false when the server ignored an old layer write. */
+/**
+ * The result of `updateOverlay`. `changed` is false when the server ignored an old layer write. `featured` is the
+ * topic that the change put on stream (`featuredTopic`), or null. The caller then credits its author.
+ */
 export interface OverlayUpdate {
   overlay: OverlayState;
   changed: boolean;
+  featured: string | null;
 }
 
 // Compare-and-set the revision. On conflict, reapply the action to current state; callers then `notifyOverlay` if
@@ -242,7 +247,7 @@ export async function updateOverlay(
       .first<OverlayRow & { layers_writes: string }>();
     const current = overlayValue(row);
     const writes: LayersWrites = storedWrites(row?.layers_writes ?? "[]");
-    if (write && passedWrite(writes, write)) return { overlay: current, changed: false };
+    if (write && passedWrite(writes, write)) return { overlay: current, changed: false, featured: null };
     const next = await nextOverlayState(env, streamerId, current, action);
     const applied: LayersWrites = write ? recordWrite(writes, write) : writes;
     // The columns from before the overlay studio keep their values: `air`, `preview`, `position`, `size`, `instant`.
@@ -266,7 +271,8 @@ export async function updateOverlay(
         current.revision,
       )
       .run();
-    if (result.meta.changes > 0) return { overlay: next, changed: true };
+    if (result.meta.changes > 0)
+      return { overlay: next, changed: true, featured: featuredTopic(current.layers, next.layers) };
   }
   throw new HttpError(409, "The overlay changed in another tab. Try again.");
 }

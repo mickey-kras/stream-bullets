@@ -126,6 +126,7 @@ Each support event has these fields:
 - `platform`: `twitch`, `youtube`, or `kick`. Only a `tip` and a `topic` have `direct`.
 - `deliveryId`: the ID that the provider gave the delivery. `id` is `platform:deliveryId`.
 - `sender`: `{id, displayName}` of the supporter on that platform, or `null`.
+  For a `topic`, `id` is the StreamBullets user ID of the author. It is never a platform user ID.
 - `anonymous`: `true` when the supporter asked for no name. An anonymous event always has `sender: null`.
 - `amount`: the amount in the native unit of the kind. Money is in micros: 1 000 000 is one unit of the currency.
   The feed never converts an amount to a different unit or currency.
@@ -139,7 +140,8 @@ Each support event has these fields:
 The parser refuses a support event that does not agree with its kind.
 Examples are a follow with an amount, money without a currency, and a tip that is not direct.
 
-No part of the server makes a `topic` event in this version. `tip` and `reactions` also have no source.
+The server makes a `topic` event when the owner features a topic. See [Topic credit](#topic-credit).
+`tip` and `reactions` have no source in this version.
 
 A consumer ignores the kinds that it does not know.
 An `event` message of an unknown kind is not valid for the parser, and the consumer ignores it.
@@ -238,6 +240,7 @@ A goal counts one thing (`counts`):
   It compares `sentAt`, or `receivedAt` when the event has no `sentAt`.
 - The alert host refuses a known event ID, as `acceptDelivery` does. Thus an event counts one time.
 - The server counts nothing for `votes` in this version. The value of such a goal stays 0.
+- No goal counts a `topic` event.
 - A goal never converts Bits, KICKs, or a currency.
 
 ### Alert host
@@ -319,6 +322,50 @@ Thus an event that wakes the object reads no database. The host reads the saved 
 
 A message to a socket never has a platform user ID. A view has the display name, and `null` for an anonymous supporter.
 The user ID of a supporter is only in the line, for the reaction of the character.
+
+### Topic credit
+
+The owner features a topic in **Live**, in the dock, or in the editor. The author of the topic then gets a credit.
+The credit is a support event of the kind `topic`. See [Support events](#support-events).
+
+The API makes a credit when these two conditions are true:
+
+- The topic layer is on stream in an output with a topic. Before the change, the layer was not on stream with that topic.
+  `featuredTopic` in `app/lib/topic-credit.ts` makes this check. `updateOverlay` gives the result in `featured`.
+- The alerts layer is on stream in an output.
+
+Thus a second **Feature on stream** of the topic on stream makes no credit. A change of a different layer also makes no credit.
+When the topic goes off stream and then comes back, the author gets one more credit.
+
+The steps of a credit are these:
+
+1. After its answer, the API reads the topic, the name of the author, and the Twitch sign-in of the author.
+2. The API sends the event to the `ChannelIngest` object of the page, on the internal path `/alert-credit`.
+   `deliveryId` is `topic:<topic ID>:<overlay revision>`. Thus each feature has one event.
+3. The object takes in the event as it takes in a support event of a platform.
+   The event has the same dedupe, `support` table, snapshot, **Live** row, and **Replay** as a platform event.
+4. The `topic` rule makes the alert. The banner shows the name of the author. The goal does not count the event.
+
+Only the API reaches `/alert-credit`. `POST /api/overlay/alerts` and `POST /api/dock/:handle/alerts` refuse the operation with `400`.
+The `/alerts` path of the object also refuses it with `400`.
+
+The character of the author waves when the author signed in with Twitch:
+
+- Better Auth keeps the `sub` claim of the Twitch ID token in `account.account_id`.
+  Twitch gives the user ID of the person in `sub`. Twitch chat gives the same user ID in `chatter_user_id`.
+  Thus the server finds the character of the author in the playground.
+- If the author has more than one Twitch sign-in, the server uses the oldest one.
+- If the author has no Twitch sign-in, or the author has no character on screen, the crowd cheers.
+
+The Twitch user ID of the author is only on the server:
+
+- The API reads it from D1 for each credit and each replay. It sends it to the object with the operation.
+- The alert host keeps it in memory while the alert waits in the line. The stored line has no subject for a topic credit.
+  After a restart of the object, a credit that waits gets the crowd effect.
+- No message to a page, no log, and no stored row has it.
+- A replay of a topic credit reads the Twitch sign-in again. Thus a replay never uses a sign-in that the author removed.
+
+An output that shows only Twitch also shows the alert of a topic credit. See [Twitch chat only](overlay-composition.md#twitch-chat-only).
 
 ### Support events of each provider
 

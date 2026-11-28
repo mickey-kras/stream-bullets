@@ -93,6 +93,7 @@ const ROUTES: Readonly<Record<string, "GET" | "POST">> = {
   "/playground": "POST",
   "/playground-config": "POST",
   "/alerts": "POST",
+  "/alert-credit": "POST",
   "/test-chat": "POST",
   "/upcoming": "POST",
 };
@@ -191,7 +192,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (url.pathname === "/page-status") return this.pageStatusChanged();
     if (url.pathname === "/close") return this.closeAll();
     if (url.pathname === "/refresh") return Response.json(await this.refreshRequested());
-    if (url.pathname === "/alerts") return this.alerts.request(request);
+    if (url.pathname.startsWith("/alert")) return this.alerts.route(url.pathname, request, this.ingest.bind(this));
     if (url.pathname === "/playground-config") await this.alerts.layersChanged();
     if (url.pathname.startsWith("/playground")) return this.playground.request(url.pathname, request);
     return this.platformRequest(url.pathname, platform, request);

@@ -256,6 +256,7 @@ The banner has these parts:
 - One line with the name of the supporter and the event, with its amount.
   An example is **LanternFox gave 5 subscriptions**.
 - One line with the name of the platform and the words **Thank you**. A topic credit has no platform name.
+  A topic credit shows the name of the author, for example **Zoë topic on stream**.
 
 These rules apply to the banner:
 
@@ -748,7 +749,7 @@ The settings of the alerts layer have these parts:
 
 - **Test alert** and **Send test**, at the right of the name of the layer.
   The list has the samples of the server: a follow, a subscription, a gift of 5 subscriptions, and 500 Bits.
-  It also has a Super Chat, a raid with 38 viewers, and an anonymous gift.
+  It also has a Super Chat, a raid with 38 viewers, a featured topic, and an anonymous gift.
   **Send test** sends `{op: "test", kind}`. See [Alert controls](api.md#alert-controls).
 - **Show on stream**.
 - A table with one row for each rule: **Event**, **Starts at**, **Banner**, **In chat**, and **Character**.
@@ -772,9 +773,9 @@ The text comes from the code of the refusal:
 | `429` | Too many changes in one minute. |
 | `503` | The server has no alerts, or the alert host cannot answer. |
 
-The table has a row for these rules: follow, subscription and membership, gift, Bits and KICKs, Super Chat and Super Sticker, and raid.
-The `topic` rule has no row. The server does not make the alert of a featured topic in this version, and the test list has no topic test.
-The constant `TOPIC_CREDITS_READY` adds the row and the test.
+The table has a row for these rules: follow, subscription and membership, gift, Bits and KICKs, Super Chat and Super Sticker, raid, and featured topic.
+The **Featured topic** rule is for the credit of the author of a topic that you feature on stream.
+See [Topic credit](channel-connections.md#topic-credit).
 
 - **Starts at** is a number only for the rules with an amount: gift, Bits and KICKs, and raid.
   The number is a whole number from 1 to 1,000,000. The other rules show **Each one**.
