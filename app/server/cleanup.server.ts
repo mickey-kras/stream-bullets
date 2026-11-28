@@ -43,6 +43,7 @@ export async function cleanExpiredData(env: AppEnv, now: number): Promise<void> 
     env.DB.prepare(
       "DELETE FROM stream_features WHERE rowid IN (SELECT rowid FROM stream_features WHERE featured_at < ? LIMIT 5000)",
     ).bind(now - FEATURE_RETENTION_MS),
+    // entry_votes_voted_at_idx finds these rows, without a scan of each vote.
     env.DB.prepare(
       "UPDATE entry_votes SET voted_at=NULL WHERE rowid IN (SELECT rowid FROM entry_votes WHERE voted_at < ? LIMIT 5000)",
     ).bind(now - VOTE_TIME_RETENTION_MS),

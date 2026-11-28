@@ -173,10 +173,7 @@ export const entryVotes = sqliteTable(
     primaryKey({ columns: [table.entryId, table.userId] }),
     index("entry_votes_user_idx").on(table.userId),
     index("entry_votes_time_idx").on(table.entryId, table.votedAt),
-    // The hourly job finds the old vote times with this index, without a scan of each vote.
-    index("entry_votes_voted_at_idx")
-      .on(table.votedAt)
-      .where(sql`${table.votedAt} IS NOT NULL`),
+    index("entry_votes_voted_at_idx").on(table.votedAt).where(sql`${table.votedAt} IS NOT NULL`),
     check("entry_votes_choice_check", sql`${table.choice} BETWEEN 0 AND 5`),
   ],
 );
