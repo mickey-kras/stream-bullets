@@ -40,7 +40,7 @@ import { type PlaygroundHost, playgroundOf } from "./playground-host";
 import { type AlertHost, alertsOf, earliestAt } from "./alert-host";
 import { detached } from "../lib/detached";
 import { keyRevokes, keyTags, outputInBody, socketKey, type SocketKey } from "./room-connections";
-import { NEW_YOUTUBE_STATE, type Connection, type YoutubeState } from "./channel-ingest-state";
+import { NEW_YOUTUBE_STATE, readConnection, type Connection, type YoutubeState } from "./channel-ingest-state";
 import {
   SNAPSHOT_SIZE,
   SNAPSHOT_MAX_AGE_MS,
@@ -534,39 +534,12 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (cached && now - cached.at < CONNECTION_CACHE_MS) return cached.value;
     for (let read = 0; read < CONNECTION_READS; read++) {
       const epoch = this.connectionEpoch;
-      const value = await this.readConnection(platform);
+      const value = await readConnection(this.env.DB, this.streamerId, platform);
       if (epoch !== this.connectionEpoch) continue;
       this.connections.set(platform, { value, at: now });
       return value;
     }
     return null;
-  }
-
-  private async readConnection(platform: ActivityPlatform): Promise<Connection | null> {
-    const row = await this.env.DB.prepare(
-      `SELECT c.id, c.external_id, c.status, c.status_code, c.last_event_at, c.support_events, s.status AS page_status
-        FROM channel_connections c JOIN streamers s ON s.id = c.streamer_id WHERE c.streamer_id=? AND c.platform=?`,
-    )
-      .bind(this.streamerId, platform)
-      .first<{
-        id: string;
-        external_id: string;
-        status: ChannelStatus;
-        status_code: string | null;
-        last_event_at: number | null;
-        support_events: number;
-        page_status: string;
-      }>();
-    if (!row) return null;
-    return {
-      id: row.id,
-      externalId: row.external_id,
-      status: row.status,
-      code: row.status_code,
-      lastEventAt: row.last_event_at,
-      suspended: row.page_status === "suspended",
-      support: row.support_events === 1,
-    };
   }
 
   private async setStatus(
