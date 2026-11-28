@@ -334,6 +334,8 @@ The API sends `{op: "count", key}` to the internal path `/goal-count` with `wait
   The alert host knows what the goal counts from its copy of the layers.
   It ignores the key when the goal counts a different thing, or when the goal layer has no place on a grid.
   Thus a vote costs one call to the object and no database read.
+- A key that the host ignores still uses its copy of the layers. Thus the alarm reads the layers again within 60 seconds.
+  A change to a `votes` goal that the host did not get a notice for then counts the next votes.
 - The host reads the saved layers only when it has no copy. If this read fails, the object answers `503`, and the vote does not count.
 - The host keeps a hash of each key that it counted, and not the key. See the storage list below.
   The count stops at 100,000 keys.

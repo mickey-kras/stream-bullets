@@ -1509,6 +1509,28 @@ describe("the goal for votes", (): void => {
     expect((await host.goalCount(request)).status).toBe(204);
     expect(schedule.mock.calls).toEqual([[T0 + LAYER_CHECK_MS]]);
   });
+
+  it("reads the layers again after an ignored count, so a missed change to a votes goal does not stay", async (): Promise<void> => {
+    const { host, readLayers, schedule, sockets, send } = standalone(withGoal("follows"));
+    sockets.length = 0;
+    await host.layersChanged();
+    // The owner switches the goal to votes, and the notice does not arrive.
+    readLayers.mockResolvedValue(withGoal("votes"));
+    const vote = (key: string): Request =>
+      new Request("https://channel-ingest.internal/goal-count", {
+        method: "POST",
+        body: JSON.stringify({ op: "count", key }),
+      });
+    vi.setSystemTime(T0 + 1000);
+    expect((await host.goalCount(vote(topicKey(topic)))).status).toBe(204);
+    // The copy says follows, so the count is ignored, but the alarm comes to read the layers again.
+    expect(schedule.mock.calls).toEqual([[T0 + LAYER_CHECK_MS]]);
+    vi.setSystemTime(T0 + LAYER_CHECK_MS);
+    await host.alarm();
+    vi.setSystemTime(T0 + LAYER_CHECK_MS + 1000);
+    expect((await host.goalCount(vote(topicKey("33333333-3333-4333-8333-333333333333")))).status).toBe(204);
+    expect(await (await send({ op: "status" })).json()).toMatchObject({ goal: { counts: "votes", value: 1 } });
+  });
 });
 
 describe("what the object keeps", (): void => {
