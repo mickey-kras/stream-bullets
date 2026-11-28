@@ -5,11 +5,14 @@ import { z } from "zod";
 import {
   activityEventSchema,
   CHANNEL_STATUS_CODES,
+  feedEvents,
+  isStreamSignal,
   isSupport,
   type ActivityEvent,
   type ActivityPlatform,
   type ChannelStatus,
   type ChannelStatusCode,
+  type IngestEvent,
 } from "../lib/activity";
 import { banKey, eventForBroadcast, snapshotEvents, snapshotMessage, withoutSupport } from "./channel-ingest-events";
 import { ReauthRequired, refreshTokens, revokeToken, unsubscribe } from "./channel-providers.server";
@@ -129,7 +132,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
       schedule: this.scheduleAlarm.bind(this),
       touch: this.touch.bind(this),
       alertsReady: (since: number) => this.alerts.ready(since),
-      ingest: (events: readonly ActivityEvent[], now: number): void => this.ingest(this.admitEvents(events, now), now),
+      ingest: (events: readonly IngestEvent[], now: number): void => this.ingest(this.admitEvents(events, now), now),
     });
     detached(
       ctx.blockConcurrencyWhile(async (): Promise<void> => {
@@ -390,14 +393,15 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     const now = Date.now();
     this.prune(now);
     if (this.known("seen", `delivery:${platform}:${deliveryId}`)) return new Response(null, { status: 204 });
-    const parsed: ActivityEvent[] = [];
+    const parsed: IngestEvent[] = [];
     for (const event of events) {
       const { success, data } = activityEventSchema.safeParse(event);
-      if (success && data.platform === platform && data.kind !== "stream") parsed.push(data);
+      if (success && data.platform === platform) parsed.push(data);
     }
     const all = this.admitEvents(parsed, now);
     if (all.length === 0) return new Response(null, { status: 204 });
-    if (!(await this.alerts.ready(earliestAt(all, now)))) return reply("Alerts unavailable", 503); // Before the checks.
+    const ready = await this.alerts.ready(earliestAt(feedEvents(all), now));
+    if (!ready) return reply("Alerts unavailable", 503); // Before the checks.
     const connection = await this.connection(platform);
     // A delivery for a channel that is gone, needs a new authorization, belongs to a suspended page, or comes from
     // another channel (a route cached before the page changed its channel) is dropped.
@@ -433,13 +437,18 @@ export class ChannelIngest extends DurableObject<AppEnv> {
       await this.setStatus(platform, current, "active", null);
   }
 
+  /** The admitted feed events (`admitFeed`), then the live signals: a signal takes no token of a bucket. */
+  private admitEvents(events: readonly IngestEvent[], now: number): IngestEvent[] {
+    return [...this.admitFeed(feedEvents(events), now), ...events.filter(isStreamSignal)];
+  }
+
   /**
-   * The events to ingest, in their order: the newest new chat messages the chat bucket allows, and the moderation
-   * and support events their buckets allow. The buckets are separate, so a flood of chat or of follows cannot keep
-   * a deleted message on screen. Chat already seen or deleted costs no token, and neither does a support event
-   * already seen. Status events come only from the object itself.
+   * The feed events to ingest, in their order: the newest new chat messages the chat bucket allows, and the
+   * moderation and support events their buckets allow. The buckets are separate, so a flood of chat or of follows
+   * cannot keep a deleted message on screen. Chat already seen or deleted costs no token, and neither does a support
+   * event already seen. Status events come only from the object itself.
    */
-  private admitEvents(events: readonly ActivityEvent[], now: number): ActivityEvent[] {
+  private admitFeed(events: readonly ActivityEvent[], now: number): ActivityEvent[] {
     const fresh = events.filter((event: ActivityEvent): boolean => {
       if (event.kind === "status") return false;
       if (event.kind === "chat") return !this.known("deleted", event.id) && !this.known("seen", `message:${event.id}`);
@@ -460,9 +469,14 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     });
   }
 
-  /** Stores and broadcasts events that already passed admission. */
-  private ingest(events: readonly ActivityEvent[], now: number): void {
-    for (const event of events) if (this.store(event, now)) this.broadcast(eventForBroadcast(event, now));
+  /**
+   * Stores and broadcasts events that already passed admission. The live signals come out first: no socket, snapshot,
+   * support table, alert or goal gets one. No consumer reads them yet, so the object drops them here, after their
+   * validation (docs/stream-reports.md).
+   */
+  private ingest(events: readonly IngestEvent[], now: number): void {
+    const feed: ActivityEvent[] = feedEvents(events);
+    for (const event of feed) if (this.store(event, now)) this.broadcast(eventForBroadcast(event, now));
     this.prune(now);
   }
 

@@ -2,10 +2,10 @@ import nodeCrypto from "node:crypto";
 import type { AppEnv } from "../env";
 import {
   quotaDay,
-  type ActivityEvent,
   type ActivityPlatform,
   type ChannelStatus,
   type ChannelStatusCode,
+  type IngestEvent,
 } from "../lib/activity";
 import { earliestAt } from "./alert-host";
 import {
@@ -40,7 +40,8 @@ import { channelsOff, type StoredTokens } from "./channel-tokens.server";
 
 /**
  * The YouTube live chat poll of a page, with the title refresh and the schedule read. The poll runs only while a
- * consumer listens, so an idle page spends no quota.
+ * consumer listens, so an idle page spends no quota. The poll also sends the live signals of the channel: a signal
+ * goes out only when the live state changes, not for each poll.
  */
 
 /** A disconnect or close started while a poll waited: the poll stops and writes nothing. */
@@ -69,8 +70,8 @@ export interface YoutubeHost {
   touch: (platform: ActivityPlatform, connection: Connection, now: number) => Promise<void>;
   /** Whether the alerts can take events from `since`. */
   alertsReady: (since: number) => Promise<boolean>;
-  /** Admits the events, then stores and broadcasts the admitted ones. */
-  ingest: (events: readonly ActivityEvent[], now: number) => void;
+  /** Admits the events, then stores and broadcasts the admitted ones. It takes the live signals out first. */
+  ingest: (events: readonly IngestEvent[], now: number) => void;
 }
 
 export class YoutubePoller {
@@ -88,8 +89,13 @@ export class YoutubePoller {
   async connected(now: number): Promise<void> {
     // A reconnect starts a new chat session but keeps a pending wait, so reconnecting cannot skip a quota wait.
     const previous = (await this.host.storage.get<YoutubeState>("youtube")) ?? NEW_YOUTUBE_STATE;
-    // The callback read the title just now.
-    const state: YoutubeState = { ...NEW_YOUTUBE_STATE, nextPollAt: previous.nextPollAt, nameAt: now };
+    // The callback read the title just now. The live state stays, so a reconnect during a stream sends no signal.
+    const state: YoutubeState = {
+      ...NEW_YOUTUBE_STATE,
+      nextPollAt: previous.nextPollAt,
+      nameAt: now,
+      live: previous.live === true,
+    };
     await this.host.storage.put("youtube", state);
     await this.host.schedule(Math.max(now, state.nextPollAt));
   }
@@ -221,6 +227,9 @@ export class YoutubePoller {
     if (!state.liveChatId) {
       state.liveChatId = await youtubeLiveChat(tokens.accessToken);
       state.pageToken = null;
+      // The broadcast is the one source of the live state: an active broadcast with a live chat is a live stream.
+      current();
+      this.liveChanged(state, state.liveChatId !== null, now);
       if (state.liveChatId) return 0;
       const since = (await this.host.storage.get<number>("listeningSince")) ?? now;
       return now - since < YOUTUBE_STARTUP_WINDOW_MS ? YOUTUBE_STARTUP_POLL_MS : YOUTUBE_IDLE_POLL_MS;
@@ -243,6 +252,17 @@ export class YoutubePoller {
     // A quiet chat and a budget that runs low both get the longer floor: the day's units last longer.
     const quiet = page.items.length === 0 || spent >= YOUTUBE_LOW_BUDGET_SHARE;
     return Math.max(page.pollingIntervalMillis, quiet ? YOUTUBE_QUIET_POLL_MS : YOUTUBE_MIN_POLL_MS);
+  }
+
+  /**
+   * Sends a live signal when the live state changes. A chat that goes offline or ends with an error sends none: the
+   * next poll reads the broadcast and decides. Thus a broadcast that YouTube still shows as active never makes a
+   * stop and a start again.
+   */
+  private liveChanged(state: YoutubeState, live: boolean, now: number): void {
+    if (state.live === live) return;
+    state.live = live;
+    this.host.ingest([{ kind: "stream", platform: "youtube", live, receivedAt: now }], now);
   }
 
   private async refreshPollingTitle(

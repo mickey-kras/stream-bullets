@@ -286,8 +286,8 @@ const supportSchema: z.ZodType<ActivitySupport> = z
   .refine((event: ActivitySupport): boolean => event.id === `${event.platform}:${event.deliveryId}`)
   .refine((event: ActivitySupport): boolean => !event.anonymous || event.sender === null);
 
-/** True for a support event. */
-export function isSupport(event: ActivityEvent): event is ActivitySupport {
+/** True for a support event. A live signal is not one. */
+export function isSupport(event: IngestEvent): event is ActivitySupport {
   const kinds: readonly string[] = SUPPORT_KINDS;
   return kinds.includes(event.kind);
 }

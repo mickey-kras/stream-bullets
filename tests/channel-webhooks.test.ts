@@ -294,6 +294,39 @@ describe("Twitch EventSub webhook", (): void => {
   });
 });
 
+describe("live signals of the webhooks", (): void => {
+  function delivered(): unknown[] {
+    return ingest.entry(page).state.storage.sql.exec("SELECT key FROM seen ORDER BY key").toArray();
+  }
+
+  it("forwards a Twitch start and stop and a Kick status change to the ingest object, which sends none of them", async (): Promise<void> => {
+    const socket = await listen();
+    const before = socket.messages().length;
+    const online = { id: "9001", broadcaster_user_id: "111", broadcaster_user_login: "host", broadcaster_user_name: "Host", type: "live", started_at: "2026-11-28T09:30:00Z" };
+    const started = twitchNotification("stream.online", online);
+    expect((await twitchWebhook(await twitchRequest(started, { id: "online-1" }), env)).status).toBe(204);
+    const offline = twitchNotification("stream.offline", { broadcaster_user_id: "111", broadcaster_user_login: "host", broadcaster_user_name: "Host" });
+    expect((await twitchWebhook(await twitchRequest(offline, { id: "offline-1" }), env)).status).toBe(204);
+    // A rerun is no live stream: it gives no signal, so nothing reaches the ingest object.
+    const rerun = twitchNotification("stream.online", { ...online, type: "rerun" });
+    expect((await twitchWebhook(await twitchRequest(rerun, { id: "rerun-1" }), env)).status).toBe(204);
+    const kickStatus = JSON.stringify({
+      broadcaster: { user_id: 333, username: "Host", channel_slug: "host" },
+      is_live: true,
+      title: "Build",
+      started_at: "2026-11-28T09:30:00+00:00",
+      ended_at: null,
+    });
+    expect((await kickWebhook(await kickRequest(kickStatus, { id: "01JLIVE1", type: "livestream.status.updated" }), env)).status).toBe(204);
+    expect(delivered()).toEqual([
+      { key: "delivery:kick:01JLIVE1" },
+      { key: "delivery:twitch:offline-1" },
+      { key: "delivery:twitch:online-1" },
+    ]);
+    expect(socket.messages()).toHaveLength(before);
+  });
+});
+
 describe("webhook routing and the off switch", (): void => {
   function countRoutes(): () => number {
     let reads = 0;
@@ -713,7 +746,7 @@ describe("webhook repair signals", (): void => {
     await room.alarm();
     expect(await twitchRow()).toEqual({ status: "active", status_code: null });
     expect(fake.subscriptions.map((item) => item.id)).not.toContain("revoked");
-    expect(fake.subscriptions.filter((item) => item.broadcaster === "111" && item.callback === `${origin}/hooks/twitch`)).toHaveLength(5);
+    expect(fake.subscriptions.filter((item) => item.broadcaster === "111" && item.callback === `${origin}/hooks/twitch`)).toHaveLength(7);
     // A revoked authorization is not repaired: the owner must reconnect.
     const revoked = revocation.replace("notification_failures_exceeded", "user_removed");
     await twitchWebhook(await twitchRequest(revoked, { type: "revocation" }), env);
