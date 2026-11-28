@@ -1,4 +1,3 @@
-import nodeCrypto from "node:crypto";
 import { DurableObject } from "cloudflare:workers";
 import type { AppEnv } from "../env";
 import { CHANNEL_PLATFORMS } from "../../db/enums";
@@ -7,30 +6,15 @@ import {
   activityEventSchema,
   CHANNEL_STATUS_CODES,
   isSupport,
-  quotaDay,
   type ActivityEvent,
   type ActivityPlatform,
   type ChannelStatus,
   type ChannelStatusCode,
 } from "../lib/activity";
 import { banKey, eventForBroadcast, snapshotEvents, snapshotMessage, withoutSupport } from "./channel-ingest-events";
-import { youtubeEvents } from "./channel-normalize";
-import { youtubeSupport } from "./channel-support";
-import {
-  channelIdentity,
-  IMPORT_HORIZON_MS,
-  type ImportedStream,
-  ProviderError,
-  ReauthRequired,
-  refreshTokens,
-  revokeToken,
-  unsubscribe,
-  twitchSchedule,
-  youtubeChatPage,
-  youtubeLiveChat,
-  youtubeUpcoming,
-} from "./channel-providers.server";
+import { ReauthRequired, refreshTokens, revokeToken, unsubscribe } from "./channel-providers.server";
 import { ChannelSubscriptions } from "./channel-ingest-subscriptions";
+import { YoutubePoller } from "./channel-ingest-youtube";
 import { channelsOff, loadTokens, replaceTokens, type StoredTokens } from "./channel-tokens.server";
 import { HttpError } from "./http.server";
 import { sampleChatAt, sampleSupportAt } from "../lib/chat-feed";
@@ -40,13 +24,7 @@ import { type PlaygroundHost, playgroundOf } from "./playground-host";
 import { type AlertHost, alertsOf, earliestAt } from "./alert-host";
 import { detached } from "../lib/detached";
 import { keyRevokes, keyTags, outputInBody, socketKey, type SocketKey } from "./room-connections";
-import {
-  NEW_YOUTUBE_STATE,
-  pageSuspended,
-  readConnection,
-  type Connection,
-  type YoutubeState,
-} from "./channel-ingest-state";
+import { pageSuspended, readConnection, type Connection } from "./channel-ingest-state";
 import {
   SNAPSHOT_SIZE,
   SNAPSHOT_MAX_AGE_MS,
@@ -59,20 +37,8 @@ import {
   CLEANUP_INTERVAL_MS,
   MAX_SOCKETS,
   HEALTH_INTERVAL_MS,
-  YOUTUBE_MIN_POLL_MS,
-  YOUTUBE_IDLE_POLL_MS,
-  BACKOFF_MIN_MS,
-  BACKOFF_MAX_MS,
-  YOUTUBE_NAME_REFRESH_MS,
-  YOUTUBE_NAME_RETRY_MS,
-  YOUTUBE_JOB_RETRY_MS,
-  YOUTUBE_LOW_BUDGET_SHARE,
-  YOUTUBE_QUIET_POLL_MS,
-  YOUTUBE_STARTUP_POLL_MS,
-  YOUTUBE_STARTUP_WINDOW_MS,
   REFRESH_MARGIN_MS,
   Admissions,
-  spendYoutubeQuota,
 } from "./channel-ingest-limits";
 
 /**
@@ -105,9 +71,6 @@ const ROUTES: Readonly<Record<string, "GET" | "POST">> = {
   "/upcoming": "POST",
 };
 
-/** A disconnect or close started while a poll waited: the poll stops and writes nothing. */
-class Superseded extends Error {}
-
 function reply(message: string, status: number): Response {
   return Response.json({ error: message }, { status, headers: { "Cache-Control": "no-store" } });
 }
@@ -120,6 +83,8 @@ export class ChannelIngest extends DurableObject<AppEnv> {
   private readonly refreshes = new Map<string, Promise<StoredTokens>>();
   /** The provider subscriptions: made on connect, and checked and repaired without the owner. */
   private readonly subscriptions: ChannelSubscriptions;
+  /** The YouTube live chat poll, with the title refresh and the schedule read. */
+  private readonly youtube: YoutubePoller;
   /** Rows in `seen` and `deleted`, so the count limit runs only when a table is over it. */
   private readonly counts = new Map<IdTable, number>();
   /** Connections read from D1, with when they were read. The handlers that change a connection clear it. */
@@ -151,6 +116,20 @@ export class ChannelIngest extends DurableObject<AppEnv> {
       generation: (platform: ActivityPlatform) => this.generations.get(platform),
       schedule: this.scheduleAlarm.bind(this),
       acceptedAt: (platform: ActivityPlatform) => this.healthAt.get(platform) ?? 0,
+    });
+    this.youtube = new YoutubePoller({
+      env,
+      storage: ctx.storage,
+      streamerId: () => this.streamerId,
+      listening: () => ctx.getWebSockets("activity").length > 0,
+      connection: this.connection.bind(this),
+      setStatus: this.setStatus.bind(this),
+      freshTokens: this.freshTokens.bind(this),
+      generation: (platform: ActivityPlatform) => this.generations.get(platform),
+      schedule: this.scheduleAlarm.bind(this),
+      touch: this.touch.bind(this),
+      alertsReady: (since: number) => this.alerts.ready(since),
+      ingest: (events: readonly ActivityEvent[], now: number): void => this.ingest(this.admitEvents(events, now), now),
     });
     detached(
       ctx.blockConcurrencyWhile(async (): Promise<void> => {
@@ -198,7 +177,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (url.pathname === "/overlay-key") return await this.overlayKeyRevoked(request);
     if (url.pathname === "/page-status") return this.pageStatusChanged();
     if (url.pathname === "/close") return this.closeAll();
-    if (url.pathname === "/refresh") return Response.json(await this.refreshRequested());
+    if (url.pathname === "/refresh") return Response.json(await this.youtube.refreshRequested());
     if (/^\/(alert|goal-count|playground)/.test(url.pathname)) return this.hostRequest(url.pathname, request);
     return this.platformRequest(url.pathname, platform, request);
   }
@@ -216,7 +195,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (pathname === "/connect") return Response.json(await this.connectChannel(platform));
     if (pathname === "/disconnect") return Response.json(await this.disconnectChannel(platform));
     if (pathname === "/reconcile") return Response.json(await this.subscriptions.requested(platform, Date.now()));
-    if (pathname === "/upcoming") return Response.json(await this.upcomingRequested(platform));
+    if (pathname === "/upcoming") return Response.json(await this.youtube.upcomingRequested(platform));
     return this.statusChanged(platform, request);
   }
 
@@ -273,12 +252,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
   private async listeningStarted(first: boolean, now: number): Promise<void> {
     // The watchdog measures silence from here, so a page without a consumer is never reported.
     if (first) await this.ctx.storage.put("listeningSince", now);
-    const youtube = await this.connection("youtube");
-    if (youtube && youtube.status !== "needs_reauth" && !youtube.suspended) {
-      // A new consumer never moves a poll forward past a backoff, an interval or a quota wait.
-      const state = (await this.ctx.storage.get<YoutubeState>("youtube")) ?? NEW_YOUTUBE_STATE;
-      await this.scheduleAlarm(Math.max(now, state.nextPollAt));
-    }
+    await this.youtube.listeningStarted(now);
     await this.subscriptions.listeningStarted(now);
   }
 
@@ -669,12 +643,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
   /** A connect succeeded: YouTube polling starts, and the next subscription check waits one interval. */
   private async connectionStarted(platform: ActivityPlatform, now: number): Promise<void> {
     if (platform !== "youtube") return this.subscriptions.connected(platform, now);
-    // A reconnect starts a new chat session but keeps a pending wait, so reconnecting cannot skip a quota wait.
-    const previous = (await this.ctx.storage.get<YoutubeState>("youtube")) ?? NEW_YOUTUBE_STATE;
-    // The callback read the title just now.
-    const state: YoutubeState = { ...NEW_YOUTUBE_STATE, nextPollAt: previous.nextPollAt, nameAt: now };
-    await this.ctx.storage.put("youtube", state);
-    await this.scheduleAlarm(Math.max(now, state.nextPollAt));
+    await this.youtube.connected(now);
   }
 
   /**
@@ -740,7 +709,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     return new Response(null, { status: 204 });
   }
 
-  // YouTube polling -----------------------------------------------------------------------------------------------
+  // Alarm ---------------------------------------------------------------------------------------------------------
 
   /** Sets the alarm to `at`, unless it already runs earlier. */
   private async scheduleAlarm(at: number): Promise<void> {
@@ -763,7 +732,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     await this.alerts.alarm();
     let wait: number | null;
     try {
-      wait = await this.pollYoutube(now);
+      wait = await this.youtube.poll(now);
     } catch (error: unknown) {
       console.error("channel_poll_failed", {
         platform: "youtube",
@@ -777,193 +746,5 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     // The playground restarts after an eviction and sets its watchdog, or saves a pending checkpoint.
     await this.playground.alarm();
     await this.alerts.wake();
-  }
-
-  /** One YouTube poll, when one is due. Returns the wait before the next one, or null for none. */
-  private async pollYoutube(now: number): Promise<number | null> {
-    if (channelsOff(this.env)) return null;
-    if (this.streamerId === undefined || this.ctx.getWebSockets("activity").length === 0) return null;
-    const connection = await this.connection("youtube");
-    if (!connection || connection.status === "needs_reauth" || connection.suspended) return null;
-    const state: YoutubeState = { ...NEW_YOUTUBE_STATE, ...(await this.ctx.storage.get<YoutubeState>("youtube")) };
-    // The alarm also runs for cleanup and when a consumer connects: no poll before its time.
-    if (now < state.nextPollAt) return state.nextPollAt - now;
-    // A disconnect or close that runs during the poll bumps the generation: the poll then writes nothing more, so
-    // no data, status or state comes back.
-    const generation = this.generations.get("youtube") ?? 0;
-    const stale = (): boolean => (this.generations.get("youtube") ?? 0) !== generation;
-    const current = (): void => {
-      if (stale()) throw new Superseded();
-    };
-    let next: number;
-    try {
-      next = await this.poll(connection, state, now, current);
-      state.backoffMs = 0;
-      if (stale()) return null;
-      if (connection.status !== "active") await this.setStatus("youtube", connection, "active", null);
-    } catch (error: unknown) {
-      if (error instanceof Superseded || stale()) return null;
-      next = await this.pollFailed(connection, state, error, now);
-    }
-    if (stale()) return null;
-    state.nextPollAt = next >= 0 ? now + next : 0;
-    await this.ctx.storage.put("youtube", state);
-    return next >= 0 ? next : null;
-  }
-
-  /**
-   * Reads the YouTube channel title again and stores it with the time (data_read_at). The quota unit is spent only
-   * after a successful read of this channel. A token for another channel changes nothing.
-   */
-  private async refreshTitle(connection: Connection, accessToken: string, now: number): Promise<void> {
-    const identity = await channelIdentity(this.env, "youtube", accessToken);
-    // The token reads another channel: nothing about this one was refreshed.
-    if (identity.externalId !== connection.externalId) throw new ProviderError(409, "channelMismatch");
-    await spendYoutubeQuota(this.env.DB, this.streamerId, 1, now);
-    await this.env.DB.prepare(
-      `UPDATE channel_connections SET display_name=?, data_read_at=?
-        WHERE id=? AND (status_code IS NULL OR status_code <> 'disconnecting')`,
-    )
-      .bind(identity.displayName, now, connection.id)
-      .run();
-  }
-
-  /**
-   * The hourly expiry job asks for a title refresh of an old YouTube connection: `refreshed`, `reauth`, `failed`,
-   * or `recent` when an attempt ran in the last YOUTUBE_JOB_RETRY_MS (the job then tries another connection).
-   */
-  private async refreshRequested(): Promise<{ result: "refreshed" | "reauth" | "failed" | "recent" }> {
-    const now = Date.now();
-    const last = (await this.ctx.storage.get<number>("refreshAttemptAt")) ?? 0;
-    if (now - last < YOUTUBE_JOB_RETRY_MS) return { result: "recent" };
-    await this.ctx.storage.put("refreshAttemptAt", now);
-    const connection = await this.connection("youtube");
-    if (!connection || connection.status === "needs_reauth") return { result: "failed" };
-    // A reconnect during this refresh replaced the authorization: a refusal of the old one writes nothing.
-    const generation = this.generations.get("youtube");
-    try {
-      const tokens = await this.freshTokens("youtube", connection);
-      await this.refreshTitle(connection, tokens.accessToken, now);
-      return { result: "refreshed" };
-    } catch (error: unknown) {
-      if (!(error instanceof ReauthRequired)) {
-        console.warn("channel_name_refresh_failed", {
-          platform: "youtube",
-          cause: error instanceof Error ? error.name : "unknown",
-        });
-        return { result: "failed" };
-      }
-      if (this.generations.get("youtube") !== generation) return { result: "failed" };
-      await this.setStatus("youtube", connection, "needs_reauth", "authorization_revoked");
-      return { result: "reauth" };
-    }
-  }
-
-  /**
-   * The channel's scheduled streams for 4 weeks (schedule import), or null when they cannot be read now: the import
-   * then changes nothing. Twitch uses the app token; YouTube spends 1 quota unit of the page for each page of 50.
-   */
-  private async upcomingRequested(platform: ActivityPlatform): Promise<{ streams: ImportedStream[] | null }> {
-    const connection = channelsOff(this.env) || platform === "kick" ? null : await this.connection(platform);
-    const blocked =
-      connection?.status === "needs_reauth" || connection?.suspended || connection?.code === "disconnecting";
-    if (!connection || blocked) return { streams: null };
-    const now = Date.now();
-    const generation = this.generations.get(platform);
-    try {
-      if (platform === "twitch")
-        return { streams: await twitchSchedule(this.env, connection.externalId, now, now + IMPORT_HORIZON_MS) };
-      const tokens = await this.freshTokens(platform, connection);
-      const spend = (): Promise<number | null> => spendYoutubeQuota(this.env.DB, this.streamerId, 1, Date.now());
-      return { streams: await youtubeUpcoming(tokens.accessToken, now + IMPORT_HORIZON_MS, spend) };
-    } catch (error: unknown) {
-      if (error instanceof ReauthRequired && platform === "youtube" && this.generations.get(platform) === generation)
-        await this.setStatus(platform, connection, "needs_reauth", "authorization_revoked");
-      else console.warn("schedule_read_failed", { platform, cause: error instanceof Error ? error.name : "unknown" });
-      return { streams: null };
-    }
-  }
-
-  /** Returns the wait before the next poll. */
-  private async poll(connection: Connection, state: YoutubeState, now: number, current: () => void): Promise<number> {
-    const spent = await spendYoutubeQuota(this.env.DB, this.streamerId, state.liveChatId ? 5 : 1, now);
-    if (spent === null) throw new ProviderError(403, "quotaExceeded");
-    const tokens = await this.freshTokens("youtube", connection);
-    // Stored YouTube data must be fresh (YouTube API Services policy): read the title again once a day. A failed
-    // read is tried again after an hour, a read of another channel after a day; neither stops the chat poll.
-    if (now - state.nameAt >= YOUTUBE_NAME_REFRESH_MS) {
-      await this.refreshPollingTitle(connection, tokens.accessToken, state, now);
-      current();
-    }
-    if (!state.liveChatId) {
-      state.liveChatId = await youtubeLiveChat(tokens.accessToken);
-      state.pageToken = null;
-      if (state.liveChatId) return 0;
-      const since = (await this.ctx.storage.get<number>("listeningSince")) ?? now;
-      return now - since < YOUTUBE_STARTUP_WINDOW_MS ? YOUTUBE_STARTUP_POLL_MS : YOUTUBE_IDLE_POLL_MS;
-    }
-    const page = await youtubeChatPage(tokens.accessToken, state.liveChatId, state.pageToken);
-    // The first page is ingested too: messages sent before LIVE_WINDOW_MS are not live, so no old command runs.
-    // Support events come from the same page at no cost. Only a connect, which supersedes this poll, changes them.
-    const support = connection.support ? youtubeSupport(page.items, now) : [];
-    const events = [...youtubeEvents(page.items, connection.externalId, now), ...support];
-    if (!(await this.alerts.ready(earliestAt(events, now)))) throw new Error("alerts_unavailable");
-    current();
-    this.ingest(this.admitEvents(events, now), now);
-    state.pageToken = page.nextPageToken;
-    if (page.items.length > 0) await this.touch("youtube", connection, now);
-    if (page.offline) {
-      state.liveChatId = null;
-      state.pageToken = null;
-      return YOUTUBE_IDLE_POLL_MS;
-    }
-    // A quiet chat and a budget that runs low both get the longer floor: the day's units last longer.
-    const quiet = page.items.length === 0 || spent >= YOUTUBE_LOW_BUDGET_SHARE;
-    return Math.max(page.pollingIntervalMillis, quiet ? YOUTUBE_QUIET_POLL_MS : YOUTUBE_MIN_POLL_MS);
-  }
-
-  private async refreshPollingTitle(
-    connection: Connection,
-    accessToken: string,
-    state: YoutubeState,
-    now: number,
-  ): Promise<void> {
-    try {
-      await this.refreshTitle(connection, accessToken, now);
-      state.nameAt = now;
-    } catch (error: unknown) {
-      if (error instanceof ReauthRequired) throw error;
-      console.warn("channel_name_refresh_failed", {
-        platform: "youtube",
-        cause: error instanceof Error ? error.name : "unknown",
-      });
-      const mismatch = error instanceof ProviderError && error.reason === "channelMismatch";
-      state.nameAt = mismatch ? now : now - YOUTUBE_NAME_REFRESH_MS + YOUTUBE_NAME_RETRY_MS;
-    }
-  }
-
-  private async pollFailed(connection: Connection, state: YoutubeState, error: unknown, now: number): Promise<number> {
-    if (error instanceof ReauthRequired) {
-      await this.setStatus("youtube", connection, "needs_reauth", "authorization_revoked");
-      return -1;
-    }
-    const reason = error instanceof ProviderError ? error.reason : null;
-    if (reason === "liveChatEnded" || reason === "liveChatNotFound" || reason === "liveChatDisabled") {
-      state.liveChatId = null;
-      state.pageToken = null;
-      return YOUTUBE_IDLE_POLL_MS;
-    }
-    if (reason === "quotaExceeded" || reason === "dailyLimitExceeded") {
-      console.warn("channel_quota_exhausted", { platform: "youtube" });
-      await this.setStatus("youtube", connection, "error", "quota_exhausted");
-      // Try again a minute after the quota resets at midnight Pacific Time.
-      return quotaDay(now).resetAt - now + 60_000;
-    }
-    console.error("channel_poll_failed", {
-      platform: "youtube",
-      cause: error instanceof Error ? error.name : "unknown",
-    });
-    state.backoffMs = Math.min(BACKOFF_MAX_MS, Math.max(BACKOFF_MIN_MS, state.backoffMs * 2));
-    return nodeCrypto.randomInt(Math.ceil(state.backoffMs / 2), state.backoffMs + 1);
   }
 }

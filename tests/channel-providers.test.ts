@@ -11,13 +11,13 @@ import {
   exchangeCode,
   listSubscriptions,
   refreshTokens,
-  requiredSubscriptions,
   revokeToken,
   subscribe,
   unsubscribe,
   youtubeChatPage,
   youtubeLiveChat,
 } from "../app/server/channel-providers.server";
+import { requiredSubscriptions } from "../app/server/channel-subscription-types";
 
 /** Provider answers the happy-path tests do not reach: odd bodies, refusals, conflicts and network errors. */
 

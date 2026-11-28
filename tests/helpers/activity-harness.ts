@@ -4,7 +4,7 @@ import { build } from "esbuild";
 import { Miniflare, Response as RuntimeResponse, type Request as RuntimeRequest } from "miniflare";
 import type { AppEnv } from "../../app/env";
 import type { ActivityChat } from "../../app/lib/activity";
-import { requiredSubscriptions } from "../../app/server/channel-providers.server";
+import { requiredSubscriptions } from "../../app/server/channel-subscription-types";
 import { tokenStatement } from "../../app/server/channel-tokens.server";
 import type { IngestReport, StepReport, WorkerReport } from "./activity-worker";
 import { fakeProviders, type FakeProviders, type ProviderFetch } from "./channels";

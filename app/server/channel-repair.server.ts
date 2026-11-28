@@ -5,12 +5,12 @@ import {
   ProviderError,
   ReauthRequired,
   listSubscriptions,
-  requiredSubscriptions,
   subscribe,
   unsubscribe,
   type ProviderSubscription,
 } from "./channel-providers.server";
 import { SUPPORT_SUBSCRIPTIONS } from "./channel-support";
+import { requiredSubscriptions } from "./channel-subscription-types";
 import { getOrigin, logError } from "./http.server";
 
 /** Repair of provider subscriptions without the owner, and the webhook health that the watchdog reads. */
