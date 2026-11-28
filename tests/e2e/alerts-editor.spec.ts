@@ -179,6 +179,20 @@ test("the owner places the Alerts layer, changes its rules, and a test from the 
   await raid.fill("12");
   await save;
   await expect(raid).not.toHaveAttribute("aria-invalid");
+  // A value typed on the way never saves: 25, then two quick Backspaces leave the field empty, and 2 does not save.
+  const before: number = saves.length;
+  await raid.fill("");
+  await raid.pressSequentially("25");
+  await raid.press("Backspace");
+  await raid.press("Backspace");
+  await page.evaluate(() => new Promise<void>((resolve) => setTimeout(resolve, 600)));
+  await raid.blur();
+  await expect(raid).toHaveAttribute("aria-invalid", "true");
+  expect(saves).toHaveLength(before);
+  expect((await storedLayers(page)).alerts.rules.raid.min).toBe(12);
+  await raid.fill("12");
+  await raid.blur();
+  await expect(raid).not.toHaveAttribute("aria-invalid");
   // A switch saves one field at once.
   save = saved(page);
   await table.getByRole("checkbox", { name: "Banner for Follow" }).check();
@@ -265,6 +279,21 @@ test("Start test also sends one test alert while the Alerts layer is on stream",
   await expect(page.locator(".sb-toast")).toHaveText(
     "Test alert not sent: No page shows alerts now. Open the overlay in OBS first.",
   );
+  await close(owner);
+});
+
+test("a threshold typed just before the owner reloads the page still saves", async ({ browser }) => {
+  await runSql("alerts-editor-leave", [
+    layersSql({ alerts: { enabled: true }, cells: { horizontal: { alerts: { c: 8, r: 0, w: 16, h: 3 } } } }),
+  ]);
+  const { owner, page, editor } = await openEditor(browser, ALERTS_IP);
+  await chip(editor, "alerts").click();
+  const raid = settings(editor).getByRole("textbox", { name: "Starts at: smallest amount for Raid" });
+  await expect(raid).toBeVisible();
+  // The reload comes well inside the pause of the field, and the field keeps the focus.
+  await raid.fill("37");
+  await page.reload();
+  await expect.poll(async () => (await storedLayers(page)).alerts.rules.raid.min).toBe(37);
   await close(owner);
 });
 
