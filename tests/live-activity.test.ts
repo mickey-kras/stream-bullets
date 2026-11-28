@@ -224,8 +224,23 @@ describe("Replay", (): void => {
     expect(shown).toContain("youtube:y0");
     // A snapshot gives the list of the server again. A replay does not change it.
     const snapshot: ActivityState = after([{ type: "snapshot", events: [first], replay: true, since: 0 }]);
-    expect(snapshot.kept).toEqual([{ id: "twitch:t1", platform: "twitch" }]);
+    expect(snapshot.kept).toEqual([{ id: "twitch:t1", platform: "twitch", receivedAt: T0 + 100 }]);
     expect(after([event(support("t1", { replay: true }))], snapshot).kept).toBe(snapshot.kept);
+  });
+
+  it("lets events expire before it drops the oldest above the limit, as the server does", (): void => {
+    // A Twitch event comes first, then 49 YouTube events of a poll that started earlier.
+    const twitch: ActivityMessage = event(support("t1", { receivedAt: T0 + 60_000 }));
+    const page: ActivityMessage[] = Array.from({ length: REPLAY_KEPT - 1 }, (_, n: number) =>
+      event(support(`y${n}`, { id: `youtube:y${n}`, platform: "youtube", receivedAt: T0 })),
+    );
+    // The YouTube events expired, the Twitch event did not, when the next one comes.
+    const late: number = T0 + REPLAY_WINDOW_MS + 1000;
+    const { rows, kept } = after([twitch, ...page, event(support("t2", { receivedAt: late }))]);
+    const shown: string[] = rows
+      .filter((row: ActivityRow): boolean => replayable(row, kept, late + 1, new Set<string>()))
+      .map((row: ActivityRow): string => row.id);
+    expect(shown).toEqual(["twitch:t2", "twitch:t1"]);
   });
 
   it("forgets the events of a platform that is disconnected, as the server deletes them", (): void => {

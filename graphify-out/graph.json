@@ -34197,7 +34197,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_activityafter",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L135",
+      "source_location": "L143",
       "target": "app_lib_live_activity_rowsafter",
       "weight": 1.0
     },
@@ -34209,7 +34209,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_activityafter",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L136",
+      "source_location": "L144",
       "target": "app_lib_live_activity_keptafter",
       "weight": 1.0
     },
@@ -34221,7 +34221,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_keptafter",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L114",
+      "source_location": "L120",
       "target": "app_lib_activity_issupport",
       "weight": 1.0
     },
@@ -34233,7 +34233,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_keptafter",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L115",
+      "source_location": "L123",
       "target": "app_lib_live_activity_keptof",
       "weight": 1.0
     },
@@ -34245,7 +34245,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_nowline",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L188",
+      "source_location": "L196",
       "target": "app_i18n_index_tn",
       "weight": 1.0
     },
@@ -34257,7 +34257,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_refusaltext",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L213",
+      "source_location": "L221",
       "target": "app_lib_live_activity_isrefusal",
       "weight": 1.0
     },
@@ -34269,7 +34269,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_rowsafter",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L121",
+      "source_location": "L129",
       "target": "app_lib_live_activity_withrows",
       "weight": 1.0
     },
@@ -34281,7 +34281,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_rowsafter",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L123",
+      "source_location": "L131",
       "target": "app_lib_live_activity_torow",
       "weight": 1.0
     },
@@ -34293,7 +34293,7 @@
       "relation": "calls",
       "source": "app_lib_live_activity_rowsafter",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L125",
+      "source_location": "L133",
       "target": "app_lib_activity_issupport",
       "weight": 1.0
     },
@@ -71697,7 +71697,7 @@
       "relation": "calls",
       "source": "tests_live_activity_test",
       "source_file": "tests/live-activity.test.ts",
-      "source_location": "L270",
+      "source_location": "L285",
       "target": "tests_live_activity_test_view",
       "weight": 1.0
     },
@@ -206191,7 +206191,7 @@
       "relation": "inherits",
       "source": "app_lib_live_activity_shownalerts",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L157",
+      "source_location": "L165",
       "target": "app_lib_alerts_alertsstate",
       "weight": 1.0
     },
@@ -226653,7 +226653,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L100",
+      "source_location": "L101",
       "target": "app_lib_live_activity_keptof",
       "weight": 1.0
     },
@@ -226664,7 +226664,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L106",
+      "source_location": "L112",
       "target": "app_lib_live_activity_keptafter",
       "weight": 1.0
     },
@@ -226675,7 +226675,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L119",
+      "source_location": "L127",
       "target": "app_lib_live_activity_rowsafter",
       "weight": 1.0
     },
@@ -226686,7 +226686,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L133",
+      "source_location": "L141",
       "target": "app_lib_live_activity_activityafter",
       "weight": 1.0
     },
@@ -226697,7 +226697,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L146",
+      "source_location": "L154",
       "target": "app_lib_live_activity_replayable",
       "weight": 1.0
     },
@@ -226708,7 +226708,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L157",
+      "source_location": "L165",
       "target": "app_lib_live_activity_shownalerts",
       "weight": 1.0
     },
@@ -226719,7 +226719,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L168",
+      "source_location": "L176",
       "target": "app_lib_live_activity_shownalerts_b093640c7fee",
       "weight": 1.0
     },
@@ -226730,7 +226730,7 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L182",
+      "source_location": "L190",
       "target": "app_lib_live_activity_secondsleft",
       "weight": 1.0
     },
@@ -226741,19 +226741,8 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L187",
+      "source_location": "L195",
       "target": "app_lib_live_activity_nowline",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_live_activity",
-      "source_file": "app/lib/live-activity.ts",
-      "source_location": "L193",
-      "target": "app_lib_live_activity_refusal_text",
       "weight": 1.0
     },
     {
@@ -226774,8 +226763,8 @@
       "relation": "contains",
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L204",
-      "target": "app_lib_live_activity_isrefusal",
+      "source_location": "L201",
+      "target": "app_lib_live_activity_refusal_text",
       "weight": 1.0
     },
     {
@@ -226786,7 +226775,7 @@
       "source": "app_lib_live_activity",
       "source_file": "app/lib/live-activity.ts",
       "source_location": "L212",
-      "target": "app_lib_live_activity_refusaltext",
+      "target": "app_lib_live_activity_isrefusal",
       "weight": 1.0
     },
     {
@@ -226798,6 +226787,17 @@
       "source_file": "app/lib/live-activity.ts",
       "source_location": "L22",
       "target": "app_lib_live_activity_replay_kept",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_live_activity",
+      "source_file": "app/lib/live-activity.ts",
+      "source_location": "L220",
+      "target": "app_lib_live_activity_refusaltext",
       "weight": 1.0
     },
     {
@@ -270375,7 +270375,7 @@
       "relation": "indirect_call",
       "source": "app_lib_live_activity_keptafter",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L107",
+      "source_location": "L113",
       "target": "app_lib_live_activity_keptof",
       "weight": 1.0
     },
@@ -279274,7 +279274,7 @@
       "label": "ShownAlerts",
       "norm_label": "shownalerts",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L157"
+      "source_location": "L165"
     },
     {
       "_callable": true,
@@ -300013,7 +300013,7 @@
       "label": "activityAfter()",
       "norm_label": "activityafter()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L133"
+      "source_location": "L141"
     },
     {
       "_callable": true,
@@ -300024,7 +300024,7 @@
       "label": "isRefusal()",
       "norm_label": "isrefusal()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L204"
+      "source_location": "L212"
     },
     {
       "_callable": true,
@@ -300035,7 +300035,7 @@
       "label": "keptAfter()",
       "norm_label": "keptafter()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L106"
+      "source_location": "L112"
     },
     {
       "_callable": true,
@@ -300046,7 +300046,7 @@
       "label": "keptOf()",
       "norm_label": "keptof()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L100"
+      "source_location": "L101"
     },
     {
       "_callable": true,
@@ -300057,7 +300057,7 @@
       "label": "nowLine()",
       "norm_label": "nowline()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L187"
+      "source_location": "L195"
     },
     {
       "_callable": true,
@@ -300068,7 +300068,7 @@
       "label": "refusalText()",
       "norm_label": "refusaltext()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L212"
+      "source_location": "L220"
     },
     {
       "_callable": true,
@@ -300079,7 +300079,7 @@
       "label": "replayable()",
       "norm_label": "replayable()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L146"
+      "source_location": "L154"
     },
     {
       "_callable": true,
@@ -300090,7 +300090,7 @@
       "label": "rowsAfter()",
       "norm_label": "rowsafter()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L119"
+      "source_location": "L127"
     },
     {
       "_callable": true,
@@ -300101,7 +300101,7 @@
       "label": "secondsLeft()",
       "norm_label": "secondsleft()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L182"
+      "source_location": "L190"
     },
     {
       "_callable": true,
@@ -300112,7 +300112,7 @@
       "label": "shownAlerts()",
       "norm_label": "shownalerts()",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L168"
+      "source_location": "L176"
     },
     {
       "_callable": true,
@@ -330752,7 +330752,7 @@
       "label": "REFUSAL_TEXT",
       "norm_label": "refusal_text",
       "source_file": "app/lib/live-activity.ts",
-      "source_location": "L193"
+      "source_location": "L201"
     },
     {
       "_origin": "ast",

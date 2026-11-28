@@ -95,13 +95,19 @@ export const INITIAL_ACTIVITY: ActivityState = { rows: [], kept: [], alertsAt: 0
 export interface KeptEvent {
   id: string;
   platform: ActivitySupport["platform"];
+  receivedAt: number;
 }
 
-const keptOf = (event: ActivitySupport): KeptEvent => ({ id: event.id, platform: event.platform });
+const keptOf = (event: ActivitySupport): KeptEvent => ({
+  id: event.id,
+  platform: event.platform,
+  receivedAt: event.receivedAt,
+});
 
 /**
  * The kept events after one message of the socket. A snapshot gives the list of the server; an original adds one; a
- * disconnect of a platform removes its events, as the server deletes them.
+ * disconnect of a platform removes its events, as the server deletes them. As the server does when it stores an event,
+ * the events older than REPLAY_WINDOW_MS go first, and only then the oldest above REPLAY_KEPT.
  */
 function keptAfter(kept: readonly KeptEvent[], message: ActivityMessage): readonly KeptEvent[] {
   if (message.type === "snapshot") return message.events.filter(isSupport).map(keptOf).slice(-REPLAY_KEPT);
@@ -112,7 +118,9 @@ function keptAfter(kept: readonly KeptEvent[], message: ActivityMessage): readon
     return left.length === kept.length ? kept : left;
   }
   if (!isSupport(event) || event.replay) return kept;
-  return [...kept.filter((one: KeptEvent): boolean => one.id !== event.id), keptOf(event)].slice(-REPLAY_KEPT);
+  const since: number = event.receivedAt - REPLAY_WINDOW_MS;
+  const fresh: KeptEvent[] = kept.filter((one: KeptEvent): boolean => one.id !== event.id && one.receivedAt >= since);
+  return [...fresh, keptOf(event)].slice(-REPLAY_KEPT);
 }
 
 /** The rows after one message of the socket. A reconnect snapshot adds the events that the server keeps. */

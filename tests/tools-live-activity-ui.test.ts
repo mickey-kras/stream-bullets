@@ -79,7 +79,7 @@ function render(more: Partial<ActivityViewProps> = {}, key: string | null = null
   const rows: readonly ActivityRow[] = more.rows ?? [];
   const kept: KeptEvent[] = rows
     .filter((one: ActivityRow): boolean => one.original)
-    .map((one: ActivityRow): KeptEvent => ({ id: one.id, platform: one.platform }));
+    .map((one: ActivityRow): KeptEvent => ({ id: one.id, platform: one.platform, receivedAt: one.receivedAt }));
   const props: ActivityViewProps = {
     alerts: quiet,
     rows,
