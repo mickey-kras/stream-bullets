@@ -93,6 +93,7 @@ const ROUTES: Readonly<Record<string, "GET" | "POST">> = {
   "/playground": "POST",
   "/playground-config": "POST",
   "/alerts": "POST",
+  "/goal-count": "POST",
   "/test-chat": "POST",
   "/upcoming": "POST",
 };
@@ -191,10 +192,15 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (url.pathname === "/page-status") return this.pageStatusChanged();
     if (url.pathname === "/close") return this.closeAll();
     if (url.pathname === "/refresh") return Response.json(await this.refreshRequested());
-    if (url.pathname === "/alerts") return this.alerts.request(request);
-    if (url.pathname === "/playground-config") await this.alerts.layersChanged();
-    if (url.pathname.startsWith("/playground")) return this.playground.request(url.pathname, request);
+    if (/^\/(alerts|goal-count|playground)/.test(url.pathname)) return this.hostRequest(url.pathname, request);
     return this.platformRequest(url.pathname, platform, request);
+  }
+  /** A request for the alert host or for the playground. */
+  private async hostRequest(pathname: string, request: Request): Promise<Response> {
+    if (pathname === "/alerts") return this.alerts.request(request);
+    if (pathname === "/goal-count") return this.alerts.goalCount(request);
+    if (pathname === "/playground-config") await this.alerts.layersChanged();
+    return this.playground.request(pathname, request);
   }
   private async platformRequest(pathname: string, name: string | null, request: Request): Promise<Response> {
     const platform = CHANNEL_PLATFORMS.find((item: ActivityPlatform): boolean => item === name);

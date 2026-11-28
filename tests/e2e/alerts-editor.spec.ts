@@ -303,7 +303,7 @@ test("the owner places the Goal layer, edits it, sees its count, and starts the 
   if (!tag || !shown) throw new Error("No tag or title.");
   expect(tag.y >= shown.y + shown.height || tag.y + tag.height <= shown.y).toBe(true);
 
-  // The list offers what the server counts today: not the poll votes.
+  // The list offers each thing that the server counts, also the poll votes and the new topics.
   const counts = panel.getByRole("combobox", { name: "Counts" });
   await expect(counts).toHaveText("Subscriptions, memberships, and gifts");
   await counts.click();
@@ -313,6 +313,7 @@ test("the owner places the Goal layer, edits it, sees its count, and starts the 
     "Bits",
     "KICKs",
     "People who chat",
+    "Poll votes and new topics",
   ]);
   save = saved(page);
   await page.getByRole("option", { name: "Bits", exact: true }).click();
@@ -358,6 +359,47 @@ test("the owner places the Goal layer, edits it, sees its count, and starts the 
   await reset.click();
   await dialog.getByRole("button", { name: "Start again" }).click();
   await expect(panel.locator("[data-goal-failed]")).toHaveText(/^Count not started again: \S/);
+  await close(owner);
+});
+
+test("a goal for poll votes counts each vote and each new topic one time", async ({ browser }) => {
+  await runSql("alerts-editor-votes", [
+    layersSql({ goal: { target: 10 }, cells: { horizontal: { goal: { c: 0, r: 4, w: 8, h: 2 } } } }),
+  ]);
+  const { owner, page, editor } = await openEditor(browser, GOAL_IP);
+  await chip(editor, "goal").click();
+  const panel = settings(editor);
+  // The saved change tells the server what the goal counts.
+  const counts = panel.getByRole("combobox", { name: "Counts" });
+  await counts.click();
+  const save = saved(page);
+  await page.getByRole("option", { name: "Poll votes and new topics", exact: true }).click();
+  await save;
+  await expect(counts).toHaveText("Poll votes and new topics");
+  const progress = panel.locator("[data-goal-progress]");
+  await expect(progress).toHaveText("0 of 10");
+  /** One write to the public page, as the owner. It gives the ID in the answer. */
+  async function write(data: Record<string, unknown>): Promise<string> {
+    const response = await owner.request.post("/api/streamers/feature_host", { data });
+    expect(response.status(), JSON.stringify(data)).toBe(200);
+    return ((await response.json()) as { id: string }).id;
+  }
+  const created: string[] = [];
+  try {
+    const poll: string = await write({ action: "create", kind: "binary", title: "A poll for the goal of votes" });
+    created.push(poll);
+    // A new poll is not a vote.
+    await write({ action: "vote", id: poll, choice: 0 });
+    await expect(progress).toHaveText("1 of 10");
+    // A changed vote counts for nothing. A new topic counts.
+    await write({ action: "vote", id: poll, choice: 1 });
+    created.push(
+      await write({ action: "create", kind: "topic", title: "A goal topic", body: "Details.", category: "Gaming" }),
+    );
+    await expect(progress).toHaveText("2 of 10");
+  } finally {
+    for (const id of created) await write({ action: "delete", id });
+  }
   await close(owner);
 });
 

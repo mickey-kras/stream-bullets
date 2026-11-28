@@ -1,4 +1,5 @@
-import { notifyRoom } from "../live.server";
+import { notifyGoalCount, notifyRoom } from "../live.server";
+import { topicKey, voteKey } from "../goal-votes";
 import { translateAfterPost } from "../translation-jobs.server";
 import { attachAboutTranslations, translatePageAfterSave } from "../page-translation.server";
 import { requestLocale } from "../../i18n/resolve";
@@ -62,6 +63,9 @@ export const streamerRoutes: ApiRoute[] = [
         ? await createMash(env, viewer.id, streamer.id, input)
         : await mutateEntry(env, viewer.id, streamer.id, input, () => requireAdminSession(request, app));
     notifyRoom(env, streamer.id);
+    // A poll vote and a new topic count for a goal that counts votes. A changed vote has the same key.
+    if (input.action === "vote") notifyGoalCount(env, streamer.id, voteKey(input.id, viewer.id));
+    if (input.action === "create" && input.kind === "topic") notifyGoalCount(env, streamer.id, topicKey(result.id));
     // A new topic, poll or comment gets its translations after the response.
     if (input.action === "create") translateAfterPost(env, "entry", result.id);
     if (input.action === "comment") translateAfterPost(env, "comment", result.id);

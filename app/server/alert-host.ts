@@ -44,6 +44,7 @@ import { onAnyOutput, type OverlayLayers } from "../lib/overlay-layers";
 import type { Reaction } from "../lib/playground/crowd";
 import { SNAPSHOT_MAX_AGE_MS } from "./channel-ingest-limits";
 import { ALERTS, SUPPORT } from "./channel-ingest-sql";
+import { goalCountSchema } from "./goal-votes";
 import { LAYER_CHECK_MS, readLayers, type PlaygroundHost, type ReactionSubject } from "./playground-host";
 
 /**
@@ -60,7 +61,8 @@ import { LAYER_CHECK_MS, readLayers, type PlaygroundHost, type ReactionSubject }
  * The host also counts the goal of the page (app/lib/goals.ts), while the goal layer has a place on the grid of an
  * output. Each stored support event counts one time: the host keeps the IDs of the newest events, so an event that a
  * provider sends again counts for nothing and plays nothing. The count goes on while the alerts are muted and while
- * no page listens. A test and a replay never reach it.
+ * no page listens. A test and a replay never reach it. For a goal that counts votes, the API tells the host of each
+ * poll vote and each new topic with a key (app/server/goal-votes.ts), and each key counts one time.
  *
  * A message to a socket has the display name of a supporter and never a user ID. The user ID stays in the line, for
  * the reaction of the character, until the alert starts.
@@ -73,8 +75,8 @@ import { LAYER_CHECK_MS, readLayers, type PlaygroundHost, type ReactionSubject }
 export const ALERT_LINE_MAX: number = ALERT_QUEUE_MAX ?? Math.floor(SNAPSHOT_MAX_AGE_MS / ALERT_SHOW_MS);
 
 /**
- * The largest number of people that a goal for chatters counts. The host keeps one key for each person, so the
- * storage of a goal has a limit.
+ * The largest number of people that a goal for chatters counts, and of votes and topics that a goal for votes
+ * counts. The host keeps one key for each of them, so the storage of a goal has a limit.
  */
 export const GOAL_PEOPLE_MAX = 100_000;
 
@@ -163,11 +165,11 @@ function alertId(alert: PendingAlert): string {
 }
 
 /**
- * The key of a person in the people of a goal. It is a hash with the salt of the count, so the storage of a goal
- * has no platform user ID.
+ * The key of a person, a vote, or a topic in the keys of a goal. It is a hash with the salt of the count, so the
+ * storage of a goal has no user ID.
  */
-function personKey(salt: string, platform: ActivityPlatform, userId: string): string {
-  return nodeCrypto.createHash("sha256").update(`${salt}:${platform}:${userId}`).digest("hex").slice(0, 32);
+function goalKey(salt: string, key: string): string {
+  return nodeCrypto.createHash("sha256").update(`${salt}:${key}`).digest("hex").slice(0, 32);
 }
 
 /**
@@ -351,6 +353,21 @@ export class AlertHost {
   }
 
   /**
+   * The object's `/goal-count` request: a poll vote or a new topic, from the API (app/server/goal-votes.ts). Only a
+   * goal that counts votes counts it, one time for each key. The request is not a control: the owner route and the
+   * dock route never send it. The host reads the saved layers only when it has no copy of them.
+   */
+  async goalCount(request: Request): Promise<Response> {
+    const parsed = goalCountSchema.safeParse(await request.json().catch((): null => null));
+    if (!parsed.success) return Response.json({ error: "Invalid count" }, { status: 400, headers: NO_STORE });
+    if (!(await this.ready(Date.now()))) return refuse("alerts_unavailable");
+    this.voted(parsed.data.key);
+    this.flush(Date.now());
+    await this.wake();
+    return new Response(null, { status: 204, headers: NO_STORE });
+  }
+
+  /**
    * The object's alarm. It reads the layers again when the copy is old and the host uses it: a page listens, the
    * goal counts, an event used the copy, or the host has no copy. Thus a missed change does not stay. Then it ends
    * the alert on stream when its time is over, and starts the next one.
@@ -461,8 +478,16 @@ export class AlertHost {
     if (goal?.progress.counts !== "chatters") return;
     const { value, startedAt } = goal.progress;
     if ((event.sentAt ?? event.receivedAt) < startedAt || value >= GOAL_PEOPLE_MAX) return;
-    if (!ALERTS.person(this.options.sql, personKey(goal.salt, event.platform, event.user.id))) return;
+    if (!ALERTS.person(this.options.sql, goalKey(goal.salt, `${event.platform}:${event.user.id}`))) return;
     this.progress(goal, { ...goal.progress, value: value + 1 });
+  }
+
+  /** Counts a poll vote or a new topic for a goal that counts votes, up to GOAL_PEOPLE_MAX keys. */
+  private voted(key: string): void {
+    const goal: StoredGoal | null = this.counting();
+    if (goal?.progress.counts !== "votes" || goal.progress.value >= GOAL_PEOPLE_MAX) return;
+    if (!ALERTS.person(this.options.sql, goalKey(goal.salt, key))) return;
+    this.progress(goal, { ...goal.progress, value: goal.progress.value + 1 });
   }
 
   private progress(goal: StoredGoal, next: GoalProgress): void {

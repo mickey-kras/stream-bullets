@@ -685,6 +685,11 @@ describe("the key of the OBS dock", (): void => {
     expect(await code(muted)).toBe("alerts_muted");
     for (const control of [{}, { op: "play" }, { op: "mute" }, { op: "replay" }, { op: "status", extra: 1 }])
       expect((await dock("alerts", control, key)).status, JSON.stringify(control)).toBe(400);
+    // The count of a goal for votes is internal: only the API sends it, after a vote or a new topic.
+    ingestCalls = [];
+    const count = { op: "count", key: "topic:12345678-1234-4234-8234-123456789012" };
+    expect((await dock("alerts", count, key)).status).toBe(400);
+    expect(ingestCalls).toEqual([]);
   });
 
   it("never starts the goal again with the dock key", async (): Promise<void> => {
