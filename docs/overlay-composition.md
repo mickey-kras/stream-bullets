@@ -322,7 +322,9 @@ The goal layer shows it. See [Goal layer](#goal-layer).
 - `chatters` counts each person who sends a chat message after the start of the count, one time.
   A person is a participant of one platform. The count stops at 100,000 people.
   The server keeps a hash for each person, and no user ID.
-- The server counts nothing for `votes` in this version. The value of such a goal stays 0.
+- `votes` counts each poll vote and each new topic of the page, one time. A changed vote counts one time.
+  The server keeps a hash for each vote and each topic, and no user ID. The count stops at 100,000.
+  See [Votes for the goal](channel-connections.md#votes-for-the-goal).
 - The pages get the count in the `alerts` message of the activity socket, as `goal`: `{counts, value, startedAt}`.
   While the page counts no goal, the message has `goal: null`.
 
@@ -804,15 +806,11 @@ The settings of the goal layer have these parts:
 - **Title on stream**: up to 60 characters. The title saves 400 milliseconds after you stop typing.
   A text under the field tells that viewers can see the title when it saves. See [Layer settings](#layer-settings).
 - **Counts**: what the goal counts. The list has subscriptions with memberships and gifts, follows, Bits, KICKs,
-  and people who chat. A change starts the count again at 0. A text under the list tells this.
+  people who chat, and poll votes with new topics. A change starts the count again at 0. A text under the list tells this.
 - **Target**: a whole number from 1 to 10,000,000.
 - The count of the server, as a bar and as text, such as **17 of 25**.
 - **Start again**: it asks first, because it sets the count to 0. Then it sends `{op: "goalReset"}`.
 - One line: a goal counts one thing. Bits, KICKs, and currencies do not convert.
-
-The list **Counts** has no entry for poll votes and new topics. The server does not count them in this version.
-A goal that already counts `votes` keeps the entry, so that the list shows the saved value.
-The constant `VOTES_GOAL_READY` adds the entry.
 
 While the goal layer has a place on a grid, the editor opens the activity socket of the owner.
 The count comes from the `alerts` messages of that socket. Without a message, the count is 0.

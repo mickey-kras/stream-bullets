@@ -291,6 +291,8 @@ The alert host of the page plays the alerts on stream. See [Alert host](channel-
 - `test`, `replay`, and `goalReset` count against the write quota of 60 changes each minute. `status`, `mute`, and `skip` do not.
   Thus the owner can always read the state and stop the alerts.
 - Only the owner of the page can use this endpoint. Unknown fields return `400`.
+- `{op: "count", key}` is not a control. This endpoint and the dock endpoint refuse it with `400`.
+  Only the API sends it to the alert host, after a poll vote or a new topic. See [Votes for the goal](channel-connections.md#votes-for-the-goal).
 - A refusal of the alert host has a code:
 
 | Status | Code | Cause |

@@ -18,6 +18,7 @@ import { ChannelSubscriptions } from "../app/server/channel-ingest-subscriptions
 import { ChannelIngest } from "../app/server/channel-ingest";
 import { SEEN_TTL_MS, SNAPSHOT_MAX_AGE_MS } from "../app/server/channel-ingest-limits";
 import { ALERTS } from "../app/server/channel-ingest-sql";
+import { topicKey, voteKey } from "../app/server/goal-votes";
 import { LAYER_CHECK_MS, PlaygroundHost } from "../app/server/playground-host";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
 import {
@@ -1343,6 +1344,192 @@ describe("the goal", (): void => {
     expect(ALERTS.first(sql, `twitch:${DELIVERIES_KEPT}`, DELIVERIES_KEPT)).toBe(false);
     // The oldest ID left the table.
     expect(ALERTS.first(sql, "twitch:0", DELIVERIES_KEPT)).toBe(true);
+  });
+});
+
+describe("the goal for votes", (): void => {
+  const poll = "a0000000-0000-4000-8000-000000000001";
+  const other = "a0000000-0000-4000-8000-000000000002";
+  const topic = "a0000000-0000-4000-8000-000000000003";
+
+  /** One poll vote or new topic, as the API tells the object. The answer has no body. */
+  async function count(key: string): Promise<number> {
+    const response = await post("goal-count", { op: "count", key });
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    return response.status;
+  }
+
+  it("counts each poll vote and each new topic one time, so a changed vote counts once", async (): Promise<void> => {
+    await setLayers(withGoal("votes"));
+    const socket = await listen("horizontal");
+    expect(last(socket).goal).toEqual({ counts: "votes", value: 0, startedAt: T0 });
+    expect(await count(voteKey(poll, "voter-id-1"))).toBe(204);
+    expect(last(socket).goal).toEqual({ counts: "votes", value: 1, startedAt: T0 });
+    // The viewer changes the vote: the key is the same, so it counts for nothing.
+    expect(await count(voteKey(poll, "voter-id-1"))).toBe(204);
+    expect(await count(voteKey(poll, "voter-id-2"))).toBe(204);
+    expect(await count(voteKey(other, "voter-id-1"))).toBe(204);
+    expect(await count(topicKey(topic))).toBe(204);
+    expect(await count(topicKey(topic))).toBe(204);
+    expect(last(socket).goal).toEqual({ counts: "votes", value: 4, startedAt: T0 });
+    // The count and the keys survive a new instance.
+    ingest.restart(page);
+    const next = await listen();
+    expect(last(next).goal?.value).toBe(4);
+    expect(await count(voteKey(poll, "voter-id-2"))).toBe(204);
+    expect(last(next).goal?.value).toBe(4);
+    // The object keeps a hash for each key, and no user ID. No message to a page has one.
+    const sql = state().storage.sql;
+    const keys: { key: string }[] = sql.exec<{ key: string }>("SELECT key FROM goal_people").toArray();
+    expect(keys).toHaveLength(4);
+    for (const key of keys) expect(key.key).toMatch(/^[0-9a-f]{32}$/);
+    const kept: string = JSON.stringify(
+      ["alert_state", "alert_counted", "alert_line"].map((table: string): unknown[] =>
+        sql.exec(`SELECT * FROM ${table}`).toArray(),
+      ),
+    );
+    expect(kept).not.toContain("voter-id");
+    expect(JSON.stringify([...socket.sent, ...next.sent])).not.toContain("voter-id");
+    // A new count forgets the keys: a vote that changes after it counts in the new count.
+    vi.setSystemTime(T0 + 1000);
+    await run({ op: "goalReset" });
+    expect(sql.exec("SELECT key FROM goal_people").toArray()).toEqual([]);
+    expect(await count(voteKey(poll, "voter-id-1"))).toBe(204);
+    expect(last(next).goal).toEqual({ counts: "votes", value: 1, startedAt: T0 + 1000 });
+  });
+
+  it("counts nothing for a goal that counts a different thing, or while the goal has no place", async (): Promise<void> => {
+    await setLayers(withGoal("subs"));
+    const socket = await listen();
+    expect(await count(voteKey(poll, "voter-id-1"))).toBe(204);
+    expect(await count(topicKey(topic))).toBe(204);
+    expect(last(socket).goal).toEqual({ counts: "subs", value: 0, startedAt: T0 });
+    await setLayers(layersOn());
+    expect(await count(topicKey(other))).toBe(204);
+    expect(last(socket).goal).toBeNull();
+    // The keys from before were not kept: they count for a goal that counts votes.
+    vi.setSystemTime(T0 + 1000);
+    await setLayers(withGoal("votes"));
+    expect(await count(voteKey(poll, "voter-id-1"))).toBe(204);
+    expect(await count(topicKey(topic))).toBe(204);
+    expect(last(socket).goal).toEqual({ counts: "votes", value: 2, startedAt: T0 + 1000 });
+  });
+
+  it("never counts a test, a replay, a support event, or a chat message", async (): Promise<void> => {
+    await setLayers(withGoal("votes"));
+    const socket = await listen();
+    await deliver([gift("g1"), support("follow", "f1"), chat("m1", "chatter-id-1")]);
+    await run({ op: "test" });
+    await run({ op: "test", kind: "follow" });
+    await run({ op: "replay", id: "twitch:g1" });
+    expect(last(socket).goal).toEqual({ counts: "votes", value: 0, startedAt: T0 });
+    expect((await run({ op: "status" })).goal?.value).toBe(0);
+  });
+
+  it("stops at GOAL_PEOPLE_MAX keys", async (): Promise<void> => {
+    const { host, storage, restart, socket } = standalone(withGoal("votes"));
+    const send = (target: AlertHost, key: string): Promise<Response> =>
+      target.goalCount(
+        new Request("https://channel-ingest.internal/goal-count", {
+          method: "POST",
+          body: JSON.stringify({ op: "count", key }),
+        }),
+      );
+    await host.layersChanged();
+    expect((await send(host, topicKey(topic))).status).toBe(204);
+    const stored = storage.sql.exec<{ body: string }>("SELECT body FROM alert_state WHERE key='goal'").toArray()[0];
+    const goal = JSON.parse(stored.body) as { progress: { value: number } };
+    goal.progress.value = GOAL_PEOPLE_MAX - 1;
+    storage.sql.exec("UPDATE alert_state SET body=? WHERE key='goal'", JSON.stringify(goal));
+    const next: AlertHost = restart();
+    await send(next, topicKey(other));
+    await send(next, topicKey(poll));
+    expect(last(socket).goal?.value).toBe(GOAL_PEOPLE_MAX);
+    expect(storage.sql.exec("SELECT key FROM goal_people").toArray()).toHaveLength(2);
+  });
+
+  it("refuses a body that is not one count, and the controls of the object refuse a count", async (): Promise<void> => {
+    await setLayers(withGoal("votes"));
+    const socket = await listen();
+    for (const body of [
+      {},
+      { op: "count" },
+      { op: "status" },
+      { op: "count", key: "" },
+      { op: "count", key: "vote:poll:voter-id-1" },
+      { op: "count", key: `vote:${poll}` },
+      { op: "count", key: `vote:${poll}:voter:id` },
+      { op: "count", key: `vote:${poll}:${"v".repeat(129)}` },
+      { op: "count", key: `topic:${topic}:voter-id-1` },
+      { op: "count", key: `poll:${poll}` },
+      { op: "count", key: topicKey(topic), value: 5 },
+    ]) {
+      const response = await post("goal-count", body);
+      expect(response.status, JSON.stringify(body)).toBe(400);
+      expect(await response.json()).toEqual({ error: "Invalid count" });
+    }
+    expect((await post("goal-count")).status).toBe(400);
+    // The count is not a control: the route of the controls refuses it.
+    expect(await refused({ op: "count", key: topicKey(topic) })).toEqual([400, null]);
+    const read = await ingest.get(ingest.idFromName(page)).fetch(url("goal-count"));
+    expect(read.status).toBe(405);
+    expect(last(socket).goal?.value).toBe(0);
+  });
+
+  it("reads the layers when the object has no copy, and answers 503 while the read fails", async (): Promise<void> => {
+    const error = vi.spyOn(console, "error").mockImplementation((): void => undefined);
+    state().storage.sql.exec("DELETE FROM alert_state");
+    ingest.restart(page);
+    await setLayers(withGoal("votes"), false);
+    const faulty = faultyDatabase(database.db);
+    faulty.fail(/SELECT layers/);
+    env.DB = faulty.db;
+    const failed = await post("goal-count", { op: "count", key: topicKey(topic) });
+    expect(failed.status).toBe(503);
+    expect(alertRefusal(await failed.json())).toBe("alerts_unavailable");
+    expect(error).toHaveBeenCalledWith("alerts_config_failed", { cause: "Error" });
+    faulty.heal();
+    expect(await count(topicKey(topic))).toBe(204);
+    expect(await run({ op: "status" })).toMatchObject({ goal: { counts: "votes", value: 1 } });
+    // The host has a copy now: the next count reads no layers.
+    faulty.fail(/SELECT layers/);
+    expect(await count(topicKey(other))).toBe(204);
+    expect(await run({ op: "status" })).toMatchObject({ goal: { counts: "votes", value: 2 } });
+  });
+
+  it("sets the alarm to the next read of the layers after a count, also with no page", async (): Promise<void> => {
+    const { host, schedule, sockets } = standalone(withGoal("votes"));
+    sockets.length = 0;
+    await host.layersChanged();
+    vi.setSystemTime(T0 + 1000);
+    const request = new Request("https://channel-ingest.internal/goal-count", {
+      method: "POST",
+      body: JSON.stringify({ op: "count", key: topicKey(topic) }),
+    });
+    expect((await host.goalCount(request)).status).toBe(204);
+    expect(schedule.mock.calls).toEqual([[T0 + LAYER_CHECK_MS]]);
+  });
+
+  it("reads the layers again after an ignored count, so a missed change to a votes goal does not stay", async (): Promise<void> => {
+    const { host, readLayers, schedule, sockets, send } = standalone(withGoal("follows"));
+    sockets.length = 0;
+    await host.layersChanged();
+    // The owner switches the goal to votes, and the notice does not arrive.
+    readLayers.mockResolvedValue(withGoal("votes"));
+    const vote = (key: string): Request =>
+      new Request("https://channel-ingest.internal/goal-count", {
+        method: "POST",
+        body: JSON.stringify({ op: "count", key }),
+      });
+    vi.setSystemTime(T0 + 1000);
+    expect((await host.goalCount(vote(topicKey(topic)))).status).toBe(204);
+    // The copy says follows, so the count is ignored, but the alarm comes to read the layers again.
+    expect(schedule.mock.calls).toEqual([[T0 + LAYER_CHECK_MS]]);
+    vi.setSystemTime(T0 + LAYER_CHECK_MS);
+    await host.alarm();
+    vi.setSystemTime(T0 + LAYER_CHECK_MS + 1000);
+    expect((await host.goalCount(vote(topicKey("33333333-3333-4333-8333-333333333333")))).status).toBe(204);
+    expect(await (await send({ op: "status" })).json()).toMatchObject({ goal: { counts: "votes", value: 1 } });
   });
 });
 
